@@ -91,6 +91,11 @@ foreach ($packs as $items) {
 }
 
 foreach ($scripts as $id => $script) {
+    // source_repo_only scripts are intentionally not shipped to target projects; skip pack-registry checks
+    if (!empty($script['source_repo_only'])) {
+        continue;
+    }
+
     $pack = (string) ($script['pack'] ?? '');
     $sourcePath = (string) ($script['source_path'] ?? '');
     $installedPath = (string) ($script['installed_path'] ?? '');
@@ -579,6 +584,10 @@ function validateScriptsPackCoverage(array $packs, array $scripts, array &$error
 
     $registryScriptPaths = [];
     foreach ($scripts as $entry) {
+        // source_repo_only scripts are intentionally not shipped to target projects
+        if (!empty($entry['source_repo_only'])) {
+            continue;
+        }
         $source = (string) ($entry['source_path'] ?? '');
         $target = (string) ($entry['installed_path'] ?? '');
         if ($source !== '') {

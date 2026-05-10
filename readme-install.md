@@ -143,30 +143,30 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 ## Quick Start — AI Workflow Kit
 
-### One-Tap Full Install (everything in a single command)
+### One-Command Install Into Any Project
+
+The installer script [`install-ai-kit.sh`](install-ai-kit.sh) is at the root of this repository. Run it from a local clone of this repo pointing at any target project. It handles prereqs, backup, full install (131 items across 21 packs — Copilot + OpenCode, all scripts, capabilities, hooks, CI, repomix), validation, and context bundle generation automatically.
+
+**Workstation tools (run once from this repo, not per project):**
 
 ```bash
-php tools/ai/install-ai-kit.php \
-  --target /path/to/your-project \
-  --profile full-governance \
-  --runtime both \
-  --project-name "your-project-name" \
-  --backup \
-  --non-interactive
+bash scripts/ai/install-mandatory-tools.sh   # rg, fd, jq, scc, watchexec, etc.
+npm install -g repomix                        # context packing
 ```
 
-That single command:
+**Install into a project:**
 
-1. Backs up any existing managed files
-2. Installs all templates, agents, prompts, skills, scripts, hooks, CI workflows, and docs
-3. Resolves `<PROJECT_NAME>` placeholders automatically
-4. Writes `.ai-install-manifest.json` for upgrade and rollback tracking
-
-**After it completes**, open `docs/ai/POST-INSTALL.md` for the required follow-up steps (placeholder resolution, validation, hook wiring).
+```bash
+bash install-ai-kit.sh /path/to/your-project
+# or with an explicit project name:
+bash install-ai-kit.sh /path/to/your-project "your-project-name"
+```
 
 ---
 
-### Step-by-Step Install (with preview and validation)
+### Step-by-Step Install (manual, with preview)
+
+If you prefer to control each step from a local clone of this repo:
 
 ```bash
 # 1. Check prerequisites (PHP 8.2+, git, jq, rg must be present)
@@ -179,18 +179,18 @@ php tools/ai/install-ai-kit.php \
   --runtime both \
   --dry-run
 
-# 3. Apply — backs up existing files, writes all new files
+# 3. Apply — backs up existing files, writes all new files, validates after
 php tools/ai/install-ai-kit.php \
   --target /path/to/your-project \
   --profile full-governance \
   --runtime both \
   --project-name "your-project-name" \
   --backup \
+  --verify-after \
   --non-interactive
 
-# 4. Validate — both must output OK: with no ERROR: lines
-php tools/ai/validate-ai-config.php
-php tools/ai/validate-install-surface.php --strict
+# 4. Audit remaining placeholders
+php tools/ai/ai.php placeholders --fail
 
 # 5. Open the post-install guide for required follow-up steps
 cat /path/to/your-project/docs/ai/POST-INSTALL.md
@@ -592,6 +592,52 @@ SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh /path/to/project \
   --top 0 --min-code 0 --min-files 0 --depth 3
 ```
 
+> **Note**: The target directory must be a git repository. If you see `Error: no files available after applying ignore rules`, the directory is not a git repo — see [Non-git directory workaround](#error-no-files-available-after-applying-ignore-rules) below.
+
+### Error: no files available after applying ignore rules
+
+This error occurs when you run repomix against a directory that has no git repository:
+
+```
+Error: no files available after applying ignore rules
+[ERROR] context tree generation failed
+```
+
+`run-repomix-context.sh` and `repomix-context-tree.sh` both require git — repomix uses the git file list to determine which files to include. A non-git directory has no tracked files, so repomix finds nothing.
+
+**Workaround A — Initialize git first (recommended):**
+
+```bash
+cd /path/to/directory
+git init
+git add -A
+git commit -m "init for repomix"
+SECRETS_SCAN=0 bash /path/to/awesome-ai-utmostcreator/scripts/ai/run-repomix-context.sh . \
+  --depth 3 --top 0 --min-code 0 --min-files 0
+```
+
+**Workaround B — Run repomix directly from inside the directory (no git required):**
+
+```bash
+cd /path/to/directory
+repomix \
+  --include "**/*" \
+  --no-gitignore \
+  --no-git-sort-by-changes \
+  --output /tmp/context-output.xml
+```
+
+> **Important**: `cd` into the directory first. Passing a path as a positional argument does not work reliably in non-git directories — repomix must be run from the target directory itself.
+
+For Obsidian vaults (markdown only):
+
+```bash
+cd /Users/you/obsidian/vault-name
+repomix --include "**/*.md" --no-gitignore --no-git-sort-by-changes --output /tmp/vault-context.xml
+```
+
+Adjust `--include` as needed (e.g., `"**/*.{js,ts,php}"` for code-only repos).
+
 ### Generate context for this repo
 
 ```bash
@@ -738,16 +784,17 @@ php tools/ai/maintenance-mode.php disable
 
 ## Known Issues and Gotchas
 
-| Issue                                                                                      | Status            | Workaround                                                                       |
-| ------------------------------------------------------------------------------------------ | ----------------- | -------------------------------------------------------------------------------- |
-| macOS Bash is 3.2; scripts need 4+                                                         | Known             | `brew install bash` + add to PATH via `~/.zprofile`                              |
-| `.husky/` exists but no `package.json`                                                     | Orphaned          | Use Lefthook instead                                                             |
-| `.eslintrc.json`, `.prettierrc.json`, `.stylelintrc.json` reference frameworks not present | Reference configs | Not a bug — they serve as starter configs for target projects                    |
-| `docs/ai/project-context.md` has `unknown` values                                          | Intentional       | Template defaults — filled in per-project during install                         |
-| VS Code sandbox `deniedDomains` warning                                                    | Fixed             | Disappears after VS Code restart                                                 |
-| `~/.gitignore_global` may block `git add`                                                  | Per-user          | Use `git add -f <file>` for files in `.vscode/`, `scripts/`, `.github/`, `docs/` |
-| Windows Git not in PATH                                                                    | Known             | `$env:Path = "C:\Program Files\Git\cmd;$env:Path"`                               |
-| `repomix` not found                                                                        | Missing tool      | `npm i -g repomix`                                                               |
+| Issue                                                                                      | Status            | Workaround                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| macOS Bash is 3.2; scripts need 4+                                                         | Known             | `brew install bash` + add to PATH via `~/.zprofile`                                                                                                                                |
+| `.husky/` exists but no `package.json`                                                     | Orphaned          | Use Lefthook instead                                                                                                                                                               |
+| `.eslintrc.json`, `.prettierrc.json`, `.stylelintrc.json` reference frameworks not present | Reference configs | Not a bug — they serve as starter configs for target projects                                                                                                                      |
+| `docs/ai/project-context.md` has `unknown` values                                          | Intentional       | Template defaults — filled in per-project during install                                                                                                                           |
+| VS Code sandbox `deniedDomains` warning                                                    | Fixed             | Disappears after VS Code restart                                                                                                                                                   |
+| `~/.gitignore_global` may block `git add`                                                  | Per-user          | Use `git add -f <file>` for files in `.vscode/`, `scripts/`, `.github/`, `docs/`                                                                                                   |
+| Windows Git not in PATH                                                                    | Known             | `$env:Path = "C:\Program Files\Git\cmd;$env:Path"`                                                                                                                                 |
+| `repomix` not found                                                                        | Missing tool      | `npm i -g repomix`                                                                                                                                                                 |
+| `Error: no files available after applying ignore rules` when running repomix               | Not a git repo    | `git init && git add -A && git commit -m "init"` in the target dir, or `cd /path/to/dir && repomix --include "**/*" --no-gitignore --no-git-sort-by-changes --output /tmp/out.xml` |
 
 ---
 
