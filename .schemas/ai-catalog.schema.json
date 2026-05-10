@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-configs.local/schemas/ai-catalog.schema.json",
+  "title": "AI Catalog",
+  "type": "object",
+  "required": [
+    "$schema",
+    "generated_by",
+    "repository",
+    "package",
+    "counts",
+    "resources",
+    "starter_profiles"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "generated_by": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "object"
+    },
+    "package": {
+      "type": "object"
+    },
+    "counts": {
+      "type": "object"
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "scope",
+          "type",
+          "name",
+          "path"
+        ],
+        "properties": {
+          "scope": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "path": {
+            "type": "string"
+          },
+          "runtime": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": true
+      }
+    },
+    "starter_profiles": {
+      "type": "array"
+    }
+  },
+  "additionalProperties": true
+}

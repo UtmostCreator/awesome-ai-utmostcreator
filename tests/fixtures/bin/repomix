@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+output=''
+include=''
+for ((i = 1; i <= $#; i++)); do
+    case "${!i}" in
+    --output)
+        next=$((i + 1))
+        output="${!next}"
+        ;;
+    --include)
+        next=$((i + 1))
+        include="${!next}"
+        ;;
+    esac
+done
+
+[[ -n "$output" ]] || {
+    echo "missing --output" >&2
+    exit 2
+}
+
+mkdir -p "$(dirname "$output")"
+printf 'fake repomix bundle for %s\n' "${include:-stdin}" >"$output"

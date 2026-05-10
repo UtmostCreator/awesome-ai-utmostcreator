@@ -1,0 +1,35 @@
+name: Export AI Universal Rules Preview
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Generate current catalog outputs
+        run: php tools/ai/generate-ai-catalog.php
+
+      - name: Export minimal starter
+        run: php tools/ai/export-ai-universal-rules.php --profile=minimal-starter
+
+      - name: Export dual-runtime starter
+        run: php tools/ai/export-ai-universal-rules.php --profile=dual-runtime-starter
+
+      - name: Export strict-governance starter
+        run: php tools/ai/export-ai-universal-rules.php --profile=strict-governance-starter
+
+      - name: Upload preview bundles
+        uses: actions/upload-artifact@v4
+        with:
+          name: ai-universal-rules-preview
+          path: dist/ai-universal-rules

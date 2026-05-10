@@ -1,0 +1,105 @@
+name: ai-universal-rules
+version: 0.3.0
+description: Portable AI workflow infrastructure for OpenCode and GitHub Copilot
+supported_tools:
+  - opencode
+  - github-copilot
+supported_surfaces:
+  opencode:
+    - tui
+    - cli
+  github-copilot:
+    - vscode
+    - cli
+    - github.com
+workflow_layers:
+  - always-on-policy
+  - durable-project-context
+  - task-entry-points
+  - staged-agents-and-handoffs
+  - capabilities-and-skills
+  - enforcement-and-runtime-observability
+required_templates:
+  - templates/core/AGENTS.template.md
+  - templates/core/copilot-instructions.template.md
+  - templates/core/project-context.template.md
+  - templates/core/execution-protocol.template.md
+  - templates/core/ai-file-standards.template.md
+  - templates/capabilities/project-context/CAPABILITY.md
+  - templates/capabilities/verify-change/CAPABILITY.md
+  - templates/capabilities/review-diff/CAPABILITY.md
+  - templates/capabilities/evidence-first-execution/CAPABILITY.md
+  - templates/instructions/execution-protocol.instructions.md
+  - templates/shared/guardrails/AI-GUARDRAILS.md
+starter_optional_capabilities:
+  - templates/capabilities/bug-regression
+  - templates/capabilities/release-safety
+  - templates/capabilities/dependency-upgrade
+runtime_entrypoints:
+  opencode:
+    - templates/core/agents
+    - templates/workflows
+    - templates/commands
+  github-copilot:
+    - templates/core/agents
+    - templates/instructions
+    - templates/workflows
+shared_templates:
+  - templates/shared/approvals/APPROVAL-PACKET.template.md
+  - templates/shared/verification/VERIFICATION-EVIDENCE.template.md
+  - templates/shared/project-interaction.md
+preview_only_assets: []
+enablement_notes:
+  - GitHub Copilot prompt files are surface-dependent and need a fallback path.
+  - Advanced Copilot agent behavior varies between VS Code, CLI, and GitHub.com.
+  - Hooks and MCP usage should be documented as advisory or enforced depending on runtime support.
+graceful_fallbacks:
+  prompts:
+    fallback: Use repository instructions, project context, and direct task prompts.
+  custom_agents:
+    fallback: Use repository and path-specific instructions with manual staged prompting.
+  hooks:
+    fallback: Use explicit verification commands and approval packets when hooks are unavailable.
+examples: []
+placeholder_reference: PLACEHOLDERS.md
+generated_outputs:
+  - packages/ai-universal-rules/catalog.json
+  - packages/ai-universal-rules/docs/BROWSE.md
+  - docs/ai/catalog.md
+  - llms.txt
+starter_profiles:
+  - id: minimal-starter
+    description: Base install for one runtime with core policy and three foundational capabilities.
+  - id: dual-runtime-starter
+    description: Base install plus both runtime adapters and compatibility docs.
+    includes:
+      - README.md
+      - QUICKSTART.md
+      - PLACEHOLDERS.md
+      - docs
+      - templates/core
+      - templates/shared
+      - templates/capabilities
+      - templates/instructions
+      - templates/workflows
+      - templates/commands
+  - id: strict-governance-starter
+    description: Dual-runtime install plus approval artifacts, operations docs, and higher-safety packs.
+    includes:
+      - README.md
+      - QUICKSTART.md
+      - PLACEHOLDERS.md
+      - docs
+      - templates/core
+      - templates/shared
+      - templates/capabilities
+      - templates/instructions
+      - templates/workflows
+      - templates/commands
+      - templates/optional/delivery
+      - templates/optional/agents
+      - docs/operations
+      - docs/workflows/RISK-AND-APPROVALS.md
+release:
+  export_root: dist/ai-universal-rules
+  bundle_prefix: ai-universal-rules

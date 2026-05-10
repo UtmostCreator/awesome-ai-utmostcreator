@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-configs.local/schemas/ai-file-standards.schema.json",
+  "title": "AI File Standards Policy",
+  "type": "object",
+  "required": [
+    "$schema",
+    "version",
+    "line_limits",
+    "execution_protocol"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "execution_protocol": {
+      "type": "object",
+      "required": [
+        "canonical_doc",
+        "capability",
+        "task_modes",
+        "minimum_understanding_for_edits",
+        "default_diff_budget",
+        "verification_statuses",
+        "protected_actions"
+      ],
+      "properties": {
+        "canonical_doc": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "task_modes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "minimum_understanding_for_edits": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "default_diff_budget": {
+          "type": "object",
+          "required": [
+            "files",
+            "changed_loc"
+          ],
+          "properties": {
+            "files": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "changed_loc": {
+              "type": "integer",
+              "minimum": 1
+            }
+          },
+          "additionalProperties": false
+        },
+        "verification_statuses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "protected_actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "line_limits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "label",
+          "patterns",
+          "target_min",
+          "target_max",
+          "warn_above",
+          "fail_above"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z0-9-]+$"
+          },
+          "label": {
+            "type": "string",
+            "minLength": 1
+          },
+          "patterns": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "target_min": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "target_max": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "warn_above": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "fail_above": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

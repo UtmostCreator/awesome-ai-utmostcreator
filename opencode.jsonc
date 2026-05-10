@@ -1,0 +1,32 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "docs/ai/workflow.md",
+    "docs/ai/execution-protocol.md",
+    "docs/ai/ai-file-standards.md",
+    "docs/ai/approval-boundaries.md",
+    "docs/ai/generated-artifacts.md",
+    "docs/ai/adapter-contract.md"
+  ],
+  "permission": {
+    "edit": "ask",
+    "bash": {
+      "pwd": "allow",
+      "git status *": "allow",
+      "git diff *": "allow",
+      "git log *": "allow",
+      "rg *": "allow",
+      "fd *": "allow",
+      "php tools/ai/validate-ai-config.php": "allow",
+      "php tools/ai/validate-ai-catalog.php": "allow",
+      "php tools/ai/generate-ai-catalog.php --check": "allow",
+      "php tools/ai/verify-full-install.php": "ask",
+      "php tools/ai/ai.php install * --dry-run": "ask",
+      "rm *": "deny",
+      "rm -rf *": "deny",
+      "git reset --hard *": "deny",
+      "git push --force *": "deny",
+      "*": "ask"
+    }
+  }
+}

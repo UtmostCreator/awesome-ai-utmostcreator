@@ -1,0 +1,16 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Project Placeholder Registry",
+  "type": "object",
+  "properties": {
+    "required": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^<[A-Z0-9_]+>$" }
+    },
+    "optional": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^<[A-Z0-9_]+>$" }
+    }
+  },
+  "required": ["required", "optional"]
+}

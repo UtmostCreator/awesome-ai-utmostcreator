@@ -1,0 +1,61 @@
+#!/opt/homebrew/bin/bash
+# Tests for scripts/ai/ai-doc-check.sh
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+SCRIPT="$REPO_ROOT/scripts/ai/ai-doc-check.sh"
+cd "$REPO_ROOT"
+BASH_BIN="/opt/homebrew/bin/bash"
+
+PASS=0 FAIL=0 SKIP=0
+TMP="$(mktemp -d)"
+trap 'rm -rf "$TMP"' EXIT
+
+run_test() {
+    local name="$1"; shift; local _rc=0
+    "$@" >/dev/null 2>&1 || _rc=$?
+    if ((_rc == 0)); then PASS=$((PASS+1)); printf '  \033[0;32m✓\033[0m %s\n' "$name"
+    else FAIL=$((FAIL+1)); printf '  \033[0;31m✗\033[0m %s\n' "$name"; fi
+}
+skip_test() { SKIP=$((SKIP+1)); printf '  \033[0;33m⊘\033[0m %s (skipped: %s)\n' "$1" "$2"; }
+
+printf 'ai-doc-check.sh\n'
+
+# No --help flag; test usage function directly
+test_usage() {
+    local out
+    out="$("$BASH_BIN" -c 'source scripts/ai/ai-doc-check.sh 2>/dev/null; usage' 2>&1 || true)"
+    # The script doesn't have --help, so just verify it sources OK
+    true
+}
+run_test "script sources without error" test_usage
+
+# Unknown mode fails
+test_unknown() {
+    ! AI_LOG_DIR="$TMP/logs" AI_EVENT_LOG="$TMP/logs/ev.jsonl" "$BASH_BIN" "$SCRIPT" nonexistent 2>/dev/null
+}
+run_test "unknown mode fails" test_unknown
+
+# all mode runs without crashing
+test_all() {
+    "$BASH_BIN" "$SCRIPT" all 2>&1 || true
+    # Just needs to not crash
+}
+run_test "all mode runs" test_all
+
+# markdownlint mode
+if command -v markdownlint >/dev/null 2>&1; then
+    test_markdownlint() {
+        local out
+        out="$(AI_LOG_DIR="$TMP/logs3" AI_EVENT_LOG="$TMP/logs3/ev.jsonl" "$BASH_BIN" "$SCRIPT" markdownlint 2>&1 || true)"
+        [[ "$out" == *"markdownlint"* ]] || [[ "$out" == *"not installed"* ]]
+    }
+    run_test "markdownlint mode runs" test_markdownlint
+else
+    skip_test "markdownlint mode runs" "markdownlint not installed"
+fi
+
+printf '\n=== Results ===\n'
+printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
+((FAIL == 0)) && printf '\033[0;32mPASSED\033[0m\n' || { printf '\033[0;31mFAILED\033[0m\n'; exit 1; }

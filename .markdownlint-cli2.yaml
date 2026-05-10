@@ -1,0 +1,8 @@
+# markdownlint-cli2 configuration
+config:
+  # MD013 - Line length: disabled globally (code blocks, generated docs, tables)
+  MD013: false
+  # MD033 - Inline HTML: allow in generated docs and templates
+  MD033: false
+  # MD041 - First line should be top-level heading: allow files without heading
+  MD041: false

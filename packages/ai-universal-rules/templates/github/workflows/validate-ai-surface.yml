@@ -1,0 +1,72 @@
+name: Validate AI Surface
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Validate root AI workflow files
+        run: php tools/ai/validate-ai-config.php
+
+      - name: Validate manifest and catalog metadata
+        run: php tools/ai/validate-ai-catalog.php
+
+      - name: Check generated docs drift
+        run: php tools/ai/generate-ai-catalog.php --check
+
+      - name: Validate generated artifact policy
+        run: php tools/ai/validate-generated-artifacts.php
+
+      - name: Validate install surface references
+        run: php tools/ai/validate-install-surface.php --strict
+
+      - name: Validate adapter drift on changed files
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+        run: php tools/ai/validate-adapter-drift.php --changed-only --fail-on-warn
+
+      - name: Check starter bundle definitions
+        run: php tools/ai/export-ai-universal-rules.php --check
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Lint shell scripts
+        run: git ls-files '*.sh' | xargs shellcheck -x
+
+      - name: Lint GitHub Actions workflows
+        run: actionlint
+
+  test-php:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+      - name: Run PHPUnit
+        run: vendor/bin/phpunit --colors=never

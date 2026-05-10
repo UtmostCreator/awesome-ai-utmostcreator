@@ -1,0 +1,14 @@
+# gitleaks configuration for app-configs
+# See: https://github.com/gitleaks/gitleaks#configuration
+
+title = "app-configs gitleaks config"
+
+[allowlist]
+description = "Path-level allowlist for files that structurally match secret patterns but contain no real secrets"
+paths = [
+    # VS Code keyboard shortcut files: "key": "ctrl+..." fields match generic-api-key
+    '''(^|.*/)\.vscode/keybindings\.json$''',
+    '''(^|.*/)keybindings\.json$''',
+    # Generated documentation artifact: may contain repeated doc text that matches patterns
+    '''(^|.*/)docs/ai/ALL_IN_ONE\.txt$''',
+]
