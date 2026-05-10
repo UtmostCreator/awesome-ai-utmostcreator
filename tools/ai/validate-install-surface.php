@@ -138,6 +138,10 @@ $allowedNext = ['verify', 'user', 'planner', 'implement', 'refactorer'];
 
 foreach (glob($root . '/packages/ai-universal-rules/templates/core/agents/*.md') ?: [] as $agentFile) {
     $agentContent = (string) file_get_contents($agentFile);
+    // Hidden agents are internal-only and not shipped to installed projects; skip install-surface checks.
+    if (preg_match('/^---\R(.*?)\R---/s', $agentContent, $fm) && preg_match('/^hidden:\s*true\s*$/m', $fm[1])) {
+        continue;
+    }
     $mode = frontmatterField($agentContent, 'mode');
     $agentName = pathinfo($agentFile, PATHINFO_FILENAME);
     $expectedMode = in_array($agentName, ['architect', 'implementer', 'reviewer'], true) ? 'all' : 'subagent';

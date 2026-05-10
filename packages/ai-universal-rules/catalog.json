@@ -37,7 +37,7 @@
         ]
     },
     "counts": {
-        "package:core-template": 20,
+        "package:core-template": 23,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 3,
@@ -56,11 +56,11 @@
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 10,
+        "root:github-copilot-agent": 11,
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 16,
         "root:github-copilot-skill": 16,
-        "root:opencode-agent": 10,
+        "root:opencode-agent": 11,
         "root:opencode-command": 18,
         "root:opencode-skill": 18,
         "root:root-doc": 16,
@@ -80,10 +80,26 @@
         {
             "scope": "package",
             "type": "core-template",
+            "name": "Post-Install Checklist",
+            "path": "packages/ai-universal-rules/templates/core/POST-INSTALL.template.md",
+            "runtime": "canonical",
+            "description": "Your AI workflow kit was installed successfully. **Complete every item below before running write-capable AI agents.**"
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
             "name": "Architect Agent",
             "path": "packages/ai-universal-rules/templates/core/agents/architect.md",
             "runtime": "canonical",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "Bootstrapper Agent",
+            "path": "packages/ai-universal-rules/templates/core/agents/bootstrapper.md",
+            "runtime": "canonical",
+            "description": "Use when installing, re-installing, or validating the AI kit from dry-run to backup to apply to full verification"
         },
         {
             "scope": "package",
@@ -188,6 +204,14 @@
             "path": "packages/ai-universal-rules/templates/core/execution-protocol.template.md",
             "runtime": "canonical",
             "description": "Use this as the canonical operating contract for non-trivial AI-assisted planning, editing, review, and verification."
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "Generated Artifacts Guide",
+            "path": "packages/ai-universal-rules/templates/core/generated-artifacts.template.md",
+            "runtime": "canonical",
+            "description": "`docs/ai/generated/` holds machine-generated files produced by `php tools/ai/ai.php` subcommands."
         },
         {
             "scope": "package",
@@ -403,7 +427,7 @@
             "name": "Generated Artifacts",
             "path": "packages/ai-universal-rules/templates/instructions/generated-artifacts.instructions.md",
             "runtime": "github-copilot",
-            "description": "Generated artifact drift routing and source-first regeneration policy"
+            "description": "Generated artifact drift routing, source-first regeneration policy, and verbose output control"
         },
         {
             "scope": "package",
@@ -1488,6 +1512,14 @@
         {
             "scope": "root",
             "type": "github-copilot-agent",
+            "name": "Bootstrapper",
+            "path": ".github/agents/bootstrapper.agent.md",
+            "runtime": "github-copilot",
+            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-agent",
             "name": "Config Maintainer",
             "path": ".github/agents/config-maintainer.agent.md",
             "runtime": "github-copilot",
@@ -1996,6 +2028,14 @@
             "path": ".opencode/agents/architect.md",
             "runtime": "opencode",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "bootstrapper",
+            "path": ".opencode/agents/bootstrapper.md",
+            "runtime": "opencode",
+            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
         },
         {
             "scope": "root",

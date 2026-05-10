@@ -7,73 +7,93 @@ This document explains **everything** in this repository — what it does, how t
 ## Table of Contents
 
 1. [What This Repository Is](#what-this-repository-is)
-2. [The Two Halves](#the-two-halves)
-3. [Prerequisites](#prerequisites)
-4. [Quick Start — AI Workflow Kit](#quick-start--ai-workflow-kit)
-5. [Quick Start — Workstation Configs](#quick-start--workstation-configs)
-6. [How The AI Installer Works (Step by Step)](#how-the-ai-installer-works-step-by-step)
-7. [Installation Profiles](#installation-profiles)
-8. [Install Options Reference](#install-options-reference)
-9. [What Gets Installed (File Map)](#what-gets-installed-file-map)
-10. [Scripts — What Each One Does](#scripts--what-each-one-does)
-11. [PHP Tools — What Each One Does](#php-tools--what-each-one-does)
-12. [Validation and Verification](#validation-and-verification)
-13. [Repomix Context Generation](#repomix-context-generation)
-14. [Regenerating Generated Files](#regenerating-generated-files)
-15. [Git Hooks](#git-hooks)
-16. [Style and Linting Config Files](#style-and-linting-config-files)
-17. [Known Issues and Gotchas](#known-issues-and-gotchas)
-18. [Repository Split Consideration](#repository-split-consideration)
+2. [Supported AI Surfaces](#supported-ai-surfaces)
+3. [Repository Layout](#repository-layout)
+4. [Prerequisites](#prerequisites)
+5. [Quick Start — AI Workflow Kit](#quick-start--ai-workflow-kit)
+6. [Quick Start — Workstation Configs](#quick-start--workstation-configs)
+7. [How The AI Installer Works (Step by Step)](#how-the-ai-installer-works-step-by-step)
+8. [Installation Profiles](#installation-profiles)
+9. [Install Options Reference](#install-options-reference)
+10. [What Gets Installed (File Map)](#what-gets-installed-file-map)
+11. [Scripts — What Each One Does](#scripts--what-each-one-does)
+12. [PHP Tools — What Each One Does](#php-tools--what-each-one-does)
+13. [Validation and Verification](#validation-and-verification)
+14. [Repomix Context Generation](#repomix-context-generation)
+15. [Regenerating Generated Files](#regenerating-generated-files)
+16. [Git Hooks](#git-hooks)
+17. [Style and Linting Config Files](#style-and-linting-config-files)
+18. [Known Issues and Gotchas](#known-issues-and-gotchas)
+19. [Repository Split Consideration](#repository-split-consideration)
 
 ---
 
 ## What This Repository Is
 
-This repository has **two purposes**:
+**This repository is designed to be installed into other projects.** It is not an application — it is a reusable AI workflow kit.
 
-1. **AI Workflow Kit** — A reusable installer that adds GitHub Copilot, OpenCode, and Claude guidance, agents, scripts, validation, and documentation to any other repository. This is the primary purpose.
-2. **Workstation Configs** — Personal macOS development environment configuration files (terminal, editor, shell, keyboard). These are secondary reference material.
+It provides a complete, AI-tool-agnostic set of templates, installers, validators, generators, and scripts that give any repository a production-ready AI-assisted development workflow. Currently supports **GitHub Copilot** (VS Code, CLI, GitHub.com) and **OpenCode** (CLI), with the architecture designed to support additional AI surfaces.
 
-The AI Workflow Kit is the part you install into other projects. The workstation configs are here as dogfood/examples.
+The kit handles:
+
+- **Agent instructions** — rules and context for AI agents across multiple tools
+- **Prompt and skill libraries** — reusable task prompts, capability packages, and skills
+- **Policy enforcement** — tool allowlists, approval boundaries, command-risk tiers
+- **Verification tooling** — validators that catch drift, stale docs, and missing files
+- **Context packing** — scripts that prepare codebases for AI within token budgets
+- **Bash scripts** — search, verification, evidence, and automation wrappers
 
 ---
 
-## The Two Halves
+## Supported AI Surfaces
 
-### AI Workflow Kit (the main product)
+This kit is **AI-tool-agnostic by design**. Each supported AI surface gets its own adapter layer, while shared policy, documentation, and capability logic lives in canonical locations.
 
-These folders make up the installable AI toolkit:
+| AI Surface                                    | Status                | Adapter Location                         | What Gets Installed                                     |
+| --------------------------------------------- | --------------------- | ---------------------------------------- | ------------------------------------------------------- |
+| **GitHub Copilot** (VS Code, CLI, GitHub.com) | Supported             | `.github/`                               | Instructions, agents, prompts, skills, hooks, workflows |
+| **OpenCode** (CLI)                            | Supported             | `.opencode/`                             | Agents, commands, skills                                |
+| **Claude** (via AGENTS.md/CLAUDE.md)          | Supported             | Root files                               | Agent instructions, thin adapter                        |
+| _Additional surfaces_                         | Open for contribution | `packages/ai-universal-rules/templates/` | PRs welcome — follow existing template patterns         |
 
-| Folder                         | What It Does                                                                                                                                                                                 |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/ai-universal-rules/` | **Source templates** — the master copies of all files that get installed into target repos. Contains `templates/`, `manifest.json`, `catalog.json`.                                          |
-| `tools/ai/`                    | **PHP installer and validators** — the CLI tools that copy templates into target repos, validate configuration, generate catalogs, and verify installs.                                      |
-| `scripts/ai/`                  | **Bash helper scripts** — search wrappers, verification scripts, context-packing tools, and AI-agent-approved shell utilities. These get installed into target repos via the `scripts-pack`. |
-| `docs/ai/`                     | **Canonical documentation** — workflow guides, architecture docs, script registry, capability descriptions. Some get installed into target repos.                                            |
-| `.github/`                     | **GitHub Copilot adapter** — instructions, agents, prompts, skills, and hooks specific to VS Code Copilot. Gets installed via the `copilot` profile.                                         |
-| `.opencode/`                   | **OpenCode adapter** — commands and skills for the OpenCode CLI tool. Gets installed via the `opencode` profile.                                                                             |
-| `AGENTS.md`                    | **Agent instructions** — repository-wide rules for AI agents (OpenCode, Claude). Gets installed to target repos.                                                                             |
-| `CLAUDE.md`                    | **Claude-specific** — thin adapter pointing to canonical docs. Gets installed to target repos.                                                                                               |
-| `tests/`                       | **Test suite** — PHPUnit tests for PHP tools, Bash tests for shell scripts. Not installed to target repos.                                                                                   |
+### How Adapters Work
 
-### Workstation Configs (reference material)
+Each AI surface has a thin adapter layer that points to **canonical documentation** in `docs/ai/`. This means:
 
-These folders are personal dev environment configs — they do **not** get installed into other repos:
+- Policy changes propagate to all surfaces automatically
+- Each surface only contains surface-specific syntax and configuration
+- Adding a new AI surface means creating a new template set in `packages/ai-universal-rules/templates/`
 
-| Folder                           | What It Does                                                           |
-| -------------------------------- | ---------------------------------------------------------------------- |
-| `configs/ghostty/`               | Ghostty terminal configuration                                         |
-| `configs/nvim/`                  | Neovim configuration (lazy.nvim, plugins, lua config)                  |
-| `configs/karabiner/`             | Karabiner-Elements keyboard remapping                                  |
-| `configs/php/`                   | PHP `php.ini` and Laravel Pint `pint.json`                             |
-| `configs/shell/`                 | Starship prompt configuration                                          |
-| `configs/vscode/`                | VS Code user settings, keybindings, launch config, workspace templates |
-| `reference/php/`                 | PHP design patterns, principles, and built-in function examples        |
-| `docs/keyboard.md`               | Keyboard ergonomics notes                                              |
-| `docs/nvim-setup.md`             | Neovim deployment guide                                                |
-| `docs/shell-setup.md`            | Shell and prompt setup                                                 |
-| `docs/software-and-cli-tools.md` | macOS development tools list                                           |
-| `docs/vscode-extensions.md`      | VS Code extension recommendations                                      |
+---
+
+## Repository Layout
+
+### Tracked Source (committed to git)
+
+These are the source files that make up the kit:
+
+| Folder / File                  | What It Does                                                                                                                            | Installed to Target? |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| `packages/ai-universal-rules/` | **Source templates** — the master copies of all files that get installed. Contains `templates/`, `manifest.json`, `catalog.json`.       | No (source only)     |
+| `tools/ai/`                    | **PHP installer, validators, generators** — the CLI tools that copy templates, validate config, generate catalogs, and verify installs. | No (source only)     |
+| `.opencode/`                   | **OpenCode adapter** — agents, commands, and skills for the OpenCode CLI tool. Gets installed via the `opencode` profile.               | Yes                  |
+| `.schemas/`                    | **JSON schemas** — validation contracts for catalog, manifest, command policy, and other structured metadata.                           | Yes                  |
+| `policies/`                    | **Governance policies** — allow/deny/confirm command rules consumed by script-level policy enforcement.                                 | Yes                  |
+| `tests/`                       | **Test suite** — PHPUnit tests for PHP tools, Bash tests for shell scripts.                                                             | No                   |
+| `AGENTS.md`                    | **Agent instructions** — repository-wide rules for AI agents (OpenCode, Claude). Gets installed to target repos.                        | Yes                  |
+| `CLAUDE.md`                    | **Claude-specific** — thin adapter pointing to canonical docs.                                                                          | Yes                  |
+
+### Generated at Runtime (not committed, created by installer or scripts)
+
+These folders appear on disk after running the installer (`self-install`) or generation scripts:
+
+| Folder        | What It Does                                                                                                                              |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `.github/`    | **GitHub Copilot adapter** — instructions, agents, prompts, skills, hooks, and workflows. Created by installer via the `copilot` profile. |
+| `docs/ai/`    | **Canonical documentation** — workflow guides, architecture docs, script registry, capability descriptions. Created by installer.         |
+| `scripts/ai/` | **Bash helper scripts** — search wrappers, verification scripts, context-packing tools. Created by installer via `scripts-pack`.          |
+| `.ai-logs/`   | **Local AI evidence logs** — session logs and evidence artifacts. Gitignored.                                                             |
+| `vendor/`     | **Composer dependencies** — created by `composer install`.                                                                                |
 
 ---
 
@@ -123,26 +143,102 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 ## Quick Start — AI Workflow Kit
 
-### Install into another repository
+### One-Tap Full Install (everything in a single command)
 
 ```bash
-# 1. Check prerequisites
+php tools/ai/install-ai-kit.php \
+  --target /path/to/your-project \
+  --profile full-governance \
+  --runtime both \
+  --project-name "your-project-name" \
+  --backup \
+  --non-interactive
+```
+
+That single command:
+
+1. Backs up any existing managed files
+2. Installs all templates, agents, prompts, skills, scripts, hooks, CI workflows, and docs
+3. Resolves `<PROJECT_NAME>` placeholders automatically
+4. Writes `.ai-install-manifest.json` for upgrade and rollback tracking
+
+**After it completes**, open `docs/ai/POST-INSTALL.md` for the required follow-up steps (placeholder resolution, validation, hook wiring).
+
+---
+
+### Step-by-Step Install (with preview and validation)
+
+```bash
+# 1. Check prerequisites (PHP 8.2+, git, jq, rg must be present)
 php tools/ai/ai.php preflight
 
-# 2. Preview what would be installed (dry-run, no files written)
-php tools/ai/ai.php install --target /path/to/your-project --profile full-governance --dry-run
+# 2. Preview what would be installed — NO files are written
+php tools/ai/install-ai-kit.php \
+  --target /path/to/your-project \
+  --profile full-governance \
+  --runtime both \
+  --dry-run
 
-# 3. Apply installation (writes files)
-php tools/ai/ai.php install --target /path/to/your-project --profile full-governance --apply
+# 3. Apply — backs up existing files, writes all new files
+php tools/ai/install-ai-kit.php \
+  --target /path/to/your-project \
+  --profile full-governance \
+  --runtime both \
+  --project-name "your-project-name" \
+  --backup \
+  --non-interactive
 
-# 4. Validate the install
+# 4. Validate — both must output OK: with no ERROR: lines
 php tools/ai/validate-ai-config.php
-php tools/ai/validate-install-surface.php
-php tools/ai/validate-ai-catalog.php
+php tools/ai/validate-install-surface.php --strict
 
-# 5. Full verification
-php tools/ai/verify-full-install.php
+# 5. Open the post-install guide for required follow-up steps
+cat /path/to/your-project/docs/ai/POST-INSTALL.md
 ```
+
+### Required Flags Reference
+
+| Flag                   | Required?                            | Default           | What It Does                                                     |
+| ---------------------- | ------------------------------------ | ----------------- | ---------------------------------------------------------------- |
+| `--target <path>`      | **Yes** (for external install)       | `.` (current dir) | Target project root                                              |
+| `--profile <name>`     | Yes                                  | `dual`            | Which packs to install. Use `full-governance` for complete setup |
+| `--runtime <name>`     | Yes                                  | `both`            | `github-copilot`, `opencode`, or `both`                          |
+| `--project-name <n>`   | Recommended                          | inferred from dir | Sets `<PROJECT_NAME>` placeholder in installed files             |
+| `--backup`             | **Yes** if target has existing files | off               | Archives managed files before overwriting                        |
+| `--non-interactive`    | Yes in CI                            | off               | Disables interactive prompts                                     |
+| `--dry-run`            | —                                    | off               | Preview only — no files written                                  |
+| `--output-json <file>` | Optional                             | off               | Write install summary + placeholder list to JSON file            |
+| `--force`              | Only when recovering                 | off               | Overwrite even non-managed files                                 |
+| `--verify-after`       | Optional                             | off               | Run validators automatically after install                       |
+
+### Profiles Quick Reference
+
+| Profile           | What It Installs                                      | Best For                       |
+| ----------------- | ----------------------------------------------------- | ------------------------------ |
+| `minimal`         | Base docs only                                        | Evaluation only                |
+| `copilot`         | Base + Copilot adapter                                | GitHub Copilot only            |
+| `opencode`        | Base + OpenCode adapter                               | OpenCode CLI only              |
+| `dual`            | Base + both adapters                                  | Teams using both tools         |
+| `full-governance` | Everything — agents, scripts, hooks, CI, capabilities | **Recommended for production** |
+| `accelerated`     | Full except evidence/evaluation packs                 | Fast start                     |
+
+### Post-Install Required Steps (summary)
+
+After any install, these three steps are **required before running write-capable AI agents**:
+
+1. Edit `docs/ai/project-context.md` — replace every `<PLACEHOLDER>` with your actual project values
+2. Edit `.github/instructions/frontend.instructions.md` — replace `<FRONTEND_PATH_GLOB>`
+3. Edit `.github/instructions/testing.instructions.md` — replace `<TEST_PATH_GLOB>`
+
+Full checklist with every placeholder explained: `docs/ai/POST-INSTALL.md` (installed in your project root).
+
+To audit remaining placeholders at any time:
+
+```bash
+php tools/ai/ai.php placeholders --fail
+```
+
+---
 
 ### Install into THIS repository (self-install / refresh)
 
@@ -153,7 +249,7 @@ php tools/ai/ai.php install --profile full-governance --reinstall --apply
 
 ---
 
-## Quick Start — Workstation Configs
+### Quick Start — Workstation Configs
 
 Workstation configs are manual copy-and-merge. There is no automated installer.
 

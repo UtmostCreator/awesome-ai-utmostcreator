@@ -67,7 +67,7 @@ function aiRunDecision(string $root, array $args): int
     ];
 
     $written = aiCliWriteArtifact($root, 'decision-add', 'php tools/ai/ai.php decision add', $data, 'ok', null, 'Use why to inspect decision history.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -100,6 +100,6 @@ function aiRunWhy(string $root, array $args): int
     ];
 
     $written = aiCliWriteArtifact($root, 'why', 'php tools/ai/ai.php why', $data, 'ok', null, 'Use session-resume for cross-artifact continuation context.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }

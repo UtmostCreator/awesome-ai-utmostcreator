@@ -252,7 +252,14 @@ class GenerateRepoStructureTest extends TestCase
         $_ENV['PATH'] = $path;
         $_SERVER['PATH'] = $path;
 
-        $process = proc_open($command, $descriptors, $pipes, $cwd, null);
+        $env = [
+            'HOME' => sys_get_temp_dir(),
+            'XDG_CONFIG_HOME' => sys_get_temp_dir(),
+            'GIT_CONFIG_GLOBAL' => '/dev/null',
+            'PATH' => $path,
+        ];
+
+        $process = proc_open($command, $descriptors, $pipes, $cwd, $env);
 
         $this->assertIsResource($process, "proc_open failed for: {$command}");
 

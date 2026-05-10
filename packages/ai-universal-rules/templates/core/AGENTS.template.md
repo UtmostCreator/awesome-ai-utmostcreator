@@ -120,6 +120,8 @@ Minimum flow:
 - Add or update focused tests when behavior changes.
 - Keep tests deterministic where possible.
 - Do not weaken tests to make changes pass.
+- Ask before changing implementation code if existing tests have not been confirmed passing first.
+- When changing a symbol used elsewhere, update all call sites in the same change.
 
 ## Verification Rules
 

@@ -36,7 +36,7 @@ function aiRunAsk(string $root, array $args): int
         $resolvedData['resolution_mode'] = 'explicit-answer';
 
         $written = aiCliWriteArtifact($root, 'ask', 'php tools/ai/ai.php ask --resolve ' . $resolveId . ' --answer ' . $answer, $resolvedData, 'ok', null, 'Clarification resolved; rerun next to continue orchestration.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 0;
     }
 
@@ -64,7 +64,7 @@ function aiRunAsk(string $root, array $args): int
     ];
 
     $written = aiCliWriteArtifact($root, 'ask', 'php tools/ai/ai.php ask', $data, 'blocked', null, 'Resolve this question before relying on next for safe action sequencing.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -111,7 +111,7 @@ function aiRunEstimate(string $root, array $args): int
     ];
 
     $written = aiCliWriteArtifact($root, 'estimate', 'php tools/ai/ai.php estimate', $data, 'ok', $riskScore, 'Use context + diff-summary before implementation.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -162,7 +162,7 @@ function aiRunImpact(string $root, array $args): int
     ];
 
     $written = aiCliWriteArtifact($root, 'impact', 'php tools/ai/ai.php impact --base ' . $base, $data, 'ok', $impactScore, 'Run related checks before merge or handoff.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -208,7 +208,7 @@ function aiRunFreshness(string $root): int
     ];
 
     $written = aiCliWriteArtifact($root, 'freshness', 'php tools/ai/ai.php freshness', $data, $status, null, $recommended);
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -280,6 +280,6 @@ function aiRunBudget(string $root, array $args): int
     ];
 
     $written = aiCliWriteArtifact($root, 'budget', 'php tools/ai/ai.php budget', $data, $status, null, $recommended);
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }

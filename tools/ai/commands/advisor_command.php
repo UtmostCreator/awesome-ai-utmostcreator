@@ -59,7 +59,7 @@ function aiRunAdvisor(string $root, array $args): int
         if (!empty($secret['blocked'])) {
             $data = ['status' => 'blocked', 'reason' => 'potential secrets detected', 'events' => $events, 'findings_file' => 'docs/ai/generated/advisor-secret-findings.json'];
             $written = aiCliWriteArtifact($root, 'advisor', 'php tools/ai/ai.php advisor', $data, 'blocked', null, 'Resolve secret findings before advisor pack/submit.');
-            fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+            fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
             return 1;
         }
     }
@@ -141,7 +141,7 @@ function aiRunAdvisor(string $root, array $args): int
         if ($missing !== []) {
             $data = ['status' => 'failed', 'mode' => 'check', 'missing' => $missing, 'events' => $events];
             $written = aiCliWriteArtifact($root, 'advisor', 'php tools/ai/ai.php advisor --check', $data, 'failed', null, 'Run advisor --all to generate missing artifacts.');
-            fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+            fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
             return 1;
         }
         $signals = aiAdvisorReadJson($dir . DIRECTORY_SEPARATOR . 'project-signals.json');
@@ -150,7 +150,7 @@ function aiRunAdvisor(string $root, array $args): int
         if ($errors !== []) {
             $data = ['status' => 'failed', 'mode' => 'check', 'errors' => $errors, 'events' => $events];
             $written = aiCliWriteArtifact($root, 'advisor', 'php tools/ai/ai.php advisor --check', $data, 'failed', null, 'Fix invalid advisor JSON shapes.');
-            fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+            fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
             return 1;
         }
     }
@@ -171,6 +171,6 @@ function aiRunAdvisor(string $root, array $args): int
         ],
     ];
     $written = aiCliWriteArtifact($root, 'advisor', 'php tools/ai/ai.php advisor', $data, 'ok', null, 'Run advisor --check to enforce deterministic advisor outputs.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }

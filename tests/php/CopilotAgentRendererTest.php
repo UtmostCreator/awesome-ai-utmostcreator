@@ -168,6 +168,11 @@ class CopilotAgentRendererTest extends TestCase
         $registry = aiCopilotAgentToolRegistry();
         $templateDir = $this->repoRoot . '/packages/ai-universal-rules/templates/core/agents';
         foreach (glob($templateDir . '/*.md') ?: [] as $tpl) {
+            $content = (string) file_get_contents($tpl);
+            // Hidden agents are internal-only and not rendered by the installer; skip them.
+            if (preg_match('/^---\R(.*?)\R---/s', $content, $fm) && preg_match('/^hidden:\s*true\s*$/m', $fm[1])) {
+                continue;
+            }
             $agentId = pathinfo($tpl, PATHINFO_FILENAME);
             $this->assertArrayHasKey(
                 $agentId,
