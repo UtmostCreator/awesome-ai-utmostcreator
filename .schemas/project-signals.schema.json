@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "project-signals",
+  "type": "object",
+  "required": ["schema_version", "project", "tracked_files_count", "counts", "ai_surface", "toolchain"],
+  "properties": {
+    "schema_version": {"type": "integer"},
+    "project": {"type": "string"},
+    "tracked_files_count": {"type": "integer"},
+    "counts": {"type": "object"},
+    "ai_surface": {"type": "object"},
+    "toolchain": {"type": "object"}
+  }
+}

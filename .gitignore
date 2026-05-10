@@ -1,0 +1,12 @@
+/vendor/
+/node_modules/
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.phpunit.result.cache
+.phpunit.cache/
+.ai-logs/
+.ai-backups/
+.repomix-context/

@@ -1,0 +1,409 @@
+<?php
+
+declare(strict_types=1);
+
+function aiRunPacks(string $root, array $args): int
+{
+    $registry = aiInstallerPackRegistry();
+    $errors = aiInstallerValidatePackRegistry($registry);
+    $profiles = aiInstallerProfileDefinitions();
+    $data = [
+        'profiles' => $profiles,
+        'all_features' => aiInstallerAllFeaturePacks(),
+        'available_packs' => array_keys($registry),
+        'registry_errors' => $errors,
+        'validation_requested' => in_array('--validate', $args, true),
+        'notes' => ['docs-reference is optional add-on only'],
+    ];
+    $status = $errors === [] ? 'ok' : 'failed';
+    $written = aiCliWriteArtifact($root, 'packs', 'php tools/ai/ai.php packs', $data, $status, null, $errors === [] ? 'Pack contracts validated.' : 'Fix pack registry contract errors.');
+    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    return $errors === [] ? 0 : 1;
+}
+
+function aiRunVersion(string $root): int
+{
+    $manifestPath = aiInstallManifestPath($root);
+    $data = ['manifest_path' => '.ai-install-manifest.json', 'present' => is_file($manifestPath)];
+    if (is_file($manifestPath)) {
+        $manifest = json_decode((string) file_get_contents($manifestPath), true);
+        if (is_array($manifest)) {
+            $data['package'] = $manifest['package'] ?? [];
+            $data['installer_version'] = $manifest['installer_version'] ?? 'unknown';
+            $data['schema_version'] = $manifest['schema_version'] ?? 'unknown';
+        }
+    }
+    $status = ($data['present'] ?? false) ? 'ok' : 'warning';
+    $written = aiCliWriteArtifact($root, 'version', 'php tools/ai/ai.php version', $data, $status, null, is_file($manifestPath) ? 'Canonical install manifest loaded.' : 'Install manifest missing; run install first.');
+    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    return is_file($manifestPath) ? 0 : 1;
+}
+
+function aiRunPlaceholders(string $root, array $args): int
+{
+    $fail = in_array('--fail', $args, true);
+    $interactive = in_array('--interactive', $args, true);
+    $setValues = [];
+    foreach ($args as $arg) {
+        if (str_starts_with($arg, '--set')) {
+            $value = '';
+            if ($arg === '--set') {
+                continue;
+            }
+            if (str_starts_with($arg, '--set=')) {
+                $value = substr($arg, 6);
+            }
+            if ($value !== '' && str_contains($value, '=')) {
+                [$k, $v] = explode('=', $value, 2);
+                $setValues['<' . strtoupper(trim($k)) . '>'] = $v;
+            }
+        }
+    }
+
+    $paths = ['AGENTS.md', 'docs/ai', '.github', '.opencode'];
+    $hits = [];
+    foreach ($paths as $path) {
+        $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+        if (is_file($abs)) {
+            aiApplyPlaceholderSetsToFile($abs, $setValues);
+            $content = (string) file_get_contents($abs);
+            if (preg_match_all('/<[A-Z0-9_]+>/', $content, $m) === 1 || (isset($m[0]) && $m[0] !== [])) {
+                $hits[] = ['path' => $path, 'placeholders' => array_values(array_unique($m[0]))];
+            }
+            continue;
+        }
+        if (!is_dir($abs)) {
+            continue;
+        }
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($abs, FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $file) {
+            if (!$file->isFile() || strtolower($file->getExtension()) !== 'md') {
+                continue;
+            }
+            aiApplyPlaceholderSetsToFile($file->getPathname(), $setValues);
+            $content = (string) file_get_contents($file->getPathname());
+            if (preg_match_all('/<[A-Z0-9_]+>/', $content, $m) === 1 || (isset($m[0]) && $m[0] !== [])) {
+                $rel = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
+                $hits[] = ['path' => $rel, 'placeholders' => array_values(array_unique($m[0]))];
+            }
+        }
+    }
+
+    if ($interactive && $hits !== []) {
+        $all = [];
+        foreach ($hits as $hit) {
+            foreach ($hit['placeholders'] as $ph) {
+                $all[$ph] = true;
+            }
+        }
+        foreach (array_keys($all) as $token) {
+            $input = aiPromptLine("Set {$token} (leave blank to skip): ");
+            if ($input === '') {
+                continue;
+            }
+            aiReplaceTokenAcrossPaths($root, $paths, $token, $input);
+        }
+    }
+
+    $data = ['count' => count($hits), 'items' => $hits, 'mode' => $fail ? 'fail' : 'scan'];
+    $status = $hits === [] ? 'ok' : ($fail ? 'failed' : 'warning');
+    $written = aiCliWriteArtifact($root, 'placeholders', 'php tools/ai/ai.php placeholders', $data, $status, null, $hits === [] ? 'No unresolved placeholders found.' : 'Resolve placeholders before strict verification.');
+    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    return $status === 'failed' ? 1 : 0;
+}
+
+function aiApplyPlaceholderSetsToFile(string $filePath, array $setValues): void
+{
+    if ($setValues === []) {
+        return;
+    }
+    $content = (string) file_get_contents($filePath);
+    $updated = str_replace(array_keys($setValues), array_values($setValues), $content);
+    if ($updated !== $content) {
+        file_put_contents($filePath, $updated);
+    }
+}
+
+function aiReplaceTokenAcrossPaths(string $root, array $paths, string $token, string $value): void
+{
+    foreach ($paths as $path) {
+        $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+        if (is_file($abs)) {
+            aiApplyPlaceholderSetsToFile($abs, [$token => $value]);
+            continue;
+        }
+        if (!is_dir($abs)) {
+            continue;
+        }
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($abs, FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $file) {
+            if (!$file->isFile() || strtolower($file->getExtension()) !== 'md') {
+                continue;
+            }
+            aiApplyPlaceholderSetsToFile($file->getPathname(), [$token => $value]);
+        }
+    }
+}
+
+function aiRunHooks(string $root, array $args): int
+{
+    $driver = aiParseArg($args, 'driver') ?? 'none';
+    $install = in_array('install', $args, true);
+    $commands = [];
+    if ($install) {
+        if ($driver === 'husky') {
+            $commands[] = 'npx husky add .husky/pre-commit "bash scripts/hooks/pre-commit.sh"';
+            $commands[] = 'npx husky add .husky/commit-msg "bash scripts/hooks/commit-msg.sh"';
+        } elseif ($driver === 'lefthook') {
+            $commands[] = 'Map scripts/hooks/pre-commit.sh and commit-msg.sh in .lefthook.yml';
+        } elseif ($driver === 'native') {
+            $commands[] = 'cp scripts/hooks/pre-commit.sh .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit';
+            $commands[] = 'cp scripts/hooks/commit-msg.sh .git/hooks/commit-msg && chmod +x .git/hooks/commit-msg';
+        }
+    }
+    $data = [
+        'status' => $install ? 'manual-required' : 'planned',
+        'install_requested' => $install,
+        'driver' => $driver,
+        'supported_drivers' => ['husky', 'lefthook', 'native'],
+        'wiring_commands' => $commands,
+        'note' => 'Hook wiring remains explicit and opt-in.',
+    ];
+    $written = aiCliWriteArtifact($root, 'hooks', 'php tools/ai/ai.php hooks', $data, 'ok', null, 'Install hooks explicitly per selected driver.');
+    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    return 0;
+}
+
+function aiRunToolchain(string $root, array $args): int
+{
+    $withRaw = aiParseArg($args, 'with') ?? aiParseArg($args, 'toolchain-tools') ?? '';
+    $with = $withRaw === '' ? [] : array_values(array_filter(array_map('trim', explode(',', $withRaw)), static fn(string $v): bool => $v !== ''));
+    $profile = aiParseArg($args, 'profile') ?? 'dual';
+    $runtime = aiParseArg($args, 'runtime') ?? 'both';
+    $check = in_array('--check', $args, true) || in_array('--toolchain-check', $args, true) || !in_array('--install-plan', $args, true);
+    $installPlan = in_array('--install-plan', $args, true) || in_array('--toolchain-install-plan', $args, true);
+    $apply = in_array('--toolchain-apply', $args, true);
+    $assumeYes = in_array('--yes', $args, true);
+
+    $cfg = aiInstallerConfigFromAiArgs($root, ['--profile', $profile, '--runtime', $runtime, '--dry-run']);
+    $packs = aiInstallerResolveSelectedPacks($cfg, aiInstallerPackRegistry());
+    $tools = aiInstallerSelectedToolList($packs, $with);
+    $report = aiInstallerToolchainReport($tools);
+
+    $platform = aiInstallerPlatformKey();
+    $installActions = [];
+    foreach ($report as $row) {
+        if (($row['present'] ?? false) === true) {
+            continue;
+        }
+        $hints = $row['install_hints'] ?? [];
+        $hint = (string) ($hints[$platform] ?? ($hints['npm'] ?? 'manual install required'));
+        $installActions[] = ['tool' => $row['tool'], 'hint' => $hint, 'safe_auto_install' => (bool) ($row['safe_auto_install'] ?? false)];
+    }
+
+    $applied = [];
+    if ($apply) {
+        if (!$assumeYes) {
+            fwrite(STDOUT, "Toolchain apply is about to run safe auto-install commands (if any).\n");
+            if (!aiPromptYesNo('Continue with toolchain apply?', true)) {
+                $data = [
+                    'status' => 'blocked',
+                    'reason' => 'toolchain apply cancelled by user',
+                    'profile' => $profile,
+                    'runtime' => $runtime,
+                    'packs' => $packs,
+                    'apply_requested' => true,
+                ];
+                $written = aiCliWriteArtifact($root, 'toolchain', 'php tools/ai/ai.php toolchain', $data, 'blocked', null, 'Re-run with --yes to apply non-interactively.');
+                fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+                return 1;
+            }
+        }
+
+        foreach ($report as $row) {
+            if (($row['present'] ?? false)) {
+                continue;
+            }
+            if (!($row['safe_auto_install'] ?? false)) {
+                $hints = $row['install_hints'] ?? [];
+                $hint = (string) ($hints[$platform] ?? ($hints['npm'] ?? 'manual install required'));
+                $applied[] = ['tool' => $row['tool'], 'status' => 'blocked', 'reason' => 'auto-install not approved', 'hint' => $hint];
+                continue;
+            }
+            $requires = is_array($row['requires_before_install'] ?? null) ? $row['requires_before_install'] : [];
+            $missingReq = aiInstallerMissingTools($requires);
+            if ($missingReq !== []) {
+                $applied[] = ['tool' => $row['tool'], 'status' => 'blocked', 'reason' => 'missing prerequisite tools: ' . implode(', ', $missingReq)];
+                continue;
+            }
+            $commands = $row['install_commands'] ?? [];
+            $cmd = is_array($commands['npm'] ?? null) ? $commands['npm'] : [];
+            if ($cmd === []) {
+                $applied[] = ['tool' => $row['tool'], 'status' => 'blocked', 'reason' => 'no safe install command'];
+                continue;
+            }
+            $result = aiInstallerRunArgv($cmd, $root);
+            $applied[] = ['tool' => $row['tool'], 'status' => $result['exit'] === 0 ? 'installed' : 'failed', 'exit' => $result['exit']];
+        }
+    }
+
+    $data = [
+        'status' => 'ok',
+        'profile' => $profile,
+        'runtime' => $runtime,
+        'packs' => $packs,
+        'check_requested' => $check,
+        'install_plan_requested' => $installPlan,
+        'apply_requested' => $apply,
+        'tools' => $report,
+        'install_actions' => $installActions,
+        'apply_results' => $applied,
+    ];
+    $written = aiCliWriteArtifact($root, 'toolchain', 'php tools/ai/ai.php toolchain', $data, 'ok', null, 'Review missing tools and rerun with --toolchain-apply only when needed.');
+    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    return 0;
+}
+
+function aiRunScriptById(string $root, string $scriptId, array $args, ?array $selectedPacks = null): array
+{
+    $registry = aiInstallerScriptRegistry();
+    if (!isset($registry[$scriptId])) {
+        return ['exit' => 1, 'error' => 'unknown script id: ' . $scriptId];
+    }
+    $entry = $registry[$scriptId];
+    $requiredPack = (string) ($entry['pack'] ?? '');
+    if (is_array($selectedPacks) && $requiredPack !== '' && !in_array($requiredPack, $selectedPacks, true)) {
+        return ['exit' => 1, 'error' => 'script requires missing pack: ' . $requiredPack, 'required_pack' => $requiredPack];
+    }
+    $scriptPath = aiInstallerResolveScriptPath($root, $entry);
+    if ($scriptPath === null) {
+        return ['exit' => 1, 'error' => 'script file not found for id: ' . $scriptId];
+    }
+
+    $requiredTools = is_array($entry['required_tools'] ?? null) ? $entry['required_tools'] : [];
+    $missing = aiInstallerMissingTools($requiredTools);
+    if ($missing !== []) {
+        return ['exit' => 1, 'error' => 'missing required tools: ' . implode(', ', $missing), 'missing_tools' => $missing];
+    }
+
+    $dryRun = in_array('--dry-run', $args, true) || !in_array('--apply', $args, true);
+    $scriptArgs = aiArgsAfterDoubleDash($args);
+    $argv = array_merge(['bash', $scriptPath], $scriptArgs);
+    if ($dryRun) {
+        return ['exit' => 0, 'dry_run' => true, 'argv' => $argv, 'script_id' => $scriptId, 'script_path' => str_replace('\\', '/', substr($scriptPath, strlen($root) + 1))];
+    }
+
+    $run = aiInstallerRunArgv($argv, $root);
+    return [
+        'exit' => $run['exit'],
+        'dry_run' => false,
+        'argv' => $argv,
+        'script_id' => $scriptId,
+        'script_path' => str_replace('\\', '/', substr($scriptPath, strlen($root) + 1)),
+        'stdout_preview' => substr((string) ($run['stdout'] ?? ''), 0, 3000),
+        'stderr_preview' => substr((string) ($run['stderr'] ?? ''), 0, 3000),
+    ];
+}
+
+function aiRunScriptCommand(string $root, array $args): int
+{
+    if (in_array('--list', $args, true)) {
+        $registry = aiInstallerScriptRegistry();
+        $items = [];
+        foreach ($registry as $id => $entry) {
+            $items[] = ['id' => $id, 'label' => $entry['label'] ?? $id, 'pack' => $entry['pack'] ?? 'unknown'];
+        }
+        $written = aiCliWriteArtifact($root, 'scripts', 'php tools/ai/ai.php run-script --list', ['scripts' => $items], 'ok', null, 'Run one with: php tools/ai/ai.php run-script <id> --dry-run');
+        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        return 0;
+    }
+
+    $scriptId = '';
+    foreach ($args as $arg) {
+        if ($arg !== '' && $arg[0] !== '-') {
+            $scriptId = $arg;
+            break;
+        }
+    }
+    if ($scriptId === '') {
+        throw new RuntimeException('run-script requires script id or --list');
+    }
+
+    $run = aiRunScriptById($root, $scriptId, $args, null);
+    $status = ($run['exit'] ?? 1) === 0 ? 'ok' : 'failed';
+    $written = aiCliWriteArtifact($root, 'scripts', 'php tools/ai/ai.php run-script ' . $scriptId, $run, $status, null, $status === 'ok' ? 'Script run completed.' : 'Fix script/tool errors and retry.');
+    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    return $status === 'ok' ? 0 : 1;
+}
+
+function aiRunInstallDocs(string $root, array $args): int
+{
+    $check = in_array('--check', $args, true);
+    $write = in_array('--write', $args, true) || !$check;
+    $target = aiParseArg($args, 'target') ?? $root;
+    $targetRoot = realpath($target);
+    if ($targetRoot === false || !is_dir($targetRoot)) {
+        throw new RuntimeException('target directory not found: ' . $target);
+    }
+
+    $manifestPath = aiInstallerCanonicalManifestPath($targetRoot);
+    $installDocDrift = [];
+
+    if ($check) {
+        if (is_file($manifestPath)) {
+            $manifest = json_decode((string) file_get_contents($manifestPath), true);
+            if (is_array($manifest)) {
+                $generated = $targetRoot . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated';
+                $jsonPath = $generated . DIRECTORY_SEPARATOR . 'install-instructions.json';
+                $mdPath = $generated . DIRECTORY_SEPARATOR . 'install-instructions.md';
+                $data = aiInstallerBuildInstalledInstructionsData($targetRoot, $manifest);
+                $expectedJson = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
+                $expectedMd = aiInstallerRenderInstalledInstructionsMarkdown($data);
+                if (!is_file($jsonPath) || (string) file_get_contents($jsonPath) !== $expectedJson) {
+                    $installDocDrift[] = 'docs/ai/generated/install-instructions.json';
+                }
+                if (!is_file($mdPath) || (string) file_get_contents($mdPath) !== $expectedMd) {
+                    $installDocDrift[] = 'docs/ai/generated/install-instructions.md';
+                }
+            }
+        }
+
+        $catalogCheck = aiInstallerCheckCatalogDocs($root);
+        $drift = array_values(array_unique(array_merge($installDocDrift, $catalogCheck['drift'] ?? [])));
+        $status = $drift === [] ? 'ok' : 'failed';
+        $data = [
+            'status' => $status,
+            'mode' => 'check',
+            'target' => $targetRoot,
+            'drift' => $drift,
+        ];
+        $written = aiCliWriteArtifact($root, 'install-docs', 'php tools/ai/ai.php install-docs --check', $data, $status, null, $status === 'ok' ? 'Install docs are up to date.' : 'Run install-docs --write to regenerate install docs.');
+        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        return $status === 'ok' ? 0 : 1;
+    }
+
+    $writtenPaths = [];
+    if (is_file($manifestPath)) {
+        $manifest = json_decode((string) file_get_contents($manifestPath), true);
+        if (is_array($manifest)) {
+            $out = aiInstallerWriteInstallDocs($targetRoot, $manifest);
+            $writtenPaths[] = aiCliToRelative($root, $out['json']);
+            $writtenPaths[] = aiCliToRelative($root, $out['md']);
+        }
+    }
+    $catalog = aiInstallerWriteCatalogDocs($root);
+    $writtenPaths[] = aiCliToRelative($root, $catalog['json']);
+    $writtenPaths[] = aiCliToRelative($root, $catalog['md']);
+    $writtenPaths[] = aiCliToRelative($root, $catalog['package_md']);
+
+    $data = [
+        'status' => 'ok',
+        'mode' => 'write',
+        'target' => $targetRoot,
+        'written' => array_values(array_unique($writtenPaths)),
+        'manifest_found' => is_file($manifestPath),
+    ];
+    $written = aiCliWriteArtifact($root, 'install-docs', 'php tools/ai/ai.php install-docs --write', $data, 'ok', null, 'Run install-docs --check in CI to prevent drift.');
+    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    return 0;
+}

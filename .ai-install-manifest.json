@@ -1,0 +1,47 @@
+{
+    "schema_version": 1,
+    "installer_version": "0.2.0",
+    "installed_at": "2026-05-10T15:25:11+00:00",
+    "updated_at": "2026-05-10T15:25:11+00:00",
+    "profile": "full-governance",
+    "mode": "sidecar-only",
+    "runtime": "both",
+    "package": {
+        "name": "ai-universal-rules",
+        "distribution": "git-tag",
+        "source_repository": "UtmostCreator/app-configs",
+        "source_remote": "origin",
+        "source_ref": "unknown",
+        "source_commit": "unknown",
+        "installed_version": "unknown"
+    },
+    "managed_paths": [
+        ".vscode/settings.json"
+    ],
+    "packs": [
+        "capabilities-extended-full",
+        "hooks-pack",
+        "ci-pack",
+        "scripts-pack",
+        "policy-pack",
+        "evidence-pack",
+        "adapter-copilot",
+        "adapter-opencode",
+        "capabilities-extended-lite",
+        "base",
+        "setup-docs",
+        "capabilities-core"
+    ],
+    "toolchain": {
+        "checked": false,
+        "install_plan_printed": false,
+        "applied": false
+    },
+    "post_install_script": {
+        "requested": null,
+        "executed": false,
+        "reason": null,
+        "exit": null
+    },
+    "package_lock_sha256": "sha256:7716b4923e252c86bf0cf9e9d403341fa06124e9d95b2958afc82391164e38ce"
+}

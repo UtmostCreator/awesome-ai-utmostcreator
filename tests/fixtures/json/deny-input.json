@@ -1,0 +1,6 @@
+{
+  "toolName": "bash",
+  "toolArgs": {
+    "command": "rm -rf /tmp/x"
+  }
+}

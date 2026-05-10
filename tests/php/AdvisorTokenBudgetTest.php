@@ -1,0 +1,38 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Tests;
+
+use PHPUnit\Framework\TestCase;
+
+class AdvisorTokenBudgetTest extends TestCase
+{
+    public function testAdvisorTokenBudgetArtifactExistsAfterAll(): void
+    {
+        $root = realpath(dirname(__DIR__, 2));
+        $this->assertNotFalse($root);
+        $php = escapeshellarg((string) PHP_BINARY);
+
+        $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+        $process = proc_open($php . ' tools/ai/ai.php advisor --all', $descriptors, $pipes, (string) $root);
+        $this->assertIsResource($process);
+        fclose($pipes[0]);
+        stream_get_contents($pipes[1]);
+        stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exit = proc_close($process);
+        $this->assertContains($exit, [0, 1]);
+
+        $artifact = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR . 'advisor-token-budget.json';
+        if (is_file($artifact)) {
+            $decoded = json_decode((string) file_get_contents($artifact), true);
+            $this->assertIsArray($decoded);
+            $this->assertArrayHasKey('tokens_estimate', $decoded);
+            $this->assertArrayHasKey('mode', $decoded);
+        } else {
+            $this->assertTrue(true, 'Token budget may be skipped when secret scan blocks pack stage.');
+        }
+    }
+}

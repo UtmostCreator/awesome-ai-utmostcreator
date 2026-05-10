@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+output=''
+for ((i = 1; i <= $#; i++)); do
+    if [[ "${!i}" == "--output" ]]; then
+        next=$((i + 1))
+        output="${!next}"
+    fi
+done
+
+[[ -n "$output" ]] || {
+    echo "missing --output" >&2
+    exit 2
+}
+
+mkdir -p "$(dirname "$output")"
+
+scenario="${FAKE_SCC_SCENARIO:-normal}"
+
+if [[ "$scenario" == "low-budget" ]]; then
+    cat >"$output" <<'EOF'
+scc_lines{language="Markdown",file="docs/huge.md"} 900000
+scc_code{language="Markdown",file="docs/huge.md"} 880000
+scc_comments{language="Markdown",file="docs/huge.md"} 10000
+scc_blanks{language="Markdown",file="docs/huge.md"} 10000
+scc_complexity{language="Markdown",file="docs/huge.md"} 1000
+scc_bytes{language="Markdown",file="docs/huge.md"} 3600000
+scc_lines{language="PHP",file="php/small.php"} 800
+scc_code{language="PHP",file="php/small.php"} 700
+scc_comments{language="PHP",file="php/small.php"} 50
+scc_blanks{language="PHP",file="php/small.php"} 50
+scc_complexity{language="PHP",file="php/small.php"} 40
+scc_bytes{language="PHP",file="php/small.php"} 12000
+EOF
+else
+    cat >"$output" <<'EOF'
+scc_lines{language="Markdown",file="docs/readme.md"} 500
+scc_code{language="Markdown",file="docs/readme.md"} 420
+scc_comments{language="Markdown",file="docs/readme.md"} 40
+scc_blanks{language="Markdown",file="docs/readme.md"} 40
+scc_complexity{language="Markdown",file="docs/readme.md"} 20
+scc_bytes{language="Markdown",file="docs/readme.md"} 9000
+scc_lines{language="PHP",file="php/app.php"} 1200
+scc_code{language="PHP",file="php/app.php"} 1000
+scc_comments{language="PHP",file="php/app.php"} 100
+scc_blanks{language="PHP",file="php/app.php"} 100
+scc_complexity{language="PHP",file="php/app.php"} 80
+scc_bytes{language="PHP",file="php/app.php"} 18000
+scc_lines{language="JSON",file="generated/cache.json"} 50
+scc_code{language="JSON",file="generated/cache.json"} 40
+scc_comments{language="JSON",file="generated/cache.json"} 5
+scc_blanks{language="JSON",file="generated/cache.json"} 5
+scc_complexity{language="JSON",file="generated/cache.json"} 2
+scc_bytes{language="JSON",file="generated/cache.json"} 1000
+EOF
+fi

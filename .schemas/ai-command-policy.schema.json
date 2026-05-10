@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-configs.local/.schemas/ai-command-policy.schema.json",
+  "title": "AI Command Policy Tiers",
+  "type": "object",
+  "required": ["version", "default_decision", "tiers"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "default_decision": { "enum": ["ask", "deny"] },
+    "tiers": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description"],
+        "additionalProperties": false,
+        "properties": {
+          "extends": { "type": "string", "minLength": 1 },
+          "description": { "type": "string", "minLength": 1 },
+          "edit": { "enum": ["allow", "deny"] },
+          "bash": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "allow": { "type": "array", "items": { "type": "string" } },
+              "ask": { "type": "array", "items": { "type": "string" } },
+              "deny": { "type": "array", "items": { "type": "string" } }
+            }
+          }
+        }
+      }
+    }
+  }
+}

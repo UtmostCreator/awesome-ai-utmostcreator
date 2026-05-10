@@ -1,0 +1,8 @@
+{
+  "bug_report_fields": ["summary", "expected_behavior", "location"],
+  "default_verification_order": [
+    "focused_test",
+    "package_or_layer_test",
+    "broader_verify"
+  ]
+}

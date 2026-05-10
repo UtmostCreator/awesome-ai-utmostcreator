@@ -1,0 +1,9 @@
+- [ ] Read user request and restate bounded outcome.
+- [ ] Run `git status --short` before edits.
+- [ ] Inspect relevant diff/context.
+- [ ] Classify task mode.
+- [ ] Declare intended scope and protected-action posture.
+- [ ] Apply minimal patch only.
+- [ ] Inspect final diff for scope drift.
+- [ ] Run focused verification command(s).
+- [ ] Report verification classification and remaining risks.

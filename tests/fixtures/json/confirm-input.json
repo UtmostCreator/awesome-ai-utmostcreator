@@ -1,0 +1,6 @@
+{
+  "toolName": "bash",
+  "toolArgs": {
+    "command": "git commit -m \"msg\""
+  }
+}

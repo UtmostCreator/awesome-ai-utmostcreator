@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "advisor-recommendation",
+  "type": "object",
+  "required": ["provider", "network_called"],
+  "properties": {
+    "provider": {"type": "string"},
+    "network_called": {"type": "boolean"}
+  }
+}

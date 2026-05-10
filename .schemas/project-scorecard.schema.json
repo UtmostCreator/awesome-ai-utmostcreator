@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "project-scorecard",
+  "type": "object",
+  "required": ["schema_version", "scores", "overall"],
+  "properties": {
+    "schema_version": {"type": "integer"},
+    "scores": {"type": "object"},
+    "overall": {"type": "integer"}
+  }
+}

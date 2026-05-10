@@ -1,0 +1,42 @@
+# app-configs
+
+> Opinionated development configuration plus a reusable cross-tool AI workflow kit.
+
+## Primary Docs
+
+- [README.md](README.md): root overview, quick start, and repo layout
+- [AGENTS.md](AGENTS.md): durable repository instructions
+- [docs/ai/copilot-getting-started.md](docs/ai/copilot-getting-started.md): GitHub Copilot adapter install map and read order
+- [docs/ai/project-context.md](docs/ai/project-context.md): live repository context
+- [docs/ai/workflow.md](docs/ai/workflow.md): live task flow
+- [docs/ai/agents.md](docs/ai/agents.md): live agent reference and package agent index
+- [docs/ai/failure-handling.md](docs/ai/failure-handling.md): command-failure taxonomy and retry policy
+- [docs/ai/agent-ops-checklist.md](docs/ai/agent-ops-checklist.md): phased verification checklist for integration audits
+- [docs/ai/integration-matrix.md](docs/ai/integration-matrix.md): concept coverage map for the live workflow layer
+- [docs/ai/catalog.md](docs/ai/catalog.md): generated browse index for live and package assets
+
+## Runtime Adapters
+
+- GitHub Copilot adapter resources live under `.github/` and are generated from `packages/ai-universal-rules/templates/instructions/`, `packages/ai-universal-rules/templates/workflows/`, and `packages/ai-universal-rules/templates/core/agents/`.
+- OpenCode adapter resources live under `.opencode/` and are generated from `packages/ai-universal-rules/templates/workflows/`, `packages/ai-universal-rules/templates/commands/`, and `packages/ai-universal-rules/templates/core/agents/`.
+- Canonical workflow resources stay runtime-neutral under `docs/ai/`, `docs/ai/capabilities/`, `scripts/ai/`, and `.schemas/`.
+
+## Reusable Kit
+
+- [packages/ai-universal-rules/README.md](packages/ai-universal-rules/README.md): package overview and operating model
+- [packages/ai-universal-rules/QUICKSTART.md](packages/ai-universal-rules/QUICKSTART.md): fastest install path
+- [packages/ai-universal-rules/docs/BROWSE.md](packages/ai-universal-rules/docs/BROWSE.md): generated package catalog
+- [packages/ai-universal-rules/manifest.json](packages/ai-universal-rules/manifest.json): machine-readable package manifest
+
+## Contribution And Trust
+
+- [CONTRIBUTING.md](CONTRIBUTING.md): contribution rules and generated file workflow
+- [SECURITY.md](SECURITY.md): security reporting
+- [SUPPORT.md](SUPPORT.md): support expectations and reporting guidance
+
+## Validation
+
+- `php tools/ai/validate-ai-config.php`
+- `php tools/ai/validate-ai-catalog.php`
+- `php tools/ai/generate-ai-catalog.php --check`
+- `php tools/ai/export-ai-universal-rules.php --check`
