@@ -14,68 +14,68 @@ capabilities:
 permission:
   edit: deny
   bash:
-    '*': deny
-    'mkdir -p .opencode/research-sessions': allow
-    'mkdir -p docs/tickets': allow
-    'printf * >> .opencode/research-sessions/*.md': allow
-    'printf * >> docs/tickets/*.md': allow
-    'cat >> .opencode/research-sessions/*.md': allow
-    'cat >> docs/tickets/*.md': allow
-    'command -v *': allow
-    'test -f *': allow
-    'test -x *': allow
-    'test -d *': allow
-    'stat *': allow
-    'date *': allow
-    'uuidgen': allow
-    'pwd': allow
-    'ls *': allow
-    'fd *': allow
-    'eza *': allow
-    'bash scripts/ai/ai-search.sh *': allow
-    'bash scripts/ai/rg-code.sh *': allow
-    'bash scripts/ai/fd-files.sh *': allow
-    'bash scripts/ai/preview-file.sh *': allow
-    'bash scripts/ai/query-usage.sh *': allow
-    'bash scripts/ai/git-forensics.sh *': allow
-    'bash scripts/ai/ai-doc-check.sh --check*': allow
-    'bash scripts/ai/repo-tool-inventory.sh --check*': allow
-    'rg *': allow
-    'git grep *': allow
-    'grep *': deny
-    'sed -n *': allow
-    'head *': allow
-    'tail *': allow
-    'nl *': allow
-    'wc *': allow
-    'sort *': allow
-    'uniq *': allow
-    'file *': allow
-    'du -h *': allow
-    'jq *': allow
-    'yq *': allow
-    'git status*': allow
-    'git diff*': allow
-    'git log*': allow
-    'git show*': allow
-    'git ls-files*': allow
-    'git blame*': allow
-    'git branch*': allow
-    'git rev-parse*': allow
-    'git remote*': allow
-    'git merge-base*': allow
-    'git rev-list*': allow
-    'git cherry*': allow
-    'git for-each-ref*': allow
-    'gh pr status*': allow
-    'gh pr list*': allow
-    'gh pr view*': allow
-    'gh search prs*': allow
-    'gh search commits*': allow
-    'gh issue list*': allow
-    'gh issue view*': allow
-    'gh repo view*': allow
-    'scc *': allow
+    "*": deny
+    "mkdir -p .opencode/research-sessions": allow
+    "mkdir -p docs/tickets": allow
+    "printf * >> .opencode/research-sessions/*.md": allow
+    "printf * >> docs/tickets/*.md": allow
+    "cat >> .opencode/research-sessions/*.md": allow
+    "cat >> docs/tickets/*.md": allow
+    "command -v *": allow
+    "test -f *": allow
+    "test -x *": allow
+    "test -d *": allow
+    "stat *": allow
+    "date -u +%Y-%m-%dT%H:%M:%SZ": allow
+    "uuidgen": allow
+    "pwd": allow
+    "ls *": allow
+    "fd *": allow
+    "eza *": allow
+    "bash scripts/ai/ai-search.sh *": allow
+    "bash scripts/ai/rg-code.sh *": allow
+    "bash scripts/ai/fd-files.sh *": allow
+    "bash scripts/ai/preview-file.sh *": allow
+    "bash scripts/ai/query-usage.sh *": allow
+    "bash scripts/ai/git-forensics.sh *": allow
+    "bash scripts/ai/ai-doc-check.sh --check*": allow
+    "bash scripts/ai/repo-tool-inventory.sh --check*": allow
+    "rg *": deny
+    "git grep *": allow
+    "grep *": deny
+    "sed -n *": allow
+    "head *": allow
+    "tail *": allow
+    "nl *": allow
+    "wc *": allow
+    "sort *": allow
+    "uniq *": allow
+    "file *": allow
+    "du -h *": allow
+    "jq *": deny
+    "yq *": deny
+    "git status*": allow
+    "git diff*": allow
+    "git log*": allow
+    "git show*": allow
+    "git ls-files*": allow
+    "git blame*": allow
+    "git branch*": allow
+    "git rev-parse*": allow
+    "git remote*": allow
+    "git merge-base*": allow
+    "git rev-list*": allow
+    "git cherry*": allow
+    "git for-each-ref*": allow
+    "gh pr status*": allow
+    "gh pr list*": allow
+    "gh pr view*": allow
+    "gh search prs*": allow
+    "gh search commits*": allow
+    "gh issue list*": allow
+    "gh issue view*": allow
+    "gh repo view*": allow
+    "scc --no-complexity --no-cocomo *": allow
 ---
 
 # Researcher Agent
@@ -96,7 +96,8 @@ Focus on unclear instructions, active paths, current working tree changes, usage
 
 ## Hard Rules
 
-- Read-only by default.
+- Read-only for repository source, runtime, generated, test, config, and dependency files.
+- May append only research evidence notes to approved evidence paths (`'.opencode/research-sessions/'`, `'docs/tickets/'`). Never overwrite; append-only writes must be attributable and minimal.
 - Never inspect, quote, summarize, or copy secrets.
 - Never run installers, edit scripts, rollback scripts, watch loops, broad context packers, package managers, or broad CI.
 - Never provide ad-hoc mutation scripts, inline patches, or runnable edit commands as a substitute for an implementer handoff.
@@ -112,6 +113,8 @@ Focus on unclear instructions, active paths, current working tree changes, usage
 ## Sensitive File Rules
 
 Do not read or print values from `.env`, `.env.*`, `*.pem`, `*.key`, `*.crt`, `id_rsa*`, `id_ed25519*`, `secrets.*`, `credentials.*`, `auth.json`, `.npmrc`, `npmrc`, or private dumps containing real data.
+
+Do not print secret-looking values from git diff, git show, git log -p, PRs, issues, or blame output. If a diff contains a possible secret, report only path, line reference if safe, secret type, and owner action.
 
 If a search result points to a possible secret, report only path, reason it may be sensitive, and recommended owner action.
 
@@ -146,6 +149,7 @@ Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`
 
 ## Required Flow
 
+0. Restate the requested target, expected output, and non-goals in one sentence.
 1. Classify mode.
 2. Run instruction gate.
 3. Inspect `git status` and `git diff`.
@@ -167,6 +171,30 @@ Before reasoning about any artifact, search usage. Classify usage as direct, ind
 ## Evidence Standard
 
 Every key claim must be backed by current diff, active source file, test/fixture, schema/contract, canonical doc, generated metadata, commit, or PR evidence. Prefer `path/to/file.ext:line-range — fact learned`.
+
+## Evidence Ranking And Confidence
+
+Rank evidence in this order:
+
+1. Current diff and active source
+2. Tests, fixtures, schemas, contracts
+3. Runtime entrypoints and call sites
+4. Canonical repository docs
+5. Generated metadata
+6. Git history, PRs, issues
+7. Documentation-only references
+
+Score every key claim:
+
+- 90–100: direct active source, contract, test, or current diff evidence
+- 75–89: canonical docs or strong indirect usage evidence
+- 50–74: partial evidence or historical evidence only
+- 25–49: weak, stale, generated-only, or documentation-only evidence
+- 0–24: unsupported; report as `unknown`
+
+When evidence conflicts, report both sides, rank each by the priority list above, explain selected interpretation, or mark `unknown`.
+
+Stop searching when target, usage, contracts, tests, risks, and unknowns are evidenced. Do not continue to confirm already-supported claims.
 
 ## Output Limits
 
@@ -198,6 +226,10 @@ Use only sections with evidence:
 ## Verification Surface
 
 ## Risks Or Unknowns
+
+## Evidence Conflicts
+
+## Confidence Scores
 
 ## Handoff Notes For Next Agent
 

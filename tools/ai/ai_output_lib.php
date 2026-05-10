@@ -2,6 +2,19 @@
 
 declare(strict_types=1);
 
+/**
+ * Format artifact write result for human-readable output.
+ * Handles the case where markdown was not written (null).
+ */
+function aiCliArtifactSummary(array $written): string
+{
+    if ($written['markdown'] !== null) {
+        return "wrote {$written['json']} and {$written['markdown']}";
+    }
+
+    return "wrote {$written['json']}";
+}
+
 function aiCliRepoRoot(): string
 {
     $root = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
@@ -113,8 +126,12 @@ function aiCliWriteArtifact(
     string $status = 'ok',
     ?int $score = null,
     ?string $recommendedNextAction = null,
-    array $inputHashes = []
+    array $inputHashes = [],
+    bool $writeMd = false
 ): array {
+    $verbose = getenv('AI_ARTIFACTS_VERBOSE') === '1';
+    $writeMd = $writeMd || $verbose;
+
     $generatedDir = aiCliGeneratedDir($root);
     $jsonPath = $generatedDir . DIRECTORY_SEPARATOR . $artifactBase . '.json';
     $mdPath = $generatedDir . DIRECTORY_SEPARATOR . $artifactBase . '.md';
@@ -140,16 +157,18 @@ function aiCliWriteArtifact(
     }
     file_put_contents($jsonPath, $encodedJson . PHP_EOL);
 
-    $markdown = "# " . ucfirst(str_replace('-', ' ', $artifactBase)) . PHP_EOL . PHP_EOL;
-    $markdown .= '- Status: `' . $status . '`' . PHP_EOL;
-    $markdown .= '- Generated at: `' . $payload['generated_at'] . '`' . PHP_EOL;
-    $markdown .= '- Commit: `' . $payload['based_on_commit'] . '`' . PHP_EOL;
-    $markdown .= '- Branch: `' . $payload['based_on_branch'] . '`' . PHP_EOL;
-    if ($recommendedNextAction !== null) {
-        $markdown .= '- Recommended next action: `' . $recommendedNextAction . '`' . PHP_EOL;
+    if ($writeMd) {
+        $markdown = "# " . ucfirst(str_replace('-', ' ', $artifactBase)) . PHP_EOL . PHP_EOL;
+        $markdown .= '- Status: `' . $status . '`' . PHP_EOL;
+        $markdown .= '- Generated at: `' . $payload['generated_at'] . '`' . PHP_EOL;
+        $markdown .= '- Commit: `' . $payload['based_on_commit'] . '`' . PHP_EOL;
+        $markdown .= '- Branch: `' . $payload['based_on_branch'] . '`' . PHP_EOL;
+        if ($recommendedNextAction !== null) {
+            $markdown .= '- Recommended next action: `' . $recommendedNextAction . '`' . PHP_EOL;
+        }
+        $markdown .= PHP_EOL . '```json' . PHP_EOL . $encodedJson . PHP_EOL . '```' . PHP_EOL;
+        file_put_contents($mdPath, $markdown);
     }
-    $markdown .= PHP_EOL . '```json' . PHP_EOL . $encodedJson . PHP_EOL . '```' . PHP_EOL;
-    file_put_contents($mdPath, $markdown);
 
     $registry = aiCliLoadArtifactsRegistry($generatedDir);
     $registry['updated_at'] = aiCliIsoNow();
@@ -157,19 +176,22 @@ function aiCliWriteArtifact(
     if (!isset($registry['artifacts']) || !is_array($registry['artifacts'])) {
         $registry['artifacts'] = [];
     }
-    $registry['artifacts'][$artifactBase . '.json'] = [
+    $registryEntry = [
         'generated_at' => $payload['generated_at'],
         'based_on_commit' => $payload['based_on_commit'],
         'command' => $command,
         'estimated_tokens' => aiCliEstimateTokens($encodedJson),
         'stale' => false,
         'json_path' => aiCliToRelative($root, $jsonPath),
-        'md_path' => aiCliToRelative($root, $mdPath),
     ];
+    if ($writeMd) {
+        $registryEntry['md_path'] = aiCliToRelative($root, $mdPath);
+    }
+    $registry['artifacts'][$artifactBase . '.json'] = $registryEntry;
     aiCliWriteArtifactsRegistry($generatedDir, $registry);
 
     return [
         'json' => aiCliToRelative($root, $jsonPath),
-        'markdown' => aiCliToRelative($root, $mdPath),
+        'markdown' => $writeMd ? aiCliToRelative($root, $mdPath) : null,
     ];
 }

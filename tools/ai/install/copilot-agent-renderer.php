@@ -153,10 +153,65 @@ function aiInstallerCopyDirAsCopilotAgents(string $src, string $dest, string $sc
     foreach (glob($src . DIRECTORY_SEPARATOR . '*.md') ?: [] as $srcFile) {
         $agentId  = pathinfo($srcFile, PATHINFO_FILENAME);
         $content  = (string) file_get_contents($srcFile);
+        if (aiAgentIsHiddenInternalOnly($content)) {
+            continue;
+        }
         $rendered = aiInstallerRenderCopilotAgent($content, $agentId, $scriptsRoot);
         $destFile = $dest . DIRECTORY_SEPARATOR . $agentId . '.agent.md';
         if (file_put_contents($destFile, $rendered) === false) {
             throw new RuntimeException('failed to write rendered agent: ' . $destFile);
+        }
+    }
+}
+
+/**
+ * Returns true when the agent template frontmatter has hidden: true.
+ * Hidden agents are internal to this kit repo and must not be shipped to installed projects.
+ */
+function aiAgentIsHiddenInternalOnly(string $content): bool
+{
+    if (!preg_match('/^---\R(.*?)\R---/s', $content, $m)) {
+        return false;
+    }
+
+    foreach (explode("\n", $m[1]) as $line) {
+        if (preg_match('/^hidden:\s*true\s*$/', trim($line))) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/**
+ * Copies the source agents directory to dest as raw OpenCode agents, skipping hidden (internal-only) agents.
+ *
+ * @param string $src  Absolute path to source agents dir
+ * @param string $dest Absolute path to destination dir (.opencode/agents)
+ */
+function aiInstallerCopyDirAsOpenCodeAgents(string $src, string $dest): void
+{
+    if (!is_dir($src)) {
+        throw new RuntimeException('missing source directory: ' . $src);
+    }
+    $srcReal  = realpath($src);
+    $destReal = file_exists($dest) ? realpath($dest) : false;
+    if ($srcReal !== false && $destReal !== false && $srcReal === $destReal) {
+        return;
+    }
+    if (file_exists($dest)) {
+        aiInstallerDeleteTree($dest);
+    }
+    aiInstallerMkdir($dest);
+
+    foreach (glob($src . DIRECTORY_SEPARATOR . '*.md') ?: [] as $srcFile) {
+        $content = (string) file_get_contents($srcFile);
+        if (aiAgentIsHiddenInternalOnly($content)) {
+            continue;
+        }
+        $destFile = $dest . DIRECTORY_SEPARATOR . basename($srcFile);
+        if (file_put_contents($destFile, $content) === false) {
+            throw new RuntimeException('failed to copy agent: ' . $destFile);
         }
     }
 }

@@ -1,6 +1,6 @@
 ---
-applyTo: '<TEST_PATH_GLOB>'
-description: 'Testing, verification ladder, regression coverage, and deterministic proof rules'
+applyTo: "<TEST_PATH_GLOB>"
+description: "Testing, verification ladder, regression coverage, and deterministic proof rules"
 ---
 
 # Testing Rules
@@ -35,9 +35,40 @@ Use the smallest sufficient proof first, then widen only when risk requires it.
 
 - Add regression coverage when fixing bugs.
 - Reproduce the bug first when practical.
-- The regression test should fail before the fix when feasible.
+- The regression test must fail before the fix is applied.
 - Do not weaken assertions to make a change pass.
 - Do not delete coverage unless the behavior is intentionally removed and approved.
+
+## Test-First Bug Fix Protocol
+
+When fixing a bug, follow this exact order:
+
+1. **Verify baseline**: run existing tests for the affected area and confirm they pass on the current code without any of your changes. If tests fail before your changes, stop and report.
+2. **Write the regression test**: add a test that reproduces the bug. This test must fail on the current unfixed code.
+3. **Apply the fix**: make the smallest code change that makes the regression test pass.
+4. **Re-verify**: run the full affected test suite and confirm no regressions.
+
+Ask before changing implementation code if existing tests have not been confirmed passing first.
+
+## Test Addition Protocol
+
+When adding or modifying tests alongside code changes:
+
+1. **Stash your code changes** (`git stash` or equivalent isolation).
+2. **Run the tests you plan to modify** and confirm they pass in their current form on the unchanged code.
+3. **Unstash** and apply your new or modified tests on top.
+4. **Confirm new tests fail** against the unfixed code (for bug fixes) or pass against the new behavior (for features).
+
+This prevents conflating test changes with implementation changes.
+
+## Reference Integrity
+
+When changing a function signature, method contract, config key, class name, or any symbol used by other code:
+
+- Find and update all call sites, references, imports, and usages — not just the declaration.
+- Staying within the discussed task scope does not exempt call sites of the symbol you changed.
+- If a rename or signature change propagates widely, report the affected surface and ask before proceeding.
+- Use symbol-usage search before changing any shared interface.
 
 ## Test Design
 

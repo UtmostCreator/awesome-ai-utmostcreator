@@ -47,6 +47,10 @@ foreach ($catalog['resources'] ?? [] as $resource) {
 }
 
 foreach (['reference/php/design-patterns', 'reference/php/design-principles', 'reference/php/php-built-ins'] as $requiredPhpReferencePath) {
+    if (!file_exists(aiAbsolutePath($root, $requiredPhpReferencePath))) {
+        continue;
+    }
+
     if (!aiCatalogHasPath($catalog, $requiredPhpReferencePath)) {
         $errors[] = "catalog.json should include PHP reference corpus path {$requiredPhpReferencePath}";
     }

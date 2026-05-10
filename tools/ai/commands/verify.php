@@ -324,7 +324,7 @@ function aiRunVerify(string $root, array $args): int
     ];
 
     $written = aiCliWriteArtifact($root, 'verify', 'php tools/ai/ai.php verify --changed', $data, $verifyStatus, null, $recommended);
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     if ($jsonMode) {
         fwrite(STDOUT, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
     }

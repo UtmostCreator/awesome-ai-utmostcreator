@@ -33,7 +33,7 @@ function aiRunAdapterPlan(string $root, array $args): int
     ];
 
     $written = aiCliWriteArtifact($root, 'adapter-plan', 'php tools/ai/ai.php adapter-plan', $data, 'ok', null, 'Run install --dry-run then install --backup-only before apply.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -50,7 +50,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
     if ($preflight !== 0 && in_array('--apply', $args, true)) {
         $data = ['status' => 'blocked', 'reason' => 'preflight failed', 'next_action' => 'fix preflight and rerun install'];
         $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install', $data, 'blocked', null, 'Preflight must pass before apply.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 1;
     }
 
@@ -71,7 +71,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
                 'selected_packs' => $selectedPacks,
             ];
             $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install', $data, 'blocked', null, 'Add the required pack with --with or choose a profile that includes it.');
-            fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+            fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
             return 1;
         }
     }
@@ -102,7 +102,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
             'manifest_path' => '.ai-install-manifest.json',
         ];
         $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install', $data, 'blocked', null, 'Use upgrade for existing installs unless forced reinstall is intended.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 1;
     }
 
@@ -122,7 +122,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
             'required_first' => ['preflight', 'package-verify', 'adapter-plan', 'install --backup-only'],
         ];
         $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install --dry-run', $data, 'ok', null, 'Run install --backup-only before install --apply.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 0;
     }
 
@@ -209,7 +209,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
             'target_count' => count($targets),
         ];
         $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install --backup-only', $data, 'ok', null, 'Backup created; proceed to install --apply once transaction apply is enabled.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 0;
     }
 
@@ -224,7 +224,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
         ];
         $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install --apply', $data, 'blocked', null, 'Create backup first, then rerun apply with --backup <backup-id>. Use --force to bypass backup requirement.');
         fwrite(STDERR, "Error: backup is mandatory for install --apply. Create a backup first or use --force to skip." . PHP_EOL);
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 1;
     }
     if ($backupId !== '') {
@@ -357,7 +357,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
         'post_install_script' => $postInstallScript,
     ];
     $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install --apply', $data, $status, null, $status === 'ok' ? 'Install apply completed; run adapter-validate next.' : 'Inspect installer output and rerun install after fixing errors.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $status === 'ok' ? 0 : 1;
 }
 
@@ -540,7 +540,7 @@ function aiRunInstallWizard(string $root): int
         'next_action' => 'Run install --apply with backup after reviewing dry-run.',
     ];
     $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install --interactive', $data, 'ok', null, 'Wizard exited before apply; no installation changes made.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -554,7 +554,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
             'manifest_path' => '.ai-install-manifest.json',
         ];
         $written = aiCliWriteArtifact($root, 'upgrade', 'php tools/ai/ai.php upgrade', $data, 'blocked', null, 'Install workflow must create manifest before upgrade.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 1;
     }
 
@@ -642,7 +642,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
             'package_verify_status' => $verify['status'] ?? 'unknown',
         ];
         $written = aiCliWriteArtifact($root, 'upgrade', 'php tools/ai/ai.php upgrade --dry-run', $data, $changes === [] ? 'ok' : 'warning', null, 'If changes look safe, run upgrade --apply.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 0;
     }
 
@@ -655,7 +655,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
             'next_action' => 'php tools/ai/ai.php install --backup-only --apply --mode ' . $mode,
         ];
         $written = aiCliWriteArtifact($root, 'upgrade', 'php tools/ai/ai.php upgrade --apply', $data, 'blocked', null, 'Create backup first, then rerun upgrade --apply --backup <id>.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 1;
     }
 
@@ -678,7 +678,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
         'install_status' => $install['status'] ?? 'unknown',
     ];
     $written = aiCliWriteArtifact($root, 'upgrade', 'php tools/ai/ai.php upgrade --apply', $data, $status, null, $status === 'ok' ? 'Upgrade apply completed; run adapter-validate.' : 'Upgrade apply failed; inspect install artifact.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $exit;
 }
 
@@ -706,7 +706,7 @@ function aiRunAdapterValidate(string $root): int
         'checks' => ['package-verify artifact', 'instruction-audit artifact', 'install manifest present', 'derived manifest drift'],
     ];
     $written = aiCliWriteArtifact($root, 'adapter-validate', 'php tools/ai/ai.php adapter-validate', $data, $status, null, 'Run package-verify and audit-instructions first if missing.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -768,6 +768,6 @@ function aiRunRollbackWorkflow(string $root, array $args): int
         'restored_targets' => $restored,
     ];
     $written = aiCliWriteArtifact($root, 'rollback', 'php tools/ai/ai.php rollback --backup ' . $backupId, $data, 'ok', null, $dryRun ? 'Dry-run complete; use --apply to restore from backup.' : 'Rollback applied from backup snapshot.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }

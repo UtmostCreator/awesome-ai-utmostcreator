@@ -129,6 +129,30 @@ class InstallerSafetyTest extends TestCase
         return $path;
     }
 
+    /** @return list<string> */
+    private function relativeGlob(string $pattern): array
+    {
+        $files = glob(self::$repoRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $pattern)) ?: [];
+        sort($files);
+
+        return array_map(
+            static fn(string $path): string => str_replace(self::$repoRoot . DIRECTORY_SEPARATOR, '', $path),
+            $files
+        );
+    }
+
+    /** @return list<string> */
+    private function targetGlob(string $target, string $pattern): array
+    {
+        $files = glob($target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $pattern)) ?: [];
+        sort($files);
+
+        return array_map(
+            static fn(string $path): string => str_replace($target . DIRECTORY_SEPARATOR, '', $path),
+            $files
+        );
+    }
+
     public function testRunScriptUnknownIdIsRejected(): void
     {
         $result = $this->runTool($this->aiCommand('run-script unknown-script --dry-run'));
@@ -214,7 +238,10 @@ class InstallerSafetyTest extends TestCase
         foreach ($files as $file) {
             $content = (string) file_get_contents($file);
             $this->assertMatchesRegularExpression('/\bmode:\s*(subagent|all)\b/', $content, 'agent must declare compatible mode: ' . basename($file));
-            $this->assertStringContainsString('hidden: false', $content, 'agent should be visible in listings: ' . basename($file));
+            // Hidden agents are internal-only (e.g. bootstrapper); allow hidden: true for those.
+            if (!preg_match('/^---\R(.*?)\R---/s', $content, $fm) || !preg_match('/^hidden:\s*true\s*$/m', $fm[1])) {
+                $this->assertStringContainsString('hidden: false', $content, 'agent should be visible in listings: ' . basename($file));
+            }
         }
     }
 
@@ -303,6 +330,199 @@ class InstallerSafetyTest extends TestCase
             $paths = array_map(static fn(array $entry): string => (string) ($entry['path'] ?? ''), $manifest['entries'] ?? []);
             $this->assertContains('.github/prompts', $paths);
             $this->assertContains('.ai-install-manifest.json', $paths);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testDirectInstallerCopilotInstallMakesInstalledSurfaceVisible(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_copilot_visible_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'github-copilot',
+                '--profile',
+                'copilot',
+                '--force',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+
+            $sourceAgents = array_values(array_filter(
+                $this->relativeGlob('packages/ai-universal-rules/templates/core/agents/*.md'),
+                function (string $relPath): bool {
+                    $content = (string) file_get_contents(self::$repoRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relPath));
+                    return !preg_match('/^---\R(.*?)\R---/s', $content, $fm) || !preg_match('/^hidden:\s*true\s*$/m', $fm[1]);
+                }
+            ));
+            $sourceWorkflows = $this->relativeGlob('packages/ai-universal-rules/templates/workflows/*.md');
+            $installedAgents = $this->targetGlob($target, '.github/agents/*.agent.md');
+            $installedPrompts = $this->targetGlob($target, '.github/prompts/*.prompt.md');
+            $installedSkills = $this->targetGlob($target, '.github/skills/*/SKILL.md');
+
+            $this->assertCount(count($sourceAgents), $installedAgents, 'Copilot install should expose every non-hidden canonical agent as a visible .agent.md file');
+            $this->assertCount(count($sourceWorkflows), $installedPrompts, 'Copilot install should expose every workflow as a visible prompt');
+            $this->assertCount(count($sourceWorkflows), $installedSkills, 'Copilot install should expose every workflow as a visible skill');
+
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'copilot-instructions.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated-artifacts.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'instructions' . DIRECTORY_SEPARATOR . 'generated-artifacts.instructions.md');
+
+            foreach (glob($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents' . DIRECTORY_SEPARATOR . '*.agent.md') ?: [] as $file) {
+                $content = (string) file_get_contents($file);
+                $this->assertStringContainsString('name:', $content, 'Copilot agent must declare name frontmatter: ' . basename($file));
+                $this->assertStringContainsString('tools:', $content, 'Copilot agent must declare tools frontmatter: ' . basename($file));
+            }
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testDirectInstallerOpenCodeInstallMakesInstalledSurfaceVisible(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_opencode_visible_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+                '--force',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+
+            $sourceAgents = array_values(array_filter(
+                $this->relativeGlob('packages/ai-universal-rules/templates/core/agents/*.md'),
+                function (string $relPath): bool {
+                    $content = (string) file_get_contents(self::$repoRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relPath));
+                    return !preg_match('/^---\R(.*?)\R---/s', $content, $fm) || !preg_match('/^hidden:\s*true\s*$/m', $fm[1]);
+                }
+            ));
+            $sourceWorkflows = $this->relativeGlob('packages/ai-universal-rules/templates/workflows/*.md');
+            $sourceCommands = $this->relativeGlob('packages/ai-universal-rules/templates/commands/*.md');
+            $expectedCommandNames = array_values(array_unique(array_map('basename', array_merge($sourceWorkflows, $sourceCommands))));
+            sort($expectedCommandNames);
+            $installedAgents = $this->targetGlob($target, '.opencode/agents/*.md');
+            $installedCommands = $this->targetGlob($target, '.opencode/commands/*.md');
+            $installedSkills = $this->targetGlob($target, '.opencode/skills/*/SKILL.md');
+            $installedCommandNames = array_values(array_map('basename', $installedCommands));
+
+            $this->assertCount(count($sourceAgents), $installedAgents, 'OpenCode install should expose every non-hidden canonical agent as a visible .md file');
+            $this->assertSame($expectedCommandNames, $installedCommandNames, 'OpenCode install should expose every workflow and command under .opencode/commands/');
+            $this->assertGreaterThanOrEqual(count($sourceWorkflows), count($installedSkills), 'OpenCode install should expose workflow skills');
+
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'opencode.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'AGENTS.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated-artifacts.md');
+
+            foreach (glob($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents' . DIRECTORY_SEPARATOR . '*.md') ?: [] as $file) {
+                $content = (string) file_get_contents($file);
+                $this->assertMatchesRegularExpression('/\bmode:\s*(subagent|all)\b/', $content, 'OpenCode agent must declare compatible mode: ' . basename($file));
+                // Hidden agents are internal-only; they must not appear in shipped installs.
+                $this->assertStringNotContainsString('hidden: true', $content, 'Internal-only agents must not be shipped to installed projects: ' . basename($file));
+                $this->assertStringContainsString('hidden: false', $content, 'OpenCode agent should be visible in listings: ' . basename($file));
+            }
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testDirectInstallerFullGovernanceBackupInstallShipsAllCoreSurfaces(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_' . uniqid('', true);
+        $outputJson = $target . DIRECTORY_SEPARATOR . 'install-output.json';
+        $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
+
+        mkdir($docsDir, 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
+        file_put_contents($docsDir . DIRECTORY_SEPARATOR . 'failure-handling.md', "# existing local copy\n");
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--force',
+                '--backup',
+                '--output-json',
+                escapeshellarg($outputJson),
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+
+            $decoded = json_decode((string) file_get_contents($outputJson), true);
+            $this->assertIsArray($decoded);
+            $this->assertSame('ok', $decoded['status'] ?? null);
+            $this->assertSame('full-governance', $decoded['profile'] ?? null);
+            $this->assertSame('both', $decoded['runtime'] ?? null);
+
+            $packs = $decoded['selected_packs'] ?? [];
+            $this->assertIsArray($packs);
+            foreach (['base', 'adapter-copilot', 'adapter-opencode', 'scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'capabilities-extended-full'] as $pack) {
+                $this->assertContains($pack, $packs, 'full-governance install should include pack ' . $pack);
+            }
+
+            $backup = $decoded['backup'] ?? null;
+            $this->assertIsArray($backup, 'backup metadata should be present for full-governance install');
+            $backupDir = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) ($backup['backup_dir'] ?? ''));
+            $this->assertDirectoryExists($backupDir);
+            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'manifest.json');
+            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'failure-handling.md');
+            $manifest = json_decode((string) file_get_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json'), true);
+            $this->assertIsArray($manifest);
+            $paths = array_map(static fn(array $entry): string => (string) ($entry['path'] ?? ''), $manifest['entries'] ?? []);
+            $this->assertContains('docs/ai/failure-handling.md', $paths);
+
+            $placeholders = $decoded['placeholders'] ?? [];
+            $this->assertIsArray($placeholders);
+            $this->assertSame([], $placeholders['unresolved_required'] ?? null, 'shipping install should not leave required placeholders unresolved');
+
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'AGENTS.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated-artifacts.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'copilot-instructions.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'hooks' . DIRECTORY_SEPARATOR . 'tool-policy.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'workflows' . DIRECTORY_SEPARATOR . 'validate-ai-surface.yml');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'opencode.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'hooks' . DIRECTORY_SEPARATOR . 'pre-commit.sh');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'hooks' . DIRECTORY_SEPARATOR . 'commit-msg.sh');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'ai-file-freshness.sh');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'ai-install-coverage.sh');
+
+            $copilotAgents = $this->targetGlob($target, '.github/agents/*.agent.md');
+            $copilotPrompts = $this->targetGlob($target, '.github/prompts/*.prompt.md');
+            $copilotSkills = $this->targetGlob($target, '.github/skills/*/SKILL.md');
+            $opencodeAgents = $this->targetGlob($target, '.opencode/agents/*.md');
+            $opencodeCommands = $this->targetGlob($target, '.opencode/commands/*.md');
+            $opencodeSkills = $this->targetGlob($target, '.opencode/skills/*/SKILL.md');
+
+            $this->assertNotEmpty($copilotAgents);
+            $this->assertNotEmpty($copilotPrompts);
+            $this->assertNotEmpty($copilotSkills);
+            $this->assertNotEmpty($opencodeAgents);
+            $this->assertNotEmpty($opencodeCommands);
+            $this->assertNotEmpty($opencodeSkills);
         } finally {
             $this->removeTree($target);
         }

@@ -31,7 +31,7 @@ function aiRunPreflight(string $root): int
     ];
 
     $written = aiCliWriteArtifact($root, 'preflight', 'php tools/ai/ai.php preflight', $data, $status, null, (string) $data['recommended_next_action']);
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $failed === [] ? 0 : 1;
 }
 
@@ -65,7 +65,7 @@ function aiRunPackageLock(string $root, array $args): int
     $status = $matches ? 'ok' : ($update ? 'ok' : 'failed');
     $next = $matches ? 'Package lock matches template sources.' : 'Run package-lock --update to refresh checksums.';
     $written = aiCliWriteArtifact($root, 'package-lock', 'php tools/ai/ai.php package-lock', $data, $status, null, $next);
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $status === 'ok' ? 0 : 1;
 }
 
@@ -111,7 +111,7 @@ function aiRunPackageVerify(string $root): int
     ];
 
     $written = aiCliWriteArtifact($root, 'package-verify', 'php tools/ai/ai.php package-verify', $data, $status, null, $status === 'ok' ? 'Source package integrity verified.' : 'Refresh lock or revert unintended template drift.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $status === 'ok' ? 0 : 1;
 }
 
@@ -147,7 +147,7 @@ function aiRunAuditInstructions(string $root): int
         ],
     ];
     $written = aiCliWriteArtifact($root, 'instruction-audit', 'php tools/ai/ai.php audit-instructions', $data, 'ok', null, 'Use adapter-plan to choose safe merge or sidecar-only mode.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 

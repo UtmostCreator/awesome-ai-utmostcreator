@@ -76,6 +76,8 @@ function aiInstallerRun(array $argv): int
         } elseif (($item['install_type'] ?? '') === 'copilot-agents') {
             $scriptsRoot = $config['targetRoot'] . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai';
             aiInstallerCopyDirAsCopilotAgents($src, $dest, $scriptsRoot);
+        } elseif (($item['install_type'] ?? '') === 'opencode-agents') {
+            aiInstallerCopyDirAsOpenCodeAgents($src, $dest);
         } elseif (($item['install_type'] ?? '') === 'skill-dirs') {
             aiInstallerCopyDirAsSkillDirs($src, $dest);
         } elseif (isset($item['rename_ext'])) {
@@ -121,12 +123,76 @@ function aiInstallerRun(array $argv): int
     if ($missingOptional !== []) {
         aiInstallerLog('missing optional tools: ' . implode(', ', $missingOptional));
     }
+    if (!$config['dryRun']) {
+        $unresolvedRequired  = $placeholderStatus['unresolved_required']  ?? [];
+        $unresolvedOptional  = $placeholderStatus['unresolved_optional']  ?? [];
+
+        if ($unresolvedRequired !== [] || $unresolvedOptional !== []) {
+            aiInstallerLog('');
+            aiInstallerLog('⚠  PLACEHOLDER RESOLUTION REQUIRED ⚠');
+            aiInstallerLog('The following files contain tokens that MUST be replaced with real project values.');
+            aiInstallerLog('Do not run AI agents in write mode until required placeholders are resolved.');
+            aiInstallerLog('');
+            aiInstallerLog('  PRIMARY FILE TO EDIT:');
+            aiInstallerLog('    docs/ai/project-context.md   ← fill every <PLACEHOLDER> with your project facts');
+            aiInstallerLog('');
+
+            $instructionFiles = [
+                '.github/instructions/frontend.instructions.md'  => '<FRONTEND_PATH_GLOB>',
+                '.github/instructions/testing.instructions.md'   => '<TEST_PATH_GLOB>',
+                'scripts/ai/pre-tool-use.sh'                     => 'project-specific rules',
+            ];
+            $extraFiles = [];
+            foreach ($instructionFiles as $rel => $token) {
+                $abs = rtrim((string) $config['targetRoot'], DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+                if (is_file($abs) && preg_match('/<[A-Z_]+>/', (string) file_get_contents($abs))) {
+                    $extraFiles[] = $rel . '  ← replace ' . $token;
+                }
+            }
+            if ($extraFiles !== []) {
+                aiInstallerLog('  ADDITIONAL FILES WITH PLACEHOLDERS:');
+                foreach ($extraFiles as $line) {
+                    aiInstallerLog('    ' . $line);
+                }
+                aiInstallerLog('');
+            }
+
+            if ($unresolvedRequired !== []) {
+                aiInstallerLog('  REQUIRED tokens (must resolve before write-capable AI runs):');
+                foreach ($unresolvedRequired as $token) {
+                    aiInstallerLog('    ' . $token);
+                }
+                aiInstallerLog('');
+            }
+
+            if ($unresolvedOptional !== []) {
+                aiInstallerLog('  OPTIONAL tokens (resolve to improve AI quality, safe to leave as-is initially):');
+                foreach (array_slice($unresolvedOptional, 0, 12) as $token) {
+                    aiInstallerLog('    ' . $token);
+                }
+                if (count($unresolvedOptional) > 12) {
+                    aiInstallerLog('    ... and ' . (count($unresolvedOptional) - 12) . ' more — see docs/ai/project-context-placeholders.md');
+                }
+                aiInstallerLog('');
+            }
+
+            aiInstallerLog('  Full placeholder guide: docs/ai/project-context-placeholders.md');
+            aiInstallerLog('  Post-install checklist: docs/ai/POST-INSTALL.md');
+            aiInstallerLog('');
+        }
+    }
+
     aiInstallerLog('next steps:');
-    aiInstallerLog('1) review AGENTS.md and docs/ai/project-context.md');
-    aiInstallerLog('2) run php tools/ai/validate-ai-config.php');
-    aiInstallerLog('3) run php tools/ai/validate-ai-catalog.php (if catalog files changed)');
-    aiInstallerLog('4) run bash scripts/ai/repomix-context-tree.sh analyze . (or scripts/ai/...)');
-    aiInstallerLog('5) run php tools/ai/ai.php advisor --all');
+    aiInstallerLog('1) ✏  Edit docs/ai/project-context.md — replace every <PLACEHOLDER> with real project facts');
+    aiInstallerLog('2) ✏  Edit .github/instructions/frontend.instructions.md — replace <FRONTEND_PATH_GLOB>');
+    aiInstallerLog('3) ✏  Edit .github/instructions/testing.instructions.md  — replace <TEST_PATH_GLOB>');
+    aiInstallerLog('4) ✔  run php tools/ai/validate-ai-config.php');
+    aiInstallerLog('5) ✔  run php tools/ai/validate-install-surface.php --strict');
+    aiInstallerLog('6) ✔  run php tools/ai/validate-ai-catalog.php (if catalog files changed)');
+    aiInstallerLog('7)    run bash scripts/ai/repomix-context-tree.sh analyze . (optional context packing)');
+    aiInstallerLog('8)    run php tools/ai/ai.php advisor --all (optional project advisor)');
+    aiInstallerLog('');
+    aiInstallerLog('Full post-install guide: docs/ai/POST-INSTALL.md');
 
     if (($config['outputJson'] ?? '') !== '') {
         $payload = [

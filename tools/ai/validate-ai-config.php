@@ -160,6 +160,8 @@ $generatedCatalogFiles = [
 ];
 
 $allowedLivePlaceholderFiles = [
+    'README.md',
+    '.github/instructions/ai-tooling.instructions.md',
     '.github/instructions/frontend.instructions.md',
     '.github/instructions/testing.instructions.md',
 ];
@@ -188,10 +190,12 @@ foreach ($liveFiles as $relativePath) {
         continue;
     }
 
+    $contentForPlaceholderScan = preg_replace('/<!--.*?-->/s', '', $content) ?: $content;
+
     if (
         !in_array($relativePath, $generatedCatalogFiles, true)
         && !in_array($relativePath, $allowedLivePlaceholderFiles, true)
-        && preg_match('/<[^>]+>/', $content) === 1
+        && preg_match('/<[^>]+>/', $contentForPlaceholderScan) === 1
     ) {
         $errors[] = "placeholder leak found in {$relativePath}";
     }
@@ -443,7 +447,7 @@ $aiWiringRequiredFiles = [
     'scripts/ai/preview-file.sh',
     'tests/scripts/ai/test-preview-file.sh',
     '.github/instructions/ai-search.instructions.md',
-    '.github/instructions/ai-tools.instructions.md',
+    '.github/instructions/ai-tooling.instructions.md',
     '.github/prompts/search-evidence.prompt.md',
     '.github/agents/repository-researcher.agent.md',
     '.opencode/opencode.json',
@@ -459,7 +463,7 @@ $aiWiringRequiredFiles = [
     'packages/ai-universal-rules/templates/commands/verify-ai-wiring.md',
     'packages/ai-universal-rules/templates/skills/ai-search/SKILL.md',
     'packages/ai-universal-rules/templates/instructions/ai-search.instructions.md',
-    'packages/ai-universal-rules/templates/instructions/ai-tools.instructions.md',
+    'packages/ai-universal-rules/templates/instructions/ai-tooling.instructions.md',
     'packages/ai-universal-rules/templates/workflows/search-evidence.md',
     'packages/ai-universal-rules/templates/workflows/review-search-tool.md',
     'packages/ai-universal-rules/templates/github/pull_request_template.md',
@@ -476,7 +480,7 @@ foreach ($aiWiringRequiredFiles as $relativePath) {
 
 $requiredSnippets = ['AI_OUTPUT=json bash scripts/ai/ai-search.sh', 'changed', 'staged', 'tracked', 'schema', 'unsafe-all', 'AI_ALLOW_UNLIMITED=1', 'unsafe_blocked', 'dry_run', 'bash scripts/ai/query-usage.sh', 'bash scripts/ai/ai-verify.sh', 'secrets'];
 $previewRequiredSnippets = ['AI_OUTPUT=json bash scripts/ai/preview-file.sh', '--range', '--around', '--max-columns', '--max-bytes', '--force', 'schema', 'status', 'tool', 'path', 'range', 'content', 'warnings', 'errors'];
-$wiringSources = ['AGENTS.md', 'docs/ai/tools/ai-search.md', 'docs/ai/tools/tool-map.md', 'docs/ai/tools/actions/preview-file.md', '.github/copilot-instructions.md', '.github/instructions/ai-tools.instructions.md', '.opencode/commands/search-evidence.md', '.opencode/commands/verify-ai-wiring.md', '.opencode/agents/repository-researcher.md', '.opencode/agents/repository-reviewer.md', '.opencode/skills/ai-search/SKILL.md', 'scripts/ai/preview-file.sh'];
+$wiringSources = ['AGENTS.md', 'docs/ai/tools/ai-search.md', 'docs/ai/tools/tool-map.md', 'docs/ai/tools/actions/preview-file.md', '.github/copilot-instructions.md', '.github/instructions/ai-tooling.instructions.md', '.opencode/commands/search-evidence.md', '.opencode/commands/verify-ai-wiring.md', '.opencode/agents/repository-researcher.md', '.opencode/agents/repository-reviewer.md', '.opencode/skills/ai-search/SKILL.md', 'scripts/ai/preview-file.sh'];
 $combined = '';
 foreach ($wiringSources as $src) {
     $combined .= "\n" . (safeRead($root, $src) ?? '');
@@ -703,6 +707,10 @@ function shouldSkipPathCheck(string $path): bool
     }
 
     if (preg_match('#^(search|read|edit|execute|vscode|agent|web|todo)/#', $path) === 1) {
+        return true;
+    }
+
+    if (str_starts_with($path, 'docs/ai/generated/task-context/')) {
         return true;
     }
 

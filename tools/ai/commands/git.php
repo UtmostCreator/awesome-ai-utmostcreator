@@ -79,7 +79,7 @@ function aiRunDiffSummary(string $root, array $args): int
         null,
         'Run risk and verify on this diff.'
     );
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -160,7 +160,7 @@ function aiRunRisk(string $root, array $args): int
         $score,
         'Run verify to validate this risk posture with command evidence.'
     );
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -201,7 +201,7 @@ function aiRunRebaseState(string $root): int
         'next_artifact' => 'docs/ai/generated/next.json',
     ];
     $written = aiCliWriteArtifact($root, 'rebase-state', 'php tools/ai/ai.php rebase-state', $data, 'ok', null, 'Open next.json and execute the recommended action.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -235,7 +235,7 @@ function aiRunCommitMsg(string $root): int
     ];
 
     $written = aiCliWriteArtifact($root, 'commit-msg', 'php tools/ai/ai.php commit-msg', $data, 'ok', null, 'Use suggested commit message or adapt to final diff intent.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -270,7 +270,7 @@ function aiRunPrSummary(string $root): int
     ];
 
     $written = aiCliWriteArtifact($root, 'pr-summary', 'php tools/ai/ai.php pr-summary', $data, 'ok', null, 'Use generated PR summary as base and refine task-specific details.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -297,6 +297,6 @@ function aiRunConflicts(string $root): int
     ];
 
     $written = aiCliWriteArtifact($root, 'conflicts', 'php tools/ai/ai.php conflicts', $data, $status, null, $conflicts === [] ? 'No merge conflicts detected.' : 'Resolve conflicts, then run rebase-state.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $conflicts === [] ? 0 : 1;
 }

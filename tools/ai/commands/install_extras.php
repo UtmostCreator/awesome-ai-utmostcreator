@@ -17,7 +17,7 @@ function aiRunPacks(string $root, array $args): int
     ];
     $status = $errors === [] ? 'ok' : 'failed';
     $written = aiCliWriteArtifact($root, 'packs', 'php tools/ai/ai.php packs', $data, $status, null, $errors === [] ? 'Pack contracts validated.' : 'Fix pack registry contract errors.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $errors === [] ? 0 : 1;
 }
 
@@ -35,7 +35,7 @@ function aiRunVersion(string $root): int
     }
     $status = ($data['present'] ?? false) ? 'ok' : 'warning';
     $written = aiCliWriteArtifact($root, 'version', 'php tools/ai/ai.php version', $data, $status, null, is_file($manifestPath) ? 'Canonical install manifest loaded.' : 'Install manifest missing; run install first.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return is_file($manifestPath) ? 0 : 1;
 }
 
@@ -108,7 +108,7 @@ function aiRunPlaceholders(string $root, array $args): int
     $data = ['count' => count($hits), 'items' => $hits, 'mode' => $fail ? 'fail' : 'scan'];
     $status = $hits === [] ? 'ok' : ($fail ? 'failed' : 'warning');
     $written = aiCliWriteArtifact($root, 'placeholders', 'php tools/ai/ai.php placeholders', $data, $status, null, $hits === [] ? 'No unresolved placeholders found.' : 'Resolve placeholders before strict verification.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $status === 'failed' ? 1 : 0;
 }
 
@@ -170,7 +170,7 @@ function aiRunHooks(string $root, array $args): int
         'note' => 'Hook wiring remains explicit and opt-in.',
     ];
     $written = aiCliWriteArtifact($root, 'hooks', 'php tools/ai/ai.php hooks', $data, 'ok', null, 'Install hooks explicitly per selected driver.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -215,7 +215,7 @@ function aiRunToolchain(string $root, array $args): int
                     'apply_requested' => true,
                 ];
                 $written = aiCliWriteArtifact($root, 'toolchain', 'php tools/ai/ai.php toolchain', $data, 'blocked', null, 'Re-run with --yes to apply non-interactively.');
-                fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+                fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
                 return 1;
             }
         }
@@ -260,7 +260,7 @@ function aiRunToolchain(string $root, array $args): int
         'apply_results' => $applied,
     ];
     $written = aiCliWriteArtifact($root, 'toolchain', 'php tools/ai/ai.php toolchain', $data, 'ok', null, 'Review missing tools and rerun with --toolchain-apply only when needed.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
 
@@ -314,7 +314,7 @@ function aiRunScriptCommand(string $root, array $args): int
             $items[] = ['id' => $id, 'label' => $entry['label'] ?? $id, 'pack' => $entry['pack'] ?? 'unknown'];
         }
         $written = aiCliWriteArtifact($root, 'scripts', 'php tools/ai/ai.php run-script --list', ['scripts' => $items], 'ok', null, 'Run one with: php tools/ai/ai.php run-script <id> --dry-run');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 0;
     }
 
@@ -332,7 +332,7 @@ function aiRunScriptCommand(string $root, array $args): int
     $run = aiRunScriptById($root, $scriptId, $args, null);
     $status = ($run['exit'] ?? 1) === 0 ? 'ok' : 'failed';
     $written = aiCliWriteArtifact($root, 'scripts', 'php tools/ai/ai.php run-script ' . $scriptId, $run, $status, null, $status === 'ok' ? 'Script run completed.' : 'Fix script/tool errors and retry.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $status === 'ok' ? 0 : 1;
 }
 
@@ -378,7 +378,7 @@ function aiRunInstallDocs(string $root, array $args): int
             'drift' => $drift,
         ];
         $written = aiCliWriteArtifact($root, 'install-docs', 'php tools/ai/ai.php install-docs --check', $data, $status, null, $status === 'ok' ? 'Install docs are up to date.' : 'Run install-docs --write to regenerate install docs.');
-        fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return $status === 'ok' ? 0 : 1;
     }
 
@@ -404,6 +404,6 @@ function aiRunInstallDocs(string $root, array $args): int
         'manifest_found' => is_file($manifestPath),
     ];
     $written = aiCliWriteArtifact($root, 'install-docs', 'php tools/ai/ai.php install-docs --write', $data, 'ok', null, 'Run install-docs --check in CI to prevent drift.');
-    fwrite(STDOUT, "OK: wrote {$written['json']} and {$written['markdown']}" . PHP_EOL);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }
