@@ -16,6 +16,26 @@ Setting up AI-assisted workflows (instructions, agents, prompts, skills, scripts
 
 ## Quick Start
 
+Copy the install script from [readme-install.md](readme-install.md#one-command-install-into-any-project) into your project and run:
+
+```bash
+bash install-ai-kit.sh /path/to/your-project
+# or with explicit project name:
+bash install-ai-kit.sh /path/to/your-project "your-project-name"
+```
+
+The script clones this repo, runs the full install (131 items across 21 packs — Copilot + OpenCode, all scripts, capabilities, hooks, CI, repomix), then cleans up.
+
+**One-time workstation tools (run once, not per project):**
+
+```bash
+# From a clone of this repo:
+bash scripts/ai/install-mandatory-tools.sh   # rg, fd, jq, scc, etc.
+npm install -g repomix                        # context packing
+```
+
+**Manual step-by-step** (if you prefer a local clone):
+
 ```bash
 # 1. Install prerequisites
 bash scripts/ai/install-mandatory-tools.sh --dry-run
@@ -24,13 +44,13 @@ bash scripts/ai/install-mandatory-tools.sh --dry-run
 php tools/ai/ai.php preflight
 
 # 3. Preview installation into your project
-php tools/ai/ai.php install --target /path/to/your-project --profile full-governance --dry-run
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime both --dry-run
 
 # 4. Apply installation
-php tools/ai/ai.php install --target /path/to/your-project --profile full-governance --apply
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime both --project-name "your-project-name" --backup --verify-after --non-interactive
 
-# 5. Validate
-php tools/ai/verify-full-install.php
+# 5. Audit placeholders
+php tools/ai/ai.php placeholders --fail
 ```
 
 ## Full Documentation
