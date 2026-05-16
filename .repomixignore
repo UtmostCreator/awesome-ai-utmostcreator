@@ -1,0 +1,9 @@
+vendor/
+node_modules/
+.git/
+.ai-logs/
+.ai-backups/
+.repomix-context/
+dist/
+build/
+coverage/

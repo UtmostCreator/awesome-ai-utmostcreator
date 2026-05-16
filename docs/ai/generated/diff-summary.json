@@ -1,0 +1,21 @@
+{
+    "schema_version": 1,
+    "artifact": "diff-summary.json",
+    "generated_at": "2026-05-16T21:32:13+00:00",
+    "command": "php tools/ai/ai.php diff-summary --base main",
+    "based_on_commit": "03c134f",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "ok",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "Run risk and verify on this diff.",
+    "data": {
+        "base": "main",
+        "changed_files_count": 0,
+        "changed_files": [],
+        "staged_files_count": 0,
+        "unstaged_files_count": 59,
+        "changed_by_type": []
+    }
+}

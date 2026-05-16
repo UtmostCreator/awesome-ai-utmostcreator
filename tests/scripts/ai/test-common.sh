@@ -1,13 +1,14 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 # Test suite for scripts/ai/common.sh
 # Requires Bash 4+ (uses associative arrays, ${var,,}, etc.)
-# Run: /opt/homebrew/bin/bash tests/scripts/ai/test-common.sh
+# Run: bash tests/scripts/ai/test-common.sh
 
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 COMMON_SH="$REPO_ROOT/scripts/ai/common.sh"
+BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 
 # ── Test harness ──────────────────────────────────────────────────────────────
 
@@ -379,7 +380,9 @@ test_rotate_noop_small_file() {
     printf 'small' >"$tmpd/log"
     AI_LOG_MAX_BYTES=100 rotate_log_if_needed_locked "$tmpd/log"
     [[ -f "$tmpd/log" ]]
-    [[ ! -f "$tmpd/log."*".bak" ]] 2>/dev/null
+    # Assert no rotation backup was created. -f cannot test a glob,
+    # so use ls on the pattern and invert the exit status.
+    ! ls "$tmpd"/log.*.bak >/dev/null 2>&1
 }
 run_test "rotate_log_if_needed_locked keeps small file" test_rotate_noop_small_file
 
@@ -636,7 +639,7 @@ test_assert_inside_repo_pass() {
 run_test "assert_inside_repo passes for repo file" test_assert_inside_repo_pass
 
 test_assert_inside_repo_fail() {
-    assert_exit 1 /opt/homebrew/bin/bash -c "
+    assert_exit 1 "$BASH_BIN" -c "
         cd '$REPO_ROOT'
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
@@ -673,7 +676,7 @@ test_assert_relative_safe_pass() {
 run_test "assert_relative_safe_path passes for normal path" test_assert_relative_safe_pass
 
 test_assert_relative_safe_fail_absolute() {
-    assert_exit 1 /opt/homebrew/bin/bash -c "
+    assert_exit 1 "$BASH_BIN" -c "
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
         assert_relative_safe_path '/etc/passwd'
@@ -682,7 +685,7 @@ test_assert_relative_safe_fail_absolute() {
 run_test "assert_relative_safe_path fails for absolute path" test_assert_relative_safe_fail_absolute
 
 test_assert_relative_safe_fail_dotdot() {
-    assert_exit 1 /opt/homebrew/bin/bash -c "
+    assert_exit 1 "$BASH_BIN" -c "
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
         assert_relative_safe_path '../escape'
@@ -691,7 +694,7 @@ test_assert_relative_safe_fail_dotdot() {
 run_test "assert_relative_safe_path fails for ../ traversal" test_assert_relative_safe_fail_dotdot
 
 test_assert_relative_safe_fail_git() {
-    assert_exit 1 /opt/homebrew/bin/bash -c "
+    assert_exit 1 "$BASH_BIN" -c "
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
         assert_relative_safe_path '.git'
@@ -700,7 +703,7 @@ test_assert_relative_safe_fail_git() {
 run_test "assert_relative_safe_path fails for .git" test_assert_relative_safe_fail_git
 
 test_assert_relative_safe_fail_empty() {
-    assert_exit 1 /opt/homebrew/bin/bash -c "
+    assert_exit 1 "$BASH_BIN" -c "
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
         assert_relative_safe_path ''
@@ -868,7 +871,7 @@ fi
 
 test_run_with_timeout_no_binary() {
     local exit_code=0
-    /opt/homebrew/bin/bash -c "
+    "$BASH_BIN" -c "
         export NO_COLOR=1 AI_SESSION_AUTO_TRAP=0
         export AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG'
         source '$COMMON_SH'
@@ -936,7 +939,7 @@ test_require_approval_granted() {
 run_test "require_approval: passes when env var is set to 1" test_require_approval_granted
 
 test_require_approval_blocked() {
-    assert_exit 2 /opt/homebrew/bin/bash -c "
+    assert_exit 2 "$BASH_BIN" -c "
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
         AI_APPROVE_DESTRUCTIVE=0 require_approval 'test action' 'AI_APPROVE_DESTRUCTIVE'
@@ -949,7 +952,7 @@ run_test "require_approval: exits 2 when env var not set" test_require_approval_
 printf '\ndie\n'
 
 test_die_exits_1() {
-    assert_exit 1 /opt/homebrew/bin/bash -c "
+    assert_exit 1 "$BASH_BIN" -c "
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
         die 'test error'
@@ -959,7 +962,7 @@ run_test "die exits with code 1" test_die_exits_1
 
 test_die_prints_error() {
     local out
-    out="$(/opt/homebrew/bin/bash -c "
+    out="$("$BASH_BIN" -c "
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
         die 'my error message'
@@ -1020,7 +1023,7 @@ test_enforce_policy_read_allowed() {
 run_test "enforce_command_policy: rg → allowed" test_enforce_policy_read_allowed
 
 test_enforce_policy_destructive_blocked() {
-    assert_exit 2 /opt/homebrew/bin/bash -c "
+    assert_exit 2 "$BASH_BIN" -c "
         export NO_COLOR=1 AI_LOG_DIR='$AI_LOG_DIR' AI_EVENT_LOG='$AI_EVENT_LOG' AI_SESSION_AUTO_TRAP=0
         source '$COMMON_SH'
         enforce_command_policy 'test-rm' rm

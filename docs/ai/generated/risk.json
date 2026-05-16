@@ -1,0 +1,20 @@
+{
+    "schema_version": 1,
+    "artifact": "risk.json",
+    "generated_at": "2026-05-16T21:32:13+00:00",
+    "command": "php tools/ai/ai.php risk --base main",
+    "based_on_commit": "03c134f",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "ok",
+    "score": 0,
+    "stale": false,
+    "recommended_next_action": "Run verify to validate this risk posture with command evidence.",
+    "data": {
+        "base": "main",
+        "risk_score": 0,
+        "risk_level": "low",
+        "changed_files_count": 0,
+        "risk_reasons": []
+    }
+}

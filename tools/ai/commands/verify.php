@@ -37,6 +37,14 @@ function aiRunVerify(string $root, array $args): int
         'advisor-check' => 'php tools/ai/ai.php advisor --check',
     ];
 
+    // Run the post-install placeholder verifier only when we're verifying an
+    // installed target (signalled by .ai-install-manifest.json at the root).
+    // In kit-author mode the canonical surfaces intentionally keep placeholders,
+    // so this check would always fail and that is by design.
+    if (is_file(aiInstallManifestPath($root))) {
+        $checks['verify-install-placeholders'] = 'php tools/ai/verify-install-placeholders.php';
+    }
+
     $results = [];
     $failed = [];
     foreach ($checks as $name => $command) {

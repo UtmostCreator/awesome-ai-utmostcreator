@@ -1,0 +1,7 @@
+- `docs/ai/source-of-truth.md`
+- `docs/ai/approval-boundaries.md`
+- `docs/ai/generated-artifacts.md`
+- `docs/ai/tool-policy.md`
+- `docs/ai/verification-matrix.md`
+- `docs/ai/failure-handling.md`
+- `docs/ai/session-reentry.md`

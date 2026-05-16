@@ -1,0 +1,173 @@
+{
+    "schema_version": 1,
+    "artifact": "toolchain.json",
+    "generated_at": "2026-05-16T21:32:18+00:00",
+    "command": "php tools/ai/ai.php toolchain",
+    "based_on_commit": "03c134f",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "ok",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "Review missing tools and rerun with --toolchain-apply only when needed.",
+    "data": {
+        "status": "ok",
+        "profile": "dual",
+        "runtime": "both",
+        "packs": [
+            "adapter-copilot",
+            "adapter-opencode",
+            "capabilities-extended-lite",
+            "scripts-pack",
+            "policy-pack",
+            "hooks-pack",
+            "base",
+            "setup-docs",
+            "capabilities-core"
+        ],
+        "check_requested": true,
+        "install_plan_requested": false,
+        "apply_requested": true,
+        "tools": [
+            {
+                "tool": "bash",
+                "label": "Bash",
+                "present": true,
+                "version": "GNU bash, version 5.3.9(1)-release (x86_64-pc-linux-gnu)",
+                "safe_auto_install": false,
+                "requires_before_install": [],
+                "install_hints": [],
+                "install_commands": []
+            },
+            {
+                "tool": "git",
+                "label": "Git",
+                "present": true,
+                "version": "git version 2.53.0",
+                "safe_auto_install": false,
+                "requires_before_install": [],
+                "install_hints": {
+                    "macos": "brew install git",
+                    "linux": "sudo apt install git",
+                    "windows": "winget install Git.Git"
+                },
+                "install_commands": []
+            },
+            {
+                "tool": "jq",
+                "label": "jq",
+                "present": true,
+                "version": "jq-1.8.1",
+                "safe_auto_install": false,
+                "requires_before_install": [],
+                "install_hints": {
+                    "macos": "brew install jq",
+                    "linux": "sudo apt install jq",
+                    "windows": "winget install jqlang.jq"
+                },
+                "install_commands": []
+            },
+            {
+                "tool": "rg",
+                "label": "ripgrep",
+                "present": true,
+                "version": "ripgrep 15.1.0",
+                "safe_auto_install": false,
+                "requires_before_install": [],
+                "install_hints": {
+                    "macos": "brew install ripgrep",
+                    "linux": "sudo apt install ripgrep",
+                    "windows": "winget install BurntSushi.ripgrep.MSVC"
+                },
+                "install_commands": []
+            },
+            {
+                "tool": "fd",
+                "label": "fd",
+                "present": false,
+                "version": "unknown",
+                "unknown": true
+            },
+            {
+                "tool": "ast-grep",
+                "label": "ast-grep",
+                "present": false,
+                "version": "unknown",
+                "unknown": true
+            },
+            {
+                "tool": "repomix",
+                "label": "Repomix",
+                "present": true,
+                "version": "1.14.0",
+                "safe_auto_install": true,
+                "requires_before_install": [
+                    "node",
+                    "npm"
+                ],
+                "install_hints": {
+                    "npm": "npm install -g repomix"
+                },
+                "install_commands": {
+                    "npm": [
+                        "npm",
+                        "install",
+                        "-g",
+                        "repomix"
+                    ]
+                }
+            },
+            {
+                "tool": "scc",
+                "label": "SCC",
+                "present": false,
+                "version": "unknown",
+                "safe_auto_install": false,
+                "requires_before_install": [],
+                "install_hints": {
+                    "macos": "brew install scc",
+                    "linux": "Install scc from your package manager or release binary",
+                    "windows": "Install scc via package manager or release binary"
+                },
+                "install_commands": []
+            }
+        ],
+        "install_actions": [
+            {
+                "tool": "fd",
+                "hint": "manual install required",
+                "safe_auto_install": false
+            },
+            {
+                "tool": "ast-grep",
+                "hint": "manual install required",
+                "safe_auto_install": false
+            },
+            {
+                "tool": "scc",
+                "hint": "Install scc from your package manager or release binary",
+                "safe_auto_install": false
+            }
+        ],
+        "apply_results": [
+            {
+                "tool": "fd",
+                "status": "blocked",
+                "reason": "auto-install not approved",
+                "hint": "manual install required"
+            },
+            {
+                "tool": "ast-grep",
+                "status": "blocked",
+                "reason": "auto-install not approved",
+                "hint": "manual install required"
+            },
+            {
+                "tool": "scc",
+                "status": "blocked",
+                "reason": "auto-install not approved",
+                "hint": "Install scc from your package manager or release binary"
+            }
+        ]
+    }
+}

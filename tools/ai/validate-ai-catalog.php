@@ -4,6 +4,35 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/ai_catalog_lib.php';
 
+$targetArg = null;
+foreach ($argv as $arg) {
+    if (str_starts_with($arg, '--target=')) {
+        $targetArg = substr($arg, 9);
+    }
+}
+
+if ($targetArg !== null || (!is_dir(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'packages') && is_file(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
+    $targetRoot = $targetArg !== null ? realpath($targetArg) : realpath(dirname(__DIR__, 2));
+    if ($targetRoot === false) {
+        fwrite(STDERR, "ERROR: target root not found\n");
+        exit(1);
+    }
+    $errors = [];
+    foreach (['docs/ai/catalog.json', 'docs/ai/manifest.json', '.ai-install-manifest.json'] as $candidate) {
+        $path = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $candidate);
+        if (is_file($path) && json_decode((string) file_get_contents($path), true) === null) {
+            $errors[] = "invalid JSON: {$candidate}";
+        }
+    }
+    foreach ($errors as $error) {
+        fwrite(STDERR, "ERROR: {$error}\n");
+    }
+    if ($errors === []) {
+        fwrite(STDOUT, "OK: target AI catalog validation passed\n");
+    }
+    exit($errors === [] ? 0 : 1);
+}
+
 $root = aiRepoRoot();
 $errors = [];
 $warnings = [];

@@ -1,0 +1,9 @@
+generator=tools/ai/generate-repo-structure.php
+source=git ls-files
+scc_enabled=true
+folder_count=7
+tracked_file_count=412
+metadata_schema_version=1
+metadata_covered=7
+metadata_exemptions=0
+metadata_missing=0

@@ -16,7 +16,7 @@ Setting up AI-assisted workflows (instructions, agents, prompts, skills, scripts
 
 ## Quick Start
 
-Copy the install script from [readme-install.md](readme-install.md#one-command-install-into-any-project) into your project and run:
+From a local clone of this repository, run the root installer and point it at your target project:
 
 ```bash
 bash install-ai-kit.sh /path/to/your-project
@@ -24,7 +24,7 @@ bash install-ai-kit.sh /path/to/your-project
 bash install-ai-kit.sh /path/to/your-project "your-project-name"
 ```
 
-The script clones this repo, runs the full install (131 items across 21 packs — Copilot + OpenCode, all scripts, capabilities, hooks, CI, repomix), then cleans up.
+The script validates this source checkout first, then runs the full install with backup and post-install validation. It does not clone or clean up another checkout for you.
 
 **One-time workstation tools (run once, not per project):**
 

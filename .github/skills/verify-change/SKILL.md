@@ -1,0 +1,43 @@
+---
+name: verify-change
+description: Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly
+argument-hint: 'Describe the change and what needs to be verified'
+---
+
+## What I Do
+
+I select and run the most relevant verification path for a change and separate executed evidence from recommendations.
+
+## When To Use Me
+
+- after a bug fix
+- after a behavior change
+- before claiming success
+- when review needs direct verification evidence
+
+## Read Alongside
+
+- `docs/ai/capabilities/verify-change/CAPABILITY.md`
+- `docs/ai/capabilities/verify-change/checklist.md`
+- `docs/ai/capabilities/verify-change/gotchas.md`
+- `docs/ai/capabilities/verify-change/examples.md`
+
+## Project Commands
+
+- Main verification command: `unknown`
+- Main build command: `unknown`
+- Main test command: `unknown`
+- Preferred narrow-first pattern: `start with the narrowest repo-local check and escalate only if needed`
+
+## Output
+
+- selected command or flow
+- why it is the smallest valid proof
+- commands run
+- results
+- remaining verification not run
+
+## Gotchas
+
+- do not claim success without running at least one direct check
+- do not report a build success as proof of behavior correctness unless the project says otherwise

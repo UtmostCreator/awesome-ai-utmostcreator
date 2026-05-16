@@ -1,0 +1,52 @@
+{
+    "schema_version": 1,
+    "project": "awesome-ai-utmostcreator",
+    "tracked_files_count": 412,
+    "top_level_paths": [
+        ".ai-install-manifest.json",
+        ".editorconfig",
+        ".gitattributes",
+        ".gitignore",
+        ".gitleaks.toml",
+        ".gitleaksignore",
+        ".markdownlint-cli2.yaml",
+        ".opencode",
+        ".schemas",
+        ".shellcheckrc",
+        "AGENTS.md",
+        "CLAUDE.md",
+        "README.md",
+        "composer.json",
+        "composer.lock",
+        "install-ai-kit.sh",
+        "llms.txt",
+        "opencode.jsonc",
+        "packages",
+        "phpunit.xml.dist",
+        "policies",
+        "readme-install.md",
+        "tests",
+        "tools"
+    ],
+    "counts": {
+        "tests_php": 12,
+        "tests_shell": 4,
+        "scripts_copilot": 0,
+        "scripts_ai": 0,
+        "tools_ai_php": 63
+    },
+    "ai_surface": {
+        "AGENTS.md": true,
+        "CLAUDE.md": true,
+        "llms.txt": true,
+        ".github/copilot-instructions.md": true
+    },
+    "toolchain": {
+        "git": true,
+        "php": true,
+        "jq": true,
+        "rg": true,
+        "repomix": true,
+        "scc": true
+    }
+}
