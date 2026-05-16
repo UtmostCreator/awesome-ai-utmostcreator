@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "directories": [
+    {
+      "path": ".",
+      "purpose": "Repository root configuration and entrypoint files.",
+      "designed_for": "Project-wide metadata and installer/runtime entry files.",
+      "install_guide": "README.md",
+      "install_script": "install-ai-kit.sh",
+      "ai_entrypoint": "AGENTS.md",
+      "notes": "Root-level tracked files are intentionally grouped under '.'."
+    },
+    {
+      "path": ".opencode",
+      "purpose": "OpenCode runtime adapters including agents, commands, and skills.",
+      "designed_for": "OpenCode users and local agent routing.",
+      "install_guide": "README.md",
+      "install_script": "tools/ai/install-opencode-kit.sh",
+      "ai_entrypoint": ".opencode/opencode.json",
+      "notes": "Canonical installed OpenCode surface for this repo."
+    },
+    {
+      "path": ".schemas",
+      "purpose": "JSON schemas used by AI tooling and artifact validation.",
+      "designed_for": "Tooling validation and contract enforcement.",
+      "install_guide": "docs/ai/validation.md",
+      "install_script": "none",
+      "ai_entrypoint": ".schemas/ai-catalog.schema.json",
+      "notes": "Schema set for generated artifacts and policy documents."
+    },
+    {
+      "path": "packages",
+      "purpose": "Canonical ai-universal-rules package source and templates.",
+      "designed_for": "Template generation and install surfaces.",
+      "install_guide": "packages/ai-universal-rules/README.md",
+      "install_script": "tools/ai/export-ai-universal-rules.php",
+      "ai_entrypoint": "packages/ai-universal-rules/catalog.json",
+      "notes": "Source-of-truth templates and manifests live here."
+    },
+    {
+      "path": "policies",
+      "purpose": "Policy baselines and runtime policy descriptors.",
+      "designed_for": "Governance and policy validation workflows.",
+      "install_guide": "policies/README.md",
+      "install_script": "none",
+      "ai_entrypoint": "policies/copilot/policy.yaml",
+      "notes": "Policy files consumed by checks and adapters."
+    },
+    {
+      "path": "tests",
+      "purpose": "PHP, shell, fixture, and integration verification suites.",
+      "designed_for": "Regression and install-safety verification.",
+      "install_guide": "README.md",
+      "install_script": "none",
+      "ai_entrypoint": "phpunit.xml.dist",
+      "notes": "Contains phpunit, bats, and script-level tests."
+    },
+    {
+      "path": "tools",
+      "purpose": "AI CLI commands, installers, validators, and generators.",
+      "designed_for": "Repository automation and install/runtime tooling.",
+      "install_guide": "tools/ai/cli-tools.md",
+      "install_script": "tools/ai/install-ai-kit.php",
+      "ai_entrypoint": "tools/ai/ai.php",
+      "notes": "Primary command surface for install and verification flows."
+    }
+  ],
+  "metadata_exemptions": []
+}

@@ -4,20 +4,6 @@ declare(strict_types=1);
 
 function aiInstallerScriptRegistry(): array
 {
-    $root = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
-    if ($root !== false) {
-        $registryPath = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'script-registry.json';
-        if (is_file($registryPath)) {
-            $registryRaw = file_get_contents($registryPath);
-            if ($registryRaw !== false) {
-                $registry = json_decode($registryRaw, true);
-                if (is_array($registry) && isset($registry['scripts']) && is_array($registry['scripts'])) {
-                    return $registry['scripts'];
-                }
-            }
-        }
-    }
-
     return [
         'common' => [
             'label' => 'Shared helper library for AI shell scripts',
@@ -223,7 +209,7 @@ function aiInstallerScriptRegistry(): array
             'source_path' => 'scripts/ai/run-repomix-context.sh',
             'installed_path' => 'scripts/ai/run-repomix-context.sh',
             'pack' => 'scripts-pack',
-            'required_tools' => ['bash', 'git', 'repomix'],
+            'required_tools' => ['bash', 'git', 'repomix', 'scc'],
             'risk' => 'read-only',
             'supports_dry_run' => true,
             'default_args' => [],
@@ -233,7 +219,7 @@ function aiInstallerScriptRegistry(): array
             'source_path' => 'scripts/ai/repomix-context-tree.sh',
             'installed_path' => 'scripts/ai/repomix-context-tree.sh',
             'pack' => 'scripts-pack',
-            'required_tools' => ['bash', 'git', 'repomix'],
+            'required_tools' => ['bash', 'git', 'repomix', 'scc'],
             'risk' => 'read-only',
             'supports_dry_run' => true,
             'default_args' => [],
@@ -258,6 +244,86 @@ function aiInstallerScriptRegistry(): array
             'supports_dry_run' => true,
             'default_args' => [],
         ],
+        'ai-structured' => [
+            'label' => 'Emit structured AI helper output',
+            'source_path' => 'scripts/ai/ai-structured.sh',
+            'installed_path' => 'scripts/ai/ai-structured.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'jq'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
+        'ai-task' => [
+            'label' => 'Task context helper wrapper',
+            'source_path' => 'scripts/ai/ai-task.sh',
+            'installed_path' => 'scripts/ai/ai-task.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'git', 'jq'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
+        'ai-test-select' => [
+            'label' => 'Select focused tests for a change',
+            'source_path' => 'scripts/ai/ai-test-select.sh',
+            'installed_path' => 'scripts/ai/ai-test-select.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'git'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
+        'session-checkpoint' => [
+            'label' => 'Write AI session checkpoint notes',
+            'source_path' => 'scripts/ai/session-checkpoint.sh',
+            'installed_path' => 'scripts/ai/session-checkpoint.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'git'],
+            'risk' => 'mutating',
+            'supports_dry_run' => true,
+            'default_args' => ['--dry-run'],
+        ],
+        'ai-file-freshness' => [
+            'label' => 'Check AI file freshness signals',
+            'source_path' => 'scripts/ai/ai-file-freshness.sh',
+            'installed_path' => 'scripts/ai/ai-file-freshness.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'git'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
+        'ai-install-coverage' => [
+            'label' => 'Check installer pack coverage',
+            'source_path' => 'scripts/ai/ai-install-coverage.sh',
+            'installed_path' => 'scripts/ai/ai-install-coverage.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'git'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
+        'check-file-refs' => [
+            'label' => 'Check documentation file references',
+            'source_path' => 'scripts/ai/check-file-refs.sh',
+            'installed_path' => 'scripts/ai/check-file-refs.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'git'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
+        'repo-stats' => [
+            'label' => 'Summarize repository file statistics',
+            'source_path' => 'scripts/ai/repo-stats.sh',
+            'installed_path' => 'scripts/ai/repo-stats.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'git'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
         'repo-tool-inventory' => [
             'label' => 'Generate/check required tools inventory doc',
             'source_path' => 'scripts/ai/repo-tool-inventory.sh',
@@ -277,6 +343,7 @@ function aiInstallerScriptRegistry(): array
             'risk' => 'mutating',
             'supports_dry_run' => true,
             'default_args' => ['--dry-run'],
+            'source_repo_only' => true,
         ],
         'setup-powershell-profile' => [
             'label' => 'Persist PowerShell PATH and tool aliases',
@@ -287,6 +354,7 @@ function aiInstallerScriptRegistry(): array
             'risk' => 'mutating',
             'supports_dry_run' => true,
             'default_args' => ['-DryRun'],
+            'source_repo_only' => true,
         ],
         'watch-loop' => [
             'label' => 'Watched command retry wrapper',
