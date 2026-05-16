@@ -1,0 +1,337 @@
+{
+    "schema_version": 1,
+    "artifact": "package-verify.json",
+    "generated_at": "2026-05-16T21:32:16+00:00",
+    "command": "php tools/ai/ai.php package-verify",
+    "based_on_commit": "03c134f",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "failed",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "Refresh lock or revert unintended template drift.",
+    "data": {
+        "path": "packages/ai-universal-rules/package-lock.ai.json",
+        "mismatch_count": 60,
+        "mismatches": [
+            {
+                "path": "templates/capabilities/evidence-first-execution/CAPABILITY.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:e955ea10bf4dc29e4f45bd49ff81f6e3ead161d7a8058a0782516573d8cc5f9a"
+            },
+            {
+                "path": "templates/capabilities/evidence-first-execution/checklist.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:c51c0d4afc5de7df2bfcc52fae552770b96a3e634608ee4cd46bb993a890c016"
+            },
+            {
+                "path": "templates/capabilities/evidence-first-execution/examples.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:ed706531663407884cb8b01c60eec4e3bce53fad7ce31b5b13f892dadfaa1609"
+            },
+            {
+                "path": "templates/capabilities/evidence-first-execution/gotchas.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:481740b010ad68f1c7f11588ee84c7c729daf0aa344c5f290e0caa374d13755e"
+            },
+            {
+                "path": "templates/capabilities/evidence-first-execution/reference.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:67d59094cec966a76957b3b1ab60a5101afa6b9bf01101397a3d0819923fdbb8"
+            },
+            {
+                "path": "templates/commands/search-evidence.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:12c812fa848ff921f53338a5ca8dca63624541a8f7f2cf866c8d471bbaf71f6c"
+            },
+            {
+                "path": "templates/commands/verify-ai-wiring.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:0ef10becc738132ae34fc1d996e1ae3aa9a75f86746cf3c3c002ee6517e5e45a"
+            },
+            {
+                "path": "templates/core/AGENTS.template.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:50195d531092f310fc6c356017ebea24d72910ce556b4485dc61cb1e8726c6a8",
+                "current": "sha256:88fdbeddf02aab99b5673b6f9e33cb414258e6841b865d95f5b32abd4ccfdf90"
+            },
+            {
+                "path": "templates/core/POST-INSTALL.template.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:eb8173efc0e9a62757d2379c6c38b1a8cf7c26dc4b13917da9aebcf1924f2a14"
+            },
+            {
+                "path": "templates/core/agents/architect.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:9fbfdd205ae0af38675dc6ec988e9fa300151a6f4029d5c39b12de2c9fa20b7d",
+                "current": "sha256:719ed4ed936a4618fdf77d97e49e2d35765333c6ea6170bc4e2972fc9edd60ad"
+            },
+            {
+                "path": "templates/core/agents/bootstrapper.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:e58488143790130f2a6ee8dd00a5b732e41fd41d8dbb9b280d810c5a08488951"
+            },
+            {
+                "path": "templates/core/agents/config-maintainer.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:66058beb3b1703e7c98846daaa20a6fb2f188ece867c3a787859f3c4285d46f9",
+                "current": "sha256:dc955602ce8bd02715cbef0b7a8c8067e4da0cd699b20df89645709005184e59"
+            },
+            {
+                "path": "templates/core/agents/implementer.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:c52f15deed38994be00cffd4ae4bdd3dc7a3f0bf95f794d852bfe325e94c3e07",
+                "current": "sha256:cb79c9b173b5496a5f55fa3c9aa8eb28c800fa2f882d2a462fd4e8eb0755491c"
+            },
+            {
+                "path": "templates/core/agents/refactorer.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:64c5ea6b70b812f4b7996801cc402006984b4ffc1fc424975b0c21f720f8e169",
+                "current": "sha256:53c5f3abc17227a47fafd37746c9094b6c419641e0cb608a07aac7c865f51a5e"
+            },
+            {
+                "path": "templates/core/agents/release-auditor.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:2df0c8fec017045ce3973781d75cd42a123a9eb505a58159ec252c7e7376a579",
+                "current": "sha256:e0864d53f16513cba429434cbfed2593931fb7e21c24e55c56e695058ec16a45"
+            },
+            {
+                "path": "templates/core/agents/repository-researcher.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:41dd823523d35d9648ff3b463f56eae9cc926c12a05d33d10314831e79ad440c"
+            },
+            {
+                "path": "templates/core/agents/repository-reviewer.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:cb7c3041041c7ff942156f99c625f21d987f6d2ff903f77526a454da236f3547"
+            },
+            {
+                "path": "templates/core/agents/researcher.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:325da9eacc073aeaef0de76f9bb2a78512688afce8aabc7e9936d417f726d7ae",
+                "current": "sha256:a7311a1ed12c6a72732bf26a8f581c21b95e56b201520f205583502073ee12d7"
+            },
+            {
+                "path": "templates/core/agents/reviewer.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:944a1e40a4e4ab50e135225a282e57fd5e0216916a4540f0968fae37753a2336",
+                "current": "sha256:337130afadde0b3142b845d11317414249e663b5dd42688d7de18bcdb43babfe"
+            },
+            {
+                "path": "templates/core/agents/workflow-auditor.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:632141c88cadc418e4f6d1f593602f60ca8d51e2d27acfaa37275b834e056651",
+                "current": "sha256:4799a8f5d238deff73c23655648d6f438933961964798e94f632ebd82799416a"
+            },
+            {
+                "path": "templates/core/ai-file-standards.template.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:9b734a13faad34825a20bdaa791ead01440fc3e0cdfc137e7c976839ae4dc6e4"
+            },
+            {
+                "path": "templates/core/copilot-instructions.template.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:8dad01e564d810eba9121de204a5de9c50d7d0316a569ed7674bfc6bda816352",
+                "current": "sha256:502982c30024267a408496c8693bfdc71f5d664a8fe297ccf9fc3f9fb9831d45"
+            },
+            {
+                "path": "templates/core/copilot-vscode-settings.template.json",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:91ea16695ebdf6535cb0666c2554bd02e117cc4571ce65f6eb0bdf9bb6bf0b63",
+                "current": "sha256:0957e12d5949a598f16964e766985e107ad41775e022e56698a9040726cb01ec"
+            },
+            {
+                "path": "templates/core/execution-protocol.template.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:9193bb093484fa040a304c96a07ffa749221357094a1e7a2da069577119a17ed"
+            },
+            {
+                "path": "templates/core/generated-artifacts.template.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:bb2156e17edf50dd0f3502c0edd99d3239c599e6bb6ca1a9ecb6025cdce30779"
+            },
+            {
+                "path": "templates/core/opencode.json",
+                "reason": "missing_from_lock",
+                "current": "sha256:f2e9fc76a5cec97cb7bda7b099344d592b27831b5e34dce600cf7a7f47e50f3c"
+            },
+            {
+                "path": "templates/core/project-context.placeholders.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:46d75a1a75d6e48eb6bf4a09af1796c18de23a85e7bc7b6960cc9c9a1b08a503"
+            },
+            {
+                "path": "templates/core/project-context.template.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:a1d062a3b617fda391433fce2ff6e7483fcebe25ffab6fb65e9f5f4c72441bbc",
+                "current": "sha256:1d579ef091ecb351886e7c41dea41aaabce3c150111ca942f8b44028d8babaf9"
+            },
+            {
+                "path": "templates/core/workflow.template.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:a93a7ce58c226f5cc609e4445dac0180b5076941aed185d0f02d7adb2098bb5d",
+                "current": "sha256:da9e5e7c32ceb06f986f7119e85296df6b41c016f0a43b4fc1765a96dec57fce"
+            },
+            {
+                "path": "templates/docs/ai/tools/actions/preview-file.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:0c97a1f4cfb371ce2acd775402044e1bb3c856cf12cda7405d95eaf6f4303aca"
+            },
+            {
+                "path": "templates/github/hooks/scripts/tool-guardian.ps1",
+                "reason": "missing_from_lock",
+                "current": "sha256:f072921a2178b89bacd60bfd45d502d01ef4cef5ffc7241234192c8842802df6"
+            },
+            {
+                "path": "templates/github/hooks/tool-guardian.json",
+                "reason": "missing_from_lock",
+                "current": "sha256:5bd925cd2a81de1b3e35bb2f6b1dfdcbba033c0fc3e0a182daee4e1593c8f0ef"
+            },
+            {
+                "path": "templates/github/hooks/tool-policy.json",
+                "reason": "missing_from_lock",
+                "current": "sha256:7aed5e7b4ea514ae4496517798d45ba75a1282f34c6b36738fe8c4285fbc9442"
+            },
+            {
+                "path": "templates/github/pull_request_template.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:2e68235300df539f2ac81823ecfbfe13bcef97de94b4fcc20b0a76c18143f937"
+            },
+            {
+                "path": "templates/github/workflows/export-ai-universal-rules-preview.yml",
+                "reason": "missing_from_lock",
+                "current": "sha256:e313eac2506c4678e25af25e87761cc93e3cb4cccfa39df41fdc8fd0055dde1d"
+            },
+            {
+                "path": "templates/github/workflows/test-external-install.yml",
+                "reason": "missing_from_lock",
+                "current": "sha256:f421dbb03045a38de645f4e4954c639344e3c74487ce425d7818ed775be14b5d"
+            },
+            {
+                "path": "templates/github/workflows/validate-ai-surface.yml",
+                "reason": "missing_from_lock",
+                "current": "sha256:61b96fbbc6ba064eb48b52ffb8a74929cbcabe67e0b7b2589d11eca4bf8238b3"
+            },
+            {
+                "path": "templates/instructions/ai-file-standards.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:8eea13c4f6763cccc97f225d8d4c2a16c6b95302ec25b22c44d581a6f6ad84c9"
+            },
+            {
+                "path": "templates/instructions/ai-scripts.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:f04aebb598cd82c2e0efa87d6986bfb9afddb5a5be18b3e1a55d9b46a1316a64"
+            },
+            {
+                "path": "templates/instructions/ai-search.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:b7cce500a99a5979287153884ce8ad2ef893ddd242581d96940f837e564477a9"
+            },
+            {
+                "path": "templates/instructions/ai-tooling.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:6185c78fb7610fadfd3e7b4f1084b5a97c620a6bbf77cc324baf677c6a639d8e"
+            },
+            {
+                "path": "templates/instructions/approval-boundaries.instructions.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:7c7edcfbe828cadae7d947d1d6d191ebbf6859d85087ad9e4d1a2ce8139809e7",
+                "current": "sha256:7fc230b64fbc2f8a8fdf379afd37224a17ee4bfb71e50fa295beb2539c594c75"
+            },
+            {
+                "path": "templates/instructions/base.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:b51ad4ea224a3c9da014cd63454f5c7ce363b3fc9a7e017089ec0daacb2be8a2"
+            },
+            {
+                "path": "templates/instructions/ci-workflows.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:b8bfad551811311df0ce3375f73cd00989a27b26dd42ef94afe0e19c688f0e10"
+            },
+            {
+                "path": "templates/instructions/composer.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:7f0bf0fee33763b40e958fbc8acebc21387c0399e552d427e2ee72e9a563f609"
+            },
+            {
+                "path": "templates/instructions/config-infra.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:e846fa06e071665c0de184c849511f36621458acf10c968980a17bed0e3eb462"
+            },
+            {
+                "path": "templates/instructions/copilot-script-enforcement.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:199dc52fa2996109ad7230984783c1d0497302e8a3233f722a9c19edcb36b314"
+            },
+            {
+                "path": "templates/instructions/execution-protocol.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:81055fe23f4e8d7d94f5033817138b3acd357ef7fe192551384c74870d8d1fce"
+            },
+            {
+                "path": "templates/instructions/generated-artifacts.instructions.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:afc4aedab347a98bd6375db7213644d04fe701a2dfd96726a83d5dcb86632974",
+                "current": "sha256:9f09b47489b4cf4520ab585a823f3379f6e8ee78f88576685e8a475dea4a6c30"
+            },
+            {
+                "path": "templates/instructions/php.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:35bf0edab9ee873a7a90d4ed6abd7600c6d1e19ebadebf70a68c1ee8ec78ba6f"
+            },
+            {
+                "path": "templates/instructions/security.instructions.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:8e8e116dab202843d0f94ee4ae8bc27c0676f2790920b7eff7e28e3636e56905",
+                "current": "sha256:916e6be35a3b8f8e9df62dd999f64b70540972f97e72d0ab03a06fff45aa616e"
+            },
+            {
+                "path": "templates/instructions/shell.instructions.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:364783597c2999a7271c16eb6e48dc20f3040436200d3870131ce5e3090f6f80"
+            },
+            {
+                "path": "templates/instructions/testing.instructions.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:06f380b3d404be5f956ededb88731c189e95f43f3e97b13c78a854c6dd5595cc",
+                "current": "sha256:6d5cb599860955840bdc9f02db957834395089326dac6347d82f508f716628f9"
+            },
+            {
+                "path": "templates/instructions/tools.instructions.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:3b5ef70a2e6e953c126ee48f3f1fac62f1b057f07a919be8468f920b688a0f7e",
+                "current": "sha256:116ad252ed2ea51e8e0ad3dd53a5a66a9327f4a5eb4be9e654474f67279b287c"
+            },
+            {
+                "path": "templates/skills/ai-scripts/SKILL.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:197d9560a4b7bed98d0d16174aa5e2bbd07fde6be78179f0219d3fc29c749e48"
+            },
+            {
+                "path": "templates/skills/ai-search/SKILL.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:77f82bde01f4beeafe20d796a83c3e9bd037f8d86c738555d31a792ef2e02d48"
+            },
+            {
+                "path": "templates/workflows/evidence-first-execution.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:021511d52df552ce7f9104b8682a0e0eab65b30d2783c4dffdf0b6ee09bdf707"
+            },
+            {
+                "path": "templates/workflows/review-search-tool.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:f3cd98e84c00b571c4e57611d5633deb3f4e7a3ccefcebbb1c875b1dfd583d80"
+            },
+            {
+                "path": "templates/workflows/script-inventory.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:4170e6ba29494a6d38b6e80c5e9071d4423c69ca52a3ac8756b827018a4dd2aa"
+            },
+            {
+                "path": "templates/workflows/search-evidence.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:1802be31ff935d105d1466094e252ce888da4bcb589b7c87e4a9a4d0fa945bee"
+            }
+        ]
+    }
+}

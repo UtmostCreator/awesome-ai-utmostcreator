@@ -1,0 +1,295 @@
+{
+    "schema_version": 1,
+    "artifact": "symbols.json",
+    "generated_at": "2026-05-16T21:32:16+00:00",
+    "command": "php tools/ai/ai.php symbols aiRun",
+    "based_on_commit": "03c134f",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "ok",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "Jump to symbol locations directly for faster edits.",
+    "data": {
+        "filter": "aiRun",
+        "count": 46,
+        "symbols": [
+            {
+                "path": "tools/ai/commands/advisor_command.php",
+                "line": 5,
+                "kind": "function",
+                "name": "aiRunAdvisor"
+            },
+            {
+                "path": "tools/ai/commands/analysis.php",
+                "line": 8,
+                "kind": "function",
+                "name": "aiRunAsk"
+            },
+            {
+                "path": "tools/ai/commands/analysis.php",
+                "line": 71,
+                "kind": "function",
+                "name": "aiRunEstimate"
+            },
+            {
+                "path": "tools/ai/commands/analysis.php",
+                "line": 118,
+                "kind": "function",
+                "name": "aiRunImpact"
+            },
+            {
+                "path": "tools/ai/commands/analysis.php",
+                "line": 169,
+                "kind": "function",
+                "name": "aiRunFreshness"
+            },
+            {
+                "path": "tools/ai/commands/analysis.php",
+                "line": 215,
+                "kind": "function",
+                "name": "aiRunBudget"
+            },
+            {
+                "path": "tools/ai/commands/decisions.php",
+                "line": 27,
+                "kind": "function",
+                "name": "aiRunDecision"
+            },
+            {
+                "path": "tools/ai/commands/decisions.php",
+                "line": 74,
+                "kind": "function",
+                "name": "aiRunWhy"
+            },
+            {
+                "path": "tools/ai/commands/git.php",
+                "line": 5,
+                "kind": "function",
+                "name": "aiRunDiffSummary"
+            },
+            {
+                "path": "tools/ai/commands/git.php",
+                "line": 86,
+                "kind": "function",
+                "name": "aiRunRisk"
+            },
+            {
+                "path": "tools/ai/commands/git.php",
+                "line": 167,
+                "kind": "function",
+                "name": "aiRunRebaseState"
+            },
+            {
+                "path": "tools/ai/commands/git.php",
+                "line": 208,
+                "kind": "function",
+                "name": "aiRunCommitMsg"
+            },
+            {
+                "path": "tools/ai/commands/git.php",
+                "line": 242,
+                "kind": "function",
+                "name": "aiRunPrSummary"
+            },
+            {
+                "path": "tools/ai/commands/git.php",
+                "line": 277,
+                "kind": "function",
+                "name": "aiRunConflicts"
+            },
+            {
+                "path": "tools/ai/commands/helpers.php",
+                "line": 81,
+                "kind": "function",
+                "name": "aiRunCommand"
+            },
+            {
+                "path": "tools/ai/commands/install_extras.php",
+                "line": 5,
+                "kind": "function",
+                "name": "aiRunPacks"
+            },
+            {
+                "path": "tools/ai/commands/install_extras.php",
+                "line": 24,
+                "kind": "function",
+                "name": "aiRunVersion"
+            },
+            {
+                "path": "tools/ai/commands/install_extras.php",
+                "line": 42,
+                "kind": "function",
+                "name": "aiRunPlaceholders"
+            },
+            {
+                "path": "tools/ai/commands/install_extras.php",
+                "line": 148,
+                "kind": "function",
+                "name": "aiRunHooks"
+            },
+            {
+                "path": "tools/ai/commands/install_extras.php",
+                "line": 177,
+                "kind": "function",
+                "name": "aiRunToolchain"
+            },
+            {
+                "path": "tools/ai/commands/install_extras.php",
+                "line": 267,
+                "kind": "function",
+                "name": "aiRunScriptById"
+            },
+            {
+                "path": "tools/ai/commands/install_extras.php",
+                "line": 308,
+                "kind": "function",
+                "name": "aiRunScriptCommand"
+            },
+            {
+                "path": "tools/ai/commands/install_extras.php",
+                "line": 339,
+                "kind": "function",
+                "name": "aiRunInstallDocs"
+            },
+            {
+                "path": "tools/ai/commands/install_preflight.php",
+                "line": 5,
+                "kind": "function",
+                "name": "aiRunPreflight"
+            },
+            {
+                "path": "tools/ai/commands/install_preflight.php",
+                "line": 38,
+                "kind": "function",
+                "name": "aiRunPackageLock"
+            },
+            {
+                "path": "tools/ai/commands/install_preflight.php",
+                "line": 72,
+                "kind": "function",
+                "name": "aiRunPackageVerify"
+            },
+            {
+                "path": "tools/ai/commands/install_preflight.php",
+                "line": 118,
+                "kind": "function",
+                "name": "aiRunAuditInstructions"
+            },
+            {
+                "path": "tools/ai/commands/install_workflow.php",
+                "line": 5,
+                "kind": "function",
+                "name": "aiRunAdapterPlan"
+            },
+            {
+                "path": "tools/ai/commands/install_workflow.php",
+                "line": 40,
+                "kind": "function",
+                "name": "aiRunInstallWorkflow"
+            },
+            {
+                "path": "tools/ai/commands/install_workflow.php",
+                "line": 364,
+                "kind": "function",
+                "name": "aiRunInstallWizard"
+            },
+            {
+                "path": "tools/ai/commands/install_workflow.php",
+                "line": 547,
+                "kind": "function",
+                "name": "aiRunUpgradeWorkflow"
+            },
+            {
+                "path": "tools/ai/commands/install_workflow.php",
+                "line": 685,
+                "kind": "function",
+                "name": "aiRunAdapterValidate"
+            },
+            {
+                "path": "tools/ai/commands/install_workflow.php",
+                "line": 713,
+                "kind": "function",
+                "name": "aiRunRollbackWorkflow"
+            },
+            {
+                "path": "tools/ai/commands/next.php",
+                "line": 5,
+                "kind": "function",
+                "name": "aiRunNext"
+            },
+            {
+                "path": "tools/ai/commands/verify.php",
+                "line": 5,
+                "kind": "function",
+                "name": "aiRunVerify"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 5,
+                "kind": "function",
+                "name": "aiRunList"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 61,
+                "kind": "function",
+                "name": "aiRunFind"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 112,
+                "kind": "function",
+                "name": "aiRunSymbols"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 177,
+                "kind": "function",
+                "name": "aiRunLogs"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 224,
+                "kind": "function",
+                "name": "aiRunEnvCheck"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 266,
+                "kind": "function",
+                "name": "aiRunFileContext"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 299,
+                "kind": "function",
+                "name": "aiRunOrphans"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 332,
+                "kind": "function",
+                "name": "aiRunAutoFix"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 376,
+                "kind": "function",
+                "name": "aiRunWorkflow"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 401,
+                "kind": "function",
+                "name": "aiRunSnapshot"
+            },
+            {
+                "path": "tools/ai/commands/workspace.php",
+                "line": 421,
+                "kind": "function",
+                "name": "aiRunSessionResume"
+            }
+        ]
+    }
+}

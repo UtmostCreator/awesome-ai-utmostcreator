@@ -1,0 +1,5 @@
+tier0: environment probe
+tier1: bounded read-only wrapper
+tier2: ask-gated broad read or mutation-adjacent command
+tier3: explicit approval mutation
+tier4: deny

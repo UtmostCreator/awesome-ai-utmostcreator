@@ -39,7 +39,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 echo ""
 echo "==> Checking prerequisites..."
 MISSING=()
-for bin in php git jq; do
+for bin in php composer git jq; do
     command -v "$bin" >/dev/null 2>&1 || MISSING+=("$bin")
 done
 if [[ ${#MISSING[@]} -gt 0 ]]; then
@@ -49,7 +49,14 @@ if [[ ${#MISSING[@]} -gt 0 ]]; then
 fi
 php -r 'if (PHP_VERSION_ID < 80200) { fwrite(STDERR, "ERROR: PHP 8.2+ required (current: " . PHP_VERSION . ")\n       On macOS with Herd: already satisfied. Otherwise: brew install php\n"); exit(1); }'
 
-echo "    php $(php -r 'echo PHP_VERSION;')  git $(git --version | awk '{print $3}')  jq $(jq --version)"
+echo "    php $(php -r 'echo PHP_VERSION;')"
+echo "    $(composer --version)"
+echo "    $(git --version)"
+echo "    $(jq --version)"
+
+echo ""
+echo "==> Validating source install surface before writing target..."
+php tools/ai/validate-install-surface.php --strict
 
 # ── Composer (if not already installed) ──────────────────────────────────────
 if [[ ! -d "$SCRIPT_DIR/vendor" ]]; then
@@ -87,15 +94,15 @@ php tools/ai/install-ai-kit.php \
 echo ""
 echo "==> Validating install surface..."
 php tools/ai/validate-install-surface.php --strict --target "$TARGET" 2>/dev/null || \
-    php tools/ai/validate-install-surface.php --target "$TARGET" || true
+    php tools/ai/validate-install-surface.php --target "$TARGET"
 
 # ── Validate config and catalog ───────────────────────────────────────────────
 echo ""
 echo "==> Validating AI config and catalog..."
 php tools/ai/validate-ai-config.php --target "$TARGET" 2>/dev/null || \
-    php tools/ai/validate-ai-config.php || true
+    php tools/ai/validate-ai-config.php
 php tools/ai/validate-ai-catalog.php --target "$TARGET" 2>/dev/null || \
-    php tools/ai/validate-ai-catalog.php || true
+    php tools/ai/validate-ai-catalog.php
 
 # ── Placeholder audit ─────────────────────────────────────────────────────────
 echo ""

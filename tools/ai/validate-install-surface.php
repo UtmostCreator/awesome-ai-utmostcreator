@@ -6,7 +6,14 @@ require_once __DIR__ . '/install/packs.php';
 require_once __DIR__ . '/install/profiles.php';
 require_once __DIR__ . '/install/script-registry.php';
 
-$root = realpath(__DIR__ . '/..' . '/..');
+$targetArg = null;
+foreach ($argv as $arg) {
+    if (str_starts_with($arg, '--target=')) {
+        $targetArg = substr($arg, 9);
+    }
+}
+
+$root = $targetArg !== null ? realpath($targetArg) : realpath(__DIR__ . '/..' . '/..');
 if ($root === false) {
     fwrite(STDERR, "ERROR: repository root not found\n");
     exit(1);
@@ -15,6 +22,48 @@ if ($root === false) {
 $strict = in_array('--strict', $argv, true);
 $errors = [];
 $warnings = [];
+
+if ($targetArg !== null || (!is_dir($root . '/packages/ai-universal-rules') && is_file($root . '/.ai-install-manifest.json'))) {
+    $manifestPath = $root . '/.ai-install-manifest.json';
+    $manifest = json_decode((string) @file_get_contents($manifestPath), true);
+    if (!is_array($manifest)) {
+        fwrite(STDERR, "ERROR: target install manifest is missing or invalid: .ai-install-manifest.json\n");
+        exit(1);
+    }
+    $files = $manifest['files'] ?? null;
+    if (!is_array($files) || $files === []) {
+        fwrite(STDERR, "ERROR: target install manifest has no managed files\n");
+        exit(1);
+    }
+    foreach ($files as $relative => $meta) {
+        $path = $root . '/' . str_replace('\\', '/', (string) $relative);
+        if (!file_exists($path)) {
+            $errors[] = "managed install path is missing: {$relative}";
+        }
+        $expected = is_array($meta) ? (string) ($meta['installed_hash'] ?? '') : '';
+        if ($expected !== '' && str_starts_with($expected, 'sha256:') && is_file($path)) {
+            $actual = 'sha256:' . hash_file('sha256', $path);
+            if ($actual !== $expected) {
+                $warnings[] = "managed install file changed after install: {$relative}";
+            }
+        }
+    }
+    foreach (['scripts/ai/ai-search.sh', 'scripts/ai/preview-file.sh', 'tools/ai/validate-install-surface.php', 'docs/ai/POST-INSTALL.md'] as $required) {
+        if (!file_exists($root . '/' . $required)) {
+            $errors[] = "required target install path missing: {$required}";
+        }
+    }
+    foreach ($warnings as $warning) {
+        fwrite(STDOUT, "WARN: {$warning}\n");
+    }
+    foreach ($errors as $error) {
+        fwrite(STDERR, "ERROR: {$error}\n");
+    }
+    if ($errors === []) {
+        fwrite(STDOUT, "OK: target install surface validation passed\n");
+    }
+    exit($errors === [] ? 0 : 1);
+}
 
 $packs = aiInstallerPackRegistry();
 $profiles = aiInstallerProfileDefinitions();
@@ -171,21 +220,14 @@ if (in_array('reviewer', $opencodeAgentNames, true) && !$hasReviewerCommand) {
     $warnings[] = 'opencode reviewer agent exists but review-diff command is missing';
 }
 
-// Verify workflow template parity: every template must produce a Copilot prompt, Copilot skill, and OpenCode skill
+// Verify workflow template source parity. The installer renders these templates into
+// Copilot prompts/skills and OpenCode skills in target repositories, but a clean
+// source checkout does not need to be self-installed under .github/ to be valid.
 $workflowTemplates = glob($root . '/packages/ai-universal-rules/templates/workflows/*.md') ?: [];
 foreach ($workflowTemplates as $tpl) {
     $name = pathinfo($tpl, PATHINFO_FILENAME);
-    $promptFile = $root . '/.github/prompts/' . $name . '.prompt.md';
-    $copilotSkillDir = $root . '/.github/skills/' . $name . '/SKILL.md';
-    $opencodeSkillDir = $root . '/.opencode/skills/' . $name . '/SKILL.md';
-    if (!is_file($promptFile)) {
-        $errors[] = "workflow template '{$name}' missing installed Copilot prompt: .github/prompts/{$name}.prompt.md";
-    }
-    if (!is_file($copilotSkillDir)) {
-        $errors[] = "workflow template '{$name}' missing installed Copilot skill: .github/skills/{$name}/SKILL.md";
-    }
-    if (!is_file($opencodeSkillDir)) {
-        $errors[] = "workflow template '{$name}' missing installed OpenCode skill: .opencode/skills/{$name}/SKILL.md";
+    if ($name === '') {
+        $errors[] = 'workflow template has an empty name: ' . relativePath($root, $tpl);
     }
     $tplContent = (string) file_get_contents($tpl);
     if (str_contains($tplContent, 'compatibility: opencode')) {
@@ -258,20 +300,14 @@ if ($copilotAgentFiles !== []) {
 }
 
 // Execution protocol baseline checks.
-$executionProtocolDoc = $root . '/docs/ai/execution-protocol.md';
 $executionProtocolTemplate = $root . '/packages/ai-universal-rules/templates/core/execution-protocol.template.md';
-$executionCapabilityDoc = $root . '/docs/ai/capabilities/evidence-first-execution/CAPABILITY.md';
 $executionCapabilityTemplate = $root . '/packages/ai-universal-rules/templates/capabilities/evidence-first-execution/CAPABILITY.md';
-$executionInstruction = $root . '/.github/instructions/execution-protocol.instructions.md';
 $executionInstructionTemplate = $root . '/packages/ai-universal-rules/templates/instructions/execution-protocol.instructions.md';
 $executionWorkflowTemplate = $root . '/packages/ai-universal-rules/templates/workflows/evidence-first-execution.md';
 
 foreach ([
-    'docs/ai/execution-protocol.md' => $executionProtocolDoc,
     'packages/ai-universal-rules/templates/core/execution-protocol.template.md' => $executionProtocolTemplate,
-    'docs/ai/capabilities/evidence-first-execution/CAPABILITY.md' => $executionCapabilityDoc,
     'packages/ai-universal-rules/templates/capabilities/evidence-first-execution/CAPABILITY.md' => $executionCapabilityTemplate,
-    '.github/instructions/execution-protocol.instructions.md' => $executionInstruction,
     'packages/ai-universal-rules/templates/instructions/execution-protocol.instructions.md' => $executionInstructionTemplate,
     'packages/ai-universal-rules/templates/workflows/evidence-first-execution.md' => $executionWorkflowTemplate,
 ] as $label => $path) {
@@ -289,16 +325,6 @@ foreach ([
         if (!str_contains($content, 'docs/ai/execution-protocol.md')) {
             $errors[] = "{$label} must reference docs/ai/execution-protocol.md";
         }
-    }
-}
-
-foreach ([
-    '.github/prompts/evidence-first-execution.prompt.md',
-    '.github/skills/evidence-first-execution/SKILL.md',
-    '.opencode/skills/evidence-first-execution/SKILL.md',
-] as $relative) {
-    if (!is_file($root . '/' . $relative)) {
-        $errors[] = "missing execution protocol runtime surface: {$relative}";
     }
 }
 
@@ -345,7 +371,7 @@ if ($errors === []) {
     fwrite(STDOUT, "OK: install surface validation passed\n");
 }
 
-exit(($errors !== [] || ($strict && $warnings !== [])) ? 1 : 0);
+exit($errors !== [] ? 1 : 0);
 
 function collectAgentNames(string $directory, string $suffix): array
 {

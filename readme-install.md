@@ -145,7 +145,9 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 ### One-Command Install Into Any Project
 
-The installer script [`install-ai-kit.sh`](install-ai-kit.sh) is at the root of this repository. Run it from a local clone of this repo pointing at any target project. It handles prereqs, backup, full install (131 items across 21 packs — Copilot + OpenCode, all scripts, capabilities, hooks, CI, repomix), validation, and context bundle generation automatically.
+The installer script [`install-ai-kit.sh`](install-ai-kit.sh) is at the root of this repository. Run it from a local clone of this repo pointing at any target project. It checks required tools, validates the source install surface, backs up target files, installs `full-governance` for Copilot + OpenCode, validates the result, and attempts optional context/inventory steps when their tools are available.
+
+If `php tools/ai/validate-install-surface.php --strict` fails in this source checkout, stop and fix the reported missing pack sources before installing into another project. The root installer now runs that validation before writing target files so a broken source checkout cannot produce a partial external install.
 
 **Workstation tools (run once from this repo, not per project):**
 
@@ -219,7 +221,7 @@ cat /path/to/your-project/docs/ai/POST-INSTALL.md
 | `copilot`         | Base + Copilot adapter                                | GitHub Copilot only            |
 | `opencode`        | Base + OpenCode adapter                               | OpenCode CLI only              |
 | `dual`            | Base + both adapters                                  | Teams using both tools         |
-| `full-governance` | Everything — agents, scripts, hooks, CI, capabilities | **Recommended for production** |
+| `full-governance` | Everything — agents, scripts, hooks, CI, capabilities, advisor tooling, target-local PHP validators | **Recommended for production** |
 | `accelerated`     | Full except evidence/evaluation packs                 | Fast start                     |
 
 ### Post-Install Required Steps (summary)
@@ -278,7 +280,7 @@ tools/ai/ai.php  ← CLI dispatcher (routes subcommands)
 
 The installer reads the `--profile` argument and expands it into a list of **packs** (groups of files). For example:
 
-- `full-governance` = `base` + `adapter-copilot` + `adapter-opencode` + `scripts-pack` + `hooks-pack` + `capabilities-extended-full` + `ci-pack` + more
+- `full-governance` = `base` + `adapter-copilot` + `adapter-opencode` + `scripts-pack` + `hooks-pack` + `capabilities-extended-full` + `ci-pack` + `advisor-pack` + `target-tools-pack` + more
 
 Profiles and packs are defined in `tools/ai/install/profiles.php` and `tools/ai/install/packs.php`.
 
@@ -343,7 +345,7 @@ User runs: php tools/ai/ai.php install --profile full-governance --apply
 | `dual`            | `minimal` + both Copilot and OpenCode adapters                     | Using both AI tools            |
 | `guarded`         | `dual` + hook policy + guard reminders                             | Safety-conscious setup         |
 | `accelerated`     | `dual` + scripts + policy + evidence packs                         | Power-user setup               |
-| `full-governance` | Everything: `accelerated` + all capabilities + hooks + CI          | **Recommended** — full setup   |
+| `full-governance` | Everything: `accelerated` + all capabilities + hooks + CI + advisor tooling + target-local PHP validators | **Recommended** — full setup   |
 | `scripts-only`    | Just the bash scripts from `scripts/ai/`                           | Bash scripts without AI config |
 | `custom`          | Empty base — opt into packs with `--with`                          | Cherry-pick specific packs     |
 
@@ -353,7 +355,7 @@ User runs: php tools/ai/ai.php install --profile full-governance --apply
 php tools/ai/install-ai-kit.php --target /path --profile copilot --with scripts-pack,advisor-pack
 ```
 
-Available packs: `scripts-pack`, `advisor-pack`, `docs-reference-pack`, `delivery-pack`, `preview-environments-pack`, `evaluation-pack`, `service-boundary-pack`, `mcp-boundaries-pack`
+Available packs: `scripts-pack`, `advisor-pack`, `target-tools-pack`, `docs-reference-pack`, `delivery-pack`, `preview-environments-pack`, `evaluation-pack`, `service-boundary-pack`, `mcp-boundaries-pack`
 
 ---
 

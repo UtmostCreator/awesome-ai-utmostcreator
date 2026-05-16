@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 # Tests for scripts/ai/ai-diff-context.sh
 set -euo pipefail
 
@@ -6,7 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 SCRIPT="$REPO_ROOT/scripts/ai/ai-diff-context.sh"
 cd "$REPO_ROOT"
-BASH_BIN="/opt/homebrew/bin/bash"
+BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 
 PASS=0 FAIL=0 SKIP=0
 TMP="$(mktemp -d)"

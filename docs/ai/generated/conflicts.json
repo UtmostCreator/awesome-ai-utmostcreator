@@ -1,0 +1,18 @@
+{
+    "schema_version": 1,
+    "artifact": "conflicts.json",
+    "generated_at": "2026-05-16T21:32:16+00:00",
+    "command": "php tools/ai/ai.php conflicts",
+    "based_on_commit": "03c134f",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "ok",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "No merge conflicts detected.",
+    "data": {
+        "status": "ok",
+        "conflict_count": 0,
+        "files": []
+    }
+}

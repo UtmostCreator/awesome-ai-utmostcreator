@@ -2,11 +2,38 @@
 
 declare(strict_types=1);
 
-$root = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
+$targetArg = null;
+foreach ($argv as $arg) {
+    if (str_starts_with($arg, '--target=')) {
+        $targetArg = substr($arg, 9);
+    }
+}
+
+$root = $targetArg !== null ? realpath($targetArg) : realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
 
 if ($root === false) {
     fwrite(STDERR, "ERROR: could not resolve repository root\n");
     exit(1);
+}
+
+if ($targetArg !== null || (!is_dir($root . DIRECTORY_SEPARATOR . 'packages') && is_file($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
+    $errors = [];
+    foreach (['AGENTS.md', 'docs/ai/project-context.md', 'docs/ai/POST-INSTALL.md', 'scripts/ai/ai-search.sh', 'tools/ai/validate-install-surface.php', '.ai-install-manifest.json'] as $required) {
+        if (!file_exists($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $required))) {
+            $errors[] = "missing required target AI config path: {$required}";
+        }
+    }
+    $manifest = json_decode((string) @file_get_contents($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+    if (!is_array($manifest) || !isset($manifest['profile'], $manifest['packs'], $manifest['files'])) {
+        $errors[] = 'target .ai-install-manifest.json is missing required fields';
+    }
+    foreach ($errors as $error) {
+        fwrite(STDERR, "ERROR: {$error}\n");
+    }
+    if ($errors === []) {
+        fwrite(STDOUT, "OK: target AI config validation passed\n");
+    }
+    exit($errors === [] ? 0 : 1);
 }
 
 $requiredFiles = [
@@ -166,6 +193,30 @@ $allowedLivePlaceholderFiles = [
     '.github/instructions/testing.instructions.md',
 ];
 
+/**
+ * Load the canonical placeholder dictionary so we can distinguish intentional
+ * template tokens from typo-style leaks. The dictionary is the union of every
+ * `<UPPERCASE_TOKEN>` referenced in PLACEHOLDERS.md.
+ *
+ * @return array<int, string> Sorted list of documented placeholder tokens.
+ */
+function loadDocumentedPlaceholders(string $root): array
+{
+    $path = $root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'PLACEHOLDERS.md';
+    if (!is_file($path)) {
+        return [];
+    }
+    $content = (string) file_get_contents($path);
+    if (!preg_match_all('/`(<[A-Z0-9_]+>)`/', $content, $matches)) {
+        return [];
+    }
+    $tokens = array_values(array_unique($matches[1]));
+    sort($tokens);
+    return $tokens;
+}
+
+$documentedPlaceholders = loadDocumentedPlaceholders($root);
+
 $errors = [];
 $warnings = [];
 $oks = [];
@@ -195,9 +246,31 @@ foreach ($liveFiles as $relativePath) {
     if (
         !in_array($relativePath, $generatedCatalogFiles, true)
         && !in_array($relativePath, $allowedLivePlaceholderFiles, true)
-        && preg_match('/<[^>]+>/', $contentForPlaceholderScan) === 1
+        && preg_match_all('/<[^>\s]+>/', $contentForPlaceholderScan, $angleMatches) > 0
     ) {
-        $errors[] = "placeholder leak found in {$relativePath}";
+        // Dictionary-aware placeholder check.
+        //
+        // This repo is a template kit; canonical docs deliberately carry
+        // `<UPPERCASE_TOKEN>` placeholders so downstream installers can
+        // substitute project-specific values. A token is only a "leak" when
+        // it is NOT documented in packages/ai-universal-rules/PLACEHOLDERS.md
+        // and is NOT a recognised non-placeholder construct (HTML-style tags,
+        // generic CLI usage hints, code-fence echoes, etc.).
+        $undocumented = [];
+        foreach ($angleMatches[0] as $rawToken) {
+            // Documented uppercase placeholder, e.g. <PROJECT_NAME>.
+            if (in_array($rawToken, $documentedPlaceholders, true)) {
+                continue;
+            }
+            // Lowercase or mixed-case angle constructs are CLI usage hints or HTML, not placeholders.
+            if (!preg_match('/^<[A-Z][A-Z0-9_]*>$/', $rawToken)) {
+                continue;
+            }
+            $undocumented[] = $rawToken;
+        }
+        if ($undocumented !== []) {
+            $errors[] = 'undocumented placeholder token(s) in ' . $relativePath . ': ' . implode(', ', array_values(array_unique($undocumented)));
+        }
     }
 
     $allowLeakScan = false;
