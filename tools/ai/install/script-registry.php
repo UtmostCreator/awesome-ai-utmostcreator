@@ -366,6 +366,17 @@ function aiInstallerScriptRegistry(): array
             'supports_dry_run' => false,
             'default_args' => [],
         ],
+        'prune-shipped-targets' => [
+            'label' => 'Kit-author cleanup of shipped-template duplicates',
+            'source_path' => 'scripts/ai/prune-shipped-targets.sh',
+            'installed_path' => 'scripts/ai/prune-shipped-targets.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'jq', 'git'],
+            'risk' => 'mutating',
+            'supports_dry_run' => true,
+            'default_args' => ['--list'],
+            'source_repo_only' => true,
+        ],
     ];
 }
 
