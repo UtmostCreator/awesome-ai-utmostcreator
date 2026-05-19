@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "env-check.json",
-    "generated_at": "2026-05-19T22:29:33+00:00",
+    "generated_at": "2026-05-19T22:49:42+00:00",
     "command": "php tools/ai/ai.php env-check",
-    "based_on_commit": "61a8b24",
+    "based_on_commit": "25538a3",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",

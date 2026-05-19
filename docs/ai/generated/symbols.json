@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "symbols.json",
-    "generated_at": "2026-05-19T22:29:36+00:00",
+    "generated_at": "2026-05-19T22:49:45+00:00",
     "command": "php tools/ai/ai.php symbols aiRun",
-    "based_on_commit": "61a8b24",
+    "based_on_commit": "25538a3",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -12,8 +12,284 @@
     "recommended_next_action": "Jump to symbol locations directly for faster edits.",
     "data": {
         "filter": "aiRun",
-        "count": 46,
+        "count": 92,
         "symbols": [
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18299,
+                "kind": "function",
+                "name": "aiRunAdvisor"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18484,
+                "kind": "function",
+                "name": "aiRunAsk"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18547,
+                "kind": "function",
+                "name": "aiRunEstimate"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18594,
+                "kind": "function",
+                "name": "aiRunImpact"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18645,
+                "kind": "function",
+                "name": "aiRunFreshness"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18691,
+                "kind": "function",
+                "name": "aiRunBudget"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18794,
+                "kind": "function",
+                "name": "aiRunDecision"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18841,
+                "kind": "function",
+                "name": "aiRunWhy"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18883,
+                "kind": "function",
+                "name": "aiRunDiffSummary"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 18964,
+                "kind": "function",
+                "name": "aiRunRisk"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19045,
+                "kind": "function",
+                "name": "aiRunRebaseState"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19086,
+                "kind": "function",
+                "name": "aiRunCommitMsg"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19120,
+                "kind": "function",
+                "name": "aiRunPrSummary"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19155,
+                "kind": "function",
+                "name": "aiRunConflicts"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19281,
+                "kind": "function",
+                "name": "aiRunCommand"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19475,
+                "kind": "function",
+                "name": "aiRunPacks"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19494,
+                "kind": "function",
+                "name": "aiRunVersion"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19512,
+                "kind": "function",
+                "name": "aiRunPlaceholders"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19618,
+                "kind": "function",
+                "name": "aiRunHooks"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19647,
+                "kind": "function",
+                "name": "aiRunToolchain"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19737,
+                "kind": "function",
+                "name": "aiRunScriptById"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19778,
+                "kind": "function",
+                "name": "aiRunScriptCommand"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19809,
+                "kind": "function",
+                "name": "aiRunInstallDocs"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19957,
+                "kind": "function",
+                "name": "aiRunPreflight"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 19990,
+                "kind": "function",
+                "name": "aiRunPackageLock"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20024,
+                "kind": "function",
+                "name": "aiRunPackageVerify"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20070,
+                "kind": "function",
+                "name": "aiRunAuditInstructions"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20175,
+                "kind": "function",
+                "name": "aiRunAdapterPlan"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20210,
+                "kind": "function",
+                "name": "aiRunInstallWorkflow"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20534,
+                "kind": "function",
+                "name": "aiRunInstallWizard"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20717,
+                "kind": "function",
+                "name": "aiRunUpgradeWorkflow"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20855,
+                "kind": "function",
+                "name": "aiRunAdapterValidate"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20883,
+                "kind": "function",
+                "name": "aiRunRollbackWorkflow"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 20954,
+                "kind": "function",
+                "name": "aiRunNext"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21171,
+                "kind": "function",
+                "name": "aiRunVerify"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21523,
+                "kind": "function",
+                "name": "aiRunList"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21579,
+                "kind": "function",
+                "name": "aiRunFind"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21630,
+                "kind": "function",
+                "name": "aiRunSymbols"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21695,
+                "kind": "function",
+                "name": "aiRunLogs"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21742,
+                "kind": "function",
+                "name": "aiRunEnvCheck"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21784,
+                "kind": "function",
+                "name": "aiRunFileContext"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21817,
+                "kind": "function",
+                "name": "aiRunOrphans"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21850,
+                "kind": "function",
+                "name": "aiRunAutoFix"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21894,
+                "kind": "function",
+                "name": "aiRunWorkflow"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21919,
+                "kind": "function",
+                "name": "aiRunSnapshot"
+            },
+            {
+                "path": "docs/ai/generated/advisor-context.md",
+                "line": 21939,
+                "kind": "function",
+                "name": "aiRunSessionResume"
+            },
             {
                 "path": "tools/ai/commands/advisor_command.php",
                 "line": 5,

@@ -1,7 +1,7 @@
 # Project Signals
 
 - Project: `awesome-ai-utmostcreator`
-- Tracked files: `727`
+- Tracked files: `833`
 - Top-level paths: `.ai-install-manifest.json, .editorconfig, .gitattributes, .github, .gitignore, .gitleaks.toml, .gitleaksignore, .markdownlint-cli2.yaml, .opencode, .repomixignore, .schemas, .shellcheckrc, .vscode, AGENTS.md, CLAUDE.md, PLACEHOLDERS.md, README.md, composer.json, composer.lock, configs, docs, install-ai-kit.sh, justfile, llms.txt, opencode.jsonc, packages, phpunit.xml.dist, policies, readme-install.md, reference, scripts, tests, tools`
 
 ## Counts
