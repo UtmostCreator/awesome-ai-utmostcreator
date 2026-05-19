@@ -1,0 +1,584 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC2016
+set -euo pipefail
+
+COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/ai/common.sh
+source "$COMMON_DIR/common.sh"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  scripts/ai/repomix-context-tree.sh <analyze|plan|pack|all|clean|purge> [root] [options]
+
+Commands:
+  analyze   Generate planner and human/machine index outputs.
+  plan      Alias of analyze.
+  pack      Pack only routes marked as decision=pack.
+  all       Run analyze then pack.
+  clean     Remove generated bundles/indexes and keep plan files.
+  purge     Remove the full tree-context output directory.
+
+Options:
+  --output-dir <dir>          Base output directory (default: .repomix-context)
+  --depth <n>                 Folder grouping depth for stats (default: 1)
+  --top <n>                   Max routes to consider, 0 means all (default: 25)
+  --min-code <n>              Minimum code lines per route (default: 300)
+  --min-files <n>             Minimum files per route (default: 2)
+  --min-score <n>             Minimum ranking score (default: 0)
+  --min-complexity <n>        Minimum complexity (default: 0)
+  --changed-since <ref>       Scope stats input to files changed since ref
+  --churn-count <n>           Commit count for churn weighting (default: 50)
+  --style <xml|markdown|json|plain>
+  --split-size <size>
+  --compress
+  --include-logs
+  --include-logs-count <n>
+  --include-diffs
+  --context-window <n>        Context window estimate (default: 128000)
+  --reserved-output <n>       Reserved output tokens (default: 4000)
+  --instruction-overhead <n>  Instruction overhead tokens (default: 8000)
+  --safety-factor <float>     Safety multiplier (default: 0.85)
+  --help
+EOF
+}
+
+die() {
+    printf 'Error: %s\n' "$1" >&2
+    exit 1
+}
+
+log() {
+    printf '[repomix-tree] %s\n' "$1"
+}
+
+confirm_context_delete() {
+    local action="$1"
+    local target="$2"
+
+    log "requested destructive context action: $action -> $target"
+
+    if [[ "${APPROVE_CONTEXT_DELETE:-0}" == "1" ]]; then
+        return 0
+    fi
+
+    if [[ -t 0 ]] && [[ "${CI:-}" != "true" ]]; then
+        printf 'Continue with %s on %s? [y/N] ' "$action" "$target" >&2
+        read -r confirm
+        [[ "$confirm" =~ ^[Yy]$ ]] && return 0
+    fi
+
+    die "context deletion requires APPROVE_CONTEXT_DELETE=1 or interactive confirmation"
+}
+
+add_winget_paths() {
+    local user_name="${USER:-${USERNAME:-}}"
+    local base="/c/Users/${user_name}/AppData/Local/Microsoft/WinGet/Packages"
+    [[ -d "$base" ]] || return 0
+    local dir
+    while IFS= read -r dir; do
+        case ":$PATH:" in
+        *":$dir:"*) ;;
+        *) PATH="$PATH:$dir" ;;
+        esac
+    done < <(find "$base" -maxdepth 3 -type f -name '*.exe' -printf '%h\n' 2>/dev/null | sort -u)
+}
+
+need_bin() {
+    local name="$1"
+    command -v "$name" >/dev/null 2>&1 || die "required binary '$name' not found"
+}
+
+ext_for_style() {
+    case "$1" in
+    xml) printf 'xml\n' ;;
+    markdown) printf 'md\n' ;;
+    json) printf 'json\n' ;;
+    plain) printf 'txt\n' ;;
+    *) die "unsupported style '$1'" ;;
+    esac
+}
+
+abs_path() {
+    local input="$1"
+    if [[ "$input" = /* ]]; then
+        printf '%s\n' "$input"
+    else
+        printf '%s\n' "$(cd "$(dirname "$input")" && pwd)/$(basename "$input")"
+    fi
+}
+
+safe_name() {
+    local name="$1"
+    name="${name//\//}"
+    name="${name//\//__}"
+    name="${name// /_}"
+    printf '%s\n' "$name"
+}
+
+estimate_tokens() {
+    local bytes="$1"
+    awk -v b="$bytes" 'BEGIN { printf "%d", int((b + 3) / 4) }'
+}
+
+usable_budget() {
+    awk -v cw="$CONTEXT_WINDOW" -v ro="$RESERVED_OUTPUT" -v io="$INSTRUCTION_OVERHEAD" -v sf="$SAFETY_FACTOR" 'BEGIN {
+      raw = cw - ro - io
+      if (raw < 0) raw = 0
+      usable = int(raw * sf)
+      if (usable < 0) usable = 0
+      printf "%d", usable
+    }'
+}
+
+COMMAND="${1:-}"
+[[ -n "$COMMAND" ]] || {
+    usage
+    exit 1
+}
+[[ "$COMMAND" != "--help" && "$COMMAND" != "-h" ]] || {
+    usage
+    exit 0
+}
+shift || true
+
+ROOT_INPUT='.'
+if (($# > 0)) && [[ "${1:-}" != --* ]]; then
+    ROOT_INPUT="$1"
+    shift || true
+fi
+
+OUTPUT_DIR='.repomix-context'
+DEPTH=1
+TOP=25
+MIN_CODE=300
+MIN_FILES=2
+MIN_SCORE=0
+MIN_COMPLEXITY=0
+CHANGED_SINCE=''
+CHURN_COUNT=50
+STYLE='xml'
+SPLIT_SIZE=''
+COMPRESS=0
+INCLUDE_LOGS=0
+INCLUDE_LOGS_COUNT=20
+INCLUDE_DIFFS=0
+CONTEXT_WINDOW=128000
+RESERVED_OUTPUT=4000
+INSTRUCTION_OVERHEAD=8000
+SAFETY_FACTOR=0.85
+
+while (($# > 0)); do
+    case "$1" in
+    --output-dir) OUTPUT_DIR="$2"; shift 2 ;;
+    --output-dir=*) OUTPUT_DIR="${1#*=}"; shift ;;
+    --depth) DEPTH="$2"; shift 2 ;;
+    --depth=*) DEPTH="${1#*=}"; shift ;;
+    --top) TOP="$2"; shift 2 ;;
+    --top=*) TOP="${1#*=}"; shift ;;
+    --min-code) MIN_CODE="$2"; shift 2 ;;
+    --min-code=*) MIN_CODE="${1#*=}"; shift ;;
+    --min-files) MIN_FILES="$2"; shift 2 ;;
+    --min-files=*) MIN_FILES="${1#*=}"; shift ;;
+    --min-score) MIN_SCORE="$2"; shift 2 ;;
+    --min-score=*) MIN_SCORE="${1#*=}"; shift ;;
+    --min-complexity) MIN_COMPLEXITY="$2"; shift 2 ;;
+    --min-complexity=*) MIN_COMPLEXITY="${1#*=}"; shift ;;
+    --changed-since) CHANGED_SINCE="$2"; shift 2 ;;
+    --changed-since=*) CHANGED_SINCE="${1#*=}"; shift ;;
+    --churn-count) CHURN_COUNT="$2"; shift 2 ;;
+    --churn-count=*) CHURN_COUNT="${1#*=}"; shift ;;
+    --style) STYLE="$2"; shift 2 ;;
+    --style=*) STYLE="${1#*=}"; shift ;;
+    --split-size) SPLIT_SIZE="$2"; shift 2 ;;
+    --split-size=*) SPLIT_SIZE="${1#*=}"; shift ;;
+    --compress) COMPRESS=1; shift ;;
+    --include-logs) INCLUDE_LOGS=1; shift ;;
+    --include-logs-count) INCLUDE_LOGS_COUNT="$2"; shift 2 ;;
+    --include-logs-count=*) INCLUDE_LOGS_COUNT="${1#*=}"; shift ;;
+    --include-diffs) INCLUDE_DIFFS=1; shift ;;
+    --context-window) CONTEXT_WINDOW="$2"; shift 2 ;;
+    --context-window=*) CONTEXT_WINDOW="${1#*=}"; shift ;;
+    --reserved-output) RESERVED_OUTPUT="$2"; shift 2 ;;
+    --reserved-output=*) RESERVED_OUTPUT="${1#*=}"; shift ;;
+    --instruction-overhead) INSTRUCTION_OVERHEAD="$2"; shift 2 ;;
+    --instruction-overhead=*) INSTRUCTION_OVERHEAD="${1#*=}"; shift ;;
+    --safety-factor) SAFETY_FACTOR="$2"; shift 2 ;;
+    --safety-factor=*) SAFETY_FACTOR="${1#*=}"; shift ;;
+    --help | -h) usage; exit 0 ;;
+    *) die "unknown option '$1'" ;;
+    esac
+done
+
+ROOT="$(abs_path "$ROOT_INPUT")"
+[[ -d "$ROOT" ]] || die "root directory '$ROOT' does not exist"
+
+require_clean_secret_scan "$ROOT"
+
+add_winget_paths
+
+if [[ "$OUTPUT_DIR" = /* ]]; then
+    OUTPUT_DIR_ABS="$OUTPUT_DIR"
+else
+    OUTPUT_DIR_ABS="$ROOT/$OUTPUT_DIR"
+fi
+
+TREE_DIR="$OUTPUT_DIR_ABS/tree-context"
+BUNDLES_DIR="$TREE_DIR/bundles"
+INDEXES_DIR="$TREE_DIR/indexes"
+TREE_PLAN_TSV="$TREE_DIR/tree-plan.tsv"
+TREE_PLAN_JSON="$TREE_DIR/tree-plan.json"
+TREE_MANIFEST_JSON="$TREE_DIR/tree-manifest.json"
+INDEX_MD="$TREE_DIR/index.md"
+INDEX_JSON="$TREE_DIR/index.json"
+ROUTER_FOLDER_METRICS="$TREE_DIR/folder-metrics.tsv"
+ROUTER_FILE_METRICS="$TREE_DIR/file-metrics.tsv"
+STYLE_EXT="$(ext_for_style "$STYLE")"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROUTER_SCRIPT="$SCRIPT_DIR/repomix-scc-router.sh"
+
+router_args=("$ROUTER_SCRIPT" stats . --output-dir "$TREE_DIR" --depth "$DEPTH" --top "$TOP" --min-code "$MIN_CODE" --min-files "$MIN_FILES" --min-score "$MIN_SCORE" --min-complexity "$MIN_COMPLEXITY" --churn-count "$CHURN_COUNT" --style "$STYLE" --include-logs-count "$INCLUDE_LOGS_COUNT")
+[[ -n "$CHANGED_SINCE" ]] && router_args+=(--changed-since "$CHANGED_SINCE")
+[[ -n "$SPLIT_SIZE" ]] && router_args+=(--split-size "$SPLIT_SIZE")
+[[ "$COMPRESS" == "1" ]] && router_args+=(--compress)
+[[ "$INCLUDE_LOGS" == "1" ]] && router_args+=(--include-logs)
+[[ "$INCLUDE_DIFFS" == "1" ]] && router_args+=(--include-diffs)
+
+ensure_tree_outputs() {
+    mkdir -p "$TREE_DIR" "$BUNDLES_DIR" "$INDEXES_DIR"
+}
+
+generate_child_index() {
+    local route="$1"
+    local decision="$2"
+    local output_rel="$3"
+    local reason="$4"
+    local output_abs="$TREE_DIR/$output_rel"
+
+    [[ "$decision" == "split" ]] || return 0
+    mkdir -p "$(dirname "$output_abs")"
+
+    {
+        printf '# Child Context Index\n\n'
+        printf 'Route: `%s`\n\n' "$route"
+        printf 'Reason: `%s`\n\n' "$reason"
+        printf 'This route exceeds budget. Create deeper bundles by rerunning with a larger `--depth` or a smaller scope.\n\n'
+        printf '## Suggested Next Actions\n\n'
+        printf '1. Re-run `scripts/ai/repomix-context-tree.sh plan . --depth %s` to split this route further.\n' "$((DEPTH + 1))"
+        printf '2. Open the resulting child route with decision `pack`.\n'
+        printf '3. Keep sibling routes closed unless the task crosses boundaries.\n'
+    } >"$output_abs"
+}
+
+ensure_actionable_route() {
+    local usable="$1"
+    local fallback_row=''
+    local fallback_group=''
+    local fallback_files=''
+    local fallback_code=''
+    local fallback_complexity=''
+    local fallback_bytes=''
+    local fallback_score=''
+    local fallback_tokens=''
+    local fallback_decision=''
+    local fallback_type=''
+    local fallback_output=''
+    local fallback_reason=''
+    local temp_plan=''
+
+    if awk -F'\t' 'NR > 1 && ($3 == "pack" || $3 == "split") { found = 1 } END { exit found ? 0 : 1 }' "$TREE_PLAN_TSV"; then
+        return 0
+    fi
+
+    fallback_row="$(tail -n +2 "$ROUTER_FOLDER_METRICS" | awk -F'\t' '$1 != "" && $4 + 0 > 0 { print; exit }')"
+    [[ -n "$fallback_row" ]] || return 0
+
+    IFS=$'\t' read -r fallback_group fallback_files _fallback_lines fallback_code _fallback_comments _fallback_blanks fallback_complexity fallback_bytes _fallback_churn _fallback_code_share _fallback_complexity_share _fallback_file_share _fallback_byte_share _fallback_churn_share fallback_score <<<"$fallback_row"
+
+    fallback_tokens="$(estimate_tokens "$fallback_bytes")"
+    if ((fallback_tokens <= usable)); then
+        fallback_decision='pack'
+        fallback_type='bundle'
+        fallback_output="bundles/$(safe_name "$fallback_group").$STYLE_EXT"
+        fallback_reason='fallback route because no route met thresholds; estimated tokens fit route budget'
+    else
+        fallback_decision='split'
+        fallback_type='index'
+        fallback_output="indexes/$(safe_name "$fallback_group").md"
+        fallback_reason='fallback route because no route met thresholds; estimated tokens exceed route budget'
+    fi
+
+    temp_plan="$TREE_DIR/.tree-plan.tsv.tmp"
+    awk -F'\t' -v OFS='\t' \
+        -v target_group="$fallback_group" \
+        -v target_type="$fallback_type" \
+        -v target_decision="$fallback_decision" \
+        -v target_tokens="$fallback_tokens" \
+        -v target_budget="$usable" \
+        -v target_output="$fallback_output" \
+        -v target_reason="$fallback_reason" \
+        'NR == 1 { print; next }
+         $1 == target_group && replaced == 0 {
+             print $1, target_type, target_decision, target_tokens, target_budget, target_output, target_reason
+             replaced = 1
+             next
+         }
+         { print }
+        ' "$TREE_PLAN_TSV" >"$temp_plan"
+    mv "$temp_plan" "$TREE_PLAN_TSV"
+}
+
+build_plan() {
+    local usable
+    local selected=0
+
+    usable="$(usable_budget)"
+    [[ -f "$ROUTER_FOLDER_METRICS" ]] || die "missing folder metrics: $ROUTER_FOLDER_METRICS"
+
+    {
+        printf 'route\ttype\tdecision\testimated_tokens\tbudget\toutput\treason\n'
+        tail -n +2 "$ROUTER_FOLDER_METRICS" | while IFS=$'\t' read -r group files _lines code _comments _blanks complexity bytes _churn _code_share _complexity_share _file_share _byte_share _churn_share score; do
+            [[ -n "$group" ]] || continue
+
+            if ((TOP > 0 && selected >= TOP)); then
+                decision='skip'
+                type='skipped'
+                output='-'
+                reason='exceeds top limit'
+                tokens="$(estimate_tokens "$bytes")"
+                printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$group" "$type" "$decision" "$tokens" "$usable" "$output" "$reason"
+                continue
+            fi
+
+            if ((code < MIN_CODE)); then
+                decision='skip'
+                type='skipped'
+                output='-'
+                reason='below min-code threshold'
+                tokens="$(estimate_tokens "$bytes")"
+                printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$group" "$type" "$decision" "$tokens" "$usable" "$output" "$reason"
+                continue
+            fi
+
+            if ((files < MIN_FILES)); then
+                decision='skip'
+                type='skipped'
+                output='-'
+                reason='below min-files threshold'
+                tokens="$(estimate_tokens "$bytes")"
+                printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$group" "$type" "$decision" "$tokens" "$usable" "$output" "$reason"
+                continue
+            fi
+
+            if ((complexity < MIN_COMPLEXITY)); then
+                decision='skip'
+                type='skipped'
+                output='-'
+                reason='below min-complexity threshold'
+                tokens="$(estimate_tokens "$bytes")"
+                printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$group" "$type" "$decision" "$tokens" "$usable" "$output" "$reason"
+                continue
+            fi
+
+            awk -v score_value="$score" -v min_score_value="$MIN_SCORE" 'BEGIN { exit !(score_value + 0 >= min_score_value + 0) }' || {
+                decision='skip'
+                type='skipped'
+                output='-'
+                reason='below min-score threshold'
+                tokens="$(estimate_tokens "$bytes")"
+                printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$group" "$type" "$decision" "$tokens" "$usable" "$output" "$reason"
+                continue
+            }
+
+            selected=$((selected + 1))
+            tokens="$(estimate_tokens "$bytes")"
+
+            if ((tokens <= usable)); then
+                decision='pack'
+                type='bundle'
+                output="bundles/$(safe_name "$group").$STYLE_EXT"
+                reason='estimated tokens fit route budget'
+            else
+                decision='split'
+                type='index'
+                output="indexes/$(safe_name "$group").md"
+                reason='estimated tokens exceed route budget'
+            fi
+
+            printf '%s\t%s\t%s\t%s\t%s\t%s\t%s\n' "$group" "$type" "$decision" "$tokens" "$usable" "$output" "$reason"
+        done
+    } >"$TREE_PLAN_TSV"
+
+    if [[ $(wc -l <"$TREE_PLAN_TSV") -le 1 ]]; then
+        die "no routes generated"
+    fi
+
+    ensure_actionable_route "$usable"
+
+    jq -R -s '
+      split("\n") | map(select(length > 0) | split("\t")) as $rows
+      | ($rows[0]) as $header
+      | [ $rows[1:][] as $row
+          | reduce range(0; $header|length) as $i ({}; . + { ($header[$i]): ($row[$i] // "") })
+        ]
+    ' "$TREE_PLAN_TSV" >"$TREE_PLAN_JSON"
+
+    jq -n \
+      --arg root "$ROOT" \
+      --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+      --argjson context_window "$CONTEXT_WINDOW" \
+      --argjson reserved_output "$RESERVED_OUTPUT" \
+      --argjson instruction_overhead "$INSTRUCTION_OVERHEAD" \
+      --argjson safety_factor "$SAFETY_FACTOR" \
+      --argjson usable_budget "$usable" \
+      --arg style "$STYLE" \
+      --arg compress "$COMPRESS" \
+      --arg changed_since "$CHANGED_SINCE" \
+      --slurpfile plan "$TREE_PLAN_JSON" \
+      '{
+        root: $root,
+        generated_at: $generated_at,
+        budget: {
+          context_window: $context_window,
+          reserved_output: $reserved_output,
+          instruction_overhead: $instruction_overhead,
+          safety_factor: $safety_factor,
+          usable_budget: $usable_budget
+        },
+        repomix: {
+          style: $style,
+          compress: ($compress == "1"),
+          changed_since: (if $changed_since == "" then null else $changed_since end)
+        },
+        routes: ($plan[0] // [])
+      }' >"$TREE_MANIFEST_JSON"
+
+    jq -n --slurpfile plan "$TREE_PLAN_JSON" '{generated_at: now, routes: ($plan[0] // [])}' >"$INDEX_JSON"
+}
+
+build_human_index() {
+    {
+        printf '# Context Index\n\n'
+        printf '## Purpose\n\n'
+        printf 'Route repository context into the smallest useful bundle before loading broader areas.\n\n'
+        printf '## Open This First\n\n'
+        printf 'Open one route marked `pack` that matches your task scope. If all relevant routes are `split`, open that child index first.\n\n'
+        printf '## Top-Level Routes\n\n'
+        printf '| Route | Type | Decision | Estimated Tokens | Budget | Why | Open |\n'
+        printf '| --- | --- | --- | ---: | ---: | --- | --- |\n'
+        tail -n +2 "$TREE_PLAN_TSV" | while IFS=$'\t' read -r route type decision estimated_tokens budget output reason; do
+            printf '| `%s` | `%s` | `%s` | %s | %s | %s | `%s` |\n' "$route" "$type" "$decision" "$estimated_tokens" "$budget" "$reason" "$output"
+        done
+        printf '\n## Next Steps For AI Agents\n\n'
+        printf 'If decision is `pack`: open the bundle and start work there; avoid sibling bundles unless scope expands.\n\n'
+        printf 'If decision is `split`: open the child index and continue route selection until you reach a `pack` route.\n\n'
+        printf 'If decision is `skip`: avoid as primary context unless the task explicitly targets that path.\n\n'
+        printf '## Wiring Locations\n\n'
+        printf '%s\n' '- `AGENTS.md`'
+        printf '%s\n' '- `.github/copilot-instructions.md`'
+        printf '%s\n' '- `docs/ai/copilot-tooling.md`'
+        printf '%s\n\n' '- `docs/ai/context-packing.md`'
+        printf '## Machine Files\n\n'
+        printf '%s\n' '- `tree-plan.tsv`'
+        printf '%s\n' '- `tree-plan.json`'
+        printf '%s\n' '- `tree-manifest.json`'
+        printf '%s\n\n' '- `index.json`'
+        printf '## Regeneration Command\n\n'
+        printf '`scripts/ai/repomix-context-tree.sh all . --compress --style %s`\n' "$STYLE"
+    } >"$INDEX_MD"
+
+    tail -n +2 "$TREE_PLAN_TSV" | while IFS=$'\t' read -r route _type decision _estimated_tokens _budget output reason; do
+        generate_child_index "$route" "$decision" "$output" "$reason"
+    done
+}
+
+run_analyze() {
+    need_bin jq
+    ensure_tree_outputs
+    (cd "$ROOT" && bash "${router_args[@]}")
+    build_plan
+    build_human_index
+    log "wrote $TREE_PLAN_TSV"
+    log "wrote $TREE_PLAN_JSON"
+    log "wrote $TREE_MANIFEST_JSON"
+    log "wrote $INDEX_MD"
+    log "wrote $INDEX_JSON"
+}
+
+pack_route() {
+    local route="$1"
+    local output="$2"
+    local out_abs="$TREE_DIR/$output"
+    local repomix_args=(--output "$out_abs" --style "$STYLE")
+
+    mkdir -p "$(dirname "$out_abs")"
+    [[ "$COMPRESS" == "1" ]] && repomix_args+=(--compress)
+    [[ -n "$SPLIT_SIZE" ]] && repomix_args+=(--split-output "$SPLIT_SIZE")
+    [[ "$INCLUDE_LOGS" == "1" ]] && repomix_args+=(--include-logs --include-logs-count "$INCLUDE_LOGS_COUNT")
+    [[ "$INCLUDE_DIFFS" == "1" ]] && repomix_args+=(--include-diffs)
+
+    if [[ "$route" == "_root" ]]; then
+        local list_file
+        list_file="$(mktemp)"
+        awk -F'\t' 'NR > 1 && $1 == "_root" { print $2 }' "$ROUTER_FILE_METRICS" >"$list_file"
+        [[ -s "$list_file" ]] || {
+            rm -f "$list_file"
+            log "skip packing '$route' because no files matched"
+            return 0
+        }
+        (cd "$ROOT" && repomix --stdin "${repomix_args[@]}" <"$list_file")
+        rm -f "$list_file"
+    else
+        (cd "$ROOT" && repomix --include "$route/**" "${repomix_args[@]}")
+    fi
+}
+
+run_pack() {
+    need_bin repomix
+    [[ -f "$TREE_PLAN_TSV" ]] || run_analyze
+    [[ -f "$ROUTER_FILE_METRICS" ]] || die "missing file metrics for packing: $ROUTER_FILE_METRICS"
+
+    local packed=0
+    tail -n +2 "$TREE_PLAN_TSV" | while IFS=$'\t' read -r route _type decision _estimated_tokens _budget output _reason; do
+        [[ "$decision" == "pack" ]] || continue
+        pack_route "$route" "$output"
+        packed=$((packed + 1))
+    done
+
+    # while loop runs in subshell in some shells; verify bundles instead of relying on counter
+    ls "$BUNDLES_DIR" >/dev/null 2>&1 || die "no bundles generated"
+}
+
+run_all() {
+    run_analyze
+    run_pack
+}
+
+run_clean() {
+    confirm_context_delete "clean" "$TREE_DIR"
+    rm -rf "$BUNDLES_DIR" "$INDEXES_DIR" "$INDEX_MD" "$INDEX_JSON"
+    log "removed generated bundles and indexes from $TREE_DIR"
+}
+
+run_purge() {
+    [[ -d "$TREE_DIR" ]] || {
+        log "no tree-context directory at $TREE_DIR"
+        return 0
+    }
+
+    [[ "$TREE_DIR" != "/" ]] || die "refusing to delete root directory"
+    [[ "$TREE_DIR" != "$ROOT" ]] || die "refusing to delete repository root"
+
+    confirm_context_delete "purge" "$TREE_DIR"
+    rm -rf "$TREE_DIR"
+    log "removed tree-context directory $TREE_DIR"
+}
+
+case "$COMMAND" in
+analyze | plan) run_analyze ;;
+pack) run_pack ;;
+all) run_all ;;
+clean) run_clean ;;
+purge) run_purge ;;
+*) usage; die "unknown command '$COMMAND'" ;;
+esac

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASH_BIN="${BASH_BIN:-/opt/homebrew/bin/bash}"
+BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 repo_root="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../../.." && pwd)"
 script="$repo_root/scripts/ai/preview-file.sh"
 

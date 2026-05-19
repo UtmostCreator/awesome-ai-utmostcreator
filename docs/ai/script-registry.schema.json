@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/utmostcreator/app-configs/docs/ai/script-registry.schema.json",
+  "title": "AI Script Registry",
+  "description": "Schema for docs/ai/script-registry.json. Each registered script declares its identity, risk class, approval surface, dry-run support, and verification expectations.",
+  "type": "object",
+  "required": ["schema_version", "scripts"],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Semantic version of the registry contract."
+    },
+    "scripts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/script" }
+    }
+  },
+  "$defs": {
+    "script": {
+      "type": "object",
+      "required": ["id", "path", "risk"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Stable identifier used by routers and policies."
+        },
+        "path": {
+          "type": "string",
+          "description": "Repo-relative script path."
+        },
+        "description": {
+          "type": "string"
+        },
+        "risk": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Risk class controlling approval boundary."
+        },
+        "approval": {
+          "type": "string",
+          "enum": ["allow", "ask", "deny"],
+          "description": "Default policy decision for invocation."
+        },
+        "supports_dry_run": {
+          "type": "boolean"
+        },
+        "evidence": {
+          "type": "object",
+          "description": "Where structured evidence is written when the script runs.",
+          "properties": {
+            "log_path": { "type": "string" },
+            "schema": { "type": "string" }
+          }
+        },
+        "verification": {
+          "type": "object",
+          "description": "Recommended verification step after invocation.",
+          "properties": {
+            "command": { "type": "string" }
+          }
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

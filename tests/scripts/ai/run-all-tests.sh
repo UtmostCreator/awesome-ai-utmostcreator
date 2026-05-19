@@ -1,6 +1,6 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 # Run all script test suites in priority order.
-# Usage: /opt/homebrew/bin/bash tests/scripts/ai/run-all-tests.sh [filter]
+# Usage: bash tests/scripts/ai/run-all-tests.sh [filter]
 #   filter: optional substring to match test file names (e.g. "common" or "rg-code")
 #
 # Environment:
@@ -40,7 +40,7 @@ run_suite() {
     if [[ "$SUITE_TIMEOUT" -gt 0 ]]; then
         # Run with timeout; kill the suite if it hangs
         local pid
-        /opt/homebrew/bin/bash "$file" 2>&1 &
+        bash "$file" 2>&1 &
         pid=$!
 
         local elapsed=0
@@ -61,7 +61,7 @@ run_suite() {
         done
         wait "$pid" || rc=$?
     else
-        /opt/homebrew/bin/bash "$file" 2>&1 || rc=$?
+        bash "$file" 2>&1 || rc=$?
     fi
 
     if ((rc == 0)); then

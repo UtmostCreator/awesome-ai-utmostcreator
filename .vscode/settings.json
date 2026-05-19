@@ -1,0 +1,36 @@
+{
+  // Stronger VS Code Copilot defaults. Keep these aligned with
+  // .github/hooks/tool-policy.json and docs/ai/script-registry.json.
+  "chat.tools.terminal.ignoreDefaultAutoApproveRules": true,
+  "chat.tools.terminal.blockDetectedFileWrites": true,
+  "chat.tools.terminal.autoApprove": {
+    "/^bash scripts\\/ai\\/(ai-search|ai-verify|ai-doc-check|ai-file-freshness|ai-install-coverage|preview-file|fd-files|rg-code|git-forensics|query-usage|ai-diff-context|pack-context|gh-pr-context|repomix-context-tree|repomix-scc-router|check-file-refs|repo-stats)\\.sh(\\s|$)/": true,
+    "/\\brm\\b|\\bdel\\b|\\brmdir\\b|\\bgit\\s+push\\b|\\bgit\\s+reset\\b|\\bsudo\\b|curl\\s+.*\\|\\s*(sh|bash|zsh|python|python3|php|node|ruby)|wget\\s+.*\\|\\s*(sh|bash|zsh|python|python3|php|node|ruby)/": false
+  },
+  "chat.agent.sandbox.enabled": true,
+  "chat.agent.networkFilter": true,
+  "chat.agent.sandbox.FileSystem.mac": {
+    "allowWrite": [
+      "."
+    ],
+    "denyWrite": [
+      "./.git/",
+      "./vendor/",
+      "./node_modules/",
+      "./.env",
+      "./.github/workflows/"
+    ]
+  },
+  "chat.agent.sandbox.FileSystem.linux": {
+    "allowWrite": [
+      "."
+    ],
+    "denyWrite": [
+      "./.git/",
+      "./vendor/",
+      "./node_modules/",
+      "./.env",
+      "./.github/workflows/"
+    ]
+  }
+}

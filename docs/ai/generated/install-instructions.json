@@ -1,0 +1,403 @@
+{
+    "installed_at": "2026-05-10T15:25:11+00:00",
+    "profile": "full-governance",
+    "packs": [
+        "capabilities-extended-full",
+        "hooks-pack",
+        "ci-pack",
+        "scripts-pack",
+        "policy-pack",
+        "evidence-pack",
+        "adapter-copilot",
+        "adapter-opencode",
+        "capabilities-extended-lite",
+        "base",
+        "setup-docs",
+        "capabilities-core",
+        "docs-reference-pack",
+        "delivery-pack",
+        "optional-agents-opencode-pack",
+        "optional-agents-copilot-pack",
+        "preview-environments-pack",
+        "evaluation-pack",
+        "service-boundary-pack",
+        "mcp-boundaries-pack",
+        "advisor-pack",
+        "target-tools-pack",
+        "shared-templates-pack"
+    ],
+    "files": [
+        ".github/agents",
+        ".github/copilot-instructions.md",
+        ".github/hooks/scripts/tool-guardian.ps1",
+        ".github/hooks/tool-guardian.json",
+        ".github/hooks/tool-policy.json",
+        ".github/instructions",
+        ".github/instructions/execution-protocol.instructions.md",
+        ".github/instructions/tools.instructions.md",
+        ".github/prompts",
+        ".github/pull_request_template.md",
+        ".github/skills",
+        ".github/workflows/export-ai-universal-rules-preview.yml",
+        ".github/workflows/test-external-install.yml",
+        ".github/workflows/validate-ai-surface.yml",
+        ".opencode/agents-optional",
+        ".vscode/settings.json",
+        "docs/ai/AI-GUARDRAILS.md",
+        "docs/ai/MCP-BOUNDARIES.md",
+        "docs/ai/POST-INSTALL.md",
+        "docs/ai/ai-file-standards.md",
+        "docs/ai/capabilities/bug-regression",
+        "docs/ai/capabilities/dependency-upgrade",
+        "docs/ai/capabilities/evidence-first-execution",
+        "docs/ai/capabilities/project-context",
+        "docs/ai/capabilities/release-safety",
+        "docs/ai/capabilities/review-diff",
+        "docs/ai/capabilities/verify-change",
+        "docs/ai/delivery/README.md",
+        "docs/ai/delivery/slice-card.template.md",
+        "docs/ai/execution-protocol.md",
+        "docs/ai/generated-artifacts.md",
+        "docs/ai/project-context-placeholders.md",
+        "docs/ai/project-context.md",
+        "docs/ai/project-stack.md",
+        "docs/ai/shared/approvals",
+        "docs/ai/shared/project-interaction.md",
+        "docs/ai/shared/verification",
+        "docs/ai/snippets",
+        "docs/ai/tools/actions/preview-file.md",
+        "docs/ai/workflow.md"
+    ],
+    "scripts": [
+        {
+            "id": "common",
+            "label": "Shared helper library for AI shell scripts",
+            "path": "scripts/ai/common.sh",
+            "required_tools": [
+                "bash"
+            ]
+        },
+        {
+            "id": "ai-search",
+            "label": "Safe repository text search wrapper",
+            "path": "scripts/ai/ai-search.sh",
+            "required_tools": [
+                "bash",
+                "git",
+                "jq",
+                "rg",
+                "fd",
+                "ast-grep"
+            ]
+        },
+        {
+            "id": "rg-code",
+            "label": "Code-focused ripgrep wrapper",
+            "path": "scripts/ai/rg-code.sh",
+            "required_tools": [
+                "bash",
+                "rg"
+            ]
+        },
+        {
+            "id": "fd-files",
+            "label": "File discovery wrapper",
+            "path": "scripts/ai/fd-files.sh",
+            "required_tools": [
+                "bash",
+                "fd"
+            ]
+        },
+        {
+            "id": "preview-file",
+            "label": "Safe file preview wrapper",
+            "path": "scripts/ai/preview-file.sh",
+            "required_tools": [
+                "bash",
+                "jq"
+            ]
+        },
+        {
+            "id": "query-usage",
+            "label": "Symbol usage query wrapper",
+            "path": "scripts/ai/query-usage.sh",
+            "required_tools": [
+                "bash",
+                "rg"
+            ]
+        },
+        {
+            "id": "git-forensics",
+            "label": "Read-only git history tracing wrapper",
+            "path": "scripts/ai/git-forensics.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "gh-pr-context",
+            "label": "GitHub PR context wrapper",
+            "path": "scripts/ai/gh-pr-context.sh",
+            "required_tools": [
+                "bash",
+                "gh",
+                "git"
+            ]
+        },
+        {
+            "id": "ai-doc-check",
+            "label": "AI docs consistency checker wrapper",
+            "path": "scripts/ai/ai-doc-check.sh",
+            "required_tools": [
+                "bash",
+                "git",
+                "rg"
+            ]
+        },
+        {
+            "id": "ai-diff-context",
+            "label": "Diff-aware context extraction wrapper",
+            "path": "scripts/ai/ai-diff-context.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "ai-verify",
+            "label": "Verification workflow wrapper",
+            "path": "scripts/ai/ai-verify.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "ai-rollback",
+            "label": "Rollback snapshot helper",
+            "path": "scripts/ai/ai-rollback.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "ai-edit",
+            "label": "Scoped repository edit wrapper",
+            "path": "scripts/ai/ai-edit.sh",
+            "required_tools": [
+                "bash",
+                "git",
+                "python3"
+            ]
+        },
+        {
+            "id": "pre-tool-use",
+            "label": "Pre-tool policy decision hook",
+            "path": "scripts/ai/pre-tool-use.sh",
+            "required_tools": [
+                "bash",
+                "jq"
+            ]
+        },
+        {
+            "id": "post-tool-use",
+            "label": "Post-tool evidence writer hook",
+            "path": "scripts/ai/post-tool-use.sh",
+            "required_tools": [
+                "bash",
+                "jq",
+                "date"
+            ]
+        },
+        {
+            "id": "repomix-context",
+            "label": "Generate Repomix context bundle",
+            "path": "scripts/ai/run-repomix-context.sh",
+            "required_tools": [
+                "bash",
+                "git",
+                "repomix"
+            ]
+        },
+        {
+            "id": "repomix-tree",
+            "label": "Generate Repomix context tree",
+            "path": "scripts/ai/repomix-context-tree.sh",
+            "required_tools": [
+                "bash",
+                "git",
+                "repomix"
+            ]
+        },
+        {
+            "id": "repomix-scc-router",
+            "label": "Generate SCC-ranked Repomix context",
+            "path": "scripts/ai/repomix-scc-router.sh",
+            "required_tools": [
+                "bash",
+                "git",
+                "jq",
+                "rg",
+                "repomix",
+                "scc"
+            ]
+        },
+        {
+            "id": "pack-context",
+            "label": "Pack AI context bundle",
+            "path": "scripts/ai/pack-context.sh",
+            "required_tools": [
+                "bash",
+                "git",
+                "jq",
+                "rg"
+            ]
+        },
+        {
+            "id": "ai-structured",
+            "label": "Emit structured AI helper output",
+            "path": "scripts/ai/ai-structured.sh",
+            "required_tools": [
+                "bash",
+                "jq"
+            ]
+        },
+        {
+            "id": "ai-task",
+            "label": "Task context helper wrapper",
+            "path": "scripts/ai/ai-task.sh",
+            "required_tools": [
+                "bash",
+                "git",
+                "jq"
+            ]
+        },
+        {
+            "id": "ai-test-select",
+            "label": "Select focused tests for a change",
+            "path": "scripts/ai/ai-test-select.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "session-checkpoint",
+            "label": "Write AI session checkpoint notes",
+            "path": "scripts/ai/session-checkpoint.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "ai-file-freshness",
+            "label": "Check AI file freshness signals",
+            "path": "scripts/ai/ai-file-freshness.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "ai-install-coverage",
+            "label": "Check installer pack coverage",
+            "path": "scripts/ai/ai-install-coverage.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "check-file-refs",
+            "label": "Check documentation file references",
+            "path": "scripts/ai/check-file-refs.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "repo-stats",
+            "label": "Summarize repository file statistics",
+            "path": "scripts/ai/repo-stats.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "repo-tool-inventory",
+            "label": "Generate/check required tools inventory doc",
+            "path": "scripts/ai/repo-tool-inventory.sh",
+            "required_tools": [
+                "bash",
+                "git"
+            ]
+        },
+        {
+            "id": "install-mandatory-tools",
+            "label": "Install mandatory CLI tools by OS",
+            "path": "scripts/ai/install-mandatory-tools.sh",
+            "required_tools": [
+                "bash"
+            ]
+        },
+        {
+            "id": "setup-powershell-profile",
+            "label": "Persist PowerShell PATH and tool aliases",
+            "path": "scripts/ai/setup-powershell-profile.ps1",
+            "required_tools": [
+                "powershell"
+            ]
+        },
+        {
+            "id": "watch-loop",
+            "label": "Watched command retry wrapper",
+            "path": "scripts/ai/watch-loop.sh",
+            "required_tools": [
+                "bash"
+            ]
+        }
+    ],
+    "required_tools": [
+        "bash",
+        "git",
+        "jq",
+        "rg",
+        "fd",
+        "ast-grep",
+        "repomix",
+        "scc"
+    ],
+    "optional_tools": [
+        "gh",
+        "fzf",
+        "bat",
+        "delta",
+        "yq",
+        "shellcheck",
+        "semgrep"
+    ],
+    "commands": {
+        "preflight": "php tools/ai/ai.php preflight",
+        "package_verify": "php tools/ai/ai.php package-verify",
+        "adapter_plan": "php tools/ai/ai.php adapter-plan --profile full-governance",
+        "install_dry_run": "php tools/ai/ai.php install --profile full-governance --reinstall --dry-run",
+        "install_backup": "php tools/ai/ai.php install --backup-only --apply --profile full-governance --reinstall",
+        "install_apply": "php tools/ai/ai.php install --apply --profile full-governance --reinstall --backup <backup-id>",
+        "verify": "php tools/ai/ai.php verify --json",
+        "placeholders": "php tools/ai/ai.php placeholders --fail",
+        "toolchain_check": "php tools/ai/ai.php toolchain --with repomix,scc --check",
+        "toolchain_plan": "php tools/ai/ai.php toolchain --with repomix,scc --install-plan",
+        "repo_tools_check": "bash scripts/ai/repo-tool-inventory.sh --check",
+        "repo_tools_generate": "bash scripts/ai/repo-tool-inventory.sh",
+        "mandatory_tools_install_dry_run": "bash scripts/ai/install-mandatory-tools.sh --dry-run",
+        "scripts_list": "php tools/ai/ai.php run-script --list",
+        "repomix_analyze": "bash scripts/ai/repomix-context-tree.sh analyze .",
+        "advisor_all": "php tools/ai/ai.php advisor --all",
+        "full_install_verify": "php tools/ai/verify-full-install.php"
+    }
+}

@@ -52,17 +52,18 @@
         "root:adapter-hook-script": 1,
         "root:adapter-policy": 1,
         "root:ai-script": 26,
-        "root:capability": 14,
+        "root:capability": 15,
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 11,
+        "root:github-copilot-agent": 10,
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 16,
         "root:github-copilot-skill": 16,
         "root:opencode-agent": 11,
         "root:opencode-command": 18,
         "root:opencode-skill": 18,
+        "root:php-reference": 3,
         "root:root-doc": 16,
         "root:schema": 1,
         "root:validator": 4,
@@ -1368,10 +1369,18 @@
         {
             "scope": "root",
             "type": "capability",
+            "name": "adapter-drift",
+            "path": "docs/ai/capabilities/adapter-drift/CAPABILITY.md",
+            "runtime": "canonical",
+            "description": "Check Copilot, OpenCode, and canonical docs for conflicting instructions after adapter changes."
+        },
+        {
+            "scope": "root",
+            "type": "capability",
             "name": "agent-observability-and-evidence",
             "path": "docs/ai/capabilities/agent-observability-and-evidence/CAPABILITY.md",
             "runtime": "canonical",
-            "description": "Make agent runs traceable, reviewable, and auditable before relying on optimization claims."
+            "description": "Capture command evidence, verification results, and handoff context without exposing secrets."
         },
         {
             "scope": "root",
@@ -1379,7 +1388,7 @@
             "name": "authorization-and-tool-governance",
             "path": "docs/ai/capabilities/authorization-and-tool-governance/CAPABILITY.md",
             "runtime": "canonical",
-            "description": "Define who can use which tools, under what scope, with which approval and audit requirements."
+            "description": "Use policy gates and approval boundaries before running commands that mutate state or broaden access."
         },
         {
             "scope": "root",
@@ -1395,7 +1404,7 @@
             "name": "config-change-safety",
             "path": "docs/ai/capabilities/config-change-safety/CAPABILITY.md",
             "runtime": "canonical",
-            "description": "Apply editor, shell, runtime, or machine-facing config changes without widening risk silently."
+            "description": "Validate schemas and preserve existing behavior when changing JSON, YAML, shell, or runtime configuration."
         },
         {
             "scope": "root",
@@ -1411,7 +1420,7 @@
             "name": "docs-sync",
             "path": "docs/ai/capabilities/docs-sync/CAPABILITY.md",
             "runtime": "canonical",
-            "description": "Keep setup and workflow documentation aligned with the actual repository after behavior, file, or path changes."
+            "description": "Update documentation when behavior, commands, paths, or installation workflow changes."
         },
         {
             "scope": "root",
@@ -1419,7 +1428,7 @@
             "name": "evaluation-and-regression",
             "path": "docs/ai/capabilities/evaluation-and-regression/CAPABILITY.md",
             "runtime": "canonical",
-            "description": "Make agent behavior testable so quality does not depend only on ad hoc review."
+            "description": "Use deterministic tests or evaluation checks to prove behavior and prevent regression."
         },
         {
             "scope": "root",
@@ -1435,7 +1444,7 @@
             "name": "preview-environments",
             "path": "docs/ai/capabilities/preview-environments/CAPABILITY.md",
             "runtime": "canonical",
-            "description": "Define a vendor-neutral operating model for temporary end-to-end environments used during review and verification."
+            "description": "Document preview setup, smoke checks, rollback, and success signals for preview-related changes."
         },
         {
             "scope": "root",
@@ -1467,7 +1476,7 @@
             "name": "service-boundary-patterns",
             "path": "docs/ai/capabilities/service-boundary-patterns/CAPABILITY.md",
             "runtime": "canonical",
-            "description": "Define public, internal, tool, and data boundaries so agent-enabled workflows do not blur trust and risk surfaces."
+            "description": "Respect adapter, API, and package boundaries. Do not introduce parallel contracts without approval."
         },
         {
             "scope": "root",
@@ -1508,14 +1517,6 @@
             "path": ".github/agents/architect.agent.md",
             "runtime": "github-copilot",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Bootstrapper",
-            "path": ".github/agents/bootstrapper.agent.md",
-            "runtime": "github-copilot",
-            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
         },
         {
             "scope": "root",
@@ -1715,7 +1716,7 @@
             "name": "generated-artifacts",
             "path": ".github/instructions/generated-artifacts.instructions.md",
             "runtime": "github-copilot",
-            "description": "Generated artifact drift routing and source-first regeneration policy"
+            "description": "Generated artifact drift routing, source-first regeneration policy, and verbose output control"
         },
         {
             "scope": "root",
@@ -2396,6 +2397,30 @@
             "path": ".opencode/skills/verify-change/SKILL.md",
             "runtime": "opencode",
             "description": "Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly"
+        },
+        {
+            "scope": "root",
+            "type": "php-reference",
+            "name": "design-patterns",
+            "path": "reference/php/design-patterns",
+            "runtime": "php",
+            "description": "Primary local PHP design pattern corpus for agent and human lookups."
+        },
+        {
+            "scope": "root",
+            "type": "php-reference",
+            "name": "design-principles",
+            "path": "reference/php/design-principles",
+            "runtime": "php",
+            "description": "Secondary PHP principles and composition examples."
+        },
+        {
+            "scope": "root",
+            "type": "php-reference",
+            "name": "php-built-ins",
+            "path": "reference/php/php-built-ins",
+            "runtime": "php",
+            "description": "Supporting PHP built-in usage examples."
         },
         {
             "scope": "root",
