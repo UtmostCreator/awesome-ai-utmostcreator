@@ -1,4 +1,4 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 # Tests for scripts/ai/ai-test-select.sh
 set -euo pipefail
 
@@ -18,7 +18,7 @@ run_test() {
     else FAIL=$((FAIL+1)); printf '  \033[0;31m✗\033[0m %s\n' "$name"; fi
 }
 
-BASH_BIN="/opt/homebrew/bin/bash"
+BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 
 printf 'ai-test-select.sh\n'
 

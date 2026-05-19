@@ -11,7 +11,7 @@ function aiInstallerProfileDefinitions(): array
         'dual' => ['minimal', 'adapter-copilot', 'adapter-opencode', 'capabilities-extended-lite', 'scripts-pack', 'policy-pack', 'hooks-pack'],
         'guarded' => ['dual', 'policy-pack', 'hooks-pack', 'evidence-pack'],
         'accelerated' => ['dual', 'scripts-pack', 'policy-pack', 'evidence-pack'],
-        'full-governance' => ['accelerated', 'capabilities-extended-full', 'hooks-pack', 'ci-pack', 'docs-reference-pack', 'delivery-pack', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'preview-environments-pack', 'evaluation-pack', 'service-boundary-pack', 'mcp-boundaries-pack', 'shared-templates-pack'],
+        'full-governance' => ['accelerated', 'capabilities-extended-full', 'hooks-pack', 'ci-pack', 'docs-reference-pack', 'delivery-pack', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'preview-environments-pack', 'evaluation-pack', 'service-boundary-pack', 'mcp-boundaries-pack', 'advisor-pack', 'target-tools-pack', 'shared-templates-pack'],
         'docs-reference' => ['docs-reference-pack'],
         'custom' => [],
     ];
@@ -41,6 +41,7 @@ function aiInstallerAllFeaturePacks(): array
         'service-boundary-pack',
         'mcp-boundaries-pack',
         'advisor-pack',
+        'target-tools-pack',
         'shared-templates-pack',
     ];
 }

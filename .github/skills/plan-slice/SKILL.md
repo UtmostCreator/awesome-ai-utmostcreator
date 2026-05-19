@@ -1,0 +1,51 @@
+---
+name: plan-slice
+description: Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation
+argument-hint: 'Describe the goal, scope, and any known constraints or risks'
+---
+
+## What I Do
+
+I produce a bounded implementation plan with risk posture, acceptance criteria, and recommended next stage before any implementation begins.
+
+## When To Use Me
+
+- when a task is multi-step, ambiguous, or affects architecture
+- when ownership is unclear and needs to be scoped first
+- when a slice may grow beyond one safe change
+
+## Do Not Use Me For
+
+- trivial single-step changes where the owner and approach are obvious
+- combined planning and implementation in one pass unless explicitly requested
+
+## Workflow
+
+1. load task context or use `project-context` if ownership is unclear
+2. confirm approval boundaries before planning mutation-heavy work
+3. define the bounded slice and acceptance criteria
+4. call out risk level, targets, and affected areas
+5. propose the smallest sound approach
+6. list verification implications, generated-artifact impact, and recommended next stage
+
+## Read Alongside
+
+- `.github/instructions/context-gate.instructions.md`
+- `.github/instructions/approval-boundaries.instructions.md`
+- `.github/instructions/generated-artifacts.instructions.md`
+- `.github/instructions/testing.instructions.md`
+- `docs/ai/workflow.md`
+
+## Output
+
+- bounded plan with acceptance criteria
+- risk level
+- affected paths and owners
+- approval gates
+- verification ladder
+- recommended next stage (implement, research, architect)
+
+## Gotchas
+
+- do not implement as part of this workflow unless explicitly asked
+- do not produce a plan so broad it cannot be reviewed in one sitting

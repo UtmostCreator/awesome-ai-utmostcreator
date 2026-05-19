@@ -1,7 +1,7 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 # Tests for scripts/ai/pre-tool-use.sh
 set -euo pipefail
-BASH_BIN="${BASH_BIN:-/opt/homebrew/bin/bash}"
+BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
@@ -133,7 +133,7 @@ run_test "composer validate is allowed" test_composer_validate
 test_phpunit() { check_decision "bash" "vendor/bin/phpunit" "allow"; }
 run_test "vendor/bin/phpunit is allowed" test_phpunit
 
-# shellcheck allowed
+# Test: shellcheck command is allowed by the policy gate
 test_shellcheck() { check_decision "bash" "shellcheck scripts/ai/common.sh" "allow"; }
 run_test "shellcheck is allowed" test_shellcheck
 

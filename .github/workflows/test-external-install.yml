@@ -1,0 +1,84 @@
+name: Test External Install
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  external-install:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - fixture: blank-generic
+            profile: minimal
+          - fixture: blank-generic
+            profile: dual
+          - fixture: existing-copilot
+            profile: copilot
+          - fixture: existing-opencode
+            profile: opencode
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Build fixture repository
+        id: fixture
+        run: |
+          set -euo pipefail
+          fixture_dir="$(mktemp -d)"
+          repo_path="$(bash "tests/fixtures/repos/${{ matrix.fixture }}/setup.sh" "$fixture_dir")"
+          echo "repo_path=$repo_path" >> "$GITHUB_OUTPUT"
+
+      - name: Capture pre-install hash (existing-copilot only)
+        id: prehash
+        if: matrix.fixture == 'existing-copilot'
+        run: |
+          set -euo pipefail
+          file="${{ steps.fixture.outputs.repo_path }}/.github/copilot-instructions.md"
+          echo "hash=$(sha256sum "$file" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Run installer
+        run: |
+          set -euo pipefail
+          target="${{ steps.fixture.outputs.repo_path }}"
+          php tools/ai/install-ai-kit.php \
+            --profile=${{ matrix.profile }} \
+            --source=. \
+            --target="$target" \
+            --non-interactive \
+            --allow-placeholders \
+            --output-json="$target/install-result.json"
+
+      - name: Verify manifest and result
+        run: |
+          set -euo pipefail
+          target="${{ steps.fixture.outputs.repo_path }}"
+          php tools/ai/install/verify-manifest.php --manifest="$target/.ai-install-manifest.json"
+          php tools/ai/install/verify-install-result.php --result="$target/install-result.json"
+          php tools/ai/install/verify-no-overwrite.php --manifest="$target/.ai-install-manifest.json"
+
+      - name: Verify no overwrite for existing-copilot
+        if: matrix.fixture == 'existing-copilot'
+        run: |
+          set -euo pipefail
+          file="${{ steps.fixture.outputs.repo_path }}/.github/copilot-instructions.md"
+          after_hash="$(sha256sum "$file" | cut -d' ' -f1)"
+          test "${{ steps.prehash.outputs.hash }}" = "$after_hash"
+
+      - name: Upload install result artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: install-result-${{ matrix.fixture }}-${{ matrix.profile }}
+          path: |
+            ${{ steps.fixture.outputs.repo_path }}/install-result.json
+            ${{ steps.fixture.outputs.repo_path }}/.ai-install-manifest.json

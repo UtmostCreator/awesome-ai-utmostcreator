@@ -1,7 +1,7 @@
-#!/opt/homebrew/bin/bash
+#!/usr/bin/env bash
 # Tests for scripts/ai/query-usage.sh
 set -euo pipefail
-BASH_BIN="${BASH_BIN:-/opt/homebrew/bin/bash}"
+BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"

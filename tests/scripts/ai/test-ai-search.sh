@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
-BASH_BIN="${BASH_BIN:-/opt/homebrew/bin/bash}"
+BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh doctor | jq -e '.status=="ok"' >/dev/null
 AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh text AGENTS.md . --dry-run | jq -e '.status=="dry_run"' >/dev/null
 AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh unsafe-all AGENTS.md . | jq -e '.status=="unsafe_blocked"' >/dev/null

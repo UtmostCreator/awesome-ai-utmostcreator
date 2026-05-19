@@ -51,6 +51,7 @@ function aiInstallerRun(array $argv): int
     }
 
     $plan = aiInstallerBuildPlan($config, $registry, $packs);
+    aiInstallerAssertPlanSourcesExist($config, $plan);
     $backupInfo = null;
     if (!$config['dryRun'] && ($config['backup'] ?? false)) {
         $backupInfo = aiInstallerCreateBackup($config['targetRoot'], $plan);
@@ -217,6 +218,30 @@ function aiInstallerRun(array $argv): int
     return 0;
 }
 
+function aiInstallerAssertPlanSourcesExist(array $config, array $plan): void
+{
+    $missing = [];
+    foreach ($plan as $item) {
+        if (in_array((string) ($item['action'] ?? ''), ['SKIP_EXISTING_UNMANAGED', 'SKIP_PROTECTED_CORE', 'SKIP_IDENTICAL_EXISTING'], true)) {
+            continue;
+        }
+
+        $source = (string) ($item['source'] ?? '');
+        $type = (string) ($item['type'] ?? 'file');
+        $abs = (string) $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $source);
+        $exists = $type === 'dir' ? is_dir($abs) : is_file($abs);
+        if (!$exists) {
+            $missing[] = $source . ' -> ' . (string) ($item['target'] ?? 'unknown');
+        }
+    }
+
+    if ($missing !== []) {
+        $sample = array_slice($missing, 0, 20);
+        $suffix = count($missing) > count($sample) ? '; ... and ' . (count($missing) - count($sample)) . ' more' : '';
+        throw new RuntimeException('install source surface is incomplete; missing selected pack source(s): ' . implode('; ', $sample) . $suffix);
+    }
+}
+
 function aiInstallerAssertAllowedTarget(array $config): void
 {
     $sourceRoot = str_replace('\\', '/', (string) ($config['sourceRoot'] ?? ''));
@@ -239,8 +264,19 @@ function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
         '<PROJECT_NAME>', '<PROJECT_TYPE>', '<PRIMARY_LANGUAGE>', '<PRIMARY_RUNTIME>',
         '<SOURCE_DIRS>', '<TEST_DIRS>', '<TEST_COMMAND>', '<BUILD_COMMAND>',
         '<LINT_COMMAND>', '<PACKAGE_MANAGER>', '<CI_COMMANDS>', '<PROTECTED_PATHS>',
+        // Project-context extensions: an installed project must resolve these
+        // before AI write-capable flows are trusted.
+        '<PRIMARY_STACK>', '<FILE_PLACEMENT_RULES>', '<NAMING_RULES>',
+        '<GOLDEN_EXAMPLES>', '<FORMATTER_CONFIG_FILES>', '<LINTER_CONFIG_FILES>',
+        '<EDITORCONFIG_PATH>', '<IGNORE_FILES>', '<GENERATED_FILES>',
+        '<PROTECTED_FILES>', '<INSTALL_COMMAND>', '<FORMAT_COMMAND>',
     ];
-    // Note: <SCRIPTS_ROOT> is resolved at install time and is intentionally not in the required list
+    // Note: <SCRIPTS_ROOT> is resolved at install time and is intentionally not in the required list.
+    // Note: <UNKNOWN>, <FILES_OR_COMMANDS_CHECKED>, <NEXT_STEP> are format slots in blocked-response examples
+    //       and are not project values. They stay as placeholders in canonical docs.
+    // Note: <PROJECT_FORMATTING_EXCEPTIONS>, <PROJECT_IGNORED_FILES>, <PROJECT_ALLOWED_SCRIPTS>,
+    //       <PROJECT_FORBIDDEN_SCRIPTS>, <PROJECT_SECURITY_RULES> are project-specific and remain
+    //       optional; they should be filled when relevant for the installed project.
     $hits = [];
     $scanRoots = ['AGENTS.md', 'docs/ai', '.github', '.opencode'];
     foreach ($scanRoots as $path) {
@@ -320,6 +356,25 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
         '<GLOBAL_OR_SHARED_RULE_SOURCES>' => 'organization instructions, user-level instructions',
         '<OPTIONAL_VERIFY_COMMAND>' => 'unknown',
         '<SCRIPTS_ROOT>' => 'scripts/ai',
+        // Project-context extension defaults. Installed projects should overwrite
+        // these with concrete values during the first audit.
+        '<PRIMARY_STACK>' => 'unknown',
+        '<FILE_PLACEMENT_RULES>' => 'unknown',
+        '<NAMING_RULES>' => 'unknown',
+        '<GOLDEN_EXAMPLES>' => 'unknown',
+        '<FORMATTER_CONFIG_FILES>' => 'unknown',
+        '<LINTER_CONFIG_FILES>' => 'unknown',
+        '<EDITORCONFIG_PATH>' => 'unknown',
+        '<IGNORE_FILES>' => 'unknown',
+        '<GENERATED_FILES>' => 'unknown',
+        '<PROTECTED_FILES>' => 'unknown',
+        '<INSTALL_COMMAND>' => 'unknown',
+        '<FORMAT_COMMAND>' => 'unknown',
+        '<PROJECT_FORMATTING_EXCEPTIONS>' => 'unknown',
+        '<PROJECT_IGNORED_FILES>' => 'unknown',
+        '<PROJECT_ALLOWED_SCRIPTS>' => 'unknown',
+        '<PROJECT_FORBIDDEN_SCRIPTS>' => 'unknown',
+        '<PROJECT_SECURITY_RULES>' => 'unknown',
     ];
 
     foreach ($applied as $item) {

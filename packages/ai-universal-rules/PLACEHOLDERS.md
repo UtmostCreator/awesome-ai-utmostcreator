@@ -27,6 +27,14 @@ Use uppercase snake case for every token. Replace each token with repository-spe
 | `<AVAILABLE_CAPABILITIES>`    | Capability folders enabled in the repository          | `project-context, verify-change, review-diff`       | Core templates                 |
 | `<REVIEW_PRIORITIES>`         | Top correctness and regression review areas           | `state ownership, API contracts, data loss risk`    | Core templates, reviewer roles |
 | `<APPROVAL_REQUIRED_CHANGES>` | Changes that require approval before proceeding       | `schema changes, auth changes, dependency changes`  | Core templates                 |
+| `<LINT_COMMAND>`              | Main lint command                                     | `npm run lint`                                      | Core templates                 |
+| `<PACKAGE_MANAGER>`           | Primary package manager                               | `pnpm`, `composer`, `pip`                           | Core templates                 |
+| `<SOURCE_DIRS>`               | Main source directories                               | `src/, apps/`                                       | Core templates                 |
+| `<TEST_DIRS>`                 | Test directories                                      | `tests/, packages/*/__tests__/`                     | Core templates                 |
+| `<TEST_COMMAND>`              | Focused test command                                  | `pnpm test`                                         | Core templates                 |
+| `<BUILD_COMMAND>`             | Build command                                         | `pnpm build`                                        | Core templates                 |
+| `<CI_COMMANDS>`               | CI commands run on every push or PR                   | `pnpm ci`                                           | Core templates                 |
+| `<PROTECTED_PATHS>`           | Paths requiring approval before edits                 | `.github/workflows/, infra/`                        | Core templates                 |
 
 ## Optional Placeholders
 
@@ -68,6 +76,37 @@ Use uppercase snake case for every token. Replace each token with repository-spe
 | `<UNRUN_CHECKS_AND_REASON>`       | Explicit unrun checks disclosure token                            | `full fixture matrix deferred to next slice`                          | Capability templates                |
 | `<RESIDUAL_RISK_NOTES>`           | Residual risk statement token                                     | `profile migration edge cases remain`                                 | Capability templates                |
 
+## Project Context Extensions
+
+These placeholders appear in `docs/ai/project-context.md` (and related canonical docs). They describe how the installed project organizes files, ignores, scripts, and commands. Fill them during install or first audit.
+
+| Placeholder                       | Meaning                                                       | Example Value                                                | Used In                          |
+| --------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------ | -------------------------------- |
+| `<PRIMARY_STACK>`                 | Primary technology stack label                                | `Laravel + Vue`                                              | Project context                  |
+| `<FILE_PLACEMENT_RULES>`          | Where new files of each kind belong                           | `Domain code under src/Domain/; tests under tests/Unit/`     | Project context                  |
+| `<NAMING_RULES>`                  | Required naming conventions                                   | `PascalCase classes; snake_case migrations`                  | Project context                  |
+| `<GOLDEN_EXAMPLES>`               | Canonical example paths to mimic                              | `src/Domain/Order/Order.php, tests/Unit/Order/OrderTest.php` | Project context                  |
+| `<FORMATTER_CONFIG_FILES>`        | Formatter configuration files in the repo                     | `.prettierrc.json, pint.json`                                | Project context                  |
+| `<LINTER_CONFIG_FILES>`           | Linter configuration files in the repo                        | `.eslintrc.json, phpstan.neon`                               | Project context                  |
+| `<EDITORCONFIG_PATH>`             | Path to the EditorConfig file                                 | `.editorconfig`                                              | Project context                  |
+| `<IGNORE_FILES>`                  | Ignore lists in the repo                                      | `.gitignore, .prettierignore, .eslintignore`                 | Project context                  |
+| `<GENERATED_FILES>`               | Paths of generated artifacts that must not be hand-edited     | `docs/ai/generated/, packages/*/dist/`                       | Project context                  |
+| `<PROTECTED_FILES>`               | Paths that require approval before edit                       | `.git/, vendor/, composer.lock`                              | Project context                  |
+| `<INSTALL_COMMAND>`               | Command to install project dependencies                       | `composer install && npm install`                            | Project context                  |
+| `<FORMAT_COMMAND>`                | Command to run the formatter                                  | `npm run format && vendor/bin/pint`                          | Project context                  |
+| `<PROJECT_FORMATTING_EXCEPTIONS>` | Paths or filetypes excluded from formatting                   | `legacy/, vendor/`                                           | Project context                  |
+| `<PROJECT_IGNORED_FILES>`         | Additional ignore patterns specific to this project           | `*.local.php, .env.local`                                    | Project context                  |
+| `<PROJECT_ALLOWED_SCRIPTS>`       | Approved repository scripts beyond the default registry       | `scripts/deploy/release.sh`                                  | Project context                  |
+| `<PROJECT_FORBIDDEN_SCRIPTS>`     | Scripts that must never run without explicit approval         | `scripts/legacy/wipe-db.sh`                                  | Project context                  |
+| `<PROJECT_SECURITY_RULES>`        | Additional security rules specific to this project            | `Never log raw PAN; PII never in fixtures`                   | Project context                  |
+| `<UNKNOWN>`                       | Format slot for an unresolved condition in blocked responses  | `task ownership`                                             | Blocked response format          |
+| `<FILES_OR_COMMANDS_CHECKED>`     | Format slot listing the evidence inspected before a block     | `git status, docs/ai/project-context.md`                     | Blocked response format          |
+| `<NEXT_STEP>`                     | Format slot stating the safest next action when blocked       | `ask for owner of legacy/billing/`                           | Blocked response format          |
+
+## Meta Placeholder
+
+`<PLACEHOLDER>` appears in installer log messages and docs as a generic stand-in for "any uppercase token". It is a documentation device, not a project value, so the installer does not substitute it.
+
 ## Notes
 
 - Keep replacements concise.
@@ -75,3 +114,5 @@ Use uppercase snake case for every token. Replace each token with repository-spe
 - Delete sections that do not fit instead of leaving vague guidance behind.
 - Do not invent tool features that your target environment does not support.
 - Only fill capability placeholders with features you have verified for the target runtime.
+- Run `php tools/ai/validate-placeholders.php` to confirm every token used in templates is documented here.
+- After install, run `php tools/ai/verify-install-placeholders.php` against the installed project to confirm no required placeholder remains unresolved.

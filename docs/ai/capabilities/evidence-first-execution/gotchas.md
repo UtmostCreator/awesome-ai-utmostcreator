@@ -1,0 +1,4 @@
+- Do not treat generated files as canonical source unless policy says so.
+- Do not update snapshots/fixtures only to silence failures.
+- Do not treat `git diff` inspection as verification proof.
+- Do not widen scope after discovering nearby issues.
