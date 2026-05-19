@@ -75,5 +75,41 @@ cat "$tmp_err"
 - Pick the budget from the table in `docs/ai/execution-protocol.md` "Long-Running Commands And Anti-Freeze Discipline" — never run a command "to see if it eventually finishes" without an upper bound.
 - Always capture stdout and stderr to files, never to in-memory pipes when the child can produce more than a few KiB.
 - Always print the exit code, elapsed time, and (on timeout) the last bytes of output so the next agent step has actionable evidence.
-- If a command times out, bisect: run a smaller scope (single test class, single file) until you find the offender. Surface the failing scope in your report.</newString>
-</invoke>
+- If a command times out, bisect: run a smaller scope (single test class, single file) until you find the offender. Surface the failing scope in your report.
+
+## Pruning Shipped-Target Duplicates (Kit Author Workflow)
+
+When this repository ships the AI universal rules pack (`packages/ai-universal-rules/templates/**`), the install step copies 40 files into the kit-author's working tree as well (paths where `.ai-install-manifest.json` records `source != key`). The local copies are convenient for testing but easy to edit by mistake — patches land in the installed copy instead of the shipped source.
+
+Use `scripts/ai/prune-shipped-targets.sh` to inspect or remove those duplicates:
+
+```bash
+# Read-only: print one path per line that --apply would delete.
+bash scripts/ai/prune-shipped-targets.sh --list
+
+# Read-only: per-pack file+byte counts, total on the last stdout line.
+bash scripts/ai/prune-shipped-targets.sh --dry-run
+
+# Destructive: requires clean worktree. Snapshots BEFORE deletion.
+bash scripts/ai/prune-shipped-targets.sh --apply
+```
+
+Safety posture:
+
+- `--list` and `--dry-run` never mutate state.
+- `--apply` refuses unless `git status --porcelain` is empty (override with `--force`, logged as a WARN).
+- `--apply` snapshots each path to `.ai-backups/prune-shipped-<ts>/` BEFORE deletion and records `{ts, path, sha256_before, snapshot_path, pack}` for every removal in `.ai-logs/prune-<ts>.jsonl`.
+- A hardcoded refuse-list (`packages/`, `tools/`, `scripts/ai/`, `tests/`, `.schemas/`, `.git/`, `.ai-logs/`, `.ai-backups/`, `docs/ai/generated/`, `vendor/`, `node_modules/`, and the script itself) is enforced before any `rm`, so a tampered manifest cannot trick the script into deleting source-of-truth files.
+
+Restore is a single command:
+
+```bash
+bash install-ai-kit.sh .
+# or
+php tools/ai/install-ai-kit.php --target . --profile full-governance \
+                                --runtime both --project-name app-configs \
+                                --non-interactive
+```
+
+`--include-candidates` adds two paths that are referenced by `tools/ai/install/packs.php` but are not in the manifest (`AGENTS.md` and `.opencode/opencode.json`). It is only honored with `--apply` and is off by default.
+
