@@ -10,3 +10,5 @@
 .ai-logs/
 .ai-backups/
 .repomix-context/
+docs/ai/generated/phpunit-junit.xml
+/composer.phar

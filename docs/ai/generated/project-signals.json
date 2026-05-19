@@ -1,7 +1,7 @@
 {
     "schema_version": 1,
     "project": "awesome-ai-utmostcreator",
-    "tracked_files_count": 727,
+    "tracked_files_count": 833,
     "top_level_paths": [
         ".ai-install-manifest.json",
         ".editorconfig",

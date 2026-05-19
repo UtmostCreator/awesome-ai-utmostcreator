@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "adapter-plan.json",
-    "generated_at": "2026-05-19T22:29:37+00:00",
+    "generated_at": "2026-05-19T22:49:47+00:00",
     "command": "php tools/ai/ai.php adapter-plan",
-    "based_on_commit": "61a8b24",
+    "based_on_commit": "25538a3",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -37,6 +37,7 @@
             ".github/prompts",
             ".github/skills",
             ".github/instructions/tools.instructions.md",
+            ".opencode/opencode.json",
             ".opencode/agents",
             ".opencode/skills",
             ".opencode/commands",
@@ -45,9 +46,11 @@
             "AGENTS.md",
             "docs/ai/project-context.md",
             "docs/ai/project-context-placeholders.md",
+            "docs/ai/execution-protocol.md",
             "docs/ai/ai-file-standards.md",
             "docs/ai/POST-INSTALL.md",
-            "docs/ai/project-stack.md"
+            "docs/ai/project-stack.md",
+            "docs/ai/capabilities/evidence-first-execution"
         ],
         "actions": [
             {
@@ -169,8 +172,8 @@
                 "merge_strategy": "replace",
                 "required": true,
                 "pack": "adapter-opencode",
-                "action": "SKIP_IDENTICAL_EXISTING",
-                "reason": "target exists and already matches source",
+                "action": "SKIP_EXISTING_UNMANAGED",
+                "reason": "target exists",
                 "requested_target": ".opencode/opencode.json"
             },
             {
@@ -867,8 +870,8 @@
                 "merge_strategy": "replace",
                 "required": true,
                 "pack": "base",
-                "action": "SKIP_IDENTICAL_EXISTING",
-                "reason": "target exists and already matches source",
+                "action": "SKIP_EXISTING_UNMANAGED",
+                "reason": "target exists",
                 "requested_target": "docs/ai/execution-protocol.md"
             },
             {
@@ -975,8 +978,8 @@
                 "merge_strategy": "replace",
                 "required": true,
                 "pack": "base",
-                "action": "SKIP_IDENTICAL_EXISTING",
-                "reason": "target exists and already matches source",
+                "action": "SKIP_EXISTING_UNMANAGED",
+                "reason": "target exists",
                 "requested_target": "docs/ai/capabilities/evidence-first-execution"
             },
             {

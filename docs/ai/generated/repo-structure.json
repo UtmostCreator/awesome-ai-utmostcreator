@@ -46,12 +46,12 @@
             "ai_entrypoint": "AGENTS.md",
             "notes": "Root-level tracked files are intentionally grouped under '.'.",
             "metrics": {
-                "lines": 2097,
-                "code": 1665,
+                "lines": 2170,
+                "code": 1738,
                 "comments": 34,
                 "blanks": 398,
                 "complexity": 42,
-                "bytes": 115847
+                "bytes": 119435
             }
         },
         {
@@ -215,12 +215,12 @@
             "ai_entrypoint": ".opencode/opencode.json",
             "notes": "Canonical installed OpenCode surface for this repo.",
             "metrics": {
-                "lines": 3320,
-                "code": 2565,
+                "lines": 3373,
+                "code": 2618,
                 "comments": 0,
                 "blanks": 755,
                 "complexity": 0,
-                "bytes": 116311
+                "bytes": 118440
             }
         },
         {
@@ -429,12 +429,12 @@
             "ai_entrypoint": "docs/ai/project-context.md",
             "notes": "Includes capabilities, generated artifacts, and architecture notes.",
             "metrics": {
-                "lines": 3621,
-                "code": 2837,
+                "lines": 3650,
+                "code": 2860,
                 "comments": 0,
-                "blanks": 784,
+                "blanks": 790,
                 "complexity": 0,
-                "bytes": 171992
+                "bytes": 174835
             }
         },
         {

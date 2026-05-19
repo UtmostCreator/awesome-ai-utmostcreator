@@ -1,7 +1,7 @@
 {
     "schema_version": 1,
     "artifact": "toolchain.json",
-    "generated_at": "2026-05-19T22:29:46+00:00",
+    "generated_at": "2026-05-19T22:49:39+00:00",
     "command": "php tools/ai/ai.php toolchain",
     "based_on_commit": "unknown",
     "based_on_branch": "unknown",

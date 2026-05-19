@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "ai-commands.json",
-    "generated_at": "2026-05-19T22:29:26+00:00",
+    "generated_at": "2026-05-19T22:49:35+00:00",
     "command": "php tools/ai/ai.php list",
-    "based_on_commit": "61a8b24",
+    "based_on_commit": "25538a3",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",

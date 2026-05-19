@@ -352,13 +352,15 @@ Minimum flow:
 
 ## Verification Rules
 
-- Primary verification command: `unknown`
-- Primary build command: `unknown`
-- Primary test command: `unknown`
+- Primary verification command: `bash scripts/ai/ai-verify.sh .` (or `php tools/ai/ai.php verify --changed` for the PHP CLI)
+- Primary build command: `unknown` (this is a tooling repo, not a build target)
+- Primary test command: `composer test` (serial, ~37s) or `composer test:fast` (paratest, ~17s)
+- Profile slow tests: `composer test:profile` then `composer test:slow [N]`
 - Preferred narrow-first verification pattern: `start with the narrowest repo-local check and escalate only if needed`
 - Verification ladder: focused proof first -> affected layer tests second -> broader repository verification third -> build as a smoke check when relevant -> release-safety review only when risk warrants it.
 - Do not claim verification you did not run.
 - Treat build success as a smoke check unless the project defines otherwise.
+- Apply per-command timeouts and the anti-freeze discipline from `docs/ai/execution-protocol.md` before running any subprocess.
 
 ## Evidence Expectations
 
