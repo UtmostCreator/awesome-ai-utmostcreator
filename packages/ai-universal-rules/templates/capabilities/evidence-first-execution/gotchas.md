@@ -2,3 +2,6 @@
 - Do not update snapshots/fixtures only to silence failures.
 - Do not treat `git diff` inspection as verification proof.
 - Do not widen scope after discovering nearby issues.
+- Do not hardcode POSIX-style temp paths in PowerShell commands. `/tmp` does not exist on Windows; use `$env:TEMP`, `[System.IO.Path]::GetTempPath()`, or `Join-Path $env:TEMP <name>` instead. Symptom: `Out-File: Could not find a part of the path 'C:\tmp\...'`.
+- Do not invoke long subprocesses (PHPUnit, verify, repomix, advisor) without a per-command timeout from the agent shell. If a step exceeds ~25-30s with no output, treat it as suspect, kill it, and surface the offending step explicitly rather than waiting silently.
+- Do not buffer >4-64KiB of subprocess output through `proc_open` pipes on Windows. Use file descriptors (`['file', $path, 'w']`) or drain the pipe in a loop with chunked reads to avoid pipe-buffer deadlock.
