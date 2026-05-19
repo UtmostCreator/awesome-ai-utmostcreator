@@ -128,10 +128,12 @@ Minimum flow:
 - Primary verification command: `<PRIMARY_VERIFY_COMMAND>`
 - Primary build command: `<PRIMARY_BUILD_COMMAND>`
 - Primary test command: `<PRIMARY_TEST_COMMAND>`
+- Profile slow tests: `composer test:profile` then `composer test:slow [N]`
 - Preferred narrow-first verification pattern: `<NARROW_VERIFY_GUIDANCE>`
 - Verification ladder: focused proof first -> affected layer tests second -> broader repository verification third -> build as a smoke check when relevant -> release-safety review only when risk warrants it.
 - Do not claim verification you did not run.
 - Treat build success as a smoke check unless the project defines otherwise.
+- Apply per-command timeouts and the anti-freeze discipline from `docs/ai/execution-protocol.md` before running any subprocess.
 
 ## Evidence Expectations
 
