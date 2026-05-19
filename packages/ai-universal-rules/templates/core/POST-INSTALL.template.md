@@ -49,7 +49,7 @@ Find the line: `applyTo: '<FRONTEND_PATH_GLOB>'`
 
 Replace `<FRONTEND_PATH_GLOB>` with the glob that matches your frontend files, for example:
 
-```
+```yaml
 applyTo: 'resources/js/**,resources/ts/**,resources/vue/**'
 ```
 
@@ -61,7 +61,7 @@ Find the line: `applyTo: '<TEST_PATH_GLOB>'`
 
 Replace `<TEST_PATH_GLOB>` with the glob for your test files, for example:
 
-```
+```yaml
 applyTo: 'tests/**,src/**/*.test.ts'
 ```
 
@@ -72,24 +72,24 @@ applyTo: 'tests/**,src/**/*.test.ts'
 Run these validation commands from your project root. All must pass before proceeding:
 
 ```bash
-# Validate configuration consistency
-php tools/ai/validate-ai-config.php
+# Validate AI-facing docs and references
+bash scripts/ai/ai-doc-check.sh --check docs/ai .github AGENTS.md CLAUDE.md
 
-# Validate install surface (Copilot and OpenCode surfaces are correct)
-php tools/ai/validate-install-surface.php --strict
+# Run the installed verification smoke check
+AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 AI_VERIFY_SCOPE=ai bash scripts/ai/ai-verify.sh .
 ```
 
-Both must output `OK:` with no `ERROR:` lines. `WARN:` lines are informational only.
+Review any `FAIL:` lines before proceeding. Tool-missing warnings are informational only.
 
 ---
 
 ## Step 4 — Required: Verify Tool Prerequisites
 
 ```bash
-php tools/ai/ai.php preflight
+bash scripts/ai/ai-verify.sh .
 ```
 
-This checks that required tools (`php`, `git`, `jq`, `rg`) are available. Install any missing tools listed.
+This confirms the installed script surface is runnable in the target repo. If macOS does not have `gtimeout`, the script now falls back to unbounded execution with a warning.
 
 ---
 
@@ -99,15 +99,7 @@ This checks that required tools (`php`, `git`, `jq`, `rg`) are available. Instal
 
 ```bash
 # Choose one:
-php tools/ai/ai.php hooks install --driver native    # git core.hooksPath
-php tools/ai/ai.php hooks install --driver husky     # Husky
-php tools/ai/ai.php hooks install --driver lefthook  # Lefthook
-```
-
-### Run the project advisor (identifies gaps in your config)
-
-```bash
-php tools/ai/ai.php advisor --all
+lefthook install
 ```
 
 ### Generate context for AI consumption
@@ -123,10 +115,11 @@ bash scripts/ai/repomix-context-tree.sh analyze .
 Run this to confirm the full install is healthy:
 
 ```bash
-php tools/ai/validate-ai-config.php && php tools/ai/validate-install-surface.php --strict
+bash scripts/ai/ai-doc-check.sh --check docs/ai .github AGENTS.md CLAUDE.md && \
+AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 AI_VERIFY_SCOPE=ai bash scripts/ai/ai-verify.sh .
 ```
 
-Both must show `OK:` with no `ERROR:` lines.
+Both should complete without `FAIL:` lines.
 
 ---
 
@@ -135,10 +128,10 @@ Both must show `OK:` with no `ERROR:` lines.
 To list all remaining unresolved placeholders in your installed files:
 
 ```bash
-php tools/ai/ai.php placeholders --fail
+rg -n '<[A-Z0-9_]+>' AGENTS.md docs/ai .github .opencode
 ```
 
-This exits non-zero if any required placeholders remain. Run it in CI to enforce resolution.
+Any remaining matches should be reviewed and resolved before write-capable AI runs.
 
 ---
 

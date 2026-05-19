@@ -1,0 +1,21 @@
+{
+    "schema_version": 1,
+    "artifact": "next.json",
+    "generated_at": "2026-05-19T22:29:31+00:00",
+    "command": "php tools/ai/ai.php next",
+    "based_on_commit": "61a8b24",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "blocked",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "Run snapshot, freshness, budget, and workflow first.",
+    "data": {
+        "status": "blocked",
+        "reason": "missing required predecessor artifacts",
+        "missing_artifacts": [
+            "budget.json",
+            "workflow.json"
+        ]
+    }
+}

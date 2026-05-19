@@ -1,0 +1,4 @@
+STDOUT:
+
+STDERR:
+ERROR: missing metadata for top-level paths: .github, .vscode, configs, docs, reference, scripts

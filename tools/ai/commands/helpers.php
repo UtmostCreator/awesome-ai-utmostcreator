@@ -78,12 +78,54 @@ function aiEvaluateStaleEntries(string $root): array
     return $stale;
 }
 
+function aiResolveWritableTempDir(string $root): string
+{
+    foreach ([sys_get_temp_dir(), getenv('TMPDIR'), getenv('TEMP'), getenv('TMP')] as $candidate) {
+        if (is_string($candidate) && $candidate !== '' && is_dir($candidate) && is_writable($candidate)) {
+            return $candidate;
+        }
+    }
+    $fallback = $root . DIRECTORY_SEPARATOR . '.ai-logs';
+    if (!is_dir($fallback)) {
+        @mkdir($fallback, 0777, true);
+    }
+    return $fallback;
+}
+
 function aiRunCommand(string $root, string $command): array
 {
+    // Use temp files for stdout/stderr instead of pipes to avoid Windows
+    // proc_open pipe-buffer deadlocks when a child writes more than the
+    // OS pipe buffer (commonly ~4-64KiB) to either stream.
+    // stream_set_blocking() does not work on pipes from proc_open on Windows.
+    $tempDir = aiResolveWritableTempDir($root);
+    $stdoutFile = @tempnam($tempDir, 'ai_cmd_out_');
+    $stderrFile = @tempnam($tempDir, 'ai_cmd_err_');
+    if ($stdoutFile === false || $stderrFile === false) {
+        // Fallback: use a writable directory inside the repo so the run still works
+        // even when the system temp directory is not writable (e.g. tests that
+        // replace the entire child environment on Windows).
+        $fallbackDir = $root . DIRECTORY_SEPARATOR . '.ai-logs';
+        if (!is_dir($fallbackDir)) {
+            @mkdir($fallbackDir, 0777, true);
+        }
+        if ($stdoutFile === false) {
+            $stdoutFile = $fallbackDir . DIRECTORY_SEPARATOR . 'ai_cmd_out_' . uniqid('', true) . '.log';
+        }
+        if ($stderrFile === false) {
+            $stderrFile = $fallbackDir . DIRECTORY_SEPARATOR . 'ai_cmd_err_' . uniqid('', true) . '.log';
+        }
+        @touch($stdoutFile);
+        @touch($stderrFile);
+        if (!is_file($stdoutFile) || !is_file($stderrFile)) {
+            throw new RuntimeException('Failed to allocate temp files for command output');
+        }
+    }
+
     $descriptors = [
         0 => ['pipe', 'r'],
-        1 => ['pipe', 'w'],
-        2 => ['pipe', 'w'],
+        1 => ['file', $stdoutFile, 'w'],
+        2 => ['file', $stderrFile, 'w'],
     ];
 
     $env = [
@@ -100,15 +142,21 @@ function aiRunCommand(string $root, string $command): array
 
     $process = proc_open($command, $descriptors, $pipes, $root, $env);
     if (!is_resource($process)) {
+        @unlink($stdoutFile);
+        @unlink($stderrFile);
         throw new RuntimeException('Failed to run command: ' . $command);
     }
 
-    fclose($pipes[0]);
-    $stdout = (string) stream_get_contents($pipes[1]);
-    $stderr = (string) stream_get_contents($pipes[2]);
-    fclose($pipes[1]);
-    fclose($pipes[2]);
+    if (isset($pipes[0]) && is_resource($pipes[0])) {
+        fclose($pipes[0]);
+    }
     $exit = proc_close($process);
+
+    $stdout = (string) @file_get_contents($stdoutFile);
+    $stderr = (string) @file_get_contents($stderrFile);
+
+    @unlink($stdoutFile);
+    @unlink($stderrFile);
 
     return [
         'command' => $command,

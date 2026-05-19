@@ -1,0 +1,822 @@
+{
+    "schema_version": 1,
+    "artifact": "find.json",
+    "generated_at": "2026-05-19T22:29:35+00:00",
+    "command": "php tools/ai/ai.php find workflow",
+    "based_on_commit": "61a8b24",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "ok",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "Open highest scoring match first, then refine query if needed.",
+    "data": {
+        "query": "workflow",
+        "path_matches_count": 40,
+        "path_matches": [
+            {
+                "path": ".github/agents/workflow-auditor.agent.md",
+                "score": 100,
+                "match": "path"
+            },
+            {
+                "path": ".opencode/agents/workflow-auditor.md",
+                "score": 100,
+                "match": "path"
+            },
+            {
+                "path": "docs/ai/snippets/workflow.snippet.md",
+                "score": 100,
+                "match": "path"
+            },
+            {
+                "path": "docs/ai/workflow.md",
+                "score": 100,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/core/agents/workflow-auditor.md",
+                "score": 100,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/core/workflow.template.md",
+                "score": 100,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/snippets/workflow.snippet.md",
+                "score": 100,
+                "match": "path"
+            },
+            {
+                "path": ".github/instructions/ai-workflow.instructions.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": ".github/instructions/ci-workflows.instructions.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": ".github/workflows/export-ai-universal-rules-preview.yml",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": ".github/workflows/test-external-install.yml",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": ".github/workflows/validate-ai-surface.yml",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/docs/workflows/AGENT-HANDOFFS.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/docs/workflows/MONOREPO-STRATEGY.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/docs/workflows/RISK-AND-APPROVALS.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/docs/workflows/RUNTIME-OBSERVABILITY.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/docs/workflows/SYSTEM-WORKFLOW.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/docs/workflows/TASK-ENTRYPOINTS.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/github/workflows/export-ai-universal-rules-preview.yml",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/github/workflows/test-external-install.yml",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/github/workflows/validate-ai-surface.yml",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/instructions/ai-workflow.instructions.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/instructions/ci-workflows.instructions.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/architecture-plan.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/bug-regression.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/dependency-upgrade.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/docs-sync.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/evidence-first-execution.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/new-feature.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/plan-slice.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/project-context.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/regression-test.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/release-safety.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/repo-investigation.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/review-diff.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/review-search-tool.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/script-inventory.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/search-evidence.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "packages/ai-universal-rules/templates/workflows/verify-change.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
+                "path": "tools/ai/commands/install_workflow.php",
+                "score": 70,
+                "match": "path"
+            }
+        ],
+        "content_matches_count": 120,
+        "content_matches": [
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 78,
+                "preview": "\".github/workflows/validate-ai-surface.yml\": {"
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 80,
+                "preview": "\"source\": \"packages/ai-universal-rules/templates/github/workflows/validate-ai-surface.yml\","
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 87,
+                "preview": "\".github/workflows/test-external-install.yml\": {"
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 89,
+                "preview": "\"source\": \"packages/ai-universal-rules/templates/github/workflows/test-external-install.yml\","
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 96,
+                "preview": "\".github/workflows/export-ai-universal-rules-preview.yml\": {"
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 98,
+                "preview": "\"source\": \"packages/ai-universal-rules/templates/github/workflows/export-ai-universal-rules-preview.yml\","
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 233,
+                "preview": "\"source\": \"packages/ai-universal-rules/templates/workflows\","
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 242,
+                "preview": "\"source\": \"packages/ai-universal-rules/templates/workflows\","
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 303,
+                "preview": "\"docs/ai/workflow.md\": {"
+            },
+            {
+                "path": ".ai-install-manifest.json",
+                "line": 305,
+                "preview": "\"source\": \"packages/ai-universal-rules/templates/core/workflow.template.md\","
+            },
+            {
+                "path": ".github/agents/architect.agent.md",
+                "line": 47,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/architecture-locks.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/verification-matrix.md`, `docs/ai/generated-artifacts.md`, `docs/ai/ownership.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".github/agents/implementer.agent.md",
+                "line": 141,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/adapter-contract.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/scripts-reference.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".github/agents/refactorer.agent.md",
+                "line": 113,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/architecture-locks.md`, `docs/ai/generated-artifacts.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".github/agents/release-auditor.agent.md",
+                "line": 43,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/approval-boundaries.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/toolchain-requirements.md`, `docs/ai/verification-matrix.md`, `docs/ai/adapter-contract.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".github/agents/researcher.agent.md",
+                "line": 71,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/scripts-reference.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".github/agents/researcher.agent.md",
+                "line": 91,
+                "preview": "| Standard | related files or one workflow                                                             | relevant paths only           |"
+            },
+            {
+                "path": ".github/agents/reviewer.agent.md",
+                "line": 46,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/tool-policy.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".github/agents/workflow-auditor.agent.md",
+                "line": 3,
+                "preview": "description: 'Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims'"
+            },
+            {
+                "path": ".github/agents/workflow-auditor.agent.md",
+                "line": 24,
+                "preview": "Audit AI workflow files, instruction drift, repo context drift, and unsupported workflow claims. Do not edit."
+            },
+            {
+                "path": ".github/agents/workflow-auditor.agent.md",
+                "line": 28,
+                "preview": "Find drift, stale policy, unsupported claims, and contradictions in AI workflow assets so they can be corrected before they mislead agents or users."
+            },
+            {
+                "path": ".github/agents/workflow-auditor.agent.md",
+                "line": 46,
+                "preview": "Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/AI-GUARDRAILS.md`, `AGENTS.md`, `docs/ai/agents.md`, `docs/ai/adapter-contract.md`."
+            },
+            {
+                "path": ".github/agents/workflow-auditor.agent.md",
+                "line": 59,
+                "preview": "2. No placeholder leaks remain in live workflow files."
+            },
+            {
+                "path": ".github/agents/workflow-auditor.agent.md",
+                "line": 61,
+                "preview": "4. No unsupported workflow claims (features, tools, hooks not present)."
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 10,
+                "preview": "- Summary: `AI workflow starter for app-configs`"
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 30,
+                "preview": "- `docs/ai/workflow.md`"
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 59,
+                "preview": "- `.github/instructions/ai-workflow.instructions.md`"
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 67,
+                "preview": "However, for **verification, validation, workflow commands, and git forensics**, you MUST use `run_in_terminal` with the repository shell scripts listed in `.github/instructions/copilot-script-enforcement.instructions.md`."
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 97,
+                "preview": "- Prefer reusable capability folders for workflow-specific guidance when the repository provides them."
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 115,
+                "preview": "Default workflow:"
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 136,
+                "preview": "- Treat prototype paths as exploratory only; promoted prototype code must pass the normal workflow before merge."
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 152,
+                "preview": "- When a workflow asset has its own `gotchas` section, follow the narrower guidance there."
+            },
+            {
+                "path": ".github/copilot-instructions.md",
+                "line": 165,
+                "preview": "- Do not assume custom-agent properties, handoffs, or advanced workflows behave the same on every Copilot surface."
+            },
+            {
+                "path": ".github/instructions/ai-file-standards.instructions.md",
+                "line": 3,
+                "preview": "description: 'AI workflow file roles, line budgets, duplication rules, and adapter boundaries'"
+            },
+            {
+                "path": ".github/instructions/ai-file-standards.instructions.md",
+                "line": 8,
+                "preview": "- Follow `docs/ai/ai-file-standards.md` before adding or expanding AI workflow files."
+            },
+            {
+                "path": ".github/instructions/ai-file-standards.instructions.md",
+                "line": 11,
+                "preview": "- Keep provider-specific syntax in provider adapters; keep portable workflow logic in `docs/ai/capabilities/`."
+            },
+            {
+                "path": ".github/instructions/ai-workflow.instructions.md",
+                "line": 3,
+                "preview": "description: 'Rules for AI workflow docs, Copilot adapter files, and stronger VS Code enforcement'"
+            },
+            {
+                "path": ".github/instructions/ai-workflow.instructions.md",
+                "line": 8,
+                "preview": "- Keep canonical workflow guidance in `docs/ai/` and adapter-specific guidance in runtime files."
+            },
+            {
+                "path": ".github/instructions/ai-workflow.instructions.md",
+                "line": 9,
+                "preview": "- Do not let `.github/` disagree with `AGENTS.md`, `CLAUDE.md`, `docs/ai/project-context.md`, or `docs/ai/workflow.md`."
+            },
+            {
+                "path": ".github/instructions/architecture.instructions.md",
+                "line": 24,
+                "preview": "- `docs/ai/workflow.md`"
+            },
+            {
+                "path": ".github/instructions/architecture.instructions.md",
+                "line": 53,
+                "preview": "- CI or release workflow changes"
+            },
+            {
+                "path": ".github/instructions/ci-workflows.instructions.md",
+                "line": 2,
+                "preview": "applyTo: \".github/workflows/**/*.yml,.github/workflows/**/*.yaml\""
+            },
+            {
+                "path": ".github/instructions/ci-workflows.instructions.md",
+                "line": 3,
+                "preview": "description: \"CI workflow safety, permissions, and trigger-scope rules\""
+            },
+            {
+                "path": ".github/instructions/ci-workflows.instructions.md",
+                "line": 8,
+                "preview": "- Treat workflow edits as high risk."
+            },
+            {
+                "path": ".github/instructions/copilot-script-enforcement.instructions.md",
+                "line": 36,
+                "preview": "### Workflow Commands (MANDATORY for AI workflow operations)"
+            },
+            {
+                "path": ".github/instructions/targets.instructions.md",
+                "line": 25,
+                "preview": "- CI workflow"
+            },
+            {
+                "path": ".github/instructions/tools.instructions.md",
+                "line": 12,
+                "preview": "- **Copilot VS Code**: Has built-in `grep_search`, `read_file`, `file_search`, `semantic_search`, `list_dir`. Use these for search/read. Use shell scripts for verification, validation, workflow, and git forensics."
+            },
+            {
+                "path": ".github/prompts/architecture-plan.prompt.md",
+                "line": 39,
+                "preview": "- do not implement as part of this workflow"
+            },
+            {
+                "path": ".github/prompts/bug-regression.prompt.md",
+                "line": 9,
+                "preview": "I drive a minimal bug-fix workflow: reproduce, localize, fix narrowly, verify, and report evidence."
+            },
+            {
+                "path": ".github/prompts/docs-sync.prompt.md",
+                "line": 3,
+                "preview": "description: Use when changed behavior or workflow needs matching documentation updates without broad implementation planning"
+            },
+            {
+                "path": ".github/prompts/docs-sync.prompt.md",
+                "line": 13,
+                "preview": "- after a behavior or workflow change needs matching docs"
+            },
+            {
+                "path": ".github/prompts/docs-sync.prompt.md",
+                "line": 24,
+                "preview": "1. identify the changed behavior or workflow"
+            },
+            {
+                "path": ".github/prompts/plan-slice.prompt.md",
+                "line": 37,
+                "preview": "- `docs/ai/workflow.md`"
+            },
+            {
+                "path": ".github/prompts/plan-slice.prompt.md",
+                "line": 50,
+                "preview": "- do not implement as part of this workflow unless explicitly asked"
+            },
+            {
+                "path": ".github/prompts/project-context.prompt.md",
+                "line": 9,
+                "preview": "I provide durable repository context for `app-configs` and point to the support files that other workflows should read next."
+            },
+            {
+                "path": ".github/prompts/project-context.prompt.md",
+                "line": 16,
+                "preview": "- when another workflow needs repository facts first"
+            },
+            {
+                "path": ".github/prompts/project-context.prompt.md",
+                "line": 45,
+                "preview": "- Summary: `AI workflow starter for app-configs`"
+            },
+            {
+                "path": ".github/prompts/project-context.prompt.md",
+                "line": 71,
+                "preview": "- Before changing code, config, docs, or workflow logic, search for similar existing patterns in the touched area and nearby owners and report the closest overlap as a percentage."
+            },
+            {
+                "path": ".github/prompts/repo-investigation.prompt.md",
+                "line": 3,
+                "preview": "description: Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence."
+            },
+            {
+                "path": ".github/prompts/repo-investigation.prompt.md",
+                "line": 9,
+                "preview": "I run a read-first investigation workflow, gathering exact evidence before proposing any change."
+            },
+            {
+                "path": ".github/skills/architecture-plan/SKILL.md",
+                "line": 39,
+                "preview": "- do not implement as part of this workflow"
+            },
+            {
+                "path": ".github/skills/bug-regression/SKILL.md",
+                "line": 9,
+                "preview": "I drive a minimal bug-fix workflow: reproduce, localize, fix narrowly, verify, and report evidence."
+            },
+            {
+                "path": ".github/skills/docs-sync/SKILL.md",
+                "line": 3,
+                "preview": "description: Use when changed behavior or workflow needs matching documentation updates without broad implementation planning"
+            },
+            {
+                "path": ".github/skills/docs-sync/SKILL.md",
+                "line": 13,
+                "preview": "- after a behavior or workflow change needs matching docs"
+            },
+            {
+                "path": ".github/skills/docs-sync/SKILL.md",
+                "line": 24,
+                "preview": "1. identify the changed behavior or workflow"
+            },
+            {
+                "path": ".github/skills/plan-slice/SKILL.md",
+                "line": 37,
+                "preview": "- `docs/ai/workflow.md`"
+            },
+            {
+                "path": ".github/skills/plan-slice/SKILL.md",
+                "line": 50,
+                "preview": "- do not implement as part of this workflow unless explicitly asked"
+            },
+            {
+                "path": ".github/skills/project-context/SKILL.md",
+                "line": 9,
+                "preview": "I provide durable repository context for `app-configs` and point to the support files that other workflows should read next."
+            },
+            {
+                "path": ".github/skills/project-context/SKILL.md",
+                "line": 16,
+                "preview": "- when another workflow needs repository facts first"
+            },
+            {
+                "path": ".github/skills/project-context/SKILL.md",
+                "line": 45,
+                "preview": "- Summary: `AI workflow starter for app-configs`"
+            },
+            {
+                "path": ".github/skills/project-context/SKILL.md",
+                "line": 71,
+                "preview": "- Before changing code, config, docs, or workflow logic, search for similar existing patterns in the touched area and nearby owners and report the closest overlap as a percentage."
+            },
+            {
+                "path": ".github/skills/repo-investigation/SKILL.md",
+                "line": 3,
+                "preview": "description: Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence."
+            },
+            {
+                "path": ".github/skills/repo-investigation/SKILL.md",
+                "line": 9,
+                "preview": "I run a read-first investigation workflow, gathering exact evidence before proposing any change."
+            },
+            {
+                "path": ".github/workflows/export-ai-universal-rules-preview.yml",
+                "line": 4,
+                "preview": "workflow_dispatch:"
+            },
+            {
+                "path": ".github/workflows/validate-ai-surface.yml",
+                "line": 22,
+                "preview": "- name: Validate root AI workflow files"
+            },
+            {
+                "path": ".github/workflows/validate-ai-surface.yml",
+                "line": 55,
+                "preview": "- name: Lint GitHub Actions workflows"
+            },
+            {
+                "path": ".opencode/agents-optional/infra-auditor.md",
+                "line": 21,
+                "preview": "- verification workflow changes"
+            },
+            {
+                "path": ".opencode/agents-optional/infra-auditor.md",
+                "line": 25,
+                "preview": "Do not use this role as a substitute for implementation, bug fixing, or canonical release workflow definitions."
+            },
+            {
+                "path": ".opencode/agents-optional/infra-auditor.md",
+                "line": 27,
+                "preview": "Defer to project context for repository facts and to `release-safety` or `dependency-upgrade` for reusable workflow guidance."
+            },
+            {
+                "path": ".opencode/agents-optional/ui-builder.md",
+                "line": 22,
+                "preview": "Defer to project context for repository facts and to narrower UI or verification workflows when available."
+            },
+            {
+                "path": ".opencode/agents/architect.md",
+                "line": 78,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/architecture-locks.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/verification-matrix.md`, `docs/ai/generated-artifacts.md`, `docs/ai/ownership.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".opencode/agents/bootstrapper.md",
+                "line": 115,
+                "preview": "Install or re-install the AI workflow kit safely into a target project. Always prefer the canonical install sequence. Prove the final state with the strongest available validation the environment supports."
+            },
+            {
+                "path": ".opencode/agents/implementer.md",
+                "line": 159,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/adapter-contract.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/scripts-reference.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".opencode/agents/refactorer.md",
+                "line": 125,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/architecture-locks.md`, `docs/ai/generated-artifacts.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".opencode/agents/release-auditor.md",
+                "line": 77,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/approval-boundaries.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/toolchain-requirements.md`, `docs/ai/verification-matrix.md`, `docs/ai/adapter-contract.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".opencode/agents/researcher.md",
+                "line": 124,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/scripts-reference.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".opencode/agents/researcher.md",
+                "line": 144,
+                "preview": "| Standard | related files or one workflow                                                             | relevant paths only           |"
+            },
+            {
+                "path": ".opencode/agents/reviewer.md",
+                "line": 88,
+                "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/tool-policy.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
+            },
+            {
+                "path": ".opencode/agents/workflow-auditor.md",
+                "line": 2,
+                "preview": "id: workflow-auditor"
+            },
+            {
+                "path": ".opencode/agents/workflow-auditor.md",
+                "line": 3,
+                "preview": "description: Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims"
+            },
+            {
+                "path": ".opencode/agents/workflow-auditor.md",
+                "line": 42,
+                "preview": "Audit AI workflow files, instruction drift, repo context drift, and unsupported workflow claims. Do not edit."
+            },
+            {
+                "path": ".opencode/agents/workflow-auditor.md",
+                "line": 46,
+                "preview": "Find drift, stale policy, unsupported claims, and contradictions in AI workflow assets so they can be corrected before they mislead agents or users."
+            },
+            {
+                "path": ".opencode/agents/workflow-auditor.md",
+                "line": 64,
+                "preview": "Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/AI-GUARDRAILS.md`, `AGENTS.md`, `docs/ai/agents.md`, `docs/ai/adapter-contract.md`."
+            },
+            {
+                "path": ".opencode/agents/workflow-auditor.md",
+                "line": 77,
+                "preview": "2. No placeholder leaks remain in live workflow files."
+            },
+            {
+                "path": ".opencode/agents/workflow-auditor.md",
+                "line": 79,
+                "preview": "4. No unsupported workflow claims (features, tools, hooks not present)."
+            },
+            {
+                "path": ".opencode/commands/architecture-plan.md",
+                "line": 39,
+                "preview": "- do not implement as part of this workflow"
+            },
+            {
+                "path": ".opencode/commands/bug-regression.md",
+                "line": 9,
+                "preview": "I drive a minimal bug-fix workflow: reproduce, localize, fix narrowly, verify, and report evidence."
+            },
+            {
+                "path": ".opencode/commands/docs-sync.md",
+                "line": 3,
+                "preview": "description: Use when changed behavior or workflow needs matching documentation updates without broad implementation planning"
+            },
+            {
+                "path": ".opencode/commands/docs-sync.md",
+                "line": 13,
+                "preview": "- after a behavior or workflow change needs matching docs"
+            },
+            {
+                "path": ".opencode/commands/docs-sync.md",
+                "line": 24,
+                "preview": "1. identify the changed behavior or workflow"
+            },
+            {
+                "path": ".opencode/commands/plan-slice.md",
+                "line": 37,
+                "preview": "- `docs/ai/workflow.md`"
+            },
+            {
+                "path": ".opencode/commands/plan-slice.md",
+                "line": 50,
+                "preview": "- do not implement as part of this workflow unless explicitly asked"
+            },
+            {
+                "path": ".opencode/commands/project-context.md",
+                "line": 9,
+                "preview": "I provide durable repository context for `app-configs` and point to the support files that other workflows should read next."
+            },
+            {
+                "path": ".opencode/commands/project-context.md",
+                "line": 16,
+                "preview": "- when another workflow needs repository facts first"
+            },
+            {
+                "path": ".opencode/commands/project-context.md",
+                "line": 45,
+                "preview": "- Summary: `AI workflow starter for app-configs`"
+            },
+            {
+                "path": ".opencode/commands/project-context.md",
+                "line": 71,
+                "preview": "- Before changing code, config, docs, or workflow logic, search for similar existing patterns in the touched area and nearby owners and report the closest overlap as a percentage."
+            },
+            {
+                "path": ".opencode/commands/repo-investigation.md",
+                "line": 3,
+                "preview": "description: Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence."
+            },
+            {
+                "path": ".opencode/commands/repo-investigation.md",
+                "line": 9,
+                "preview": "I run a read-first investigation workflow, gathering exact evidence before proposing any change."
+            },
+            {
+                "path": ".opencode/commands/verify.md",
+                "line": 2,
+                "preview": "description: Compatibility command that runs the verification workflow; prefer the verify-change skill for reusable guidance"
+            },
+            {
+                "path": ".opencode/opencode.json",
+                "line": 28,
+                "preview": "\".github/workflows/**\": \"deny\","
+            },
+            {
+                "path": ".opencode/skills/architecture-plan/SKILL.md",
+                "line": 39,
+                "preview": "- do not implement as part of this workflow"
+            },
+            {
+                "path": ".opencode/skills/bug-regression/SKILL.md",
+                "line": 9,
+                "preview": "I drive a minimal bug-fix workflow: reproduce, localize, fix narrowly, verify, and report evidence."
+            },
+            {
+                "path": ".opencode/skills/docs-sync/SKILL.md",
+                "line": 3,
+                "preview": "description: Use when changed behavior or workflow needs matching documentation updates without broad implementation planning"
+            },
+            {
+                "path": ".opencode/skills/docs-sync/SKILL.md",
+                "line": 13,
+                "preview": "- after a behavior or workflow change needs matching docs"
+            },
+            {
+                "path": ".opencode/skills/docs-sync/SKILL.md",
+                "line": 24,
+                "preview": "1. identify the changed behavior or workflow"
+            },
+            {
+                "path": ".opencode/skills/plan-slice/SKILL.md",
+                "line": 37,
+                "preview": "- `docs/ai/workflow.md`"
+            },
+            {
+                "path": ".opencode/skills/plan-slice/SKILL.md",
+                "line": 50,
+                "preview": "- do not implement as part of this workflow unless explicitly asked"
+            },
+            {
+                "path": ".opencode/skills/project-context/SKILL.md",
+                "line": 9,
+                "preview": "I provide durable repository context for `app-configs` and point to the support files that other workflows should read next."
+            },
+            {
+                "path": ".opencode/skills/project-context/SKILL.md",
+                "line": 16,
+                "preview": "- when another workflow needs repository facts first"
+            },
+            {
+                "path": ".opencode/skills/project-context/SKILL.md",
+                "line": 45,
+                "preview": "- Summary: `AI workflow starter for app-configs`"
+            },
+            {
+                "path": ".opencode/skills/project-context/SKILL.md",
+                "line": 71,
+                "preview": "- Before changing code, config, docs, or workflow logic, search for similar existing patterns in the touched area and nearby owners and report the closest overlap as a percentage."
+            }
+        ]
+    }
+}

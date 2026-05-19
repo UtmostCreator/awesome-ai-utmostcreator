@@ -7,7 +7,7 @@ COPILOT_LOG_DIR="${COPILOT_LOG_DIR:-${AI_LOG_DIR:-.ai-logs}}"
 COPILOT_CONTEXT_DIR="${COPILOT_CONTEXT_DIR:-.repomix-context}"
 COPILOT_SESSION_DIR="${COPILOT_SESSION_DIR:-${COPILOT_LOG_DIR}/sessions}"
 COPILOT_SNAPSHOT_DIR="${COPILOT_SNAPSHOT_DIR:-${COPILOT_LOG_DIR}/snapshots}"
-COPILOT_EVENT_LOG="${COPILOT_EVENT_LOG:-${COPILOT_LOG_DIR}/tool-usage.jsonl}"
+COPILOT_EVENT_LOG="${COPILOT_EVENT_LOG:-${AI_EVENT_LOG:-${COPILOT_LOG_DIR}/tool-usage.jsonl}}"
 AI_SESSION_GENERATED_DIR="${AI_SESSION_GENERATED_DIR:-docs/ai/generated/sessions}"
 
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 2 ]]; then
@@ -28,21 +28,26 @@ fi
 
 agent_session_init() {
     local name="${1:-$(basename "$0" .sh)}"
+    local session_base="${AI_SESSION_DIR:-$COPILOT_SESSION_DIR}"
+    local log_dir="${AI_LOG_DIR:-$COPILOT_LOG_DIR}"
+    local snapshot_dir="${AI_SNAPSHOT_DIR:-$COPILOT_SNAPSHOT_DIR}"
     SESSION_ID="${SESSION_ID:-${name}-$(date +%Y%m%d-%H%M%S)-$$}"
     TRACE_ID="${TRACE_ID:-trc-${SESSION_ID}}"
     TASK_ID="${TASK_ID:-tsk-${SESSION_ID}}"
-    SESSION_DIR="${COPILOT_SESSION_DIR}/${SESSION_ID}"
+    SESSION_DIR="${session_base}/${SESSION_ID}"
     SESSION_LOG="${SESSION_DIR}/session.jsonl"
-    mkdir -p "$SESSION_DIR" "$COPILOT_LOG_DIR" "$COPILOT_SNAPSHOT_DIR"
+    mkdir -p "$SESSION_DIR" "$log_dir" "$snapshot_dir"
     log_json "session.start" '{}' || true
 }
 
 append_log_entry() {
     local entry="${1:?entry required}"
     local repo_root
+    local log_dir="${AI_LOG_DIR:-$COPILOT_LOG_DIR}"
+    local event_log="${AI_EVENT_LOG:-$COPILOT_EVENT_LOG}"
 
-    mkdir -p "$COPILOT_LOG_DIR"
-    printf '%s\n' "$entry" >>"$COPILOT_EVENT_LOG"
+    mkdir -p "$log_dir"
+    printf '%s\n' "$entry" >>"$event_log"
 
     if [[ -n "${SESSION_LOG:-}" ]]; then
         printf '%s\n' "$entry" >>"$SESSION_LOG"
@@ -59,6 +64,7 @@ append_log_entry() {
 log_json() {
     local event="${1:-event}"
     local payload="${2:-{}}"
+    local caller="${3:-$(basename "${BASH_SOURCE[1]:-unknown}" .sh)}"
     local payload_json
     local entry
 
@@ -67,15 +73,15 @@ log_json() {
     fi
 
         entry="$(jq -cn \
-                --arg event_version "1.1" \
+                --arg event_version "2.0" \
                 --arg event_type "$event" \
                 --arg trace_id "${TRACE_ID:-unknown}" \
                 --arg session_id "${SESSION_ID:-unknown}" \
                 --arg task_id "${TASK_ID:-unknown}" \
                 --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-                --arg actor_id "${ACTOR_ID:-$(basename "${BASH_SOURCE[1]:-unknown}" .sh)}" \
+                --arg actor_id "${ACTOR_ID:-$caller}" \
                 --arg delegated_by "${DELEGATED_BY:-}" \
-                --arg tool_name "$(basename "${BASH_SOURCE[1]:-unknown}")" \
+                --arg tool_name "$caller" \
                 --arg repo_root "$(git_root 2>/dev/null || pwd)" \
                 --arg git_branch "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown')" \
                 --arg git_commit "$(git rev-parse HEAD 2>/dev/null || printf 'unknown')" \
@@ -142,6 +148,248 @@ log_ok() { printf '%b[OK]%b    %s\n' "$_C_GREEN" "$_C_RESET" "$*" >&2; }
 log_warn() { printf '%b[WARN]%b  %s\n' "$_C_YELLOW" "$_C_RESET" "$*" >&2; }
 log_error() { printf '%b[ERROR]%b %s\n' "$_C_RED" "$_C_RESET" "$*" >&2; }
 
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+require_bash_version() {
+    local min="${1:-4}"
+    ((BASH_VERSINFO[0] >= min)) || die "bash $min+ required"
+}
+
+json_available() {
+    command_exists jq
+}
+
+find_timeout_bin() {
+    if command_exists gtimeout; then
+        printf 'gtimeout\n'
+    elif command_exists timeout; then
+        printf 'timeout\n'
+    else
+        printf '\n'
+    fi
+}
+
+find_fd_bin() {
+    if command_exists fd; then
+        printf 'fd\n'
+    elif command_exists fdfind; then
+        printf 'fdfind\n'
+    else
+        printf '\n'
+    fi
+}
+
+now_ms() {
+    local s
+    s="$(date +%s)"
+    printf '%s000\n' "$s"
+}
+
+redact_sensitive_text() {
+    local in
+    in="$(cat)"
+    in="$(printf '%s' "$in" | sed -E 's/([Tt]oken|[Pp]assword|[Aa]pi[_-]?[Kk]ey|[Ss]ecret)[[:space:]]*=[[:space:]]*[^[:space:]]+/\1=REDACTED/g')"
+    in="$(printf '%s' "$in" | sed -E 's/(Authorization:[[:space:]]*Bearer)[[:space:]]+[^[:space:]]+/\1 REDACTED/g')"
+    in="$(printf '%s' "$in" | sed -E 's/[A-Za-z0-9_\/+=-]{48,}/REDACTED_LONG_SECRET/g')"
+    printf '%s' "$in"
+}
+
+redact_json_payload() {
+    jq -c 'walk(if type == "object" then with_entries(if (.key|ascii_downcase|test("token|secret|password|api[_-]?key|authorization")) then .value = "REDACTED" else . end) else . end)' 2>/dev/null || jq -cn --arg raw "$(cat)" '{raw:$raw}'
+}
+
+json_compact_or_raw() {
+    local payload="${1:-}"
+    jq -c . <<<"$payload" 2>/dev/null || jq -cn --arg raw "$payload" '{raw:$raw}'
+}
+
+emit_envelope() {
+    local status="${1:-ok}" tool="${2:-unknown}" content="${3:-{}}" warnings="${4:-[]}" errors="${5:-[]}" elapsed="${6:-0}" truncated="${7:-false}"
+    local parsed_content parsed_warnings parsed_errors parsed_truncated
+    parsed_content="$(json_compact_or_raw "$content")"
+    parsed_warnings="$(jq -c . <<<"$warnings" 2>/dev/null || printf '[]')"
+    parsed_errors="$(jq -c . <<<"$errors" 2>/dev/null || printf '[]')"
+    parsed_truncated="$(jq -c . <<<"$truncated" 2>/dev/null || printf 'false')"
+    jq -cn \
+      --arg schema "1" \
+      --arg status "$status" \
+      --arg tool "$tool" \
+      --arg content_raw "$parsed_content" \
+      --arg warnings_raw "$parsed_warnings" \
+      --arg errors_raw "$parsed_errors" \
+      --arg elapsed_raw "$elapsed" \
+      --arg truncated_raw "$parsed_truncated" \
+      '{
+        schema: ($schema|tonumber),
+        status: $status,
+        tool: $tool,
+        content: (try ($content_raw|fromjson) catch {raw:$content_raw}),
+        warnings: (try ($warnings_raw|fromjson) catch []),
+        errors: (try ($errors_raw|fromjson) catch []),
+        meta: {
+          elapsed_ms: (try ($elapsed_raw|tonumber) catch 0),
+          truncated: (try ($truncated_raw|fromjson) catch false)
+        }
+      }'
+}
+
+emit_blocked_envelope() {
+    local reason="${1:-blocked}"
+    local errors_json
+    errors_json="$(jq -cn --arg reason "$reason" '[$reason]')"
+    emit_envelope "unsafe_blocked" "unknown" '{}' '[]' "$errors_json" 0 false
+}
+
+rotate_log_if_needed_locked() {
+    local file="${1:?file required}"
+    local max="${AI_LOG_MAX_BYTES:-1048576}"
+    [[ -f "$file" ]] || return 0
+    local size
+    size="$(wc -c <"$file" | tr -d ' ')"
+    if ((size > max)); then
+        mv "$file" "$file.$(date +%s).bak"
+    fi
+}
+
+append_jsonl_safe() {
+    local file="${1:?file required}" line="${2:?line required}"
+    mkdir -p "$(dirname "$file")"
+    printf '%s\n' "$line" >>"$file"
+}
+
+repo_root() {
+    git_root
+}
+
+classify_command() {
+    local tool="${1:-}" sub="${2:-}"
+    case "$tool" in
+        rg|fd|fdfind|cat|bat|sed|awk|jq|yq) echo read ;;
+        rm|rmdir|mv|truncate|dd) echo destructive ;;
+        curl|wget|ssh|scp|rsync) echo network ;;
+        brew|apt|apt-get|winget|choco) echo install ;;
+        npm)
+            case "$sub" in
+                install|add|update|remove|upgrade|require|global) echo install ;;
+                test|run|exec|lint|validate|check) echo write ;;
+                *) echo unknown ;;
+            esac ;;
+        git)
+            case "$sub" in
+                status|diff|show|log|grep|rev-parse|ls-files|branch) echo read ;;
+                reset|clean|checkout|restore|push|pull|commit) echo destructive ;;
+                *) echo unknown ;;
+            esac ;;
+        php|node|python|python3|bash|sh|zsh|make|just) echo write ;;
+        *) echo unknown ;;
+    esac
+}
+
+approval_env_for_category() {
+    case "${1:-}" in
+        destructive) echo AI_APPROVE_DESTRUCTIVE ;;
+        network) echo AI_APPROVE_NETWORK ;;
+        install) echo AI_APPROVE_INSTALL ;;
+        unknown) echo AI_APPROVE_UNKNOWN_COMMAND ;;
+        *) echo "" ;;
+    esac
+}
+
+command_basename() {
+    [[ -n "${1:-}" ]] || { echo ""; return 0; }
+    basename "$1"
+}
+
+realpath_safe() {
+    local p="${1:?path required}"
+    if command_exists realpath; then
+        realpath "$p"
+    else
+        printf '%s/%s\n' "$(cd "$(dirname "$p")" && pwd)" "$(basename "$p")"
+    fi
+}
+
+assert_inside_repo() {
+    local p="$(realpath_safe "${1:?path required}")"
+    local root="$(repo_root)"
+    [[ "$p" == "$root" || "$p" == "$root"/* ]] || die "path outside repo: $p"
+}
+
+repo_relative_path() {
+    local p="$(realpath_safe "${1:?path required}")"
+    local root="$(repo_root)"
+    if [[ "$p" == "$root" ]]; then
+        echo "."
+    else
+        echo "${p#"$root"/}"
+    fi
+}
+
+assert_relative_safe_path() {
+    local p="${1:-}"
+    [[ -n "$p" ]] || die "empty path"
+    [[ "$p" != /* ]] || die "absolute path not allowed"
+    [[ "$p" != *".."* ]] || die "path traversal not allowed"
+    [[ "$p" != ".git"* ]] || die ".git path not allowed"
+}
+
+path_matches_protected_pattern() {
+    local p="${1,,}"
+    case "$p" in
+        .env|.env.*|*.key|*.pem|*.crt|*.p12|*.pfx|*secret*|agents.md|.github/*|docs/ai/generated/*) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
+estimate_tokens_string() {
+    local s="${1-}"
+    local n=${#s}
+    echo $(((n + 3) / 4))
+}
+
+truncate_file_preview() {
+    local file="${1:?file required}" max="${2:-4096}"
+    if command_exists head; then
+        head -c "$max" "$file"
+    else
+        cat "$file"
+    fi
+}
+
+require_approval() {
+    local action="${1:-action}" env_var="${2:-}"
+    [[ -n "$env_var" ]] || return 0
+    if [[ "${!env_var:-0}" != "1" ]]; then
+        log_error "approval required for $action ($env_var=1)"
+        exit 2
+    fi
+}
+
+enforce_command_policy() {
+    local action="${1:-cmd}"; shift || true
+    local tool="${1:-}"
+    local sub="${2:-}"
+    local category
+    category="$(classify_command "$tool" "$sub")"
+    case "$category" in
+        read) return 0 ;;
+        destructive|network|install|unknown)
+            require_approval "$action" "$(approval_env_for_category "$category")"
+            ;;
+        write)
+            [[ -n "${AI_TASK_SCOPE:-}" ]] || { log_error "AI_TASK_SCOPE required for write commands"; exit 2; }
+            ;;
+    esac
+}
+
+wait_for_capture_flag() {
+    local f="${1:?flag required}"
+    [[ -s "$f" ]] && return 0
+    printf 'true' >"$f"
+}
+
 die() {
     log_error "$*"
     log_json "error" "$(jq -cn --arg msg "$*" '{msg:$msg}')" || true
@@ -187,6 +435,9 @@ run_with_timeout() {
     if [[ -n "$timeout_bin" ]]; then
         "$timeout_bin" "$seconds" "$@"
     else
+        if [[ "${AI_ALLOW_NO_TIMEOUT:-1}" == "0" ]]; then
+            return 124
+        fi
         "$@"
     fi
 }

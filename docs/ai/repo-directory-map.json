@@ -1,0 +1,123 @@
+{
+  "schema_version": 1,
+  "directories": [
+    {
+      "path": ".",
+      "purpose": "Repository root configuration and entrypoint files.",
+      "designed_for": "Project-wide metadata and installer/runtime entry files.",
+      "install_guide": "README.md",
+      "install_script": "install-ai-kit.sh",
+      "ai_entrypoint": "AGENTS.md",
+      "notes": "Root-level tracked files are intentionally grouped under '.'."
+    },
+    {
+      "path": ".github",
+      "purpose": "GitHub Copilot runtime adapters: instructions, agents, prompts, skills, workflows, hooks.",
+      "designed_for": "GitHub Copilot users and CI workflow integration.",
+      "install_guide": "README.md",
+      "install_script": "tools/ai/install-copilot-kit.sh",
+      "ai_entrypoint": ".github/copilot-instructions.md",
+      "notes": "Canonical installed Copilot surface for this repo."
+    },
+    {
+      "path": ".opencode",
+      "purpose": "OpenCode runtime adapters including agents, commands, and skills.",
+      "designed_for": "OpenCode users and local agent routing.",
+      "install_guide": "README.md",
+      "install_script": "tools/ai/install-opencode-kit.sh",
+      "ai_entrypoint": ".opencode/opencode.json",
+      "notes": "Canonical installed OpenCode surface for this repo."
+    },
+    {
+      "path": ".schemas",
+      "purpose": "JSON schemas used by AI tooling and artifact validation.",
+      "designed_for": "Tooling validation and contract enforcement.",
+      "install_guide": "docs/ai/validation.md",
+      "install_script": "none",
+      "ai_entrypoint": ".schemas/ai-catalog.schema.json",
+      "notes": "Schema set for generated artifacts and policy documents."
+    },
+    {
+      "path": ".vscode",
+      "purpose": "VS Code workspace settings used by repository contributors.",
+      "designed_for": "Local editor configuration for consistent contributor experience.",
+      "install_guide": "README.md",
+      "install_script": "none",
+      "ai_entrypoint": ".vscode/settings.json",
+      "notes": "Editor configuration; not part of installed AI surface."
+    },
+    {
+      "path": "configs",
+      "purpose": "Shared shell and runtime configuration snippets used by contributors.",
+      "designed_for": "Local developer shell setup and reusable runtime config.",
+      "install_guide": "README.md",
+      "install_script": "none",
+      "ai_entrypoint": "configs/shell/.zshrc",
+      "notes": "Optional configuration referenced by contributor environments."
+    },
+    {
+      "path": "docs",
+      "purpose": "Canonical AI workflow documentation, capabilities, and generated artifacts.",
+      "designed_for": "Humans and agents reading the source-of-truth for policies and workflows.",
+      "install_guide": "docs/ai/project-context.md",
+      "install_script": "none",
+      "ai_entrypoint": "docs/ai/project-context.md",
+      "notes": "Includes capabilities, generated artifacts, and architecture notes."
+    },
+    {
+      "path": "packages",
+      "purpose": "Canonical ai-universal-rules package source and templates.",
+      "designed_for": "Template generation and install surfaces.",
+      "install_guide": "packages/ai-universal-rules/README.md",
+      "install_script": "tools/ai/export-ai-universal-rules.php",
+      "ai_entrypoint": "packages/ai-universal-rules/catalog.json",
+      "notes": "Source-of-truth templates and manifests live here."
+    },
+    {
+      "path": "policies",
+      "purpose": "Policy baselines and runtime policy descriptors.",
+      "designed_for": "Governance and policy validation workflows.",
+      "install_guide": "policies/README.md",
+      "install_script": "none",
+      "ai_entrypoint": "policies/copilot/policy.yaml",
+      "notes": "Policy files consumed by checks and adapters."
+    },
+    {
+      "path": "reference",
+      "purpose": "Reference materials and example sources for documentation and tests.",
+      "designed_for": "Authors of docs and tests needing canonical reference examples.",
+      "install_guide": "reference/README.md",
+      "install_script": "none",
+      "ai_entrypoint": "reference/README.md",
+      "notes": "Read-only reference content; not installed into target projects."
+    },
+    {
+      "path": "scripts",
+      "purpose": "Operational shell scripts used by AI workflow and contributors.",
+      "designed_for": "Repository automation, evidence collection, and discovery wrappers.",
+      "install_guide": "docs/ai/scripts-reference.md",
+      "install_script": "none",
+      "ai_entrypoint": "scripts/ai/ai-search.sh",
+      "notes": "Includes scripts/ai/* canonical AI tooling and scripts/doctor.sh."
+    },
+    {
+      "path": "tests",
+      "purpose": "PHP, shell, fixture, and integration verification suites.",
+      "designed_for": "Regression and install-safety verification.",
+      "install_guide": "README.md",
+      "install_script": "none",
+      "ai_entrypoint": "phpunit.xml.dist",
+      "notes": "Contains phpunit, bats, and script-level tests."
+    },
+    {
+      "path": "tools",
+      "purpose": "AI CLI commands, installers, validators, and generators.",
+      "designed_for": "Repository automation and install/runtime tooling.",
+      "install_guide": "tools/ai/cli-tools.md",
+      "install_script": "tools/ai/install-ai-kit.php",
+      "ai_entrypoint": "tools/ai/ai.php",
+      "notes": "Primary command surface for install and verification flows."
+    }
+  ],
+  "metadata_exemptions": []
+}

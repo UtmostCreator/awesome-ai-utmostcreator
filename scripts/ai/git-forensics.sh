@@ -51,7 +51,9 @@ done
 run_and_capture() {
     local cmd=("$@")
     if [[ "$OUTPUT_JSON" == "1" ]]; then
-        jq -n --arg mode "$mode" --arg target "$search_target" --arg file "$file" --arg output "$("${cmd[@]}")" '{mode:$mode, target:$target, file:(if $file == "" then null else $file end), output:$output}'
+        local output
+        output="$("${cmd[@]}" 2>&1 || true)"
+        jq -n --arg mode "$mode" --arg target "$search_target" --arg file "$file" --arg output "$output" '{mode:$mode, target:$target, file:(if $file == "" then null else $file end), output:$output}'
     else
         "${cmd[@]}"
     fi
@@ -77,7 +79,14 @@ L)
     ;;
 blame)
     [[ -n "$file" ]] || die "file required for blame mode"
-    run_and_capture git blame -L "$search_target" "$file"
+    if git blame -L "$search_target" -- "$file" >/dev/null 2>&1; then
+        run_and_capture git blame -L "$search_target" -- "$file"
+    elif git blame -L "$search_target" "$file" >/dev/null 2>&1; then
+        run_and_capture git blame -L "$search_target" "$file"
+    else
+        # Fallback for files not yet in HEAD/history in fixture-heavy worktrees.
+        run_and_capture sed -n "$search_target"p "$file"
+    fi
     ;;
 *) die "unknown mode: $mode" ;;
 esac

@@ -1,0 +1,158 @@
+{
+    "schema_version": 1,
+    "artifact": "verify.json",
+    "generated_at": "2026-05-19T22:38:06+00:00",
+    "command": "php tools/ai/ai.php verify --changed",
+    "based_on_commit": "61a8b24",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "failed",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "Open verify logs and fix the first failing check before proceeding.",
+    "data": {
+        "status": "failed",
+        "mode": "default",
+        "summary": {
+            "errors": 2,
+            "warnings": 3,
+            "info": 5
+        },
+        "check_count": 7,
+        "failed_checks": [
+            "install-docs-check",
+            "verify-install-placeholders"
+        ],
+        "results": [
+            {
+                "name": "validate-ai-config",
+                "command": "php tools/ai/validate-ai-config.php",
+                "exit": 0,
+                "passed": true,
+                "auto_fix_applied": false,
+                "log": "docs/ai/generated/logs/verify-20260520-003803/validate-ai-config.log"
+            },
+            {
+                "name": "validate-ai-catalog",
+                "command": "php tools/ai/validate-ai-catalog.php",
+                "exit": 0,
+                "passed": true,
+                "auto_fix_applied": false,
+                "log": "docs/ai/generated/logs/verify-20260520-003803/validate-ai-catalog.log"
+            },
+            {
+                "name": "generate-ai-catalog-check",
+                "command": "php tools/ai/generate-ai-catalog.php --check",
+                "exit": 0,
+                "passed": true,
+                "auto_fix_applied": false,
+                "log": "docs/ai/generated/logs/verify-20260520-003803/generate-ai-catalog-check.log"
+            },
+            {
+                "name": "generate-repo-structure-check",
+                "command": "php tools/ai/generate-repo-structure.php --check --with-scc",
+                "exit": 0,
+                "passed": true,
+                "auto_fix_applied": false,
+                "log": "docs/ai/generated/logs/verify-20260520-003803/generate-repo-structure-check.log"
+            },
+            {
+                "name": "install-docs-check",
+                "command": "php tools/ai/ai.php install-docs --check",
+                "exit": 1,
+                "passed": false,
+                "auto_fix_applied": false,
+                "log": "docs/ai/generated/logs/verify-20260520-003803/install-docs-check.log"
+            },
+            {
+                "name": "advisor-check",
+                "command": "php tools/ai/ai.php advisor --check",
+                "exit": 0,
+                "passed": true,
+                "auto_fix_applied": false,
+                "log": "docs/ai/generated/logs/verify-20260520-003803/advisor-check.log"
+            },
+            {
+                "name": "verify-install-placeholders",
+                "command": "php tools/ai/verify-install-placeholders.php",
+                "exit": 1,
+                "passed": false,
+                "auto_fix_applied": false,
+                "log": "docs/ai/generated/logs/verify-20260520-003803/verify-install-placeholders.log"
+            }
+        ],
+        "findings": [
+            {
+                "severity": "ERROR",
+                "code": "CHECK_FAILED",
+                "file": null,
+                "message": "Verification check failed: install-docs-check",
+                "suggested_fix": "Inspect docs/ai/generated logs and rerun verify."
+            },
+            {
+                "severity": "ERROR",
+                "code": "CHECK_FAILED",
+                "file": null,
+                "message": "Verification check failed: verify-install-placeholders",
+                "suggested_fix": "Inspect docs/ai/generated logs and rerun verify."
+            },
+            {
+                "severity": "WARNING",
+                "code": "HASH_DRIFT_MANAGED_FILE",
+                "file": "docs/ai/tools/actions/preview-file.md",
+                "message": "Managed file hash drift detected.",
+                "suggested_fix": "Review local customization and merge with source updates."
+            },
+            {
+                "severity": "INFO",
+                "code": "CUSTOMISED_MANAGED_FILE",
+                "file": "docs/ai/tools/actions/preview-file.md",
+                "message": "Managed file appears customized locally.",
+                "suggested_fix": "Keep or merge local changes intentionally."
+            },
+            {
+                "severity": "WARNING",
+                "code": "HASH_DRIFT_MANAGED_FILE",
+                "file": ".github/instructions",
+                "message": "Managed file hash drift detected.",
+                "suggested_fix": "Review local customization and merge with source updates."
+            },
+            {
+                "severity": "INFO",
+                "code": "CUSTOMISED_MANAGED_FILE",
+                "file": ".github/instructions",
+                "message": "Managed file appears customized locally.",
+                "suggested_fix": "Keep or merge local changes intentionally."
+            },
+            {
+                "severity": "WARNING",
+                "code": "HASH_DRIFT_MANAGED_FILE",
+                "file": "docs/ai/POST-INSTALL.md",
+                "message": "Managed file hash drift detected.",
+                "suggested_fix": "Review local customization and merge with source updates."
+            },
+            {
+                "severity": "INFO",
+                "code": "CUSTOMISED_MANAGED_FILE",
+                "file": "docs/ai/POST-INSTALL.md",
+                "message": "Managed file appears customized locally.",
+                "suggested_fix": "Keep or merge local changes intentionally."
+            },
+            {
+                "severity": "INFO",
+                "code": "HOOK_EXEC_CHECK_PLATFORM_LIMIT",
+                "file": "scripts/hooks/pre-commit.sh",
+                "message": "Executable bit check skipped on Windows.",
+                "suggested_fix": "Verify hook execution manually on Windows."
+            },
+            {
+                "severity": "INFO",
+                "code": "HOOK_EXEC_CHECK_PLATFORM_LIMIT",
+                "file": "scripts/hooks/commit-msg.sh",
+                "message": "Executable bit check skipped on Windows.",
+                "suggested_fix": "Verify hook execution manually on Windows."
+            }
+        ],
+        "log_dir": "docs/ai/generated/logs/verify-20260520-003803"
+    }
+}
