@@ -64,6 +64,7 @@
 - `tests/php/CopilotAgentRendererTest.php`
 - `tests/php/GenerateRepoStructureTest.php`
 - `tests/php/InstallerSafetyTest.php`
+- `tests/php/Support/list-slow-tests.php`
 - `tests/php/bootstrap.php`
 - `tests/scripts/ai/run-all-tests.sh`
 - `tests/scripts/ai/test-ai-diff-context.sh`

@@ -3,7 +3,7 @@
     "source": "git ls-files",
     "with_scc": true,
     "folder_count": 13,
-    "tracked_file_count": 650,
+    "tracked_file_count": 651,
     "metadata": {
         "schema_version": 1,
         "coverage_required": true,
@@ -429,12 +429,12 @@
             "ai_entrypoint": "docs/ai/project-context.md",
             "notes": "Includes capabilities, generated artifacts, and architecture notes.",
             "metrics": {
-                "lines": 3650,
-                "code": 2860,
+                "lines": 3722,
+                "code": 2914,
                 "comments": 0,
-                "blanks": 790,
+                "blanks": 808,
                 "complexity": 0,
-                "bytes": 174835
+                "bytes": 178213
             }
         },
         {
@@ -616,12 +616,12 @@
             "ai_entrypoint": "packages/ai-universal-rules/catalog.json",
             "notes": "Source-of-truth templates and manifests live here.",
             "metrics": {
-                "lines": 11857,
-                "code": 9695,
+                "lines": 11888,
+                "code": 9720,
                 "comments": 0,
-                "blanks": 2162,
+                "blanks": 2168,
                 "complexity": 19,
-                "bytes": 483403
+                "bytes": 486456
             }
         },
         {
@@ -728,7 +728,7 @@
         },
         {
             "path": "tests",
-            "file_count": 55,
+            "file_count": 56,
             "files": [
                 "tests/fixtures/bin/repomix",
                 "tests/fixtures/bin/scc",
@@ -753,6 +753,7 @@
                 "tests/php/CopilotAgentRendererTest.php",
                 "tests/php/GenerateRepoStructureTest.php",
                 "tests/php/InstallerSafetyTest.php",
+                "tests/php/Support/list-slow-tests.php",
                 "tests/php/bootstrap.php",
                 "tests/scripts/ai/run-all-tests.sh",
                 "tests/scripts/ai/test-ai-diff-context.sh",
@@ -786,7 +787,7 @@
                 "tests/shell/pre-tool-use.bats",
                 "tests/shell/repomix-context-tree.bats"
             ],
-            "files_csv": "tests/fixtures/bin/repomix,tests/fixtures/bin/scc,tests/fixtures/json/allow-input.json,tests/fixtures/json/confirm-input.json,tests/fixtures/json/deny-input.json,tests/fixtures/php/frontmatter-empty.md,tests/fixtures/php/frontmatter-malformed.md,tests/fixtures/php/frontmatter-valid.md,tests/fixtures/repos/blank-generic/setup.sh,tests/fixtures/repos/existing-copilot/setup.sh,tests/fixtures/repos/existing-opencode/setup.sh,tests/fixtures/repos/minimal/setup.sh,tests/php/AdvisorDriftTest.php,tests/php/AdvisorScannerTest.php,tests/php/AdvisorSchemaTest.php,tests/php/AdvisorSecretScanTest.php,tests/php/AdvisorTokenBudgetTest.php,tests/php/AiCatalogLibIoTest.php,tests/php/AiCatalogLibTest.php,tests/php/CliToolsTest.php,tests/php/CopilotAgentRendererTest.php,tests/php/GenerateRepoStructureTest.php,tests/php/InstallerSafetyTest.php,tests/php/bootstrap.php,tests/scripts/ai/run-all-tests.sh,tests/scripts/ai/test-ai-diff-context.sh,tests/scripts/ai/test-ai-doc-check.sh,tests/scripts/ai/test-ai-edit.sh,tests/scripts/ai/test-ai-rollback.sh,tests/scripts/ai/test-ai-search.sh,tests/scripts/ai/test-ai-structured.sh,tests/scripts/ai/test-ai-task.sh,tests/scripts/ai/test-ai-test-select.sh,tests/scripts/ai/test-ai-verify.sh,tests/scripts/ai/test-common.sh,tests/scripts/ai/test-fd-files.sh,tests/scripts/ai/test-gh-pr-context.sh,tests/scripts/ai/test-git-forensics.sh,tests/scripts/ai/test-install-mandatory-tools.sh,tests/scripts/ai/test-pack-context.sh,tests/scripts/ai/test-post-tool-use.sh,tests/scripts/ai/test-pre-tool-use.sh,tests/scripts/ai/test-preview-file.sh,tests/scripts/ai/test-query-usage.sh,tests/scripts/ai/test-repo-tool-inventory.sh,tests/scripts/ai/test-repomix-context-tree.sh,tests/scripts/ai/test-repomix-scc-router.sh,tests/scripts/ai/test-rg-code.sh,tests/scripts/ai/test-run-repomix-context.sh,tests/scripts/ai/test-session-checkpoint.sh,tests/scripts/ai/test-watch-loop.sh,tests/shell/doctor.bats,tests/shell/post-tool-use.bats,tests/shell/pre-tool-use.bats,tests/shell/repomix-context-tree.bats",
+            "files_csv": "tests/fixtures/bin/repomix,tests/fixtures/bin/scc,tests/fixtures/json/allow-input.json,tests/fixtures/json/confirm-input.json,tests/fixtures/json/deny-input.json,tests/fixtures/php/frontmatter-empty.md,tests/fixtures/php/frontmatter-malformed.md,tests/fixtures/php/frontmatter-valid.md,tests/fixtures/repos/blank-generic/setup.sh,tests/fixtures/repos/existing-copilot/setup.sh,tests/fixtures/repos/existing-opencode/setup.sh,tests/fixtures/repos/minimal/setup.sh,tests/php/AdvisorDriftTest.php,tests/php/AdvisorScannerTest.php,tests/php/AdvisorSchemaTest.php,tests/php/AdvisorSecretScanTest.php,tests/php/AdvisorTokenBudgetTest.php,tests/php/AiCatalogLibIoTest.php,tests/php/AiCatalogLibTest.php,tests/php/CliToolsTest.php,tests/php/CopilotAgentRendererTest.php,tests/php/GenerateRepoStructureTest.php,tests/php/InstallerSafetyTest.php,tests/php/Support/list-slow-tests.php,tests/php/bootstrap.php,tests/scripts/ai/run-all-tests.sh,tests/scripts/ai/test-ai-diff-context.sh,tests/scripts/ai/test-ai-doc-check.sh,tests/scripts/ai/test-ai-edit.sh,tests/scripts/ai/test-ai-rollback.sh,tests/scripts/ai/test-ai-search.sh,tests/scripts/ai/test-ai-structured.sh,tests/scripts/ai/test-ai-task.sh,tests/scripts/ai/test-ai-test-select.sh,tests/scripts/ai/test-ai-verify.sh,tests/scripts/ai/test-common.sh,tests/scripts/ai/test-fd-files.sh,tests/scripts/ai/test-gh-pr-context.sh,tests/scripts/ai/test-git-forensics.sh,tests/scripts/ai/test-install-mandatory-tools.sh,tests/scripts/ai/test-pack-context.sh,tests/scripts/ai/test-post-tool-use.sh,tests/scripts/ai/test-pre-tool-use.sh,tests/scripts/ai/test-preview-file.sh,tests/scripts/ai/test-query-usage.sh,tests/scripts/ai/test-repo-tool-inventory.sh,tests/scripts/ai/test-repomix-context-tree.sh,tests/scripts/ai/test-repomix-scc-router.sh,tests/scripts/ai/test-rg-code.sh,tests/scripts/ai/test-run-repomix-context.sh,tests/scripts/ai/test-session-checkpoint.sh,tests/scripts/ai/test-watch-loop.sh,tests/shell/doctor.bats,tests/shell/post-tool-use.bats,tests/shell/pre-tool-use.bats,tests/shell/repomix-context-tree.bats",
             "purpose": "PHP, shell, fixture, and integration verification suites.",
             "designed_for": "Regression and install-safety verification.",
             "install_guide": "README.md",
@@ -794,12 +795,12 @@
             "ai_entrypoint": "phpunit.xml.dist",
             "notes": "Contains phpunit, bats, and script-level tests.",
             "metrics": {
-                "lines": 5525,
-                "code": 4232,
-                "comments": 384,
-                "blanks": 909,
-                "complexity": 497,
-                "bytes": 202784
+                "lines": 5584,
+                "code": 4272,
+                "comments": 393,
+                "blanks": 919,
+                "complexity": 500,
+                "bytes": 204474
             }
         },
         {
