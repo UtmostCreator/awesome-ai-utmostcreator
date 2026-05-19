@@ -68,6 +68,18 @@ fi
 
 cd "$SCRIPT_DIR"
 
+check_target_path() {
+    local relative_path="$1"
+
+    if [[ -e "$TARGET/$relative_path" ]]; then
+        echo "    OK  $relative_path"
+        return 0
+    fi
+
+    echo "    MISS $relative_path"
+    return 1
+}
+
 # ── Preflight ────────────────────────────────────────────────────────────────
 echo ""
 echo "==> Running preflight check..."
@@ -92,10 +104,34 @@ php tools/ai/install-ai-kit.php \
 
 # ── Validate install surface ──────────────────────────────────────────────────
 echo ""
+<<<<<<< Updated upstream
 echo "==> Validating install surface..."
 php tools/ai/validate-install-surface.php --strict --target "$TARGET" 2>/dev/null || \
     php tools/ai/validate-install-surface.php --target "$TARGET"
+||||||| Stash base
+echo "==> Validating install surface..."
+php tools/ai/validate-install-surface.php --strict --target "$TARGET" 2>/dev/null || \
+    php tools/ai/validate-install-surface.php --target "$TARGET" || true
+=======
+echo "==> Checking installed target surface..."
+target_failures=0
+for relative_path in \
+    AGENTS.md \
+    CLAUDE.md \
+    docs/ai/project-context.md \
+    docs/ai/POST-INSTALL.md \
+    scripts/ai/ai-doc-check.sh \
+    scripts/ai/ai-verify.sh \
+    .github/copilot-instructions.md \
+    .github/instructions/frontend.instructions.md \
+    .github/instructions/testing.instructions.md \
+    .opencode/opencode.json
+do
+    check_target_path "$relative_path" || target_failures=$((target_failures + 1))
+done
+>>>>>>> Stashed changes
 
+<<<<<<< Updated upstream
 # ── Validate config and catalog ───────────────────────────────────────────────
 echo ""
 echo "==> Validating AI config and catalog..."
@@ -103,12 +139,35 @@ php tools/ai/validate-ai-config.php --target "$TARGET" 2>/dev/null || \
     php tools/ai/validate-ai-config.php
 php tools/ai/validate-ai-catalog.php --target "$TARGET" 2>/dev/null || \
     php tools/ai/validate-ai-catalog.php
-
-# ── Placeholder audit ─────────────────────────────────────────────────────────
+||||||| Stash base
+# ── Validate config and catalog ───────────────────────────────────────────────
 echo ""
-echo "==> Auditing placeholders in target..."
-php tools/ai/ai.php placeholders --target "$TARGET" 2>/dev/null || \
-    php tools/ai/ai.php placeholders || true
+echo "==> Validating AI config and catalog..."
+php tools/ai/validate-ai-config.php --target "$TARGET" 2>/dev/null || \
+    php tools/ai/validate-ai-config.php || true
+php tools/ai/validate-ai-catalog.php --target "$TARGET" 2>/dev/null || \
+    php tools/ai/validate-ai-catalog.php || true
+=======
+if [[ $target_failures -gt 0 ]]; then
+    echo "    WARN: $target_failures expected install surface path(s) missing"
+fi
+>>>>>>> Stashed changes
+
+echo ""
+echo "==> Running target-local documentation checks..."
+if [[ -f "$TARGET/scripts/ai/ai-doc-check.sh" ]]; then
+    (cd "$TARGET" && bash scripts/ai/ai-doc-check.sh --check docs/ai .github AGENTS.md CLAUDE.md) || true
+else
+    echo "    Skipped: scripts/ai/ai-doc-check.sh not installed in target"
+fi
+
+echo ""
+echo "==> Running target-local verification smoke check..."
+if [[ -f "$TARGET/scripts/ai/ai-verify.sh" ]]; then
+    (cd "$TARGET" && AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 AI_VERIFY_SCOPE=ai bash scripts/ai/ai-verify.sh .) || true
+else
+    echo "    Skipped: scripts/ai/ai-verify.sh not installed in target"
+fi
 
 # ── Repomix context bundle ────────────────────────────────────────────────────
 echo ""
@@ -158,7 +217,7 @@ echo "       $TARGET/.github/instructions/frontend.instructions.md  ← <FRONTEN
 echo "       $TARGET/.github/instructions/testing.instructions.md   ← <TEST_PATH_GLOB>"
 echo ""
 echo "  2. Re-audit after filling:"
-echo "       cd $SCRIPT_DIR && php tools/ai/ai.php placeholders --fail --target $TARGET"
+echo "       rg -n '<[A-Z0-9_]+>' $TARGET/AGENTS.md $TARGET/docs/ai $TARGET/.github $TARGET/.opencode"
 echo ""
 echo "  3. Wire git hooks in target (optional):"
 echo "       cd $TARGET && lefthook install"

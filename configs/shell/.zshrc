@@ -80,7 +80,7 @@ function yy() {
 }
 
 # CMS dev workspace
-alias cms='bash ~/cms-dev.sh'
+alias cms='bash ~/scripts/cms-dev.sh'
 export APP_CONFIGS_HOME="${APP_CONFIGS_HOME:-$HOME/workspace/app-configs}"
 alias acfg='cd "$APP_CONFIGS_HOME"'
 
