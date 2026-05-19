@@ -82,7 +82,11 @@ fi
 auth_decision="$(authorization_decision "${failure_category:-unknown}")"
 exec_status="$(execution_status "${failure_category:-unknown}")"
 mutates_state="$(detect_mutation)"
-args_hash="$(jq -cS '.toolArgs // {}' <<<"$input" | shasum -a 256 | awk '{print "sha256:" $1}')"
+if command -v sha256sum >/dev/null 2>&1; then
+    args_hash="$(jq -cS '.toolArgs // {}' <<<"$input" | sha256sum | awk '{print "sha256:" $1}')"
+else
+    args_hash="$(jq -cS '.toolArgs // {}' <<<"$input" | shasum -a 256 | awk '{print "sha256:" $1}')"
+fi
 
 entry="$(jq -cn \
     --argjson event "$input" \

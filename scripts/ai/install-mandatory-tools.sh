@@ -113,6 +113,7 @@ verify_tools() {
 
 OS_KIND="$(detect_os)"
 printf 'Detected OS: %s\n' "$OS_KIND"
+printf 'Package manager hints include brew/apt/winget by platform.\n'
 
 case "$OS_KIND" in
 windows) install_windows ;;

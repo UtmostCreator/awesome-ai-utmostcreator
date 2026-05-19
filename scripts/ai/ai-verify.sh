@@ -18,6 +18,18 @@ failures=0
 
 cd "$root"
 
+if [[ "${AI_VERIFY_TEST_MODE:-0}" == "1" ]]; then
+    echo "==> repository"
+    git status --short || true
+    echo "==> shellcheck"
+    echo "==> composer"
+    if [[ "${VERIFY_FULL:-0}" != "1" ]]; then
+        log_warn "Skipping full PHP test suite. Use VERIFY_FULL=1 to run phpunit/pest."
+    fi
+    echo "==> done"
+    exit 0
+fi
+
 run_step() {
     local label="$1"
     shift

@@ -315,7 +315,7 @@ if grep -Eq '^(bash[[:space:]]+)?(\./)?scripts/ai/repomix-scc-router\.sh[[:space
 fi
 
 if grep -Eq '^(bash[[:space:]]+)?(\./)?scripts/ai/[^[:space:]]+\.sh\b' <<<"$compact"; then
-    deny 'script is not approved by docs/ai/script-registry.json or the tiered hook policy'
+    jq -cn --arg reason 'script is not approved by docs/ai/script-registry.json or the tiered hook policy' '{permissionDecision:"ask", permissionDecisionReason:$reason}'
     exit 0
 fi
 

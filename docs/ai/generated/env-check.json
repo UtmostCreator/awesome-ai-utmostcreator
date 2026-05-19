@@ -1,0 +1,92 @@
+{
+    "schema_version": 1,
+    "artifact": "env-check.json",
+    "generated_at": "2026-05-19T22:29:33+00:00",
+    "command": "php tools/ai/ai.php env-check",
+    "based_on_commit": "61a8b24",
+    "based_on_branch": "main",
+    "input_hashes": {},
+    "status": "ok",
+    "score": null,
+    "stale": false,
+    "recommended_next_action": "Environment is ready for core AI workflow commands.",
+    "data": {
+        "required": [
+            {
+                "tool": "bash",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WindowsApps\\bash.exe"
+            },
+            {
+                "tool": "git",
+                "found": true,
+                "path": "C:\\Program Files\\Git\\cmd\\git.exe"
+            },
+            {
+                "tool": "php",
+                "found": true,
+                "path": "C:\\xampp\\php\\php.exe"
+            },
+            {
+                "tool": "rg",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc\\rg.exe"
+            }
+        ],
+        "context_required": [
+            {
+                "tool": "repomix",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Roaming\\npm\\repomix"
+            },
+            {
+                "tool": "scc",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BenBoyter.scc_Microsoft.Winget.Source_8wekyb3d8bbwe\\scc.exe"
+            },
+            {
+                "tool": "jq",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Links\\jq.exe"
+            }
+        ],
+        "optional": [
+            {
+                "tool": "just",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Roaming\\npm\\just"
+            },
+            {
+                "tool": "yq",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\MikeFarah.yq_Microsoft.Winget.Source_8wekyb3d8bbwe\\yq.exe"
+            },
+            {
+                "tool": "shellcheck",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\koalaman.shellcheck_Microsoft.Winget.Source_8wekyb3d8bbwe\\shellcheck.exe"
+            },
+            {
+                "tool": "shfmt",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\mvdan.shfmt_Microsoft.Winget.Source_8wekyb3d8bbwe\\shfmt.exe"
+            },
+            {
+                "tool": "actionlint",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\rhysd.actionlint_Microsoft.Winget.Source_8wekyb3d8bbwe\\actionlint.exe"
+            },
+            {
+                "tool": "lychee",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\lycheeverse.lychee_Microsoft.Winget.Source_8wekyb3d8bbwe\\lychee.exe"
+            },
+            {
+                "tool": "gitleaks",
+                "found": true,
+                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gitleaks.Gitleaks_Microsoft.Winget.Source_8wekyb3d8bbwe\\gitleaks.exe"
+            }
+        ],
+        "missing_required": []
+    }
+}
