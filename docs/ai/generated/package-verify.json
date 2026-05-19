@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "package-verify.json",
-    "generated_at": "2026-05-19T22:49:46+00:00",
+    "generated_at": "2026-05-19T23:12:07+00:00",
     "command": "php tools/ai/ai.php package-verify",
-    "based_on_commit": "25538a3",
+    "based_on_commit": "fb651d9",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "failed",
@@ -27,12 +27,12 @@
             {
                 "path": "templates/capabilities/evidence-first-execution/examples.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:ed706531663407884cb8b01c60eec4e3bce53fad7ce31b5b13f892dadfaa1609"
+                "current": "sha256:dd15af8834edc54c95c837da55d85e12f63200f22dbcfc3641219c40d347b8da"
             },
             {
                 "path": "templates/capabilities/evidence-first-execution/gotchas.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:481740b010ad68f1c7f11588ee84c7c729daf0aa344c5f290e0caa374d13755e"
+                "current": "sha256:5bb22b32cfb2a97ad6029c9a84da631ae12046d8e9b142ba2c8dbb038b5cb6d1"
             },
             {
                 "path": "templates/capabilities/evidence-first-execution/reference.md",
@@ -53,7 +53,7 @@
                 "path": "templates/core/AGENTS.template.md",
                 "reason": "checksum_mismatch",
                 "expected": "sha256:50195d531092f310fc6c356017ebea24d72910ce556b4485dc61cb1e8726c6a8",
-                "current": "sha256:88fdbeddf02aab99b5673b6f9e33cb414258e6841b865d95f5b32abd4ccfdf90"
+                "current": "sha256:57a264e8404d388df14b0a8f0e9135817e9c69b936f929e610e0ec9a9508e22a"
             },
             {
                 "path": "templates/core/POST-INSTALL.template.md",
@@ -143,7 +143,7 @@
             {
                 "path": "templates/core/execution-protocol.template.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:9193bb093484fa040a304c96a07ffa749221357094a1e7a2da069577119a17ed"
+                "current": "sha256:89af06550f60175daef731b261c49d476c5f59e69d570c366280a91d5da7da00"
             },
             {
                 "path": "templates/core/generated-artifacts.template.md",

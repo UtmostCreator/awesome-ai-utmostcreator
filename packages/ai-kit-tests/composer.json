@@ -1,0 +1,33 @@
+{
+  "name": "app-configs/ai-kit-tests",
+  "description": "Internal PHP/shell test suite for the awesome-ai-utmostcreator AI kit. Not shipped.",
+  "type": "library",
+  "require": {
+    "php": ">=8.2"
+  },
+  "require-dev": {
+    "brianium/paratest": "^7.4",
+    "phpunit/phpunit": "^11.0"
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "AppConfigs\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true
+  },
+  "scripts": {
+    "test": "phpunit --configuration phpunit.xml.dist",
+    "test:fast": "paratest --configuration phpunit.xml.dist --processes=4 --runner=WrapperRunner",
+    "test:profile": "phpunit --configuration phpunit.xml.dist --log-junit=../../docs/ai/generated/phpunit-junit.xml",
+    "test:slow": "php tests/Support/list-slow-tests.php"
+  },
+  "scripts-descriptions": {
+    "test": "Run the full PHPUnit suite serially (~37s).",
+    "test:fast": "Run the suite in parallel via paratest (4 procs by default, ~17s).",
+    "test:profile": "Run PHPUnit and emit JUnit XML at docs/ai/generated/phpunit-junit.xml for slow-test ranking.",
+    "test:slow": "Print per-test timing for the last junit profile (run `composer test:profile` first)."
+  }
+}

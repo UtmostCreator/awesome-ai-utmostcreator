@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "impact.json",
-    "generated_at": "2026-05-19T22:49:42+00:00",
+    "generated_at": "2026-05-19T23:12:03+00:00",
     "command": "php tools/ai/ai.php impact --base main",
-    "based_on_commit": "25538a3",
+    "based_on_commit": "fb651d9",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",

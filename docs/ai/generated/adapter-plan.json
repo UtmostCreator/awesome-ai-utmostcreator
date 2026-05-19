@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "adapter-plan.json",
-    "generated_at": "2026-05-19T22:49:47+00:00",
+    "generated_at": "2026-05-19T23:12:07+00:00",
     "command": "php tools/ai/ai.php adapter-plan",
-    "based_on_commit": "25538a3",
+    "based_on_commit": "fb651d9",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -49,8 +49,7 @@
             "docs/ai/execution-protocol.md",
             "docs/ai/ai-file-standards.md",
             "docs/ai/POST-INSTALL.md",
-            "docs/ai/project-stack.md",
-            "docs/ai/capabilities/evidence-first-execution"
+            "docs/ai/project-stack.md"
         ],
         "actions": [
             {
@@ -978,8 +977,8 @@
                 "merge_strategy": "replace",
                 "required": true,
                 "pack": "base",
-                "action": "SKIP_EXISTING_UNMANAGED",
-                "reason": "target exists",
+                "action": "SKIP_IDENTICAL_EXISTING",
+                "reason": "target exists and already matches source",
                 "requested_target": "docs/ai/capabilities/evidence-first-execution"
             },
             {
