@@ -8,6 +8,7 @@ function aiInstallerPackRegistry(): array
 {
     return [
         'setup-docs' => [
+            ['type' => 'file', 'source' => 'PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/agents.md', 'target' => 'docs/ai/agents.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/adapter-contract.md', 'target' => 'docs/ai/adapter-contract.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/approval-boundaries.md', 'target' => 'docs/ai/approval-boundaries.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -28,7 +29,9 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/available-packs.md', 'target' => 'docs/ai/available-packs.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/command-policy.md', 'target' => 'docs/ai/command-policy.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/command-policy.tiers.yaml', 'target' => 'docs/ai/command-policy.tiers.yaml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            // catalog.md, SETUP.md, package-boundaries.md intentionally excluded: source-repo-specific generated/meta files
+            ['type' => 'file', 'source' => 'docs/ai/catalog.md', 'target' => 'docs/ai/catalog.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'llms.txt', 'target' => 'llms.txt', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            // SETUP.md and package-boundaries.md intentionally excluded: source-repo-specific generated/meta files
             ['type' => 'file', 'source' => 'docs/ai/repo-documentation-generation.md', 'target' => 'docs/ai/repo-documentation-generation.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/capabilities/README.md', 'target' => 'docs/ai/capabilities/README.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
         ],
@@ -112,6 +115,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/ai-structured.sh', 'target' => 'scripts/ai/ai-structured.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-task.sh', 'target' => 'scripts/ai/ai-task.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-test-select.sh', 'target' => 'scripts/ai/ai-test-select.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/run-repo-tests.sh', 'target' => 'scripts/ai/run-repo-tests.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/session-checkpoint.sh', 'target' => 'scripts/ai/session-checkpoint.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-doc-check.sh', 'target' => 'scripts/ai/ai-doc-check.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/ai-file-freshness.sh', 'target' => 'scripts/ai/ai-file-freshness.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
@@ -185,6 +189,16 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => '.schemas/advisor-recommendation.schema.json', 'target' => '.schemas/advisor-recommendation.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'target-tools-pack' => [
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/README.md', 'target' => 'packages/ai-universal-rules/README.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/QUICKSTART.md', 'target' => 'packages/ai-universal-rules/QUICKSTART.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'packages/ai-universal-rules/manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'packages/ai-universal-rules/manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'packages/ai-universal-rules/package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'packages/ai-universal-rules/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'packages/ai-universal-rules/docs', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'packages/ai-universal-rules/policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates', 'target' => 'packages/ai-universal-rules/templates', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/install', 'target' => 'tools/ai/install', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/commands', 'target' => 'tools/ai/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai.php', 'target' => 'tools/ai/ai.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],

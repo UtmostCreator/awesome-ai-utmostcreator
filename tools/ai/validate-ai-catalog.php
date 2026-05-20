@@ -11,7 +11,9 @@ foreach ($argv as $arg) {
     }
 }
 
-if ($targetArg !== null || (!is_dir(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'packages') && is_file(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
+$candidateRoot = dirname(__DIR__, 2);
+$sourceRepoMode = is_file($candidateRoot . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
+if ($targetArg !== null || (!$sourceRepoMode && is_file($candidateRoot . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
     $targetRoot = $targetArg !== null ? realpath($targetArg) : realpath(dirname(__DIR__, 2));
     if ($targetRoot === false) {
         fwrite(STDERR, "ERROR: target root not found\n");

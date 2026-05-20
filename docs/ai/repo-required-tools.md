@@ -70,6 +70,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/post-tool-use.sh`
 - `scripts/ai/pre-tool-use.sh`
 - `scripts/ai/preview-file.sh`
+- `scripts/ai/prune-shipped-targets.sh`
 - `scripts/ai/query-usage.sh`
 - `scripts/ai/repo-stats.sh`
 - `scripts/ai/repo-tool-inventory.sh`

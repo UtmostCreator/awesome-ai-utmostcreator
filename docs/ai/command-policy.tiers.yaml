@@ -1,5 +1,39 @@
-tier0: environment probe
-tier1: bounded read-only wrapper
-tier2: ask-gated broad read or mutation-adjacent command
-tier3: explicit approval mutation
-tier4: deny
+tiers:
+  tier0:
+    allow:
+      - "pwd"
+      - "date *"
+    ask: []
+    deny: []
+  tier1:
+    allow:
+      - "bash scripts/ai/ai-search.sh *"
+      - "bash scripts/ai/preview-file.sh *"
+      - "bash scripts/ai/query-usage.sh *"
+      - "git status*"
+      - "git diff*"
+      - "git log*"
+      - "php tools/ai/validate-*.php *"
+    ask: []
+    deny: []
+  tier2:
+    allow: []
+    ask:
+      - "bash scripts/ai/ai-verify.sh *"
+      - "bash scripts/ai/pack-context.sh *"
+      - "git commit*"
+    deny: []
+  tier3:
+    allow: []
+    ask:
+      - "bash scripts/ai/ai-edit.sh *"
+      - "bash scripts/ai/ai-rollback.sh *"
+      - "php tools/ai/install-ai-kit.php *"
+    deny: []
+  tier4:
+    allow: []
+    ask: []
+    deny:
+      - "rm *"
+      - "git reset --hard *"
+      - "git clean *"

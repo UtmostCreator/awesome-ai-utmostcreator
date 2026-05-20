@@ -142,6 +142,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   validate:
     runs-on: ubuntu-latest
@@ -202,10 +206,22 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            vendor
+            ~/.composer/cache
+          key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
       - name: Install Composer dependencies
-        run: composer install --no-interaction --prefer-dist
-      - name: Run PHPUnit
-        run: vendor/bin/phpunit --colors=never
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Run PHPUnit (paratest, 4 procs)
+        run: composer test:fast -- --colors=never
 
 ```
 
@@ -354,7 +370,7 @@ Minimum flow:
 
 - Primary verification command: `bash scripts/ai/ai-verify.sh .` (or `php tools/ai/ai.php verify --changed` for the PHP CLI)
 - Primary build command: `unknown` (this is a tooling repo, not a build target)
-- Primary test command: `composer test` (serial, ~37s) or `composer test:fast` (paratest, ~17s)
+- Primary test command: `PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh`; for PHP-only use `composer test:fast` (paratest, ~19-21s). Use serial `composer test` only when serial ordering matters.
 - Profile slow tests: `composer test:profile` then `composer test:slow [N]`
 - Preferred narrow-first verification pattern: `start with the narrowest repo-local check and escalate only if needed`
 - Verification ladder: focused proof first -> affected layer tests second -> broader repository verification third -> build as a smoke check when relevant -> release-safety review only when risk warrants it.
@@ -452,6 +468,9 @@ If deeper process is needed, prefer `docs/ai/capabilities/` and `packages/ai-uni
 # Scripts Reference
 
 The approved script registry is defined by `tools/ai/install/script-registry.php` and installed as `docs/ai/script-registry.json`.
+
+- `scripts/ai/run-repo-tests.sh` — single parallel-first repository test runner. Runs root ParaTest, shell suites, optional Bats/package suites, and validators. Read-only; default `PARATEST_PROCS=12`, cap `20`.
+- `scripts/ai/prune-shipped-targets.sh` — kit-author cleanup of files duplicated from `packages/ai-universal-rules/templates/**`. Read-only modes: `--list`, `--dry-run`. Mutating: `--apply` (requires clean worktree, snapshots to `.ai-backups/prune-shipped-<ts>/`, logs to `.ai-logs/prune-<ts>.jsonl`). Restore: `bash install-ai-kit.sh .`.
 
 ```
 
@@ -568,7 +587,7 @@ Required tools depend on selected packs. Core full-governance installs require P
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
         "root:adapter-policy": 1,
-        "root:ai-script": 26,
+        "root:ai-script": 27,
         "root:capability": 15,
         "root:cli": 1,
         "root:exporter": 1,
@@ -1254,7 +1273,7 @@ Required tools depend on selected packs. Core full-governance installs require P
         {
             "scope": "package",
             "type": "package-capability",
-            "name": "examples",
+            "name": "Read-only: print one path per line that --apply would delete.",
             "path": "packages/ai-universal-rules/templates/capabilities/evidence-first-execution/examples.md",
             "runtime": "canonical",
             "description": "Good: source-fix with focused test and explicit verification status."
@@ -1761,7 +1780,7 @@ Required tools depend on selected packs. Core full-governance installs require P
             "name": "fd-files.sh",
             "path": "scripts/ai/fd-files.sh",
             "runtime": "canonical",
-            "description": "Repo-aware file discovery wrapper around fd with safer defaults."
+            "description": "Repo-aware file discovery wrapper around fd/fdfind with rg fallback and safer defaults."
         },
         {
             "scope": "root",
@@ -1858,6 +1877,14 @@ Required tools depend on selected packs. Core full-governance installs require P
             "path": "scripts/ai/rg-code.sh",
             "runtime": "canonical",
             "description": "Mode-aware ripgrep wrapper with JSON, file-list, count, and context output modes."
+        },
+        {
+            "scope": "root",
+            "type": "ai-script",
+            "name": "run-repo-tests.sh",
+            "path": "scripts/ai/run-repo-tests.sh",
+            "runtime": "canonical",
+            "description": "Parallel-first repository test runner for PHP, shell, Bats, and validators."
         },
         {
             "scope": "root",
@@ -6416,7 +6443,7 @@ set -euo pipefail
 # shellcheck source=scripts/ai/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
-require_bins fd jq
+require_bins jq
 
 usage() {
     cat <<'EOF'
@@ -6425,7 +6452,17 @@ Usage:
 EOF
 }
 
-query="${1:?query required}"
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    usage
+    exit 0
+fi
+
+if [[ $# -lt 1 ]]; then
+    usage >&2
+    exit 1
+fi
+
+query="$1"
 shift || true
 
 root="."
@@ -6480,10 +6517,53 @@ for ext in "${EXTRA_TYPES[@]+${EXTRA_TYPES[@]}}"; do
     args+=(-e "$ext")
 done
 
+fd_bin="$(find_fd_bin || true)"
+
+run_discovery() {
+    if [[ -n "$fd_bin" ]]; then
+        "$fd_bin" "${args[@]}" "$query" "$root"
+        return
+    fi
+
+    require_bins rg
+    local rg_args=(
+        --files
+        -g '!vendor/**'
+        -g '!node_modules/**'
+        -g '!dist/**'
+        -g '!.git/**'
+        -g '!.repomix-context/**'
+    )
+
+    if [[ "$INCLUDE_HIDDEN" == "1" ]]; then
+        rg_args+=(--hidden)
+    fi
+
+    local path base ext wanted include
+    while IFS= read -r path; do
+        base="${path##*/}"
+        [[ "$base" == *"$query"* || "$path" == *"$query"* ]] || continue
+
+        if [[ ${#EXTRA_TYPES[@]} -gt 0 ]]; then
+            ext="${base##*.}"
+            include=0
+            for wanted in "${EXTRA_TYPES[@]}"; do
+                if [[ "$ext" == "$wanted" ]]; then
+                    include=1
+                    break
+                fi
+            done
+            [[ "$include" == "1" ]] || continue
+        fi
+
+        printf '%s\n' "$path"
+    done < <(rg "${rg_args[@]}" "$root")
+}
+
 if [[ "$OUTPUT_FORMAT" == "json" ]]; then
-    fd "${args[@]}" "$query" "$root" | jq -R . | jq -s .
+    run_discovery | jq -R . | jq -s .
 else
-    fd "${args[@]}" "$query" "$root"
+    run_discovery
 fi
 
 ```
@@ -7769,6 +7849,343 @@ else
         printf '%s\n' "$truncated_content"
     fi
 fi
+
+```
+
+## FILE: scripts/ai/prune-shipped-targets.sh
+
+```text
+#!/usr/bin/env bash
+# prune-shipped-targets.sh
+#
+# Read .ai-install-manifest.json and operate on the kit-author's local copies
+# of files installed from packages/ai-universal-rules/templates/**. The 40
+# entries where the manifest's `.value.source != .key` are duplicates of the
+# shipped template; deleting the local copies prevents agents from editing
+# the wrong side of the source/installed boundary.
+#
+# Modes (mutually exclusive): --list (default), --dry-run, --apply.
+# Restore after --apply: `bash install-ai-kit.sh .` (or the php installer).
+#
+# See docs/ai/capabilities/evidence-first-execution/examples.md for the
+# documented workflow.
+
+set -euo pipefail
+set -E
+
+# shellcheck source=scripts/ai/common.sh
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
+SCRIPT_VERSION="1"
+SCRIPT_NAME="prune-shipped-targets"
+
+usage() {
+    cat <<'EOF'
+Usage:
+  bash scripts/ai/prune-shipped-targets.sh [--list | --dry-run | --apply] [--force]
+                                            [--include-candidates]
+                                            [--manifest PATH]
+
+Modes (mutually exclusive):
+  --list         (default) print one path per line that WOULD be removed.
+                 Read-only. Exit 0.
+  --dry-run      group by pack, print file+byte counts, no deletion.
+                 Read-only. Exit 0.
+  --apply        actually delete. Requires clean worktree (unless --force).
+                 Snapshots each path to .ai-backups/prune-shipped-<ts>/
+                 BEFORE deletion. Writes JSONL log to
+                 .ai-logs/prune-<ts>.jsonl.
+
+Options:
+  --include-candidates   only meaningful with --apply. Also delete the two
+                         candidate paths that are referenced in
+                         tools/ai/install/packs.php but absent from the
+                         manifest (AGENTS.md and .opencode/opencode.json).
+                         Off by default.
+  --force        bypass the clean-worktree refusal (logs WARN).
+  --manifest PATH  override .ai-install-manifest.json path.
+  --help, -h     show this help and exit 0.
+
+Exit codes:
+  0  success (--list/--dry-run always 0 when manifest valid)
+  1  manifest missing or invalid JSON
+  2  --apply refused due to dirty worktree
+  3  --apply refused due to refuse-list violation (defense in depth)
+  4  internal error (jq failed, mkdir failed, etc.)
+
+Restore after --apply:
+  bash install-ai-kit.sh .
+EOF
+}
+
+# ---- Hardcoded refuse-list (defense-in-depth) ---------------------------
+# Prefix patterns checked against repo-relative paths BEFORE any rm. The
+# manifest is never trusted blindly; even if a future generator placed one
+# of these prefixes in the manifest, --apply will refuse with exit 3.
+REFUSE_PREFIXES=(
+    "packages/"
+    "tools/"
+    "scripts/ai/"
+    "tests/"
+    ".schemas/"
+    ".git/"
+    ".ai-logs/"
+    ".ai-backups/"
+    "docs/ai/generated/"
+    "vendor/"
+    "node_modules/"
+)
+
+# The two candidate paths intentionally outside the manifest. Only deleted
+# when --apply --include-candidates is set.
+CANDIDATE_PATHS=(
+    "AGENTS.md"
+    ".opencode/opencode.json"
+)
+
+path_is_refused() {
+    local rel="${1:?rel path required}"
+    local prefix
+    # The script itself must never be deleted.
+    if [[ "$rel" == "scripts/ai/prune-shipped-targets.sh" ]]; then
+        return 0
+    fi
+    for prefix in "${REFUSE_PREFIXES[@]}"; do
+        if [[ "$rel" == "$prefix"* ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+# ---- Argument parsing ---------------------------------------------------
+mode="list"
+mode_set=0
+force=0
+include_candidates=0
+manifest_path=".ai-install-manifest.json"
+
+set_mode() {
+    if (( mode_set == 1 )); then
+        printf '[ERROR] only one of --list/--dry-run/--apply may be given\n' >&2
+        exit 4
+    fi
+    mode="$1"
+    mode_set=1
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --help|-h) usage; exit 0 ;;
+        --list) set_mode list; shift ;;
+        --dry-run) set_mode dry-run; shift ;;
+        --apply) set_mode apply; shift ;;
+        --force) force=1; shift ;;
+        --include-candidates) include_candidates=1; shift ;;
+        --manifest) manifest_path="${2:?--manifest requires value}"; shift 2 ;;
+        --manifest=*) manifest_path="${1#*=}"; shift ;;
+        *)
+            printf '[ERROR] unknown argument: %s\n' "$1" >&2
+            usage >&2
+            exit 4
+            ;;
+    esac
+done
+
+# ---- Manifest validation ------------------------------------------------
+if [[ ! -f "$manifest_path" ]]; then
+    printf '[ERROR] manifest not found: %s\n' "$manifest_path" >&2
+    exit 1
+fi
+
+require_bins jq
+
+if ! jq -e . "$manifest_path" >/dev/null 2>&1; then
+    printf '[ERROR] manifest is not valid JSON: %s\n' "$manifest_path" >&2
+    exit 1
+fi
+
+# Collect (path \t pack) tuples for entries where source != key.
+collect_entries() {
+    jq -r '
+        .files
+        | to_entries[]
+        | select(.value.source != .key)
+        | "\(.key)\t\(.value.pack // "unknown")"
+    ' "$manifest_path"
+}
+
+mapfile -t ENTRIES < <(collect_entries)
+
+if (( ${#ENTRIES[@]} == 0 )); then
+    printf '[WARN] manifest has no entries where source != key; nothing to do\n' >&2
+fi
+
+# ---- --list mode --------------------------------------------------------
+if [[ "$mode" == "list" ]]; then
+    for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
+        path="${line%%$'\t'*}"
+        printf '%s\n' "$path"
+    done
+    exit 0
+fi
+
+# Banner for --dry-run and --apply.
+printf '%s v%s (mode=%s include-candidates=%d force=%d)\n' \
+    "$SCRIPT_NAME" "$SCRIPT_VERSION" "$mode" "$include_candidates" "$force" >&2
+
+# Helper: size in bytes for a file OR directory (recursive).
+path_size_bytes() {
+    local p="${1:?path required}"
+    if [[ ! -e "$p" ]]; then
+        printf '0\n'
+        return 0
+    fi
+    if [[ -d "$p" ]]; then
+        # Sum sizes of all regular files under the dir. du -sb is GNU-only;
+        # use a find+stat loop for portability with Git Bash on Windows.
+        local total=0 fsize
+        while IFS= read -r -d '' f; do
+            fsize="$(wc -c <"$f" 2>/dev/null | tr -d ' \r\n')"
+            [[ -z "$fsize" ]] && fsize=0
+            total=$((total + fsize))
+        done < <(find "$p" -type f -print0 2>/dev/null)
+        printf '%d\n' "$total"
+    else
+        local fsize
+        fsize="$(wc -c <"$p" 2>/dev/null | tr -d ' \r\n')"
+        [[ -z "$fsize" ]] && fsize=0
+        printf '%d\n' "$fsize"
+    fi
+}
+
+# ---- --dry-run mode -----------------------------------------------------
+if [[ "$mode" == "dry-run" ]]; then
+    declare -A PACK_FILES PACK_BYTES
+    total_bytes=0
+    total_files=0
+    for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
+        path="${line%%$'\t'*}"
+        pack="${line#*$'\t'}"
+        bytes="$(path_size_bytes "$path")"
+        PACK_FILES[$pack]=$(( ${PACK_FILES[$pack]:-0} + 1 ))
+        PACK_BYTES[$pack]=$(( ${PACK_BYTES[$pack]:-0} + bytes ))
+        total_bytes=$(( total_bytes + bytes ))
+        total_files=$(( total_files + 1 ))
+    done
+
+    printf '\n%-40s %8s %12s\n' "PACK" "FILES" "BYTES" >&2
+    printf '%-40s %8s %12s\n' "----" "-----" "-----" >&2
+    for pack in "${!PACK_FILES[@]}"; do
+        printf '%-40s %8d %12d\n' "$pack" "${PACK_FILES[$pack]}" "${PACK_BYTES[$pack]}" >&2
+    done
+    printf '%-40s %8s %12s\n' "----" "-----" "-----" >&2
+    printf '%-40s %8d %12d\n' "TOTAL" "$total_files" "$total_bytes" >&2
+    printf 'total_bytes=%d\n' "$total_bytes"
+    exit 0
+fi
+
+# ---- --apply mode -------------------------------------------------------
+# 1) clean worktree (unless --force)
+if [[ "$force" != "1" ]]; then
+    if [[ -n "$(git status --porcelain 2>/dev/null)" ]]; then
+        printf '[ERROR] --apply refused: working tree is not clean. Commit/stash or use --force.\n' >&2
+        exit 2
+    fi
+else
+    printf '[WARN] --force given: skipping clean-worktree check\n' >&2
+fi
+
+# 2) refuse-list defense-in-depth on every collected path
+for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
+    path="${line%%$'\t'*}"
+    if path_is_refused "$path"; then
+        printf '[ERROR] refuse-list violation: manifest entry %s matches a protected prefix; refusing --apply\n' "$path" >&2
+        exit 3
+    fi
+done
+
+# 3) Prepare backup and log directories
+ts="$(date +%Y%m%d-%H%M%S)"
+repo_root_path="$(git_root)"
+backup_root="$repo_root_path/.ai-backups/prune-shipped-$ts"
+log_dir="$repo_root_path/.ai-logs"
+log_file="$log_dir/prune-$ts.jsonl"
+
+mkdir -p "$backup_root" || { printf '[ERROR] cannot mkdir %s\n' "$backup_root" >&2; exit 4; }
+mkdir -p "$log_dir" || { printf '[ERROR] cannot mkdir %s\n' "$log_dir" >&2; exit 4; }
+
+printf '[INFO] backup root: %s\n' "$backup_root" >&2
+printf '[INFO] audit log:   %s\n' "$log_file" >&2
+
+snapshot_and_delete() {
+    local rel="${1:?rel path required}"
+    local pack="${2:-unknown}"
+    local abs="$repo_root_path/$rel"
+
+    if [[ ! -e "$abs" ]]; then
+        printf '[WARN] not present, skipping: %s\n' "$rel" >&2
+        return 0
+    fi
+
+    # Defense-in-depth: assert path inside repo and not refused.
+    assert_inside_repo "$abs"
+    if path_is_refused "$rel"; then
+        printf '[ERROR] refuse-list violation at delete time: %s\n' "$rel" >&2
+        exit 3
+    fi
+
+    local snap_dest="$backup_root/$rel"
+    mkdir -p "$(dirname "$snap_dest")"
+
+    local sha=""
+    if [[ -f "$abs" ]]; then
+        cp -p "$abs" "$snap_dest"
+        if command_exists sha256sum; then
+            sha="$(sha256sum "$abs" | awk '{print $1}')"
+        elif command_exists shasum; then
+            sha="$(shasum -a 256 "$abs" | awk '{print $1}')"
+        fi
+    elif [[ -d "$abs" ]]; then
+        # Recursive copy preserving structure; cp -a not available everywhere
+        cp -R "$abs/." "$snap_dest/"
+        sha="dir"
+    fi
+
+    # JSONL log entry written BEFORE deletion so it survives any rm failure.
+    jq -cn \
+        --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --arg path "$rel" \
+        --arg sha256_before "$sha" \
+        --arg snapshot_path "$snap_dest" \
+        --arg pack "$pack" \
+        '{ts:$ts, path:$path, sha256_before:$sha256_before, snapshot_path:$snapshot_path, pack:$pack}' \
+        >>"$log_file"
+
+    rm -rf -- "$abs"
+    printf '[OK] deleted: %s (snapshot=%s)\n' "$rel" "$snap_dest" >&2
+}
+
+# 4) Iterate manifest entries
+for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
+    path="${line%%$'\t'*}"
+    pack="${line#*$'\t'}"
+    snapshot_and_delete "$path" "$pack"
+done
+
+# 5) Candidate paths (only when explicitly requested AND in --apply mode)
+if (( include_candidates == 1 )); then
+    for cand in "${CANDIDATE_PATHS[@]}"; do
+        if path_is_refused "$cand"; then
+            printf '[ERROR] candidate %s matches refuse-list; refusing\n' "$cand" >&2
+            exit 3
+        fi
+        snapshot_and_delete "$cand" "candidate"
+    done
+fi
+
+printf '[OK] prune complete. Restore with: bash install-ai-kit.sh .\n' >&2
+exit 0
 
 ```
 
@@ -12221,6 +12638,400 @@ class InstallerSafetyTest extends TestCase
 
 ```
 
+## FILE: tests/php/PruneShippedTargetsTest.php
+
+```text
+<?php
+
+declare(strict_types=1);
+
+namespace Tests;
+
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Contract tests for scripts/ai/prune-shipped-targets.sh.
+ *
+ * Only the read-only paths (--list, --dry-run, --help) and safety refusals
+ * (--apply with missing manifest) are exercised. The destructive --apply
+ * path against the live repo is INTENTIONALLY NOT TESTED here — the human
+ * runs --apply later when ready (see commit message).
+ */
+class PruneShippedTargetsTest extends TestCase
+{
+    private static string $repoRoot;
+    private static string $script;
+    private static string $manifest;
+    private static string $bashBin;
+
+    public static function setUpBeforeClass(): void
+    {
+        $root = realpath(dirname(__DIR__, 2));
+        if ($root === false) {
+            throw new \RuntimeException('Could not resolve repo root from tests/php/');
+        }
+        self::$repoRoot = $root;
+        self::$script   = 'scripts/ai/prune-shipped-targets.sh';
+        self::$manifest = $root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json';
+
+        if (!is_file($root . DIRECTORY_SEPARATOR . self::$script)) {
+            throw new \RuntimeException('prune-shipped-targets.sh missing at: ' . self::$script);
+        }
+        if (!is_file(self::$manifest)) {
+            throw new \RuntimeException('.ai-install-manifest.json missing; cannot test');
+        }
+
+        self::$bashBin = self::locateBash();
+    }
+
+    /**
+     * Locate a usable bash binary. On Windows, PATH-resolved `bash` often
+     * points to the WSL stub at AppData\Local\Microsoft\WindowsApps\bash.exe
+     * which fails with "RPC call ... handle" when no WSL distro is
+     * installed. Prefer Git for Windows' bash, fall back to PATH.
+     */
+    private static function locateBash(): string
+    {
+        if (DIRECTORY_SEPARATOR === '\\') {
+            $candidates = [
+                'C:\\Program Files\\Git\\bin\\bash.exe',
+                'C:\\Program Files\\Git\\usr\\bin\\bash.exe',
+                'C:\\Program Files (x86)\\Git\\bin\\bash.exe',
+                'C:\\msys64\\usr\\bin\\bash.exe',
+            ];
+            foreach ($candidates as $c) {
+                if (is_file($c)) {
+                    return $c;
+                }
+            }
+        }
+        return 'bash';
+    }
+
+    /**
+     * Run bash with the given args against the script in the repo root.
+     *
+     * Mirrors CliToolsTest::runTool() but adds bash + file-redirected
+     * capture for Windows pipe-buffer safety. stdout/stderr are written
+     * to temp files (not pipes) to avoid the Windows ~4-64KiB deadlock
+     * documented in docs/ai/capabilities/evidence-first-execution/examples.md.
+     *
+     * @param  list<string> $args extra args appended after the script path
+     * @return array{stdout:string, stderr:string, exit:int}
+     */
+    private function runBash(array $args, ?string $bashOverride = null, ?string $cwd = null): array
+    {
+        $bash = $bashOverride ?? self::$bashBin;
+
+        // Capture stdout/stderr via the pipe descriptors. This works for
+        // bounded outputs (<<= a few KB); the prune-shipped-targets read-only
+        // modes emit only ~40 short lines plus a small per-pack table.
+        $cmdParts = [$bash, self::$script];
+        foreach ($args as $a) {
+            $cmdParts[] = $a;
+        }
+        $cmd = implode(' ', array_map('escapeshellarg', $cmdParts));
+
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+        $env = [
+            'HOME'              => sys_get_temp_dir(),
+            'XDG_CONFIG_HOME'   => sys_get_temp_dir(),
+            'GIT_CONFIG_GLOBAL' => '/dev/null',
+            'PATH'              => (string) getenv('PATH'),
+            'NO_COLOR'          => '1',
+        ];
+
+        $proc = proc_open($cmd, $descriptors, $pipes, $cwd ?? self::$repoRoot, $env);
+        $this->assertIsResource($proc, "proc_open failed for: $cmd");
+        fclose($pipes[0]);
+        $stdout = (string) stream_get_contents($pipes[1]);
+        $stderr = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exit = proc_close($proc);
+
+        return ['stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit];
+    }
+
+    /** @return array<string,array{source:string, pack:string}> */
+    private function manifestEntries(): array
+    {
+        $raw    = (string) file_get_contents(self::$manifest);
+        $parsed = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+        $out    = [];
+        foreach (($parsed['files'] ?? []) as $key => $meta) {
+            if (!is_array($meta)) {
+                continue;
+            }
+            $out[(string) $key] = [
+                'source' => (string) ($meta['source'] ?? $key),
+                'pack'   => (string) ($meta['pack'] ?? 'unknown'),
+            ];
+        }
+        return $out;
+    }
+
+    // ---- 1: --list exits 0 with non-empty output --------------------
+
+    public function testListModeExitsZero(): void
+    {
+        $r = $this->runBash(['--list']);
+        $this->assertSame(0, $r['exit'], "--list exited non-zero. stderr:\n" . $r['stderr']);
+        $this->assertNotSame('', trim($r['stdout']), '--list produced no output');
+    }
+
+    // ---- 2: every --list line is a manifest key with source != key --
+
+    public function testListModeOutputAllPathsAreInManifest(): void
+    {
+        $r       = $this->runBash(['--list']);
+        $this->assertSame(0, $r['exit']);
+        $lines   = array_values(array_filter(array_map('trim', explode("\n", $r['stdout'])), 'strlen'));
+        $entries = $this->manifestEntries();
+
+        $this->assertNotEmpty($lines, '--list should print at least one path');
+        foreach ($lines as $line) {
+            $this->assertArrayHasKey(
+                $line,
+                $entries,
+                "--list emitted '$line' but it is not a key in .ai-install-manifest.json"
+            );
+            $this->assertNotSame(
+                $line,
+                $entries[$line]['source'],
+                "--list emitted '$line' but its manifest source equals the key (no duplication)"
+            );
+        }
+    }
+
+    // ---- 3: --list never includes refuse-listed prefixes ------------
+
+    public function testListModeNeverContainsRefuseListedPaths(): void
+    {
+        $r     = $this->runBash(['--list']);
+        $this->assertSame(0, $r['exit']);
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $r['stdout'])), 'strlen'));
+
+        $refused = [
+            'packages/',
+            'tools/',
+            'scripts/ai/',
+            'tests/',
+            '.schemas/',
+            '.git/',
+            'vendor/',
+            'node_modules/',
+        ];
+        foreach ($lines as $line) {
+            foreach ($refused as $prefix) {
+                $this->assertStringStartsNotWith(
+                    $prefix,
+                    $line,
+                    "--list emitted refuse-listed path '$line' (matches '$prefix')"
+                );
+            }
+        }
+    }
+
+    // ---- 4: --dry-run exits 0; stdout ends with total_bytes=N -------
+
+    public function testDryRunExitsZero(): void
+    {
+        $r = $this->runBash(['--dry-run']);
+        $this->assertSame(0, $r['exit'], "--dry-run exited non-zero. stderr:\n" . $r['stderr']);
+
+        // stderr carries the per-pack table.
+        $this->assertStringContainsString(
+            'PACK',
+            $r['stderr'],
+            '--dry-run should print a per-pack table header to stderr'
+        );
+        $this->assertStringContainsString('TOTAL', $r['stderr']);
+
+        // Last non-empty stdout line must match total_bytes=<int>.
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $r['stdout'])), 'strlen'));
+        $this->assertNotEmpty($lines, '--dry-run must print at least one stdout line');
+        $last = end($lines);
+        $this->assertMatchesRegularExpression(
+            '/^total_bytes=\d+$/',
+            (string) $last,
+            "--dry-run last stdout line should be 'total_bytes=N', got: '$last'"
+        );
+    }
+
+    // ---- 5: --apply refuses on dirty worktree -----------------------
+
+    public function testApplyRefusesOnDirtyWorktree(): void
+    {
+        // We cannot safely dirty the live repo. Fabricate a throwaway git
+        // repo in a tempdir, copy the script + common.sh in, and run
+        // --apply there. The manifest has zero qualifying entries; we still
+        // expect exit 2 (dirty worktree) BEFORE the no-op loop runs.
+        $tempBase = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'prune-dirty-' . bin2hex(random_bytes(4));
+        if (!@mkdir($tempBase, 0777, true)) {
+            $this->markTestSkipped('cannot create tempdir for dirty-worktree fixture');
+        }
+
+        try {
+            // Initialize git + commit a minimal manifest + leave dirt.
+            $bashSetup = sprintf(
+                'cd %s && git init -q && '
+                . 'git config user.email t@t.t && git config user.name t && '
+                . 'printf \'{"files":{}}\' > .ai-install-manifest.json && '
+                . 'git add -A && git commit -q -m init && '
+                . 'printf dirt > dirt.txt && git status --porcelain',
+                escapeshellarg($tempBase)
+            );
+            $setup = $this->runRawBash($bashSetup, $tempBase);
+            if ($setup['exit'] !== 0 || trim($setup['stdout']) === '') {
+                $this->markTestSkipped('could not fabricate dirty worktree (git not configured); stderr: ' . $setup['stderr']);
+            }
+
+            // Copy script + common.sh into the fake repo.
+            $scriptAbs = self::$repoRoot . DIRECTORY_SEPARATOR . self::$script;
+            $commonAbs = self::$repoRoot . DIRECTORY_SEPARATOR . 'scripts/ai/common.sh';
+            @mkdir($tempBase . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai', 0777, true);
+            copy($scriptAbs, $tempBase . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'prune-shipped-targets.sh');
+            copy($commonAbs, $tempBase . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'common.sh');
+
+            // Run --apply from inside the fake repo via runBash with cwd override.
+            $r = $this->runBash(['--apply'], null, $tempBase);
+
+            $this->assertSame(
+                2,
+                $r['exit'],
+                "--apply on dirty worktree should exit 2, got {$r['exit']}. stderr:\n{$r['stderr']}"
+            );
+            $this->assertMatchesRegularExpression(
+                '/refused|clean/i',
+                $r['stderr'],
+                'refusal stderr should mention "refused" or "clean"'
+            );
+        } finally {
+            $this->rrmdir($tempBase);
+        }
+    }
+
+    /**
+     * Helper: run a raw bash -c command (used only for the dirty-worktree
+     * setup, since we need git commands inline).
+     *
+     * @return array{stdout:string, stderr:string, exit:int}
+     */
+    private function runRawBash(string $bashCmd, string $cwd): array
+    {
+        $cmd = escapeshellarg(self::$bashBin) . ' -lc ' . escapeshellarg($bashCmd);
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+        $env = [
+            'HOME'              => sys_get_temp_dir(),
+            'XDG_CONFIG_HOME'   => sys_get_temp_dir(),
+            'GIT_CONFIG_GLOBAL' => '/dev/null',
+            'PATH'              => (string) getenv('PATH'),
+            'NO_COLOR'          => '1',
+        ];
+        $proc = proc_open($cmd, $descriptors, $pipes, $cwd, $env);
+        if (!is_resource($proc)) {
+            return ['stdout' => '', 'stderr' => 'proc_open failed', 'exit' => -1];
+        }
+        fclose($pipes[0]);
+        $out = (string) stream_get_contents($pipes[1]);
+        $err = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exit = proc_close($proc);
+        return ['stdout' => $out, 'stderr' => $err, 'exit' => $exit];
+    }
+
+    private function rrmdir(string $dir): void
+    {
+        if (!is_dir($dir)) {
+            return;
+        }
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($it as $f) {
+            /** @var \SplFileInfo $f */
+            if ($f->isDir()) {
+                @rmdir($f->getPathname());
+            } else {
+                @chmod($f->getPathname(), 0666);
+                @unlink($f->getPathname());
+            }
+        }
+        @rmdir($dir);
+    }
+
+    // ---- 6: --apply with missing manifest exits 1 -------------------
+
+    public function testApplyRefusesWhenManifestMissing(): void
+    {
+        $bogus = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'definitely-does-not-exist-' . bin2hex(random_bytes(4)) . '.json';
+        $this->assertFileDoesNotExist($bogus);
+
+        $r = $this->runBash(['--apply', '--manifest', $bogus]);
+        $this->assertSame(
+            1,
+            $r['exit'],
+            "missing manifest should exit 1, got {$r['exit']}. stderr:\n{$r['stderr']}"
+        );
+        $this->assertMatchesRegularExpression(
+            '/manifest not found/i',
+            $r['stderr'],
+            'stderr should explain missing manifest'
+        );
+    }
+
+    // ---- 7: --help prints usage and exits 0 -------------------------
+
+    public function testHelpFlag(): void
+    {
+        $r = $this->runBash(['--help']);
+        $this->assertSame(0, $r['exit'], "--help should exit 0. stderr:\n" . $r['stderr']);
+        $combined = $r['stdout'] . $r['stderr'];
+        $this->assertStringContainsString('Usage:', $combined);
+        $this->assertStringContainsString('--list', $combined);
+        $this->assertStringContainsString('--dry-run', $combined);
+        $this->assertStringContainsString('--apply', $combined);
+    }
+
+    // ---- 8: --include-candidates does NOT affect --list -------------
+
+    public function testIncludeCandidatesOnlyAffectsApply(): void
+    {
+        $base = $this->runBash(['--list']);
+        $with = $this->runBash(['--list', '--include-candidates']);
+
+        $this->assertSame(0, $base['exit']);
+        $this->assertSame(0, $with['exit']);
+
+        // Output must be byte-identical: candidates are an --apply-only
+        // concept (the manifest is the source of truth for --list).
+        $this->assertSame(
+            $base['stdout'],
+            $with['stdout'],
+            '--include-candidates must not change --list output; candidates are --apply-only'
+        );
+
+        // Defense-in-depth: AGENTS.md and .opencode/opencode.json are NOT
+        // manifest keys, so they must never appear in --list regardless.
+        $lines = array_values(array_filter(array_map('trim', explode("\n", $with['stdout'])), 'strlen'));
+        $this->assertNotContains('AGENTS.md', $lines);
+        $this->assertNotContains('.opencode/opencode.json', $lines);
+    }
+}
+
+```
+
 ## FILE: tests/php/Support/list-slow-tests.php
 
 ```text
@@ -12308,6 +13119,7 @@ require_once dirname(__DIR__, 2) . '/tools/ai/ai_catalog_lib.php';
 #
 # Environment:
 #   SUITE_TIMEOUT=120   Per-suite timeout in seconds (default: 120). Set 0 to disable.
+#   SCRIPT_TEST_JOBS=8  Number of shell test suites to run concurrently.
 
 set -euo pipefail
 
@@ -12322,6 +13134,7 @@ FAIL=0
 SKIP=0
 TIMEOUT_COUNT=0
 FAILED_SUITES=()
+SCRIPT_TEST_JOBS="${SCRIPT_TEST_JOBS:-8}"
 
 run_suite() {
     local name="$1"
@@ -12377,41 +13190,121 @@ run_suite() {
 
 printf '\033[1m=== AI Script Test Runner ===\033[0m\n'
 
-# P0 — Critical path
-run_suite "common.sh"          "tests/scripts/ai/test-common.sh"
-run_suite "ai-search.sh"       "tests/scripts/ai/test-ai-search.sh"
-run_suite "rg-code.sh"         "tests/scripts/ai/test-rg-code.sh"
-run_suite "fd-files.sh"        "tests/scripts/ai/test-fd-files.sh"
-run_suite "preview-file.sh"    "tests/scripts/ai/test-preview-file.sh"
-run_suite "pre-tool-use.sh"    "tests/scripts/ai/test-pre-tool-use.sh"
-run_suite "post-tool-use.sh"   "tests/scripts/ai/test-post-tool-use.sh"
-run_suite "ai-verify.sh"       "tests/scripts/ai/test-ai-verify.sh"
+SUITES=(
+    "common.sh|tests/scripts/ai/test-common.sh"
+    "ai-search.sh|tests/scripts/ai/test-ai-search.sh"
+    "rg-code.sh|tests/scripts/ai/test-rg-code.sh"
+    "fd-files.sh|tests/scripts/ai/test-fd-files.sh"
+    "preview-file.sh|tests/scripts/ai/test-preview-file.sh"
+    "pre-tool-use.sh|tests/scripts/ai/test-pre-tool-use.sh"
+    "post-tool-use.sh|tests/scripts/ai/test-post-tool-use.sh"
+    "ai-verify.sh|tests/scripts/ai/test-ai-verify.sh"
+    "ai-diff-context.sh|tests/scripts/ai/test-ai-diff-context.sh"
+    "query-usage.sh|tests/scripts/ai/test-query-usage.sh"
+    "ai-test-select.sh|tests/scripts/ai/test-ai-test-select.sh"
+    "ai-task.sh|tests/scripts/ai/test-ai-task.sh"
+    "ai-doc-check.sh|tests/scripts/ai/test-ai-doc-check.sh"
+    "session-checkpoint.sh|tests/scripts/ai/test-session-checkpoint.sh"
+    "git-forensics.sh|tests/scripts/ai/test-git-forensics.sh"
+    "gh-pr-context.sh|tests/scripts/ai/test-gh-pr-context.sh"
+    "ai-structured.sh|tests/scripts/ai/test-ai-structured.sh"
+    "pack-context.sh|tests/scripts/ai/test-pack-context.sh"
+    "repomix-scc-router.sh|tests/scripts/ai/test-repomix-scc-router.sh"
+    "repomix-context-tree.sh|tests/scripts/ai/test-repomix-context-tree.sh"
+    "run-repomix-context.sh|tests/scripts/ai/test-run-repomix-context.sh"
+    "repo-tool-inventory.sh|tests/scripts/ai/test-repo-tool-inventory.sh"
+    "watch-loop.sh|tests/scripts/ai/test-watch-loop.sh"
+    "ai-edit.sh|tests/scripts/ai/test-ai-edit.sh"
+    "ai-rollback.sh|tests/scripts/ai/test-ai-rollback.sh"
+    "install-mandatory-tools.sh|tests/scripts/ai/test-install-mandatory-tools.sh"
+)
 
-# P1 — Important
-run_suite "ai-diff-context.sh"    "tests/scripts/ai/test-ai-diff-context.sh"
-run_suite "query-usage.sh"        "tests/scripts/ai/test-query-usage.sh"
-run_suite "ai-test-select.sh"     "tests/scripts/ai/test-ai-test-select.sh"
-run_suite "ai-task.sh"            "tests/scripts/ai/test-ai-task.sh"
-run_suite "ai-doc-check.sh"       "tests/scripts/ai/test-ai-doc-check.sh"
-run_suite "session-checkpoint.sh" "tests/scripts/ai/test-session-checkpoint.sh"
+run_suite_with_timeout() {
+    local file="$1"
+    local pid elapsed
 
-# P2 — Important but less frequent
-run_suite "git-forensics.sh"         "tests/scripts/ai/test-git-forensics.sh"
-run_suite "gh-pr-context.sh"         "tests/scripts/ai/test-gh-pr-context.sh"
-run_suite "ai-structured.sh"         "tests/scripts/ai/test-ai-structured.sh"
-run_suite "pack-context.sh"          "tests/scripts/ai/test-pack-context.sh"
-run_suite "repomix-scc-router.sh"    "tests/scripts/ai/test-repomix-scc-router.sh"
-run_suite "repomix-context-tree.sh"  "tests/scripts/ai/test-repomix-context-tree.sh"
+    if [[ "$SUITE_TIMEOUT" -le 0 ]]; then
+        bash "$file"
+        return
+    fi
 
-# P3 — Useful
-run_suite "run-repomix-context.sh"   "tests/scripts/ai/test-run-repomix-context.sh"
-run_suite "repo-tool-inventory.sh"   "tests/scripts/ai/test-repo-tool-inventory.sh"
-run_suite "watch-loop.sh"            "tests/scripts/ai/test-watch-loop.sh"
+    bash "$file" &
+    pid=$!
+    elapsed=0
+    while kill -0 "$pid" 2>/dev/null; do
+        if ((elapsed >= SUITE_TIMEOUT)); then
+            kill -TERM "$pid" 2>/dev/null || true
+            sleep 1
+            kill -9 "$pid" 2>/dev/null || true
+            wait "$pid" 2>/dev/null || true
+            return 124
+        fi
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+    wait "$pid"
+}
 
-# P4 — Controlled
-run_suite "ai-edit.sh"              "tests/scripts/ai/test-ai-edit.sh"
-run_suite "ai-rollback.sh"          "tests/scripts/ai/test-ai-rollback.sh"
-run_suite "install-mandatory-tools.sh" "tests/scripts/ai/test-install-mandatory-tools.sh"
+run_parallel_suites() {
+    local idx=0 entry name file log rc
+    local pids=() names=() logs=()
+
+    PARALLEL_TMP_DIR="$(mktemp -d)"
+    trap 'rm -rf "${PARALLEL_TMP_DIR:-}"' EXIT
+
+    for entry in "${SUITES[@]}"; do
+        name="${entry%%|*}"
+        file="${entry#*|}"
+
+        if [[ -n "$FILTER" && "$name" != *"$FILTER"* ]]; then
+            continue
+        fi
+
+        if [[ ! -f "$file" ]]; then
+            printf '  \033[0;33m⊘\033[0m %s (not yet created)\n' "$name"
+            SKIP=$((SKIP + 1))
+            continue
+        fi
+
+        log="$PARALLEL_TMP_DIR/${name//[^A-Za-z0-9_.-]/_}.log"
+        printf '\n\033[1m━━━ %s (queued) ━━━\033[0m\n' "$name"
+        (run_suite_with_timeout "$file") >"$log" 2>&1 &
+        pids[idx]=$!
+        names[idx]="$name"
+        logs[idx]="$log"
+        idx=$((idx + 1))
+    done
+
+    for idx in "${!pids[@]}"; do
+        rc=0
+        wait "${pids[$idx]}" || rc=$?
+        name="${names[$idx]}"
+        log="${logs[$idx]}"
+
+        printf '\n\033[1m━━━ %s ━━━\033[0m\n' "$name"
+        cat "$log"
+
+        if ((rc == 0)); then
+            PASS=$((PASS + 1))
+        elif ((rc == 124)); then
+            printf '  \033[0;31m⏱\033[0m %s (killed after %ds timeout)\n' "$name" "$SUITE_TIMEOUT"
+            FAIL=$((FAIL + 1))
+            TIMEOUT_COUNT=$((TIMEOUT_COUNT + 1))
+            FAILED_SUITES+=("$name (TIMEOUT)")
+        else
+            FAIL=$((FAIL + 1))
+            FAILED_SUITES+=("$name")
+        fi
+    done
+}
+
+if ((SCRIPT_TEST_JOBS > 1)); then
+    run_parallel_suites
+else
+    for entry in "${SUITES[@]}"; do
+        run_suite "${entry%%|*}" "${entry#*|}"
+    done
+fi
 
 printf '\n\033[1m=== Suite Summary ===\033[0m\n'
 printf '  Passed:   %d\n' "$PASS"
@@ -13022,7 +13915,7 @@ printf 'ai-verify.sh\n'
 # Script runs and produces output
 test_runs() {
     local out
-    out="$("$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+    out="$(AI_VERIFY_TEST_MODE=1 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
     [[ "$out" == *"==>"* ]]
 }
 run_test "script runs and prints step markers" test_runs
@@ -13030,7 +13923,7 @@ run_test "script runs and prints step markers" test_runs
 # Prints repository status
 test_repo_status() {
     local out
-    out="$("$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+    out="$(AI_VERIFY_TEST_MODE=1 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
     [[ "$out" == *"repository"* ]]
 }
 run_test "prints repository section" test_repo_status
@@ -13039,7 +13932,7 @@ run_test "prints repository section" test_repo_status
 if command -v shellcheck >/dev/null 2>&1; then
     test_shellcheck() {
         local out
-        out="$(AI_VERIFY_SCOPE=ai "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+        out="$(AI_VERIFY_TEST_MODE=1 AI_VERIFY_SCOPE=ai "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
         [[ "$out" == *"shellcheck"* ]]
     }
     run_test "runs shellcheck on AI scripts" test_shellcheck
@@ -13051,7 +13944,7 @@ fi
 if command -v composer >/dev/null 2>&1 && [[ -f "$REPO_ROOT/composer.json" ]]; then
     test_composer() {
         local out
-        out="$("$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+        out="$(AI_VERIFY_TEST_MODE=1 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
         [[ "$out" == *"composer"* ]]
     }
     run_test "runs composer validate" test_composer
@@ -13062,7 +13955,7 @@ fi
 # VERIFY_FULL=0 skips full test suite
 test_skip_full() {
     local out
-    out="$(VERIFY_FULL=0 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+    out="$(AI_VERIFY_TEST_MODE=1 VERIFY_FULL=0 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
     [[ "$out" == *"Skipping full"* ]] || [[ "$out" == *"done"* ]]
 }
 run_test "VERIFY_FULL=0 skips full test suite" test_skip_full
@@ -13070,7 +13963,7 @@ run_test "VERIFY_FULL=0 skips full test suite" test_skip_full
 # AI_VERIFY_SCOPE=changed limits scope
 test_scope_changed() {
     local out
-    out="$(AI_VERIFY_SCOPE=changed "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+    out="$(AI_VERIFY_TEST_MODE=1 AI_VERIFY_SCOPE=changed "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
     # Should complete without error
     [[ "$out" == *"==>"* ]]
 }
@@ -17322,7 +18215,7 @@ function aiCollectRootResources(string $root): array
         'scripts/ai/ai-test-select.sh' => ['ai-script', 'ai-test-select.sh', 'Selects likely relevant tests from changed files and task context.'],
         'scripts/ai/ai-verify.sh' => ['ai-script', 'ai-verify.sh', 'Project-aware verification gate for AI-driven changes across shell, PHP, JS/TS, and security checks.'],
         'scripts/ai/common.sh' => ['ai-script', 'common.sh', 'Shared helper library for AI workflow scripts, logging, snapshots, and token-budget checks.'],
-        'scripts/ai/fd-files.sh' => ['ai-script', 'fd-files.sh', 'Repo-aware file discovery wrapper around fd with safer defaults.'],
+        'scripts/ai/fd-files.sh' => ['ai-script', 'fd-files.sh', 'Repo-aware file discovery wrapper around fd/fdfind with rg fallback and safer defaults.'],
         'scripts/ai/gh-pr-context.sh' => ['ai-script', 'gh-pr-context.sh', 'GitHub PR context wrapper with metadata, diff, checks, reviews, and optional PR-scoped context packing.'],
         'scripts/ai/git-forensics.sh' => ['ai-script', 'git-forensics.sh', 'Git history and blame wrapper for evidence-oriented code archaeology.'],
         'scripts/ai/install-mandatory-tools.sh' => ['ai-script', 'install-mandatory-tools.sh', 'Installs mandatory CLI tools required by the AI workflow script layer.'],
@@ -17335,6 +18228,7 @@ function aiCollectRootResources(string $root): array
         'scripts/ai/repomix-context-tree.sh' => ['ai-script', 'repomix-context-tree.sh', 'Builds repository tree context for Repomix-based AI context packing.'],
         'scripts/ai/repomix-scc-router.sh' => ['ai-script', 'repomix-scc-router.sh', 'Ranked context router that produces TSV and JSON bundle plans with churn-aware scoring.'],
         'scripts/ai/rg-code.sh' => ['ai-script', 'rg-code.sh', 'Mode-aware ripgrep wrapper with JSON, file-list, count, and context output modes.'],
+        'scripts/ai/run-repo-tests.sh' => ['ai-script', 'run-repo-tests.sh', 'Parallel-first repository test runner for PHP, shell, Bats, and validators.'],
         'scripts/ai/run-repomix-context.sh' => ['ai-script', 'run-repomix-context.sh', 'Runs Repomix context generation with repository-aware defaults.'],
         'scripts/ai/session-checkpoint.sh' => ['ai-script', 'session-checkpoint.sh', 'Creates session checkpoints for recovery and traceability.'],
         'scripts/ai/watch-loop.sh' => ['ai-script', 'watch-loop.sh', 'Watch-based verification loop with debounce and repo-local session logging.'],
@@ -26280,6 +27174,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/ai-structured.sh', 'target' => 'scripts/ai/ai-structured.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-task.sh', 'target' => 'scripts/ai/ai-task.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-test-select.sh', 'target' => 'scripts/ai/ai-test-select.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/run-repo-tests.sh', 'target' => 'scripts/ai/run-repo-tests.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/session-checkpoint.sh', 'target' => 'scripts/ai/session-checkpoint.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-doc-check.sh', 'target' => 'scripts/ai/ai-doc-check.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/ai-file-freshness.sh', 'target' => 'scripts/ai/ai-file-freshness.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
@@ -26834,7 +27729,17 @@ function aiInstallerScriptRegistry(): array
             'source_path' => 'scripts/ai/fd-files.sh',
             'installed_path' => 'scripts/ai/fd-files.sh',
             'pack' => 'scripts-pack',
-            'required_tools' => ['bash', 'fd'],
+            'required_tools' => ['bash', 'jq', 'rg'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
+        'run-repo-tests' => [
+            'label' => 'Parallel-first repository test runner',
+            'source_path' => 'scripts/ai/run-repo-tests.sh',
+            'installed_path' => 'scripts/ai/run-repo-tests.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'php'],
             'risk' => 'read-only',
             'supports_dry_run' => false,
             'default_args' => [],
@@ -27152,6 +28057,17 @@ function aiInstallerScriptRegistry(): array
             'risk' => 'read-only',
             'supports_dry_run' => false,
             'default_args' => [],
+        ],
+        'prune-shipped-targets' => [
+            'label' => 'Kit-author cleanup of shipped-template duplicates',
+            'source_path' => 'scripts/ai/prune-shipped-targets.sh',
+            'installed_path' => 'scripts/ai/prune-shipped-targets.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'jq', 'git'],
+            'risk' => 'mutating',
+            'supports_dry_run' => true,
+            'default_args' => ['--list'],
+            'source_repo_only' => true,
         ],
     ];
 }

@@ -1,7 +1,7 @@
 {
     "schema_version": 1,
     "project": "awesome-ai-utmostcreator",
-    "tracked_files_count": 855,
+    "tracked_files_count": 869,
     "top_level_paths": [
         ".ai-install-manifest.json",
         ".editorconfig",
@@ -38,10 +38,10 @@
         "tools"
     ],
     "counts": {
-        "tests_php": 13,
+        "tests_php": 14,
         "tests_shell": 4,
-        "scripts_copilot": 30,
-        "scripts_ai": 30,
+        "scripts_copilot": 31,
+        "scripts_ai": 31,
         "tools_ai_php": 64
     },
     "ai_surface": {

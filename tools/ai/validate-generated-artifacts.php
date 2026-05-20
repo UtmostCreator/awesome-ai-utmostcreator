@@ -9,7 +9,8 @@ if ($root === false || !is_dir($root)) {
     exit(1);
 }
 
-$existenceOnly = in_array('--existence-only', $argv, true);
+$sourceRepoMode = is_file($root . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
+$existenceOnly = in_array('--existence-only', $argv, true) || !$sourceRepoMode;
 $write = in_array('--write', $argv, true) || in_array('--fix', $argv, true);
 
 $required = [
@@ -84,6 +85,9 @@ if ($errors !== []) {
 }
 
 fwrite(STDOUT, "OK: generated artifact baseline present\n");
+if (!$sourceRepoMode) {
+    fwrite(STDOUT, "INFO: installed target mode; skipped source-repository drift checks\n");
+}
 exit(0);
 
 /**

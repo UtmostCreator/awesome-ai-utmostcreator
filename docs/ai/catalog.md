@@ -31,7 +31,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
 - `root / adapter-policy` - 1
-- `root / ai-script` - 26
+- `root / ai-script` - 27
 - `root / capability` - 15
 - `root / cli` - 1
 - `root / exporter` - 1
@@ -68,7 +68,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`ai-script`|ai-test-select.sh|`scripts/ai/ai-test-select.sh`|Selects likely relevant tests from changed files and task context.|
 |`ai-script`|ai-verify.sh|`scripts/ai/ai-verify.sh`|Project-aware verification gate for AI-driven changes across shell, PHP, JS/TS, and security checks.|
 |`ai-script`|common.sh|`scripts/ai/common.sh`|Shared helper library for AI workflow scripts, logging, snapshots, and token-budget checks.|
-|`ai-script`|fd-files.sh|`scripts/ai/fd-files.sh`|Repo-aware file discovery wrapper around fd with safer defaults.|
+|`ai-script`|fd-files.sh|`scripts/ai/fd-files.sh`|Repo-aware file discovery wrapper around fd/fdfind with rg fallback and safer defaults.|
 |`ai-script`|gh-pr-context.sh|`scripts/ai/gh-pr-context.sh`|GitHub PR context wrapper with metadata, diff, checks, reviews, and optional PR-scoped context packing.|
 |`ai-script`|git-forensics.sh|`scripts/ai/git-forensics.sh`|Git history and blame wrapper for evidence-oriented code archaeology.|
 |`ai-script`|install-mandatory-tools.sh|`scripts/ai/install-mandatory-tools.sh`|Installs mandatory CLI tools required by the AI workflow script layer.|
@@ -81,6 +81,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`ai-script`|repomix-context-tree.sh|`scripts/ai/repomix-context-tree.sh`|Builds repository tree context for Repomix-based AI context packing.|
 |`ai-script`|repomix-scc-router.sh|`scripts/ai/repomix-scc-router.sh`|Ranked context router that produces TSV and JSON bundle plans with churn-aware scoring.|
 |`ai-script`|rg-code.sh|`scripts/ai/rg-code.sh`|Mode-aware ripgrep wrapper with JSON, file-list, count, and context output modes.|
+|`ai-script`|run-repo-tests.sh|`scripts/ai/run-repo-tests.sh`|Parallel-first repository test runner for PHP, shell, Bats, and validators.|
 |`ai-script`|run-repomix-context.sh|`scripts/ai/run-repomix-context.sh`|Runs Repomix context generation with repository-aware defaults.|
 |`ai-script`|session-checkpoint.sh|`scripts/ai/session-checkpoint.sh`|Creates session checkpoints for recovery and traceability.|
 |`ai-script`|watch-loop.sh|`scripts/ai/watch-loop.sh`|Watch-based verification loop with debounce and repo-local session logging.|
@@ -327,7 +328,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`package-capability`|Dependency Upgrade Reference|`packages/ai-universal-rules/templates/capabilities/dependency-upgrade/reference.md`|Use this file for stable upgrade facts:|
 |`package-capability`|Evidence-First Execution Capability|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/CAPABILITY.md`|Run non-trivial changes with explicit scope control, dirty-worktree protection, and evidence-backed verification.|
 |`package-capability`|checklist|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/checklist.md`|- [ ] Read user request and restate bounded outcome.|
-|`package-capability`|examples|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/examples.md`|Good: source-fix with focused test and explicit verification status.|
+|`package-capability`|Read-only: print one path per line that --apply would delete.|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/examples.md`|Good: source-fix with focused test and explicit verification status.|
 |`package-capability`|gotchas|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/gotchas.md`|- Do not treat generated files as canonical source unless policy says so.|
 |`package-capability`|reference|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/reference.md`|- `docs/ai/source-of-truth.md`|
 |`package-capability`|Project Context Capability|`packages/ai-universal-rules/templates/capabilities/project-context/CAPABILITY.md`|Provide durable repository context that other capabilities, agents, and prompts can rely on before planning, implementing, reviewing, or verifying changes.|

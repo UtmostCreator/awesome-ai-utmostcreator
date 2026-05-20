@@ -2,6 +2,8 @@
 set -euo pipefail
 
 POLICY_FILE="${COPILOT_POLICY_FILE:-policies/copilot/policy.yaml}"
+MAINTENANCE_STATE_FILE="${COPILOT_MAINTENANCE_STATE_FILE:-.ai-logs/maintenance-mode.json}"
+# maintenance mode allows repository-delivered scripts only
 
 deny() {
     jq -cn --arg reason "$1" '{permissionDecision:"deny", permissionDecisionReason:$reason}'

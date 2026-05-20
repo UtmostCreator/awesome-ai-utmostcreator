@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "package-verify.json",
-    "generated_at": "2026-05-19T23:12:07+00:00",
+    "generated_at": "2026-05-20T00:21:03+00:00",
     "command": "php tools/ai/ai.php package-verify",
-    "based_on_commit": "fb651d9",
+    "based_on_commit": "b4d1f7d",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "failed",
@@ -27,7 +27,7 @@
             {
                 "path": "templates/capabilities/evidence-first-execution/examples.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:dd15af8834edc54c95c837da55d85e12f63200f22dbcfc3641219c40d347b8da"
+                "current": "sha256:f98b35c3d801a70f1843c833000ca3aa0c95190a13d7a78538468102a690dad7"
             },
             {
                 "path": "templates/capabilities/evidence-first-execution/gotchas.md",
@@ -143,7 +143,7 @@
             {
                 "path": "templates/core/execution-protocol.template.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:89af06550f60175daef731b261c49d476c5f59e69d570c366280a91d5da7da00"
+                "current": "sha256:3f9e7cc5af591c9d342ac383d95737657671d15f72ed15666fccfe03751fddf8"
             },
             {
                 "path": "templates/core/generated-artifacts.template.md",
@@ -153,7 +153,7 @@
             {
                 "path": "templates/core/opencode.json",
                 "reason": "missing_from_lock",
-                "current": "sha256:f2e9fc76a5cec97cb7bda7b099344d592b27831b5e34dce600cf7a7f47e50f3c"
+                "current": "sha256:d24898477a9720e1a8b6f37a85b58351c285bd4b325162054be0422e50d0f9aa"
             },
             {
                 "path": "templates/core/project-context.placeholders.md",

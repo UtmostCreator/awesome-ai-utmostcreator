@@ -32,6 +32,7 @@
 - `scripts/ai/post-tool-use.sh`
 - `scripts/ai/pre-tool-use.sh`
 - `scripts/ai/preview-file.sh`
+- `scripts/ai/prune-shipped-targets.sh`
 - `scripts/ai/query-usage.sh`
 - `scripts/ai/repo-stats.sh`
 - `scripts/ai/repo-tool-inventory.sh`
@@ -64,6 +65,7 @@
 - `tests/php/CopilotAgentRendererTest.php`
 - `tests/php/GenerateRepoStructureTest.php`
 - `tests/php/InstallerSafetyTest.php`
+- `tests/php/PruneShippedTargetsTest.php`
 - `tests/php/Support/list-slow-tests.php`
 - `tests/php/bootstrap.php`
 - `tests/scripts/ai/run-all-tests.sh`
