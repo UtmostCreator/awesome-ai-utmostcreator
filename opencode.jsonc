@@ -11,6 +11,7 @@
   "permission": {
     "edit": "ask",
     "bash": {
+      "*": "ask",
       "pwd": "allow",
       "ls *": "allow",
       "cat *": "ask",
@@ -43,6 +44,8 @@
       "AI_OUTPUT=json bash scripts/ai/preview-file.sh *": "allow",
       "bash scripts/ai/preview-file.sh *": "allow",
       "bash scripts/ai/query-usage.sh *": "allow",
+      "bash scripts/ai/run-repo-tests.sh": "allow",
+      "bash scripts/ai/run-repo-tests.sh *": "allow",
       "bash scripts/ai/ai-verify.sh *": "ask",
       "bash scripts/ai/ai-doc-check.sh --check *": "allow",
       "bash scripts/ai/repo-tool-inventory.sh": "allow",
@@ -75,16 +78,24 @@
       "composer test:profile": "allow",
       "composer validate": "allow",
       "shellcheck *": "allow",
+      "markdownlint-cli2 *": "allow",
       "shfmt -d *": "allow",
       "actionlint *": "allow",
       "actionlint": "allow",
+      "vendor/bin/pint --test *": "allow",
+      "./vendor/bin/pint --test *": "allow",
+      "vendor/bin/phpstan analyse *": "allow",
+      "./vendor/bin/phpstan analyse *": "allow",
+      "vendor/bin/php-cs-fixer check *": "allow",
+      "./vendor/bin/php-cs-fixer check *": "allow",
+      "vendor/bin/php-cs-fixer fix --dry-run *": "allow",
+      "./vendor/bin/php-cs-fixer fix --dry-run *": "allow",
       "php tools/ai/verify-full-install.php": "ask",
       "php tools/ai/ai.php install * --dry-run": "ask",
       "rm *": "deny",
       "rm -rf *": "deny",
       "git reset --hard *": "deny",
-      "git push --force *": "deny",
-      "*": "ask"
+      "git push --force *": "deny"
     }
   }
 }

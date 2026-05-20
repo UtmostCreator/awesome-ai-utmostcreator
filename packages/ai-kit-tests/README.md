@@ -9,8 +9,8 @@ The PHP tests cover unit logic (`tests/Unit/`), CLI/integration contracts agains
 ```bash
 cd packages/ai-kit-tests
 composer install --no-interaction --prefer-dist
-composer test:fast            # paratest, 4 workers (~17s)
-composer test                 # serial PHPUnit (~37s)
+composer test:fast            # paratest, 12 workers (~19-21s)
+composer test                 # serial PHPUnit (~60s)
 composer test:profile         # emits ../../docs/ai/generated/phpunit-junit.xml
 composer test:slow [N]        # ranks the N slowest tests from the last profile
 

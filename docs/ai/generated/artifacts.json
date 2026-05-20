@@ -1,194 +1,194 @@
 {
     "schema_version": 1,
-    "updated_at": "2026-05-19T23:12:15+00:00",
-    "current_commit": "unknown",
+    "updated_at": "2026-05-20T00:21:43+00:00",
+    "current_commit": "b4d1f7d",
     "artifacts": {
         "advisor.json": {
-            "generated_at": "2026-05-19T23:11:59+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:52+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php advisor",
             "estimated_tokens": 283,
             "stale": false,
             "json_path": "docs/ai/generated/advisor.json"
         },
         "ai-commands.json": {
-            "generated_at": "2026-05-19T23:11:55+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:46+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php list",
             "estimated_tokens": 367,
             "stale": false,
             "json_path": "docs/ai/generated/ai-commands.json"
         },
         "project-snapshot.json": {
-            "generated_at": "2026-05-19T23:11:55+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:47+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php snapshot",
-            "estimated_tokens": 351,
+            "estimated_tokens": 1126,
             "stale": false,
             "json_path": "docs/ai/generated/project-snapshot.json"
         },
         "freshness.json": {
-            "generated_at": "2026-05-19T23:11:56+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:47+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php freshness",
-            "estimated_tokens": 1829,
+            "estimated_tokens": 1695,
             "stale": false,
             "json_path": "docs/ai/generated/freshness.json"
         },
         "diff-summary.json": {
-            "generated_at": "2026-05-19T23:11:56+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:48+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php diff-summary --base main",
             "estimated_tokens": 150,
             "stale": false,
             "json_path": "docs/ai/generated/diff-summary.json"
         },
         "risk.json": {
-            "generated_at": "2026-05-19T23:11:57+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:49+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php risk --base main",
             "estimated_tokens": 141,
             "stale": false,
             "json_path": "docs/ai/generated/risk.json"
         },
         "install-docs.json": {
-            "generated_at": "2026-05-19T23:11:58+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:50+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php install-docs --check",
-            "estimated_tokens": 203,
+            "estimated_tokens": 217,
             "stale": false,
             "json_path": "docs/ai/generated/install-docs.json"
         },
         "verify.json": {
-            "generated_at": "2026-05-19T23:12:01+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:54+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php verify --changed",
-            "estimated_tokens": 1968,
+            "estimated_tokens": 2138,
             "stale": false,
             "json_path": "docs/ai/generated/verify.json"
         },
         "next.json": {
-            "generated_at": "2026-05-19T23:12:01+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:55+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php next",
             "estimated_tokens": 149,
             "stale": false,
             "json_path": "docs/ai/generated/next.json"
         },
         "env-check.json": {
-            "generated_at": "2026-05-19T23:12:02+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:57+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php env-check",
             "estimated_tokens": 902,
             "stale": false,
             "json_path": "docs/ai/generated/env-check.json"
         },
         "impact.json": {
-            "generated_at": "2026-05-19T23:12:03+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:58+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php impact --base main",
             "estimated_tokens": 147,
             "stale": false,
             "json_path": "docs/ai/generated/impact.json"
         },
         "ask.json": {
-            "generated_at": "2026-05-19T23:12:03+00:00",
-            "based_on_commit": "fb651d9",
-            "command": "php tools/ai/ai.php ask --resolve q-20260519-231203-256d51 --answer both",
+            "generated_at": "2026-05-20T00:20:59+00:00",
+            "based_on_commit": "b4d1f7d",
+            "command": "php tools/ai/ai.php ask --resolve q-20260520-002059-256d51 --answer both",
             "estimated_tokens": 251,
             "stale": false,
             "json_path": "docs/ai/generated/ask.json"
         },
         "estimate.json": {
-            "generated_at": "2026-05-19T23:12:04+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:20:59+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php estimate",
             "estimated_tokens": 180,
             "stale": false,
             "json_path": "docs/ai/generated/estimate.json"
         },
         "conflicts.json": {
-            "generated_at": "2026-05-19T23:12:04+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:00+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php conflicts",
             "estimated_tokens": 116,
             "stale": false,
             "json_path": "docs/ai/generated/conflicts.json"
         },
         "find.json": {
-            "generated_at": "2026-05-19T23:12:05+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:01+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php find workflow",
-            "estimated_tokens": 9955,
+            "estimated_tokens": 9922,
             "stale": false,
             "json_path": "docs/ai/generated/find.json"
         },
         "symbols.json": {
-            "generated_at": "2026-05-19T23:12:06+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:02+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php symbols aiRun",
             "estimated_tokens": 4673,
             "stale": false,
             "json_path": "docs/ai/generated/symbols.json"
         },
         "preflight.json": {
-            "generated_at": "2026-05-19T23:12:14+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:43+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php preflight",
             "estimated_tokens": 346,
             "stale": false,
             "json_path": "docs/ai/generated/preflight.json"
         },
         "package-lock.json": {
-            "generated_at": "2026-05-19T23:12:06+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:03+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php package-lock",
             "estimated_tokens": 142,
             "stale": false,
             "json_path": "docs/ai/generated/package-lock.json"
         },
         "package-verify.json": {
-            "generated_at": "2026-05-19T23:12:07+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:03+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php package-verify",
             "estimated_tokens": 4359,
             "stale": false,
             "json_path": "docs/ai/generated/package-verify.json"
         },
         "instruction-audit.json": {
-            "generated_at": "2026-05-19T23:12:07+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:04+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php audit-instructions",
             "estimated_tokens": 3136,
             "stale": false,
             "json_path": "docs/ai/generated/instruction-audit.json"
         },
         "adapter-plan.json": {
-            "generated_at": "2026-05-19T23:12:07+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:04+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php adapter-plan",
-            "estimated_tokens": 14087,
+            "estimated_tokens": 14213,
             "stale": false,
             "json_path": "docs/ai/generated/adapter-plan.json"
         },
         "install.json": {
-            "generated_at": "2026-05-19T23:12:14+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:05+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php install --dry-run",
             "estimated_tokens": 282,
             "stale": false,
             "json_path": "docs/ai/generated/install.json"
         },
         "adapter-validate.json": {
-            "generated_at": "2026-05-19T23:12:08+00:00",
-            "based_on_commit": "fb651d9",
+            "generated_at": "2026-05-20T00:21:05+00:00",
+            "based_on_commit": "b4d1f7d",
             "command": "php tools/ai/ai.php adapter-validate",
             "estimated_tokens": 209,
             "stale": false,
             "json_path": "docs/ai/generated/adapter-validate.json"
         },
         "scripts.json": {
-            "generated_at": "2026-05-19T23:12:14+00:00",
+            "generated_at": "2026-05-20T00:20:47+00:00",
             "based_on_commit": "unknown",
             "command": "php tools/ai/ai.php run-script repomix-context",
             "estimated_tokens": 156,
@@ -196,7 +196,7 @@
             "json_path": "docs/ai/generated/scripts.json"
         },
         "toolchain.json": {
-            "generated_at": "2026-05-19T23:12:15+00:00",
+            "generated_at": "2026-05-20T00:20:48+00:00",
             "based_on_commit": "unknown",
             "command": "php tools/ai/ai.php toolchain",
             "estimated_tokens": 1861,

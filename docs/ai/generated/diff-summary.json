@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "diff-summary.json",
-    "generated_at": "2026-05-19T23:11:56+00:00",
+    "generated_at": "2026-05-20T00:20:48+00:00",
     "command": "php tools/ai/ai.php diff-summary --base main",
-    "based_on_commit": "fb651d9",
+    "based_on_commit": "b4d1f7d",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -15,7 +15,7 @@
         "changed_files_count": 0,
         "changed_files": [],
         "staged_files_count": 0,
-        "unstaged_files_count": 17,
+        "unstaged_files_count": 65,
         "changed_by_type": []
     }
 }

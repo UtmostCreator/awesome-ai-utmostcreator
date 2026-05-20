@@ -16,7 +16,8 @@ if ($root === false) {
     exit(1);
 }
 
-if ($targetArg !== null || (!is_dir($root . DIRECTORY_SEPARATOR . 'packages') && is_file($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
+$sourceRepoMode = is_file($root . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
+if ($targetArg !== null || (!$sourceRepoMode && is_file($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
     $errors = [];
     foreach (['AGENTS.md', 'docs/ai/project-context.md', 'docs/ai/POST-INSTALL.md', 'scripts/ai/ai-search.sh', 'tools/ai/validate-install-surface.php', '.ai-install-manifest.json'] as $required) {
         if (!file_exists($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $required))) {

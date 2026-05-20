@@ -22,6 +22,7 @@
     "ai-structured": {"source_path":"scripts/ai/ai-structured.sh","installed_path":"scripts/ai/ai-structured.sh","pack":"scripts-pack","risk":"read-only"},
     "ai-task": {"source_path":"scripts/ai/ai-task.sh","installed_path":"scripts/ai/ai-task.sh","pack":"scripts-pack","risk":"read-only"},
     "ai-test-select": {"source_path":"scripts/ai/ai-test-select.sh","installed_path":"scripts/ai/ai-test-select.sh","pack":"scripts-pack","risk":"read-only"},
+    "run-repo-tests": {"source_path":"scripts/ai/run-repo-tests.sh","installed_path":"scripts/ai/run-repo-tests.sh","pack":"scripts-pack","risk":"read-only"},
     "session-checkpoint": {"source_path":"scripts/ai/session-checkpoint.sh","installed_path":"scripts/ai/session-checkpoint.sh","pack":"scripts-pack","risk":"mutating"},
     "ai-file-freshness": {"source_path":"scripts/ai/ai-file-freshness.sh","installed_path":"scripts/ai/ai-file-freshness.sh","pack":"scripts-pack","risk":"read-only"},
     "ai-install-coverage": {"source_path":"scripts/ai/ai-install-coverage.sh","installed_path":"scripts/ai/ai-install-coverage.sh","pack":"scripts-pack","risk":"read-only"},

@@ -22,7 +22,7 @@ printf 'ai-verify.sh\n'
 # Script runs and produces output
 test_runs() {
     local out
-    out="$("$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+    out="$(AI_VERIFY_TEST_MODE=1 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
     [[ "$out" == *"==>"* ]]
 }
 run_test "script runs and prints step markers" test_runs
@@ -30,7 +30,7 @@ run_test "script runs and prints step markers" test_runs
 # Prints repository status
 test_repo_status() {
     local out
-    out="$("$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+    out="$(AI_VERIFY_TEST_MODE=1 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
     [[ "$out" == *"repository"* ]]
 }
 run_test "prints repository section" test_repo_status
@@ -39,7 +39,7 @@ run_test "prints repository section" test_repo_status
 if command -v shellcheck >/dev/null 2>&1; then
     test_shellcheck() {
         local out
-        out="$(AI_VERIFY_SCOPE=ai "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+        out="$(AI_VERIFY_TEST_MODE=1 AI_VERIFY_SCOPE=ai "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
         [[ "$out" == *"shellcheck"* ]]
     }
     run_test "runs shellcheck on AI scripts" test_shellcheck
@@ -51,7 +51,7 @@ fi
 if command -v composer >/dev/null 2>&1 && [[ -f "$REPO_ROOT/composer.json" ]]; then
     test_composer() {
         local out
-        out="$("$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+        out="$(AI_VERIFY_TEST_MODE=1 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
         [[ "$out" == *"composer"* ]]
     }
     run_test "runs composer validate" test_composer
@@ -62,7 +62,7 @@ fi
 # VERIFY_FULL=0 skips full test suite
 test_skip_full() {
     local out
-    out="$(VERIFY_FULL=0 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+    out="$(AI_VERIFY_TEST_MODE=1 VERIFY_FULL=0 "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
     [[ "$out" == *"Skipping full"* ]] || [[ "$out" == *"done"* ]]
 }
 run_test "VERIFY_FULL=0 skips full test suite" test_skip_full
@@ -70,7 +70,7 @@ run_test "VERIFY_FULL=0 skips full test suite" test_skip_full
 # AI_VERIFY_SCOPE=changed limits scope
 test_scope_changed() {
     local out
-    out="$(AI_VERIFY_SCOPE=changed "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
+    out="$(AI_VERIFY_TEST_MODE=1 AI_VERIFY_SCOPE=changed "$BASH_BIN" "$SCRIPT" "$REPO_ROOT" 2>&1 || true)"
     # Should complete without error
     [[ "$out" == *"==>"* ]]
 }

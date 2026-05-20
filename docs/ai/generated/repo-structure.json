@@ -3,7 +3,7 @@
     "source": "git ls-files",
     "with_scc": true,
     "folder_count": 13,
-    "tracked_file_count": 651,
+    "tracked_file_count": 658,
     "metadata": {
         "schema_version": 1,
         "coverage_required": true,
@@ -46,12 +46,12 @@
             "ai_entrypoint": "AGENTS.md",
             "notes": "Root-level tracked files are intentionally grouped under '.'.",
             "metrics": {
-                "lines": 2170,
-                "code": 1738,
+                "lines": 2181,
+                "code": 1749,
                 "comments": 34,
                 "blanks": 398,
                 "complexity": 42,
-                "bytes": 119435
+                "bytes": 120036
             }
         },
         {
@@ -139,12 +139,12 @@
             "ai_entrypoint": ".github/copilot-instructions.md",
             "notes": "Canonical installed Copilot surface for this repo.",
             "metrics": {
-                "lines": 3842,
-                "code": 2814,
+                "lines": 3858,
+                "code": 2826,
                 "comments": 0,
-                "blanks": 1028,
+                "blanks": 1032,
                 "complexity": 19,
-                "bytes": 150357
+                "bytes": 150782
             }
         },
         {
@@ -215,12 +215,12 @@
             "ai_entrypoint": ".opencode/opencode.json",
             "notes": "Canonical installed OpenCode surface for this repo.",
             "metrics": {
-                "lines": 3373,
-                "code": 2618,
+                "lines": 3392,
+                "code": 2637,
                 "comments": 0,
                 "blanks": 755,
                 "complexity": 0,
-                "bytes": 118440
+                "bytes": 119560
             }
         },
         {
@@ -429,18 +429,23 @@
             "ai_entrypoint": "docs/ai/project-context.md",
             "notes": "Includes capabilities, generated artifacts, and architecture notes.",
             "metrics": {
-                "lines": 3722,
-                "code": 2914,
+                "lines": 3805,
+                "code": 2974,
                 "comments": 0,
-                "blanks": 808,
+                "blanks": 831,
                 "complexity": 0,
-                "bytes": 178213
+                "bytes": 185584
             }
         },
         {
             "path": "packages",
-            "file_count": 166,
+            "file_count": 171,
             "files": [
+                "packages/ai-kit-tests/README.md",
+                "packages/ai-kit-tests/composer.json",
+                "packages/ai-kit-tests/phpunit.xml.dist",
+                "packages/ai-kit-tests/tests/Support/list-slow-tests.php",
+                "packages/ai-kit-tests/tests/bootstrap.php",
                 "packages/ai-universal-rules/PLACEHOLDERS.md",
                 "packages/ai-universal-rules/QUICKSTART.md",
                 "packages/ai-universal-rules/README.md",
@@ -608,7 +613,7 @@
                 "packages/ai-universal-rules/templates/workflows/search-evidence.md",
                 "packages/ai-universal-rules/templates/workflows/verify-change.md"
             ],
-            "files_csv": "packages/ai-universal-rules/PLACEHOLDERS.md,packages/ai-universal-rules/QUICKSTART.md,packages/ai-universal-rules/README.md,packages/ai-universal-rules/catalog.json,packages/ai-universal-rules/docs/BROWSE.md,packages/ai-universal-rules/docs/CAPABILITY-MODEL.md,packages/ai-universal-rules/docs/COMPATIBILITY.md,packages/ai-universal-rules/docs/COMPOSITION-RECIPES.md,packages/ai-universal-rules/docs/CONTROL-MODEL.md,packages/ai-universal-rules/docs/DESIGN-PRINCIPLES.md,packages/ai-universal-rules/docs/EVALUATION.md,packages/ai-universal-rules/docs/INSTALL-CATALOG.md,packages/ai-universal-rules/docs/INSTALL-GITHUB-COPILOT.md,packages/ai-universal-rules/docs/INSTALL-OPENCODE.md,packages/ai-universal-rules/docs/ONBOARDING.md,packages/ai-universal-rules/docs/PRECEDENCE.md,packages/ai-universal-rules/docs/PROJECT-EXAMPLES.md,packages/ai-universal-rules/docs/RELEASE-BUNDLES.md,packages/ai-universal-rules/docs/foundations/CAPABILITY-MODEL.md,packages/ai-universal-rules/docs/foundations/COMPATIBILITY.md,packages/ai-universal-rules/docs/foundations/CONTROL-MODEL.md,packages/ai-universal-rules/docs/foundations/DESIGN-PRINCIPLES.md,packages/ai-universal-rules/docs/foundations/PRECEDENCE.md,packages/ai-universal-rules/docs/foundations/SKILLS.md,packages/ai-universal-rules/docs/operations/EVAL-SCENARIOS.md,packages/ai-universal-rules/docs/operations/GOVERNANCE.md,packages/ai-universal-rules/docs/operations/HOOKS-AND-ENFORCEMENT.md,packages/ai-universal-rules/docs/operations/MAINTENANCE.md,packages/ai-universal-rules/docs/operations/MCP-BOUNDARIES.md,packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md,packages/ai-universal-rules/docs/workflows/AGENT-HANDOFFS.md,packages/ai-universal-rules/docs/workflows/MONOREPO-STRATEGY.md,packages/ai-universal-rules/docs/workflows/RISK-AND-APPROVALS.md,packages/ai-universal-rules/docs/workflows/RUNTIME-OBSERVABILITY.md,packages/ai-universal-rules/docs/workflows/SYSTEM-WORKFLOW.md,packages/ai-universal-rules/docs/workflows/TASK-ENTRYPOINTS.md,packages/ai-universal-rules/manifest.json,packages/ai-universal-rules/manifest.yml,packages/ai-universal-rules/package-lock.ai.json,packages/ai-universal-rules/policies/ai-file-standards.json,packages/ai-universal-rules/templates/capabilities/README.md,packages/ai-universal-rules/templates/capabilities/bug-regression/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/bug-regression/checklist.md,packages/ai-universal-rules/templates/capabilities/bug-regression/config.example.json,packages/ai-universal-rules/templates/capabilities/bug-regression/examples.md,packages/ai-universal-rules/templates/capabilities/bug-regression/gotchas.md,packages/ai-universal-rules/templates/capabilities/bug-regression/reference.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/checklist.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/examples.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/gotchas.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/reference.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/checklist.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/examples.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/gotchas.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/reference.md,packages/ai-universal-rules/templates/capabilities/project-context/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/project-context/examples.md,packages/ai-universal-rules/templates/capabilities/project-context/gotchas.md,packages/ai-universal-rules/templates/capabilities/project-context/reference.md,packages/ai-universal-rules/templates/capabilities/release-safety/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/release-safety/checklist.md,packages/ai-universal-rules/templates/capabilities/release-safety/examples.md,packages/ai-universal-rules/templates/capabilities/release-safety/gotchas.md,packages/ai-universal-rules/templates/capabilities/release-safety/reference.md,packages/ai-universal-rules/templates/capabilities/review-diff/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/review-diff/checklist.md,packages/ai-universal-rules/templates/capabilities/review-diff/examples.md,packages/ai-universal-rules/templates/capabilities/review-diff/gotchas.md,packages/ai-universal-rules/templates/capabilities/review-diff/reference.md,packages/ai-universal-rules/templates/capabilities/verify-change/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/verify-change/checklist.md,packages/ai-universal-rules/templates/capabilities/verify-change/examples.md,packages/ai-universal-rules/templates/capabilities/verify-change/gotchas.md,packages/ai-universal-rules/templates/capabilities/verify-change/reference.md,packages/ai-universal-rules/templates/commands/search-evidence.md,packages/ai-universal-rules/templates/commands/verify-ai-wiring.md,packages/ai-universal-rules/templates/commands/verify.md,packages/ai-universal-rules/templates/core/AGENTS.template.md,packages/ai-universal-rules/templates/core/POST-INSTALL.template.md,packages/ai-universal-rules/templates/core/agents/architect.md,packages/ai-universal-rules/templates/core/agents/bootstrapper.md,packages/ai-universal-rules/templates/core/agents/config-maintainer.md,packages/ai-universal-rules/templates/core/agents/implementer.md,packages/ai-universal-rules/templates/core/agents/refactorer.md,packages/ai-universal-rules/templates/core/agents/release-auditor.md,packages/ai-universal-rules/templates/core/agents/repository-researcher.md,packages/ai-universal-rules/templates/core/agents/repository-reviewer.md,packages/ai-universal-rules/templates/core/agents/researcher.md,packages/ai-universal-rules/templates/core/agents/reviewer.md,packages/ai-universal-rules/templates/core/agents/workflow-auditor.md,packages/ai-universal-rules/templates/core/ai-file-standards.template.md,packages/ai-universal-rules/templates/core/copilot-instructions.template.md,packages/ai-universal-rules/templates/core/copilot-vscode-settings.template.json,packages/ai-universal-rules/templates/core/execution-protocol.template.md,packages/ai-universal-rules/templates/core/generated-artifacts.template.md,packages/ai-universal-rules/templates/core/opencode.json,packages/ai-universal-rules/templates/core/project-context.placeholders.md,packages/ai-universal-rules/templates/core/project-context.template.md,packages/ai-universal-rules/templates/core/project-stack.template.md,packages/ai-universal-rules/templates/core/workflow.template.md,packages/ai-universal-rules/templates/docs/ai/tools/actions/preview-file.md,packages/ai-universal-rules/templates/github/hooks/scripts/tool-guardian.ps1,packages/ai-universal-rules/templates/github/hooks/tool-guardian.json,packages/ai-universal-rules/templates/github/hooks/tool-policy.json,packages/ai-universal-rules/templates/github/pull_request_template.md,packages/ai-universal-rules/templates/github/workflows/export-ai-universal-rules-preview.yml,packages/ai-universal-rules/templates/github/workflows/test-external-install.yml,packages/ai-universal-rules/templates/github/workflows/validate-ai-surface.yml,packages/ai-universal-rules/templates/instructions/ai-file-standards.instructions.md,packages/ai-universal-rules/templates/instructions/ai-scripts.instructions.md,packages/ai-universal-rules/templates/instructions/ai-search.instructions.md,packages/ai-universal-rules/templates/instructions/ai-tooling.instructions.md,packages/ai-universal-rules/templates/instructions/ai-workflow.instructions.md,packages/ai-universal-rules/templates/instructions/approval-boundaries.instructions.md,packages/ai-universal-rules/templates/instructions/architecture.instructions.md,packages/ai-universal-rules/templates/instructions/base.instructions.md,packages/ai-universal-rules/templates/instructions/ci-workflows.instructions.md,packages/ai-universal-rules/templates/instructions/composer.instructions.md,packages/ai-universal-rules/templates/instructions/config-infra.instructions.md,packages/ai-universal-rules/templates/instructions/context-gate.instructions.md,packages/ai-universal-rules/templates/instructions/copilot-script-enforcement.instructions.md,packages/ai-universal-rules/templates/instructions/execution-protocol.instructions.md,packages/ai-universal-rules/templates/instructions/frontend.instructions.md,packages/ai-universal-rules/templates/instructions/generated-artifacts.instructions.md,packages/ai-universal-rules/templates/instructions/php.instructions.md,packages/ai-universal-rules/templates/instructions/security.instructions.md,packages/ai-universal-rules/templates/instructions/shell.instructions.md,packages/ai-universal-rules/templates/instructions/targets.instructions.md,packages/ai-universal-rules/templates/instructions/testing.instructions.md,packages/ai-universal-rules/templates/instructions/tools.instructions.md,packages/ai-universal-rules/templates/optional/agents/architecture-plan.md,packages/ai-universal-rules/templates/optional/agents/bugfix.md,packages/ai-universal-rules/templates/optional/agents/build-config.md,packages/ai-universal-rules/templates/optional/agents/docs.md,packages/ai-universal-rules/templates/optional/agents/infra-auditor.md,packages/ai-universal-rules/templates/optional/agents/ui-builder.md,packages/ai-universal-rules/templates/optional/agents/upgrade.md,packages/ai-universal-rules/templates/optional/delivery/README.md,packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md,packages/ai-universal-rules/templates/shared/approvals/APPROVAL-PACKET.template.md,packages/ai-universal-rules/templates/shared/guardrails/AI-GUARDRAILS.md,packages/ai-universal-rules/templates/shared/project-interaction.md,packages/ai-universal-rules/templates/shared/verification/VERIFICATION-EVIDENCE.template.md,packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md,packages/ai-universal-rules/templates/skills/ai-search/SKILL.md,packages/ai-universal-rules/templates/snippets/approvals.snippet.md,packages/ai-universal-rules/templates/snippets/verification.snippet.md,packages/ai-universal-rules/templates/snippets/workflow.snippet.md,packages/ai-universal-rules/templates/workflows/architecture-plan.md,packages/ai-universal-rules/templates/workflows/bug-regression.md,packages/ai-universal-rules/templates/workflows/dependency-upgrade.md,packages/ai-universal-rules/templates/workflows/docs-sync.md,packages/ai-universal-rules/templates/workflows/evidence-first-execution.md,packages/ai-universal-rules/templates/workflows/new-feature.md,packages/ai-universal-rules/templates/workflows/plan-slice.md,packages/ai-universal-rules/templates/workflows/project-context.md,packages/ai-universal-rules/templates/workflows/regression-test.md,packages/ai-universal-rules/templates/workflows/release-safety.md,packages/ai-universal-rules/templates/workflows/repo-investigation.md,packages/ai-universal-rules/templates/workflows/review-diff.md,packages/ai-universal-rules/templates/workflows/review-search-tool.md,packages/ai-universal-rules/templates/workflows/script-inventory.md,packages/ai-universal-rules/templates/workflows/search-evidence.md,packages/ai-universal-rules/templates/workflows/verify-change.md",
+            "files_csv": "packages/ai-kit-tests/README.md,packages/ai-kit-tests/composer.json,packages/ai-kit-tests/phpunit.xml.dist,packages/ai-kit-tests/tests/Support/list-slow-tests.php,packages/ai-kit-tests/tests/bootstrap.php,packages/ai-universal-rules/PLACEHOLDERS.md,packages/ai-universal-rules/QUICKSTART.md,packages/ai-universal-rules/README.md,packages/ai-universal-rules/catalog.json,packages/ai-universal-rules/docs/BROWSE.md,packages/ai-universal-rules/docs/CAPABILITY-MODEL.md,packages/ai-universal-rules/docs/COMPATIBILITY.md,packages/ai-universal-rules/docs/COMPOSITION-RECIPES.md,packages/ai-universal-rules/docs/CONTROL-MODEL.md,packages/ai-universal-rules/docs/DESIGN-PRINCIPLES.md,packages/ai-universal-rules/docs/EVALUATION.md,packages/ai-universal-rules/docs/INSTALL-CATALOG.md,packages/ai-universal-rules/docs/INSTALL-GITHUB-COPILOT.md,packages/ai-universal-rules/docs/INSTALL-OPENCODE.md,packages/ai-universal-rules/docs/ONBOARDING.md,packages/ai-universal-rules/docs/PRECEDENCE.md,packages/ai-universal-rules/docs/PROJECT-EXAMPLES.md,packages/ai-universal-rules/docs/RELEASE-BUNDLES.md,packages/ai-universal-rules/docs/foundations/CAPABILITY-MODEL.md,packages/ai-universal-rules/docs/foundations/COMPATIBILITY.md,packages/ai-universal-rules/docs/foundations/CONTROL-MODEL.md,packages/ai-universal-rules/docs/foundations/DESIGN-PRINCIPLES.md,packages/ai-universal-rules/docs/foundations/PRECEDENCE.md,packages/ai-universal-rules/docs/foundations/SKILLS.md,packages/ai-universal-rules/docs/operations/EVAL-SCENARIOS.md,packages/ai-universal-rules/docs/operations/GOVERNANCE.md,packages/ai-universal-rules/docs/operations/HOOKS-AND-ENFORCEMENT.md,packages/ai-universal-rules/docs/operations/MAINTENANCE.md,packages/ai-universal-rules/docs/operations/MCP-BOUNDARIES.md,packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md,packages/ai-universal-rules/docs/workflows/AGENT-HANDOFFS.md,packages/ai-universal-rules/docs/workflows/MONOREPO-STRATEGY.md,packages/ai-universal-rules/docs/workflows/RISK-AND-APPROVALS.md,packages/ai-universal-rules/docs/workflows/RUNTIME-OBSERVABILITY.md,packages/ai-universal-rules/docs/workflows/SYSTEM-WORKFLOW.md,packages/ai-universal-rules/docs/workflows/TASK-ENTRYPOINTS.md,packages/ai-universal-rules/manifest.json,packages/ai-universal-rules/manifest.yml,packages/ai-universal-rules/package-lock.ai.json,packages/ai-universal-rules/policies/ai-file-standards.json,packages/ai-universal-rules/templates/capabilities/README.md,packages/ai-universal-rules/templates/capabilities/bug-regression/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/bug-regression/checklist.md,packages/ai-universal-rules/templates/capabilities/bug-regression/config.example.json,packages/ai-universal-rules/templates/capabilities/bug-regression/examples.md,packages/ai-universal-rules/templates/capabilities/bug-regression/gotchas.md,packages/ai-universal-rules/templates/capabilities/bug-regression/reference.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/checklist.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/examples.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/gotchas.md,packages/ai-universal-rules/templates/capabilities/dependency-upgrade/reference.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/checklist.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/examples.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/gotchas.md,packages/ai-universal-rules/templates/capabilities/evidence-first-execution/reference.md,packages/ai-universal-rules/templates/capabilities/project-context/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/project-context/examples.md,packages/ai-universal-rules/templates/capabilities/project-context/gotchas.md,packages/ai-universal-rules/templates/capabilities/project-context/reference.md,packages/ai-universal-rules/templates/capabilities/release-safety/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/release-safety/checklist.md,packages/ai-universal-rules/templates/capabilities/release-safety/examples.md,packages/ai-universal-rules/templates/capabilities/release-safety/gotchas.md,packages/ai-universal-rules/templates/capabilities/release-safety/reference.md,packages/ai-universal-rules/templates/capabilities/review-diff/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/review-diff/checklist.md,packages/ai-universal-rules/templates/capabilities/review-diff/examples.md,packages/ai-universal-rules/templates/capabilities/review-diff/gotchas.md,packages/ai-universal-rules/templates/capabilities/review-diff/reference.md,packages/ai-universal-rules/templates/capabilities/verify-change/CAPABILITY.md,packages/ai-universal-rules/templates/capabilities/verify-change/checklist.md,packages/ai-universal-rules/templates/capabilities/verify-change/examples.md,packages/ai-universal-rules/templates/capabilities/verify-change/gotchas.md,packages/ai-universal-rules/templates/capabilities/verify-change/reference.md,packages/ai-universal-rules/templates/commands/search-evidence.md,packages/ai-universal-rules/templates/commands/verify-ai-wiring.md,packages/ai-universal-rules/templates/commands/verify.md,packages/ai-universal-rules/templates/core/AGENTS.template.md,packages/ai-universal-rules/templates/core/POST-INSTALL.template.md,packages/ai-universal-rules/templates/core/agents/architect.md,packages/ai-universal-rules/templates/core/agents/bootstrapper.md,packages/ai-universal-rules/templates/core/agents/config-maintainer.md,packages/ai-universal-rules/templates/core/agents/implementer.md,packages/ai-universal-rules/templates/core/agents/refactorer.md,packages/ai-universal-rules/templates/core/agents/release-auditor.md,packages/ai-universal-rules/templates/core/agents/repository-researcher.md,packages/ai-universal-rules/templates/core/agents/repository-reviewer.md,packages/ai-universal-rules/templates/core/agents/researcher.md,packages/ai-universal-rules/templates/core/agents/reviewer.md,packages/ai-universal-rules/templates/core/agents/workflow-auditor.md,packages/ai-universal-rules/templates/core/ai-file-standards.template.md,packages/ai-universal-rules/templates/core/copilot-instructions.template.md,packages/ai-universal-rules/templates/core/copilot-vscode-settings.template.json,packages/ai-universal-rules/templates/core/execution-protocol.template.md,packages/ai-universal-rules/templates/core/generated-artifacts.template.md,packages/ai-universal-rules/templates/core/opencode.json,packages/ai-universal-rules/templates/core/project-context.placeholders.md,packages/ai-universal-rules/templates/core/project-context.template.md,packages/ai-universal-rules/templates/core/project-stack.template.md,packages/ai-universal-rules/templates/core/workflow.template.md,packages/ai-universal-rules/templates/docs/ai/tools/actions/preview-file.md,packages/ai-universal-rules/templates/github/hooks/scripts/tool-guardian.ps1,packages/ai-universal-rules/templates/github/hooks/tool-guardian.json,packages/ai-universal-rules/templates/github/hooks/tool-policy.json,packages/ai-universal-rules/templates/github/pull_request_template.md,packages/ai-universal-rules/templates/github/workflows/export-ai-universal-rules-preview.yml,packages/ai-universal-rules/templates/github/workflows/test-external-install.yml,packages/ai-universal-rules/templates/github/workflows/validate-ai-surface.yml,packages/ai-universal-rules/templates/instructions/ai-file-standards.instructions.md,packages/ai-universal-rules/templates/instructions/ai-scripts.instructions.md,packages/ai-universal-rules/templates/instructions/ai-search.instructions.md,packages/ai-universal-rules/templates/instructions/ai-tooling.instructions.md,packages/ai-universal-rules/templates/instructions/ai-workflow.instructions.md,packages/ai-universal-rules/templates/instructions/approval-boundaries.instructions.md,packages/ai-universal-rules/templates/instructions/architecture.instructions.md,packages/ai-universal-rules/templates/instructions/base.instructions.md,packages/ai-universal-rules/templates/instructions/ci-workflows.instructions.md,packages/ai-universal-rules/templates/instructions/composer.instructions.md,packages/ai-universal-rules/templates/instructions/config-infra.instructions.md,packages/ai-universal-rules/templates/instructions/context-gate.instructions.md,packages/ai-universal-rules/templates/instructions/copilot-script-enforcement.instructions.md,packages/ai-universal-rules/templates/instructions/execution-protocol.instructions.md,packages/ai-universal-rules/templates/instructions/frontend.instructions.md,packages/ai-universal-rules/templates/instructions/generated-artifacts.instructions.md,packages/ai-universal-rules/templates/instructions/php.instructions.md,packages/ai-universal-rules/templates/instructions/security.instructions.md,packages/ai-universal-rules/templates/instructions/shell.instructions.md,packages/ai-universal-rules/templates/instructions/targets.instructions.md,packages/ai-universal-rules/templates/instructions/testing.instructions.md,packages/ai-universal-rules/templates/instructions/tools.instructions.md,packages/ai-universal-rules/templates/optional/agents/architecture-plan.md,packages/ai-universal-rules/templates/optional/agents/bugfix.md,packages/ai-universal-rules/templates/optional/agents/build-config.md,packages/ai-universal-rules/templates/optional/agents/docs.md,packages/ai-universal-rules/templates/optional/agents/infra-auditor.md,packages/ai-universal-rules/templates/optional/agents/ui-builder.md,packages/ai-universal-rules/templates/optional/agents/upgrade.md,packages/ai-universal-rules/templates/optional/delivery/README.md,packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md,packages/ai-universal-rules/templates/shared/approvals/APPROVAL-PACKET.template.md,packages/ai-universal-rules/templates/shared/guardrails/AI-GUARDRAILS.md,packages/ai-universal-rules/templates/shared/project-interaction.md,packages/ai-universal-rules/templates/shared/verification/VERIFICATION-EVIDENCE.template.md,packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md,packages/ai-universal-rules/templates/skills/ai-search/SKILL.md,packages/ai-universal-rules/templates/snippets/approvals.snippet.md,packages/ai-universal-rules/templates/snippets/verification.snippet.md,packages/ai-universal-rules/templates/snippets/workflow.snippet.md,packages/ai-universal-rules/templates/workflows/architecture-plan.md,packages/ai-universal-rules/templates/workflows/bug-regression.md,packages/ai-universal-rules/templates/workflows/dependency-upgrade.md,packages/ai-universal-rules/templates/workflows/docs-sync.md,packages/ai-universal-rules/templates/workflows/evidence-first-execution.md,packages/ai-universal-rules/templates/workflows/new-feature.md,packages/ai-universal-rules/templates/workflows/plan-slice.md,packages/ai-universal-rules/templates/workflows/project-context.md,packages/ai-universal-rules/templates/workflows/regression-test.md,packages/ai-universal-rules/templates/workflows/release-safety.md,packages/ai-universal-rules/templates/workflows/repo-investigation.md,packages/ai-universal-rules/templates/workflows/review-diff.md,packages/ai-universal-rules/templates/workflows/review-search-tool.md,packages/ai-universal-rules/templates/workflows/script-inventory.md,packages/ai-universal-rules/templates/workflows/search-evidence.md,packages/ai-universal-rules/templates/workflows/verify-change.md",
             "purpose": "Canonical ai-universal-rules package source and templates.",
             "designed_for": "Template generation and install surfaces.",
             "install_guide": "packages/ai-universal-rules/README.md",
@@ -616,12 +621,12 @@
             "ai_entrypoint": "packages/ai-universal-rules/catalog.json",
             "notes": "Source-of-truth templates and manifests live here.",
             "metrics": {
-                "lines": 11888,
-                "code": 9720,
-                "comments": 0,
-                "blanks": 2168,
-                "complexity": 19,
-                "bytes": 486456
+                "lines": 12199,
+                "code": 9971,
+                "comments": 12,
+                "blanks": 2216,
+                "complexity": 22,
+                "bytes": 500297
             }
         },
         {
@@ -674,7 +679,7 @@
         },
         {
             "path": "scripts",
-            "file_count": 33,
+            "file_count": 34,
             "files": [
                 "scripts/ai/ai-diff-context.sh",
                 "scripts/ai/ai-doc-check.sh",
@@ -697,6 +702,7 @@
                 "scripts/ai/post-tool-use.sh",
                 "scripts/ai/pre-tool-use.sh",
                 "scripts/ai/preview-file.sh",
+                "scripts/ai/prune-shipped-targets.sh",
                 "scripts/ai/query-usage.sh",
                 "scripts/ai/repo-stats.sh",
                 "scripts/ai/repo-tool-inventory.sh",
@@ -710,7 +716,7 @@
                 "scripts/hooks/commit-msg.sh",
                 "scripts/hooks/pre-commit.sh"
             ],
-            "files_csv": "scripts/ai/ai-diff-context.sh,scripts/ai/ai-doc-check.sh,scripts/ai/ai-edit.sh,scripts/ai/ai-file-freshness.sh,scripts/ai/ai-install-coverage.sh,scripts/ai/ai-rollback.sh,scripts/ai/ai-search.sh,scripts/ai/ai-structured.sh,scripts/ai/ai-task.sh,scripts/ai/ai-test-select.sh,scripts/ai/ai-verify.sh,scripts/ai/check-file-refs.sh,scripts/ai/common.sh,scripts/ai/fd-files.sh,scripts/ai/gh-pr-context.sh,scripts/ai/git-forensics.sh,scripts/ai/install-mandatory-tools.sh,scripts/ai/pack-context.sh,scripts/ai/post-tool-use.sh,scripts/ai/pre-tool-use.sh,scripts/ai/preview-file.sh,scripts/ai/query-usage.sh,scripts/ai/repo-stats.sh,scripts/ai/repo-tool-inventory.sh,scripts/ai/repomix-context-tree.sh,scripts/ai/repomix-scc-router.sh,scripts/ai/rg-code.sh,scripts/ai/run-repomix-context.sh,scripts/ai/session-checkpoint.sh,scripts/ai/watch-loop.sh,scripts/doctor.sh,scripts/hooks/commit-msg.sh,scripts/hooks/pre-commit.sh",
+            "files_csv": "scripts/ai/ai-diff-context.sh,scripts/ai/ai-doc-check.sh,scripts/ai/ai-edit.sh,scripts/ai/ai-file-freshness.sh,scripts/ai/ai-install-coverage.sh,scripts/ai/ai-rollback.sh,scripts/ai/ai-search.sh,scripts/ai/ai-structured.sh,scripts/ai/ai-task.sh,scripts/ai/ai-test-select.sh,scripts/ai/ai-verify.sh,scripts/ai/check-file-refs.sh,scripts/ai/common.sh,scripts/ai/fd-files.sh,scripts/ai/gh-pr-context.sh,scripts/ai/git-forensics.sh,scripts/ai/install-mandatory-tools.sh,scripts/ai/pack-context.sh,scripts/ai/post-tool-use.sh,scripts/ai/pre-tool-use.sh,scripts/ai/preview-file.sh,scripts/ai/prune-shipped-targets.sh,scripts/ai/query-usage.sh,scripts/ai/repo-stats.sh,scripts/ai/repo-tool-inventory.sh,scripts/ai/repomix-context-tree.sh,scripts/ai/repomix-scc-router.sh,scripts/ai/rg-code.sh,scripts/ai/run-repomix-context.sh,scripts/ai/session-checkpoint.sh,scripts/ai/watch-loop.sh,scripts/doctor.sh,scripts/hooks/commit-msg.sh,scripts/hooks/pre-commit.sh",
             "purpose": "Operational shell scripts used by AI workflow and contributors.",
             "designed_for": "Repository automation, evidence collection, and discovery wrappers.",
             "install_guide": "docs/ai/scripts-reference.md",
@@ -718,17 +724,17 @@
             "ai_entrypoint": "scripts/ai/ai-search.sh",
             "notes": "Includes scripts/ai/* canonical AI tooling and scripts/doctor.sh.",
             "metrics": {
-                "lines": 6198,
-                "code": 5219,
-                "comments": 107,
-                "blanks": 872,
-                "complexity": 880,
-                "bytes": 176124
+                "lines": 6582,
+                "code": 5514,
+                "comments": 147,
+                "blanks": 921,
+                "complexity": 939,
+                "bytes": 188040
             }
         },
         {
             "path": "tests",
-            "file_count": 56,
+            "file_count": 57,
             "files": [
                 "tests/fixtures/bin/repomix",
                 "tests/fixtures/bin/scc",
@@ -753,6 +759,7 @@
                 "tests/php/CopilotAgentRendererTest.php",
                 "tests/php/GenerateRepoStructureTest.php",
                 "tests/php/InstallerSafetyTest.php",
+                "tests/php/PruneShippedTargetsTest.php",
                 "tests/php/Support/list-slow-tests.php",
                 "tests/php/bootstrap.php",
                 "tests/scripts/ai/run-all-tests.sh",
@@ -787,7 +794,7 @@
                 "tests/shell/pre-tool-use.bats",
                 "tests/shell/repomix-context-tree.bats"
             ],
-            "files_csv": "tests/fixtures/bin/repomix,tests/fixtures/bin/scc,tests/fixtures/json/allow-input.json,tests/fixtures/json/confirm-input.json,tests/fixtures/json/deny-input.json,tests/fixtures/php/frontmatter-empty.md,tests/fixtures/php/frontmatter-malformed.md,tests/fixtures/php/frontmatter-valid.md,tests/fixtures/repos/blank-generic/setup.sh,tests/fixtures/repos/existing-copilot/setup.sh,tests/fixtures/repos/existing-opencode/setup.sh,tests/fixtures/repos/minimal/setup.sh,tests/php/AdvisorDriftTest.php,tests/php/AdvisorScannerTest.php,tests/php/AdvisorSchemaTest.php,tests/php/AdvisorSecretScanTest.php,tests/php/AdvisorTokenBudgetTest.php,tests/php/AiCatalogLibIoTest.php,tests/php/AiCatalogLibTest.php,tests/php/CliToolsTest.php,tests/php/CopilotAgentRendererTest.php,tests/php/GenerateRepoStructureTest.php,tests/php/InstallerSafetyTest.php,tests/php/Support/list-slow-tests.php,tests/php/bootstrap.php,tests/scripts/ai/run-all-tests.sh,tests/scripts/ai/test-ai-diff-context.sh,tests/scripts/ai/test-ai-doc-check.sh,tests/scripts/ai/test-ai-edit.sh,tests/scripts/ai/test-ai-rollback.sh,tests/scripts/ai/test-ai-search.sh,tests/scripts/ai/test-ai-structured.sh,tests/scripts/ai/test-ai-task.sh,tests/scripts/ai/test-ai-test-select.sh,tests/scripts/ai/test-ai-verify.sh,tests/scripts/ai/test-common.sh,tests/scripts/ai/test-fd-files.sh,tests/scripts/ai/test-gh-pr-context.sh,tests/scripts/ai/test-git-forensics.sh,tests/scripts/ai/test-install-mandatory-tools.sh,tests/scripts/ai/test-pack-context.sh,tests/scripts/ai/test-post-tool-use.sh,tests/scripts/ai/test-pre-tool-use.sh,tests/scripts/ai/test-preview-file.sh,tests/scripts/ai/test-query-usage.sh,tests/scripts/ai/test-repo-tool-inventory.sh,tests/scripts/ai/test-repomix-context-tree.sh,tests/scripts/ai/test-repomix-scc-router.sh,tests/scripts/ai/test-rg-code.sh,tests/scripts/ai/test-run-repomix-context.sh,tests/scripts/ai/test-session-checkpoint.sh,tests/scripts/ai/test-watch-loop.sh,tests/shell/doctor.bats,tests/shell/post-tool-use.bats,tests/shell/pre-tool-use.bats,tests/shell/repomix-context-tree.bats",
+            "files_csv": "tests/fixtures/bin/repomix,tests/fixtures/bin/scc,tests/fixtures/json/allow-input.json,tests/fixtures/json/confirm-input.json,tests/fixtures/json/deny-input.json,tests/fixtures/php/frontmatter-empty.md,tests/fixtures/php/frontmatter-malformed.md,tests/fixtures/php/frontmatter-valid.md,tests/fixtures/repos/blank-generic/setup.sh,tests/fixtures/repos/existing-copilot/setup.sh,tests/fixtures/repos/existing-opencode/setup.sh,tests/fixtures/repos/minimal/setup.sh,tests/php/AdvisorDriftTest.php,tests/php/AdvisorScannerTest.php,tests/php/AdvisorSchemaTest.php,tests/php/AdvisorSecretScanTest.php,tests/php/AdvisorTokenBudgetTest.php,tests/php/AiCatalogLibIoTest.php,tests/php/AiCatalogLibTest.php,tests/php/CliToolsTest.php,tests/php/CopilotAgentRendererTest.php,tests/php/GenerateRepoStructureTest.php,tests/php/InstallerSafetyTest.php,tests/php/PruneShippedTargetsTest.php,tests/php/Support/list-slow-tests.php,tests/php/bootstrap.php,tests/scripts/ai/run-all-tests.sh,tests/scripts/ai/test-ai-diff-context.sh,tests/scripts/ai/test-ai-doc-check.sh,tests/scripts/ai/test-ai-edit.sh,tests/scripts/ai/test-ai-rollback.sh,tests/scripts/ai/test-ai-search.sh,tests/scripts/ai/test-ai-structured.sh,tests/scripts/ai/test-ai-task.sh,tests/scripts/ai/test-ai-test-select.sh,tests/scripts/ai/test-ai-verify.sh,tests/scripts/ai/test-common.sh,tests/scripts/ai/test-fd-files.sh,tests/scripts/ai/test-gh-pr-context.sh,tests/scripts/ai/test-git-forensics.sh,tests/scripts/ai/test-install-mandatory-tools.sh,tests/scripts/ai/test-pack-context.sh,tests/scripts/ai/test-post-tool-use.sh,tests/scripts/ai/test-pre-tool-use.sh,tests/scripts/ai/test-preview-file.sh,tests/scripts/ai/test-query-usage.sh,tests/scripts/ai/test-repo-tool-inventory.sh,tests/scripts/ai/test-repomix-context-tree.sh,tests/scripts/ai/test-repomix-scc-router.sh,tests/scripts/ai/test-rg-code.sh,tests/scripts/ai/test-run-repomix-context.sh,tests/scripts/ai/test-session-checkpoint.sh,tests/scripts/ai/test-watch-loop.sh,tests/shell/doctor.bats,tests/shell/post-tool-use.bats,tests/shell/pre-tool-use.bats,tests/shell/repomix-context-tree.bats",
             "purpose": "PHP, shell, fixture, and integration verification suites.",
             "designed_for": "Regression and install-safety verification.",
             "install_guide": "README.md",
@@ -795,12 +802,12 @@
             "ai_entrypoint": "phpunit.xml.dist",
             "notes": "Contains phpunit, bats, and script-level tests.",
             "metrics": {
-                "lines": 5584,
-                "code": 4272,
-                "comments": 393,
-                "blanks": 919,
-                "complexity": 500,
-                "bytes": 204474
+                "lines": 6054,
+                "code": 4636,
+                "comments": 446,
+                "blanks": 972,
+                "complexity": 531,
+                "bytes": 221584
             }
         },
         {
@@ -928,12 +935,12 @@
             "ai_entrypoint": "tools/ai/ai.php",
             "notes": "Primary command surface for install and verification flows.",
             "metrics": {
-                "lines": 16094,
-                "code": 13783,
+                "lines": 16117,
+                "code": 13806,
                 "comments": 249,
                 "blanks": 2062,
                 "complexity": 1570,
-                "bytes": 608426
+                "bytes": 609740
             }
         }
     ]

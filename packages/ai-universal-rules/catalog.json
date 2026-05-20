@@ -51,7 +51,7 @@
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
         "root:adapter-policy": 1,
-        "root:ai-script": 26,
+        "root:ai-script": 27,
         "root:capability": 15,
         "root:cli": 1,
         "root:exporter": 1,
@@ -737,7 +737,7 @@
         {
             "scope": "package",
             "type": "package-capability",
-            "name": "examples",
+            "name": "Read-only: print one path per line that --apply would delete.",
             "path": "packages/ai-universal-rules/templates/capabilities/evidence-first-execution/examples.md",
             "runtime": "canonical",
             "description": "Good: source-fix with focused test and explicit verification status."
@@ -1244,7 +1244,7 @@
             "name": "fd-files.sh",
             "path": "scripts/ai/fd-files.sh",
             "runtime": "canonical",
-            "description": "Repo-aware file discovery wrapper around fd with safer defaults."
+            "description": "Repo-aware file discovery wrapper around fd/fdfind with rg fallback and safer defaults."
         },
         {
             "scope": "root",
@@ -1341,6 +1341,14 @@
             "path": "scripts/ai/rg-code.sh",
             "runtime": "canonical",
             "description": "Mode-aware ripgrep wrapper with JSON, file-list, count, and context output modes."
+        },
+        {
+            "scope": "root",
+            "type": "ai-script",
+            "name": "run-repo-tests.sh",
+            "path": "scripts/ai/run-repo-tests.sh",
+            "runtime": "canonical",
+            "description": "Parallel-first repository test runner for PHP, shell, Bats, and validators."
         },
         {
             "scope": "root",

@@ -10,6 +10,9 @@ if ($root === false) {
 
 $placeholdersDoc = $root . '/packages/ai-universal-rules/PLACEHOLDERS.md';
 if (!is_file($placeholdersDoc)) {
+    $placeholdersDoc = $root . '/PLACEHOLDERS.md';
+}
+if (!is_file($placeholdersDoc)) {
     fwrite(STDERR, "ERROR: missing PLACEHOLDERS.md\n");
     exit(1);
 }
@@ -21,12 +24,15 @@ if (preg_match_all('/`(<[A-Z0-9_]+>)`/', $doc, $m) === 1 || (!empty($m[1]))) {
 }
 
 $templatePaths = [];
-$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root . '/packages/ai-universal-rules/templates', FilesystemIterator::SKIP_DOTS));
-foreach ($it as $file) {
-    if (!$file->isFile() || strtolower($file->getExtension()) !== 'md') {
-        continue;
+$templatesDir = $root . '/packages/ai-universal-rules/templates';
+if (is_dir($templatesDir)) {
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($templatesDir, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $file) {
+        if (!$file->isFile() || strtolower($file->getExtension()) !== 'md') {
+            continue;
+        }
+        $templatePaths[] = $file->getPathname();
     }
-    $templatePaths[] = $file->getPathname();
 }
 
 $used = [];

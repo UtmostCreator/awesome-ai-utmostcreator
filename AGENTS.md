@@ -140,7 +140,7 @@ Minimum flow:
 
 - Primary verification command: `bash scripts/ai/ai-verify.sh .` (or `php tools/ai/ai.php verify --changed` for the PHP CLI)
 - Primary build command: `unknown` (this is a tooling repo, not a build target)
-- Primary test command: `composer test` (serial, ~37s) or `composer test:fast` (paratest, ~17s)
+- Primary test command: `PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh`; for PHP-only use `composer test:fast` (paratest, ~19-21s). Use serial `composer test` only when serial ordering matters.
 - Profile slow tests: `composer test:profile` then `composer test:slow [N]`
 - Preferred narrow-first verification pattern: `start with the narrowest repo-local check and escalate only if needed`
 - Verification ladder: focused proof first -> affected layer tests second -> broader repository verification third -> build as a smoke check when relevant -> release-safety review only when risk warrants it.
