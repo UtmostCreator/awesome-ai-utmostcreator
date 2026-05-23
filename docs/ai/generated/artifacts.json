@@ -1,7 +1,7 @@
 {
     "schema_version": 1,
-    "updated_at": "2026-05-20T00:21:43+00:00",
-    "current_commit": "b4d1f7d",
+    "updated_at": "2026-05-22T11:30:08+00:00",
+    "current_commit": "unknown",
     "artifacts": {
         "advisor.json": {
             "generated_at": "2026-05-20T00:20:52+00:00",
@@ -36,18 +36,18 @@
             "json_path": "docs/ai/generated/freshness.json"
         },
         "diff-summary.json": {
-            "generated_at": "2026-05-20T00:20:48+00:00",
-            "based_on_commit": "b4d1f7d",
+            "generated_at": "2026-05-22T11:30:07+00:00",
+            "based_on_commit": "unknown",
             "command": "php tools/ai/ai.php diff-summary --base main",
-            "estimated_tokens": 150,
+            "estimated_tokens": 151,
             "stale": false,
             "json_path": "docs/ai/generated/diff-summary.json"
         },
         "risk.json": {
-            "generated_at": "2026-05-20T00:20:49+00:00",
-            "based_on_commit": "b4d1f7d",
+            "generated_at": "2026-05-21T10:44:55+00:00",
+            "based_on_commit": "unknown",
             "command": "php tools/ai/ai.php risk --base main",
-            "estimated_tokens": 141,
+            "estimated_tokens": 142,
             "stale": false,
             "json_path": "docs/ai/generated/risk.json"
         },
@@ -84,10 +84,10 @@
             "json_path": "docs/ai/generated/env-check.json"
         },
         "impact.json": {
-            "generated_at": "2026-05-20T00:20:58+00:00",
-            "based_on_commit": "b4d1f7d",
+            "generated_at": "2026-05-22T11:24:37+00:00",
+            "based_on_commit": "unknown",
             "command": "php tools/ai/ai.php impact --base main",
-            "estimated_tokens": 147,
+            "estimated_tokens": 148,
             "stale": false,
             "json_path": "docs/ai/generated/impact.json"
         },
@@ -108,10 +108,10 @@
             "json_path": "docs/ai/generated/estimate.json"
         },
         "conflicts.json": {
-            "generated_at": "2026-05-20T00:21:00+00:00",
-            "based_on_commit": "b4d1f7d",
+            "generated_at": "2026-05-21T10:44:55+00:00",
+            "based_on_commit": "unknown",
             "command": "php tools/ai/ai.php conflicts",
-            "estimated_tokens": 116,
+            "estimated_tokens": 117,
             "stale": false,
             "json_path": "docs/ai/generated/conflicts.json"
         },

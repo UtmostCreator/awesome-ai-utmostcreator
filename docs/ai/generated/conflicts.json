@@ -1,10 +1,10 @@
 {
     "schema_version": 1,
     "artifact": "conflicts.json",
-    "generated_at": "2026-05-20T00:21:00+00:00",
+    "generated_at": "2026-05-21T10:44:55+00:00",
     "command": "php tools/ai/ai.php conflicts",
-    "based_on_commit": "b4d1f7d",
-    "based_on_branch": "main",
+    "based_on_commit": "unknown",
+    "based_on_branch": "unknown",
     "input_hashes": {},
     "status": "ok",
     "score": null,

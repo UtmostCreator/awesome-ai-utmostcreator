@@ -215,4 +215,4 @@ The structure data powers the tables above and lives in `docs/ai/generated/repo-
 
 ## License
 
-See [SECURITY.md](SECURITY.md) and [SUPPORT.md](SUPPORT.md).
+See [docs/ai/AI-GUARDRAILS.md](docs/ai/AI-GUARDRAILS.md) and [policies/README.md](policies/README.md).
