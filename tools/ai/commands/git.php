@@ -2,6 +2,17 @@
 
 declare(strict_types=1);
 
+function aiGitLines(string $root, string $args): array
+{
+    $result = aiRunCommand(
+        $root,
+        'git -C ' . escapeshellarg($root) . ' ' . $args
+    );
+
+    $lines = preg_split('/\R/', $result['stdout']) ?: [];
+    return array_values(array_filter(array_map(static fn(string $line): string => trim($line), $lines), static fn(string $line): bool => $line !== ''));
+}
+
 function aiRunDiffSummary(string $root, array $args): int
 {
     $base = 'main';
@@ -17,21 +28,9 @@ function aiRunDiffSummary(string $root, array $args): int
         }
     }
 
-    $changed = [];
-    exec(
-        'git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD' . aiShellNullRedirect(),
-        $changed
-    );
-    $staged = [];
-    exec(
-        'git -C ' . escapeshellarg($root) . ' diff --name-only --cached' . aiShellNullRedirect(),
-        $staged
-    );
-    $unstaged = [];
-    exec(
-        'git -C ' . escapeshellarg($root) . ' diff --name-only' . aiShellNullRedirect(),
-        $unstaged
-    );
+    $changed = aiGitLines($root, 'diff --name-only ' . escapeshellarg($base) . '...HEAD');
+    $staged = aiGitLines($root, 'diff --name-only --cached');
+    $unstaged = aiGitLines($root, 'diff --name-only');
 
     $classify = static function (string $path): string {
         if (str_starts_with($path, 'docs/')) {
@@ -98,11 +97,7 @@ function aiRunRisk(string $root, array $args): int
         }
     }
 
-    $changed = [];
-    exec(
-        'git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD' . aiShellNullRedirect(),
-        $changed
-    );
+    $changed = aiGitLines($root, 'diff --name-only ' . escapeshellarg($base) . '...HEAD');
 
     $score = 0;
     $reasons = [];
@@ -276,8 +271,7 @@ function aiRunPrSummary(string $root): int
 
 function aiRunConflicts(string $root): int
 {
-    $statusOut = [];
-    exec('git -C ' . escapeshellarg($root) . ' status --porcelain', $statusOut);
+    $statusOut = aiGitLines($root, 'status --porcelain');
     $conflicts = [];
     foreach ($statusOut as $line) {
         $prefix = substr($line, 0, 2);

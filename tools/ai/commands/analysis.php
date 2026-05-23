@@ -118,8 +118,12 @@ function aiRunEstimate(string $root, array $args): int
 function aiRunImpact(string $root, array $args): int
 {
     $base = aiParseArg($args, 'base') ?? 'main';
-    $changed = [];
-    exec('git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD', $changed);
+    $gitResult = aiRunCommand(
+        $root,
+        'git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD'
+    );
+    $changed = preg_split('/\R/', $gitResult['stdout']) ?: [];
+    $changed = array_values(array_filter(array_map(static fn(string $line): string => trim($line), $changed), static fn(string $line): bool => $line !== ''));
 
     $areas = [];
     $tests = [];

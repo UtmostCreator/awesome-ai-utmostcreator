@@ -77,6 +77,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/repomix-context-tree.sh`
 - `scripts/ai/repomix-scc-router.sh`
 - `scripts/ai/rg-code.sh`
+- `scripts/ai/run-repo-tests.sh`
 - `scripts/ai/run-repomix-context.sh`
 - `scripts/ai/session-checkpoint.sh`
 - `scripts/ai/watch-loop.sh`

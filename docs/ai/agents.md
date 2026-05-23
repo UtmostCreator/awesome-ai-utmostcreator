@@ -9,6 +9,7 @@ The following agents are live in this repository. Each `.github/agents/*.agent.m
 | Agent | GitHub Copilot path | When to use |
 | --- | --- | --- |
 | Architect | `.github/agents/architect.agent.md` | Scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation. |
+| Bootstrapper | `.github/agents/bootstrapper.agent.md` | Internal AI kit installation workflow from dry-run through apply and validation for this repository. |
 | Config Maintainer | `.github/agents/config-maintainer.agent.md` | Changing editor, shell, runtime, or tool configuration while preserving current behavior. |
 | Implementer | `.github/agents/implementer.agent.md` | A bounded implementation slice is clear and focused verification should happen in this repository. |
 | Refactorer | `.github/agents/refactorer.agent.md` | Behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability. |
