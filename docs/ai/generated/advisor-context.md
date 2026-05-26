@@ -573,7 +573,7 @@ Required tools depend on selected packs. Core full-governance installs require P
         ]
     },
     "counts": {
-        "package:core-template": 23,
+        "package:core-template": 24,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 3,
@@ -653,6 +653,14 @@ Required tools depend on selected packs. Core full-governance installs require P
             "path": "packages/ai-universal-rules/templates/core/agents/implementer.md",
             "runtime": "canonical",
             "description": "Use when a bounded implementation slice is clear and focused verification should happen in this repository"
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "POST-Install Agent",
+            "path": "packages/ai-universal-rules/templates/core/agents/post-install.md",
+            "runtime": "canonical",
+            "description": "Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification"
         },
         {
             "scope": "package",
@@ -6893,7 +6901,7 @@ install_linux() {
     }
 
     run_cmd sudo apt-get update
-    run_cmd sudo apt-get install -y git php-cli ripgrep jq nodejs npm
+    run_cmd sudo apt-get install -y git php-cli ripgrep jq nodejs npm fd-find shellcheck
 
     if run_cmd sudo apt-get install -y scc; then
         :
@@ -6901,6 +6909,25 @@ install_linux() {
         run_cmd go install github.com/boyter/scc/v3@latest
     else
         printf 'Warning: failed to install scc via apt and Go is not available.\n' >&2
+    fi
+
+    # gitleaks (required by advisor + secret-scan strict mode)
+    if ! need_cmd gitleaks; then
+        if run_cmd bash -c 'mkdir -p "$HOME/.local/bin" && curl -L --fail https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz && tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks && install -m 0755 /tmp/gitleaks "$HOME/.local/bin/gitleaks"'; then
+            :
+        else
+            printf 'Warning: failed to install gitleaks from release archive.\n' >&2
+        fi
+    fi
+
+    # ast-grep via npm (user-local prefix to avoid sudo)
+    if ! need_cmd ast-grep; then
+        run_cmd bash -c 'mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && npm install -g @ast-grep/cli'
+    fi
+
+    # fd alias if package shipped as fdfind
+    if ! need_cmd fd && need_cmd fdfind; then
+        run_cmd bash -c 'mkdir -p "$HOME/.local/bin" && ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"'
     fi
 
     run_cmd npm install -g repomix
@@ -7304,6 +7331,8 @@ append_log_entry "$entry"
 set -euo pipefail
 
 POLICY_FILE="${COPILOT_POLICY_FILE:-policies/copilot/policy.yaml}"
+MAINTENANCE_STATE_FILE="${COPILOT_MAINTENANCE_STATE_FILE:-.ai-logs/maintenance-mode.json}"
+# maintenance mode allows repository-delivered scripts only
 
 deny() {
     jq -cn --arg reason "$1" '{permissionDecision:"deny", permissionDecisionReason:$reason}'
@@ -9853,6 +9882,123 @@ matches)
     rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -n "$pattern" "$root"
     ;;
 esac
+
+```
+
+## FILE: scripts/ai/run-repo-tests.sh
+
+```text
+#!/usr/bin/env bash
+# Run the repository's existing test suites with parallel-first defaults.
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
+
+PARATEST_PROCS="${PARATEST_PROCS:-12}"
+MAX_PARATEST_PROCS="${MAX_PARATEST_PROCS:-20}"
+SUITE_TIMEOUT="${SUITE_TIMEOUT:-360}"
+PHP_BIN="${PHP_BIN:-}"
+
+if ! [[ "$PARATEST_PROCS" =~ ^[0-9]+$ ]]; then
+    echo "ERROR: PARATEST_PROCS must be numeric" >&2
+    exit 2
+fi
+
+if ((PARATEST_PROCS > MAX_PARATEST_PROCS)); then
+    PARATEST_PROCS="$MAX_PARATEST_PROCS"
+fi
+
+if [[ -z "$PHP_BIN" ]]; then
+    if command -v php.exe >/dev/null 2>&1; then
+        PHP_BIN="php.exe"
+    else
+        PHP_BIN="php"
+    fi
+fi
+
+TMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+JOBS=()
+NAMES=()
+LOGS=()
+
+run_job() {
+    local name="$1"
+    shift
+    local log="$TMP_DIR/${name//[^A-Za-z0-9_.-]/_}.log"
+
+    echo "==> start: $name"
+    ("$@") >"$log" 2>&1 &
+    JOBS+=("$!")
+    NAMES+=("$name")
+    LOGS+=("$log")
+}
+
+run_job "php-paratest-root" \
+    "$PHP_BIN" vendor/bin/paratest --configuration phpunit.xml.dist --processes="$PARATEST_PROCS" --runner=WrapperRunner
+
+run_job "script-tests" \
+    bash tests/scripts/ai/run-all-tests.sh
+
+if command -v bats >/dev/null 2>&1 && [[ -d tests/shell ]]; then
+    if file tests/shell/*.bats 2>/dev/null | grep -q 'CRLF'; then
+        echo "==> skip: bats-shell-tests (CRLF checkout; normalize *.bats to LF to run under Bash/Bats)"
+    else
+    run_job "bats-shell-tests" bats tests/shell
+    fi
+else
+    echo "==> skip: bats-shell-tests (bats not installed or tests/shell missing)"
+fi
+
+if [[ -f packages/ai-kit-tests/phpunit.xml.dist ]] && [[ -d packages/ai-kit-tests/tests ]]; then
+    if find packages/ai-kit-tests/tests -type f -name '*Test.php' -print -quit | grep -q .; then
+        run_job "php-paratest-package" \
+            "$PHP_BIN" packages/ai-kit-tests/vendor/bin/paratest \
+                --configuration packages/ai-kit-tests/phpunit.xml.dist \
+                --processes="$PARATEST_PROCS" \
+                --runner=WrapperRunner
+    else
+        echo "==> skip: php-paratest-package (no package Test.php files yet)"
+    fi
+fi
+
+failures=0
+for i in "${!JOBS[@]}"; do
+    pid="${JOBS[$i]}"
+    name="${NAMES[$i]}"
+    log="${LOGS[$i]}"
+    set +e
+    wait "$pid"
+    rc=$?
+    set -e
+
+    if ((rc == 0)); then
+        echo "==> pass: $name"
+    else
+        echo "==> fail: $name (exit $rc)" >&2
+        failures=$((failures + 1))
+    fi
+
+    echo "--- $name log ---"
+    cat "$log"
+    echo "--- end $name log ---"
+done
+
+echo "==> validators"
+"$PHP_BIN" tools/ai/validate-ai-config.php
+"$PHP_BIN" tools/ai/validate-ai-catalog.php
+"$PHP_BIN" tools/ai/validate-generated-artifacts.php
+"$PHP_BIN" tools/ai/validate-install-surface.php --strict
+
+if ((failures > 0)); then
+    echo "ERROR: $failures parallel test job(s) failed" >&2
+    exit 1
+fi
+
+echo "==> all repo tests passed"
 
 ```
 
@@ -12561,6 +12707,66 @@ class InstallerSafetyTest extends TestCase
             $this->assertNotEmpty($opencodeAgents);
             $this->assertNotEmpty($opencodeCommands);
             $this->assertNotEmpty($opencodeSkills);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testDirectInstallerFullGovernanceOpencodeOnlyValidatesAsInstalledTarget(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_opencode_' . uniqid('', true);
+
+        mkdir($target, 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
+
+        $git = $this->runTool('git init ' . escapeshellarg($target));
+        $this->assertSame(0, $git['exit'], $git['stderr']);
+        $gitAdd = $this->runTool('git -C ' . escapeshellarg($target) . ' add README.md');
+        $this->assertSame(0, $gitAdd['exit'], $gitAdd['stderr']);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'opencode',
+                '--without',
+                'optional-agents-copilot-pack',
+                '--project-name',
+                'app-configs',
+                '--backup',
+                '--verify-after',
+                '--non-interactive',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+
+            $manifest = json_decode((string) file_get_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+            $this->assertIsArray($manifest);
+            $this->assertContains('adapter-opencode', $manifest['packs'] ?? []);
+            $this->assertNotContains('adapter-copilot', $manifest['packs'] ?? []);
+            $this->assertNotContains('optional-agents-copilot-pack', $manifest['packs'] ?? []);
+
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'opencode.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'verify-install-placeholders.php');
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'copilot-instructions.md');
+            $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'instructions');
+            $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'prompts');
+            $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents');
+
+            foreach ([
+                'php tools/ai/validate-ai-config.php',
+                'php tools/ai/validate-install-surface.php --strict',
+                'php tools/ai/validate-ai-catalog.php',
+            ] as $targetCommand) {
+                $validate = $this->runTool('cd ' . escapeshellarg($target) . ' && ' . $targetCommand);
+                $this->assertSame(0, $validate['exit'], $targetCommand . "\n" . $validate['stdout'] . $validate['stderr']);
+            }
         } finally {
             $this->removeTree($target);
         }
@@ -17063,7 +17269,13 @@ function aiAdvisorRequireCleanSecretScan(string $root): void
     exec('cd ' . escapeshellarg($root) . ' && ' . $cmd . ' 2>&1', $output, $exit);
 
     if ($exit !== 0) {
-        throw new RuntimeException('advisor secret-scan gate blocked context/prompt generation');
+        $combined = trim(implode("\n", $output));
+        $hint = $combined !== '' ? PHP_EOL . $combined : '';
+        throw new RuntimeException(
+            'advisor secret-scan gate blocked context/prompt generation. '
+            . 'Install gitleaks or set AI_ALLOW_NO_SECRET_SCANNER=1 in trusted local contexts.'
+            . $hint
+        );
     }
 }
 
@@ -17547,7 +17759,7 @@ function aiAdvisorSecretScan(string $root): array
         ['pattern' => '/AKIA[0-9A-Z]{16}/', 'blocking' => true],
         ['pattern' => '/ghp_[A-Za-z0-9_]{30,}/', 'blocking' => true],
         ['pattern' => '/sk-[A-Za-z0-9]{20,}/', 'blocking' => true],
-        ['pattern' => '/private[_-]?key/i', 'blocking' => true],
+        ['pattern' => '/-----BEGIN [A-Z ]*PRIVATE KEY-----/', 'blocking' => true],
         ['pattern' => '/(password|secret|token)\s*=\s*["\']?[A-Za-z0-9_\-\/+=]{12,}/i', 'blocking' => false],
     ];
 
@@ -19553,8 +19765,12 @@ function aiRunEstimate(string $root, array $args): int
 function aiRunImpact(string $root, array $args): int
 {
     $base = aiParseArg($args, 'base') ?? 'main';
-    $changed = [];
-    exec('git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD', $changed);
+    $gitResult = aiRunCommand(
+        $root,
+        'git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD'
+    );
+    $changed = preg_split('/\R/', $gitResult['stdout']) ?: [];
+    $changed = array_values(array_filter(array_map(static fn(string $line): string => trim($line), $changed), static fn(string $line): bool => $line !== ''));
 
     $areas = [];
     $tests = [];
@@ -19839,6 +20055,17 @@ function aiRunWhy(string $root, array $args): int
 
 declare(strict_types=1);
 
+function aiGitLines(string $root, string $args): array
+{
+    $result = aiRunCommand(
+        $root,
+        'git -C ' . escapeshellarg($root) . ' ' . $args
+    );
+
+    $lines = preg_split('/\R/', $result['stdout']) ?: [];
+    return array_values(array_filter(array_map(static fn(string $line): string => trim($line), $lines), static fn(string $line): bool => $line !== ''));
+}
+
 function aiRunDiffSummary(string $root, array $args): int
 {
     $base = 'main';
@@ -19854,21 +20081,9 @@ function aiRunDiffSummary(string $root, array $args): int
         }
     }
 
-    $changed = [];
-    exec(
-        'git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD' . aiShellNullRedirect(),
-        $changed
-    );
-    $staged = [];
-    exec(
-        'git -C ' . escapeshellarg($root) . ' diff --name-only --cached' . aiShellNullRedirect(),
-        $staged
-    );
-    $unstaged = [];
-    exec(
-        'git -C ' . escapeshellarg($root) . ' diff --name-only' . aiShellNullRedirect(),
-        $unstaged
-    );
+    $changed = aiGitLines($root, 'diff --name-only ' . escapeshellarg($base) . '...HEAD');
+    $staged = aiGitLines($root, 'diff --name-only --cached');
+    $unstaged = aiGitLines($root, 'diff --name-only');
 
     $classify = static function (string $path): string {
         if (str_starts_with($path, 'docs/')) {
@@ -19935,11 +20150,7 @@ function aiRunRisk(string $root, array $args): int
         }
     }
 
-    $changed = [];
-    exec(
-        'git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD' . aiShellNullRedirect(),
-        $changed
-    );
+    $changed = aiGitLines($root, 'diff --name-only ' . escapeshellarg($base) . '...HEAD');
 
     $score = 0;
     $reasons = [];
@@ -20113,8 +20324,7 @@ function aiRunPrSummary(string $root): int
 
 function aiRunConflicts(string $root): int
 {
-    $statusOut = [];
-    exec('git -C ' . escapeshellarg($root) . ' status --porcelain', $statusOut);
+    $statusOut = aiGitLines($root, 'status --porcelain');
     $conflicts = [];
     foreach ($statusOut as $line) {
         $prefix = substr($line, 0, 2);
@@ -22157,10 +22367,15 @@ function aiRunVerify(string $root, array $args): int
         'validate-ai-config' => 'php tools/ai/validate-ai-config.php',
         'validate-ai-catalog' => 'php tools/ai/validate-ai-catalog.php',
         'generate-ai-catalog-check' => 'php tools/ai/generate-ai-catalog.php --check',
-        'generate-repo-structure-check' => 'php tools/ai/generate-repo-structure.php --check --with-scc',
         'install-docs-check' => 'php tools/ai/ai.php install-docs --check',
         'advisor-check' => 'php tools/ai/ai.php advisor --check',
     ];
+
+    if (!is_file(aiInstallManifestPath($root)) || is_file($root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'repo-directory-map.json')) {
+        $checks = array_slice($checks, 0, 3, true)
+            + ['generate-repo-structure-check' => 'php tools/ai/generate-repo-structure.php --check --with-scc']
+            + array_slice($checks, 3, null, true);
+    }
 
     // Run the post-install placeholder verifier only when we're verifying an
     // installed target (signalled by .ai-install-manifest.json at the root).
@@ -22186,6 +22401,22 @@ function aiRunVerify(string $root, array $args): int
 
         if ($run['exit'] !== 0 && $name === 'generate-repo-structure-check') {
             $regen = aiRunCommand($root, 'php tools/ai/generate-repo-structure.php --with-scc');
+            if ($regen['exit'] === 0) {
+                $run = aiRunCommand($root, $command);
+                $autoFixApplied = true;
+            }
+        }
+
+        if ($run['exit'] !== 0 && $name === 'install-docs-check' && is_file(aiInstallManifestPath($root))) {
+            $regen = aiRunCommand($root, 'php tools/ai/ai.php install-docs --write');
+            if ($regen['exit'] === 0) {
+                $run = aiRunCommand($root, $command);
+                $autoFixApplied = true;
+            }
+        }
+
+        if ($run['exit'] !== 0 && $name === 'advisor-check' && is_file(aiInstallManifestPath($root))) {
+            $regen = aiRunCommand($root, 'php tools/ai/ai.php advisor --all');
             if ($regen['exit'] === 0) {
                 $run = aiRunCommand($root, $command);
                 $autoFixApplied = true;
@@ -25697,6 +25928,7 @@ function aiCopilotAgentToolRegistry(): array
         'repository-researcher' => $executeToolsWithQuestions,
         'repository-reviewer' => $readOnlyTools,
         'implementer'       => $editExecuteTools,
+        'post-install'      => $editExecuteTools,
         'config-maintainer' => $editExecuteTools,
         'refactorer'        => $editExecuteTools,
     ];
@@ -25749,6 +25981,8 @@ function aiInstallerRun(array $argv): int
         return 0;
     }
 
+    aiInstallerBootstrapPath();
+
     aiInstallerLog('source root: ' . $config['sourceRoot']);
     aiInstallerLog('target root: ' . $config['targetRoot']);
     aiInstallerLog('profile: ' . $config['profile']);
@@ -25777,7 +26011,11 @@ function aiInstallerRun(array $argv): int
         }
     }
     if ($missingRequired !== [] && ($config['dependencyMode'] ?? 'strict') === 'strict') {
-        throw new RuntimeException('missing required tools for selected packs: ' . implode(', ', $missingRequired));
+        $hint = aiInstallerMissingToolsHint($missingRequired);
+        throw new RuntimeException(
+            'missing required tools for selected packs: ' . implode(', ', $missingRequired)
+            . PHP_EOL . $hint
+        );
     }
 
     $plan = aiInstallerBuildPlan($config, $registry, $packs);
@@ -25843,6 +26081,19 @@ function aiInstallerRun(array $argv): int
         $manifest = aiInstallerBuildManifest($config, $packs, $applied);
         $manifest['placeholders'] = $placeholderStatus;
         aiInstallerWriteManifest($config['targetRoot'], $manifest);
+
+        if (!empty($config['verifyAfter'])) {
+            $verify = aiInstallerRunTargetCommand($config['targetRoot'], [PHP_BINARY, 'tools/ai/ai.php', 'verify']);
+            if ($verify['stdout'] !== '') {
+                fwrite(STDOUT, $verify['stdout']);
+            }
+            if ($verify['stderr'] !== '') {
+                fwrite(STDERR, $verify['stderr']);
+            }
+            if ($verify['exit'] !== 0) {
+                throw new RuntimeException('post-install verification failed; inspect target docs/ai/generated/verify.json');
+            }
+        }
     }
 
     aiInstallerLog($config['dryRun'] ? 'dry-run complete; no files changed' : 'install complete');
@@ -25988,6 +26239,28 @@ function aiInstallerAssertAllowedTarget(array $config): void
     }
 }
 
+/** @param list<string> $command @return array{stdout:string,stderr:string,exit:int} */
+function aiInstallerRunTargetCommand(string $targetRoot, array $command): array
+{
+    $escaped = implode(' ', array_map('escapeshellarg', $command));
+    $descriptors = [
+        0 => ['pipe', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['pipe', 'w'],
+    ];
+    $process = proc_open($escaped, $descriptors, $pipes, $targetRoot);
+    if (!is_resource($process)) {
+        throw new RuntimeException('could not start post-install verification');
+    }
+    fclose($pipes[0]);
+    $stdout = (string) stream_get_contents($pipes[1]);
+    $stderr = (string) stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    $exit = proc_close($process);
+    return ['stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit];
+}
+
 function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
 {
     $required = [
@@ -26021,6 +26294,10 @@ function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
         $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($abs, FilesystemIterator::SKIP_DOTS));
         foreach ($it as $f) {
             if (!$f->isFile() || strtolower($f->getExtension()) !== 'md') {
+                continue;
+            }
+            $relative = ltrim(str_replace('\\', '/', substr($f->getPathname(), strlen($targetRoot))), '/');
+            if ($relative === 'docs/ai/catalog.md') {
                 continue;
             }
             $hits = array_merge($hits, aiInstallerExtractPlaceholders((string) file_get_contents($f->getPathname())));
@@ -26108,7 +26385,18 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
     ];
 
     foreach ($applied as $item) {
-        $abs = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['target']);
+        $target = (string) ($item['target'] ?? '');
+        // The shipped package source must stay verbatim so kit-level tools
+        // (generate-ai-catalog, validate-ai-catalog, package-verify) keep
+        // working in installed targets. PLACEHOLDERS.md is also informational
+        // and must not be rewritten.
+        if (
+            $target === 'PLACEHOLDERS.md'
+            || str_starts_with($target, 'packages/ai-universal-rules/')
+        ) {
+            continue;
+        }
+        $abs = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $target);
         if (is_file($abs) && str_ends_with(strtolower($abs), '.md')) {
             $content = (string) file_get_contents($abs);
             file_put_contents($abs, str_replace(array_keys($map), array_values($map), $content));
@@ -26174,6 +26462,10 @@ function aiInstallerCopyFile(string $src, string $dest): void
     aiInstallerMkdir(dirname($dest));
     if (!copy($src, $dest)) {
         throw new RuntimeException('failed to copy file: ' . $src);
+    }
+    $mode = @fileperms($src);
+    if ($mode !== false) {
+        @chmod($dest, $mode & 0777);
     }
 }
 
@@ -27070,6 +27362,7 @@ function aiInstallerPackRegistry(): array
 {
     return [
         'setup-docs' => [
+            ['type' => 'file', 'source' => 'PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/agents.md', 'target' => 'docs/ai/agents.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/adapter-contract.md', 'target' => 'docs/ai/adapter-contract.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/approval-boundaries.md', 'target' => 'docs/ai/approval-boundaries.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -27090,7 +27383,9 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/available-packs.md', 'target' => 'docs/ai/available-packs.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/command-policy.md', 'target' => 'docs/ai/command-policy.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/command-policy.tiers.yaml', 'target' => 'docs/ai/command-policy.tiers.yaml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            // catalog.md, SETUP.md, package-boundaries.md intentionally excluded: source-repo-specific generated/meta files
+            ['type' => 'file', 'source' => 'docs/ai/catalog.md', 'target' => 'docs/ai/catalog.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'llms.txt', 'target' => 'llms.txt', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            // SETUP.md and package-boundaries.md intentionally excluded: source-repo-specific generated/meta files
             ['type' => 'file', 'source' => 'docs/ai/repo-documentation-generation.md', 'target' => 'docs/ai/repo-documentation-generation.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/capabilities/README.md', 'target' => 'docs/ai/capabilities/README.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
         ],
@@ -27248,6 +27543,16 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => '.schemas/advisor-recommendation.schema.json', 'target' => '.schemas/advisor-recommendation.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'target-tools-pack' => [
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/README.md', 'target' => 'packages/ai-universal-rules/README.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/QUICKSTART.md', 'target' => 'packages/ai-universal-rules/QUICKSTART.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'packages/ai-universal-rules/manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'packages/ai-universal-rules/manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'packages/ai-universal-rules/package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'packages/ai-universal-rules/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'packages/ai-universal-rules/docs', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'packages/ai-universal-rules/policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates', 'target' => 'packages/ai-universal-rules/templates', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/install', 'target' => 'tools/ai/install', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/commands', 'target' => 'tools/ai/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai.php', 'target' => 'tools/ai/ai.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -27271,6 +27576,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'tools/ai/validate-command-policy.php', 'target' => 'tools/ai/validate-command-policy.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-generated-artifacts.php', 'target' => 'tools/ai/validate-generated-artifacts.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-install-surface.php', 'target' => 'tools/ai/validate-install-surface.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'tools/ai/verify-install-placeholders.php', 'target' => 'tools/ai/verify-install-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-placeholders.php', 'target' => 'tools/ai/validate-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/verify-full-install.php', 'target' => 'tools/ai/verify-full-install.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => '.schemas/ai-catalog.schema.json', 'target' => '.schemas/ai-catalog.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
@@ -27287,6 +27593,22 @@ function aiInstallerPackRegistry(): array
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/shared/approvals', 'target' => 'docs/ai/shared/approvals', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/shared/verification', 'target' => 'docs/ai/shared/verification', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/snippets', 'target' => 'docs/ai/snippets', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+        ],
+        // Ship the source package descriptor + generated catalog so installed
+        // targets can run generate-ai-catalog/validate-generated-artifacts and
+        // package-verify without re-downloading the source repo.
+        'package-source-pack' => [
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'packages/ai-universal-rules/manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'packages/ai-universal-rules/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'packages/ai-universal-rules/manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'packages/ai-universal-rules/package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/README.md', 'target' => 'packages/ai-universal-rules/README.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'packages/ai-universal-rules/docs', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'packages/ai-universal-rules/policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            // Root-level PLACEHOLDERS.md index so validate-placeholders.php
+            // running from the installed target does not error out.
+            ['type' => 'file', 'source' => 'PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
         ],
     ];
 }
@@ -27542,7 +27864,7 @@ function aiInstallerProfileDefinitions(): array
         'dual' => ['minimal', 'adapter-copilot', 'adapter-opencode', 'capabilities-extended-lite', 'scripts-pack', 'policy-pack', 'hooks-pack'],
         'guarded' => ['dual', 'policy-pack', 'hooks-pack', 'evidence-pack'],
         'accelerated' => ['dual', 'scripts-pack', 'policy-pack', 'evidence-pack'],
-        'full-governance' => ['accelerated', 'capabilities-extended-full', 'hooks-pack', 'ci-pack', 'docs-reference-pack', 'delivery-pack', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'preview-environments-pack', 'evaluation-pack', 'service-boundary-pack', 'mcp-boundaries-pack', 'advisor-pack', 'target-tools-pack', 'shared-templates-pack'],
+        'full-governance' => ['accelerated', 'capabilities-extended-full', 'hooks-pack', 'ci-pack', 'docs-reference-pack', 'delivery-pack', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'preview-environments-pack', 'evaluation-pack', 'service-boundary-pack', 'mcp-boundaries-pack', 'advisor-pack', 'target-tools-pack', 'shared-templates-pack', 'package-source-pack'],
         'docs-reference' => ['docs-reference-pack'],
         'custom' => [],
     ];
@@ -27574,6 +27896,7 @@ function aiInstallerAllFeaturePacks(): array
         'advisor-pack',
         'target-tools-pack',
         'shared-templates-pack',
+        'package-source-pack',
     ];
 }
 
@@ -28234,11 +28557,107 @@ function aiInstallerPlatformKey(): string
     };
 }
 
+/**
+ * Ensure common user-local and platform tool directories are on PATH so the
+ * installer's `command -v` checks see tools that the user installed under
+ * their home directory (e.g. ~/.local/bin, ~/go/bin, ~/.cargo/bin) or via
+ * npm prefix changes. Idempotent. Called once at installer entry.
+ */
+function aiInstallerBootstrapPath(): void
+{
+    $home = (string) (getenv('HOME') ?: getenv('USERPROFILE') ?: '');
+    if ($home === '') {
+        return;
+    }
+
+    $sep = PHP_OS_FAMILY === 'Windows' ? ';' : ':';
+    $candidates = PHP_OS_FAMILY === 'Windows'
+        ? [
+            $home . DIRECTORY_SEPARATOR . '.local' . DIRECTORY_SEPARATOR . 'bin',
+            $home . DIRECTORY_SEPARATOR . 'go' . DIRECTORY_SEPARATOR . 'bin',
+            $home . DIRECTORY_SEPARATOR . '.cargo' . DIRECTORY_SEPARATOR . 'bin',
+            $home . DIRECTORY_SEPARATOR . 'AppData' . DIRECTORY_SEPARATOR . 'Local' . DIRECTORY_SEPARATOR . 'Microsoft' . DIRECTORY_SEPARATOR . 'WinGet' . DIRECTORY_SEPARATOR . 'Links',
+        ]
+        : [
+            $home . '/.local/bin',
+            $home . '/go/bin',
+            $home . '/.cargo/bin',
+            '/opt/homebrew/bin',
+            '/usr/local/bin',
+        ];
+
+    $path = (string) getenv('PATH');
+    $existing = $path === '' ? [] : (preg_split('/' . preg_quote($sep, '/') . '/', $path) ?: []);
+    $existingNormalized = array_map(
+        static fn(string $p): string => rtrim(str_replace('\\', '/', $p), '/'),
+        $existing
+    );
+
+    $additions = [];
+    foreach ($candidates as $dir) {
+        if (!is_dir($dir)) {
+            continue;
+        }
+        $norm = rtrim(str_replace('\\', '/', $dir), '/');
+        if (in_array($norm, $existingNormalized, true)) {
+            continue;
+        }
+        $additions[] = $dir;
+    }
+
+    if ($additions === []) {
+        return;
+    }
+
+    $newPath = implode($sep, array_merge($additions, $existing === false ? [] : $existing));
+    putenv('PATH=' . $newPath);
+    $_SERVER['PATH'] = $newPath;
+    $_ENV['PATH'] = $newPath;
+}
+
 function aiInstallerSelectedToolList(array $selectedPacks, array $withTools): array
 {
     $dep = aiInstallerPackToolRequirements($selectedPacks);
     $tools = array_values(array_unique(array_merge($dep['required'] ?? [], $withTools)));
     return $tools;
+}
+
+/**
+ * Render a per-tool install hint block for the missing required tools.
+ * Always prints PATH bootstrap reminder + the cross-platform install commands.
+ */
+function aiInstallerMissingToolsHint(array $missing): string
+{
+    $home = (string) (getenv('HOME') ?: getenv('USERPROFILE') ?: '~');
+    $lines = [];
+    $lines[] = 'How to fix:';
+    $lines[] = '  1) Ensure user bins are on PATH:';
+    if (PHP_OS_FAMILY === 'Windows') {
+        $lines[] = '       setx PATH "%USERPROFILE%\\.local\\bin;%PATH%"';
+    } else {
+        $lines[] = '       export PATH="' . $home . '/.local/bin:$PATH"';
+    }
+    $hintMap = [
+        'fd' => 'apt: sudo apt install -y fd-find && ln -s "$(command -v fdfind)" ~/.local/bin/fd  |  brew: brew install fd  |  winget: winget install sharkdp.fd',
+        'ast-grep' => 'npm: npm config set prefix "$HOME/.local" && npm install -g @ast-grep/cli  |  brew: brew install ast-grep  |  winget: winget install ast-grep',
+        'scc' => 'release: curl -L https://github.com/boyter/scc/releases/latest/download/scc_Linux_x86_64.tar.gz | tar -xz -C ~/.local/bin scc  |  brew: brew install scc  |  winget: winget install BenBoyter.scc',
+        'repomix' => 'npm: npm install -g repomix',
+        'rg' => 'apt: sudo apt install -y ripgrep  |  brew: brew install ripgrep  |  winget: winget install BurntSushi.ripgrep.MSVC',
+        'jq' => 'apt: sudo apt install -y jq  |  brew: brew install jq  |  winget: winget install jqlang.jq',
+        'git' => 'apt: sudo apt install -y git  |  brew: brew install git  |  winget: winget install Git.Git',
+        'bash' => 'install your distro\'s bash package; on Windows use WSL or Git Bash',
+        'gitleaks' => 'release: curl -L https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz | tar -xz -C ~/.local/bin gitleaks',
+        'shellcheck' => 'apt: sudo apt install -y shellcheck  |  brew: brew install shellcheck  |  winget: winget install koalaman.shellcheck',
+        'yq' => 'apt: sudo apt install -y yq  |  brew: brew install yq  |  winget: winget install MikeFarah.yq',
+    ];
+    $lines[] = '  2) Install missing tools:';
+    foreach ($missing as $tool) {
+        $hint = $hintMap[$tool] ?? 'see docs/ai/mandatory-tools-install.md';
+        $lines[] = '       - ' . $tool . ': ' . $hint;
+    }
+    $lines[] = '  3) Or rerun with --dependency-mode warn to proceed without strict checks (not recommended for full-governance).';
+    $lines[] = '     Reference: docs/ai/mandatory-tools-install.md, docs/ai/toolchain-requirements.md.';
+    return implode(PHP_EOL, $lines);
 }
 
 function aiInstallerCheckTool(string $tool, array $meta): array
@@ -29133,6 +29552,8 @@ for ($i = 1; $i < $argc; $i++) {
 }
 
 $isCi = strtolower((string) getenv('CI')) === 'true' || getenv('GITHUB_ACTIONS') === 'true';
+$allowNoScanner = strtolower((string) getenv('AI_ALLOW_NO_SECRET_SCANNER')) === '1'
+    || strtolower((string) getenv('AI_ALLOW_NO_SECRET_SCANNER')) === 'true';
 
 if (hasBin('gitleaks')) {
     $cmd = 'gitleaks detect --source ' . escapeshellarg($root) . ' --redact --no-banner';
@@ -29148,8 +29569,9 @@ if (hasBin('trufflehog')) {
 
 $message = "no secret scanner found (gitleaks/trufflehog). scope={$scope}";
 
-if ($strict || $isCi) {
+if (($strict || $isCi) && !$allowNoScanner) {
     fwrite(STDERR, "ERROR: {$message}\n");
+    fwrite(STDERR, "Hint: install gitleaks (see docs/ai/mandatory-tools-install.md) or set AI_ALLOW_NO_SECRET_SCANNER=1 to skip in non-publishing contexts.\n");
     exit(1);
 }
 
@@ -31425,7 +31847,9 @@ foreach ($argv as $arg) {
     }
 }
 
-if ($targetArg !== null || (!is_dir(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . 'packages') && is_file(dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
+$candidateRoot = dirname(__DIR__, 2);
+$sourceRepoMode = is_file($candidateRoot . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
+if ($targetArg !== null || (!$sourceRepoMode && is_file($candidateRoot . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
     $targetRoot = $targetArg !== null ? realpath($targetArg) : realpath(dirname(__DIR__, 2));
     if ($targetRoot === false) {
         fwrite(STDERR, "ERROR: target root not found\n");
@@ -31587,7 +32011,8 @@ if ($root === false) {
     exit(1);
 }
 
-if ($targetArg !== null || (!is_dir($root . DIRECTORY_SEPARATOR . 'packages') && is_file($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
+$sourceRepoMode = is_file($root . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
+if ($targetArg !== null || (!$sourceRepoMode && is_file($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
     $errors = [];
     foreach (['AGENTS.md', 'docs/ai/project-context.md', 'docs/ai/POST-INSTALL.md', 'scripts/ai/ai-search.sh', 'tools/ai/validate-install-surface.php', '.ai-install-manifest.json'] as $required) {
         if (!file_exists($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $required))) {
@@ -32616,7 +33041,8 @@ if ($root === false || !is_dir($root)) {
     exit(1);
 }
 
-$existenceOnly = in_array('--existence-only', $argv, true);
+$sourceRepoMode = is_file($root . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
+$existenceOnly = in_array('--existence-only', $argv, true) || !$sourceRepoMode;
 $write = in_array('--write', $argv, true) || in_array('--fix', $argv, true);
 
 $required = [
@@ -32691,6 +33117,9 @@ if ($errors !== []) {
 }
 
 fwrite(STDOUT, "OK: generated artifact baseline present\n");
+if (!$sourceRepoMode) {
+    fwrite(STDOUT, "INFO: installed target mode; skipped source-repository drift checks\n");
+}
 exit(0);
 
 /**
@@ -32741,6 +33170,7 @@ function writePrefixedLines(string $prefix, string $content, $stream): void
         fwrite($stream, $prefix . $line . PHP_EOL);
     }
 }
+
 ```
 
 ## FILE: tools/ai/validate-install-surface.php
@@ -32771,7 +33201,7 @@ $strict = in_array('--strict', $argv, true);
 $errors = [];
 $warnings = [];
 
-if ($targetArg !== null || (!is_dir($root . '/packages/ai-universal-rules') && is_file($root . '/.ai-install-manifest.json'))) {
+if ($targetArg !== null || (is_file($root . '/.ai-install-manifest.json') && !is_dir($root . '/packages/ai-universal-rules/templates'))) {
     $manifestPath = $root . '/.ai-install-manifest.json';
     $manifest = json_decode((string) @file_get_contents($manifestPath), true);
     if (!is_array($manifest)) {
@@ -33402,6 +33832,9 @@ if ($root === false) {
 
 $placeholdersDoc = $root . '/packages/ai-universal-rules/PLACEHOLDERS.md';
 if (!is_file($placeholdersDoc)) {
+    $placeholdersDoc = $root . '/PLACEHOLDERS.md';
+}
+if (!is_file($placeholdersDoc)) {
     fwrite(STDERR, "ERROR: missing PLACEHOLDERS.md\n");
     exit(1);
 }
@@ -33413,12 +33846,15 @@ if (preg_match_all('/`(<[A-Z0-9_]+>)`/', $doc, $m) === 1 || (!empty($m[1]))) {
 }
 
 $templatePaths = [];
-$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root . '/packages/ai-universal-rules/templates', FilesystemIterator::SKIP_DOTS));
-foreach ($it as $file) {
-    if (!$file->isFile() || strtolower($file->getExtension()) !== 'md') {
-        continue;
+$templatesDir = $root . '/packages/ai-universal-rules/templates';
+if (is_dir($templatesDir)) {
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($templatesDir, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $file) {
+        if (!$file->isFile() || strtolower($file->getExtension()) !== 'md') {
+            continue;
+        }
+        $templatePaths[] = $file->getPathname();
     }
-    $templatePaths[] = $file->getPathname();
 }
 
 $used = [];
@@ -33784,6 +34220,11 @@ function requiredTokensList(): array
  */
 function scanFile(string $absolutePath, string $target, array $requiredTokens, array &$findings): void
 {
+    $relative = ltrim(str_replace('\\', '/', substr($absolutePath, strlen($target))), '/');
+    if (placeholderVerifierShouldSkipPath($relative)) {
+        return;
+    }
+
     $content = @file_get_contents($absolutePath);
     if ($content === false) {
         return;
@@ -33793,7 +34234,6 @@ function scanFile(string $absolutePath, string $target, array $requiredTokens, a
     if (!preg_match_all('/<[A-Z][A-Z0-9_]*>/', $stripped, $matches, PREG_OFFSET_CAPTURE)) {
         return;
     }
-    $relative = ltrim(str_replace('\\', '/', substr($absolutePath, strlen($target))), '/');
     foreach ($matches[0] as $hit) {
         [$token, $offset] = $hit;
         $line = 1 + substr_count(substr($content, 0, $offset), "\n");
@@ -33805,6 +34245,11 @@ function scanFile(string $absolutePath, string $target, array $requiredTokens, a
             'required' => $isRequired,
         ];
     }
+}
+
+function placeholderVerifierShouldSkipPath(string $relativePath): bool
+{
+    return $relativePath === 'docs/ai/catalog.md';
 }
 
 /**

@@ -1,10 +1,10 @@
 {
     "schema_version": 1,
     "artifact": "toolchain.json",
-    "generated_at": "2026-05-20T00:20:48+00:00",
+    "generated_at": "2026-05-26T16:58:19+00:00",
     "command": "php tools/ai/ai.php toolchain",
-    "based_on_commit": "unknown",
-    "based_on_branch": "unknown",
+    "based_on_commit": "c8ec700",
+    "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
     "score": null,
@@ -32,8 +32,8 @@
             {
                 "tool": "bash",
                 "label": "Bash",
-                "present": false,
-                "version": "unknown",
+                "present": true,
+                "version": "GNU bash, version 5.3.9(1)-release (x86_64-pc-linux-gnu)",
                 "safe_auto_install": false,
                 "requires_before_install": [],
                 "install_hints": [],
@@ -42,8 +42,8 @@
             {
                 "tool": "git",
                 "label": "Git",
-                "present": false,
-                "version": "unknown",
+                "present": true,
+                "version": "git version 2.53.0",
                 "safe_auto_install": false,
                 "requires_before_install": [],
                 "install_hints": {
@@ -56,8 +56,8 @@
             {
                 "tool": "jq",
                 "label": "jq",
-                "present": false,
-                "version": "unknown",
+                "present": true,
+                "version": "jq-1.8.1",
                 "safe_auto_install": false,
                 "requires_before_install": [],
                 "install_hints": {
@@ -70,8 +70,8 @@
             {
                 "tool": "rg",
                 "label": "ripgrep",
-                "present": false,
-                "version": "unknown",
+                "present": true,
+                "version": "ripgrep 15.1.0",
                 "safe_auto_install": false,
                 "requires_before_install": [],
                 "install_hints": {
@@ -98,8 +98,8 @@
             {
                 "tool": "repomix",
                 "label": "Repomix",
-                "present": false,
-                "version": "unknown",
+                "present": true,
+                "version": "1.14.0",
                 "safe_auto_install": true,
                 "requires_before_install": [
                     "node",
@@ -134,26 +134,6 @@
         ],
         "install_actions": [
             {
-                "tool": "bash",
-                "hint": "manual install required",
-                "safe_auto_install": false
-            },
-            {
-                "tool": "git",
-                "hint": "winget install Git.Git",
-                "safe_auto_install": false
-            },
-            {
-                "tool": "jq",
-                "hint": "winget install jqlang.jq",
-                "safe_auto_install": false
-            },
-            {
-                "tool": "rg",
-                "hint": "winget install BurntSushi.ripgrep.MSVC",
-                "safe_auto_install": false
-            },
-            {
                 "tool": "fd",
                 "hint": "manual install required",
                 "safe_auto_install": false
@@ -164,42 +144,13 @@
                 "safe_auto_install": false
             },
             {
-                "tool": "repomix",
-                "hint": "npm install -g repomix",
-                "safe_auto_install": true
-            },
-            {
                 "tool": "scc",
-                "hint": "Install scc via package manager or release binary",
+                "hint": "Install scc from your package manager or release binary",
                 "safe_auto_install": false
             }
         ],
         "apply_results": [
             {
-                "tool": "bash",
-                "status": "blocked",
-                "reason": "auto-install not approved",
-                "hint": "manual install required"
-            },
-            {
-                "tool": "git",
-                "status": "blocked",
-                "reason": "auto-install not approved",
-                "hint": "winget install Git.Git"
-            },
-            {
-                "tool": "jq",
-                "status": "blocked",
-                "reason": "auto-install not approved",
-                "hint": "winget install jqlang.jq"
-            },
-            {
-                "tool": "rg",
-                "status": "blocked",
-                "reason": "auto-install not approved",
-                "hint": "winget install BurntSushi.ripgrep.MSVC"
-            },
-            {
                 "tool": "fd",
                 "status": "blocked",
                 "reason": "auto-install not approved",
@@ -212,15 +163,10 @@
                 "hint": "manual install required"
             },
             {
-                "tool": "repomix",
-                "status": "blocked",
-                "reason": "missing prerequisite tools: node, npm"
-            },
-            {
                 "tool": "scc",
                 "status": "blocked",
                 "reason": "auto-install not approved",
-                "hint": "Install scc via package manager or release binary"
+                "hint": "Install scc from your package manager or release binary"
             }
         ]
     }

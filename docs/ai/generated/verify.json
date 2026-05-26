@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "verify.json",
-    "generated_at": "2026-05-20T00:20:54+00:00",
+    "generated_at": "2026-05-26T16:58:16+00:00",
     "command": "php tools/ai/ai.php verify --changed",
-    "based_on_commit": "b4d1f7d",
+    "based_on_commit": "c8ec700",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "failed",
@@ -14,13 +14,12 @@
         "status": "failed",
         "mode": "default",
         "summary": {
-            "errors": 2,
-            "warnings": 6,
-            "info": 8
+            "errors": 1,
+            "warnings": 7,
+            "info": 12
         },
         "check_count": 7,
         "failed_checks": [
-            "install-docs-check",
             "verify-install-placeholders"
         ],
         "results": [
@@ -30,7 +29,7 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260520-022049/validate-ai-config.log"
+                "log": "docs/ai/generated/logs/verify-20260526-165814/validate-ai-config.log"
             },
             {
                 "name": "validate-ai-catalog",
@@ -38,7 +37,7 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260520-022049/validate-ai-catalog.log"
+                "log": "docs/ai/generated/logs/verify-20260526-165814/validate-ai-catalog.log"
             },
             {
                 "name": "generate-ai-catalog-check",
@@ -46,7 +45,7 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260520-022049/generate-ai-catalog-check.log"
+                "log": "docs/ai/generated/logs/verify-20260526-165814/generate-ai-catalog-check.log"
             },
             {
                 "name": "generate-repo-structure-check",
@@ -54,15 +53,15 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260520-022049/generate-repo-structure-check.log"
+                "log": "docs/ai/generated/logs/verify-20260526-165814/generate-repo-structure-check.log"
             },
             {
                 "name": "install-docs-check",
                 "command": "php tools/ai/ai.php install-docs --check",
-                "exit": 1,
-                "passed": false,
+                "exit": 0,
+                "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260520-022049/install-docs-check.log"
+                "log": "docs/ai/generated/logs/verify-20260526-165814/install-docs-check.log"
             },
             {
                 "name": "advisor-check",
@@ -70,7 +69,7 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260520-022049/advisor-check.log"
+                "log": "docs/ai/generated/logs/verify-20260526-165814/advisor-check.log"
             },
             {
                 "name": "verify-install-placeholders",
@@ -78,17 +77,10 @@
                 "exit": 1,
                 "passed": false,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260520-022049/verify-install-placeholders.log"
+                "log": "docs/ai/generated/logs/verify-20260526-165814/verify-install-placeholders.log"
             }
         ],
         "findings": [
-            {
-                "severity": "ERROR",
-                "code": "CHECK_FAILED",
-                "file": null,
-                "message": "Verification check failed: install-docs-check",
-                "suggested_fix": "Inspect docs/ai/generated logs and rerun verify."
-            },
             {
                 "severity": "ERROR",
                 "code": "CHECK_FAILED",
@@ -99,6 +91,20 @@
             {
                 "severity": "WARNING",
                 "code": "HASH_DRIFT_MANAGED_FILE",
+                "file": ".github/hooks/scripts/tool-guardian.ps1",
+                "message": "Managed file hash drift detected.",
+                "suggested_fix": "Review local customization and merge with source updates."
+            },
+            {
+                "severity": "INFO",
+                "code": "CUSTOMISED_MANAGED_FILE",
+                "file": ".github/hooks/scripts/tool-guardian.ps1",
+                "message": "Managed file appears customized locally.",
+                "suggested_fix": "Keep or merge local changes intentionally."
+            },
+            {
+                "severity": "WARNING",
+                "code": "HASH_DRIFT_MANAGED_FILE",
                 "file": ".github/workflows/validate-ai-surface.yml",
                 "message": "Managed file hash drift detected.",
                 "suggested_fix": "Review local customization and merge with source updates."
@@ -182,19 +188,40 @@
             },
             {
                 "severity": "INFO",
-                "code": "HOOK_EXEC_CHECK_PLATFORM_LIMIT",
-                "file": "scripts/hooks/pre-commit.sh",
-                "message": "Executable bit check skipped on Windows.",
-                "suggested_fix": "Verify hook execution manually on Windows."
+                "code": "MISSING_OPTIONAL_TOOL",
+                "file": "scripts/ai",
+                "message": "Optional tool missing: gh",
+                "suggested_fix": "Install optional tooling for faster workflows."
             },
             {
                 "severity": "INFO",
-                "code": "HOOK_EXEC_CHECK_PLATFORM_LIMIT",
-                "file": "scripts/hooks/commit-msg.sh",
-                "message": "Executable bit check skipped on Windows.",
-                "suggested_fix": "Verify hook execution manually on Windows."
+                "code": "MISSING_OPTIONAL_TOOL",
+                "file": "scripts/ai",
+                "message": "Optional tool missing: bat",
+                "suggested_fix": "Install optional tooling for faster workflows."
+            },
+            {
+                "severity": "INFO",
+                "code": "MISSING_OPTIONAL_TOOL",
+                "file": "scripts/ai",
+                "message": "Optional tool missing: delta",
+                "suggested_fix": "Install optional tooling for faster workflows."
+            },
+            {
+                "severity": "INFO",
+                "code": "MISSING_OPTIONAL_TOOL",
+                "file": "scripts/ai",
+                "message": "Optional tool missing: yq",
+                "suggested_fix": "Install optional tooling for faster workflows."
+            },
+            {
+                "severity": "INFO",
+                "code": "MISSING_OPTIONAL_TOOL",
+                "file": "scripts/ai",
+                "message": "Optional tool missing: semgrep",
+                "suggested_fix": "Install optional tooling for faster workflows."
             }
         ],
-        "log_dir": "docs/ai/generated/logs/verify-20260520-022049"
+        "log_dir": "docs/ai/generated/logs/verify-20260526-165814"
     }
 }

@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "find.json",
-    "generated_at": "2026-05-20T00:21:01+00:00",
+    "generated_at": "2026-05-26T16:58:18+00:00",
     "command": "php tools/ai/ai.php find workflow",
-    "based_on_commit": "b4d1f7d",
+    "based_on_commit": "c8ec700",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -624,17 +624,17 @@
             },
             {
                 "path": ".opencode/agents/bootstrapper.md",
-                "line": 115,
+                "line": 122,
                 "preview": "Install or re-install the AI workflow kit safely into a target project. Always prefer the canonical install sequence. Prove the final state with the strongest available validation the environment supports."
             },
             {
                 "path": ".opencode/agents/implementer.md",
-                "line": 159,
+                "line": 192,
                 "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/adapter-contract.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/scripts-reference.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
             },
             {
                 "path": ".opencode/agents/refactorer.md",
-                "line": 125,
+                "line": 134,
                 "preview": "Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/architecture-locks.md`, `docs/ai/generated-artifacts.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`."
             },
             {

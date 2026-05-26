@@ -72,6 +72,7 @@ For broader operator recipes across Copilot, OpenCode, docs, scripts, hooks, adv
 - `ai-search` -> `scripts/ai/ai-search.sh`
 - `rg-code` -> `scripts/ai/rg-code.sh`
 - `fd-files` -> `scripts/ai/fd-files.sh`
+- `run-repo-tests` -> `scripts/ai/run-repo-tests.sh`
 - `preview-file` -> `scripts/ai/preview-file.sh`
 - `query-usage` -> `scripts/ai/query-usage.sh`
 - `git-forensics` -> `scripts/ai/git-forensics.sh`
@@ -99,6 +100,7 @@ For broader operator recipes across Copilot, OpenCode, docs, scripts, hooks, adv
 - `install-mandatory-tools` -> `scripts/ai/install-mandatory-tools.sh`
 - `setup-powershell-profile` -> `scripts/ai/setup-powershell-profile.ps1`
 - `watch-loop` -> `scripts/ai/watch-loop.sh`
+- `prune-shipped-targets` -> `scripts/ai/prune-shipped-targets.sh`
 
 ## Installed Files
 

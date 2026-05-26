@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "adapter-plan.json",
-    "generated_at": "2026-05-20T00:21:04+00:00",
+    "generated_at": "2026-05-26T16:58:18+00:00",
     "command": "php tools/ai/ai.php adapter-plan",
-    "based_on_commit": "b4d1f7d",
+    "based_on_commit": "c8ec700",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -42,6 +42,7 @@
             ".opencode/commands",
             ".opencode/commands",
             "docs/ai/tools/actions/preview-file.md",
+            ".github/hooks/scripts/tool-guardian.ps1",
             "AGENTS.md",
             "docs/ai/project-context.md",
             "docs/ai/project-context-placeholders.md",
@@ -784,8 +785,8 @@
                 "merge_strategy": "replace",
                 "required": false,
                 "pack": "hooks-pack",
-                "action": "SKIP_IDENTICAL_EXISTING",
-                "reason": "target exists and already matches source",
+                "action": "SKIP_EXISTING_UNMANAGED",
+                "reason": "target exists",
                 "requested_target": ".github/hooks/scripts/tool-guardian.ps1"
             },
             {
@@ -991,6 +992,18 @@
                 "action": "SKIP_IDENTICAL_EXISTING",
                 "reason": "target exists and already matches source",
                 "requested_target": "docs/ai/capabilities/evidence-first-execution"
+            },
+            {
+                "type": "file",
+                "source": "PLACEHOLDERS.md",
+                "target": "PLACEHOLDERS.md",
+                "core": false,
+                "merge_strategy": "replace",
+                "required": true,
+                "pack": "setup-docs",
+                "action": "SKIP_IDENTICAL_EXISTING",
+                "reason": "target exists and already matches source",
+                "requested_target": "PLACEHOLDERS.md"
             },
             {
                 "type": "file",
@@ -1219,6 +1232,30 @@
                 "action": "SKIP_IDENTICAL_EXISTING",
                 "reason": "target exists and already matches source",
                 "requested_target": "docs/ai/command-policy.tiers.yaml"
+            },
+            {
+                "type": "file",
+                "source": "docs/ai/catalog.md",
+                "target": "docs/ai/catalog.md",
+                "core": false,
+                "merge_strategy": "replace",
+                "required": false,
+                "pack": "setup-docs",
+                "action": "SKIP_IDENTICAL_EXISTING",
+                "reason": "target exists and already matches source",
+                "requested_target": "docs/ai/catalog.md"
+            },
+            {
+                "type": "file",
+                "source": "llms.txt",
+                "target": "llms.txt",
+                "core": false,
+                "merge_strategy": "replace",
+                "required": false,
+                "pack": "setup-docs",
+                "action": "SKIP_IDENTICAL_EXISTING",
+                "reason": "target exists and already matches source",
+                "requested_target": "llms.txt"
             },
             {
                 "type": "file",

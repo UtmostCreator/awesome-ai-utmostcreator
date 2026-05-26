@@ -1,5 +1,5 @@
 {
-    "tokens_estimate": 299274,
+    "tokens_estimate": 304762,
     "soft_budget_tokens": 120000,
     "hard_budget_tokens": 180000,
     "mode": "hard_limit_exceeded",

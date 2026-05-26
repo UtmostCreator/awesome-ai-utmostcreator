@@ -1,10 +1,10 @@
 {
     "schema_version": 1,
     "artifact": "scripts.json",
-    "generated_at": "2026-05-20T00:20:47+00:00",
+    "generated_at": "2026-05-26T16:58:19+00:00",
     "command": "php tools/ai/ai.php run-script repomix-context",
-    "based_on_commit": "unknown",
-    "based_on_branch": "unknown",
+    "based_on_commit": "c8ec700",
+    "based_on_branch": "main",
     "input_hashes": {},
     "status": "failed",
     "score": null,
@@ -12,11 +12,8 @@
     "recommended_next_action": "Fix script/tool errors and retry.",
     "data": {
         "exit": 1,
-        "error": "missing required tools: bash, git, repomix, scc",
+        "error": "missing required tools: scc",
         "missing_tools": [
-            "bash",
-            "git",
-            "repomix",
             "scc"
         ]
     }
