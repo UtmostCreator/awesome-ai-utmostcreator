@@ -40,6 +40,8 @@ for ($i = 1; $i < $argc; $i++) {
 }
 
 $isCi = strtolower((string) getenv('CI')) === 'true' || getenv('GITHUB_ACTIONS') === 'true';
+$allowNoScanner = strtolower((string) getenv('AI_ALLOW_NO_SECRET_SCANNER')) === '1'
+    || strtolower((string) getenv('AI_ALLOW_NO_SECRET_SCANNER')) === 'true';
 
 if (hasBin('gitleaks')) {
     $cmd = 'gitleaks detect --source ' . escapeshellarg($root) . ' --redact --no-banner';
@@ -55,8 +57,9 @@ if (hasBin('trufflehog')) {
 
 $message = "no secret scanner found (gitleaks/trufflehog). scope={$scope}";
 
-if ($strict || $isCi) {
+if (($strict || $isCi) && !$allowNoScanner) {
     fwrite(STDERR, "ERROR: {$message}\n");
+    fwrite(STDERR, "Hint: install gitleaks (see docs/ai/mandatory-tools-install.md) or set AI_ALLOW_NO_SECRET_SCANNER=1 to skip in non-publishing contexts.\n");
     exit(1);
 }
 

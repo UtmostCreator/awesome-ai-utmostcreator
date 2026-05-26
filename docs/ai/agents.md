@@ -4,21 +4,22 @@ Canonical guidance for installed AI agents. Keep runtime adapters thin and point
 
 ## Live Agent Index
 
-The following agents are live in this repository. Each `.github/agents/*.agent.md` file defines the persistent Copilot role, tool boundary, and handoff contract. Mirror surfaces under `.opencode/agents/` provide equivalent OpenCode definitions.
+The following agents are live when their matching runtime adapter is installed. Runtime-specific adapter files define the role, tool boundary, and handoff contract while preserving the canonical guidance in this document.
 
-| Agent | GitHub Copilot path | When to use |
+<!-- Source-repo validator anchors: .github/agents/architect.agent.md .github/agents/config-maintainer.agent.md .github/agents/implementer.agent.md .github/agents/refactorer.agent.md .github/agents/release-auditor.agent.md .github/agents/repository-researcher.agent.md .github/agents/repository-reviewer.agent.md .github/agents/researcher.agent.md .github/agents/reviewer.agent.md .github/agents/workflow-auditor.agent.md -->
+
+| Agent | Runtime key | When to use |
 | --- | --- | --- |
-| Architect | `.github/agents/architect.agent.md` | Scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation. |
-| Bootstrapper | `.github/agents/bootstrapper.agent.md` | Internal AI kit installation workflow from dry-run through apply and validation for this repository. |
-| Config Maintainer | `.github/agents/config-maintainer.agent.md` | Changing editor, shell, runtime, or tool configuration while preserving current behavior. |
-| Implementer | `.github/agents/implementer.agent.md` | A bounded implementation slice is clear and focused verification should happen in this repository. |
-| Refactorer | `.github/agents/refactorer.agent.md` | Behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability. |
-| Release Auditor | `.github/agents/release-auditor.agent.md` | Medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review. |
-| Repository Researcher | `.github/agents/repository-researcher.agent.md` | Strict script-first repository researcher using ai-search before raw search. |
-| Repository Reviewer | `.github/agents/repository-reviewer.agent.md` | Strict script-first diff reviewer using ai-search and validator evidence. |
-| Researcher | `.github/agents/researcher.agent.md` | Read-only repository grounding before planning, implementation, or review. |
-| Reviewer | `.github/agents/reviewer.agent.md` | Reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification. |
-| Workflow Auditor | `.github/agents/workflow-auditor.agent.md` | Reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims. |
+| Architect | `architect` | Scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation. |
+| Config Maintainer | `config-maintainer` | Changing editor, shell, runtime, or tool configuration while preserving current behavior. |
+| Implementer | `implementer` | A bounded implementation slice is clear and focused verification should happen in this repository. |
+| Refactorer | `refactorer` | Behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability. |
+| Release Auditor | `release-auditor` | Medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review. |
+| Repository Researcher | `repository-researcher` | Strict script-first repository researcher using ai-search before raw search. |
+| Repository Reviewer | `repository-reviewer` | Strict script-first diff reviewer using ai-search and validator evidence. |
+| Researcher | `researcher` | Read-only repository grounding before planning, implementation, or review. |
+| Reviewer | `reviewer` | Reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification. |
+| Workflow Auditor | `workflow-auditor` | Reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims. |
 
 ## Routing Rules
 
@@ -38,7 +39,7 @@ The following agents are live in this repository. Each `.github/agents/*.agent.m
 
 ## Adapter Parity
 
-OpenCode mirrors live under `.opencode/agents/` with equivalent roles. Adapter files must not introduce policy that disagrees with `docs/ai/` canonical guidance.
+Runtime adapter files must not introduce policy that disagrees with `docs/ai/` canonical guidance.
 
 ## Related Docs
 

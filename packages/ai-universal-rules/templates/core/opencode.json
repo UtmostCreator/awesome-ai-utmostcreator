@@ -105,8 +105,8 @@
         "vendor/bin/php-cs-fixer fix --dry-run *": "allow",
         "./vendor/bin/php-cs-fixer fix --dry-run *": "allow",
         "php tools/ai/ai.php install * --dry-run": "allow",
-        "php tools/ai/ai.php install * --apply": "allow",
-        "php tools/ai/install-ai-kit.php *": "allow",
+        "php tools/ai/ai.php install * --apply": "ask",
+        "php tools/ai/install-ai-kit.php *": "ask",
         "php tools/ai/validate-install-surface.php": "allow",
         "php tools/ai/verify-full-install.php": "allow",
         "php tools/ai/ai.php advisor --all": "allow",
@@ -165,7 +165,11 @@
         "cp *": "ask",
         "chmod *": "ask",
         "git reset*": "ask",
-        "git clean*": "ask"
+        "git clean*": "ask",
+        "rm -rf *": "deny",
+        "git push --force*": "deny",
+        "git reset --hard*": "deny",
+        "git clean -f*": "deny"
       },
     "skill": {
       "*": "ask",

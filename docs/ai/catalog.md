@@ -17,7 +17,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 
 ## Highlights
 
-- `package / core-template` - 23
+- `package / core-template` - 24
 - `package / foundation-doc` - 6
 - `package / github-copilot-instruction-template` - 22
 - `package / opencode-command-template` - 3
@@ -36,7 +36,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / cli` - 1
 - `root / exporter` - 1
 - `root / generator` - 1
-- `root / github-copilot-agent` - 11
+- `root / github-copilot-agent` - 10
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 16
 - `root / github-copilot-skill` - 16
@@ -104,7 +104,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`exporter`|export-ai-universal-rules|`tools/ai/export-ai-universal-rules.php`|Builds starter-profile release bundles under dist/.|
 |`generator`|generate-ai-catalog|`tools/ai/generate-ai-catalog.php`|Generates catalog docs, catalog JSON, and llms.txt.|
 |`github-copilot-agent`|Architect|`.github/agents/architect.agent.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
-|`github-copilot-agent`|Bootstrapper|`.github/agents/bootstrapper.agent.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|
 |`github-copilot-agent`|Config Maintainer|`.github/agents/config-maintainer.agent.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`github-copilot-agent`|Implementer|`.github/agents/implementer.agent.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
 |`github-copilot-agent`|Refactorer|`.github/agents/refactorer.agent.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
@@ -252,6 +251,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`core-template`|Bootstrapper Agent|`packages/ai-universal-rules/templates/core/agents/bootstrapper.md`|Use when installing, re-installing, or validating the AI kit from dry-run to backup to apply to full verification|
 |`core-template`|Config Maintainer Agent|`packages/ai-universal-rules/templates/core/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`core-template`|Implementer Agent|`packages/ai-universal-rules/templates/core/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
+|`core-template`|POST-Install Agent|`packages/ai-universal-rules/templates/core/agents/post-install.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
 |`core-template`|Refactorer Agent|`packages/ai-universal-rules/templates/core/agents/refactorer.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
 |`core-template`|Release Auditor Agent|`packages/ai-universal-rules/templates/core/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
 |`core-template`|Repository Researcher|`packages/ai-universal-rules/templates/core/agents/repository-researcher.md`|Strict script-first repository researcher using ai-search before raw search|

@@ -19,6 +19,8 @@ function aiInstallerRun(array $argv): int
         return 0;
     }
 
+    aiInstallerBootstrapPath();
+
     aiInstallerLog('source root: ' . $config['sourceRoot']);
     aiInstallerLog('target root: ' . $config['targetRoot']);
     aiInstallerLog('profile: ' . $config['profile']);
@@ -47,7 +49,11 @@ function aiInstallerRun(array $argv): int
         }
     }
     if ($missingRequired !== [] && ($config['dependencyMode'] ?? 'strict') === 'strict') {
-        throw new RuntimeException('missing required tools for selected packs: ' . implode(', ', $missingRequired));
+        $hint = aiInstallerMissingToolsHint($missingRequired);
+        throw new RuntimeException(
+            'missing required tools for selected packs: ' . implode(', ', $missingRequired)
+            . PHP_EOL . $hint
+        );
     }
 
     $plan = aiInstallerBuildPlan($config, $registry, $packs);
@@ -113,6 +119,19 @@ function aiInstallerRun(array $argv): int
         $manifest = aiInstallerBuildManifest($config, $packs, $applied);
         $manifest['placeholders'] = $placeholderStatus;
         aiInstallerWriteManifest($config['targetRoot'], $manifest);
+
+        if (!empty($config['verifyAfter'])) {
+            $verify = aiInstallerRunTargetCommand($config['targetRoot'], [PHP_BINARY, 'tools/ai/ai.php', 'verify']);
+            if ($verify['stdout'] !== '') {
+                fwrite(STDOUT, $verify['stdout']);
+            }
+            if ($verify['stderr'] !== '') {
+                fwrite(STDERR, $verify['stderr']);
+            }
+            if ($verify['exit'] !== 0) {
+                throw new RuntimeException('post-install verification failed; inspect target docs/ai/generated/verify.json');
+            }
+        }
     }
 
     aiInstallerLog($config['dryRun'] ? 'dry-run complete; no files changed' : 'install complete');
@@ -258,6 +277,28 @@ function aiInstallerAssertAllowedTarget(array $config): void
     }
 }
 
+/** @param list<string> $command @return array{stdout:string,stderr:string,exit:int} */
+function aiInstallerRunTargetCommand(string $targetRoot, array $command): array
+{
+    $escaped = implode(' ', array_map('escapeshellarg', $command));
+    $descriptors = [
+        0 => ['pipe', 'r'],
+        1 => ['pipe', 'w'],
+        2 => ['pipe', 'w'],
+    ];
+    $process = proc_open($escaped, $descriptors, $pipes, $targetRoot);
+    if (!is_resource($process)) {
+        throw new RuntimeException('could not start post-install verification');
+    }
+    fclose($pipes[0]);
+    $stdout = (string) stream_get_contents($pipes[1]);
+    $stderr = (string) stream_get_contents($pipes[2]);
+    fclose($pipes[1]);
+    fclose($pipes[2]);
+    $exit = proc_close($process);
+    return ['stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit];
+}
+
 function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
 {
     $required = [
@@ -291,6 +332,10 @@ function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
         $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($abs, FilesystemIterator::SKIP_DOTS));
         foreach ($it as $f) {
             if (!$f->isFile() || strtolower($f->getExtension()) !== 'md') {
+                continue;
+            }
+            $relative = ltrim(str_replace('\\', '/', substr($f->getPathname(), strlen($targetRoot))), '/');
+            if ($relative === 'docs/ai/catalog.md') {
                 continue;
             }
             $hits = array_merge($hits, aiInstallerExtractPlaceholders((string) file_get_contents($f->getPathname())));
@@ -378,7 +423,18 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
     ];
 
     foreach ($applied as $item) {
-        $abs = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['target']);
+        $target = (string) ($item['target'] ?? '');
+        // The shipped package source must stay verbatim so kit-level tools
+        // (generate-ai-catalog, validate-ai-catalog, package-verify) keep
+        // working in installed targets. PLACEHOLDERS.md is also informational
+        // and must not be rewritten.
+        if (
+            $target === 'PLACEHOLDERS.md'
+            || str_starts_with($target, 'packages/ai-universal-rules/')
+        ) {
+            continue;
+        }
+        $abs = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $target);
         if (is_file($abs) && str_ends_with(strtolower($abs), '.md')) {
             $content = (string) file_get_contents($abs);
             file_put_contents($abs, str_replace(array_keys($map), array_values($map), $content));
@@ -444,6 +500,10 @@ function aiInstallerCopyFile(string $src, string $dest): void
     aiInstallerMkdir(dirname($dest));
     if (!copy($src, $dest)) {
         throw new RuntimeException('failed to copy file: ' . $src);
+    }
+    $mode = @fileperms($src);
+    if ($mode !== false) {
+        @chmod($dest, $mode & 0777);
     }
 }
 

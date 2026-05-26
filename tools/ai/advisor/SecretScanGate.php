@@ -11,7 +11,13 @@ function aiAdvisorRequireCleanSecretScan(string $root): void
     exec('cd ' . escapeshellarg($root) . ' && ' . $cmd . ' 2>&1', $output, $exit);
 
     if ($exit !== 0) {
-        throw new RuntimeException('advisor secret-scan gate blocked context/prompt generation');
+        $combined = trim(implode("\n", $output));
+        $hint = $combined !== '' ? PHP_EOL . $combined : '';
+        throw new RuntimeException(
+            'advisor secret-scan gate blocked context/prompt generation. '
+            . 'Install gitleaks or set AI_ALLOW_NO_SECRET_SCANNER=1 in trusted local contexts.'
+            . $hint
+        );
     }
 }
 

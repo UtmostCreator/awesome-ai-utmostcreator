@@ -82,7 +82,7 @@ install_linux() {
     }
 
     run_cmd sudo apt-get update
-    run_cmd sudo apt-get install -y git php-cli ripgrep jq nodejs npm
+    run_cmd sudo apt-get install -y git php-cli ripgrep jq nodejs npm fd-find shellcheck
 
     if run_cmd sudo apt-get install -y scc; then
         :
@@ -90,6 +90,25 @@ install_linux() {
         run_cmd go install github.com/boyter/scc/v3@latest
     else
         printf 'Warning: failed to install scc via apt and Go is not available.\n' >&2
+    fi
+
+    # gitleaks (required by advisor + secret-scan strict mode)
+    if ! need_cmd gitleaks; then
+        if run_cmd bash -c 'mkdir -p "$HOME/.local/bin" && curl -L --fail https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz && tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks && install -m 0755 /tmp/gitleaks "$HOME/.local/bin/gitleaks"'; then
+            :
+        else
+            printf 'Warning: failed to install gitleaks from release archive.\n' >&2
+        fi
+    fi
+
+    # ast-grep via npm (user-local prefix to avoid sudo)
+    if ! need_cmd ast-grep; then
+        run_cmd bash -c 'mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && npm install -g @ast-grep/cli'
+    fi
+
+    # fd alias if package shipped as fdfind
+    if ! need_cmd fd && need_cmd fdfind; then
+        run_cmd bash -c 'mkdir -p "$HOME/.local/bin" && ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"'
     fi
 
     run_cmd npm install -g repomix

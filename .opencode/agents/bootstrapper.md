@@ -67,6 +67,13 @@ permission:
     "git rev-parse*": allow
     "git stash list*": allow
     "git stash show*": allow
+    "git add*": ask
+    "git commit*": ask
+    "git restore *": ask
+    "git stash push*": ask
+    "git stash pop*": ask
+    "git stash apply*": ask
+    "git stash drop*": ask
     "bash scripts/ai/ai-search.sh *": allow
     "bash scripts/ai/rg-code.sh *": allow
     "bash scripts/ai/fd-files.sh *": allow

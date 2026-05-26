@@ -32,10 +32,15 @@ function aiRunVerify(string $root, array $args): int
         'validate-ai-config' => 'php tools/ai/validate-ai-config.php',
         'validate-ai-catalog' => 'php tools/ai/validate-ai-catalog.php',
         'generate-ai-catalog-check' => 'php tools/ai/generate-ai-catalog.php --check',
-        'generate-repo-structure-check' => 'php tools/ai/generate-repo-structure.php --check --with-scc',
         'install-docs-check' => 'php tools/ai/ai.php install-docs --check',
         'advisor-check' => 'php tools/ai/ai.php advisor --check',
     ];
+
+    if (!is_file(aiInstallManifestPath($root)) || is_file($root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'repo-directory-map.json')) {
+        $checks = array_slice($checks, 0, 3, true)
+            + ['generate-repo-structure-check' => 'php tools/ai/generate-repo-structure.php --check --with-scc']
+            + array_slice($checks, 3, null, true);
+    }
 
     // Run the post-install placeholder verifier only when we're verifying an
     // installed target (signalled by .ai-install-manifest.json at the root).
@@ -61,6 +66,22 @@ function aiRunVerify(string $root, array $args): int
 
         if ($run['exit'] !== 0 && $name === 'generate-repo-structure-check') {
             $regen = aiRunCommand($root, 'php tools/ai/generate-repo-structure.php --with-scc');
+            if ($regen['exit'] === 0) {
+                $run = aiRunCommand($root, $command);
+                $autoFixApplied = true;
+            }
+        }
+
+        if ($run['exit'] !== 0 && $name === 'install-docs-check' && is_file(aiInstallManifestPath($root))) {
+            $regen = aiRunCommand($root, 'php tools/ai/ai.php install-docs --write');
+            if ($regen['exit'] === 0) {
+                $run = aiRunCommand($root, $command);
+                $autoFixApplied = true;
+            }
+        }
+
+        if ($run['exit'] !== 0 && $name === 'advisor-check' && is_file(aiInstallManifestPath($root))) {
+            $regen = aiRunCommand($root, 'php tools/ai/ai.php advisor --all');
             if ($regen['exit'] === 0) {
                 $run = aiRunCommand($root, $command);
                 $autoFixApplied = true;

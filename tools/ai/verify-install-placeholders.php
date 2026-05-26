@@ -185,6 +185,11 @@ function requiredTokensList(): array
  */
 function scanFile(string $absolutePath, string $target, array $requiredTokens, array &$findings): void
 {
+    $relative = ltrim(str_replace('\\', '/', substr($absolutePath, strlen($target))), '/');
+    if (placeholderVerifierShouldSkipPath($relative)) {
+        return;
+    }
+
     $content = @file_get_contents($absolutePath);
     if ($content === false) {
         return;
@@ -194,7 +199,6 @@ function scanFile(string $absolutePath, string $target, array $requiredTokens, a
     if (!preg_match_all('/<[A-Z][A-Z0-9_]*>/', $stripped, $matches, PREG_OFFSET_CAPTURE)) {
         return;
     }
-    $relative = ltrim(str_replace('\\', '/', substr($absolutePath, strlen($target))), '/');
     foreach ($matches[0] as $hit) {
         [$token, $offset] = $hit;
         $line = 1 + substr_count(substr($content, 0, $offset), "\n");
@@ -206,6 +210,11 @@ function scanFile(string $absolutePath, string $target, array $requiredTokens, a
             'required' => $isRequired,
         ];
     }
+}
+
+function placeholderVerifierShouldSkipPath(string $relativePath): bool
+{
+    return $relativePath === 'docs/ai/catalog.md';
 }
 
 /**

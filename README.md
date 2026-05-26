@@ -49,6 +49,9 @@ php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-go
 # 4. Apply installation
 php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime both --project-name "your-project-name" --backup --verify-after --non-interactive
 
+# OpenCode-only full install, excluding GitHub Copilot adapter surfaces
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime opencode --without optional-agents-copilot-pack --project-name "your-project-name" --backup --verify-after --non-interactive
+
 # 5. Audit placeholders
 php tools/ai/ai.php placeholders --fail
 ```

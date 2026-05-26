@@ -37,7 +37,7 @@
         ]
     },
     "counts": {
-        "package:core-template": 23,
+        "package:core-template": 24,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 3,
@@ -56,7 +56,7 @@
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 11,
+        "root:github-copilot-agent": 10,
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 16,
         "root:github-copilot-skill": 16,
@@ -117,6 +117,14 @@
             "path": "packages/ai-universal-rules/templates/core/agents/implementer.md",
             "runtime": "canonical",
             "description": "Use when a bounded implementation slice is clear and focused verification should happen in this repository"
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "POST-Install Agent",
+            "path": "packages/ai-universal-rules/templates/core/agents/post-install.md",
+            "runtime": "canonical",
+            "description": "Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification"
         },
         {
             "scope": "package",
@@ -1525,14 +1533,6 @@
             "path": ".github/agents/architect.agent.md",
             "runtime": "github-copilot",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Bootstrapper",
-            "path": ".github/agents/bootstrapper.agent.md",
-            "runtime": "github-copilot",
-            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
         },
         {
             "scope": "root",

@@ -52,6 +52,34 @@ permission:
     'git status*': allow
     'git diff*': allow
     'git log*': allow
+    'git show*': allow
+    'git branch*': allow
+    'git rev-parse*': allow
+    'git ls-files*': allow
+    'git stash list*': allow
+    'git stash show*': allow
+    'git add*': ask
+    'git commit*': ask
+    'git restore *': ask
+    'git stash push*': ask
+    'git stash pop*': ask
+    'git stash apply*': ask
+    'git stash drop*': ask
+    'git checkout*': ask
+    'bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/preview-file.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'bash scripts/ai/query-usage.sh *': allow
+    'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
+    'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
+    'bash -n scripts/*.sh': allow
+    'bash -n scripts/**/*.sh': allow
+    'bash -n scripts/doctor.sh': allow
+    'bash scripts/doctor.sh': allow
+    'bash scripts/doctor.sh *': allow
     'shellcheck *': allow
     'php -l *': allow
     'php tools/ai/validate-*.php *': allow
