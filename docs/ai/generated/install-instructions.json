@@ -105,7 +105,17 @@
             "path": "scripts/ai/fd-files.sh",
             "required_tools": [
                 "bash",
-                "fd"
+                "jq",
+                "rg"
+            ]
+        },
+        {
+            "id": "run-repo-tests",
+            "label": "Parallel-first repository test runner",
+            "path": "scripts/ai/run-repo-tests.sh",
+            "required_tools": [
+                "bash",
+                "php"
             ]
         },
         {
@@ -218,7 +228,8 @@
             "required_tools": [
                 "bash",
                 "git",
-                "repomix"
+                "repomix",
+                "scc"
             ]
         },
         {
@@ -228,7 +239,8 @@
             "required_tools": [
                 "bash",
                 "git",
-                "repomix"
+                "repomix",
+                "scc"
             ]
         },
         {
@@ -359,6 +371,16 @@
             "path": "scripts/ai/watch-loop.sh",
             "required_tools": [
                 "bash"
+            ]
+        },
+        {
+            "id": "prune-shipped-targets",
+            "label": "Kit-author cleanup of shipped-template duplicates",
+            "path": "scripts/ai/prune-shipped-targets.sh",
+            "required_tools": [
+                "bash",
+                "jq",
+                "git"
             ]
         }
     ],

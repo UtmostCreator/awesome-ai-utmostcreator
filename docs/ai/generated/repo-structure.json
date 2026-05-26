@@ -3,7 +3,7 @@
     "source": "git ls-files",
     "with_scc": true,
     "folder_count": 13,
-    "tracked_file_count": 658,
+    "tracked_file_count": 659,
     "metadata": {
         "schema_version": 1,
         "coverage_required": true,
@@ -46,12 +46,12 @@
             "ai_entrypoint": "AGENTS.md",
             "notes": "Root-level tracked files are intentionally grouped under '.'.",
             "metrics": {
-                "lines": 2181,
-                "code": 1749,
+                "lines": 2196,
+                "code": 1762,
                 "comments": 34,
-                "blanks": 398,
+                "blanks": 400,
                 "complexity": 42,
-                "bytes": 120036
+                "bytes": 120898
             }
         },
         {
@@ -144,7 +144,7 @@
                 "comments": 0,
                 "blanks": 1032,
                 "complexity": 19,
-                "bytes": 150782
+                "bytes": 150706
             }
         },
         {
@@ -215,12 +215,12 @@
             "ai_entrypoint": ".opencode/opencode.json",
             "notes": "Canonical installed OpenCode surface for this repo.",
             "metrics": {
-                "lines": 3392,
-                "code": 2637,
+                "lines": 3459,
+                "code": 2704,
                 "comments": 0,
                 "blanks": 755,
                 "complexity": 0,
-                "bytes": 119560
+                "bytes": 121350
             }
         },
         {
@@ -297,7 +297,7 @@
                 "comments": 51,
                 "blanks": 70,
                 "complexity": 57,
-                "bytes": 12249
+                "bytes": 11860
             }
         },
         {
@@ -429,12 +429,12 @@
             "ai_entrypoint": "docs/ai/project-context.md",
             "notes": "Includes capabilities, generated artifacts, and architecture notes.",
             "metrics": {
-                "lines": 3805,
-                "code": 2974,
+                "lines": 3862,
+                "code": 3025,
                 "comments": 0,
-                "blanks": 831,
+                "blanks": 837,
                 "complexity": 0,
-                "bytes": 185584
+                "bytes": 187662
             }
         },
         {
@@ -621,12 +621,12 @@
             "ai_entrypoint": "packages/ai-universal-rules/catalog.json",
             "notes": "Source-of-truth templates and manifests live here.",
             "metrics": {
-                "lines": 12199,
-                "code": 9971,
+                "lines": 12360,
+                "code": 10132,
                 "comments": 12,
                 "blanks": 2216,
                 "complexity": 22,
-                "bytes": 500297
+                "bytes": 507740
             }
         },
         {
@@ -679,7 +679,7 @@
         },
         {
             "path": "scripts",
-            "file_count": 34,
+            "file_count": 35,
             "files": [
                 "scripts/ai/ai-diff-context.sh",
                 "scripts/ai/ai-doc-check.sh",
@@ -709,6 +709,7 @@
                 "scripts/ai/repomix-context-tree.sh",
                 "scripts/ai/repomix-scc-router.sh",
                 "scripts/ai/rg-code.sh",
+                "scripts/ai/run-repo-tests.sh",
                 "scripts/ai/run-repomix-context.sh",
                 "scripts/ai/session-checkpoint.sh",
                 "scripts/ai/watch-loop.sh",
@@ -716,7 +717,7 @@
                 "scripts/hooks/commit-msg.sh",
                 "scripts/hooks/pre-commit.sh"
             ],
-            "files_csv": "scripts/ai/ai-diff-context.sh,scripts/ai/ai-doc-check.sh,scripts/ai/ai-edit.sh,scripts/ai/ai-file-freshness.sh,scripts/ai/ai-install-coverage.sh,scripts/ai/ai-rollback.sh,scripts/ai/ai-search.sh,scripts/ai/ai-structured.sh,scripts/ai/ai-task.sh,scripts/ai/ai-test-select.sh,scripts/ai/ai-verify.sh,scripts/ai/check-file-refs.sh,scripts/ai/common.sh,scripts/ai/fd-files.sh,scripts/ai/gh-pr-context.sh,scripts/ai/git-forensics.sh,scripts/ai/install-mandatory-tools.sh,scripts/ai/pack-context.sh,scripts/ai/post-tool-use.sh,scripts/ai/pre-tool-use.sh,scripts/ai/preview-file.sh,scripts/ai/prune-shipped-targets.sh,scripts/ai/query-usage.sh,scripts/ai/repo-stats.sh,scripts/ai/repo-tool-inventory.sh,scripts/ai/repomix-context-tree.sh,scripts/ai/repomix-scc-router.sh,scripts/ai/rg-code.sh,scripts/ai/run-repomix-context.sh,scripts/ai/session-checkpoint.sh,scripts/ai/watch-loop.sh,scripts/doctor.sh,scripts/hooks/commit-msg.sh,scripts/hooks/pre-commit.sh",
+            "files_csv": "scripts/ai/ai-diff-context.sh,scripts/ai/ai-doc-check.sh,scripts/ai/ai-edit.sh,scripts/ai/ai-file-freshness.sh,scripts/ai/ai-install-coverage.sh,scripts/ai/ai-rollback.sh,scripts/ai/ai-search.sh,scripts/ai/ai-structured.sh,scripts/ai/ai-task.sh,scripts/ai/ai-test-select.sh,scripts/ai/ai-verify.sh,scripts/ai/check-file-refs.sh,scripts/ai/common.sh,scripts/ai/fd-files.sh,scripts/ai/gh-pr-context.sh,scripts/ai/git-forensics.sh,scripts/ai/install-mandatory-tools.sh,scripts/ai/pack-context.sh,scripts/ai/post-tool-use.sh,scripts/ai/pre-tool-use.sh,scripts/ai/preview-file.sh,scripts/ai/prune-shipped-targets.sh,scripts/ai/query-usage.sh,scripts/ai/repo-stats.sh,scripts/ai/repo-tool-inventory.sh,scripts/ai/repomix-context-tree.sh,scripts/ai/repomix-scc-router.sh,scripts/ai/rg-code.sh,scripts/ai/run-repo-tests.sh,scripts/ai/run-repomix-context.sh,scripts/ai/session-checkpoint.sh,scripts/ai/watch-loop.sh,scripts/doctor.sh,scripts/hooks/commit-msg.sh,scripts/hooks/pre-commit.sh",
             "purpose": "Operational shell scripts used by AI workflow and contributors.",
             "designed_for": "Repository automation, evidence collection, and discovery wrappers.",
             "install_guide": "docs/ai/scripts-reference.md",
@@ -724,12 +725,12 @@
             "ai_entrypoint": "scripts/ai/ai-search.sh",
             "notes": "Includes scripts/ai/* canonical AI tooling and scripts/doctor.sh.",
             "metrics": {
-                "lines": 6582,
-                "code": 5514,
-                "comments": 147,
-                "blanks": 921,
-                "complexity": 939,
-                "bytes": 188040
+                "lines": 6714,
+                "code": 5617,
+                "comments": 153,
+                "blanks": 944,
+                "complexity": 959,
+                "bytes": 192067
             }
         },
         {
@@ -802,12 +803,12 @@
             "ai_entrypoint": "phpunit.xml.dist",
             "notes": "Contains phpunit, bats, and script-level tests.",
             "metrics": {
-                "lines": 6054,
-                "code": 4636,
+                "lines": 6114,
+                "code": 4688,
                 "comments": 446,
-                "blanks": 972,
+                "blanks": 980,
                 "complexity": 531,
-                "bytes": 221584
+                "bytes": 224740
             }
         },
         {
@@ -935,12 +936,12 @@
             "ai_entrypoint": "tools/ai/ai.php",
             "notes": "Primary command surface for install and verification flows.",
             "metrics": {
-                "lines": 16117,
-                "code": 13806,
-                "comments": 249,
-                "blanks": 2062,
-                "complexity": 1570,
-                "bytes": 609740
+                "lines": 16355,
+                "code": 14007,
+                "comments": 269,
+                "blanks": 2079,
+                "complexity": 1602,
+                "bytes": 624608
             }
         }
     ]

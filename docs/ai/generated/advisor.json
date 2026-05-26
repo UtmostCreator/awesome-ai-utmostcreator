@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "advisor.json",
-    "generated_at": "2026-05-20T00:20:52+00:00",
+    "generated_at": "2026-05-26T16:58:15+00:00",
     "command": "php tools/ai/ai.php advisor",
-    "based_on_commit": "b4d1f7d",
+    "based_on_commit": "c8ec700",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",

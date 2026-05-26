@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "env-check.json",
-    "generated_at": "2026-05-20T00:20:57+00:00",
+    "generated_at": "2026-05-26T16:58:17+00:00",
     "command": "php tools/ai/ai.php env-check",
-    "based_on_commit": "b4d1f7d",
+    "based_on_commit": "c8ec700",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -15,76 +15,76 @@
             {
                 "tool": "bash",
                 "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WindowsApps\\bash.exe"
+                "path": "/usr/bin/bash"
             },
             {
                 "tool": "git",
                 "found": true,
-                "path": "C:\\Program Files\\Git\\cmd\\git.exe"
+                "path": "/usr/bin/git"
             },
             {
                 "tool": "php",
                 "found": true,
-                "path": "C:\\xampp\\php\\php.exe"
+                "path": "/usr/bin/php"
             },
             {
                 "tool": "rg",
                 "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BurntSushi.ripgrep.MSVC_Microsoft.Winget.Source_8wekyb3d8bbwe\\ripgrep-15.1.0-x86_64-pc-windows-msvc\\rg.exe"
+                "path": "/usr/bin/rg"
             }
         ],
         "context_required": [
             {
                 "tool": "repomix",
                 "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Roaming\\npm\\repomix"
+                "path": "/usr/local/bin/repomix"
             },
             {
                 "tool": "scc",
                 "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\BenBoyter.scc_Microsoft.Winget.Source_8wekyb3d8bbwe\\scc.exe"
+                "path": "/home/utmost-creator/.local/bin/scc"
             },
             {
                 "tool": "jq",
                 "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Links\\jq.exe"
+                "path": "/usr/bin/jq"
             }
         ],
         "optional": [
             {
                 "tool": "just",
                 "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Roaming\\npm\\just"
+                "path": "/mnt/c/Users/UC-LL5S/AppData/Roaming/npm/just"
             },
             {
                 "tool": "yq",
-                "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\MikeFarah.yq_Microsoft.Winget.Source_8wekyb3d8bbwe\\yq.exe"
+                "found": false,
+                "path": null
             },
             {
                 "tool": "shellcheck",
                 "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\koalaman.shellcheck_Microsoft.Winget.Source_8wekyb3d8bbwe\\shellcheck.exe"
+                "path": "/usr/bin/shellcheck"
             },
             {
                 "tool": "shfmt",
-                "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\mvdan.shfmt_Microsoft.Winget.Source_8wekyb3d8bbwe\\shfmt.exe"
+                "found": false,
+                "path": null
             },
             {
                 "tool": "actionlint",
-                "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\rhysd.actionlint_Microsoft.Winget.Source_8wekyb3d8bbwe\\actionlint.exe"
+                "found": false,
+                "path": null
             },
             {
                 "tool": "lychee",
-                "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\lycheeverse.lychee_Microsoft.Winget.Source_8wekyb3d8bbwe\\lychee.exe"
+                "found": false,
+                "path": null
             },
             {
                 "tool": "gitleaks",
                 "found": true,
-                "path": "C:\\Users\\UC-LL5S\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gitleaks.Gitleaks_Microsoft.Winget.Source_8wekyb3d8bbwe\\gitleaks.exe"
+                "path": "/home/utmost-creator/.local/bin/gitleaks"
             }
         ],
         "missing_required": []

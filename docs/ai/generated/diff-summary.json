@@ -1,10 +1,10 @@
 {
     "schema_version": 1,
     "artifact": "diff-summary.json",
-    "generated_at": "2026-05-22T11:30:07+00:00",
+    "generated_at": "2026-05-26T16:58:14+00:00",
     "command": "php tools/ai/ai.php diff-summary --base main",
-    "based_on_commit": "unknown",
-    "based_on_branch": "unknown",
+    "based_on_commit": "c8ec700",
+    "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
     "score": null,
@@ -15,7 +15,7 @@
         "changed_files_count": 0,
         "changed_files": [],
         "staged_files_count": 0,
-        "unstaged_files_count": 13,
+        "unstaged_files_count": 71,
         "changed_by_type": []
     }
 }

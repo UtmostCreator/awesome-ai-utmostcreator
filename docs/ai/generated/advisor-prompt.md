@@ -4,7 +4,7 @@ Use attached repo evidence to provide deterministic recommendations.
 
 ## Inputs
 
-- tracked files: `869`
+- tracked files: `940`
 - overall score: `81`
 - token mode: `hard_limit_exceeded`
 

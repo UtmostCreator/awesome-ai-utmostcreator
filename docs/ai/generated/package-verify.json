@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "package-verify.json",
-    "generated_at": "2026-05-20T00:21:03+00:00",
+    "generated_at": "2026-05-26T16:58:18+00:00",
     "command": "php tools/ai/ai.php package-verify",
-    "based_on_commit": "b4d1f7d",
+    "based_on_commit": "c8ec700",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "failed",
@@ -12,7 +12,7 @@
     "recommended_next_action": "Refresh lock or revert unintended template drift.",
     "data": {
         "path": "packages/ai-universal-rules/package-lock.ai.json",
-        "mismatch_count": 60,
+        "mismatch_count": 62,
         "mismatches": [
             {
                 "path": "templates/capabilities/evidence-first-execution/CAPABILITY.md",
@@ -53,7 +53,7 @@
                 "path": "templates/core/AGENTS.template.md",
                 "reason": "checksum_mismatch",
                 "expected": "sha256:50195d531092f310fc6c356017ebea24d72910ce556b4485dc61cb1e8726c6a8",
-                "current": "sha256:57a264e8404d388df14b0a8f0e9135817e9c69b936f929e610e0ec9a9508e22a"
+                "current": "sha256:4c3202d0d04437a25b5c45d7f09fc166f20c65d9d6b1aea8e9fdd1dec4cc3225"
             },
             {
                 "path": "templates/core/POST-INSTALL.template.md",
@@ -69,25 +69,30 @@
             {
                 "path": "templates/core/agents/bootstrapper.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:e58488143790130f2a6ee8dd00a5b732e41fd41d8dbb9b280d810c5a08488951"
+                "current": "sha256:c55280c6038d72cd8773db7ab50fd9e3c1b42aaf4abc9eb25cedbe4729d08e82"
             },
             {
                 "path": "templates/core/agents/config-maintainer.md",
                 "reason": "checksum_mismatch",
                 "expected": "sha256:66058beb3b1703e7c98846daaa20a6fb2f188ece867c3a787859f3c4285d46f9",
-                "current": "sha256:dc955602ce8bd02715cbef0b7a8c8067e4da0cd699b20df89645709005184e59"
+                "current": "sha256:0396f47f58f5987f6b39699b40297716b3236a325a948a6e165ce85db22ff650"
             },
             {
                 "path": "templates/core/agents/implementer.md",
                 "reason": "checksum_mismatch",
                 "expected": "sha256:c52f15deed38994be00cffd4ae4bdd3dc7a3f0bf95f794d852bfe325e94c3e07",
-                "current": "sha256:cb79c9b173b5496a5f55fa3c9aa8eb28c800fa2f882d2a462fd4e8eb0755491c"
+                "current": "sha256:3049d1382169b5f85c64e17c09c3d414962224febbfa5287b4689e4ba81a37e1"
+            },
+            {
+                "path": "templates/core/agents/post-install.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:66fc91547fbd507bdb16b3cc80da4c506401a2fc31a3d019e5634c268cf70289"
             },
             {
                 "path": "templates/core/agents/refactorer.md",
                 "reason": "checksum_mismatch",
                 "expected": "sha256:64c5ea6b70b812f4b7996801cc402006984b4ffc1fc424975b0c21f720f8e169",
-                "current": "sha256:53c5f3abc17227a47fafd37746c9094b6c419641e0cb608a07aac7c865f51a5e"
+                "current": "sha256:d9958653e0742573dd87bdc7b258f0656f76aaa5659e305b539083b027aaf0c7"
             },
             {
                 "path": "templates/core/agents/release-auditor.md",
@@ -103,7 +108,7 @@
             {
                 "path": "templates/core/agents/repository-reviewer.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:cb7c3041041c7ff942156f99c625f21d987f6d2ff903f77526a454da236f3547"
+                "current": "sha256:6df7fb0c6b1a6cba3a99e2a1968815d99b761b66fb764ed1dbc522f8c6834fd6"
             },
             {
                 "path": "templates/core/agents/researcher.md",
@@ -153,7 +158,7 @@
             {
                 "path": "templates/core/opencode.json",
                 "reason": "missing_from_lock",
-                "current": "sha256:d24898477a9720e1a8b6f37a85b58351c285bd4b325162054be0422e50d0f9aa"
+                "current": "sha256:7047100126c0b55fe66940105d74aa9c2d7cdf8ea245381d03f600ce32b8020d"
             },
             {
                 "path": "templates/core/project-context.placeholders.md",
@@ -301,6 +306,11 @@
                 "reason": "checksum_mismatch",
                 "expected": "sha256:3b5ef70a2e6e953c126ee48f3f1fac62f1b057f07a919be8468f920b688a0f7e",
                 "current": "sha256:116ad252ed2ea51e8e0ad3dd53a5a66a9327f4a5eb4be9e654474f67279b287c"
+            },
+            {
+                "path": "templates/internal/agents/ai-maintenance.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:22d8de2986cb4ac99e899bbb42bcbecd6f7d372481f029dd83cdb80e815a1277"
             },
             {
                 "path": "templates/skills/ai-scripts/SKILL.md",

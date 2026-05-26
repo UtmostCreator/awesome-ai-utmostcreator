@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "install.json",
-    "generated_at": "2026-05-20T00:21:05+00:00",
+    "generated_at": "2026-05-26T16:58:19+00:00",
     "command": "php tools/ai/ai.php install --dry-run",
-    "based_on_commit": "b4d1f7d",
+    "based_on_commit": "c8ec700",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -29,7 +29,7 @@
         "apply": false,
         "summary": {
             "create": 0,
-            "skip": 18
+            "skip": 19
         },
         "install_kind": "reinstall",
         "required_first": [
