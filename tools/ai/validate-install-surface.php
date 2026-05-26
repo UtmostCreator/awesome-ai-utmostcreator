@@ -23,7 +23,7 @@ $strict = in_array('--strict', $argv, true);
 $errors = [];
 $warnings = [];
 
-if ($targetArg !== null || (!is_dir($root . '/packages/ai-universal-rules') && is_file($root . '/.ai-install-manifest.json'))) {
+if ($targetArg !== null || (is_file($root . '/.ai-install-manifest.json') && !is_dir($root . '/packages/ai-universal-rules/templates'))) {
     $manifestPath = $root . '/.ai-install-manifest.json';
     $manifest = json_decode((string) @file_get_contents($manifestPath), true);
     if (!is_array($manifest)) {

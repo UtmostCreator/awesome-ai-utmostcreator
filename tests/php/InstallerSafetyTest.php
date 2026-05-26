@@ -528,6 +528,66 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testDirectInstallerFullGovernanceOpencodeOnlyValidatesAsInstalledTarget(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_opencode_' . uniqid('', true);
+
+        mkdir($target, 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
+
+        $git = $this->runTool('git init ' . escapeshellarg($target));
+        $this->assertSame(0, $git['exit'], $git['stderr']);
+        $gitAdd = $this->runTool('git -C ' . escapeshellarg($target) . ' add README.md');
+        $this->assertSame(0, $gitAdd['exit'], $gitAdd['stderr']);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'opencode',
+                '--without',
+                'optional-agents-copilot-pack',
+                '--project-name',
+                'app-configs',
+                '--backup',
+                '--verify-after',
+                '--non-interactive',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+
+            $manifest = json_decode((string) file_get_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+            $this->assertIsArray($manifest);
+            $this->assertContains('adapter-opencode', $manifest['packs'] ?? []);
+            $this->assertNotContains('adapter-copilot', $manifest['packs'] ?? []);
+            $this->assertNotContains('optional-agents-copilot-pack', $manifest['packs'] ?? []);
+
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'opencode.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'verify-install-placeholders.php');
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'copilot-instructions.md');
+            $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'instructions');
+            $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'prompts');
+            $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents');
+
+            foreach ([
+                'php tools/ai/validate-ai-config.php',
+                'php tools/ai/validate-install-surface.php --strict',
+                'php tools/ai/validate-ai-catalog.php',
+            ] as $targetCommand) {
+                $validate = $this->runTool('cd ' . escapeshellarg($target) . ' && ' . $targetCommand);
+                $this->assertSame(0, $validate['exit'], $targetCommand . "\n" . $validate['stdout'] . $validate['stderr']);
+            }
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testDirectInstallerCanWriteUpgradeCopiesForExistingTargets(): void
     {
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_upgrade_' . uniqid('', true);

@@ -81,13 +81,31 @@ permission:
     "git rev-parse*": allow
     "git stash list*": allow
     "git stash show*": allow
+    "git add*": ask
+    "git commit*": ask
+    "git restore *": ask
+    "git stash push*": ask
+    "git stash pop*": ask
+    "git stash apply*": ask
+    "git stash drop*": ask
     "bash scripts/ai/ai-search.sh *": allow
+    "AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
+    "env AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
     "bash scripts/ai/rg-code.sh *": allow
     "bash scripts/ai/fd-files.sh *": allow
     "bash scripts/ai/preview-file.sh *": allow
+    "AI_OUTPUT=json bash scripts/ai/preview-file.sh *": allow
+    "env AI_OUTPUT=json bash scripts/ai/preview-file.sh *": allow
     "bash scripts/ai/query-usage.sh *": allow
     "bash scripts/ai/git-forensics.sh *": allow
     "bash scripts/ai/ai-verify.sh *": allow
+    "AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *": allow
+    "env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *": allow
+    "bash -n scripts/*.sh": allow
+    "bash -n scripts/**/*.sh": allow
+    "bash -n scripts/doctor.sh": allow
+    "bash scripts/doctor.sh": allow
+    "bash scripts/doctor.sh *": allow
     "bash scripts/ai/ai-doc-check.sh --check*": allow
     "bash scripts/ai/ai-file-freshness.sh *": allow
     "bash scripts/ai/ai-install-coverage.sh *": allow

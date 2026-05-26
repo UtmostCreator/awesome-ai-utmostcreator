@@ -90,6 +90,39 @@ permission:
     'git rev-parse*': allow
     'git stash list*': allow
     'git stash show*': allow
+    'git add*': ask
+    'git commit*': ask
+    'git restore *': ask
+    'git reset*': ask
+    'git stash push*': ask
+    'git stash pop*': ask
+    'git stash apply*': ask
+    'git stash drop*': ask
+    'git fetch*': ask
+    'git merge*': ask
+    'git pull*': ask
+    'git checkout*': ask
+    'git switch*': ask
+    'git tag*': ask
+    'git cherry-pick*': ask
+    'git revert*': ask
+    'bash scripts/ai/install-mandatory-tools.sh *': ask
+    'php tools/ai/ai.php install * --apply': ask
+    'php tools/ai/install-ai-kit.php *': ask
+    'composer install*': ask
+    'composer update*': ask
+    'composer require*': ask
+    'npm install*': ask
+    'npm ci*': ask
+    'pnpm install*': ask
+    'pnpm add*': ask
+    'yarn install*': ask
+    'yarn add*': ask
+    'bun install*': ask
+    'bun add*': ask
+    './vendor/bin/paratest *': ask
+    'vendor/bin/paratest *': ask
+    'paratest *': ask
     'bash scripts/ai/ai-search.sh *': allow
     'bash scripts/ai/rg-code.sh *': allow
     'bash scripts/ai/fd-files.sh *': allow

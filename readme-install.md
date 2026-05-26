@@ -191,6 +191,17 @@ php tools/ai/install-ai-kit.php \
   --verify-after \
   --non-interactive
 
+# OpenCode-only full install — excludes GitHub Copilot adapter files
+php tools/ai/install-ai-kit.php \
+  --target /path/to/your-project \
+  --profile full-governance \
+  --runtime opencode \
+  --without optional-agents-copilot-pack \
+  --project-name "your-project-name" \
+  --backup \
+  --verify-after \
+  --non-interactive
+
 # 4. Audit remaining placeholders
 php tools/ai/ai.php placeholders --fail
 
@@ -205,6 +216,7 @@ cat /path/to/your-project/docs/ai/POST-INSTALL.md
 | `--target <path>`      | **Yes** (for external install)       | `.` (current dir) | Target project root                                              |
 | `--profile <name>`     | Yes                                  | `dual`            | Which packs to install. Use `full-governance` for complete setup |
 | `--runtime <name>`     | Yes                                  | `both`            | `github-copilot`, `opencode`, or `both`                          |
+| `--without <packs>`    | Optional                             | off               | Remove packs from the profile; use `optional-agents-copilot-pack` when doing an OpenCode-only full install |
 | `--project-name <n>`   | Recommended                          | inferred from dir | Sets `<PROJECT_NAME>` placeholder in installed files             |
 | `--backup`             | **Yes** if target has existing files | off               | Archives managed files before overwriting                        |
 | `--non-interactive`    | Yes in CI                            | off               | Disables interactive prompts                                     |

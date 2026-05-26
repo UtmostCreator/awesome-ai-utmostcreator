@@ -52,6 +52,20 @@ permission:
     'git status*': allow
     'git diff*': allow
     'git log*': allow
+    'git show*': allow
+    'git branch*': allow
+    'git rev-parse*': allow
+    'git ls-files*': allow
+    'git stash list*': allow
+    'git stash show*': allow
+    'git add*': ask
+    'git commit*': ask
+    'git restore *': ask
+    'git stash push*': ask
+    'git stash pop*': ask
+    'git stash apply*': ask
+    'git stash drop*': ask
+    'git checkout*': ask
     'shellcheck *': allow
     'php -l *': allow
     'php tools/ai/validate-*.php *': allow

@@ -17,7 +17,7 @@ function aiAdvisorSecretScan(string $root): array
         ['pattern' => '/AKIA[0-9A-Z]{16}/', 'blocking' => true],
         ['pattern' => '/ghp_[A-Za-z0-9_]{30,}/', 'blocking' => true],
         ['pattern' => '/sk-[A-Za-z0-9]{20,}/', 'blocking' => true],
-        ['pattern' => '/private[_-]?key/i', 'blocking' => true],
+        ['pattern' => '/-----BEGIN [A-Z ]*PRIVATE KEY-----/', 'blocking' => true],
         ['pattern' => '/(password|secret|token)\s*=\s*["\']?[A-Za-z0-9_\-\/+=]{12,}/i', 'blocking' => false],
     ];
 
