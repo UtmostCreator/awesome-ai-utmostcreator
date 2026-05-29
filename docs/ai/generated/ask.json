@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "ask.json",
-    "generated_at": "2026-05-26T16:58:17+00:00",
-    "command": "php tools/ai/ai.php ask --resolve q-20260526-165817-256d51 --answer both",
-    "based_on_commit": "c8ec700",
+    "generated_at": "2026-05-29T23:45:40+00:00",
+    "command": "php tools/ai/ai.php ask --resolve q-20260529-234540-256d51 --answer both",
+    "based_on_commit": "ce1b0c7",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -12,7 +12,7 @@
     "recommended_next_action": "Clarification resolved; rerun next to continue orchestration.",
     "data": {
         "status": "resolved",
-        "question_id": "q-20260526-165817-256d51",
+        "question_id": "q-20260529-234540-256d51",
         "question": "Which runtime adapter is in scope?",
         "options": [
             "copilot",
@@ -24,7 +24,7 @@
         "blocks": [
             "next"
         ],
-        "resolved_at_utc": "2026-05-26T16:58:17+00:00",
+        "resolved_at_utc": "2026-05-29T23:45:40+00:00",
         "answer": "both",
         "resolution_mode": "explicit-answer"
     }

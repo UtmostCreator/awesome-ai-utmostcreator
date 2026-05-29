@@ -121,16 +121,7 @@ function aiInstallerRun(array $argv): int
         aiInstallerWriteManifest($config['targetRoot'], $manifest);
 
         if (!empty($config['verifyAfter'])) {
-            $verify = aiInstallerRunTargetCommand($config['targetRoot'], [PHP_BINARY, 'tools/ai/ai.php', 'verify']);
-            if ($verify['stdout'] !== '') {
-                fwrite(STDOUT, $verify['stdout']);
-            }
-            if ($verify['stderr'] !== '') {
-                fwrite(STDERR, $verify['stderr']);
-            }
-            if ($verify['exit'] !== 0) {
-                throw new RuntimeException('post-install verification failed; inspect target docs/ai/generated/verify.json');
-            }
+            aiInstallerRunPostInstallVerification($config['targetRoot']);
         }
     }
 
@@ -297,6 +288,28 @@ function aiInstallerRunTargetCommand(string $targetRoot, array $command): array
     fclose($pipes[2]);
     $exit = proc_close($process);
     return ['stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit];
+}
+
+function aiInstallerRunPostInstallVerification(string $targetRoot): void
+{
+    $commands = [
+        [PHP_BINARY, 'tools/ai/validate-ai-config.php'],
+        [PHP_BINARY, 'tools/ai/validate-install-surface.php', '--strict'],
+        [PHP_BINARY, 'tools/ai/validate-ai-catalog.php'],
+    ];
+
+    foreach ($commands as $command) {
+        $verify = aiInstallerRunTargetCommand($targetRoot, $command);
+        if ($verify['stdout'] !== '') {
+            fwrite(STDOUT, $verify['stdout']);
+        }
+        if ($verify['stderr'] !== '') {
+            fwrite(STDERR, $verify['stderr']);
+        }
+        if ($verify['exit'] !== 0) {
+            throw new RuntimeException('post-install verification failed; inspect target validator output');
+        }
+    }
 }
 
 function aiInstallerCollectPlaceholderStatus(string $targetRoot): array

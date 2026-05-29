@@ -2,6 +2,7 @@
 set -euo pipefail
 
 POLICY_FILE="${AI_POLICY_FILE:-${COPILOT_POLICY_FILE:-policies/copilot/policy.yaml}}"
+MAINTENANCE_STATE_FILE="${AI_MAINTENANCE_STATE_FILE:-${COPILOT_MAINTENANCE_STATE_FILE:-.ai-logs/maintenance-mode.json}}"
 # maintenance mode allows repository-delivered scripts only
 
 deny() {
@@ -27,22 +28,45 @@ is_terminal_tool() {
     esac
 }
 
-allow_registered_script() {
+executed_script_token() {
     local compact="$1"
+    local token next_token
+    local tokens=()
+    local index
+
+    read -r -a tokens <<<"$compact"
+    for ((index = 0; index < ${#tokens[@]}; index++)); do
+        token="${tokens[$index]}"
+
+        if [[ "$token" == "env" ]]; then
+            continue
+        fi
+
+        if [[ "$token" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+            continue
+        fi
+
+        if [[ "$token" == "bash" || "$token" == "sh" || "$token" == "zsh" ]]; then
+            next_token="${tokens[$((index + 1))]:-}"
+            [[ -n "$next_token" ]] && printf '%s\n' "$next_token"
+            return 0
+        fi
+
+        printf '%s\n' "$token"
+        return 0
+    done
+
+    return 1
+}
+
+registered_script_paths() {
     local registry_file="${AI_SCRIPT_REGISTRY_FILE:-${COPILOT_SCRIPT_REGISTRY_FILE:-docs/ai/script-registry.json}}"
-    local path escaped
 
     if ! command -v jq >/dev/null 2>&1 || [[ ! -f "$registry_file" ]]; then
         return 1
     fi
 
-    while IFS= read -r path; do
-        [[ -n "$path" ]] || continue
-        escaped="$(printf '%s' "$path" | sed 's/[][.^$*+?(){}|\\]/\\&/g')"
-        if grep -Eq "^(bash[[:space:]]+)?(\./)?${escaped}([[:space:]]|$)" <<<"$compact"; then
-            return 0
-        fi
-    done < <(jq -r '
+    jq -r '
         [
           (.scripts // {} | to_entries[]?.value.installed_path),
           (.scripts // {} | to_entries[]?.value.source_path),
@@ -51,7 +75,33 @@ allow_registered_script() {
         | flatten
         | map(select(type == "string" and . != ""))
         | unique[]
-    ' "$registry_file" 2>/dev/null)
+    ' "$registry_file" 2>/dev/null
+}
+
+maintenance_mode_active() {
+    [[ -f "$MAINTENANCE_STATE_FILE" ]] || return 1
+    command -v jq >/dev/null 2>&1 || return 1
+
+    jq -e '(.enabled // false) == true and ((.expires_at_epoch // 0) > now)' "$MAINTENANCE_STATE_FILE" >/dev/null 2>&1
+}
+
+allow_registered_script() {
+    local compact="$1"
+    local path executed_script
+
+    executed_script="$(executed_script_token "$compact" || true)"
+    [[ -n "$executed_script" ]] || return 1
+
+    if ! command -v jq >/dev/null 2>&1; then
+        return 1
+    fi
+
+    while IFS= read -r path; do
+        [[ -n "$path" ]] || continue
+        if [[ "$executed_script" == "$path" || "$executed_script" == "./$path" ]]; then
+            return 0
+        fi
+    done < <(registered_script_paths)
 
     return 1
 }
@@ -116,6 +166,19 @@ strict_allowlist="${AI_STRICT_ALLOWLIST:-${COPILOT_STRICT_ALLOWLIST:-0}}"
 
 evaluate_policy_yaml "$compact" || true
 
+if maintenance_mode_active; then
+    executed_script="$(executed_script_token "$compact" || true)"
+    if [[ -n "$executed_script" ]] && [[ "$executed_script" == *.sh || "$executed_script" == */* ]]; then
+        if allow_registered_script "$compact"; then
+            allow
+        else
+            jq -cn --arg reason 'maintenance mode allows only approved repository scripts' \
+                '{permissionDecision:"ask", permissionDecisionReason:$reason}'
+        fi
+        exit 0
+    fi
+fi
+
 if grep -Eq '(^|[[:space:]])(sudo|su -|mkfs|dd|shutdown|reboot|halt|poweroff|mount|umount)([[:space:]]|$)' <<<"$compact"; then
     deny 'dangerous system command blocked by repo policy'
     exit 0
@@ -150,11 +213,6 @@ if grep -Eq '(^|[[:space:]])(cat|bat|less|head|tail)([[:space:]]|$)' <<<"$compac
     grep -Eq '(^|[[:space:]])[^[:space:]]*\.env([^[:space:]]*)?([[:space:]]|$)' <<<"$compact" &&
     ! grep -Eq '(^|[[:space:]])[^[:space:]]*\.env\.example([[:space:]]|$)' <<<"$compact"; then
     deny 'direct .env secret extraction blocked by repo policy'
-    exit 0
-fi
-
-if allow_registered_script "$compact"; then
-    allow
     exit 0
 fi
 
@@ -272,6 +330,16 @@ fi
 if grep -Eq '^just[[:space:]]+context-(clean|purge)\b' <<<"$compact"; then
     jq -cn --arg reason 'Tier 3: just context-clean/purge deletes generated artifacts — explicit approval required' \
         '{permissionDecision:"ask", permissionDecisionReason:$reason}'
+    exit 0
+fi
+
+if grep -Eq '^(bash[[:space:]]+)?(\./)?scripts/ai/watch-loop\.sh\b' <<<"$compact"; then
+    deny 'watch-loop requires review of the delegated command before execution'
+    exit 0
+fi
+
+if allow_registered_script "$compact"; then
+    allow
     exit 0
 fi
 

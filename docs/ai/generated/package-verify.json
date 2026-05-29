@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "package-verify.json",
-    "generated_at": "2026-05-26T16:58:18+00:00",
+    "generated_at": "2026-05-29T23:45:41+00:00",
     "command": "php tools/ai/ai.php package-verify",
-    "based_on_commit": "c8ec700",
+    "based_on_commit": "ce1b0c7",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "failed",
@@ -12,7 +12,7 @@
     "recommended_next_action": "Refresh lock or revert unintended template drift.",
     "data": {
         "path": "packages/ai-universal-rules/package-lock.ai.json",
-        "mismatch_count": 62,
+        "mismatch_count": 76,
         "mismatches": [
             {
                 "path": "templates/capabilities/evidence-first-execution/CAPABILITY.md",
@@ -38,6 +38,36 @@
                 "path": "templates/capabilities/evidence-first-execution/reference.md",
                 "reason": "missing_from_lock",
                 "current": "sha256:67d59094cec966a76957b3b1ab60a5101afa6b9bf01101397a3d0819923fdbb8"
+            },
+            {
+                "path": "templates/capabilities/mentor-mode/CAPABILITY.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:36e607e5aa4ca7db215a1bed1573bb1bc3740ee43609ff9a8036bd9d2462b694"
+            },
+            {
+                "path": "templates/capabilities/mentor-mode/checklist.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:1ab87d631939f528b4e40351bc64046d3c2e058cbc969c742a33aca5ae699b9e"
+            },
+            {
+                "path": "templates/capabilities/mentor-mode/config.example.json",
+                "reason": "missing_from_lock",
+                "current": "sha256:3e317493fc0a3b2a99417fc79187588ca2820482269151c9b601785a68ae6ec7"
+            },
+            {
+                "path": "templates/capabilities/mentor-mode/examples.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:0c18453f2eb7adec99cb325cfa3b74c4a3bec44e7e26a51cd041884b31cd9ba9"
+            },
+            {
+                "path": "templates/capabilities/mentor-mode/gotchas.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:29ae49483b1afaae1ae52a9c165d1e09f05cf0105af5cbfee09589758968c7e8"
+            },
+            {
+                "path": "templates/capabilities/mentor-mode/reference.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:7aef581624c96e342f10a65392cc2c871164cadec72cdf70d5c23b621aeef580"
             },
             {
                 "path": "templates/commands/search-evidence.md",
@@ -103,12 +133,12 @@
             {
                 "path": "templates/core/agents/repository-researcher.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:41dd823523d35d9648ff3b463f56eae9cc926c12a05d33d10314831e79ad440c"
+                "current": "sha256:57803765a742026cb3a841ec42e5ccb5a29afa4d4ca0aabd29911bf4369adccd"
             },
             {
                 "path": "templates/core/agents/repository-reviewer.md",
                 "reason": "missing_from_lock",
-                "current": "sha256:6df7fb0c6b1a6cba3a99e2a1968815d99b761b66fb764ed1dbc522f8c6834fd6"
+                "current": "sha256:39fea4df9714ad8bf3563ee1e571f891032758e8677dceb65688d5c6cfceeadb"
             },
             {
                 "path": "templates/core/agents/researcher.md",
@@ -313,6 +343,48 @@
                 "current": "sha256:22d8de2986cb4ac99e899bbb42bcbecd6f7d372481f029dd83cdb80e815a1277"
             },
             {
+                "path": "templates/optional/agents/architecture-plan.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:da5ac9a3d258135a26e0facfa9c0954f26d2b9335958934df7977c28d24b9a51",
+                "current": "sha256:1facfebc55f0bbeafc8366b546fd0fe1b9c468a023ee03476840cb630b4cd7f4"
+            },
+            {
+                "path": "templates/optional/agents/bugfix.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:f312f2c5ba3beddbb14b4e7a578a8e7008c41a2450caf61ad3083ccbaaad7282",
+                "current": "sha256:a6c2307b10a2ec403b53f250308dcf7d695ddbc5571fe5cdb1b74f11402fca79"
+            },
+            {
+                "path": "templates/optional/agents/build-config.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:40ca9400a02cf74e3a2734d4e40a4d03800306182ecc6f16dffe7e54aca48a8a",
+                "current": "sha256:9f0c3f233829c93e3344db183211c4eb2698a891a3e71e5aa06626818e6bf794"
+            },
+            {
+                "path": "templates/optional/agents/docs.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:eb3f41c12bf9ddbc64e00bb63e776ffcb4763faecb391bdcab5883113028ca60",
+                "current": "sha256:c37ae04033d4f9485ef69d0dfb3d802a6d83dba74037a8e54791743341eaab6d"
+            },
+            {
+                "path": "templates/optional/agents/infra-auditor.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:92ec2d83d309342784568d91d2194052cf12385397e2c0131f666324b72ad013",
+                "current": "sha256:89f97d1b1e0263a7e041ad9c089e3a9ed16da2eafbc83a58abe7592ebcf85b9b"
+            },
+            {
+                "path": "templates/optional/agents/ui-builder.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:6200e92ea652644adcba5572e1895b75f716def5d36541f96a46be4e4632a99e",
+                "current": "sha256:4f72f5da9e41a7e34af1a1d17c78f373e6e64a91a940c3ef1ad1f33880e8d37f"
+            },
+            {
+                "path": "templates/optional/agents/upgrade.md",
+                "reason": "checksum_mismatch",
+                "expected": "sha256:e884f49272e45c350088b44f4507e7cb4344e7de0fef7c9bb9da7a5f671b0045",
+                "current": "sha256:cbf0d290ca84d0d044cc62065fddae6412f28dc3aa40e7aec5d7ff65da7447f1"
+            },
+            {
                 "path": "templates/skills/ai-scripts/SKILL.md",
                 "reason": "missing_from_lock",
                 "current": "sha256:197d9560a4b7bed98d0d16174aa5e2bbd07fde6be78179f0219d3fc29c749e48"
@@ -326,6 +398,11 @@
                 "path": "templates/workflows/evidence-first-execution.md",
                 "reason": "missing_from_lock",
                 "current": "sha256:021511d52df552ce7f9104b8682a0e0eab65b30d2783c4dffdf0b6ee09bdf707"
+            },
+            {
+                "path": "templates/workflows/mentor-mode.md",
+                "reason": "missing_from_lock",
+                "current": "sha256:d26c56bb18a49e4dc5c3a4a504d7b993d76fed2ab05cf540c0c6c3efb420dd25"
             },
             {
                 "path": "templates/workflows/review-search-tool.md",

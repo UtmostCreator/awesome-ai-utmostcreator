@@ -4,7 +4,14 @@ declare(strict_types=1);
 
 function aiAdvisorGeneratedDir(string $root): string
 {
-    $dir = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated';
+    $override = getenv('AI_ADVISOR_GENERATED_DIR');
+    if (is_string($override) && $override !== '') {
+        $dir = str_starts_with($override, DIRECTORY_SEPARATOR)
+            ? $override
+            : $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $override);
+    } else {
+        $dir = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated';
+    }
     if (!is_dir($dir) && !mkdir($dir, 0777, true) && !is_dir($dir)) {
         throw new RuntimeException('Could not create advisor generated directory.');
     }
