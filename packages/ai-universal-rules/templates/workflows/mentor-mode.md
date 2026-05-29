@@ -1,0 +1,27 @@
+---
+name: mentor-mode
+description: Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default
+argument-hint: 'learn | pair | deliver | lookup (optional; inferred when omitted)'
+---
+
+## What I Do
+
+I set the active agent into Mentor Mode for the current task. I am a mode-setter, not a separate brain: I load the `mentor-mode` skill and apply the requested mode.
+
+## Usage
+
+- `/mentor-mode learn` - scaffold; withhold the full solution by default
+- `/mentor-mode pair` - collaborate; the human drives the load-bearing code
+- `/mentor-mode deliver` - full assistance for commodity work or incidents
+- `/mentor-mode lookup` - one-off bypass for a direct factual answer
+- no argument - infer the mode and state the inference in one line
+
+## Read Alongside
+
+- `docs/ai/capabilities/mentor-mode/CAPABILITY.md`
+- `docs/ai/capabilities/mentor-mode/config.example.json`
+
+## Gotchas
+
+- I only set the posture; the ladder and thresholds live in the capability and config
+- I do not change the active agent's tool permissions or role

@@ -23,26 +23,26 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / opencode-command-template` - 3
 - `package / operations-doc` - 6
 - `package / optional-template` - 9
-- `package / package-capability` - 36
+- `package / package-capability` - 42
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
-- `package / workflow-template` - 16
+- `package / workflow-template` - 17
 - `root / adapter-doc` - 1
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
 - `root / adapter-policy` - 1
 - `root / ai-script` - 27
-- `root / capability` - 15
+- `root / capability` - 16
 - `root / cli` - 1
 - `root / exporter` - 1
 - `root / generator` - 1
 - `root / github-copilot-agent` - 10
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 16
-- `root / github-copilot-skill` - 16
+- `root / github-copilot-prompt` - 17
+- `root / github-copilot-skill` - 17
 - `root / opencode-agent` - 11
-- `root / opencode-command` - 18
-- `root / opencode-skill` - 18
+- `root / opencode-command` - 19
+- `root / opencode-skill` - 19
 - `root / php-reference` - 3
 - `root / root-doc` - 16
 - `root / schema` - 1
@@ -94,6 +94,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`capability`|docs-sync|`docs/ai/capabilities/docs-sync/CAPABILITY.md`|Update documentation when behavior, commands, paths, or installation workflow changes.|
 |`capability`|evaluation-and-regression|`docs/ai/capabilities/evaluation-and-regression/CAPABILITY.md`|Use deterministic tests or evaluation checks to prove behavior and prevent regression.|
 |`capability`|evidence-first-execution|`docs/ai/capabilities/evidence-first-execution/CAPABILITY.md`|Run non-trivial changes with explicit scope control, dirty-worktree protection, and evidence-backed verification.|
+|`capability`|mentor-mode|`docs/ai/capabilities/mentor-mode/CAPABILITY.md`|Let an AI coding agent stay maximally useful now without eroding the human's independent capability later. Mentor Mode defaults to the lowest level of assistance that unblocks the human and makes full answer-delivery a deliberate, logged choice rather than the frictionless default.|
 |`capability`|preview-environments|`docs/ai/capabilities/preview-environments/CAPABILITY.md`|Document preview setup, smoke checks, rollback, and success signals for preview-related changes.|
 |`capability`|project-context|`docs/ai/capabilities/project-context/CAPABILITY.md`|Provide durable repository context that other capabilities, agents, and prompts can rely on before planning, implementing, reviewing, or verifying changes.|
 |`capability`|release-safety|`docs/ai/capabilities/release-safety/CAPABILITY.md`|Assess rollout, rollback, observability, and compatibility posture for changes whose risk extends beyond local correctness.|
@@ -140,6 +141,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|dependency-upgrade|`.github/prompts/dependency-upgrade.prompt.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`github-copilot-prompt`|docs-sync|`.github/prompts/docs-sync.prompt.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`github-copilot-prompt`|evidence-first-execution|`.github/prompts/evidence-first-execution.prompt.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`github-copilot-prompt`|mentor-mode|`.github/prompts/mentor-mode.prompt.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-prompt`|new-feature|`.github/prompts/new-feature.prompt.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-prompt`|plan-slice|`.github/prompts/plan-slice.prompt.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`github-copilot-prompt`|project-context|`.github/prompts/project-context.prompt.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
@@ -156,6 +158,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|dependency-upgrade|`.github/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`github-copilot-skill`|docs-sync|`.github/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`github-copilot-skill`|evidence-first-execution|`.github/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`github-copilot-skill`|mentor-mode|`.github/skills/mentor-mode/SKILL.md`|Use when the human is coding in a skill they want to retain or grow and a full solution would otherwise be handed over by default. Defaults to the lowest assistance that unblocks and makes answer-delivery a deliberate, logged choice. Do not use for genuine commodity work or incidents (use deliver mode) or pure fact lookups (use the lookup bypass).|
 |`github-copilot-skill`|new-feature|`.github/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-skill`|plan-slice|`.github/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`github-copilot-skill`|project-context|`.github/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
@@ -183,6 +186,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|dependency-upgrade|`.opencode/commands/dependency-upgrade.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`opencode-command`|docs-sync|`.opencode/commands/docs-sync.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-command`|evidence-first-execution|`.opencode/commands/evidence-first-execution.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`opencode-command`|mentor-mode|`.opencode/commands/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-command`|new-feature|`.opencode/commands/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-command`|plan-slice|`.opencode/commands/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`opencode-command`|project-context|`.opencode/commands/project-context.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
@@ -203,6 +207,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|dependency-upgrade|`.opencode/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`opencode-skill`|docs-sync|`.opencode/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-skill`|evidence-first-execution|`.opencode/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`opencode-skill`|mentor-mode|`.opencode/skills/mentor-mode/SKILL.md`|Use when the human is coding in a skill they want to retain or grow and a full solution would otherwise be handed over by default. Defaults to the lowest assistance that unblocks and makes answer-delivery a deliberate, logged choice. Do not use for genuine commodity work or incidents (use deliver mode) or pure fact lookups (use the lookup bypass).|
 |`opencode-skill`|new-feature|`.opencode/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-skill`|plan-slice|`.opencode/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`opencode-skill`|project-context|`.opencode/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
@@ -332,6 +337,12 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`package-capability`|Read-only: print one path per line that --apply would delete.|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/examples.md`|Good: source-fix with focused test and explicit verification status.|
 |`package-capability`|gotchas|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/gotchas.md`|- Do not treat generated files as canonical source unless policy says so.|
 |`package-capability`|reference|`packages/ai-universal-rules/templates/capabilities/evidence-first-execution/reference.md`|- `docs/ai/source-of-truth.md`|
+|`package-capability`|Mentor Mode Capability|`packages/ai-universal-rules/templates/capabilities/mentor-mode/CAPABILITY.md`|Let an AI coding agent stay maximally useful now without eroding the human's independent capability later. Mentor Mode defaults to the lowest level of assistance that unblocks the human and makes full answer-delivery a deliberate, logged choice rather than the frictionless default.|
+|`package-capability`|Mentor Mode Checklist|`packages/ai-universal-rules/templates/capabilities/mentor-mode/checklist.md`|1. Classify the mode: `learn` (growth path), `pair` (collaborative build), `deliver` (commodity or incident), or the `lookup` bypass. Infer and state it in one line when unset.|
+|`package-capability`|config.example|`packages/ai-universal-rules/templates/capabilities/mentor-mode/config.example.json`|{|
+|`package-capability`|Mentor Mode Examples|`packages/ai-universal-rules/templates/capabilities/mentor-mode/examples.md`|Each pair shows answer-delivery (the harmful default) versus Mentor Mode.|
+|`package-capability`|Mentor Mode Gotchas|`packages/ai-universal-rules/templates/capabilities/mentor-mode/gotchas.md`|- Socratic theatre: asking a leading question and answering it in the same turn. End the turn on the question and let the human answer first.|
+|`package-capability`|Mentor Mode Reference|`packages/ai-universal-rules/templates/capabilities/mentor-mode/reference.md`|Liu, Christian, Dumbalska, Bakker, Dubey (2026), "AI Assistance Reduces Persistence and Hurts Independent Performance," arXiv:2604.04721 (v2, 7 Apr 2026), DOI 10.48550/arXiv.2604.04721.|
 |`package-capability`|Project Context Capability|`packages/ai-universal-rules/templates/capabilities/project-context/CAPABILITY.md`|Provide durable repository context that other capabilities, agents, and prompts can rely on before planning, implementing, reviewing, or verifying changes.|
 |`package-capability`|Project Context Examples|`packages/ai-universal-rules/templates/capabilities/project-context/examples.md`|If a request touches checkout behavior:|
 |`package-capability`|Project Context Gotchas|`packages/ai-universal-rules/templates/capabilities/project-context/gotchas.md`|- Do not treat legacy or inactive paths as the default implementation target.|
@@ -366,6 +377,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-template`|dependency-upgrade|`packages/ai-universal-rules/templates/workflows/dependency-upgrade.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`workflow-template`|docs-sync|`packages/ai-universal-rules/templates/workflows/docs-sync.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`workflow-template`|evidence-first-execution|`packages/ai-universal-rules/templates/workflows/evidence-first-execution.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`workflow-template`|mentor-mode|`packages/ai-universal-rules/templates/workflows/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`workflow-template`|new-feature|`packages/ai-universal-rules/templates/workflows/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`workflow-template`|plan-slice|`packages/ai-universal-rules/templates/workflows/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`workflow-template`|project-context|`packages/ai-universal-rules/templates/workflows/project-context.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|

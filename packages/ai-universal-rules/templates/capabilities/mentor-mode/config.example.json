@@ -1,0 +1,47 @@
+{
+  "mode": {
+    "default": "learn",
+    "values": ["learn", "pair", "deliver"],
+    "bypass": "lookup"
+  },
+  "ladder": {
+    "min": 0,
+    "max": 5
+  },
+  "mode_start": {
+    "learn": 1,
+    "pair": 2,
+    "deliver": 5
+  },
+  "mode_ceiling": {
+    "learn": 4,
+    "pair": 4,
+    "deliver": 5
+  },
+  "struggle_gate": {
+    "mode": "learn",
+    "before_rung": 3
+  },
+  "retention": {
+    "trigger_from_rung": 4,
+    "deferred_modes": ["deliver"]
+  },
+  "cohort": {
+    "default": "developer",
+    "start_level_delta": {
+      "apprentice": -1,
+      "developer": 0,
+      "senior": 1
+    },
+    "learn_ignores_positive_offset": true
+  },
+  "safety_override": ["data_loss", "security_vuln", "production_impact"],
+  "logging": {
+    "skill_debt_log": ".mentor/skill-debt.md",
+    "learning_log": ".mentor/learning-log.md"
+  },
+  "paths": {
+    "learn_globs": [],
+    "deliver_globs": []
+  }
+}
