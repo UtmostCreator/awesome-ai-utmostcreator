@@ -103,6 +103,7 @@ Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/capabilities/
 | Capability             | Load when change involves                  |
 | ---------------------- | ------------------------------------------ |
 | `config-change-safety` | any config file, policy file, runtime flag |
+| `authorization-and-tool-governance` | autonomy levels or tool permission changes |
 | `verify-change`        | focused sanity check or lint after change  |
 | `docs-sync`            | docs reference changed config              |
 

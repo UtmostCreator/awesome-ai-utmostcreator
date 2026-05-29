@@ -33,6 +33,10 @@ permission:
     'fd *': allow
     'eza *': allow
     'bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/rg-code.sh *': allow
     'bash scripts/ai/fd-files.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
@@ -130,7 +134,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `project-context`                   | repo map, source of truth, context compiler, AI context output |
 | `adapter-drift`                     | Copilot/OpenCode/provider parity or adapter templates          |
 | `agent-observability-and-evidence`  | evidence logs, session notes, traceability                     |
-| `authorization-and-tool-governance` | permissions, hooks, allow/deny policy, sensitive operations    |
+| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, allow/deny policy, sensitive operations |
 | `review-diff`                       | review surface, changed files, regression risk                 |
 | `verify-change`                     | verification surface or test selection                         |
 

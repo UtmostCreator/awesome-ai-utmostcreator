@@ -236,7 +236,7 @@ For scores below 50/100, do not implement.
 | ----------------------------------- | ----------------------------------------------------------- |
 | `adapter-drift`                     | provider parity, adapter templates, instruction generation  |
 | `agent-observability-and-evidence`  | evidence logs, proof format, session notes                  |
-| `authorization-and-tool-governance` | permissions, hooks, allow/deny policy, sensitive operations |
+| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, allow/deny policy, sensitive operations |
 | `bug-regression`                    | bug fix, reproduction, regression coverage                  |
 | `config-change-safety`              | YAML/JSON config, policies, runtime flags                   |
 | `dependency-upgrade`                | package versions, lockfiles, compatibility                  |

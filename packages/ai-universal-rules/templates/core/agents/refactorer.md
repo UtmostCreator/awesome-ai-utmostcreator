@@ -152,6 +152,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `verify-change`             | proving behavior preservation                 |
 | `docs-sync`                 | docs need alignment after structural movement |
 | `service-boundary-patterns` | boundaries, ownership, public/private split   |
+| `authorization-and-tool-governance` | autonomy levels or policy/refactor boundaries |
 | `config-change-safety`      | config or policy structure                    |
 
 Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`, `reference.md`.
