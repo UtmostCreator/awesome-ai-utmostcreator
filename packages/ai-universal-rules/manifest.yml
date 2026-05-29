@@ -35,6 +35,7 @@ starter_optional_capabilities:
   - templates/capabilities/bug-regression
   - templates/capabilities/release-safety
   - templates/capabilities/dependency-upgrade
+  - templates/capabilities/mentor-mode
 runtime_entrypoints:
   opencode:
     - templates/core/agents

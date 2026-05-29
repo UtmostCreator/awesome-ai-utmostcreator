@@ -84,6 +84,7 @@ function aiInstallerPackRegistry(): array
         ],
         'capabilities-extended-full' => [
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/dependency-upgrade', 'target' => 'docs/ai/capabilities/dependency-upgrade', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/mentor-mode', 'target' => 'docs/ai/capabilities/mentor-mode', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
         'policy-pack' => [
             ['type' => 'file', 'source' => 'docs/ai/command-risk-taxonomy.md', 'target' => 'docs/ai/command-risk-taxonomy.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
