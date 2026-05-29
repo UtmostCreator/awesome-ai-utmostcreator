@@ -292,7 +292,7 @@ tools/ai/ai.php  ← CLI dispatcher (routes subcommands)
 
 The installer reads the `--profile` argument and expands it into a list of **packs** (groups of files). For example:
 
-- `full-governance` = `base` + `adapter-copilot` + `adapter-opencode` + `scripts-pack` + `hooks-pack` + `capabilities-extended-full` + `ci-pack` + `advisor-pack` + `target-tools-pack` + more
+- `full-governance` = `base` + `adapter-copilot` + `adapter-opencode` + `scripts-pack` + `hooks-pack` + `capabilities-governance` + `ci-pack` + `advisor-pack` + `target-tools-pack` + more
 
 Profiles and packs are defined in `tools/ai/install/profiles.php` and `tools/ai/install/packs.php`.
 
