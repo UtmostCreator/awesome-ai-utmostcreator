@@ -30,9 +30,9 @@ parse_size() {
     if [[ "$raw" =~ ^([0-9]+)([KkMmGg])$ ]]; then
         local n="${BASH_REMATCH[1]}"
         case "${BASH_REMATCH[2],,}" in
-            k) echo $((n * 1024)) ;;
-            m) echo $((n * 1024 * 1024)) ;;
-            g) echo $((n * 1024 * 1024 * 1024)) ;;
+        k) echo $((n * 1024)) ;;
+        m) echo $((n * 1024 * 1024)) ;;
+        g) echo $((n * 1024 * 1024 * 1024)) ;;
         esac
     else
         echo "$raw"
@@ -54,32 +54,83 @@ max_columns=200
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --help|-h) usage; exit 0 ;;
-        --plain) plain=1; shift ;;
-        --dry-run) dry_run=1; shift ;;
-        --force) force=1; shift ;;
-        --lines) lines="${2:-}"; shift 2 ;;
-        --lines=*) lines="${1#*=}"; shift ;;
-        --range) range="${2:-}"; shift 2 ;;
-        --range=*) range="${1#*=}"; shift ;;
-        --around) around="${2:-}"; shift 2 ;;
-        --around=*) around="${1#*=}"; shift ;;
-        --context) context="${2:-3}"; shift 2 ;;
-        --context=*) context="${1#*=}"; shift ;;
-        --max-bytes) max_bytes_raw="${2:-65536}"; shift 2 ;;
-        --max-bytes=*) max_bytes_raw="${1#*=}"; shift ;;
-        --max-columns) max_columns="${2:-200}"; shift 2 ;;
-        --max-columns=*) max_columns="${1#*=}"; shift ;;
-        --*)
-            if [[ "$json_mode" == "json" ]]; then
-                emit_json "error" "" "" "[\"unknown option: $1\"]"
-                exit 1
-            fi
-            die "unknown option: $1"
-            ;;
-        *)
-            if [[ -z "$file" ]]; then file="$1"; shift; else die "unexpected arg: $1"; fi
-            ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    --plain)
+        plain=1
+        shift
+        ;;
+    --dry-run)
+        dry_run=1
+        shift
+        ;;
+    --force)
+        force=1
+        shift
+        ;;
+    --lines)
+        lines="${2:-}"
+        shift 2
+        ;;
+    --lines=*)
+        lines="${1#*=}"
+        shift
+        ;;
+    --range)
+        range="${2:-}"
+        shift 2
+        ;;
+    --range=*)
+        range="${1#*=}"
+        shift
+        ;;
+    --around)
+        around="${2:-}"
+        shift 2
+        ;;
+    --around=*)
+        around="${1#*=}"
+        shift
+        ;;
+    --context)
+        context="${2:-3}"
+        shift 2
+        ;;
+    --context=*)
+        context="${1#*=}"
+        shift
+        ;;
+    --max-bytes)
+        max_bytes_raw="${2:-65536}"
+        shift 2
+        ;;
+    --max-bytes=*)
+        max_bytes_raw="${1#*=}"
+        shift
+        ;;
+    --max-columns)
+        max_columns="${2:-200}"
+        shift 2
+        ;;
+    --max-columns=*)
+        max_columns="${1#*=}"
+        shift
+        ;;
+    --*)
+        if [[ "$json_mode" == "json" ]]; then
+            emit_json "error" "" "" "[\"unknown option: $1\"]"
+            exit 1
+        fi
+        die "unknown option: $1"
+        ;;
+    *)
+        if [[ -z "$file" ]]; then
+            file="$1"
+            shift
+        else die "unexpected arg: $1"; fi
+        ;;
     esac
 done
 
@@ -120,7 +171,7 @@ if [[ "$dry_run" == "1" ]]; then
 fi
 
 size="$(wc -c <"$file" | tr -d ' ')"
-if (( size > max_bytes )) && [[ "$force" != "1" ]]; then
+if ((size > max_bytes)) && [[ "$force" != "1" ]]; then
     if [[ "$json_mode" == "json" ]]; then
         emit_json "error" "$file" "" '["max-bytes exceeded"]'
     else
@@ -131,7 +182,7 @@ fi
 
 # Real binary detection: count NUL bytes via tr (avoid bash $'\x00' empty-string bug).
 nul_count="$(LC_ALL=C tr -cd '\000' <"$file" | wc -c | tr -d ' ')"
-if (( nul_count > 0 )) && [[ "$force" != "1" ]]; then
+if ((nul_count > 0)) && [[ "$force" != "1" ]]; then
     if [[ "$json_mode" == "json" ]]; then
         emit_json "error" "$file" "" '["binary file blocked"]'
     else
@@ -158,8 +209,9 @@ if [[ -n "$range" ]]; then
         fi
         exit 1
     fi
-    start="${BASH_REMATCH[1]}"; end="${BASH_REMATCH[2]}"
-    if (( start > end )); then
+    start="${BASH_REMATCH[1]}"
+    end="${BASH_REMATCH[2]}"
+    if ((start > end)); then
         if [[ "$json_mode" == "json" ]]; then
             emit_json "error" "$file" "" '["invalid --range"]'
         else
@@ -177,8 +229,9 @@ elif [[ -n "$around" ]]; then
         echo "[ERROR] invalid --context" >&2
         exit 1
     fi
-    start=$((around-context)); ((start<1)) && start=1
-    end=$((around+context))
+    start=$((around - context))
+    ((start < 1)) && start=1
+    end=$((around + context))
     content="$(sed -n "${start},${end}p" "$file")"
 elif [[ -n "$lines" ]]; then
     content="$(sed -n "1,${lines}p" "$file")"

@@ -58,37 +58,37 @@ has_package_dependency() {
 
 tracked_existing_shell_files() {
     case "$AI_VERIFY_SCOPE" in
-        ai)
-            git ls-files -co --exclude-standard 'scripts/ai/*.sh' |
+    ai)
+        git ls-files -co --exclude-standard 'scripts/ai/*.sh' |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
                 [[ "$script" == scripts/ai/check-batch*.sh ]] && continue
                 printf '%s\n' "$script"
             done
-            ;;
-        changed)
-            {
-                git diff --name-only --diff-filter=ACMRT -- '*.sh'
-                git diff --cached --name-only --diff-filter=ACMRT -- '*.sh'
-                git ls-files --others --exclude-standard -- '*.sh'
-            } |
+        ;;
+    changed)
+        {
+            git diff --name-only --diff-filter=ACMRT -- '*.sh'
+            git diff --cached --name-only --diff-filter=ACMRT -- '*.sh'
+            git ls-files --others --exclude-standard -- '*.sh'
+        } |
             sort -u |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
                 [[ "$script" == scripts/ai/check-batch*.sh ]] && continue
                 printf '%s\n' "$script"
             done
-            ;;
-        all)
-            git ls-files -co --exclude-standard '*.sh' |
+        ;;
+    all)
+        git ls-files -co --exclude-standard '*.sh' |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
                 printf '%s\n' "$script"
             done
-            ;;
-        *)
-            die "unknown AI_VERIFY_SCOPE: $AI_VERIFY_SCOPE"
-            ;;
+        ;;
+    *)
+        die "unknown AI_VERIFY_SCOPE: $AI_VERIFY_SCOPE"
+        ;;
     esac
 }
 

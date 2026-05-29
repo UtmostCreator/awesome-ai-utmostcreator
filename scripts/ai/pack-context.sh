@@ -36,10 +36,10 @@ EOF
 backend="${1:-auto}"
 
 case "$backend" in
-auto|repomix|files-to-prompt|code2prompt)
+auto | repomix | files-to-prompt | code2prompt)
     shift || true
     ;;
---help|-h)
+--help | -h)
     usage
     exit 0
     ;;
@@ -65,7 +65,7 @@ args_contain_output() {
     local arg
     for arg in "$@"; do
         case "$arg" in
-        --output|--output=*)
+        --output | --output=*)
             return 0
             ;;
         esac

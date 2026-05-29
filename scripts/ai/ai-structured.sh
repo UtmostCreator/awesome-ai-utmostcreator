@@ -43,7 +43,7 @@ json)
     jq "$query" "$file"
     ;;
 
-yaml|yml)
+yaml | yml)
     require_bins yq
     file="${1:?file required}"
     query="${2:?yq query required}"
@@ -59,7 +59,7 @@ validate-json)
     log_ok "valid JSON: $file"
     ;;
 
-validate-yaml|validate-yml)
+validate-yaml | validate-yml)
     require_bins yq
     file="${1:?file required}"
     [[ -f "$file" ]] || die "file not found: $file"
@@ -112,7 +112,7 @@ xml)
     fi
     ;;
 
---help|-h)
+--help | -h)
     usage
     ;;
 

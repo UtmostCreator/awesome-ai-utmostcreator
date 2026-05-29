@@ -3,11 +3,16 @@
 
 set -euo pipefail
 
-COPILOT_LOG_DIR="${COPILOT_LOG_DIR:-${AI_LOG_DIR:-.ai-logs}}"
-COPILOT_CONTEXT_DIR="${COPILOT_CONTEXT_DIR:-.repomix-context}"
-COPILOT_SESSION_DIR="${COPILOT_SESSION_DIR:-${COPILOT_LOG_DIR}/sessions}"
-COPILOT_SNAPSHOT_DIR="${COPILOT_SNAPSHOT_DIR:-${COPILOT_LOG_DIR}/snapshots}"
-COPILOT_EVENT_LOG="${COPILOT_EVENT_LOG:-${AI_EVENT_LOG:-${COPILOT_LOG_DIR}/tool-usage.jsonl}}"
+AI_LOG_DIR="${AI_LOG_DIR:-${COPILOT_LOG_DIR:-.ai-logs}}"
+COPILOT_LOG_DIR="${COPILOT_LOG_DIR:-$AI_LOG_DIR}"
+AI_CONTEXT_DIR="${AI_CONTEXT_DIR:-${COPILOT_CONTEXT_DIR:-.repomix-context}}"
+COPILOT_CONTEXT_DIR="${COPILOT_CONTEXT_DIR:-$AI_CONTEXT_DIR}"
+AI_SESSION_DIR="${AI_SESSION_DIR:-${COPILOT_SESSION_DIR:-${AI_LOG_DIR}/sessions}}"
+COPILOT_SESSION_DIR="${COPILOT_SESSION_DIR:-$AI_SESSION_DIR}"
+AI_SNAPSHOT_DIR="${AI_SNAPSHOT_DIR:-${COPILOT_SNAPSHOT_DIR:-${AI_LOG_DIR}/snapshots}}"
+COPILOT_SNAPSHOT_DIR="${COPILOT_SNAPSHOT_DIR:-$AI_SNAPSHOT_DIR}"
+AI_EVENT_LOG="${AI_EVENT_LOG:-${COPILOT_EVENT_LOG:-${AI_LOG_DIR}/tool-usage.jsonl}}"
+COPILOT_EVENT_LOG="${COPILOT_EVENT_LOG:-$AI_EVENT_LOG}"
 AI_SESSION_GENERATED_DIR="${AI_SESSION_GENERATED_DIR:-docs/ai/generated/sessions}"
 
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 2 ]]; then
@@ -72,21 +77,21 @@ log_json() {
         payload_json="$(jq -cn --arg raw "$payload" '{raw:$raw}')"
     fi
 
-        entry="$(jq -cn \
-                --arg event_version "2.0" \
-                --arg event_type "$event" \
-                --arg trace_id "${TRACE_ID:-unknown}" \
-                --arg session_id "${SESSION_ID:-unknown}" \
-                --arg task_id "${TASK_ID:-unknown}" \
-                --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-                --arg actor_id "${ACTOR_ID:-$caller}" \
-                --arg delegated_by "${DELEGATED_BY:-}" \
-                --arg tool_name "$caller" \
-                --arg repo_root "$(git_root 2>/dev/null || pwd)" \
-                --arg git_branch "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown')" \
-                --arg git_commit "$(git rev-parse HEAD 2>/dev/null || printf 'unknown')" \
-                --argjson data "$payload_json" \
-                '{
+    entry="$(jq -cn \
+        --arg event_version "2.0" \
+        --arg event_type "$event" \
+        --arg trace_id "${TRACE_ID:-unknown}" \
+        --arg session_id "${SESSION_ID:-unknown}" \
+        --arg task_id "${TASK_ID:-unknown}" \
+        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --arg actor_id "${ACTOR_ID:-$caller}" \
+        --arg delegated_by "${DELEGATED_BY:-}" \
+        --arg tool_name "$caller" \
+        --arg repo_root "$(git_root 2>/dev/null || pwd)" \
+        --arg git_branch "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown')" \
+        --arg git_commit "$(git rev-parse HEAD 2>/dev/null || printf 'unknown')" \
+        --argjson data "$payload_json" \
+        '{
                     event_version: $event_version,
                     event_type: $event_type,
                     trace_id: $trace_id,
@@ -140,7 +145,7 @@ log_json() {
                     details: (if ($data | type) == "object" then $data else {raw: $data} end)
                 }')"
 
-        append_log_entry "$entry"
+    append_log_entry "$entry"
 }
 
 log_info() { printf '%b[INFO]%b  %s\n' "$_C_CYAN" "$_C_RESET" "$*" >&2; }
@@ -213,15 +218,15 @@ emit_envelope() {
     parsed_errors="$(jq -c . <<<"$errors" 2>/dev/null || printf '[]')"
     parsed_truncated="$(jq -c . <<<"$truncated" 2>/dev/null || printf 'false')"
     jq -cn \
-      --arg schema "1" \
-      --arg status "$status" \
-      --arg tool "$tool" \
-      --arg content_raw "$parsed_content" \
-      --arg warnings_raw "$parsed_warnings" \
-      --arg errors_raw "$parsed_errors" \
-      --arg elapsed_raw "$elapsed" \
-      --arg truncated_raw "$parsed_truncated" \
-      '{
+        --arg schema "1" \
+        --arg status "$status" \
+        --arg tool "$tool" \
+        --arg content_raw "$parsed_content" \
+        --arg warnings_raw "$parsed_warnings" \
+        --arg errors_raw "$parsed_errors" \
+        --arg elapsed_raw "$elapsed" \
+        --arg truncated_raw "$parsed_truncated" \
+        '{
         schema: ($schema|tonumber),
         status: $status,
         tool: $tool,
@@ -266,39 +271,44 @@ repo_root() {
 classify_command() {
     local tool="${1:-}" sub="${2:-}"
     case "$tool" in
-        rg|fd|fdfind|cat|bat|sed|awk|jq|yq) echo read ;;
-        rm|rmdir|mv|truncate|dd) echo destructive ;;
-        curl|wget|ssh|scp|rsync) echo network ;;
-        brew|apt|apt-get|winget|choco) echo install ;;
-        npm)
-            case "$sub" in
-                install|add|update|remove|upgrade|require|global) echo install ;;
-                test|run|exec|lint|validate|check) echo write ;;
-                *) echo unknown ;;
-            esac ;;
-        git)
-            case "$sub" in
-                status|diff|show|log|grep|rev-parse|ls-files|branch) echo read ;;
-                reset|clean|checkout|restore|push|pull|commit) echo destructive ;;
-                *) echo unknown ;;
-            esac ;;
-        php|node|python|python3|bash|sh|zsh|make|just) echo write ;;
+    rg | fd | fdfind | cat | bat | sed | awk | jq | yq) echo read ;;
+    rm | rmdir | mv | truncate | dd) echo destructive ;;
+    curl | wget | ssh | scp | rsync) echo network ;;
+    brew | apt | apt-get | winget | choco) echo install ;;
+    npm)
+        case "$sub" in
+        install | add | update | remove | upgrade | require | global) echo install ;;
+        test | run | exec | lint | validate | check) echo write ;;
         *) echo unknown ;;
+        esac
+        ;;
+    git)
+        case "$sub" in
+        status | diff | show | log | grep | rev-parse | ls-files | branch) echo read ;;
+        reset | clean | checkout | restore | push | pull | commit) echo destructive ;;
+        *) echo unknown ;;
+        esac
+        ;;
+    php | node | python | python3 | bash | sh | zsh | make | just) echo write ;;
+    *) echo unknown ;;
     esac
 }
 
 approval_env_for_category() {
     case "${1:-}" in
-        destructive) echo AI_APPROVE_DESTRUCTIVE ;;
-        network) echo AI_APPROVE_NETWORK ;;
-        install) echo AI_APPROVE_INSTALL ;;
-        unknown) echo AI_APPROVE_UNKNOWN_COMMAND ;;
-        *) echo "" ;;
+    destructive) echo AI_APPROVE_DESTRUCTIVE ;;
+    network) echo AI_APPROVE_NETWORK ;;
+    install) echo AI_APPROVE_INSTALL ;;
+    unknown) echo AI_APPROVE_UNKNOWN_COMMAND ;;
+    *) echo "" ;;
     esac
 }
 
 command_basename() {
-    [[ -n "${1:-}" ]] || { echo ""; return 0; }
+    [[ -n "${1:-}" ]] || {
+        echo ""
+        return 0
+    }
     basename "$1"
 }
 
@@ -312,14 +322,20 @@ realpath_safe() {
 }
 
 assert_inside_repo() {
-    local p="$(realpath_safe "${1:?path required}")"
-    local root="$(repo_root)"
+    local p
+    local root
+
+    p="$(realpath_safe "${1:?path required}")"
+    root="$(repo_root)"
     [[ "$p" == "$root" || "$p" == "$root"/* ]] || die "path outside repo: $p"
 }
 
 repo_relative_path() {
-    local p="$(realpath_safe "${1:?path required}")"
-    local root="$(repo_root)"
+    local p
+    local root
+
+    p="$(realpath_safe "${1:?path required}")"
+    root="$(repo_root)"
     if [[ "$p" == "$root" ]]; then
         echo "."
     else
@@ -338,8 +354,8 @@ assert_relative_safe_path() {
 path_matches_protected_pattern() {
     local p="${1,,}"
     case "$p" in
-        .env|.env.*|*.key|*.pem|*.crt|*.p12|*.pfx|*secret*|agents.md|.github/*|docs/ai/generated/*) return 0 ;;
-        *) return 1 ;;
+    .env | .env.* | *.key | *.pem | *.crt | *.p12 | *.pfx | *secret* | agents.md | .github/* | docs/ai/generated/*) return 0 ;;
+    *) return 1 ;;
     esac
 }
 
@@ -368,19 +384,24 @@ require_approval() {
 }
 
 enforce_command_policy() {
-    local action="${1:-cmd}"; shift || true
+    local action="${1:-cmd}"
+
+    shift || true
     local tool="${1:-}"
     local sub="${2:-}"
     local category
     category="$(classify_command "$tool" "$sub")"
     case "$category" in
-        read) return 0 ;;
-        destructive|network|install|unknown)
-            require_approval "$action" "$(approval_env_for_category "$category")"
-            ;;
-        write)
-            [[ -n "${AI_TASK_SCOPE:-}" ]] || { log_error "AI_TASK_SCOPE required for write commands"; exit 2; }
-            ;;
+    read) return 0 ;;
+    destructive | network | install | unknown)
+        require_approval "$action" "$(approval_env_for_category "$category")"
+        ;;
+    write)
+        [[ -n "${AI_TASK_SCOPE:-}" ]] || {
+            log_error "AI_TASK_SCOPE required for write commands"
+            exit 2
+        }
+        ;;
     esac
 }
 

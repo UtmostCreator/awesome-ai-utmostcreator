@@ -602,8 +602,8 @@ Repomix creates AI-ready context bundles from repository source code. This is us
 ### Generate context for any project
 
 ```bash
-SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh /path/to/project \
-  --top 0 --min-code 0 --min-files 0 --depth 3
+SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh /Users/example-user/Workspaces/example-app \
+  --depth 3 --top 0 --min-code 0 --min-files 0 --context-window 128000
 ```
 
 > **Note**: The target directory must be a git repository. If you see `Error: no files available after applying ignore rules`, the directory is not a git repo — see [Non-git directory workaround](#error-no-files-available-after-applying-ignore-rules) below.
@@ -612,7 +612,7 @@ SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh /path/to/project \
 
 This error occurs when you run repomix against a directory that has no git repository:
 
-```
+```text
 Error: no files available after applying ignore rules
 [ERROR] context tree generation failed
 ```
@@ -646,7 +646,7 @@ repomix \
 For Obsidian vaults (markdown only):
 
 ```bash
-cd /Users/you/obsidian/vault-name
+cd /Users/example-user/Documents/knowledge-vault
 repomix --include "**/*.md" --no-gitignore --no-git-sort-by-changes --output /tmp/vault-context.xml
 ```
 
@@ -685,7 +685,7 @@ just context-tree-run           # Guided build with dependency checks
 
 ### Output structure
 
-```
+```text
 .repomix-context/tree-context/
 ├── index.md              ← Human-readable route index (open first)
 ├── tree-plan.json        ← Machine-readable route plan

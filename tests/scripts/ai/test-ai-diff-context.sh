@@ -7,6 +7,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 SCRIPT="$REPO_ROOT/scripts/ai/ai-diff-context.sh"
 cd "$REPO_ROOT"
 BASH_BIN="${BASH_BIN:-$(command -v bash)}"
+TIMEOUT_BIN="$(command -v gtimeout || command -v timeout || true)"
 
 PASS=0 FAIL=0 SKIP=0
 TMP="$(mktemp -d)"
@@ -41,6 +42,21 @@ test_since_no_ref() {
     ! AI_CONTEXT_DIR="$TMP/ctx7" "$BASH_BIN" "$SCRIPT" since 2>/dev/null
 }
 run_test "since without ref fails" test_since_no_ref
+
+test_since_dry_run_no_tests_finishes() {
+    [[ -n "$TIMEOUT_BIN" ]] || return 2
+
+    local out
+    out="$(AI_SESSION_DURABLE_LOG=0 "$TIMEOUT_BIN" 5 "$BASH_BIN" "$SCRIPT" since HEAD~1 --dry-run --no-tests 2>/dev/null)"
+
+    grep -q '"dry_run": true' <<<"$out"
+}
+
+if [[ -n "$TIMEOUT_BIN" ]]; then
+    run_test "since dry-run no-tests finishes and prints dry-run JSON" test_since_dry_run_no_tests_finishes
+else
+    skip_test "since dry-run no-tests finishes and prints dry-run JSON" "no timeout binary"
+fi
 
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"

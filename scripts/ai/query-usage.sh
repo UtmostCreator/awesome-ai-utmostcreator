@@ -23,14 +23,39 @@ fi
 
 while (($# > 0)); do
     case "$1" in
-    --multiplier) MULTIPLIER="$2"; shift 2 ;;
-    --multiplier=*) MULTIPLIER="${1#*=}"; shift ;;
-    --multiplier-label) LABEL="$2"; shift 2 ;;
-    --multiplier-label=*) LABEL="${1#*=}"; shift ;;
-    --reserved-output) RESERVED_OUTPUT="$2"; shift 2 ;;
-    --reserved-output=*) RESERVED_OUTPUT="${1#*=}"; shift ;;
-    --help | -h) usage; exit 0 ;;
-    *) echo "Unknown option: $1" >&2; usage; exit 2 ;;
+    --multiplier)
+        MULTIPLIER="$2"
+        shift 2
+        ;;
+    --multiplier=*)
+        MULTIPLIER="${1#*=}"
+        shift
+        ;;
+    --multiplier-label)
+        LABEL="$2"
+        shift 2
+        ;;
+    --multiplier-label=*)
+        LABEL="${1#*=}"
+        shift
+        ;;
+    --reserved-output)
+        RESERVED_OUTPUT="$2"
+        shift 2
+        ;;
+    --reserved-output=*)
+        RESERVED_OUTPUT="${1#*=}"
+        shift
+        ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        usage
+        exit 2
+        ;;
     esac
 done
 
@@ -45,7 +70,7 @@ if [[ -d "$TARGET" ]]; then
         BYTES="$(rg --files "$TARGET" 2>/dev/null | xargs -I{} sh -c 'wc -c <"$1"' _ {} 2>/dev/null | awk '{s+=$1} END{print s+0}')"
     fi
 else
-    BYTES="$(wc -c < "$TARGET")"
+    BYTES="$(wc -c <"$TARGET")"
 fi
 
 RAW_TOKENS="$(awk -v b="$BYTES" 'BEGIN { printf "%d", int((b + 3) / 4) }')"
