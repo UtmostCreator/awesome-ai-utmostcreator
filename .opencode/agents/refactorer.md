@@ -80,6 +80,10 @@ permission:
     'git stash apply*': ask
     'git stash drop*': ask
     'bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/rg-code.sh *': allow
     'bash scripts/ai/fd-files.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
@@ -141,6 +145,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `verify-change`             | proving behavior preservation                 |
 | `docs-sync`                 | docs need alignment after structural movement |
 | `service-boundary-patterns` | boundaries, ownership, public/private split   |
+| `authorization-and-tool-governance` | autonomy levels or policy/refactor boundaries |
 | `config-change-safety`      | config or policy structure                    |
 
 Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`, `reference.md`.

@@ -43,6 +43,10 @@ permission:
     'git branch*': allow
     'git rev-parse*': allow
     'bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/rg-code.sh *': allow
     'bash scripts/ai/fd-files.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
@@ -83,7 +87,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `release-safety`                    | rollout, rollback, disable path, production risk   |
 | `preview-environments`              | preview deploys, smoke checks, TTL, data isolation |
 | `config-change-safety`              | config, flags, runtime policy                      |
-| `authorization-and-tool-governance` | permissions, hooks, tool policy                    |
+| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, tool policy   |
 | `adapter-drift`                     | provider parity or generated adapter files         |
 | `agent-observability-and-evidence`  | evidence logs, traceability                        |
 | `verify-change`                     | validation depth and smoke checks                  |

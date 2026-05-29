@@ -33,6 +33,10 @@ permission:
     'git show*': allow
     'git ls-files*': allow
     'bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/ai-doc-check.sh --check*': allow
     'php tools/ai/validate-*.php *': allow
 ---
@@ -70,6 +74,7 @@ Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/workflow.md`,
 | `adapter-drift`                    | Copilot/OpenCode parity, adapter template drift |
 | `project-context`                  | repo context file correctness                   |
 | `agent-observability-and-evidence` | evidence logs, session notes                    |
+| `authorization-and-tool-governance` | autonomy levels, tool permissions, approval gates |
 
 ## Audit Checklist
 

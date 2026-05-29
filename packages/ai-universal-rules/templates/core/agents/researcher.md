@@ -133,7 +133,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `project-context`                   | repo map, source of truth, context compiler, AI context output |
 | `adapter-drift`                     | Copilot/OpenCode/provider parity or adapter templates          |
 | `agent-observability-and-evidence`  | evidence logs, session notes, traceability                     |
-| `authorization-and-tool-governance` | permissions, hooks, allow/deny policy, sensitive operations    |
+| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, allow/deny policy, sensitive operations |
 | `review-diff`                       | review surface, changed files, regression risk                 |
 | `verify-change`                     | verification surface or test selection                         |
 

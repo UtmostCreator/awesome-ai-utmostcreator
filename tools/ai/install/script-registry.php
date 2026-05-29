@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 function aiInstallerScriptRegistry(): array
 {
-    return [
+    $scripts = [
         'common' => [
             'label' => 'Shared helper library for AI shell scripts',
             'source_path' => 'scripts/ai/common.sh',
@@ -388,6 +388,32 @@ function aiInstallerScriptRegistry(): array
             'source_repo_only' => true,
         ],
     ];
+
+    foreach ($scripts as $id => $entry) {
+        if (!isset($entry['autonomy_level'])) {
+            $scripts[$id]['autonomy_level'] = aiInstallerInferScriptAutonomyLevel($entry);
+        }
+    }
+
+    return $scripts;
+}
+
+function aiInstallerInferScriptAutonomyLevel(array $entry): string
+{
+    if (($entry['risk'] ?? '') === 'mutating' || ($entry['mutates_state'] ?? false) === true || ($entry['requires_approval'] ?? false) === true) {
+        return 'act_with_approval';
+    }
+
+    $writesPaths = $entry['writes_paths'] ?? [];
+    if (is_array($writesPaths) && $writesPaths !== []) {
+        return 'advise';
+    }
+
+    if (($entry['supports_dry_run'] ?? false) === true) {
+        return 'advise';
+    }
+
+    return 'observe';
 }
 
 function aiInstallerCommandPolicyRiskTiers(): array

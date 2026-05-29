@@ -11,30 +11,50 @@
       "description": "Semantic version of the registry contract."
     },
     "scripts": {
-      "type": "array",
-      "items": { "$ref": "#/$defs/script" }
+      "description": "Script entries keyed by stable script id.",
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/script" }
     }
   },
   "$defs": {
     "script": {
       "type": "object",
-      "required": ["id", "path", "risk"],
+      "required": ["source_path", "installed_path", "risk", "autonomy_level"],
       "properties": {
         "id": {
           "type": "string",
           "description": "Stable identifier used by routers and policies."
         },
+        "source_path": {
+          "type": "string",
+          "description": "Repo-relative source script path."
+        },
+        "installed_path": {
+          "type": "string",
+          "description": "Repo-relative installed script path."
+        },
         "path": {
           "type": "string",
-          "description": "Repo-relative script path."
+          "description": "Legacy repo-relative script path. Prefer installed_path."
         },
         "description": {
           "type": "string"
         },
         "risk": {
           "type": "string",
-          "enum": ["low", "medium", "high"],
+          "enum": ["read-only", "mutating", "low", "medium", "high"],
           "description": "Risk class controlling approval boundary."
+        },
+        "autonomy_level": {
+          "type": "string",
+          "enum": ["observe", "advise", "act_with_approval", "act_autonomously"],
+          "description": "Maximum default autonomy level for the script. See docs/ai/capabilities/authorization-and-tool-governance/CAPABILITY.md."
+        },
+        "mutates_state": {
+          "type": "boolean"
+        },
+        "requires_approval": {
+          "type": "boolean"
         },
         "approval": {
           "type": "string",

@@ -53,7 +53,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `verify-change`                     | changed behavior or verification claims     |
 | `bug-regression`                    | bug fix or regression test                  |
 | `adapter-drift`                     | provider parity, generated adapter surfaces |
-| `authorization-and-tool-governance` | permissions, hooks, policy surfaces         |
+| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, policy surfaces |
 | `config-change-safety`              | config, JSON/YAML, runtime flags            |
 | `release-safety`                    | medium/high risk, rollout/rollback          |
 | `docs-sync`                         | docs, generated docs, capability alignment  |

@@ -54,6 +54,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `service-boundary-patterns` | cross-package/service/API ownership boundaries       |
 | `config-change-safety`      | JSON/YAML/runtime config, policy files, flags        |
 | `adapter-drift`             | provider-specific templates, Copilot/OpenCode parity |
+| `authorization-and-tool-governance` | autonomy levels, approval boundaries, tool permissions |
 | `release-safety`            | rollout, rollback, production-impacting behavior     |
 | `docs-sync`                 | docs must change with code or generated output       |
 | `verify-change`             | acceptance criteria and verification plan            |

@@ -49,7 +49,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `release-safety`                    | rollout, rollback, disable path, production risk   |
 | `preview-environments`              | preview deploys, smoke checks, TTL, data isolation |
 | `config-change-safety`              | config, flags, runtime policy                      |
-| `authorization-and-tool-governance` | permissions, hooks, tool policy                    |
+| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, tool policy   |
 | `adapter-drift`                     | provider parity or generated adapter files         |
 | `agent-observability-and-evidence`  | evidence logs, traceability                        |
 | `verify-change`                     | validation depth and smoke checks                  |

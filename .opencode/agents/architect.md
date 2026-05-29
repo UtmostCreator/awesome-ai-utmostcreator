@@ -43,6 +43,10 @@ permission:
     'git branch*': allow
     'git rev-parse*': allow
     'bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/rg-code.sh *': allow
     'bash scripts/ai/fd-files.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
@@ -85,6 +89,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 | `service-boundary-patterns` | cross-package/service/API ownership boundaries       |
 | `config-change-safety`      | JSON/YAML/runtime config, policy files, flags        |
 | `adapter-drift`             | provider-specific templates, Copilot/OpenCode parity |
+| `authorization-and-tool-governance` | autonomy levels, approval boundaries, tool permissions |
 | `release-safety`            | rollout, rollback, production-impacting behavior     |
 | `docs-sync`                 | docs must change with code or generated output       |
 | `verify-change`             | acceptance criteria and verification plan            |

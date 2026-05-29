@@ -152,10 +152,27 @@ if (!isset($registry['scripts']) || !is_array($registry['scripts'])) {
             continue;
         }
 
-        foreach (['tier', 'mutates_state', 'writes_paths', 'reads_secret_values', 'supports_json', 'bounded_output', 'requires_approval', 'command', 'interface'] as $field) {
+        foreach (['tier', 'mutates_state', 'writes_paths', 'reads_secret_values', 'supports_json', 'bounded_output', 'requires_approval', 'command', 'interface', 'autonomy_level'] as $field) {
             if (!array_key_exists($field, $meta)) {
                 $warnings[] = "registry entry missing {$field} metadata: {$id}";
             }
+        }
+
+        $autonomyLevel = (string) ($meta['autonomy_level'] ?? '');
+        $allowedAutonomyLevels = ['observe', 'advise', 'act_with_approval', 'act_autonomously'];
+        if ($autonomyLevel !== '' && !in_array($autonomyLevel, $allowedAutonomyLevels, true)) {
+            $errors[] = "registry entry has invalid autonomy_level {$autonomyLevel}: {$id}";
+        }
+
+        $isMutating = ($meta['risk'] ?? '') === 'mutating'
+            || ($meta['mutates_state'] ?? false) === true
+            || ($meta['requires_approval'] ?? false) === true;
+        if ($isMutating && !in_array($autonomyLevel, ['act_with_approval', 'act_autonomously'], true)) {
+            $errors[] = "registry entry understates mutating autonomy level: {$id}";
+        }
+
+        if ($autonomyLevel === 'act_autonomously') {
+            $errors[] = "registry entry declares unsupported autonomous mutation level without project-specific controls: {$id}";
         }
     }
 }

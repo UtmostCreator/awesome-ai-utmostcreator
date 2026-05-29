@@ -52,6 +52,7 @@ Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/workflow.md`,
 | `adapter-drift`                    | Copilot/OpenCode parity, adapter template drift |
 | `project-context`                  | repo context file correctness                   |
 | `agent-observability-and-evidence` | evidence logs, session notes                    |
+| `authorization-and-tool-governance` | autonomy levels, tool permissions, approval gates |
 
 ## Audit Checklist
 
