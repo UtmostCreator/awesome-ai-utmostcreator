@@ -370,8 +370,24 @@ class CliToolsTest extends TestCase
         $this->assertSame(0, $result['exit'], "ai.php adapter-validate exited non-zero:\n" . $result['stderr']);
     }
 
+    private function skipIfToolchainMissing(array $tools): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/toolchain.php';
+        $missing = [];
+        foreach ($tools as $tool) {
+            if (!aiInstallerCommandExists($tool)) {
+                $missing[] = $tool;
+            }
+        }
+        if ($missing !== []) {
+            $this->markTestSkipped('required toolchain not installed: ' . implode(', ', $missing));
+        }
+    }
+
     private function refreshRepoStructureBaseline(): void
     {
+        $this->skipIfToolchainMissing(['scc']);
+
         $result = $this->runTool('php tools/ai/generate-repo-structure.php --with-scc');
 
         $this->assertSame(
