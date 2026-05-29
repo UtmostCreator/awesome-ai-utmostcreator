@@ -383,7 +383,7 @@ function aiRunInstallWizard(string $root): int
     if (!$allFeatures) {
         $customize = aiPromptYesNo('Customize optional packs?', true);
         if ($customize || $profile === 'custom') {
-            foreach (['scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'evidence-pack', 'docs-reference-pack', 'capabilities-extended-full', 'delivery-pack', 'optional-agents-pack', 'optional-prompts-pack'] as $pack) {
+            foreach (['scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'evidence-pack', 'docs-reference-pack', 'capabilities-governance', 'delivery-pack', 'optional-agents-pack', 'optional-prompts-pack'] as $pack) {
                 if (aiPromptYesNo('Install ' . $pack . '?', true)) {
                     $with[] = $pack;
                 }

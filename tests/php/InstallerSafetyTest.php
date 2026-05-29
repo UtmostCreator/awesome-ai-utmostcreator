@@ -480,7 +480,7 @@ class InstallerSafetyTest extends TestCase
 
             $packs = $decoded['selected_packs'] ?? [];
             $this->assertIsArray($packs);
-            foreach (['base', 'adapter-copilot', 'adapter-opencode', 'scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'capabilities-extended-full'] as $pack) {
+            foreach (['base', 'adapter-copilot', 'adapter-opencode', 'scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'capabilities-governance'] as $pack) {
                 $this->assertContains($pack, $packs, 'full-governance install should include pack ' . $pack);
             }
 
