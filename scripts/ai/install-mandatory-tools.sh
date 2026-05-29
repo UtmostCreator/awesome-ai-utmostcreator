@@ -94,7 +94,7 @@ install_linux() {
 
     # gitleaks (required by advisor + secret-scan strict mode)
     if ! need_cmd gitleaks; then
-        if run_cmd bash -c 'mkdir -p "$HOME/.local/bin" && curl -L --fail https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz && tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks && install -m 0755 /tmp/gitleaks "$HOME/.local/bin/gitleaks"'; then
+        if run_cmd bash -c "mkdir -p \"$HOME/.local/bin\" && curl -L --fail https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz -o \"${TMPDIR:-/tmp}/gitleaks.tar.gz\" && tar -xzf \"${TMPDIR:-/tmp}/gitleaks.tar.gz\" -C \"${TMPDIR:-/tmp}\" gitleaks && install -m 0755 \"${TMPDIR:-/tmp}/gitleaks\" \"$HOME/.local/bin/gitleaks\""; then
             :
         else
             printf 'Warning: failed to install gitleaks from release archive.\n' >&2
@@ -103,12 +103,12 @@ install_linux() {
 
     # ast-grep via npm (user-local prefix to avoid sudo)
     if ! need_cmd ast-grep; then
-        run_cmd bash -c 'mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && npm install -g @ast-grep/cli'
+        run_cmd bash -c "mkdir -p \"$HOME/.local\" && npm config set prefix \"$HOME/.local\" && npm install -g @ast-grep/cli"
     fi
 
     # fd alias if package shipped as fdfind
     if ! need_cmd fd && need_cmd fdfind; then
-        run_cmd bash -c 'mkdir -p "$HOME/.local/bin" && ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"'
+        run_cmd bash -c "mkdir -p \"$HOME/.local/bin\" && ln -sf \"$(command -v fdfind)\" \"$HOME/.local/bin/fd\""
     fi
 
     run_cmd npm install -g repomix

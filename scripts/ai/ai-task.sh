@@ -190,11 +190,11 @@ json)
     build_inventory
     ;;
 
-verify|test|lint|typecheck)
+verify | test | lint | typecheck)
     recommend_command "$mode"
     ;;
 
---help|-h)
+--help | -h)
     usage
     ;;
 
