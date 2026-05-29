@@ -152,7 +152,10 @@ function aiInstallerPackRegistry(): array
         'docs-reference-pack' => [
             ['type' => 'file', 'source' => 'docs/ai/agent-ops.md', 'target' => 'docs/ai/agent-ops.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/agent-ops-checklist.md', 'target' => 'docs/ai/agent-ops-checklist.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'docs/ai/failure-handling.md', 'target' => 'docs/ai/failure-handling.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'docs/ai/validation.md', 'target' => 'docs/ai/validation.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/context-packing.md', 'target' => 'docs/ai/context-packing.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'docs/ai/hooks.md', 'target' => 'docs/ai/hooks.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/scripts-reference.md', 'target' => 'docs/ai/scripts-reference.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/toolchain-requirements.md', 'target' => 'docs/ai/toolchain-requirements.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
