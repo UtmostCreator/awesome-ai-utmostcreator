@@ -129,6 +129,25 @@ class InstallerSafetyTest extends TestCase
         return $path;
     }
 
+    /**
+     * Skip a test when external tools the installer hard-requires are absent.
+     * Uses the installer's own detector so the check matches what the install
+     * subprocess will see. Tests still run in CI where the toolchain is present.
+     */
+    private function skipIfToolchainMissing(array $tools): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/toolchain.php';
+        $missing = [];
+        foreach ($tools as $tool) {
+            if (!aiInstallerCommandExists($tool)) {
+                $missing[] = $tool;
+            }
+        }
+        if ($missing !== []) {
+            $this->markTestSkipped('required toolchain not installed: ' . implode(', ', $missing));
+        }
+    }
+
     /** @return list<string> */
     private function relativeGlob(string $pattern): array
     {
@@ -282,6 +301,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerBackupArchivesExistingManagedFiles(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_backup_' . uniqid('', true);
         $promptDir = $target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'prompts';
         $outputJson = $target . DIRECTORY_SEPARATOR . 'install-output.json';
@@ -337,6 +358,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerCopilotInstallMakesInstalledSurfaceVisible(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_copilot_visible_' . uniqid('', true);
         mkdir($target, 0700, true);
 
@@ -388,6 +411,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerOpenCodeInstallMakesInstalledSurfaceVisible(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_opencode_visible_' . uniqid('', true);
         mkdir($target, 0700, true);
 
@@ -445,6 +470,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerFullGovernanceBackupInstallShipsAllCoreSurfaces(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_' . uniqid('', true);
         $outputJson = $target . DIRECTORY_SEPARATOR . 'install-output.json';
         $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
@@ -530,6 +557,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerFullGovernanceOpencodeOnlyValidatesAsInstalledTarget(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_opencode_' . uniqid('', true);
 
         mkdir($target, 0700, true);
