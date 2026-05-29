@@ -204,6 +204,22 @@ JSON schemas that define the expected shape of catalog files, manifests, command
 
 Optional for context packing: `repomix`, `scc`, `fd`
 
+## Running Tests Locally
+
+From a fresh clone, install PHP dependencies before running any PHPUnit, ParaTest, or repo-wide test command:
+
+```bash
+composer install
+```
+
+Then run the full repository test runner:
+
+```bash
+PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh
+```
+
+The test runner and the direct PHPUnit commands rely on Composer-managed binaries and autoloaded packages under `vendor/`.
+
 ## Regenerating Structure Data
 
 ```bash
