@@ -1,9 +1,10 @@
 {
     "schema_version": 1,
     "project": "awesome-ai-utmostcreator",
-    "tracked_files_count": 940,
+    "tracked_files_count": 964,
     "top_level_paths": [
         ".ai-install-manifest.json",
+        ".ai-logs",
         ".editorconfig",
         ".gitattributes",
         ".github",
@@ -38,11 +39,11 @@
         "tools"
     ],
     "counts": {
-        "tests_php": 14,
+        "tests_php": 15,
         "tests_shell": 4,
         "scripts_copilot": 32,
         "scripts_ai": 32,
-        "tools_ai_php": 64
+        "tools_ai_php": 65
     },
     "ai_surface": {
         "AGENTS.md": true,
@@ -56,6 +57,6 @@
         "jq": true,
         "rg": true,
         "repomix": true,
-        "scc": true
+        "scc": false
     }
 }

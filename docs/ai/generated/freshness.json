@@ -1,192 +1,192 @@
 {
     "schema_version": 1,
     "artifact": "freshness.json",
-    "generated_at": "2026-05-26T16:58:14+00:00",
+    "generated_at": "2026-05-29T02:22:23+00:00",
     "command": "php tools/ai/ai.php freshness",
-    "based_on_commit": "c8ec700",
+    "based_on_commit": "2426a1a",
     "based_on_branch": "main",
     "input_hashes": {},
-    "status": "ok",
+    "status": "warning",
     "score": null,
     "stale": false,
-    "recommended_next_action": "php tools/ai/ai.php next",
+    "recommended_next_action": "php tools/ai/ai.php snapshot",
     "data": {
-        "status": "ok",
-        "stale_count": 0,
+        "status": "warning",
+        "stale_count": 18,
         "artifact_count": 25,
         "artifacts": [
             {
                 "artifact": "advisor.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
+                "based_on_commit": "2426a1a",
+                "current_commit": "2426a1a",
                 "stale": false,
                 "recommendation": "Current at HEAD."
             },
             {
                 "artifact": "ai-commands.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
+                "based_on_commit": "2426a1a",
+                "current_commit": "2426a1a",
                 "stale": false,
                 "recommendation": "Current at HEAD."
             },
             {
                 "artifact": "project-snapshot.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
+                "based_on_commit": "2426a1a",
+                "current_commit": "2426a1a",
                 "stale": false,
                 "recommendation": "Current at HEAD."
             },
             {
                 "artifact": "freshness.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "diff-summary.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "risk.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "install-docs.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "verify.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "next.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "env-check.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "impact.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "ask.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "estimate.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "conflicts.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "find.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "symbols.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "preflight.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
+                "based_on_commit": "2426a1a",
+                "current_commit": "2426a1a",
                 "stale": false,
                 "recommendation": "Current at HEAD."
             },
             {
                 "artifact": "package-lock.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "package-verify.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "instruction-audit.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "adapter-plan.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "install.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
+                "based_on_commit": "2426a1a",
+                "current_commit": "2426a1a",
                 "stale": false,
                 "recommendation": "Current at HEAD."
             },
             {
                 "artifact": "adapter-validate.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
-                "stale": false,
-                "recommendation": "Current at HEAD."
+                "based_on_commit": "73e4519",
+                "current_commit": "2426a1a",
+                "stale": true,
+                "recommendation": "Regenerate this artifact before using next."
             },
             {
                 "artifact": "scripts.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
+                "based_on_commit": "2426a1a",
+                "current_commit": "2426a1a",
                 "stale": false,
                 "recommendation": "Current at HEAD."
             },
             {
                 "artifact": "toolchain.json",
-                "based_on_commit": "c8ec700",
-                "current_commit": "c8ec700",
+                "based_on_commit": "2426a1a",
+                "current_commit": "2426a1a",
                 "stale": false,
                 "recommendation": "Current at HEAD."
             }

@@ -5,8 +5,8 @@
 | ai_surface_coverage | 100 |
 | test_readiness | 100 |
 | script_safety | 100 |
-| toolchain_readiness | 100 |
+| toolchain_readiness | 83 |
 | complexity_risk | 0 |
 | generated_doc_hygiene | 85 |
 
-- Overall: `81`
+- Overall: `78`

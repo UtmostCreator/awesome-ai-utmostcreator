@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "env-check.json",
-    "generated_at": "2026-05-26T16:58:17+00:00",
+    "generated_at": "2026-05-29T02:22:27+00:00",
     "command": "php tools/ai/ai.php env-check",
-    "based_on_commit": "c8ec700",
+    "based_on_commit": "2426a1a",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -41,8 +41,8 @@
             },
             {
                 "tool": "scc",
-                "found": true,
-                "path": "/home/utmost-creator/.local/bin/scc"
+                "found": false,
+                "path": null
             },
             {
                 "tool": "jq",
@@ -83,8 +83,8 @@
             },
             {
                 "tool": "gitleaks",
-                "found": true,
-                "path": "/home/utmost-creator/.local/bin/gitleaks"
+                "found": false,
+                "path": null
             }
         ],
         "missing_required": []
