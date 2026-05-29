@@ -47,8 +47,19 @@ run_job() {
     LOGS+=("$log")
 }
 
-run_job "php-paratest-root" \
-    "$PHP_BIN" vendor/bin/paratest --configuration phpunit.xml.dist --processes="$PARATEST_PROCS" --runner=WrapperRunner
+run_job "php-root-tests" \
+    bash -lc '
+if [[ -x vendor/bin/paratest ]]; then
+    exec "$1" vendor/bin/paratest --configuration phpunit.xml.dist --processes="$2" --runner=WrapperRunner
+fi
+
+if [[ -x vendor/bin/phpunit ]]; then
+    exec "$1" vendor/bin/phpunit --configuration phpunit.xml.dist
+fi
+
+echo "ERROR: neither vendor/bin/paratest nor vendor/bin/phpunit is available" >&2
+exit 1
+' _ "$PHP_BIN" "$PARATEST_PROCS"
 
 run_job "script-tests" \
     bash tests/scripts/ai/run-all-tests.sh

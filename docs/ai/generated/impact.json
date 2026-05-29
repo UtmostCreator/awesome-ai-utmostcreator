@@ -1,10 +1,10 @@
 {
     "schema_version": 1,
     "artifact": "impact.json",
-    "generated_at": "2026-05-27T14:44:41+00:00",
+    "generated_at": "2026-05-29T23:45:40+00:00",
     "command": "php tools/ai/ai.php impact --base main",
-    "based_on_commit": "unknown",
-    "based_on_branch": "unknown",
+    "based_on_commit": "ce1b0c7",
+    "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
     "score": 0,

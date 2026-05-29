@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "env-check.json",
-    "generated_at": "2026-05-26T16:58:17+00:00",
+    "generated_at": "2026-05-29T23:45:40+00:00",
     "command": "php tools/ai/ai.php env-check",
-    "based_on_commit": "c8ec700",
+    "based_on_commit": "ce1b0c7",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -15,7 +15,7 @@
             {
                 "tool": "bash",
                 "found": true,
-                "path": "/usr/bin/bash"
+                "path": "/bin/bash"
             },
             {
                 "tool": "git",
@@ -25,24 +25,24 @@
             {
                 "tool": "php",
                 "found": true,
-                "path": "/usr/bin/php"
+                "path": "/opt/homebrew/bin/php"
             },
             {
                 "tool": "rg",
                 "found": true,
-                "path": "/usr/bin/rg"
+                "path": "/opt/homebrew/bin/rg"
             }
         ],
         "context_required": [
             {
                 "tool": "repomix",
                 "found": true,
-                "path": "/usr/local/bin/repomix"
+                "path": "/opt/homebrew/bin/repomix"
             },
             {
                 "tool": "scc",
                 "found": true,
-                "path": "/home/utmost-creator/.local/bin/scc"
+                "path": "/opt/homebrew/bin/scc"
             },
             {
                 "tool": "jq",
@@ -54,37 +54,37 @@
             {
                 "tool": "just",
                 "found": true,
-                "path": "/mnt/c/Users/UC-LL5S/AppData/Roaming/npm/just"
+                "path": "/opt/homebrew/bin/just"
             },
             {
                 "tool": "yq",
-                "found": false,
-                "path": null
+                "found": true,
+                "path": "/opt/homebrew/bin/yq"
             },
             {
                 "tool": "shellcheck",
                 "found": true,
-                "path": "/usr/bin/shellcheck"
+                "path": "/opt/homebrew/bin/shellcheck"
             },
             {
                 "tool": "shfmt",
-                "found": false,
-                "path": null
+                "found": true,
+                "path": "/opt/homebrew/bin/shfmt"
             },
             {
                 "tool": "actionlint",
-                "found": false,
-                "path": null
+                "found": true,
+                "path": "/opt/homebrew/bin/actionlint"
             },
             {
                 "tool": "lychee",
-                "found": false,
-                "path": null
+                "found": true,
+                "path": "/opt/homebrew/bin/lychee"
             },
             {
                 "tool": "gitleaks",
                 "found": true,
-                "path": "/home/utmost-creator/.local/bin/gitleaks"
+                "path": "/opt/homebrew/bin/gitleaks"
             }
         ],
         "missing_required": []

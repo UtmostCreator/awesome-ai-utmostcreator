@@ -56,7 +56,7 @@
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 10,
+        "root:github-copilot-agent": 11,
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 17,
         "root:github-copilot-skill": 17,
@@ -1597,6 +1597,14 @@
             "path": ".github/agents/architect.agent.md",
             "runtime": "github-copilot",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-agent",
+            "name": "Bootstrapper",
+            "path": ".github/agents/bootstrapper.agent.md",
+            "runtime": "github-copilot",
+            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
         },
         {
             "scope": "root",

@@ -8,6 +8,33 @@ use PHPUnit\Framework\TestCase;
 
 class AdvisorSchemaTest extends TestCase
 {
+    private function removeTree(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $items = scandir($path);
+        if ($items === false) {
+            return;
+        }
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $child = $path . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($child)) {
+                $this->removeTree($child);
+            } else {
+                @unlink($child);
+            }
+        }
+
+        @rmdir($path);
+    }
+
     public function testAdvisorSchemaFilesExist(): void
     {
         $root = realpath(dirname(__DIR__, 2));
@@ -21,17 +48,16 @@ class AdvisorSchemaTest extends TestCase
     {
         $root = realpath(dirname(__DIR__, 2));
         $this->assertNotFalse($root);
-        $generated = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated';
+        $generated = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'advisor-schema-' . uniqid('', true);
         $signals = $generated . DIRECTORY_SEPARATOR . 'project-signals.json';
-        if (!is_dir($generated)) {
-            mkdir($generated, 0777, true);
-        }
-        $original = is_file($signals) ? (string) file_get_contents($signals) : null;
+        mkdir($generated, 0777, true);
         file_put_contents($signals, json_encode(['schema_version' => 1], JSON_PRETTY_PRINT));
 
         $php = escapeshellarg((string) PHP_BINARY);
         $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-        $process = proc_open($php . ' tools/ai/ai.php advisor --validate', $descriptors, $pipes, (string) $root);
+        $env = $_ENV;
+        $env['AI_ADVISOR_GENERATED_DIR'] = $generated;
+        $process = proc_open($php . ' tools/ai/ai.php advisor --validate', $descriptors, $pipes, (string) $root, $env);
         $this->assertIsResource($process);
         fclose($pipes[0]);
         stream_get_contents($pipes[1]);
@@ -40,11 +66,7 @@ class AdvisorSchemaTest extends TestCase
         fclose($pipes[2]);
         $exit = proc_close($process);
 
-        if ($original === null) {
-            @unlink($signals);
-        } else {
-            file_put_contents($signals, $original);
-        }
+        $this->removeTree($generated);
 
         $this->assertSame(1, $exit);
     }

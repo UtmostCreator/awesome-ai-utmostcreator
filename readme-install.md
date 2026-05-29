@@ -211,30 +211,30 @@ cat /path/to/your-project/docs/ai/POST-INSTALL.md
 
 ### Required Flags Reference
 
-| Flag                   | Required?                            | Default           | What It Does                                                     |
-| ---------------------- | ------------------------------------ | ----------------- | ---------------------------------------------------------------- |
-| `--target <path>`      | **Yes** (for external install)       | `.` (current dir) | Target project root                                              |
-| `--profile <name>`     | Yes                                  | `dual`            | Which packs to install. Use `full-governance` for complete setup |
-| `--runtime <name>`     | Yes                                  | `both`            | `github-copilot`, `opencode`, or `both`                          |
+| Flag                   | Required?                            | Default           | What It Does                                                                                               |
+| ---------------------- | ------------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------- |
+| `--target <path>`      | **Yes** (for external install)       | `.` (current dir) | Target project root                                                                                        |
+| `--profile <name>`     | Yes                                  | `dual`            | Which packs to install. Use `full-governance` for complete setup                                           |
+| `--runtime <name>`     | Yes                                  | `both`            | `github-copilot`, `opencode`, or `both`                                                                    |
 | `--without <packs>`    | Optional                             | off               | Remove packs from the profile; use `optional-agents-copilot-pack` when doing an OpenCode-only full install |
-| `--project-name <n>`   | Recommended                          | inferred from dir | Sets `<PROJECT_NAME>` placeholder in installed files             |
-| `--backup`             | **Yes** if target has existing files | off               | Archives managed files before overwriting                        |
-| `--non-interactive`    | Yes in CI                            | off               | Disables interactive prompts                                     |
-| `--dry-run`            | —                                    | off               | Preview only — no files written                                  |
-| `--output-json <file>` | Optional                             | off               | Write install summary + placeholder list to JSON file            |
-| `--force`              | Only when recovering                 | off               | Overwrite even non-managed files                                 |
-| `--verify-after`       | Optional                             | off               | Run validators automatically after install                       |
+| `--project-name <n>`   | Recommended                          | inferred from dir | Sets `<PROJECT_NAME>` placeholder in installed files                                                       |
+| `--backup`             | **Yes** if target has existing files | off               | Archives managed files before overwriting                                                                  |
+| `--non-interactive`    | Yes in CI                            | off               | Disables interactive prompts                                                                               |
+| `--dry-run`            | —                                    | off               | Preview only — no files written                                                                            |
+| `--output-json <file>` | Optional                             | off               | Write install summary + placeholder list to JSON file                                                      |
+| `--force`              | Only when recovering                 | off               | Overwrite even non-managed files                                                                           |
+| `--verify-after`       | Optional                             | off               | Run validators automatically after install                                                                 |
 
 ### Profiles Quick Reference
 
-| Profile           | What It Installs                                      | Best For                       |
-| ----------------- | ----------------------------------------------------- | ------------------------------ |
-| `minimal`         | Base docs only                                        | Evaluation only                |
-| `copilot`         | Base + Copilot adapter                                | GitHub Copilot only            |
-| `opencode`        | Base + OpenCode adapter                               | OpenCode CLI only              |
-| `dual`            | Base + both adapters                                  | Teams using both tools         |
+| Profile           | What It Installs                                                                                    | Best For                       |
+| ----------------- | --------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `minimal`         | Base docs only                                                                                      | Evaluation only                |
+| `copilot`         | Base + Copilot adapter                                                                              | GitHub Copilot only            |
+| `opencode`        | Base + OpenCode adapter                                                                             | OpenCode CLI only              |
+| `dual`            | Base + both adapters                                                                                | Teams using both tools         |
 | `full-governance` | Everything — agents, scripts, hooks, CI, capabilities, advisor tooling, target-local PHP validators | **Recommended for production** |
-| `accelerated`     | Full except evidence/evaluation packs                 | Fast start                     |
+| `accelerated`     | Full except evidence/evaluation packs                                                               | Fast start                     |
 
 ### Post-Install Required Steps (summary)
 
@@ -349,17 +349,17 @@ User runs: php tools/ai/ai.php install --profile full-governance --apply
 
 ## Installation Profiles
 
-| Profile           | What It Installs                                                   | When to Use                    |
-| ----------------- | ------------------------------------------------------------------ | ------------------------------ |
-| `minimal`         | Base policy + project context + guardrails + 3 core capabilities   | Smallest useful setup          |
-| `copilot`         | `minimal` + GitHub Copilot adapter (instructions, agents, prompts) | VS Code / GitHub Copilot only  |
-| `opencode`        | `minimal` + OpenCode adapter (commands, skills)                    | OpenCode CLI only              |
-| `dual`            | `minimal` + both Copilot and OpenCode adapters                     | Using both AI tools            |
-| `guarded`         | `dual` + hook policy + guard reminders                             | Safety-conscious setup         |
-| `accelerated`     | `dual` + scripts + policy + evidence packs                         | Power-user setup               |
+| Profile           | What It Installs                                                                                          | When to Use                    |
+| ----------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `minimal`         | Base policy + project context + guardrails + 3 core capabilities                                          | Smallest useful setup          |
+| `copilot`         | `minimal` + GitHub Copilot adapter (instructions, agents, prompts)                                        | VS Code / GitHub Copilot only  |
+| `opencode`        | `minimal` + OpenCode adapter (commands, skills)                                                           | OpenCode CLI only              |
+| `dual`            | `minimal` + both Copilot and OpenCode adapters                                                            | Using both AI tools            |
+| `guarded`         | `dual` + hook policy + guard reminders                                                                    | Safety-conscious setup         |
+| `accelerated`     | `dual` + scripts + policy + evidence packs                                                                | Power-user setup               |
 | `full-governance` | Everything: `accelerated` + all capabilities + hooks + CI + advisor tooling + target-local PHP validators | **Recommended** — full setup   |
-| `scripts-only`    | Just the bash scripts from `scripts/ai/`                           | Bash scripts without AI config |
-| `custom`          | Empty base — opt into packs with `--with`                          | Cherry-pick specific packs     |
+| `scripts-only`    | Just the bash scripts from `scripts/ai/`                                                                  | Bash scripts without AI config |
+| `custom`          | Empty base — opt into packs with `--with`                                                                 | Cherry-pick specific packs     |
 
 ### Optional Packs (use with `--with`)
 

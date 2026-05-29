@@ -182,7 +182,10 @@ collect_entries() {
     ' "$manifest_path"
 }
 
-mapfile -t ENTRIES < <(collect_entries)
+ENTRIES=()
+while IFS= read -r entry; do
+    ENTRIES+=("$entry")
+done < <(collect_entries)
 
 if ((${#ENTRIES[@]} == 0)); then
     printf '[WARN] manifest has no entries where source != key; nothing to do\n' >&2
@@ -228,24 +231,29 @@ path_size_bytes() {
 
 # ---- --dry-run mode -----------------------------------------------------
 if [[ "$mode" == "dry-run" ]]; then
-    declare -A PACK_FILES PACK_BYTES
+    summary_file="$(mktemp)"
     total_bytes=0
     total_files=0
     for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
         path="${line%%$'\t'*}"
         pack="${line#*$'\t'}"
         bytes="$(path_size_bytes "$path")"
-        PACK_FILES[$pack]=$((${PACK_FILES[$pack]:-0} + 1))
-        PACK_BYTES[$pack]=$((${PACK_BYTES[$pack]:-0} + bytes))
+        printf '%s\t%s\n' "$pack" "$bytes" >>"$summary_file"
         total_bytes=$((total_bytes + bytes))
         total_files=$((total_files + 1))
     done
 
     printf '\n%-40s %8s %12s\n' "PACK" "FILES" "BYTES" >&2
     printf '%-40s %8s %12s\n' "----" "-----" "-----" >&2
-    for pack in "${!PACK_FILES[@]}"; do
-        printf '%-40s %8d %12d\n' "$pack" "${PACK_FILES[$pack]}" "${PACK_BYTES[$pack]}" >&2
-    done
+    awk -F'\t' '
+        { files[$1]++; bytes[$1] += $2 }
+        END {
+            for (pack in files) {
+                printf "%-40s %8d %12d\n", pack, files[pack], bytes[pack]
+            }
+        }
+    ' "$summary_file" | sort >&2
+    rm -f "$summary_file"
     printf '%-40s %8s %12s\n' "----" "-----" "-----" >&2
     printf '%-40s %8d %12d\n' "TOTAL" "$total_files" "$total_bytes" >&2
     printf 'total_bytes=%d\n' "$total_bytes"
