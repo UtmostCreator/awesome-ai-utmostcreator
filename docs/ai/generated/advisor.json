@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "advisor.json",
-    "generated_at": "2026-05-26T16:58:15+00:00",
+    "generated_at": "2026-05-29T02:22:24+00:00",
     "command": "php tools/ai/ai.php advisor",
-    "based_on_commit": "c8ec700",
+    "based_on_commit": "2426a1a",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -12,7 +12,13 @@
     "recommended_next_action": "Run advisor --check to enforce deterministic advisor outputs.",
     "data": {
         "status": "ok",
-        "events": [],
+        "events": [
+            {
+                "step": "check",
+                "prompt_artifacts_optional": true,
+                "note": "advisor secret-scan gate blocked context/prompt generation. Install gitleaks or set AI_ALLOW_NO_SECRET_SCANNER=1 in trusted local contexts.\nERROR: no secret scanner found (gitleaks/trufflehog). scope=--all\nHint: install gitleaks (see docs/ai/mandatory-tools-install.md) or set AI_ALLOW_NO_SECRET_SCANNER=1 to skip in non-publishing contexts."
+            }
+        ],
         "outputs": {
             "project_signals": "docs/ai/generated/project-signals.json",
             "project_scorecard": "docs/ai/generated/project-scorecard.json",

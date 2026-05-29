@@ -23,7 +23,7 @@
             "minimal",
             "adapter-copilot",
             "adapter-opencode",
-            "capabilities-extended-lite",
+            "capabilities-extended",
             "scripts-pack",
             "policy-pack",
             "hooks-pack"
@@ -42,7 +42,7 @@
         ],
         "full-governance": [
             "accelerated",
-            "capabilities-extended-full",
+            "capabilities-governance",
             "hooks-pack",
             "ci-pack",
             "docs-reference-pack",
@@ -55,8 +55,7 @@
             "mcp-boundaries-pack",
             "advisor-pack",
             "target-tools-pack",
-            "shared-templates-pack",
-            "package-source-pack"
+            "shared-templates-pack"
         ],
         "docs-reference": [
             "docs-reference-pack"
@@ -85,12 +84,12 @@
             "item_count": 7
         },
         {
-            "id": "capabilities-extended-lite",
+            "id": "capabilities-extended",
             "item_count": 2
         },
         {
-            "id": "capabilities-extended-full",
-            "item_count": 1
+            "id": "capabilities-governance",
+            "item_count": 2
         },
         {
             "id": "policy-pack",
@@ -106,7 +105,7 @@
         },
         {
             "id": "ci-pack",
-            "item_count": 4
+            "item_count": 2
         },
         {
             "id": "evidence-pack",
@@ -150,7 +149,7 @@
         },
         {
             "id": "target-tools-pack",
-            "item_count": 44
+            "item_count": 41
         },
         {
             "id": "shared-templates-pack",
@@ -159,6 +158,10 @@
         {
             "id": "package-source-pack",
             "item_count": 9
+        },
+        {
+            "id": "kit-authoring-pack",
+            "item_count": 4
         }
     ],
     "scripts": {

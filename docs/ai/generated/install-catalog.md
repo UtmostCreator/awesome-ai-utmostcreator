@@ -7,10 +7,10 @@ Deterministic catalog generated from installer registries.
 - `minimal`: `base, setup-docs, capabilities-core`
 - `copilot`: `minimal, adapter-copilot, scripts-pack, policy-pack, hooks-pack`
 - `opencode`: `minimal, adapter-opencode, scripts-pack, policy-pack, hooks-pack`
-- `dual`: `minimal, adapter-copilot, adapter-opencode, capabilities-extended-lite, scripts-pack, policy-pack, hooks-pack`
+- `dual`: `minimal, adapter-copilot, adapter-opencode, capabilities-extended, scripts-pack, policy-pack, hooks-pack`
 - `guarded`: `dual, policy-pack, hooks-pack, evidence-pack`
 - `accelerated`: `dual, scripts-pack, policy-pack, evidence-pack`
-- `full-governance`: `accelerated, capabilities-extended-full, hooks-pack, ci-pack, docs-reference-pack, delivery-pack, optional-agents-opencode-pack, optional-agents-copilot-pack, preview-environments-pack, evaluation-pack, service-boundary-pack, mcp-boundaries-pack, advisor-pack, target-tools-pack, shared-templates-pack, package-source-pack`
+- `full-governance`: `accelerated, capabilities-governance, hooks-pack, ci-pack, docs-reference-pack, delivery-pack, optional-agents-opencode-pack, optional-agents-copilot-pack, preview-environments-pack, evaluation-pack, service-boundary-pack, mcp-boundaries-pack, advisor-pack, target-tools-pack, shared-templates-pack`
 - `docs-reference`: `docs-reference-pack`
 - `custom`: ``
 
@@ -21,12 +21,12 @@ Deterministic catalog generated from installer registries.
 - `base` (14 items)
 - `adapter-copilot` (9 items)
 - `adapter-opencode` (7 items)
-- `capabilities-extended-lite` (2 items)
-- `capabilities-extended-full` (1 items)
+- `capabilities-extended` (2 items)
+- `capabilities-governance` (2 items)
 - `policy-pack` (3 items)
 - `scripts-pack` (37 items)
 - `hooks-pack` (6 items)
-- `ci-pack` (4 items)
+- `ci-pack` (2 items)
 - `evidence-pack` (2 items)
 - `docs-reference-pack` (8 items)
 - `delivery-pack` (2 items)
@@ -37,9 +37,10 @@ Deterministic catalog generated from installer registries.
 - `service-boundary-pack` (1 items)
 - `mcp-boundaries-pack` (1 items)
 - `advisor-pack` (4 items)
-- `target-tools-pack` (44 items)
+- `target-tools-pack` (41 items)
 - `shared-templates-pack` (4 items)
 - `package-source-pack` (9 items)
+- `kit-authoring-pack` (4 items)
 
 ## Script IDs
 

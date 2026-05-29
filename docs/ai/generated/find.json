@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "find.json",
-    "generated_at": "2026-05-26T16:58:18+00:00",
+    "generated_at": "2026-05-29T02:22:27+00:00",
     "command": "php tools/ai/ai.php find workflow",
-    "based_on_commit": "c8ec700",
+    "based_on_commit": "2426a1a",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -12,7 +12,7 @@
     "recommended_next_action": "Open highest scoring match first, then refine query if needed.",
     "data": {
         "query": "workflow",
-        "path_matches_count": 40,
+        "path_matches_count": 41,
         "path_matches": [
             {
                 "path": ".github/agents/workflow-auditor.agent.md",
@@ -155,6 +155,11 @@
                 "match": "path"
             },
             {
+                "path": "packages/ai-universal-rules/templates/workflows/mentor-mode.md",
+                "score": 70,
+                "match": "path"
+            },
+            {
                 "path": "packages/ai-universal-rules/templates/workflows/new-feature.md",
                 "score": 70,
                 "match": "path"
@@ -266,6 +271,11 @@
                 "path": ".ai-install-manifest.json",
                 "line": 305,
                 "preview": "\"source\": \"packages/ai-universal-rules/templates/core/workflow.template.md\","
+            },
+            {
+                "path": ".ai-logs/README.md",
+                "line": 3,
+                "preview": "This directory is the canonical **local evidence root** for AI workflow runs."
             },
             {
                 "path": ".github/agents/architect.agent.md",
@@ -599,22 +609,22 @@
             },
             {
                 "path": ".opencode/agents-optional/infra-auditor.md",
-                "line": 21,
+                "line": 49,
                 "preview": "- verification workflow changes"
             },
             {
                 "path": ".opencode/agents-optional/infra-auditor.md",
-                "line": 25,
+                "line": 53,
                 "preview": "Do not use this role as a substitute for implementation, bug fixing, or canonical release workflow definitions."
             },
             {
                 "path": ".opencode/agents-optional/infra-auditor.md",
-                "line": 27,
+                "line": 55,
                 "preview": "Defer to project context for repository facts and to `release-safety` or `dependency-upgrade` for reusable workflow guidance."
             },
             {
                 "path": ".opencode/agents-optional/ui-builder.md",
-                "line": 22,
+                "line": 88,
                 "preview": "Defer to project context for repository facts and to narrower UI or verification workflows when available."
             },
             {
@@ -811,11 +821,6 @@
                 "path": ".opencode/skills/project-context/SKILL.md",
                 "line": 16,
                 "preview": "- when another workflow needs repository facts first"
-            },
-            {
-                "path": ".opencode/skills/project-context/SKILL.md",
-                "line": 45,
-                "preview": "- Summary: `AI workflow starter for app-configs`"
             }
         ]
     }
