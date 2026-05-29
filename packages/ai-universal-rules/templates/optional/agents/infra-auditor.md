@@ -6,9 +6,37 @@ hidden: false
 temperature: 0.0
 argument-hint: 'Describe the dependency, build, or compatibility concern to audit'
 capabilities:
-  - read
+  - release-safety
+  - dependency-upgrade
 permission:
   edit: deny
+  bash:
+    '*': deny
+    'pwd': allow
+    'ls *': allow
+    'fd *': allow
+    'rg *': allow
+    'git grep *': allow
+    'git status*': allow
+    'git diff*': allow
+    'git log*': allow
+    'git show*': allow
+    'git blame*': allow
+    'git ls-files*': allow
+    'git rev-parse*': allow
+    'sed -n *': allow
+    'head *': allow
+    'tail *': allow
+    'wc *': allow
+    'jq *': allow
+    'yq *': allow
+    'bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/preview-file.sh *': allow
+    'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-forensics.sh *': allow
+    'php tools/ai/validate-*.php *': allow
+    'composer validate*': allow
+    'grep *': ask
 ---
 
 You are the infra auditor for `<PROJECT_NAME>`.

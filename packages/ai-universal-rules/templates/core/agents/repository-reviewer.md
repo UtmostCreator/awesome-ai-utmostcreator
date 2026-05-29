@@ -29,10 +29,16 @@ permission:
     'bash scripts/doctor.sh *': allow
     'php tools/ai/validate-*.php *': allow
     'php tools/ai/generate-*.php --check*': allow
+    'git show*': allow
+    'git blame*': allow
+    'git ls-files*': allow
+    'git rev-parse*': allow
+    'git grep *': allow
+    'ls *': allow
+    'rg *': allow
+    'fd *': allow
     'grep *': ask
-    'rg *': ask
     'find *': ask
-    'fd *': ask
     'cat *': ask
     'sed *': ask
     'awk *': ask

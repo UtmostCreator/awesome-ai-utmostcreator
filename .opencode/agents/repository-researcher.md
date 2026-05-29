@@ -19,10 +19,16 @@ permission:
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
     'bash scripts/ai/ai-diff-context.sh *': allow
+    'git show*': allow
+    'git blame*': allow
+    'git ls-files*': allow
+    'git rev-parse*': allow
+    'git grep *': allow
+    'ls *': allow
+    'rg *': allow
+    'fd *': allow
     'grep *': ask
-    'rg *': ask
     'find *': ask
-    'fd *': ask
     'cat *': ask
     'sed *': ask
     'awk *': ask
