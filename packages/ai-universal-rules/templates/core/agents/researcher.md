@@ -33,6 +33,10 @@ permission:
     "fd *": allow
     "eza *": allow
     "bash scripts/ai/ai-search.sh *": allow
+    "AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
+    "env AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
+    "AI_OUTPUT=json bash scripts/ai/preview-file.sh *": allow
+    "env AI_OUTPUT=json bash scripts/ai/preview-file.sh *": allow
     "bash scripts/ai/rg-code.sh *": allow
     "bash scripts/ai/fd-files.sh *": allow
     "bash scripts/ai/preview-file.sh *": allow
