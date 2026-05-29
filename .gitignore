@@ -7,7 +7,8 @@
 .idea/
 .phpunit.result.cache
 .phpunit.cache/
-.ai-logs/
+.ai-logs/*
+!.ai-logs/README.md
 .ai-backups/
 .repomix-context/
 docs/ai/generated/phpunit-junit.xml
