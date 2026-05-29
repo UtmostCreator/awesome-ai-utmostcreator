@@ -4,6 +4,35 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/toolchain-registry.php';
 
+/**
+ * Windows cmd.exe cannot use a UNC path (e.g. \\wsl.localhost\...) as its
+ * working directory and prints "UNC paths are not supported" before every
+ * spawned command. These tool-detection calls are PATH-based and cwd-agnostic,
+ * so temporarily switch to a non-UNC directory around them. No-op elsewhere.
+ */
+function aiInstallerSafeCwdEnter(): ?string
+{
+    if (PHP_OS_FAMILY !== 'Windows') {
+        return null;
+    }
+    $cwd = getcwd();
+    if ($cwd === false || !str_starts_with($cwd, '\\\\')) {
+        return null;
+    }
+    $tmp = sys_get_temp_dir();
+    if ($tmp !== '' && is_dir($tmp) && @chdir($tmp)) {
+        return $cwd;
+    }
+    return null;
+}
+
+function aiInstallerSafeCwdLeave(?string $prev): void
+{
+    if ($prev !== null) {
+        @chdir($prev);
+    }
+}
+
 function aiInstallerPlatformKey(): string
 {
     $family = PHP_OS_FAMILY;
@@ -163,7 +192,9 @@ function aiInstallerCommandExists(string $cmd): bool
     $out = [];
     $exit = 0;
     if (PHP_OS_FAMILY === 'Windows') {
+        $safePrev = aiInstallerSafeCwdEnter();
         exec('where ' . escapeshellarg($cmd) . ' >NUL 2>&1', $out, $exit);
+        aiInstallerSafeCwdLeave($safePrev);
         if ($exit === 0) {
             return true;
         }

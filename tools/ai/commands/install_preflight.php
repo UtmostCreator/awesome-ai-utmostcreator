@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../install/toolchain.php';
+
 function aiRunPreflight(string $root): int
 {
     $checks = [];
@@ -13,7 +15,9 @@ function aiRunPreflight(string $root): int
 
     $gitOut = [];
     $gitExit = 0;
+    $gitSafePrev = aiInstallerSafeCwdEnter();
     exec('git --version', $gitOut, $gitExit);
+    aiInstallerSafeCwdLeave($gitSafePrev);
     $checks[] = ['name' => 'git', 'status' => $gitExit === 0 ? 'passed' : 'failed'];
 
     $generated = aiCliGeneratedDir($root);
@@ -133,7 +137,9 @@ function aiRunAuditInstructions(string $root): int
     }
 
     $extra = [];
+    $auditSafePrev = aiInstallerSafeCwdEnter();
     exec('git -C ' . escapeshellarg($root) . ' ls-files ".github/instructions/*.instructions.md" ".opencode/**"', $extra);
+    aiInstallerSafeCwdLeave($auditSafePrev);
     foreach ($extra as $path) {
         $found[] = ['path' => $path, 'ownership_hint' => 'runtime_adapter'];
     }

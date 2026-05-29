@@ -49,7 +49,23 @@ function aiCliGitValue(string $root, string $command): string
 {
     $output = [];
     $exit = 0;
+    // On Windows, cmd.exe cannot use a UNC working directory and prints
+    // "UNC paths are not supported" before each spawned command. This call
+    // already targets the repo via `git -C`, so run it from a non-UNC cwd.
+    $cwdPrev = null;
+    if (PHP_OS_FAMILY === 'Windows') {
+        $cwd = getcwd();
+        if ($cwd !== false && str_starts_with($cwd, '\\\\')) {
+            $tmp = sys_get_temp_dir();
+            if ($tmp !== '' && is_dir($tmp) && @chdir($tmp)) {
+                $cwdPrev = $cwd;
+            }
+        }
+    }
     exec('git -C ' . escapeshellarg($root) . ' ' . $command . ' 2>' . escapeshellarg(aiCliNullDevice()), $output, $exit);
+    if ($cwdPrev !== null) {
+        @chdir($cwdPrev);
+    }
     if ($exit !== 0 || $output === []) {
         return 'unknown';
     }
