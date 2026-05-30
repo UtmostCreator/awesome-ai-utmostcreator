@@ -122,7 +122,6 @@ echo "==> Checking installed target surface..."
 target_failures=0
 for relative_path in \
     AGENTS.md \
-    CLAUDE.md \
     docs/ai/project-context.md \
     docs/ai/POST-INSTALL.md \
     scripts/ai/ai-doc-check.sh \
@@ -141,18 +140,20 @@ fi
 echo ""
 echo "==> Running target-local documentation checks..."
 if [[ -f "$TARGET/scripts/ai/ai-doc-check.sh" ]]; then
-    (cd "$TARGET" && bash scripts/ai/ai-doc-check.sh --check docs/ai .github AGENTS.md CLAUDE.md) || true
+    (
+        cd "$TARGET" &&
+        bash "$SCRIPT_DIR/scripts/ai/ai-doc-check.sh" markdownlint docs/ai .github AGENTS.md .github/copilot-instructions.md &&
+        bash "$SCRIPT_DIR/scripts/ai/ai-doc-check.sh" links docs/ai .github AGENTS.md .github/copilot-instructions.md
+    ) || true
 else
     echo "    Skipped: scripts/ai/ai-doc-check.sh not installed in target"
 fi
 
 echo ""
-echo "==> Running target-local verification smoke check..."
-if [[ -f "$TARGET/scripts/ai/ai-verify.sh" ]]; then
-    (cd "$TARGET" && AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 AI_VERIFY_SCOPE=ai bash scripts/ai/ai-verify.sh .) || true
-else
-    echo "    Skipped: scripts/ai/ai-verify.sh not installed in target"
-fi
+echo "==> Skipping broad target-local verification smoke check..."
+echo "    Install-safe validators already ran above."
+echo "    Run full repo verification manually after install if needed:"
+echo "      cd $TARGET && AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh ."
 
 # ── Repomix context bundle ────────────────────────────────────────────────────
 echo ""
