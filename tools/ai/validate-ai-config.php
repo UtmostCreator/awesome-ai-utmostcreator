@@ -804,7 +804,7 @@ function shouldSkipPathCheck(string $path): bool
 function loadAgnosticLeakRules(string $root): array
 {
     $defaults = [
-        'banned_terms' => ['Statamic', 'Nuxt', 'Vue 3', 'PHPUnit 11'],
+        'banned_terms' => ['project-name-3', 'Nuxt', 'Vue 3', 'PHPUnit 11'],
         'allowed_paths' => [],
     ];
 

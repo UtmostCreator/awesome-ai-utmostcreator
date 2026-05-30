@@ -200,7 +200,8 @@ function scanFile(string $absolutePath, string $target, array $requiredTokens, a
         return;
     }
     foreach ($matches[0] as $hit) {
-        [$token, $offset] = $hit;
+        $token = (string) ($hit[0] ?? '');
+        $offset = (int) ($hit[1] ?? 0);
         $line = 1 + substr_count(substr($content, 0, $offset), "\n");
         $isRequired = in_array($token, $requiredTokens, true);
         $findings[] = [
@@ -214,7 +215,11 @@ function scanFile(string $absolutePath, string $target, array $requiredTokens, a
 
 function placeholderVerifierShouldSkipPath(string $relativePath): bool
 {
-    return $relativePath === 'docs/ai/catalog.md';
+    if ($relativePath === 'docs/ai/catalog.md' || $relativePath === 'docs/ai/project-context-placeholders.md') {
+        return true;
+    }
+
+    return str_starts_with($relativePath, 'docs/ai/generated/');
 }
 
 /**

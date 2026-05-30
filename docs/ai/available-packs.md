@@ -4,7 +4,7 @@ Installed profile: `full-governance`
 
 ## Installed
 
-- `capabilities-governance`
+- `capabilities-extended-full`
 - `hooks-pack`
 - `ci-pack`
 - `scripts-pack`
@@ -12,7 +12,7 @@ Installed profile: `full-governance`
 - `evidence-pack`
 - `adapter-copilot`
 - `adapter-opencode`
-- `capabilities-extended`
+- `capabilities-extended-lite`
 - `base`
 - `setup-docs`
 - `capabilities-core`
@@ -27,6 +27,8 @@ Installed profile: `full-governance`
 - `advisor-pack`
 - `target-tools-pack`
 - `shared-templates-pack`
+- `capabilities-governance`
+- `capabilities-extended`
 
 ## Add Later
 

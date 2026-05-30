@@ -698,6 +698,111 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testDirectInstallerResolvesRequiredPlaceholdersOnSkipIdenticalExisting(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_skip_identical_placeholders_' . uniqid('', true);
+        $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
+
+        mkdir($docsDir, 0700, true);
+        copy(
+            self::$repoRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'project-context.template.md',
+            $docsDir . DIRECTORY_SEPARATOR . 'project-context.md'
+        );
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--project-name',
+                'app-configs',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stdout'] . $result['stderr']);
+
+            $manifest = json_decode((string) file_get_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+            $this->assertIsArray($manifest);
+            $placeholders = $manifest['placeholders'] ?? null;
+            $this->assertIsArray($placeholders);
+            $this->assertSame([], $placeholders['unresolved_required'] ?? null, 'strict install should resolve required placeholders even when matching files were skipped as identical');
+
+            $projectContext = (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'project-context.md');
+            $this->assertStringNotContainsString('<PRIMARY_STACK>', $projectContext);
+            $this->assertStringContainsString('Primary stack: `unknown`', $projectContext);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testVerifyInstallPlaceholdersIgnoresGeneratedAndReferenceDocs(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_placeholder_skip_' . uniqid('', true);
+        $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
+        $generatedDir = $docsDir . DIRECTORY_SEPARATOR . 'generated';
+
+        mkdir($generatedDir, 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'AGENTS.md', "# AGENTS\n");
+        file_put_contents($docsDir . DIRECTORY_SEPARATOR . 'project-context.md', "# Project Context\n\n- Primary stack: `unknown`\n");
+        copy(
+            self::$repoRoot . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'project-context-placeholders.md',
+            $docsDir . DIRECTORY_SEPARATOR . 'project-context-placeholders.md'
+        );
+        file_put_contents($generatedDir . DIRECTORY_SEPARATOR . 'advisor-context.md', "# Generated\n\n<PROJECT_NAME>\n<PRIMARY_STACK>\n");
+
+        try {
+            $result = $this->runTool(
+                'php tools/ai/verify-install-placeholders.php --target=' . escapeshellarg($target)
+            );
+
+            $this->assertSame(0, $result['exit'], $result['stdout'] . $result['stderr']);
+            $this->assertStringContainsString('OK: no required placeholders remain', $result['stdout']);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testSelfTargetPlaceholderRewriteCanProcessSkippedUnmanagedFiles(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_self_target_placeholders_' . uniqid('', true);
+        $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
+
+        mkdir($docsDir, 0700, true);
+        file_put_contents(
+            $docsDir . DIRECTORY_SEPARATOR . 'project-context.md',
+            "# Project Context\n\n- Primary stack: `<PRIMARY_STACK>`\n- Install: `<INSTALL_COMMAND>`\n"
+        );
+
+        try {
+            aiInstallerApplyPlaceholders(
+                $target,
+                'app-configs',
+                [[
+                    'target' => 'docs/ai/project-context.md',
+                    'action' => 'SKIP_EXISTING_UNMANAGED',
+                ]],
+                true
+            );
+
+            $projectContext = (string) file_get_contents($docsDir . DIRECTORY_SEPARATOR . 'project-context.md');
+            $this->assertStringNotContainsString('<PRIMARY_STACK>', $projectContext);
+            $this->assertStringNotContainsString('<INSTALL_COMMAND>', $projectContext);
+            $this->assertStringContainsString('Primary stack: `unknown`', $projectContext);
+            $this->assertStringContainsString('Install: `unknown`', $projectContext);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testDirectInstallerCanWriteUpgradeCopiesForExistingTargets(): void
     {
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_upgrade_' . uniqid('', true);

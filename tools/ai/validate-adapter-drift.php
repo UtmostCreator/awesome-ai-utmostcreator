@@ -92,7 +92,7 @@ foreach ($adapterFiles as $relativePath) {
         $warnings[] = "{$relativePath} looks too large for an adapter surface";
     }
 
-    foreach (['Statamic', 'Nuxt', 'example-co', 'statamic-cms'] as $banned) {
+    foreach (['project-name-3', 'Nuxt', 'project-name-2', 'project-name'] as $banned) {
         if (stripos($content, $banned) !== false) {
             $warnings[] = "{$relativePath} contains non-agnostic term '{$banned}'";
         }

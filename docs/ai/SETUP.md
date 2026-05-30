@@ -6,7 +6,7 @@
 
 ## Installed Packs
 
-- `capabilities-governance`
+- `capabilities-extended-full`
 - `hooks-pack`
 - `ci-pack`
 - `scripts-pack`
@@ -14,7 +14,7 @@
 - `evidence-pack`
 - `adapter-copilot`
 - `adapter-opencode`
-- `capabilities-extended`
+- `capabilities-extended-lite`
 - `base`
 - `setup-docs`
 - `capabilities-core`
@@ -29,6 +29,8 @@
 - `advisor-pack`
 - `target-tools-pack`
 - `shared-templates-pack`
+- `capabilities-governance`
+- `capabilities-extended`
 
 ## Next Steps
 

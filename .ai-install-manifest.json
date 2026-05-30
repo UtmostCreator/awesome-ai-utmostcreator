@@ -2,7 +2,7 @@
     "schema_version": 1,
     "installer_version": "0.2.0",
     "installed_at": "2026-05-10T15:25:11+00:00",
-    "updated_at": "2026-05-16T13:54:14+00:00",
+    "updated_at": "2026-05-30T01:18:43+00:00",
     "profile": "full-governance",
     "package": {
         "name": "ai-universal-rules",
@@ -36,7 +36,9 @@
         "mcp-boundaries-pack",
         "advisor-pack",
         "target-tools-pack",
-        "shared-templates-pack"
+        "shared-templates-pack",
+        "capabilities-governance",
+        "capabilities-extended"
     ],
     "files": {
         "docs/ai/capabilities/dependency-upgrade": {
@@ -349,7 +351,7 @@
             "pack": "base",
             "source": "packages/ai-universal-rules/templates/core/POST-INSTALL.template.md",
             "source_hash": "sha256:eb8173efc0e9a62757d2379c6c38b1a8cf7c26dc4b13917da9aebcf1924f2a14",
-            "installed_hash": "sha256:eb8173efc0e9a62757d2379c6c38b1a8cf7c26dc4b13917da9aebcf1924f2a14",
+            "installed_hash": "sha256:1d19c4fcbb672ef678a4cd0bd54c979026793c44586338ba7f1f4664ce87352b",
             "managed": true,
             "merge_strategy": "replace",
             "required": true
@@ -407,29 +409,16 @@
     "placeholders": {
         "unresolved_required": [],
         "unresolved_optional": [
-            "<PLACEHOLDER>",
-            "<PRIMARY_STACK>",
-            "<FILE_PLACEMENT_RULES>",
-            "<NAMING_RULES>",
-            "<GOLDEN_EXAMPLES>",
-            "<FORMATTER_CONFIG_FILES>",
-            "<LINTER_CONFIG_FILES>",
-            "<EDITORCONFIG_PATH>",
-            "<IGNORE_FILES>",
-            "<INSTALL_COMMAND>",
-            "<FORMAT_COMMAND>",
-            "<GENERATED_FILES>",
-            "<PROTECTED_FILES>",
-            "<PROJECT_FORMATTING_EXCEPTIONS>",
-            "<PROJECT_IGNORED_FILES>",
-            "<PROJECT_ALLOWED_SCRIPTS>",
-            "<PROJECT_FORBIDDEN_SCRIPTS>",
-            "<PROJECT_SECURITY_RULES>",
-            "<FRONTEND_PATH_GLOB>",
-            "<TEST_PATH_GLOB>",
             "<UNKNOWN>",
             "<FILES_OR_COMMANDS_CHECKED>",
             "<NEXT_STEP>",
+            "<CLAIM_BEING_PROVED>",
+            "<FOCUSED_PROOF_COMMAND>",
+            "<PASS_FAIL_OR_OUTPUT>",
+            "<FOCUSED_PROOF_EXPLANATION>",
+            "<OPTIONAL_VERIFY_EXPLANATION>",
+            "<UNRUN_CHECKS_AND_REASON>",
+            "<RESIDUAL_RISK_NOTES>",
             "<CHANGE_REQUEST>",
             "<RISK_LEVEL>",
             "<AFFECTED_PATHS>",
@@ -440,14 +429,10 @@
             "<SUCCESS_SIGNAL>",
             "<VERIFICATION_PLAN>",
             "<OPEN_QUESTIONS>",
-            "<CLAIM_BEING_PROVED>",
-            "<FOCUSED_PROOF_COMMAND>",
-            "<PASS_FAIL_OR_OUTPUT>",
-            "<FOCUSED_PROOF_EXPLANATION>",
-            "<OPTIONAL_VERIFY_EXPLANATION>",
-            "<UNRUN_CHECKS_AND_REASON>",
-            "<RESIDUAL_RISK_NOTES>"
+            "<PLACEHOLDER_NAME>",
+            "<FRONTEND_PATH_GLOB>",
+            "<TEST_PATH_GLOB>"
         ],
-        "resolved_values_hash": "sha256:23a25cd7f76e1844f1d49509cd9a57771cf4e9f0c3c2bd9cfb8024f15be38522"
+        "resolved_values_hash": "sha256:e76cdd701fcaedcd2c369102c277a2e03bf5c0ac4784f6f0a4186d2f55b3b7b1"
     }
 }

@@ -251,7 +251,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 
 | Type | Name | Path | Description |
 | --- | --- | --- | --- |
-|`core-template`|<PROJECT_NAME> - Repository Instructions|`packages/ai-universal-rules/templates/core/AGENTS.template.md`|- Project: `<PROJECT_NAME>`|
+|`core-template`|awesome-ai-utmostcreator - Repository Instructions|`packages/ai-universal-rules/templates/core/AGENTS.template.md`|- Project: `awesome-ai-utmostcreator`|
 |`core-template`|Post-Install Checklist|`packages/ai-universal-rules/templates/core/POST-INSTALL.template.md`|Your AI workflow kit was installed successfully. **Complete every item below before running write-capable AI agents.**|
 |`core-template`|Architect Agent|`packages/ai-universal-rules/templates/core/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`core-template`|Bootstrapper Agent|`packages/ai-universal-rules/templates/core/agents/bootstrapper.md`|Use when installing, re-installing, or validating the AI kit from dry-run to backup to apply to full verification|
@@ -265,15 +265,15 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`core-template`|Researcher Agent|`packages/ai-universal-rules/templates/core/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`core-template`|Reviewer Agent|`packages/ai-universal-rules/templates/core/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
 |`core-template`|Workflow Auditor Agent|`packages/ai-universal-rules/templates/core/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
-|`core-template`|<PROJECT_NAME> AI File Standards|`packages/ai-universal-rules/templates/core/ai-file-standards.template.md`|Use this file as the installed repository's canonical content and size contract for AI workflow files.|
-|`core-template`|Repository Instructions For <PROJECT_NAME>|`packages/ai-universal-rules/templates/core/copilot-instructions.template.md`|Use these instructions as the repository-wide baseline for GitHub Copilot.|
+|`core-template`|awesome-ai-utmostcreator AI File Standards|`packages/ai-universal-rules/templates/core/ai-file-standards.template.md`|Use this file as the installed repository's canonical content and size contract for AI workflow files.|
+|`core-template`|Repository Instructions For awesome-ai-utmostcreator|`packages/ai-universal-rules/templates/core/copilot-instructions.template.md`|Use these instructions as the repository-wide baseline for GitHub Copilot.|
 |`core-template`|copilot-vscode-settings.template|`packages/ai-universal-rules/templates/core/copilot-vscode-settings.template.json`|{|
 |`core-template`|Execution Protocol|`packages/ai-universal-rules/templates/core/execution-protocol.template.md`|Use this as the canonical operating contract for non-trivial AI-assisted planning, editing, review, and verification.|
 |`core-template`|Generated Artifacts Guide|`packages/ai-universal-rules/templates/core/generated-artifacts.template.md`|`docs/ai/generated/` holds machine-generated files produced by `php tools/ai/ai.php` subcommands.|
 |`core-template`|opencode|`packages/ai-universal-rules/templates/core/opencode.json`|{|
 |`core-template`|Project Context Placeholder Guide|`packages/ai-universal-rules/templates/core/project-context.placeholders.md`|Use this file when installing templates into a new project. Fill placeholders before enabling write-capable AI flows.|
-|`core-template`|<PROJECT_NAME> Project Context|`packages/ai-universal-rules/templates/core/project-context.template.md`|Use this file as durable, canonical project context for instructions, agents, prompts, and capabilities.|
-|`core-template`|<PROJECT_NAME> Project Stack|`packages/ai-universal-rules/templates/core/project-stack.template.md`|Compatibility note: `project-stack.template.md` remains for older installs.|
+|`core-template`|awesome-ai-utmostcreator Project Context|`packages/ai-universal-rules/templates/core/project-context.template.md`|Use this file as durable, canonical project context for instructions, agents, prompts, and capabilities.|
+|`core-template`|awesome-ai-utmostcreator Project Stack|`packages/ai-universal-rules/templates/core/project-stack.template.md`|Compatibility note: `project-stack.template.md` remains for older installs.|
 |`core-template`|Workflow|`packages/ai-universal-rules/templates/core/workflow.template.md`|For non-trivial work, follow `docs/ai/execution-protocol.md`.|
 |`foundation-doc`|Capability Model|`packages/ai-universal-rules/docs/foundations/CAPABILITY-MODEL.md`|Capabilities are the canonical reusable workflow layer in this kit.|
 |`foundation-doc`|Compatibility|`packages/ai-universal-rules/docs/foundations/COMPATIBILITY.md`|This package is intentionally asymmetric.|
@@ -312,13 +312,13 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`operations-doc`|Maintenance|`packages/ai-universal-rules/docs/operations/MAINTENANCE.md`|Treat this package like workflow infrastructure, not throwaway prompts.|
 |`operations-doc`|MCP Boundaries|`packages/ai-universal-rules/docs/operations/MCP-BOUNDARIES.md`|MCP extends capability, but also risk.|
 |`operations-doc`|Troubleshooting|`packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md`|- unresolved placeholders|
-|`optional-template`|architecture-plan|`packages/ai-universal-rules/templates/optional/agents/architecture-plan.md`|Produce a focused implementation plan for a medium or large change in <PROJECT_NAME>|
-|`optional-template`|bugfix|`packages/ai-universal-rules/templates/optional/agents/bugfix.md`|Use when fixing a bug in <PROJECT_NAME>, reproducing it first when practical, and keeping the fix minimal|
-|`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in <PROJECT_NAME>|
-|`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in <PROJECT_NAME>|
-|`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>|
+|`optional-template`|architecture-plan|`packages/ai-universal-rules/templates/optional/agents/architecture-plan.md`|Produce a focused implementation plan for a medium or large change in awesome-ai-utmostcreator|
+|`optional-template`|bugfix|`packages/ai-universal-rules/templates/optional/agents/bugfix.md`|Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal|
+|`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in awesome-ai-utmostcreator|
+|`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in awesome-ai-utmostcreator|
+|`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator|
 |`optional-template`|ui-builder|`packages/ai-universal-rules/templates/optional/agents/ui-builder.md`|Use when implementing UI work while preserving repository interaction patterns and accessibility rules|
-|`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades carefully in <PROJECT_NAME>|
+|`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades carefully in awesome-ai-utmostcreator|
 |`optional-template`|Optional Delivery Pack|`packages/ai-universal-rules/templates/optional/delivery/README.md`|Use this pack when you want a lightweight slice card for non-trivial work.|
 |`optional-template`|Slice Card|`packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md`|- User outcome:|
 |`package-capability`|Capability Templates|`packages/ai-universal-rules/templates/capabilities/README.md`|These folders are the canonical reusable workflow units in this kit.|
@@ -365,7 +365,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`package-capability`|Verify Change Reference|`packages/ai-universal-rules/templates/capabilities/verify-change/reference.md`|Use this file to record repository-specific verification facts such as:|
 |`shared-template`|Approval Packet|`packages/ai-universal-rules/templates/shared/approvals/APPROVAL-PACKET.template.md`|- request: `<CHANGE_REQUEST>`|
 |`shared-template`|AI Guardrails|`packages/ai-universal-rules/templates/shared/guardrails/AI-GUARDRAILS.md`|Use this file as the cross-tool control layer for common failure modes.|
-|`shared-template`|System Architecture - How The Projects Interact|`packages/ai-universal-rules/templates/shared/project-interaction.md`|This document is the canonical cross-repository overview for the multi-project workspace that includes `<PROJECT_NAME>`.|
+|`shared-template`|System Architecture - How The Projects Interact|`packages/ai-universal-rules/templates/shared/project-interaction.md`|This document is the canonical cross-repository overview for the multi-project workspace that includes `awesome-ai-utmostcreator`.|
 |`shared-template`|Verification Evidence|`packages/ai-universal-rules/templates/shared/verification/VERIFICATION-EVIDENCE.template.md`|- `<CLAIM_BEING_PROVED>`|
 |`workflow-doc`|Agent Handoffs|`packages/ai-universal-rules/docs/workflows/AGENT-HANDOFFS.md`|Use staged agents to reduce context pollution and scope drift.|
 |`workflow-doc`|Monorepo Strategy|`packages/ai-universal-rules/docs/workflows/MONOREPO-STRATEGY.md`|Large repos need a nested strategy or the workflow becomes noisy.|
