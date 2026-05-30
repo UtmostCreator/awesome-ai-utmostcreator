@@ -146,8 +146,8 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/validation.md', 'target' => 'docs/ai/validation.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
         ],
         'evidence-pack' => [
-            ['type' => 'file', 'source' => 'docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md', 'target' => 'docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => 'docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md', 'target' => 'docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'docs/ai/capabilities/agent-observability-and-evidence/event-schema.md', 'target' => 'docs/ai/capabilities/agent-observability-and-evidence/event-schema.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md', 'target' => 'docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
         ],
         'docs-reference-pack' => [
             ['type' => 'file', 'source' => 'docs/ai/agent-ops.md', 'target' => 'docs/ai/agent-ops.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],

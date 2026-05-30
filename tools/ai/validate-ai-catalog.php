@@ -88,8 +88,8 @@ foreach (['reference/php/design-patterns', 'reference/php/design-principles', 'r
 }
 
 foreach ([
-    'docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md',
-    'docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md',
+    'docs/ai/capabilities/agent-observability-and-evidence/event-schema.md',
+    'docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md',
     'schemas/ai/evidence-event.schema.json',
 ] as $requiredEvidencePath) {
     if (!aiCatalogHasPath($catalog, $requiredEvidencePath)) {
@@ -98,9 +98,9 @@ foreach ([
 }
 
 foreach ([
-    'docs/ai/capabilities/evaluation-and-regression/GOLDEN_TASKS.md',
-    'docs/ai/capabilities/evaluation-and-regression/REPLAY_RULES.md',
-    'docs/ai/capabilities/evaluation-and-regression/HUMAN_REVIEW_RULES.md',
+    'docs/ai/capabilities/evaluation-and-regression/golden-tasks.md',
+    'docs/ai/capabilities/evaluation-and-regression/replay-rules.md',
+    'docs/ai/capabilities/evaluation-and-regression/human-review-rules.md',
 ] as $requiredEvaluationPath) {
     if (!aiCatalogHasPath($catalog, $requiredEvaluationPath)) {
         $errors[] = "catalog.json should include evaluation support path {$requiredEvaluationPath}";
@@ -108,9 +108,9 @@ foreach ([
 }
 
 foreach ([
-    'docs/ai/capabilities/preview-environments/LIFECYCLE.md',
-    'docs/ai/capabilities/preview-environments/DATA_AND_SECRET_RULES.md',
-    'docs/ai/capabilities/preview-environments/CHECKLIST.md',
+    'docs/ai/capabilities/preview-environments/lifecycle.md',
+    'docs/ai/capabilities/preview-environments/data-and-secret-rules.md',
+    'docs/ai/capabilities/preview-environments/checklist.md',
 ] as $requiredPreviewPath) {
     if (!aiCatalogHasPath($catalog, $requiredPreviewPath)) {
         $errors[] = "catalog.json should include preview support path {$requiredPreviewPath}";
