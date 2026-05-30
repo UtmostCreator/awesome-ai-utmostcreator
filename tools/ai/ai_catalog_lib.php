@@ -292,7 +292,7 @@ function aiCollectRootResources(string $root): array
     }
 
     $adapterSurfaceMap = [
-        'policies/copilot/policy.yaml' => ['adapter-policy', 'copilot-policy', 'Declarative allow, deny, and confirm rules for the GitHub Copilot adapter policy surface.', 'github-copilot'],
+        'policies/ai/policy.yaml' => ['adapter-policy', 'ai-policy', 'Declarative allow, deny, and confirm rules enforced for all runtimes by the canonical pre-tool-use hook.', 'canonical'],
         '.github/hooks/tool-policy.json' => ['adapter-hook', 'tool-policy', 'GitHub Copilot hook configuration for tool policy enforcement.', 'github-copilot'],
         '.github/hooks/tool-guardian.json' => ['adapter-hook', 'tool-guardian', 'GitHub Copilot hook configuration for guarded tool execution.', 'github-copilot'],
         '.github/hooks/scripts/tool-guardian.ps1' => ['adapter-hook-script', 'tool-guardian.ps1', 'PowerShell hook script for GitHub Copilot guarded tool execution.', 'github-copilot'],
