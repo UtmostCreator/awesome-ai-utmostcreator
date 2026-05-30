@@ -6,12 +6,12 @@ Canonical guidance for installed AI agents. Keep runtime adapters thin and point
 
 The following agents are live when their matching runtime adapter is installed. Runtime-specific adapter files define the role, tool boundary, and handoff contract while preserving the canonical guidance in this document.
 
-<!-- Source-repo validator anchors: .github/agents/architect.agent.md .github/agents/config-maintainer.agent.md .github/agents/implementer.agent.md .github/agents/refactorer.agent.md .github/agents/release-auditor.agent.md .github/agents/repository-researcher.agent.md .github/agents/repository-reviewer.agent.md .github/agents/researcher.agent.md .github/agents/reviewer.agent.md .github/agents/workflow-auditor.agent.md -->
+<!-- Source-repo validator anchors: .github/agents/architect.agent.md .github/agents/bootstrapper.agent.md .github/agents/config-maintainer.agent.md .github/agents/implementer.agent.md .github/agents/refactorer.agent.md .github/agents/release-auditor.agent.md .github/agents/repository-researcher.agent.md .github/agents/repository-reviewer.agent.md .github/agents/researcher.agent.md .github/agents/reviewer.agent.md .github/agents/workflow-auditor.agent.md -->
 
 | Agent                 | Runtime key             | When to use                                                                                                                                         |
 | --------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Architect             | `architect`             | Scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation.                                 |
-| Bootstrapper          | `bootstrapper`          | OpenCode-internal: installing or rehydrating the repository AI workflow surface. Not shipped to installed projects and has no Copilot adapter file.  |
+| Bootstrapper          | `bootstrapper`          | OpenCode-internal: installing or rehydrating the repository AI workflow surface. Not shipped to installed projects and has no Copilot adapter file. |
 | Config Maintainer     | `config-maintainer`     | Changing editor, shell, runtime, or tool configuration while preserving current behavior.                                                           |
 | Implementer           | `implementer`           | A bounded implementation slice is clear and focused verification should happen in this repository.                                                  |
 | Refactorer            | `refactorer`            | Behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability.                            |
