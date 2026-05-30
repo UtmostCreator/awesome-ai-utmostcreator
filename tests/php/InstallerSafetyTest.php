@@ -555,6 +555,87 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testDirectInstallerReinstallBackupCapturesAllPreviouslyManagedFiles(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_reinstall_backup_' . uniqid('', true);
+        $firstOutputJson = $target . DIRECTORY_SEPARATOR . 'install-first.json';
+        $secondOutputJson = $target . DIRECTORY_SEPARATOR . 'install-second.json';
+
+        mkdir($target, 0700, true);
+
+        try {
+            $firstCommand = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--force',
+                '--backup',
+                '--output-json',
+                escapeshellarg($firstOutputJson),
+            ]);
+
+            $firstResult = $this->runTool($firstCommand);
+            $this->assertSame(0, $firstResult['exit'], $firstResult['stderr']);
+
+            $firstManifestPath = $target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json';
+            $firstManifest = json_decode((string) file_get_contents($firstManifestPath), true);
+            $this->assertIsArray($firstManifest);
+
+            $managedPaths = array_keys((array) ($firstManifest['files'] ?? []));
+            sort($managedPaths);
+            $this->assertNotEmpty($managedPaths, 'first install should record managed files');
+
+            $secondCommand = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--force',
+                '--backup',
+                '--output-json',
+                escapeshellarg($secondOutputJson),
+            ]);
+
+            $secondResult = $this->runTool($secondCommand);
+            $this->assertSame(0, $secondResult['exit'], $secondResult['stderr']);
+
+            $secondDecoded = json_decode((string) file_get_contents($secondOutputJson), true);
+            $this->assertIsArray($secondDecoded);
+            $backup = $secondDecoded['backup'] ?? null;
+            $this->assertIsArray($backup, 'reinstall should emit backup metadata');
+
+            $backupDir = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) ($backup['backup_dir'] ?? ''));
+            $this->assertDirectoryExists($backupDir);
+
+            $backupManifest = json_decode((string) file_get_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json'), true);
+            $this->assertIsArray($backupManifest);
+
+            $backupPaths = array_map(static fn(array $entry): string => (string) ($entry['path'] ?? ''), $backupManifest['entries'] ?? []);
+            sort($backupPaths);
+
+            $missingPaths = array_values(array_diff($managedPaths, $backupPaths));
+            $this->assertSame([], $missingPaths, 'reinstall backup must capture every previously managed installed path');
+
+            foreach ($managedPaths as $path) {
+                $snapshotPath = $backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+                $this->assertFileExists($snapshotPath, 'backup snapshot missing managed path: ' . $path);
+            }
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testDirectInstallerFullGovernanceOpencodeOnlyValidatesAsInstalledTarget(): void
     {
         $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
