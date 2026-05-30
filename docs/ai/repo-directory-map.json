@@ -38,7 +38,7 @@
       "notes": "OpenCode runtime adapters (agents, commands, skills); the canonical OpenCode config is the repo-root opencode.jsonc."
     },
     {
-      "path": "schemas/ai",
+      "path": "schemas",
       "purpose": "JSON schemas used by AI tooling and artifact validation.",
       "designed_for": "Tooling validation and contract enforcement.",
       "install_guide": "docs/ai/validation.md",
