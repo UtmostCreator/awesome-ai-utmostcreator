@@ -21,7 +21,7 @@ description: 'Rules for AI workflow docs, Copilot adapter files, and stronger VS
 - For behavior-changing agentic work, route through `docs/ai/capabilities/evaluation-and-regression/CAPABILITY.md` and include regression evidence in task output.
 - For medium/high-risk changes requiring temporary environment validation, route through `docs/ai/capabilities/preview-environments/CAPABILITY.md` and include lifecycle/cleanup evidence in task output.
 - Route broad edits through `scripts/ai/ai-edit.sh` instead of raw shell replacement commands when the Copilot tool layer can handle the change.
-- Keep the Copilot hook policy aligned with `policies/copilot/policy.yaml`, `scripts/ai/pre-tool-use.sh`, `scripts/ai/post-tool-use.sh`, `docs/ai/script-registry.md`, and `docs/ai/script-registry.json`.
+- Keep the AI hook policy aligned with `policies/ai/policy.yaml`, `scripts/ai/pre-tool-use.sh`, `scripts/ai/post-tool-use.sh`, `docs/ai/script-registry.md`, and `docs/ai/script-registry.json`.
 - Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer; when the runtime supports repository hooks, they must remain authoritative through `.github/hooks/tool-policy.json`, and when it does not, the same boundary still applies without claiming automatic enforcement.
 - Treat `.ai-logs/README.md` as the canonical checked-in contract for local evidence logs on supported shell-hook surfaces.
 - Treat `.agent.md` tool lists as hard upper bounds, not suggestions.

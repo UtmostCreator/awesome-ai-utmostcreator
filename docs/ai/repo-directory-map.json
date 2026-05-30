@@ -88,7 +88,7 @@
       "designed_for": "Governance and policy validation workflows.",
       "install_guide": "policies/README.md",
       "install_script": "none",
-      "ai_entrypoint": "policies/copilot/policy.yaml",
+      "ai_entrypoint": "policies/ai/policy.yaml",
       "notes": "Policy files consumed by checks and adapters."
     },
     {

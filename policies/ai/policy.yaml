@@ -60,7 +60,7 @@ allow:
   # Tier 1 — read-only wrapper scripts (auto-approve)
   # See docs/ai/command-risk-taxonomy.md for the full invocation matrix.
   - id: tier1-read-only-scripts
-    reason: "Tier 1: read-only copilot scripts (no source mutation)"
+    reason: "Tier 1: read-only AI wrapper scripts (no source mutation)"
     pattern: '^(bash\s+)?(\./)?scripts/ai/(ai-search|ai-verify|preview-file|fd-files|rg-code|git-forensics|repo-stats|query-usage)\.sh\b'
   # Tier 1† — read-only-adjacent scripts (write only to generated directories)
   - id: tier1-generated-output-scripts

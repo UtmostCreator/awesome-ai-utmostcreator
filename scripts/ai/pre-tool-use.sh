@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-POLICY_FILE="${AI_POLICY_FILE:-${COPILOT_POLICY_FILE:-policies/copilot/policy.yaml}}"
+POLICY_FILE="${AI_POLICY_FILE:-${COPILOT_POLICY_FILE:-policies/ai/policy.yaml}}"
 MAINTENANCE_STATE_FILE="${AI_MAINTENANCE_STATE_FILE:-${COPILOT_MAINTENANCE_STATE_FILE:-.ai-logs/maintenance-mode.json}}"
 # maintenance mode allows repository-delivered scripts only
 

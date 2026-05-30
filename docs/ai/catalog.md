@@ -57,7 +57,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`adapter-hook`|tool-guardian|`.github/hooks/tool-guardian.json`|GitHub Copilot hook configuration for guarded tool execution.|
 |`adapter-hook`|tool-policy|`.github/hooks/tool-policy.json`|GitHub Copilot hook configuration for tool policy enforcement.|
 |`adapter-hook-script`|tool-guardian.ps1|`.github/hooks/scripts/tool-guardian.ps1`|PowerShell hook script for GitHub Copilot guarded tool execution.|
-|`adapter-policy`|copilot-policy|`policies/copilot/policy.yaml`|Declarative allow, deny, and confirm rules for the GitHub Copilot adapter policy surface.|
+|`adapter-policy`|ai-policy|`policies/ai/policy.yaml`|Declarative allow, deny, and confirm rules enforced for all runtimes by the canonical pre-tool-use hook.|
 |`ai-script`|ai-diff-context.sh|`scripts/ai/ai-diff-context.sh`|Builds focused diff and change-context packs for AI review and implementation.|
 |`ai-script`|ai-doc-check.sh|`scripts/ai/ai-doc-check.sh`|Checks AI-facing documentation surfaces for required references and drift.|
 |`ai-script`|ai-edit.sh|`scripts/ai/ai-edit.sh`|Guarded edit wrapper with snapshots, dry-run behavior, visible diff, and optional verification.|

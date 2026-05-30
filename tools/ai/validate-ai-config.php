@@ -98,7 +98,7 @@ $requiredFiles = [
     'scripts/ai/ai-rollback.sh',
     'tools/ai/validate-command-policy.php',
     'tools/ai/render-agent-permissions.php',
-    'policies/copilot/policy.yaml',
+    'policies/ai/policy.yaml',
     '.schemas/evidence-event.schema.json',
     '.ai-logs/README.md',
     'packages/ai-universal-rules/manifest.json',

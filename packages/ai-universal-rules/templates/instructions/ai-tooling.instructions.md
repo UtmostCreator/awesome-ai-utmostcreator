@@ -1,5 +1,5 @@
 ---
-applyTo: 'tools/ai/**,scripts/ai/**,docs/ai/script-registry.md,docs/ai/script-registry.json,docs/ai/tools/**,policies/copilot/policy.yaml,.github/hooks/tool-policy.json'
+applyTo: 'tools/ai/**,scripts/ai/**,docs/ai/script-registry.md,docs/ai/script-registry.json,docs/ai/tools/**,policies/ai/policy.yaml,.github/hooks/tool-policy.json'
 description: 'AI tooling contract, registry alignment, and hook-policy consistency'
 ---
 

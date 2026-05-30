@@ -1217,10 +1217,10 @@
         {
             "scope": "root",
             "type": "adapter-policy",
-            "name": "copilot-policy",
-            "path": "policies/copilot/policy.yaml",
-            "runtime": "github-copilot",
-            "description": "Declarative allow, deny, and confirm rules for the GitHub Copilot adapter policy surface."
+            "name": "ai-policy",
+            "path": "policies/ai/policy.yaml",
+            "runtime": "canonical",
+            "description": "Declarative allow, deny, and confirm rules enforced for all runtimes by the canonical pre-tool-use hook."
         },
         {
             "scope": "root",
