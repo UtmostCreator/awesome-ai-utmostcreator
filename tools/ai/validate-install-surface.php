@@ -35,6 +35,17 @@ if ($targetArg !== null || (is_file($root . '/.ai-install-manifest.json') && !is
         fwrite(STDERR, "ERROR: target install manifest has no managed files\n");
         exit(1);
     }
+    $installerGeneratedPaths = [
+        'docs/ai/POST-INSTALL.md',
+        'docs/ai/available-packs.md',
+        'docs/ai/SETUP.md',
+        'docs/ai/installed-files.md',
+        'docs/ai/project-configuration.md',
+        'docs/ai/generated/install-summary.md',
+        'docs/ai/generated/install-instructions.md',
+        'docs/ai/generated/install-instructions.json',
+        'docs/ai/generated/install-manifest.json',
+    ];
     foreach ($files as $relative => $meta) {
         $path = $root . '/' . str_replace('\\', '/', (string) $relative);
         if (!file_exists($path)) {
@@ -43,7 +54,7 @@ if ($targetArg !== null || (is_file($root . '/.ai-install-manifest.json') && !is
         $expected = is_array($meta) ? (string) ($meta['installed_hash'] ?? '') : '';
         if ($expected !== '' && str_starts_with($expected, 'sha256:') && is_file($path)) {
             $actual = 'sha256:' . hash_file('sha256', $path);
-            if ($actual !== $expected) {
+            if ($actual !== $expected && !in_array((string) $relative, $installerGeneratedPaths, true)) {
                 $warnings[] = "managed install file changed after install: {$relative}";
             }
         }
