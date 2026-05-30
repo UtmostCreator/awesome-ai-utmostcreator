@@ -11,5 +11,8 @@
 !.ai-logs/README.md
 .ai-backups/
 .repomix-context/
-docs/ai/generated/phpunit-junit.xml
+# Generated AI artifacts: regenerated locally by `php tools/ai/ai.php` subcommands.
+# Not tracked so each environment produces fresh output and avoids merge conflicts.
+# Tests still validate them via regenerate-then-check (see tests/php/CliToolsTest.php).
+docs/ai/generated/
 /composer.phar

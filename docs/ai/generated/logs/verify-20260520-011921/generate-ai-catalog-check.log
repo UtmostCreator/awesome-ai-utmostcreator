@@ -1,7 +1,0 @@
-STDOUT:
-OK: packages/ai-universal-rules/catalog.json is up to date
-OK: docs/ai/catalog.md is up to date
-OK: packages/ai-universal-rules/docs/BROWSE.md is up to date
-OK: llms.txt is up to date
-
-STDERR:

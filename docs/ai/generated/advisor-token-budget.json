@@ -1,7 +1,0 @@
-{
-    "tokens_estimate": 313582,
-    "soft_budget_tokens": 120000,
-    "hard_budget_tokens": 180000,
-    "mode": "hard_limit_exceeded",
-    "chunking_required": true
-}
