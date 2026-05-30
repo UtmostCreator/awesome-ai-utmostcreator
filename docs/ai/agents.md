@@ -8,19 +8,19 @@ The following agents are live when their matching runtime adapter is installed. 
 
 <!-- Source-repo validator anchors: .github/agents/architect.agent.md .github/agents/config-maintainer.agent.md .github/agents/implementer.agent.md .github/agents/refactorer.agent.md .github/agents/release-auditor.agent.md .github/agents/repository-researcher.agent.md .github/agents/repository-reviewer.agent.md .github/agents/researcher.agent.md .github/agents/reviewer.agent.md .github/agents/workflow-auditor.agent.md -->
 
-| Agent | Runtime key | When to use |
-| --- | --- | --- |
-| Architect | `architect` | Scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation. |
-| Bootstrapper | `bootstrapper` | OpenCode-internal: installing or rehydrating the repository AI workflow surface. Not shipped to installed projects and has no Copilot adapter file. |
-| Config Maintainer | `config-maintainer` | Changing editor, shell, runtime, or tool configuration while preserving current behavior. |
-| Implementer | `implementer` | A bounded implementation slice is clear and focused verification should happen in this repository. |
-| Refactorer | `refactorer` | Behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability. |
-| Release Auditor | `release-auditor` | Medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review. |
-| Repository Researcher | `repository-researcher` | Strict script-first repository researcher using ai-search before raw search. |
-| Repository Reviewer | `repository-reviewer` | Strict script-first diff reviewer using ai-search and validator evidence. |
-| Researcher | `researcher` | Read-only repository grounding before planning, implementation, or review. |
-| Reviewer | `reviewer` | Reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification. |
-| Workflow Auditor | `workflow-auditor` | Reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims. |
+| Agent                 | Runtime key             | When to use                                                                                                                                         |
+| --------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Architect             | `architect`             | Scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation.                                 |
+| Bootstrapper          | `bootstrapper`          | OpenCode-internal: installing or rehydrating the repository AI workflow surface. Not shipped to installed projects and has no Copilot adapter file.  |
+| Config Maintainer     | `config-maintainer`     | Changing editor, shell, runtime, or tool configuration while preserving current behavior.                                                           |
+| Implementer           | `implementer`           | A bounded implementation slice is clear and focused verification should happen in this repository.                                                  |
+| Refactorer            | `refactorer`            | Behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability.                            |
+| Release Auditor       | `release-auditor`       | Medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review.                                    |
+| Repository Researcher | `repository-researcher` | Strict script-first repository researcher using ai-search before raw search.                                                                        |
+| Repository Reviewer   | `repository-reviewer`   | Strict script-first diff reviewer using ai-search and validator evidence.                                                                           |
+| Researcher            | `researcher`            | Read-only repository grounding before planning, implementation, or review.                                                                          |
+| Reviewer              | `reviewer`              | Reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification.                              |
+| Workflow Auditor      | `workflow-auditor`      | Reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims.                                                 |
 
 ## Routing Rules
 

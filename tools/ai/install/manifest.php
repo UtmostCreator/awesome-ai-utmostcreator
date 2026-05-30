@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../repo-tool-inventory.php';
+
 function aiInstallerCanonicalManifestPath(string $targetRoot): string
 {
     return $targetRoot . DIRECTORY_SEPARATOR . '.ai-install-manifest.json';
@@ -20,11 +22,12 @@ function aiInstallerWriteManifest(string $targetRoot, array $manifest): void
     aiInstallerMkdir(dirname($canonical));
     aiInstallerMkdir(dirname($derived));
 
+    aiInstallerWriteSetupDocs($targetRoot, $manifest);
+
+    $manifest = aiInstallerRefreshGeneratedManifestEntries($targetRoot, $manifest);
     $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
     file_put_contents($canonical, $json);
     file_put_contents($derived, $json);
-
-    aiInstallerWriteSetupDocs($targetRoot, $manifest);
 }
 
 function aiInstallerBuildManifest(array $config, array $packs, array $applied): array
@@ -206,7 +209,29 @@ function aiInstallerWriteSetupDocs(string $targetRoot, array $manifest): void
     file_put_contents($docsRoot . DIRECTORY_SEPARATOR . 'available-packs.md', $availablePacks);
     file_put_contents($generated . DIRECTORY_SEPARATOR . 'install-summary.md', $summary);
 
+    repoToolInventoryWriteOutput($targetRoot, 'docs/ai/repo-required-tools.md');
+
     if (function_exists('aiInstallerWriteInstallDocs')) {
         aiInstallerWriteInstallDocs($targetRoot, $manifest);
     }
+}
+
+function aiInstallerRefreshGeneratedManifestEntries(string $targetRoot, array $manifest): array
+{
+    $refreshable = [
+        'docs/ai/POST-INSTALL.md',
+        'docs/ai/available-packs.md',
+        'docs/ai/repo-required-tools.md',
+    ];
+
+    foreach ($refreshable as $relativePath) {
+        if (!isset($manifest['files'][$relativePath]) || !is_array($manifest['files'][$relativePath])) {
+            continue;
+        }
+
+        $absolutePath = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+        $manifest['files'][$relativePath]['installed_hash'] = aiInstallerHashPath($absolutePath);
+    }
+
+    return $manifest;
 }
