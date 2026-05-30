@@ -178,7 +178,7 @@ class PruneShippedTargetsTest extends TestCase
             'tools/',
             'scripts/ai/',
             'tests/',
-            '.schemas/',
+            'schemas/ai/',
             '.git/',
             'vendor/',
             'node_modules/',
@@ -379,10 +379,10 @@ class PruneShippedTargetsTest extends TestCase
             '--include-candidates must not change --list output; candidates are --apply-only'
         );
 
-        // Defense-in-depth: AGENTS.md and .opencode/opencode.json are NOT
+        // Defense-in-depth: AGENTS.md and opencode.jsonc are NOT
         // manifest keys, so they must never appear in --list regardless.
         $lines = array_values(array_filter(array_map('trim', explode("\n", $with['stdout'])), 'strlen'));
         $this->assertNotContains('AGENTS.md', $lines);
-        $this->assertNotContains('.opencode/opencode.json', $lines);
+        $this->assertNotContains('opencode.jsonc', $lines);
     }
 }

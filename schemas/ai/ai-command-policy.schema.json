@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://app-configs.local/.schemas/ai-command-policy.schema.json",
+  "$id": "https://app-configs.local/schemas/ai/ai-command-policy.schema.json",
   "title": "AI Command Policy Tiers",
   "type": "object",
   "required": ["version", "default_decision", "tiers"],

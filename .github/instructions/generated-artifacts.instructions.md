@@ -1,5 +1,5 @@
 ---
-applyTo: "docs/ai/generated/**,.schemas/**,tools/ai/**,scripts/ai/**,docs/ai/script-registry.md,docs/ai/script-registry.json"
+applyTo: "docs/ai/generated/**,schemas/ai/**,tools/ai/**,scripts/ai/**,docs/ai/script-registry.md,docs/ai/script-registry.json"
 description: "Generated artifact drift routing, source-first regeneration policy, and verbose output control"
 ---
 
@@ -53,3 +53,12 @@ All files in docs/ai/generated/ are safe to delete and regenerate.
 Regenerate only what you need next.
 
 For full policy, see `docs/ai/generated-artifacts.md`.
+
+## Canonical References
+
+Prefer canonical repository docs over this adapter file:
+
+- `docs/ai/project-context.md`
+- `docs/ai/workflow.md`
+- `docs/ai/AI-GUARDRAILS.md`
+- `docs/ai/generated-artifacts.md`

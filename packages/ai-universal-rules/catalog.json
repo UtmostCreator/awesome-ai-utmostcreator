@@ -1,5 +1,5 @@
 {
-    "$schema": "../../.schemas/ai-catalog.schema.json",
+    "$schema": "../../schemas/ai/ai-catalog.schema.json",
     "generated_by": "php tools/ai/generate-ai-catalog.php",
     "repository": {
         "name": "app-configs",
@@ -56,7 +56,7 @@
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 11,
+        "root:github-copilot-agent": 10,
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 17,
         "root:github-copilot-skill": 17,
@@ -1601,14 +1601,6 @@
         {
             "scope": "root",
             "type": "github-copilot-agent",
-            "name": "Bootstrapper",
-            "path": ".github/agents/bootstrapper.agent.md",
-            "runtime": "github-copilot",
-            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
             "name": "Config Maintainer",
             "path": ".github/agents/config-maintainer.agent.md",
             "runtime": "github-copilot",
@@ -2578,7 +2570,7 @@
             "scope": "root",
             "type": "root-doc",
             "name": "agent-evidence-schema",
-            "path": "docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md",
+            "path": "docs/ai/capabilities/agent-observability-and-evidence/event-schema.md",
             "runtime": "canonical",
             "description": "Structured evidence event model for traceable agent runs on supported runtimes."
         },
@@ -2586,7 +2578,7 @@
             "scope": "root",
             "type": "root-doc",
             "name": "agent-failure-taxonomy",
-            "path": "docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md",
+            "path": "docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md",
             "runtime": "canonical",
             "description": "Normalized failure categories for agent evidence events and taxonomy mapping guidance."
         },
@@ -2594,7 +2586,7 @@
             "scope": "root",
             "type": "root-doc",
             "name": "evaluation-golden-tasks",
-            "path": "docs/ai/capabilities/evaluation-and-regression/GOLDEN_TASKS.md",
+            "path": "docs/ai/capabilities/evaluation-and-regression/golden-tasks.md",
             "runtime": "canonical",
             "description": "Golden-task patterns for behavior-regression checks in agent workflows."
         },
@@ -2602,7 +2594,7 @@
             "scope": "root",
             "type": "root-doc",
             "name": "evaluation-human-review-rules",
-            "path": "docs/ai/capabilities/evaluation-and-regression/HUMAN_REVIEW_RULES.md",
+            "path": "docs/ai/capabilities/evaluation-and-regression/human-review-rules.md",
             "runtime": "canonical",
             "description": "Human-review triggers and decision record expectations for risky agent outcomes."
         },
@@ -2610,7 +2602,7 @@
             "scope": "root",
             "type": "root-doc",
             "name": "evaluation-replay-rules",
-            "path": "docs/ai/capabilities/evaluation-and-regression/REPLAY_RULES.md",
+            "path": "docs/ai/capabilities/evaluation-and-regression/replay-rules.md",
             "runtime": "canonical",
             "description": "Replay rules for reproducing and classifying failed or ambiguous agent runs."
         },
@@ -2618,7 +2610,7 @@
             "scope": "root",
             "type": "root-doc",
             "name": "preview-checklist",
-            "path": "docs/ai/capabilities/preview-environments/CHECKLIST.md",
+            "path": "docs/ai/capabilities/preview-environments/checklist.md",
             "runtime": "canonical",
             "description": "Checklist for preview-environment readiness, evidence, and cleanup."
         },
@@ -2626,7 +2618,7 @@
             "scope": "root",
             "type": "root-doc",
             "name": "preview-data-and-secrets",
-            "path": "docs/ai/capabilities/preview-environments/DATA_AND_SECRET_RULES.md",
+            "path": "docs/ai/capabilities/preview-environments/data-and-secret-rules.md",
             "runtime": "canonical",
             "description": "Data and secret isolation rules for preview environments."
         },
@@ -2634,7 +2626,7 @@
             "scope": "root",
             "type": "root-doc",
             "name": "preview-lifecycle",
-            "path": "docs/ai/capabilities/preview-environments/LIFECYCLE.md",
+            "path": "docs/ai/capabilities/preview-environments/lifecycle.md",
             "runtime": "canonical",
             "description": "Vendor-neutral lifecycle and TTL expectations for temporary preview environments."
         },
@@ -2674,7 +2666,7 @@
             "scope": "root",
             "type": "schema",
             "name": "evidence-event.schema.json",
-            "path": ".schemas/evidence-event.schema.json",
+            "path": "schemas/ai/evidence-event.schema.json",
             "runtime": "canonical",
             "description": "JSON schema for durable agent evidence events emitted by supported runtime surfaces."
         },

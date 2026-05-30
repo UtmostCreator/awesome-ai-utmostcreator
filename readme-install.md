@@ -77,7 +77,7 @@ These are the source files that make up the kit:
 | `packages/ai-universal-rules/` | **Source templates** — the master copies of all files that get installed. Contains `templates/`, `manifest.json`, `catalog.json`.       | No (source only)     |
 | `tools/ai/`                    | **PHP installer, validators, generators** — the CLI tools that copy templates, validate config, generate catalogs, and verify installs. | No (source only)     |
 | `.opencode/`                   | **OpenCode adapter** — agents, commands, and skills for the OpenCode CLI tool. Gets installed via the `opencode` profile.               | Yes                  |
-| `.schemas/`                    | **JSON schemas** — validation contracts for catalog, manifest, command policy, and other structured metadata.                           | Yes                  |
+| `schemas/ai/`                    | **JSON schemas** — validation contracts for catalog, manifest, command policy, and other structured metadata.                           | Yes                  |
 | `policies/`                    | **Governance policies** — allow/deny/confirm command rules consumed by script-level policy enforcement.                                 | Yes                  |
 | `tests/`                       | **Test suite** — PHPUnit tests for PHP tools, Bash tests for shell scripts.                                                             | No                   |
 | `AGENTS.md`                    | **Agent instructions** — repository-wide rules for AI agents (OpenCode, Claude). Gets installed to target repos.                        | Yes                  |

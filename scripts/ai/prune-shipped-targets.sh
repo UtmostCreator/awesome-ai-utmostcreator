@@ -43,7 +43,7 @@ Options:
   --include-candidates   only meaningful with --apply. Also delete the two
                          candidate paths that are referenced in
                          tools/ai/install/packs.php but absent from the
-                         manifest (AGENTS.md and .opencode/opencode.json).
+                         manifest (AGENTS.md and opencode.jsonc).
                          Off by default.
   --force        bypass the clean-worktree refusal (logs WARN).
   --manifest PATH  override .ai-install-manifest.json path.
@@ -70,7 +70,7 @@ REFUSE_PREFIXES=(
     "tools/"
     "scripts/ai/"
     "tests/"
-    ".schemas/"
+    "schemas/ai/"
     ".git/"
     ".ai-logs/"
     ".ai-backups/"
@@ -83,7 +83,7 @@ REFUSE_PREFIXES=(
 # when --apply --include-candidates is set.
 CANDIDATE_PATHS=(
     "AGENTS.md"
-    ".opencode/opencode.json"
+    "opencode.jsonc"
 )
 
 path_is_refused() {

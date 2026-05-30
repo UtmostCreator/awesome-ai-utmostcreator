@@ -184,7 +184,7 @@ function aiCollectCatalog(string $root): array
     ksort($counts);
 
     return [
-        '$schema' => '../../.schemas/ai-catalog.schema.json',
+        '$schema' => '../../schemas/ai/ai-catalog.schema.json',
         'generated_by' => 'php tools/ai/generate-ai-catalog.php',
         'repository' => [
             'name' => 'app-configs',
@@ -222,14 +222,14 @@ function aiCollectRootResources(string $root): array
         'docs/ai/agent-ops-checklist.md' => ['root-doc', 'agent-ops-checklist', 'Phased verification checklist for auditing AI workflow integration in the live repo.'],
         'docs/ai/integration-matrix.md' => ['root-doc', 'integration-matrix', 'Coverage map that tracks which AI workflow concepts are covered, partial, or missing.'],
         'docs/ai/AI-GUARDRAILS.md' => ['root-doc', 'AI Guardrails', 'Cross-tool guardrails for approval boundaries, evidence, and recurring failure modes.'],
-        'docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md' => ['root-doc', 'agent-evidence-schema', 'Structured evidence event model for traceable agent runs on supported runtimes.'],
-        'docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md' => ['root-doc', 'agent-failure-taxonomy', 'Normalized failure categories for agent evidence events and taxonomy mapping guidance.'],
-        'docs/ai/capabilities/evaluation-and-regression/GOLDEN_TASKS.md' => ['root-doc', 'evaluation-golden-tasks', 'Golden-task patterns for behavior-regression checks in agent workflows.'],
-        'docs/ai/capabilities/evaluation-and-regression/REPLAY_RULES.md' => ['root-doc', 'evaluation-replay-rules', 'Replay rules for reproducing and classifying failed or ambiguous agent runs.'],
-        'docs/ai/capabilities/evaluation-and-regression/HUMAN_REVIEW_RULES.md' => ['root-doc', 'evaluation-human-review-rules', 'Human-review triggers and decision record expectations for risky agent outcomes.'],
-        'docs/ai/capabilities/preview-environments/LIFECYCLE.md' => ['root-doc', 'preview-lifecycle', 'Vendor-neutral lifecycle and TTL expectations for temporary preview environments.'],
-        'docs/ai/capabilities/preview-environments/DATA_AND_SECRET_RULES.md' => ['root-doc', 'preview-data-and-secrets', 'Data and secret isolation rules for preview environments.'],
-        'docs/ai/capabilities/preview-environments/CHECKLIST.md' => ['root-doc', 'preview-checklist', 'Checklist for preview-environment readiness, evidence, and cleanup.'],
+        'docs/ai/capabilities/agent-observability-and-evidence/event-schema.md' => ['root-doc', 'agent-evidence-schema', 'Structured evidence event model for traceable agent runs on supported runtimes.'],
+        'docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md' => ['root-doc', 'agent-failure-taxonomy', 'Normalized failure categories for agent evidence events and taxonomy mapping guidance.'],
+        'docs/ai/capabilities/evaluation-and-regression/golden-tasks.md' => ['root-doc', 'evaluation-golden-tasks', 'Golden-task patterns for behavior-regression checks in agent workflows.'],
+        'docs/ai/capabilities/evaluation-and-regression/replay-rules.md' => ['root-doc', 'evaluation-replay-rules', 'Replay rules for reproducing and classifying failed or ambiguous agent runs.'],
+        'docs/ai/capabilities/evaluation-and-regression/human-review-rules.md' => ['root-doc', 'evaluation-human-review-rules', 'Human-review triggers and decision record expectations for risky agent outcomes.'],
+        'docs/ai/capabilities/preview-environments/lifecycle.md' => ['root-doc', 'preview-lifecycle', 'Vendor-neutral lifecycle and TTL expectations for temporary preview environments.'],
+        'docs/ai/capabilities/preview-environments/data-and-secret-rules.md' => ['root-doc', 'preview-data-and-secrets', 'Data and secret isolation rules for preview environments.'],
+        'docs/ai/capabilities/preview-environments/checklist.md' => ['root-doc', 'preview-checklist', 'Checklist for preview-environment readiness, evidence, and cleanup.'],
     ];
 
     foreach ($rootDocMap as $relativePath => [$type, $name, $description]) {
@@ -296,7 +296,7 @@ function aiCollectRootResources(string $root): array
         '.github/hooks/tool-policy.json' => ['adapter-hook', 'tool-policy', 'GitHub Copilot hook configuration for tool policy enforcement.', 'github-copilot'],
         '.github/hooks/tool-guardian.json' => ['adapter-hook', 'tool-guardian', 'GitHub Copilot hook configuration for guarded tool execution.', 'github-copilot'],
         '.github/hooks/scripts/tool-guardian.ps1' => ['adapter-hook-script', 'tool-guardian.ps1', 'PowerShell hook script for GitHub Copilot guarded tool execution.', 'github-copilot'],
-        '.schemas/evidence-event.schema.json' => ['schema', 'evidence-event.schema.json', 'JSON schema for durable agent evidence events emitted by supported runtime surfaces.', 'canonical'],
+        'schemas/ai/evidence-event.schema.json' => ['schema', 'evidence-event.schema.json', 'JSON schema for durable agent evidence events emitted by supported runtime surfaces.', 'canonical'],
     ];
 
     foreach ($adapterSurfaceMap as $relativePath => [$type, $name, $description, $runtime]) {
@@ -676,7 +676,7 @@ function aiRenderLlms(array $catalog): string
     $lines[] = '';
     $lines[] = '- GitHub Copilot adapter resources live under `.github/` and are generated from `packages/ai-universal-rules/templates/instructions/`, `packages/ai-universal-rules/templates/workflows/`, and `packages/ai-universal-rules/templates/core/agents/`.';
     $lines[] = '- OpenCode adapter resources live under `.opencode/` and are generated from `packages/ai-universal-rules/templates/workflows/`, `packages/ai-universal-rules/templates/commands/`, and `packages/ai-universal-rules/templates/core/agents/`.';
-    $lines[] = '- Canonical workflow resources stay runtime-neutral under `docs/ai/`, `docs/ai/capabilities/`, `scripts/ai/`, and `.schemas/`.';
+    $lines[] = '- Canonical workflow resources stay runtime-neutral under `docs/ai/`, `docs/ai/capabilities/`, `scripts/ai/`, and `schemas/ai/`.';
     $lines[] = '';
     $lines[] = '## Reusable Kit';
     $lines[] = '';

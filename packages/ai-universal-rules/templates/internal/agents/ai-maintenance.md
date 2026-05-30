@@ -23,7 +23,7 @@ permission:
     'docs/ai/**': allow
     'README.md': allow
     'readme-install.md': allow
-    '.schemas/**': allow
+    'schemas/ai/**': allow
     '.github/workflows/**': allow
     '.opencode/**': deny
     '.github/agents/**': deny

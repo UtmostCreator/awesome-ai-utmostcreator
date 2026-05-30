@@ -161,7 +161,7 @@ class AgentPermissionPolicyTest extends TestCase
     public static function projectConfigProvider(): array
     {
         return [
-            ['.opencode/opencode.json'],
+            ['opencode.jsonc'],
             ['packages/ai-universal-rules/templates/core/opencode.json'],
         ];
     }

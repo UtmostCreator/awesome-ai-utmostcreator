@@ -14,7 +14,7 @@ Use this file as durable, canonical project context for instructions, agents, pr
 
 ## 2) Scope and Ownership
 
-- Active paths: `.ai-install-manifest.json,.editorconfig,.gitattributes,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.schemas,.shellcheckrc,AGENTS.md,CLAUDE.md,README.md,composer.json,composer.lock,install-ai-kit.sh,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,tests,tools`
+- Active paths: `.ai-install-manifest.json,.editorconfig,.gitattributes,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.shellcheckrc,AGENTS.md,CLAUDE.md,README.md,composer.json,composer.lock,install-ai-kit.sh,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,schemas,tests,tools`
 - Inactive/legacy paths: `unknown`
 - Primary entrypoints: `README.md, docs/ai/project-context.md`
 - Architecture notes: `Keep policy and capability docs canonical; keep runtime adapters thin.`

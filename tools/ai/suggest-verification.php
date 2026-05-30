@@ -41,7 +41,7 @@ foreach ($paths as $path) {
         $matchedAny = true;
         $recommend['php tools/ai/validate-ai-config.php'] = true;
     }
-    if (str_starts_with($path, 'policies/') || str_starts_with($path, '.schemas/')) {
+    if (str_starts_with($path, 'policies/') || str_starts_with($path, 'schemas/ai/')) {
         $matchedAny = true;
         $recommend['php tools/ai/validate-generated-artifacts.php'] = true;
         $risk = 'high';
