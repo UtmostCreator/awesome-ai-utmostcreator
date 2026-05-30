@@ -70,7 +70,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/instructions/execution-protocol.instructions.md', 'target' => '.github/instructions/execution-protocol.instructions.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
         'adapter-opencode' => [
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/core/opencode.json', 'target' => '.opencode/opencode.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/core/opencode.json', 'target' => 'opencode.jsonc', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/core/agents', 'target' => '.opencode/agents', 'install_type' => 'opencode-agents', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/workflows', 'target' => '.opencode/skills', 'install_type' => 'skill-dirs', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/workflows', 'target' => '.opencode/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -89,7 +89,7 @@ function aiInstallerPackRegistry(): array
         'policy-pack' => [
             ['type' => 'file', 'source' => 'docs/ai/command-risk-taxonomy.md', 'target' => 'docs/ai/command-risk-taxonomy.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/failure-handling.md', 'target' => 'docs/ai/failure-handling.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => '.schemas/evidence-event.schema.json', 'target' => '.schemas/evidence-event.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/evidence-event.schema.json', 'target' => 'schemas/ai/evidence-event.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
         ],
         'scripts-pack' => [
             ['type' => 'file', 'source' => 'scripts/ai/common.sh', 'target' => 'scripts/ai/common.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -146,8 +146,8 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/validation.md', 'target' => 'docs/ai/validation.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
         ],
         'evidence-pack' => [
-            ['type' => 'file', 'source' => 'docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md', 'target' => 'docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => 'docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md', 'target' => 'docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'docs/ai/capabilities/agent-observability-and-evidence/event-schema.md', 'target' => 'docs/ai/capabilities/agent-observability-and-evidence/event-schema.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md', 'target' => 'docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
         ],
         'docs-reference-pack' => [
             ['type' => 'file', 'source' => 'docs/ai/agent-ops.md', 'target' => 'docs/ai/agent-ops.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
@@ -183,9 +183,9 @@ function aiInstallerPackRegistry(): array
         ],
         'advisor-pack' => [
             ['type' => 'dir', 'source' => 'tools/ai/advisor', 'target' => 'tools/ai/advisor', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
-            ['type' => 'file', 'source' => '.schemas/project-signals.schema.json', 'target' => '.schemas/project-signals.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
-            ['type' => 'file', 'source' => '.schemas/project-scorecard.schema.json', 'target' => '.schemas/project-scorecard.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
-            ['type' => 'file', 'source' => '.schemas/advisor-recommendation.schema.json', 'target' => '.schemas/advisor-recommendation.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'schemas/ai/project-signals.schema.json', 'target' => 'schemas/ai/project-signals.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'schemas/ai/project-scorecard.schema.json', 'target' => 'schemas/ai/project-scorecard.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'schemas/ai/advisor-recommendation.schema.json', 'target' => 'schemas/ai/advisor-recommendation.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'target-tools-pack' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -221,14 +221,14 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'tools/ai/verify-install-placeholders.php', 'target' => 'tools/ai/verify-install-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-placeholders.php', 'target' => 'tools/ai/validate-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/verify-full-install.php', 'target' => 'tools/ai/verify-full-install.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => '.schemas/ai-catalog.schema.json', 'target' => '.schemas/ai-catalog.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => '.schemas/ai-command-policy.schema.json', 'target' => '.schemas/ai-command-policy.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => '.schemas/ai-file-standards.schema.json', 'target' => '.schemas/ai-file-standards.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => '.schemas/ai-handoff.schema.json', 'target' => '.schemas/ai-handoff.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
-            ['type' => 'file', 'source' => '.schemas/ai-universal-rules-manifest.schema.json', 'target' => '.schemas/ai-universal-rules-manifest.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => '.schemas/generated-artifacts.schema.json', 'target' => '.schemas/generated-artifacts.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => '.schemas/project-placeholders.schema.json', 'target' => '.schemas/project-placeholders.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => '.schemas/verification-matrix.schema.json', 'target' => '.schemas/verification-matrix.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/ai-catalog.schema.json', 'target' => 'schemas/ai/ai-catalog.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/ai-command-policy.schema.json', 'target' => 'schemas/ai/ai-command-policy.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/ai-file-standards.schema.json', 'target' => 'schemas/ai/ai-file-standards.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/ai-handoff.schema.json', 'target' => 'schemas/ai/ai-handoff.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'schemas/ai/ai-universal-rules-manifest.schema.json', 'target' => 'schemas/ai/ai-universal-rules-manifest.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/generated-artifacts.schema.json', 'target' => 'schemas/ai/generated-artifacts.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/project-placeholders.schema.json', 'target' => 'schemas/ai/project-placeholders.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/verification-matrix.schema.json', 'target' => 'schemas/ai/verification-matrix.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
         ],
         'shared-templates-pack' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/shared/project-interaction.md', 'target' => 'docs/ai/shared/project-interaction.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],

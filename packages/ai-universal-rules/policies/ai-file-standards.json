@@ -1,5 +1,5 @@
 {
-  "$schema": "../../.schemas/ai-file-standards.schema.json",
+  "$schema": "../../schemas/ai/ai-file-standards.schema.json",
   "version": "1.0.0",
   "execution_protocol": {
     "canonical_doc": "docs/ai/execution-protocol.md",

@@ -36,7 +36,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / cli` - 1
 - `root / exporter` - 1
 - `root / generator` - 1
-- `root / github-copilot-agent` - 11
+- `root / github-copilot-agent` - 10
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 17
 - `root / github-copilot-skill` - 17
@@ -105,7 +105,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`exporter`|export-ai-universal-rules|`tools/ai/export-ai-universal-rules.php`|Builds starter-profile release bundles under dist/.|
 |`generator`|generate-ai-catalog|`tools/ai/generate-ai-catalog.php`|Generates catalog docs, catalog JSON, and llms.txt.|
 |`github-copilot-agent`|Architect|`.github/agents/architect.agent.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
-|`github-copilot-agent`|Bootstrapper|`.github/agents/bootstrapper.agent.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|
 |`github-copilot-agent`|Config Maintainer|`.github/agents/config-maintainer.agent.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`github-copilot-agent`|Implementer|`.github/agents/implementer.agent.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
 |`github-copilot-agent`|Refactorer|`.github/agents/refactorer.agent.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
@@ -227,19 +226,19 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`root-doc`|agent-ops-checklist|`docs/ai/agent-ops-checklist.md`|Phased verification checklist for auditing AI workflow integration in the live repo.|
 |`root-doc`|agent-ops|`docs/ai/agent-ops.md`|Agent operations model for observability, evaluation, optimization, IAM, and architecture routing.|
 |`root-doc`|agents|`docs/ai/agents.md`|Durable live-agent reference plus package-agent index for later lookup.|
-|`root-doc`|agent-evidence-schema|`docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md`|Structured evidence event model for traceable agent runs on supported runtimes.|
-|`root-doc`|agent-failure-taxonomy|`docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md`|Normalized failure categories for agent evidence events and taxonomy mapping guidance.|
-|`root-doc`|evaluation-golden-tasks|`docs/ai/capabilities/evaluation-and-regression/GOLDEN_TASKS.md`|Golden-task patterns for behavior-regression checks in agent workflows.|
-|`root-doc`|evaluation-human-review-rules|`docs/ai/capabilities/evaluation-and-regression/HUMAN_REVIEW_RULES.md`|Human-review triggers and decision record expectations for risky agent outcomes.|
-|`root-doc`|evaluation-replay-rules|`docs/ai/capabilities/evaluation-and-regression/REPLAY_RULES.md`|Replay rules for reproducing and classifying failed or ambiguous agent runs.|
-|`root-doc`|preview-checklist|`docs/ai/capabilities/preview-environments/CHECKLIST.md`|Checklist for preview-environment readiness, evidence, and cleanup.|
-|`root-doc`|preview-data-and-secrets|`docs/ai/capabilities/preview-environments/DATA_AND_SECRET_RULES.md`|Data and secret isolation rules for preview environments.|
-|`root-doc`|preview-lifecycle|`docs/ai/capabilities/preview-environments/LIFECYCLE.md`|Vendor-neutral lifecycle and TTL expectations for temporary preview environments.|
+|`root-doc`|agent-evidence-schema|`docs/ai/capabilities/agent-observability-and-evidence/event-schema.md`|Structured evidence event model for traceable agent runs on supported runtimes.|
+|`root-doc`|agent-failure-taxonomy|`docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md`|Normalized failure categories for agent evidence events and taxonomy mapping guidance.|
+|`root-doc`|evaluation-golden-tasks|`docs/ai/capabilities/evaluation-and-regression/golden-tasks.md`|Golden-task patterns for behavior-regression checks in agent workflows.|
+|`root-doc`|evaluation-human-review-rules|`docs/ai/capabilities/evaluation-and-regression/human-review-rules.md`|Human-review triggers and decision record expectations for risky agent outcomes.|
+|`root-doc`|evaluation-replay-rules|`docs/ai/capabilities/evaluation-and-regression/replay-rules.md`|Replay rules for reproducing and classifying failed or ambiguous agent runs.|
+|`root-doc`|preview-checklist|`docs/ai/capabilities/preview-environments/checklist.md`|Checklist for preview-environment readiness, evidence, and cleanup.|
+|`root-doc`|preview-data-and-secrets|`docs/ai/capabilities/preview-environments/data-and-secret-rules.md`|Data and secret isolation rules for preview environments.|
+|`root-doc`|preview-lifecycle|`docs/ai/capabilities/preview-environments/lifecycle.md`|Vendor-neutral lifecycle and TTL expectations for temporary preview environments.|
 |`root-doc`|failure-handling|`docs/ai/failure-handling.md`|Failure taxonomy, retry policy, corrected usage guidance, and logging contract.|
 |`root-doc`|integration-matrix|`docs/ai/integration-matrix.md`|Coverage map that tracks which AI workflow concepts are covered, partial, or missing.|
 |`root-doc`|project-context-doc|`docs/ai/project-context.md`|Durable repository context for instructions, capabilities, and runtime adapters.|
 |`root-doc`|workflow|`docs/ai/workflow.md`|Default live workflow for risk, verification, context, and docs sync.|
-|`schema`|evidence-event.schema.json|`.schemas/evidence-event.schema.json`|JSON schema for durable agent evidence events emitted by supported runtime surfaces.|
+|`schema`|evidence-event.schema.json|`schemas/ai/evidence-event.schema.json`|JSON schema for durable agent evidence events emitted by supported runtime surfaces.|
 |`validator`|validate-ai-catalog|`tools/ai/validate-ai-catalog.php`|Validates manifest, catalog, and starter profile metadata.|
 |`validator`|validate-ai-config|`tools/ai/validate-ai-config.php`|Validates the root live AI workflow layer.|
 |`validator`|validate-generated-artifacts|`tools/ai/validate-generated-artifacts.php`|Validates generated artifact presence and drift.|
@@ -251,7 +250,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 
 | Type | Name | Path | Description |
 | --- | --- | --- | --- |
-|`core-template`|awesome-ai-utmostcreator - Repository Instructions|`packages/ai-universal-rules/templates/core/AGENTS.template.md`|- Project: `awesome-ai-utmostcreator`|
+|`core-template`|<PROJECT_NAME> - Repository Instructions|`packages/ai-universal-rules/templates/core/AGENTS.template.md`|- Project: `<PROJECT_NAME>`|
 |`core-template`|Post-Install Checklist|`packages/ai-universal-rules/templates/core/POST-INSTALL.template.md`|Your AI workflow kit was installed successfully. **Complete every item below before running write-capable AI agents.**|
 |`core-template`|Architect Agent|`packages/ai-universal-rules/templates/core/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`core-template`|Bootstrapper Agent|`packages/ai-universal-rules/templates/core/agents/bootstrapper.md`|Use when installing, re-installing, or validating the AI kit from dry-run to backup to apply to full verification|
@@ -265,15 +264,15 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`core-template`|Researcher Agent|`packages/ai-universal-rules/templates/core/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`core-template`|Reviewer Agent|`packages/ai-universal-rules/templates/core/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
 |`core-template`|Workflow Auditor Agent|`packages/ai-universal-rules/templates/core/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
-|`core-template`|awesome-ai-utmostcreator AI File Standards|`packages/ai-universal-rules/templates/core/ai-file-standards.template.md`|Use this file as the installed repository's canonical content and size contract for AI workflow files.|
-|`core-template`|Repository Instructions For awesome-ai-utmostcreator|`packages/ai-universal-rules/templates/core/copilot-instructions.template.md`|Use these instructions as the repository-wide baseline for GitHub Copilot.|
+|`core-template`|<PROJECT_NAME> AI File Standards|`packages/ai-universal-rules/templates/core/ai-file-standards.template.md`|Use this file as the installed repository's canonical content and size contract for AI workflow files.|
+|`core-template`|Repository Instructions For <PROJECT_NAME>|`packages/ai-universal-rules/templates/core/copilot-instructions.template.md`|Use these instructions as the repository-wide baseline for GitHub Copilot.|
 |`core-template`|copilot-vscode-settings.template|`packages/ai-universal-rules/templates/core/copilot-vscode-settings.template.json`|{|
 |`core-template`|Execution Protocol|`packages/ai-universal-rules/templates/core/execution-protocol.template.md`|Use this as the canonical operating contract for non-trivial AI-assisted planning, editing, review, and verification.|
 |`core-template`|Generated Artifacts Guide|`packages/ai-universal-rules/templates/core/generated-artifacts.template.md`|`docs/ai/generated/` holds machine-generated files produced by `php tools/ai/ai.php` subcommands.|
 |`core-template`|opencode|`packages/ai-universal-rules/templates/core/opencode.json`|{|
 |`core-template`|Project Context Placeholder Guide|`packages/ai-universal-rules/templates/core/project-context.placeholders.md`|Use this file when installing templates into a new project. Fill placeholders before enabling write-capable AI flows.|
-|`core-template`|awesome-ai-utmostcreator Project Context|`packages/ai-universal-rules/templates/core/project-context.template.md`|Use this file as durable, canonical project context for instructions, agents, prompts, and capabilities.|
-|`core-template`|awesome-ai-utmostcreator Project Stack|`packages/ai-universal-rules/templates/core/project-stack.template.md`|Compatibility note: `project-stack.template.md` remains for older installs.|
+|`core-template`|<PROJECT_NAME> Project Context|`packages/ai-universal-rules/templates/core/project-context.template.md`|Use this file as durable, canonical project context for instructions, agents, prompts, and capabilities.|
+|`core-template`|<PROJECT_NAME> Project Stack|`packages/ai-universal-rules/templates/core/project-stack.template.md`|Compatibility note: `project-stack.template.md` remains for older installs.|
 |`core-template`|Workflow|`packages/ai-universal-rules/templates/core/workflow.template.md`|For non-trivial work, follow `docs/ai/execution-protocol.md`.|
 |`foundation-doc`|Capability Model|`packages/ai-universal-rules/docs/foundations/CAPABILITY-MODEL.md`|Capabilities are the canonical reusable workflow layer in this kit.|
 |`foundation-doc`|Compatibility|`packages/ai-universal-rules/docs/foundations/COMPATIBILITY.md`|This package is intentionally asymmetric.|
@@ -312,13 +311,13 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`operations-doc`|Maintenance|`packages/ai-universal-rules/docs/operations/MAINTENANCE.md`|Treat this package like workflow infrastructure, not throwaway prompts.|
 |`operations-doc`|MCP Boundaries|`packages/ai-universal-rules/docs/operations/MCP-BOUNDARIES.md`|MCP extends capability, but also risk.|
 |`operations-doc`|Troubleshooting|`packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md`|- unresolved placeholders|
-|`optional-template`|architecture-plan|`packages/ai-universal-rules/templates/optional/agents/architecture-plan.md`|Produce a focused implementation plan for a medium or large change in awesome-ai-utmostcreator|
-|`optional-template`|bugfix|`packages/ai-universal-rules/templates/optional/agents/bugfix.md`|Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal|
-|`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in awesome-ai-utmostcreator|
-|`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in awesome-ai-utmostcreator|
-|`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator|
+|`optional-template`|architecture-plan|`packages/ai-universal-rules/templates/optional/agents/architecture-plan.md`|Produce a focused implementation plan for a medium or large change in <PROJECT_NAME>|
+|`optional-template`|bugfix|`packages/ai-universal-rules/templates/optional/agents/bugfix.md`|Use when fixing a bug in <PROJECT_NAME>, reproducing it first when practical, and keeping the fix minimal|
+|`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in <PROJECT_NAME>|
+|`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in <PROJECT_NAME>|
+|`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>|
 |`optional-template`|ui-builder|`packages/ai-universal-rules/templates/optional/agents/ui-builder.md`|Use when implementing UI work while preserving repository interaction patterns and accessibility rules|
-|`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades carefully in awesome-ai-utmostcreator|
+|`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades carefully in <PROJECT_NAME>|
 |`optional-template`|Optional Delivery Pack|`packages/ai-universal-rules/templates/optional/delivery/README.md`|Use this pack when you want a lightweight slice card for non-trivial work.|
 |`optional-template`|Slice Card|`packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md`|- User outcome:|
 |`package-capability`|Capability Templates|`packages/ai-universal-rules/templates/capabilities/README.md`|These folders are the canonical reusable workflow units in this kit.|
@@ -365,7 +364,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`package-capability`|Verify Change Reference|`packages/ai-universal-rules/templates/capabilities/verify-change/reference.md`|Use this file to record repository-specific verification facts such as:|
 |`shared-template`|Approval Packet|`packages/ai-universal-rules/templates/shared/approvals/APPROVAL-PACKET.template.md`|- request: `<CHANGE_REQUEST>`|
 |`shared-template`|AI Guardrails|`packages/ai-universal-rules/templates/shared/guardrails/AI-GUARDRAILS.md`|Use this file as the cross-tool control layer for common failure modes.|
-|`shared-template`|System Architecture - How The Projects Interact|`packages/ai-universal-rules/templates/shared/project-interaction.md`|This document is the canonical cross-repository overview for the multi-project workspace that includes `awesome-ai-utmostcreator`.|
+|`shared-template`|System Architecture - How The Projects Interact|`packages/ai-universal-rules/templates/shared/project-interaction.md`|This document is the canonical cross-repository overview for the multi-project workspace that includes `<PROJECT_NAME>`.|
 |`shared-template`|Verification Evidence|`packages/ai-universal-rules/templates/shared/verification/VERIFICATION-EVIDENCE.template.md`|- `<CLAIM_BEING_PROVED>`|
 |`workflow-doc`|Agent Handoffs|`packages/ai-universal-rules/docs/workflows/AGENT-HANDOFFS.md`|Use staged agents to reduce context pollution and scope drift.|
 |`workflow-doc`|Monorepo Strategy|`packages/ai-universal-rules/docs/workflows/MONOREPO-STRATEGY.md`|Large repos need a nested strategy or the workflow becomes noisy.|

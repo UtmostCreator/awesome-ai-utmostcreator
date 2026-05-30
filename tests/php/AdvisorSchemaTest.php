@@ -39,9 +39,9 @@ class AdvisorSchemaTest extends TestCase
     {
         $root = realpath(dirname(__DIR__, 2));
         $this->assertNotFalse($root);
-        $this->assertFileExists($root . DIRECTORY_SEPARATOR . '.schemas' . DIRECTORY_SEPARATOR . 'project-signals.schema.json');
-        $this->assertFileExists($root . DIRECTORY_SEPARATOR . '.schemas' . DIRECTORY_SEPARATOR . 'project-scorecard.schema.json');
-        $this->assertFileExists($root . DIRECTORY_SEPARATOR . '.schemas' . DIRECTORY_SEPARATOR . 'advisor-recommendation.schema.json');
+        $this->assertFileExists($root . DIRECTORY_SEPARATOR . 'schemas' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'project-signals.schema.json');
+        $this->assertFileExists($root . DIRECTORY_SEPARATOR . 'schemas' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'project-scorecard.schema.json');
+        $this->assertFileExists($root . DIRECTORY_SEPARATOR . 'schemas' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'advisor-recommendation.schema.json');
     }
 
     public function testAdvisorCheckFailsForMalformedSignals(): void

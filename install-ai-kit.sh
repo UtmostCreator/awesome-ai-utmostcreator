@@ -129,7 +129,7 @@ for relative_path in \
     .github/copilot-instructions.md \
     .github/instructions/frontend.instructions.md \
     .github/instructions/testing.instructions.md \
-    .opencode/opencode.json
+    opencode.jsonc
 do
     check_target_path "$relative_path" || target_failures=$((target_failures + 1))
 done

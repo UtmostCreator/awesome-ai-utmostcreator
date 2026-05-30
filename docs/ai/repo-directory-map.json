@@ -34,16 +34,16 @@
       "designed_for": "OpenCode users and local agent routing.",
       "install_guide": "README.md",
       "install_script": "tools/ai/install-opencode-kit.sh",
-      "ai_entrypoint": ".opencode/opencode.json",
-      "notes": "Canonical installed OpenCode surface for this repo."
+      "ai_entrypoint": "opencode.jsonc",
+      "notes": "OpenCode runtime adapters (agents, commands, skills); the canonical OpenCode config is the repo-root opencode.jsonc."
     },
     {
-      "path": ".schemas",
+      "path": "schemas",
       "purpose": "JSON schemas used by AI tooling and artifact validation.",
       "designed_for": "Tooling validation and contract enforcement.",
       "install_guide": "docs/ai/validation.md",
       "install_script": "none",
-      "ai_entrypoint": ".schemas/ai-catalog.schema.json",
+      "ai_entrypoint": "schemas/ai/ai-catalog.schema.json",
       "notes": "Schema set for generated artifacts and policy documents."
     },
     {

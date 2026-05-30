@@ -455,7 +455,11 @@ function lintJsonFiles(array &$report, string $root, array $files): void
 function isJsoncLikePath(string $file): bool
 {
     $path = str_replace('\\', '/', $file);
-    return str_starts_with($path, 'configs/vscode/') || $path === 'configs/karabiner/karabiner.json';
+
+    return str_starts_with($path, 'configs/vscode/')
+        || $path === 'configs/karabiner/karabiner.json'
+        || $path === '.vscode/settings.json'
+        || str_ends_with($path, 'copilot-vscode-settings.template.json');
 }
 
 function stripJsonCommentsAndTrailingCommas(string $input): string
