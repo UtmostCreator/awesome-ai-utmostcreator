@@ -111,5 +111,5 @@ php tools/ai/install-ai-kit.php --target . --profile full-governance \
                                 --non-interactive
 ```
 
-`--include-candidates` adds two paths that are referenced by `tools/ai/install/packs.php` but are not in the manifest (`AGENTS.md` and `.opencode/opencode.json`). It is only honored with `--apply` and is off by default.
+`--include-candidates` adds two paths that are referenced by `tools/ai/install/packs.php` but are not in the manifest (`AGENTS.md` and `opencode.jsonc`). It is only honored with `--apply` and is off by default.
 

@@ -24,7 +24,7 @@ permission:
     '.opencode/agents/**': allow
     '.opencode/commands/**': allow
     '.opencode/skills/**': allow
-    '.opencode/opencode.json': allow
+    'opencode.jsonc': allow
     'scripts/ai/**': allow
     '.git/**': deny
     'vendor/**': deny

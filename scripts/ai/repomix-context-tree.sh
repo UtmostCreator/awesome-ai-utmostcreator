@@ -580,7 +580,7 @@ build_human_index() {
         printf '## Wiring Locations\n\n'
         printf '%s\n' '- `AGENTS.md`'
         printf '%s\n' '- `.github/copilot-instructions.md`'
-        printf '%s\n' '- `.opencode/opencode.json`'
+        printf '%s\n' '- `opencode.jsonc`'
         printf '%s\n' '- `docs/ai/adapter-contract.md`'
         printf '%s\n\n' '- `docs/ai/context-packing.md`'
         printf '## Machine Files\n\n'

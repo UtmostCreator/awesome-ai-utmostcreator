@@ -34,8 +34,8 @@
       "designed_for": "OpenCode users and local agent routing.",
       "install_guide": "README.md",
       "install_script": "tools/ai/install-opencode-kit.sh",
-      "ai_entrypoint": ".opencode/opencode.json",
-      "notes": "Canonical installed OpenCode surface for this repo."
+      "ai_entrypoint": "opencode.jsonc",
+      "notes": "OpenCode runtime adapters (agents, commands, skills); the canonical OpenCode config is the repo-root opencode.jsonc."
     },
     {
       "path": ".schemas",
