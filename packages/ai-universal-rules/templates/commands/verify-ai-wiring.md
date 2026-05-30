@@ -19,3 +19,7 @@ Checklist:
 - Mutating or broad wrappers (`ai-verify`, `pack-context`, repomix context scripts, `ai-edit`, `ai-rollback`, `install-mandatory-tools`) require ask.
 - Researcher/reviewer agents deny edits and start with changed/staged/tracked evidence.
 - File reading uses `preview-file`; usage discovery uses `query-usage`; verification uses `ai-verify`.
+
+## Canonical References
+
+Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/AI-GUARDRAILS.md`.

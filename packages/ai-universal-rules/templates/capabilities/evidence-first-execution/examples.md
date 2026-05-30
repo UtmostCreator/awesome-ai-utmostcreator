@@ -99,7 +99,7 @@ Safety posture:
 - `--list` and `--dry-run` never mutate state.
 - `--apply` refuses unless `git status --porcelain` is empty (override with `--force`, logged as a WARN).
 - `--apply` snapshots each path to `.ai-backups/prune-shipped-<ts>/` BEFORE deletion and records `{ts, path, sha256_before, snapshot_path, pack}` for every removal in `.ai-logs/prune-<ts>.jsonl`.
-- A hardcoded refuse-list (`packages/`, `tools/`, `scripts/ai/`, `tests/`, `.schemas/`, `.git/`, `.ai-logs/`, `.ai-backups/`, `docs/ai/generated/`, `vendor/`, `node_modules/`, and the script itself) is enforced before any `rm`, so a tampered manifest cannot trick the script into deleting source-of-truth files.
+- A hardcoded refuse-list (`packages/`, `tools/`, `scripts/ai/`, `tests/`, `schemas/ai/`, `.git/`, `.ai-logs/`, `.ai-backups/`, `docs/ai/generated/`, `vendor/`, `node_modules/`, and the script itself) is enforced before any `rm`, so a tampered manifest cannot trick the script into deleting source-of-truth files.
 
 Restore is a single command:
 
