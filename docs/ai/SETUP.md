@@ -6,7 +6,7 @@
 
 ## Installed Packs
 
-- `capabilities-extended-full`
+- `capabilities-governance`
 - `hooks-pack`
 - `ci-pack`
 - `scripts-pack`
@@ -14,7 +14,7 @@
 - `evidence-pack`
 - `adapter-copilot`
 - `adapter-opencode`
-- `capabilities-extended-lite`
+- `capabilities-extended`
 - `base`
 - `setup-docs`
 - `capabilities-core`
