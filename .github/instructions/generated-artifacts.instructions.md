@@ -1,5 +1,5 @@
 ---
-applyTo: "docs/ai/generated/**,.schemas/**,tools/ai/**,scripts/ai/**,docs/ai/script-registry.md,docs/ai/script-registry.json"
+applyTo: "docs/ai/generated/**,schemas/ai/**,tools/ai/**,scripts/ai/**,docs/ai/script-registry.md,docs/ai/script-registry.json"
 description: "Generated artifact drift routing, source-first regeneration policy, and verbose output control"
 ---
 

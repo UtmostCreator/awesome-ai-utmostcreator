@@ -70,7 +70,7 @@ REFUSE_PREFIXES=(
     "tools/"
     "scripts/ai/"
     "tests/"
-    ".schemas/"
+    "schemas/ai/"
     ".git/"
     ".ai-logs/"
     ".ai-backups/"

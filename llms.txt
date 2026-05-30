@@ -19,7 +19,7 @@
 
 - GitHub Copilot adapter resources live under `.github/` and are generated from `packages/ai-universal-rules/templates/instructions/`, `packages/ai-universal-rules/templates/workflows/`, and `packages/ai-universal-rules/templates/core/agents/`.
 - OpenCode adapter resources live under `.opencode/` and are generated from `packages/ai-universal-rules/templates/workflows/`, `packages/ai-universal-rules/templates/commands/`, and `packages/ai-universal-rules/templates/core/agents/`.
-- Canonical workflow resources stay runtime-neutral under `docs/ai/`, `docs/ai/capabilities/`, `scripts/ai/`, and `.schemas/`.
+- Canonical workflow resources stay runtime-neutral under `docs/ai/`, `docs/ai/capabilities/`, `scripts/ai/`, and `schemas/ai/`.
 
 ## Reusable Kit
 

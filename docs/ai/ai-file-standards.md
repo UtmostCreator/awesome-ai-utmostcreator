@@ -1,6 +1,6 @@
-# app-configs AI File Standards
+# AI File Standards
 
-Use this file as the installed repository's canonical content and size contract for AI workflow files.
+Use this file as the canonical content and size contract for AI workflow files in this repository and in installed target repositories.
 
 ## Purpose
 
