@@ -178,7 +178,7 @@ class PruneShippedTargetsTest extends TestCase
             'tools/',
             'scripts/ai/',
             'tests/',
-            '.schemas/',
+            'schemas/ai/',
             '.git/',
             'vendor/',
             'node_modules/',

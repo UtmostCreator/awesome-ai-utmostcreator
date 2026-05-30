@@ -7,7 +7,7 @@ This kit ships canonical docs, instructions, agents, and prompts containing `<UP
 | Source                                              | Purpose                                                                 |
 | --------------------------------------------------- | ----------------------------------------------------------------------- |
 | `packages/ai-universal-rules/PLACEHOLDERS.md`       | Authoritative dictionary: every token, meaning, example, used-in column |
-| `.schemas/project-placeholders.schema.json`         | JSON schema enforcing the registry shape                                |
+| `schemas/ai/project-placeholders.schema.json`         | JSON schema enforcing the registry shape                                |
 | `docs/ai/project-context-placeholders.md`           | Quick guide for filling `docs/ai/project-context.md`                    |
 | `tools/ai/install/core.php`                         | Installer substitution map (required + optional tokens, default values) |
 | `tools/ai/validate-placeholders.php`                | Kit check: every token used in templates is documented in the dictionary |

@@ -184,7 +184,7 @@ function aiCollectCatalog(string $root): array
     ksort($counts);
 
     return [
-        '$schema' => '../../.schemas/ai-catalog.schema.json',
+        '$schema' => '../../schemas/ai/ai-catalog.schema.json',
         'generated_by' => 'php tools/ai/generate-ai-catalog.php',
         'repository' => [
             'name' => 'app-configs',
@@ -296,7 +296,7 @@ function aiCollectRootResources(string $root): array
         '.github/hooks/tool-policy.json' => ['adapter-hook', 'tool-policy', 'GitHub Copilot hook configuration for tool policy enforcement.', 'github-copilot'],
         '.github/hooks/tool-guardian.json' => ['adapter-hook', 'tool-guardian', 'GitHub Copilot hook configuration for guarded tool execution.', 'github-copilot'],
         '.github/hooks/scripts/tool-guardian.ps1' => ['adapter-hook-script', 'tool-guardian.ps1', 'PowerShell hook script for GitHub Copilot guarded tool execution.', 'github-copilot'],
-        '.schemas/evidence-event.schema.json' => ['schema', 'evidence-event.schema.json', 'JSON schema for durable agent evidence events emitted by supported runtime surfaces.', 'canonical'],
+        'schemas/ai/evidence-event.schema.json' => ['schema', 'evidence-event.schema.json', 'JSON schema for durable agent evidence events emitted by supported runtime surfaces.', 'canonical'],
     ];
 
     foreach ($adapterSurfaceMap as $relativePath => [$type, $name, $description, $runtime]) {
@@ -676,7 +676,7 @@ function aiRenderLlms(array $catalog): string
     $lines[] = '';
     $lines[] = '- GitHub Copilot adapter resources live under `.github/` and are generated from `packages/ai-universal-rules/templates/instructions/`, `packages/ai-universal-rules/templates/workflows/`, and `packages/ai-universal-rules/templates/core/agents/`.';
     $lines[] = '- OpenCode adapter resources live under `.opencode/` and are generated from `packages/ai-universal-rules/templates/workflows/`, `packages/ai-universal-rules/templates/commands/`, and `packages/ai-universal-rules/templates/core/agents/`.';
-    $lines[] = '- Canonical workflow resources stay runtime-neutral under `docs/ai/`, `docs/ai/capabilities/`, `scripts/ai/`, and `.schemas/`.';
+    $lines[] = '- Canonical workflow resources stay runtime-neutral under `docs/ai/`, `docs/ai/capabilities/`, `scripts/ai/`, and `schemas/ai/`.';
     $lines[] = '';
     $lines[] = '## Reusable Kit';
     $lines[] = '';

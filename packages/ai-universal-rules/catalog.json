@@ -1,5 +1,5 @@
 {
-    "$schema": "../../.schemas/ai-catalog.schema.json",
+    "$schema": "../../schemas/ai/ai-catalog.schema.json",
     "generated_by": "php tools/ai/generate-ai-catalog.php",
     "repository": {
         "name": "app-configs",
@@ -2666,7 +2666,7 @@
             "scope": "root",
             "type": "schema",
             "name": "evidence-event.schema.json",
-            "path": ".schemas/evidence-event.schema.json",
+            "path": "schemas/ai/evidence-event.schema.json",
             "runtime": "canonical",
             "description": "JSON schema for durable agent evidence events emitted by supported runtime surfaces."
         },

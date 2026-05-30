@@ -238,7 +238,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`root-doc`|integration-matrix|`docs/ai/integration-matrix.md`|Coverage map that tracks which AI workflow concepts are covered, partial, or missing.|
 |`root-doc`|project-context-doc|`docs/ai/project-context.md`|Durable repository context for instructions, capabilities, and runtime adapters.|
 |`root-doc`|workflow|`docs/ai/workflow.md`|Default live workflow for risk, verification, context, and docs sync.|
-|`schema`|evidence-event.schema.json|`.schemas/evidence-event.schema.json`|JSON schema for durable agent evidence events emitted by supported runtime surfaces.|
+|`schema`|evidence-event.schema.json|`schemas/ai/evidence-event.schema.json`|JSON schema for durable agent evidence events emitted by supported runtime surfaces.|
 |`validator`|validate-ai-catalog|`tools/ai/validate-ai-catalog.php`|Validates manifest, catalog, and starter profile metadata.|
 |`validator`|validate-ai-config|`tools/ai/validate-ai-config.php`|Validates the root live AI workflow layer.|
 |`validator`|validate-generated-artifacts|`tools/ai/validate-generated-artifacts.php`|Validates generated artifact presence and drift.|

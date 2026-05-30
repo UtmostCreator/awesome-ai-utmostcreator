@@ -90,7 +90,7 @@ foreach (['reference/php/design-patterns', 'reference/php/design-principles', 'r
 foreach ([
     'docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md',
     'docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md',
-    '.schemas/evidence-event.schema.json',
+    'schemas/ai/evidence-event.schema.json',
 ] as $requiredEvidencePath) {
     if (!aiCatalogHasPath($catalog, $requiredEvidencePath)) {
         $errors[] = "catalog.json should include evidence support path {$requiredEvidencePath}";

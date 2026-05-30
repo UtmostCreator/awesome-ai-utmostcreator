@@ -112,7 +112,7 @@ function aiRunRisk(string $root, array $args): int
             $reasons[] = 'installer behavior changed';
             continue;
         }
-        if (str_starts_with($path, '.schemas/')) {
+        if (str_starts_with($path, 'schemas/ai/')) {
             $score += 20;
             $reasons[] = 'schema contract changed';
             continue;
