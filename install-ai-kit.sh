@@ -8,8 +8,8 @@
 #   bash install-ai-kit.sh /path/to/your-project "my-project-name"
 #
 # Examples:
-#   bash install-ai-kit.sh /Users/you/Herd/headless-cms
-#   bash install-ai-kit.sh /Users/you/Herd/headless-cms headless-cms
+#   bash install-ai-kit.sh /Users/you/Herd/project-name
+#   bash install-ai-kit.sh /Users/you/Herd/project-name project-name
 # =============================================================================
 set -euo pipefail
 
@@ -21,8 +21,8 @@ if [[ -z "$TARGET" ]]; then
     echo "Usage: bash install-ai-kit.sh /path/to/project [project-name]"
     echo ""
     echo "Examples:"
-    echo "  bash install-ai-kit.sh /Users/you/Herd/headless-cms"
-    echo "  bash install-ai-kit.sh /Users/you/Herd/headless-cms headless-cms"
+    echo "  bash install-ai-kit.sh /Users/you/Herd/project-name"
+    echo "  bash install-ai-kit.sh /Users/you/Herd/project-name project-name"
     exit 1
 fi
 
@@ -157,15 +157,11 @@ fi
 # ── Repomix context bundle ────────────────────────────────────────────────────
 echo ""
 if command -v repomix >/dev/null 2>&1 && command -v rg >/dev/null 2>&1 && command -v scc >/dev/null 2>&1; then
-    echo "==> Generating repomix context bundle (full params)..."
-    SECRETS_SCAN=0 bash "$SCRIPT_DIR/scripts/ai/run-repomix-context.sh" "$TARGET" \
-        --depth 3 --top 0 --min-code 0 --min-files 0 2>/dev/null || true
-elif command -v repomix >/dev/null 2>&1 && command -v rg >/dev/null 2>&1; then
-    echo "==> Generating repomix context bundle (scc not found, skipping complexity routing)..."
-    SECRETS_SCAN=0 bash "$SCRIPT_DIR/scripts/ai/run-repomix-context.sh" "$TARGET" \
-        --depth 3 --top 0 --min-code 0 --min-files 0 2>/dev/null || true
+    echo "==> Generating repomix context bundle (depth=3, top=120, min-code=800, min-files=3, max-bundle-tokens=100000)..."
+    SECRETS_SCAN=0 MAX_BUNDLE_TOKENS=100000 bash "$SCRIPT_DIR/scripts/ai/run-repomix-context.sh" "$TARGET" \
+        --depth 3 --top 120 --min-code 800 --min-files 3 2>/dev/null || true
 else
-    echo "==> Skipping repomix bundle — missing: $(command -v repomix >/dev/null 2>&1 || echo 'repomix ') $(command -v rg >/dev/null 2>&1 || echo 'rg')"
+    echo "==> Skipping repomix bundle — missing: $(command -v repomix >/dev/null 2>&1 || echo 'repomix ')$(command -v rg >/dev/null 2>&1 || echo 'rg ')$(command -v scc >/dev/null 2>&1 || echo 'scc')"
     echo "    To enable: npm install -g repomix && brew install ripgrep scc"
 fi
 

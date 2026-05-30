@@ -4,33 +4,33 @@ Use this file when installing templates into a new project. Fill placeholders be
 
 ## Required rule placeholders
 
-- `<FILE_PLACEMENT_RULES>`
-- `<NAMING_RULES>`
-- `<GOLDEN_EXAMPLES>`
+- `unknown`
+- `unknown`
+- `unknown`
 - `secrets, destructive changes, auth or billing changes`
 - `unknown`
 - `unknown`
 
 ## Formatting and ignore placeholders
 
-- `<FORMATTER_CONFIG_FILES>`
-- `<LINTER_CONFIG_FILES>`
-- `<EDITORCONFIG_PATH>`
-- `<IGNORE_FILES>`
-- `<PROJECT_FORMATTING_EXCEPTIONS>`
-- `<PROJECT_IGNORED_FILES>`
+- `unknown`
+- `unknown`
+- `unknown`
+- `unknown`
+- `unknown`
+- `unknown`
 
 ## Script policy placeholders
 
-- `<PROJECT_ALLOWED_SCRIPTS>`
-- `<PROJECT_FORBIDDEN_SCRIPTS>`
-- `<PROJECT_SECURITY_RULES>`
+- `unknown`
+- `unknown`
+- `unknown`
 
 ## Command placeholders
 
-- `<INSTALL_COMMAND>`
 - `unknown`
-- `<FORMAT_COMMAND>`
+- `unknown`
+- `unknown`
 - `unknown`
 
 ## Safety notes

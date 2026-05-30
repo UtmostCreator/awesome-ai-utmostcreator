@@ -9,7 +9,7 @@ Use this file as durable, canonical project context for instructions, agents, pr
 - Primary language: `unknown`
 - Primary runtime: `unknown`
 - Supported targets: `unknown`
-- Primary stack: `<PRIMARY_STACK>`
+- Primary stack: `unknown`
 - Package manager: `unknown`
 
 ## 2) Scope and Ownership
@@ -48,19 +48,19 @@ If missing, perform read-only discovery first and produce a plan before edits.
 
 ## 5) Placement, Naming, and Reuse
 
-- File placement rules: `<FILE_PLACEMENT_RULES>`
-- Naming rules: `<NAMING_RULES>`
-- Golden examples: `<GOLDEN_EXAMPLES>`
+- File placement rules: `unknown`
+- Naming rules: `unknown`
+- Golden examples: `unknown`
 
 Before adding non-trivial logic, search for overlap and report nearest reuse percentage.
 If overlap is `>=75%`, extend or adapt existing patterns instead of adding duplicates.
 
 ## 6) Formatting, Ignored Files, and Script Rules
 
-- Formatter config files: `<FORMATTER_CONFIG_FILES>`
-- Linter config files: `<LINTER_CONFIG_FILES>`
-- EditorConfig path: `<EDITORCONFIG_PATH>`
-- Ignore files (`.gitignore`, lint ignore lists, etc.): `<IGNORE_FILES>`
+- Formatter config files: `unknown`
+- Linter config files: `unknown`
+- EditorConfig path: `unknown`
+- Ignore files (`.gitignore`, lint ignore lists, etc.): `unknown`
 
 Script rules:
 
@@ -71,8 +71,8 @@ Script rules:
 
 ## 7) Generated and Protected Files
 
-- Generated files/paths: `<GENERATED_FILES>`
-- Protected files/paths: `<PROTECTED_FILES>`
+- Generated files/paths: `unknown`
+- Protected files/paths: `unknown`
 
 Do not edit generated files directly unless the task explicitly requires regeneration.
 
@@ -85,9 +85,9 @@ Do not edit generated files directly unless the task explicitly requires regener
 
 Additional project commands:
 
-- Install: `<INSTALL_COMMAND>`
+- Install: `unknown`
 - Lint: `unknown`
-- Format: `<FORMAT_COMMAND>`
+- Format: `unknown`
 
 ## 9) Approval Boundaries
 
@@ -122,8 +122,8 @@ Safe next step: <NEXT_STEP>
 
 Fill and maintain these for each installed project:
 
-- Formatting exceptions: `<PROJECT_FORMATTING_EXCEPTIONS>`
-- Additional ignored files/paths: `<PROJECT_IGNORED_FILES>`
-- Allowed scripts list: `<PROJECT_ALLOWED_SCRIPTS>`
-- Forbidden script patterns: `<PROJECT_FORBIDDEN_SCRIPTS>`
-- Additional security rules: `<PROJECT_SECURITY_RULES>`
+- Formatting exceptions: `unknown`
+- Additional ignored files/paths: `unknown`
+- Allowed scripts list: `unknown`
+- Forbidden script patterns: `unknown`
+- Additional security rules: `unknown`

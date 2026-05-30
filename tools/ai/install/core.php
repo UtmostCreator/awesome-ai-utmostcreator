@@ -105,7 +105,12 @@ function aiInstallerRun(array $argv): int
     ];
 
     if (!$config['dryRun']) {
-        aiInstallerApplyPlaceholders($config['targetRoot'], $config['projectName'], $applied);
+        aiInstallerApplyPlaceholders(
+            $config['targetRoot'],
+            $config['projectName'],
+            $plan,
+            aiInstallerIsSelfTargetInstall($config)
+        );
         $placeholderStatus = aiInstallerCollectPlaceholderStatus($config['targetRoot']);
 
         $strictProfiles = ['guarded', 'accelerated', 'full-governance'];
@@ -228,6 +233,14 @@ function aiInstallerRun(array $argv): int
     return 0;
 }
 
+function aiInstallerIsSelfTargetInstall(array $config): bool
+{
+    $sourceRoot = str_replace('\\', '/', (string) ($config['sourceRoot'] ?? ''));
+    $targetRoot = str_replace('\\', '/', (string) ($config['targetRoot'] ?? ''));
+
+    return $sourceRoot !== '' && $sourceRoot === $targetRoot;
+}
+
 function aiInstallerAssertPlanSourcesExist(array $config, array $plan): void
 {
     $missing = [];
@@ -348,7 +361,7 @@ function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
                 continue;
             }
             $relative = ltrim(str_replace('\\', '/', substr($f->getPathname(), strlen($targetRoot))), '/');
-            if ($relative === 'docs/ai/catalog.md') {
+            if (aiInstallerShouldSkipPlaceholderScanPath($relative)) {
                 continue;
             }
             $hits = array_merge($hits, aiInstallerExtractPlaceholders((string) file_get_contents($f->getPathname())));
@@ -365,6 +378,15 @@ function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
     ];
 }
 
+function aiInstallerShouldSkipPlaceholderScanPath(string $relativePath): bool
+{
+    if ($relativePath === 'docs/ai/catalog.md' || $relativePath === 'docs/ai/project-context-placeholders.md') {
+        return true;
+    }
+
+    return str_starts_with($relativePath, 'docs/ai/generated/');
+}
+
 function aiInstallerExtractPlaceholders(string $content): array
 {
     if (preg_match_all('/<[A-Z0-9_]+>/', $content, $m) !== 1 && (!isset($m[0]) || $m[0] === [])) {
@@ -373,7 +395,7 @@ function aiInstallerExtractPlaceholders(string $content): array
     return array_values(array_unique($m[0] ?? []));
 }
 
-function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, array $applied): void
+function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, array $plan, bool $allowSkippedUnmanaged = false): void
 {
     $map = [
         '<PROJECT_NAME>' => $projectName,
@@ -435,8 +457,15 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
         '<PROJECT_SECURITY_RULES>' => 'unknown',
     ];
 
-    foreach ($applied as $item) {
+    foreach ($plan as $item) {
         $target = (string) ($item['target'] ?? '');
+        $action = (string) ($item['action'] ?? '');
+        if (
+            $action === 'SKIP_PROTECTED_CORE'
+            || ($action === 'SKIP_EXISTING_UNMANAGED' && !$allowSkippedUnmanaged)
+        ) {
+            continue;
+        }
         // The shipped package source must stay verbatim so kit-level tools
         // (generate-ai-catalog, validate-ai-catalog, package-verify) keep
         // working in installed targets. PLACEHOLDERS.md is also informational
