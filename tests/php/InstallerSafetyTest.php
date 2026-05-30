@@ -550,6 +550,9 @@ class InstallerSafetyTest extends TestCase
             $this->assertNotEmpty($opencodeAgents);
             $this->assertNotEmpty($opencodeCommands);
             $this->assertNotEmpty($opencodeSkills);
+
+            $postInstall = (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'POST-INSTALL.md');
+            $this->assertStringContainsString('post-install-setup', $postInstall, 'generated post-install checklist should advertise the shipped setup helper');
         } finally {
             $this->removeTree($target);
         }

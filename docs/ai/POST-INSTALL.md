@@ -13,6 +13,7 @@
 
 ## Commands
 
+- Post-install setup: `post-install-setup` (OpenCode command) or `post-install-setup` (workflow / skill on supported surfaces)
 - Verify: `php tools/ai/ai.php verify`
 - Strict verify: `php tools/ai/ai.php verify --strict`
 - Placeholders: `php tools/ai/ai.php placeholders --fail`
@@ -27,5 +28,6 @@
 ## Project Configuration Checklist
 
 - Fill project facts and commands in `docs/ai/project-context.md`.
+- Start with `post-install-setup` if you want a guided setup pass after install.
 - Confirm risk areas and approval-required changes.
 - Confirm active/inactive paths and runtime targets.
