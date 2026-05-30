@@ -524,7 +524,7 @@ $aiWiringRequiredFiles = [
     '.github/instructions/ai-tooling.instructions.md',
     '.github/prompts/search-evidence.prompt.md',
     '.github/agents/repository-researcher.agent.md',
-    '.opencode/opencode.json',
+    'opencode.jsonc',
     '.opencode/commands/search-evidence.md',
     '.opencode/commands/verify-ai-wiring.md',
     '.opencode/agents/repository-researcher.md',
@@ -571,7 +571,7 @@ foreach ($previewRequiredSnippets as $snippet) {
     }
 }
 
-$opencodeConfig = loadJsonFile($root, '.opencode/opencode.json', $errors);
+$opencodeConfig = loadJsonFile($root, 'opencode.jsonc', $errors);
 if (is_array($opencodeConfig)) {
     validateOpenCodePermissions($opencodeConfig, $errors);
 }
@@ -620,17 +620,17 @@ function validateOpenCodePermissions(array $config, array &$errors): void
     $permission = $config['permission'] ?? null;
 
     if (!is_array($permission)) {
-        $errors[] = '.opencode/opencode.json missing permission object';
+        $errors[] = 'opencode.jsonc missing permission object';
         return;
     }
 
     if (($permission['*'] ?? null) !== 'ask') {
-        $errors[] = '.opencode/opencode.json permission.* must be ask';
+        $errors[] = 'opencode.jsonc permission.* must be ask';
     }
 
     $bash = $permission['bash'] ?? null;
     if (!is_array($bash)) {
-        $errors[] = '.opencode/opencode.json permission.bash must be an object';
+        $errors[] = 'opencode.jsonc permission.bash must be an object';
     } else {
         requirePermissionValue($bash, '*', ['ask', 'deny'], 'permission.bash.*', $errors);
 
@@ -684,7 +684,7 @@ function validateOpenCodePermissions(array $config, array &$errors): void
 
     $read = $permission['read'] ?? null;
     if (!is_array($read)) {
-        $errors[] = '.opencode/opencode.json permission.read must be an object';
+        $errors[] = 'opencode.jsonc permission.read must be an object';
     } else {
         requirePermissionValue($read, '*', ['allow'], 'permission.read.*', $errors);
         foreach (['.env', '.env.*', '*.pem', '*.key', '*.crt'] as $pattern) {
@@ -694,7 +694,7 @@ function validateOpenCodePermissions(array $config, array &$errors): void
 
     $edit = $permission['edit'] ?? null;
     if (!is_array($edit)) {
-        $errors[] = '.opencode/opencode.json permission.edit must be an object';
+        $errors[] = 'opencode.jsonc permission.edit must be an object';
     } else {
         requirePermissionValue($edit, '*', ['ask', 'deny'], 'permission.edit.*', $errors);
         foreach (['docs/ai/generated/**', '.opencode/**', '.github/agents/**', '.github/instructions/**', '.github/prompts/**', '.github/prompts-optional/**', '.github/skills/**', '.github/workflows/**', '.github/copilot-instructions.md', '.github/pull_request_template.md', '.env', '.env.*', '*.pem', '*.key', '*.crt'] as $pattern) {
@@ -705,7 +705,7 @@ function validateOpenCodePermissions(array $config, array &$errors): void
     foreach (['grep', 'glob', 'list'] as $tool) {
         $toolPermission = $permission[$tool] ?? null;
         if (!is_array($toolPermission)) {
-            $errors[] = ".opencode/opencode.json permission.{$tool} must be an object";
+            $errors[] = "opencode.jsonc permission.{$tool} must be an object";
             continue;
         }
 
@@ -714,7 +714,7 @@ function validateOpenCodePermissions(array $config, array &$errors): void
 
     $skill = $permission['skill'] ?? null;
     if (!is_array($skill)) {
-        $errors[] = '.opencode/opencode.json permission.skill must be an object';
+        $errors[] = 'opencode.jsonc permission.skill must be an object';
     } else {
         requirePermissionValue($skill, '*', ['ask'], 'permission.skill.*', $errors);
         foreach (['ai-search', 'ai-verification', 'ai-context'] as $skillName) {
@@ -724,7 +724,7 @@ function validateOpenCodePermissions(array $config, array &$errors): void
 
     foreach (['external_directory', 'doom_loop'] as $guard) {
         if (($permission[$guard] ?? null) !== 'ask') {
-            $errors[] = ".opencode/opencode.json permission.{$guard} must be ask";
+            $errors[] = "opencode.jsonc permission.{$guard} must be ask";
         }
     }
 }

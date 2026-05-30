@@ -5,8 +5,27 @@
     "docs/ai/tools/ai-search.md",
     "docs/ai/tools/tool-map.md",
     "docs/ai/tools/actions/search-evidence.md",
-    "docs/ai/tools/actions/preview-file.md"
+    "docs/ai/tools/actions/preview-file.md",
+    "docs/ai/workflow.md",
+    "docs/ai/execution-protocol.md",
+    "docs/ai/ai-file-standards.md",
+    "docs/ai/approval-boundaries.md",
+    "docs/ai/generated-artifacts.md",
+    "docs/ai/adapter-contract.md"
   ],
+  "watcher": {
+    "ignore": [
+      ".git/**",
+      "node_modules/**",
+      "vendor/**",
+      "dist/**",
+      "build/**",
+      "coverage/**",
+      ".ai-logs/**",
+      ".repomix-context/**",
+      ".ai-backups/**"
+    ]
+  },
   "permission": {
     "*": "ask",
     "read": {
@@ -15,7 +34,9 @@
       ".env.*": "deny",
       "*.pem": "deny",
       "*.key": "deny",
-      "*.crt": "deny"
+      "*.crt": "deny",
+      ".env.example": "allow",
+      "*.env.example": "allow"
     },
     "edit": {
       "*": "ask",
@@ -171,6 +192,8 @@
         "git reset --hard*": "deny",
         "git clean -f*": "deny"
       },
+    "webfetch": "ask",
+    "websearch": "ask",
     "skill": {
       "*": "ask",
       "ai-search": "allow",
