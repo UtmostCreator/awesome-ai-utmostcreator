@@ -184,6 +184,7 @@ function aiInstallerWriteSetupDocs(string $targetRoot, array $manifest): void
         $postInstall .= "- Optional tools: `fd`, `gh`, `fzf`, `bat`, `delta`, `yq`, `shellcheck`, `semgrep`, `ast-grep`.\n";
     }
     $postInstall .= "\n## Commands\n\n";
+    $postInstall .= "- Post-install setup: `post-install-setup` (OpenCode command) or `post-install-setup` (workflow / skill on supported surfaces)\n";
     $postInstall .= "- Verify: `php tools/ai/ai.php verify`\n";
     $postInstall .= "- Strict verify: `php tools/ai/ai.php verify --strict`\n";
     $postInstall .= "- Placeholders: `php tools/ai/ai.php placeholders --fail`\n";
@@ -194,6 +195,7 @@ function aiInstallerWriteSetupDocs(string $targetRoot, array $manifest): void
     $postInstall .= "- Wire hooks with: `php tools/ai/ai.php hooks install --driver husky|lefthook|native`.\n";
     $postInstall .= "\n## Project Configuration Checklist\n\n";
     $postInstall .= "- Fill project facts and commands in `docs/ai/project-context.md`.\n";
+    $postInstall .= "- Start with `post-install-setup` if you want a guided setup pass after install.\n";
     $postInstall .= "- Confirm risk areas and approval-required changes.\n";
     $postInstall .= "- Confirm active/inactive paths and runtime targets.\n";
 

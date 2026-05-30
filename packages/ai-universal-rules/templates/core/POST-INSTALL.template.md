@@ -50,7 +50,7 @@ Find the line: `applyTo: '<FRONTEND_PATH_GLOB>'`
 Replace `<FRONTEND_PATH_GLOB>` with the glob that matches your frontend files, for example:
 
 ```yaml
-applyTo: 'resources/js/**,resources/ts/**,resources/vue/**'
+applyTo: "resources/js/**,resources/ts/**,resources/vue/**"
 ```
 
 If you have no frontend code, replace with `applyTo: ''` or delete the file.
@@ -62,8 +62,15 @@ Find the line: `applyTo: '<TEST_PATH_GLOB>'`
 Replace `<TEST_PATH_GLOB>` with the glob for your test files, for example:
 
 ```yaml
-applyTo: 'tests/**,src/**/*.test.ts'
+applyTo: "tests/**,src/**/*.test.ts"
 ```
+
+### Guided setup helper
+
+If your AI surface supports shipped workflows or commands, start with `post-install-setup` after filling the obvious placeholders.
+
+- OpenCode: use the installed command `post-install-setup`
+- Copilot / workflow-capable surfaces: use the shipped `post-install-setup` workflow or skill
 
 ---
 
@@ -72,24 +79,34 @@ applyTo: 'tests/**,src/**/*.test.ts'
 Run these validation commands from your project root. All must pass before proceeding:
 
 ```bash
-# Validate AI-facing docs and references
-bash scripts/ai/ai-doc-check.sh --check docs/ai .github AGENTS.md CLAUDE.md
+# Confirm required placeholders are resolved
+php tools/ai/ai.php placeholders --fail
 
-# Run the installed verification smoke check
-AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 AI_VERIFY_SCOPE=ai bash scripts/ai/ai-verify.sh .
+# Validate the installed AI surface
+php tools/ai/validate-ai-config.php
+php tools/ai/validate-install-surface.php --strict
+php tools/ai/validate-ai-catalog.php
 ```
 
 Review any `FAIL:` lines before proceeding. Tool-missing warnings are informational only.
 
 ---
 
-## Step 4 — Required: Verify Tool Prerequisites
+## Step 4 — Recommended: Verify Tool Prerequisites And Follow-Up Guidance
 
 ```bash
-bash scripts/ai/ai-verify.sh .
+php tools/ai/ai.php advisor --all
 ```
 
-This confirms the installed script surface is runnable in the target repo. If macOS does not have `gtimeout`, the script now falls back to unbounded execution with a warning.
+This gives the installed repo a guided follow-up pass after the install-safe validators are green.
+
+If you want broader repository verification after setup, run it explicitly:
+
+```bash
+AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh .
+```
+
+Treat application-level lint, typecheck, dependency-auth, or Semgrep failures as target-repo issues unless the installed AI files caused them.
 
 ---
 
@@ -115,8 +132,10 @@ bash scripts/ai/repomix-context-tree.sh analyze .
 Run this to confirm the full install is healthy:
 
 ```bash
-bash scripts/ai/ai-doc-check.sh --check docs/ai .github AGENTS.md CLAUDE.md && \
-AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 AI_VERIFY_SCOPE=ai bash scripts/ai/ai-verify.sh .
+php tools/ai/ai.php placeholders --fail && \
+php tools/ai/validate-ai-config.php && \
+php tools/ai/validate-install-surface.php --strict && \
+php tools/ai/validate-ai-catalog.php
 ```
 
 Both should complete without `FAIL:` lines.
