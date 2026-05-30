@@ -20,6 +20,15 @@
       "notes": "Canonical installed Copilot surface for this repo."
     },
     {
+      "path": ".ai-logs",
+      "purpose": "Local AI evidence logs, session traces, and snapshots written during repository workflows.",
+      "designed_for": "Maintainers reviewing local evidence and debugging workflow runs.",
+      "install_guide": ".ai-logs/README.md",
+      "install_script": "none",
+      "ai_entrypoint": ".ai-logs/README.md",
+      "notes": "Only the README is tracked; runtime logs remain gitignored."
+    },
+    {
       "path": ".opencode",
       "purpose": "OpenCode runtime adapters including agents, commands, and skills.",
       "designed_for": "OpenCode users and local agent routing.",

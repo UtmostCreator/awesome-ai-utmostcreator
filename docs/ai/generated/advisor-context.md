@@ -579,26 +579,26 @@ Required tools depend on selected packs. Core full-governance installs require P
         "package:opencode-command-template": 3,
         "package:operations-doc": 6,
         "package:optional-template": 9,
-        "package:package-capability": 36,
+        "package:package-capability": 42,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
-        "package:workflow-template": 16,
+        "package:workflow-template": 17,
         "root:adapter-doc": 1,
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
         "root:adapter-policy": 1,
         "root:ai-script": 27,
-        "root:capability": 15,
+        "root:capability": 16,
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 10,
+        "root:github-copilot-agent": 11,
         "root:github-copilot-instruction": 22,
-        "root:github-copilot-prompt": 16,
-        "root:github-copilot-skill": 16,
+        "root:github-copilot-prompt": 17,
+        "root:github-copilot-skill": 17,
         "root:opencode-agent": 11,
-        "root:opencode-command": 18,
-        "root:opencode-skill": 18,
+        "root:opencode-command": 19,
+        "root:opencode-skill": 19,
         "root:php-reference": 3,
         "root:root-doc": 16,
         "root:schema": 1,
@@ -1305,6 +1305,54 @@ Required tools depend on selected packs. Core full-governance installs require P
         {
             "scope": "package",
             "type": "package-capability",
+            "name": "Mentor Mode Capability",
+            "path": "packages/ai-universal-rules/templates/capabilities/mentor-mode/CAPABILITY.md",
+            "runtime": "canonical",
+            "description": "Let an AI coding agent stay maximally useful now without eroding the human's independent capability later. Mentor Mode defaults to the lowest level of assistance that unblocks the human and makes full answer-delivery a deliberate, logged choice rather than the frictionless default."
+        },
+        {
+            "scope": "package",
+            "type": "package-capability",
+            "name": "Mentor Mode Checklist",
+            "path": "packages/ai-universal-rules/templates/capabilities/mentor-mode/checklist.md",
+            "runtime": "canonical",
+            "description": "1. Classify the mode: `learn` (growth path), `pair` (collaborative build), `deliver` (commodity or incident), or the `lookup` bypass. Infer and state it in one line when unset."
+        },
+        {
+            "scope": "package",
+            "type": "package-capability",
+            "name": "config.example",
+            "path": "packages/ai-universal-rules/templates/capabilities/mentor-mode/config.example.json",
+            "runtime": "canonical",
+            "description": "{"
+        },
+        {
+            "scope": "package",
+            "type": "package-capability",
+            "name": "Mentor Mode Examples",
+            "path": "packages/ai-universal-rules/templates/capabilities/mentor-mode/examples.md",
+            "runtime": "canonical",
+            "description": "Each pair shows answer-delivery (the harmful default) versus Mentor Mode."
+        },
+        {
+            "scope": "package",
+            "type": "package-capability",
+            "name": "Mentor Mode Gotchas",
+            "path": "packages/ai-universal-rules/templates/capabilities/mentor-mode/gotchas.md",
+            "runtime": "canonical",
+            "description": "- Socratic theatre: asking a leading question and answering it in the same turn. End the turn on the question and let the human answer first."
+        },
+        {
+            "scope": "package",
+            "type": "package-capability",
+            "name": "Mentor Mode Reference",
+            "path": "packages/ai-universal-rules/templates/capabilities/mentor-mode/reference.md",
+            "runtime": "canonical",
+            "description": "Liu, Christian, Dumbalska, Bakker, Dubey (2026), \"AI Assistance Reduces Persistence and Hurts Independent Performance,\" arXiv:2604.04721 (v2, 7 Apr 2026), DOI 10.48550/arXiv.2604.04721."
+        },
+        {
+            "scope": "package",
+            "type": "package-capability",
             "name": "Project Context Capability",
             "path": "packages/ai-universal-rules/templates/capabilities/project-context/CAPABILITY.md",
             "runtime": "canonical",
@@ -1573,6 +1621,14 @@ Required tools depend on selected packs. Core full-governance installs require P
             "path": "packages/ai-universal-rules/templates/workflows/evidence-first-execution.md",
             "runtime": "dual-runtime",
             "description": "Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output."
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "mentor-mode",
+            "path": "packages/ai-universal-rules/templates/workflows/mentor-mode.md",
+            "runtime": "dual-runtime",
+            "description": "Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default"
         },
         {
             "scope": "package",
@@ -1993,6 +2049,14 @@ Required tools depend on selected packs. Core full-governance installs require P
         {
             "scope": "root",
             "type": "capability",
+            "name": "mentor-mode",
+            "path": "docs/ai/capabilities/mentor-mode/CAPABILITY.md",
+            "runtime": "canonical",
+            "description": "Let an AI coding agent stay maximally useful now without eroding the human's independent capability later. Mentor Mode defaults to the lowest level of assistance that unblocks the human and makes full answer-delivery a deliberate, logged choice rather than the frictionless default."
+        },
+        {
+            "scope": "root",
+            "type": "capability",
             "name": "preview-environments",
             "path": "docs/ai/capabilities/preview-environments/CAPABILITY.md",
             "runtime": "canonical",
@@ -2069,6 +2133,14 @@ Required tools depend on selected packs. Core full-governance installs require P
             "path": ".github/agents/architect.agent.md",
             "runtime": "github-copilot",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-agent",
+            "name": "Bootstrapper",
+            "path": ".github/agents/bootstrapper.agent.md",
+            "runtime": "github-copilot",
+            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
         },
         {
             "scope": "root",
@@ -2361,6 +2433,14 @@ Required tools depend on selected packs. Core full-governance installs require P
         {
             "scope": "root",
             "type": "github-copilot-prompt",
+            "name": "mentor-mode",
+            "path": ".github/prompts/mentor-mode.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
             "name": "new-feature",
             "path": ".github/prompts/new-feature.prompt.md",
             "runtime": "github-copilot",
@@ -2485,6 +2565,14 @@ Required tools depend on selected packs. Core full-governance installs require P
             "path": ".github/skills/evidence-first-execution/SKILL.md",
             "runtime": "github-copilot",
             "description": "Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "mentor-mode",
+            "path": ".github/skills/mentor-mode/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use when the human is coding in a skill they want to retain or grow and a full solution would otherwise be handed over by default. Defaults to the lowest assistance that unblocks and makes answer-delivery a deliberate, logged choice. Do not use for genuine commodity work or incidents (use deliver mode) or pure fact lookups (use the lookup bypass)."
         },
         {
             "scope": "root",
@@ -2705,6 +2793,14 @@ Required tools depend on selected packs. Core full-governance installs require P
         {
             "scope": "root",
             "type": "opencode-command",
+            "name": "mentor-mode",
+            "path": ".opencode/commands/mentor-mode.md",
+            "runtime": "opencode",
+            "description": "Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-command",
             "name": "new-feature",
             "path": ".opencode/commands/new-feature.md",
             "runtime": "opencode",
@@ -2861,6 +2957,14 @@ Required tools depend on selected packs. Core full-governance installs require P
             "path": ".opencode/skills/evidence-first-execution/SKILL.md",
             "runtime": "opencode",
             "description": "Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output."
+        },
+        {
+            "scope": "root",
+            "type": "opencode-skill",
+            "name": "mentor-mode",
+            "path": ".opencode/skills/mentor-mode/SKILL.md",
+            "runtime": "opencode",
+            "description": "Use when the human is coding in a skill they want to retain or grow and a full solution would otherwise be handed over by default. Defaults to the lowest assistance that unblocks and makes answer-delivery a deliberate, logged choice. Do not use for genuine commodity work or incidents (use deliver mode) or pure fact lookups (use the lookup bypass)."
         },
         {
             "scope": "root",
@@ -3418,6 +3522,7 @@ starter_optional_capabilities:
   - templates/capabilities/bug-regression
   - templates/capabilities/release-safety
   - templates/capabilities/dependency-upgrade
+  - templates/capabilities/mentor-mode
 runtime_entrypoints:
   opencode:
     - templates/core/agents
@@ -3510,6 +3615,7 @@ INCLUDE_DIFFS="${INCLUDE_DIFFS:-0}"
 DRY_RUN="${DRY_RUN:-0}"
 STRICT_TOKENS="${STRICT_TOKENS:-0}"
 SPLIT_OUTPUT="${SPLIT_OUTPUT:-}"
+COMMON_OPTION_CONSUMED=0
 
 usage() {
     cat <<'EOF'
@@ -3543,41 +3649,52 @@ EOF
 }
 
 parse_common_option() {
+    COMMON_OPTION_CONSUMED=0
+
     case "${1:-}" in
     --include-diffs)
         INCLUDE_DIFFS=1
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --no-tests)
         INCLUDE_TESTS=0
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --no-secrets-scan)
         SECRETS_SCAN=0
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --dry-run)
         DRY_RUN=1
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --strict)
         STRICT_TOKENS=1
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --token-budget)
         TOKEN_BUDGET="${2:?token budget required}"
-        return 2
+        COMMON_OPTION_CONSUMED=2
+        return 0
         ;;
     --token-budget=*)
         TOKEN_BUDGET="${1#*=}"
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --split)
         SPLIT_OUTPUT="${2:?split size required}"
-        return 2
+        COMMON_OPTION_CONSUMED=2
+        return 0
         ;;
     --split=*)
         SPLIT_OUTPUT="${1#*=}"
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --help | -h)
@@ -3628,11 +3745,11 @@ regex_escape_lines() {
 build_stem_regex() {
     local stems=("$@")
 
-    printf '%s\n' "${stems[@]}" \
-        | sed '/^$/d' \
-        | sort -u \
-        | regex_escape_lines \
-        | paste -sd'|' -
+    printf '%s\n' "${stems[@]}" |
+        sed '/^$/d' |
+        sort -u |
+        regex_escape_lines |
+        paste -sd'|' -
 }
 
 collect_file_stems() {
@@ -3928,7 +4045,7 @@ cmd_since() {
         arg="$1"
         shift_by=0
         if parse_common_option "$arg" "${2:-}"; then
-            shift_by=$?
+            shift_by="$COMMON_OPTION_CONSUMED"
             shift "$shift_by"
         else
             positional+=("$arg")
@@ -3960,7 +4077,7 @@ cmd_unstaged() {
     while (($# > 0)); do
         shift_by=0
         if parse_common_option "$1" "${2:-}"; then
-            shift_by=$?
+            shift_by="$COMMON_OPTION_CONSUMED"
             shift "$shift_by"
         else
             die "unknown option: $1"
@@ -3995,7 +4112,7 @@ cmd_pr() {
         arg="$1"
         shift_by=0
         if parse_common_option "$arg" "${2:-}"; then
-            shift_by=$?
+            shift_by="$COMMON_OPTION_CONSUMED"
             shift "$shift_by"
         else
             positional+=("$arg")
@@ -4039,7 +4156,7 @@ cmd_recent() {
         *)
             shift_by=0
             if parse_common_option "$1" "${2:-}"; then
-                shift_by=$?
+                shift_by="$COMMON_OPTION_CONSUMED"
                 shift "$shift_by"
             else
                 die "unknown option: $1"
@@ -4072,7 +4189,7 @@ cmd_touched() {
         arg="$1"
         shift_by=0
         if parse_common_option "$arg" "${2:-}"; then
-            shift_by=$?
+            shift_by="$COMMON_OPTION_CONSUMED"
             shift "$shift_by"
         else
             positional+=("$arg")
@@ -4127,6 +4244,7 @@ touched) cmd_touched "$@" ;;
     die "unknown command: $cmd"
     ;;
 esac
+
 ```
 
 ## FILE: scripts/ai/ai-doc-check.sh
@@ -4212,7 +4330,7 @@ links)
 drift)
     run_drift
     ;;
---help|-h)
+--help | -h)
     usage
     ;;
 *)
@@ -4228,6 +4346,7 @@ fi
 
 log_json "doc-check.passed" "$(jq -cn --arg mode "$mode" '{mode:$mode}')"
 echo "==> docs ok"
+
 ```
 
 ## FILE: scripts/ai/ai-edit.sh
@@ -4440,6 +4559,7 @@ else
 fi
 
 log_json "edit.apply" "$(jq -cn --arg mode "$mode" --arg snapshot "$snapshot" '{mode:$mode, snapshot:$snapshot}')"
+
 ```
 
 ## FILE: scripts/ai/ai-file-freshness.sh
@@ -4517,9 +4637,9 @@ resolve_snapshot() {
 
     match="$(
         find "$SNAPSHOT_DIR" -maxdepth 1 \
-            \( -name "${input}*.manifest.json" -o -name "${input}*.patch" -o -name "${input}*.ref" \) \
-            | sort -r \
-            | head -1
+            \( -name "${input}*.manifest.json" -o -name "${input}*.patch" -o -name "${input}*.ref" \) |
+            sort -r |
+            head -1
     )"
 
     [[ -n "$match" ]] || die "no snapshot found matching: $input"
@@ -4573,8 +4693,8 @@ cmd_list() {
         count=$((count + 1))
     done < <(
         find "$SNAPSHOT_DIR" -maxdepth 1 \
-            \( -name '*.manifest.json' -o -name '*.patch' -o -name '*.ref' \) \
-            | sort -r
+            \( -name '*.manifest.json' -o -name '*.patch' -o -name '*.ref' \) |
+            sort -r
     )
 
     printf '\n%d snapshot artifact(s) found\n' "$count"
@@ -4739,7 +4859,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 usage() {
     cat <<'EOF'
 Usage:
-  ai-search.sh MODE QUERY [root] [--fixed] [--dry-run]
+    ai-search.sh MODE QUERY [root] [--fixed] [--ignore-case] [--dry-run]
 
 Modes:
   changed | staged | tracked | text | files | struct | docs | doctor | unsafe-all
@@ -4790,13 +4910,27 @@ root="${3:-.}"
 shift 3 2>/dev/null || true
 
 fixed=0
+ignore_case=0
 dry_run=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --fixed) fixed=1; shift ;;
-        --dry-run) dry_run=1; shift ;;
-        --help|-h) usage; exit 0 ;;
-        *) shift ;;
+    --fixed)
+        fixed=1
+        shift
+        ;;
+    --ignore-case | -i)
+        ignore_case=1
+        shift
+        ;;
+    --dry-run)
+        dry_run=1
+        shift
+        ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    *) shift ;;
     esac
 done
 
@@ -4818,6 +4952,11 @@ if [[ -z "$query" ]]; then
     exit 1
 fi
 
+case_args=()
+if [[ "$ignore_case" == "1" ]] || [[ ! "$query" =~ [[:upper:]] ]]; then
+    case_args=(-i)
+fi
+
 if [[ "$dry_run" == "1" ]]; then
     if [[ "$json_mode" == "json" ]]; then
         emit_json "dry_run" "[]"
@@ -4829,9 +4968,9 @@ fi
 
 run_text() {
     if [[ "$fixed" == "1" ]]; then
-        rg -n --fixed-strings -- "$query" "$root" 2>/dev/null || true
+        rg "${case_args[@]}" -n --fixed-strings -- "$query" "$root" 2>/dev/null || true
     else
-        rg -n -- "$query" "$root" 2>/dev/null || true
+        rg "${case_args[@]}" -n -- "$query" "$root" 2>/dev/null || true
     fi
 }
 
@@ -4846,40 +4985,40 @@ run_files() {
 }
 
 case "$mode" in
-    changed)
-        out="$(git -C "$root" diff --name-only 2>/dev/null | tr -d '\r' || true)"
-        ;;
-    staged)
-        out="$(git -C "$root" diff --name-only --cached 2>/dev/null | tr -d '\r' || true)"
-        ;;
-    tracked)
-        if [[ "$fixed" == "1" ]]; then
-            out="$(git -C "$root" grep -n --fixed-strings -- "$query" 2>/dev/null || true)"
-        else
-            out="$(git -C "$root" grep -n -- "$query" 2>/dev/null || true)"
-        fi
-        ;;
-    text|docs)
-        out="$(run_text)"
-        ;;
-    files)
-        out="$(run_files)"
-        ;;
-    struct)
-        if command_exists ast-grep; then
-            out="$(ast-grep run --lang "${AI_LANG:-php}" --pattern "$query" "$root" 2>/dev/null || true)"
-        else
-            out=""
-        fi
-        ;;
-    *)
-        if [[ "$json_mode" == "json" ]]; then
-            emit_json "error" "[]" '["unknown mode"]'
-        else
-            echo "[ERROR] unknown mode: $mode" >&2
-        fi
-        exit 1
-        ;;
+changed)
+    out="$(git -C "$root" diff --name-only 2>/dev/null | tr -d '\r' || true)"
+    ;;
+staged)
+    out="$(git -C "$root" diff --name-only --cached 2>/dev/null | tr -d '\r' || true)"
+    ;;
+tracked)
+    if [[ "$fixed" == "1" ]]; then
+        out="$(git -C "$root" grep "${case_args[@]}" -n --fixed-strings -- "$query" 2>/dev/null || true)"
+    else
+        out="$(git -C "$root" grep "${case_args[@]}" -n -- "$query" 2>/dev/null || true)"
+    fi
+    ;;
+text | docs)
+    out="$(run_text)"
+    ;;
+files)
+    out="$(run_files)"
+    ;;
+struct)
+    if command_exists ast-grep; then
+        out="$(ast-grep run --lang "${AI_LANG:-php}" --pattern "$query" "$root" 2>/dev/null || true)"
+    else
+        out=""
+    fi
+    ;;
+*)
+    if [[ "$json_mode" == "json" ]]; then
+        emit_json "error" "[]" '["unknown mode"]'
+    else
+        echo "[ERROR] unknown mode: $mode" >&2
+    fi
+    exit 1
+    ;;
 esac
 
 if [[ "$json_mode" == "json" ]]; then
@@ -4944,7 +5083,7 @@ json)
     jq "$query" "$file"
     ;;
 
-yaml|yml)
+yaml | yml)
     require_bins yq
     file="${1:?file required}"
     query="${2:?yq query required}"
@@ -4960,7 +5099,7 @@ validate-json)
     log_ok "valid JSON: $file"
     ;;
 
-validate-yaml|validate-yml)
+validate-yaml | validate-yml)
     require_bins yq
     file="${1:?file required}"
     [[ -f "$file" ]] || die "file not found: $file"
@@ -5013,7 +5152,7 @@ xml)
     fi
     ;;
 
---help|-h)
+--help | -h)
     usage
     ;;
 
@@ -5024,6 +5163,7 @@ xml)
 esac
 
 log_json "structured.query" "$(jq -cn --arg mode "$mode" '{mode:$mode}')"
+
 ```
 
 ## FILE: scripts/ai/ai-task.sh
@@ -5221,11 +5361,11 @@ json)
     build_inventory
     ;;
 
-verify|test|lint|typecheck)
+verify | test | lint | typecheck)
     recommend_command "$mode"
     ;;
 
---help|-h)
+--help | -h)
     usage
     ;;
 
@@ -5236,6 +5376,7 @@ verify|test|lint|typecheck)
 esac
 
 log_json "task.query" "$(jq -cn --arg mode "$mode" '{mode:$mode}')"
+
 ```
 
 ## FILE: scripts/ai/ai-test-select.sh
@@ -5342,7 +5483,7 @@ command_for_test() {
             printf 'vendor/bin/phpunit %s\n' "$test_file"
         fi
         ;;
-    *.js|*.ts|*.jsx|*.tsx|*.vue)
+    *.js | *.ts | *.jsx | *.tsx | *.vue)
         if [[ -f pnpm-lock.yaml ]]; then
             printf 'pnpm test -- %s\n' "$test_file"
         elif [[ -f package.json ]]; then
@@ -5439,7 +5580,7 @@ json)
     select_for_files "${files[@]+${files[@]}}"
     ;;
 
---help|-h)
+--help | -h)
     usage
     ;;
 
@@ -5450,6 +5591,7 @@ json)
 esac
 
 log_json "test-select.query" "$(jq -cn --arg mode "$mode" '{mode:$mode}')"
+
 ```
 
 ## FILE: scripts/ai/ai-verify.sh
@@ -5515,37 +5657,37 @@ has_package_dependency() {
 
 tracked_existing_shell_files() {
     case "$AI_VERIFY_SCOPE" in
-        ai)
-            git ls-files -co --exclude-standard 'scripts/ai/*.sh' |
+    ai)
+        git ls-files -co --exclude-standard 'scripts/ai/*.sh' |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
                 [[ "$script" == scripts/ai/check-batch*.sh ]] && continue
                 printf '%s\n' "$script"
             done
-            ;;
-        changed)
-            {
-                git diff --name-only --diff-filter=ACMRT -- '*.sh'
-                git diff --cached --name-only --diff-filter=ACMRT -- '*.sh'
-                git ls-files --others --exclude-standard -- '*.sh'
-            } |
+        ;;
+    changed)
+        {
+            git diff --name-only --diff-filter=ACMRT -- '*.sh'
+            git diff --cached --name-only --diff-filter=ACMRT -- '*.sh'
+            git ls-files --others --exclude-standard -- '*.sh'
+        } |
             sort -u |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
                 [[ "$script" == scripts/ai/check-batch*.sh ]] && continue
                 printf '%s\n' "$script"
             done
-            ;;
-        all)
-            git ls-files -co --exclude-standard '*.sh' |
+        ;;
+    all)
+        git ls-files -co --exclude-standard '*.sh' |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
                 printf '%s\n' "$script"
             done
-            ;;
-        *)
-            die "unknown AI_VERIFY_SCOPE: $AI_VERIFY_SCOPE"
-            ;;
+        ;;
+    *)
+        die "unknown AI_VERIFY_SCOPE: $AI_VERIFY_SCOPE"
+        ;;
     esac
 }
 
@@ -5702,6 +5844,7 @@ fi
 
 echo '==> done'
 log_json "verify.passed" "$(jq -cn '{status:"passed"}')" || true
+
 ```
 
 ## FILE: scripts/ai/check-file-refs.sh
@@ -5721,11 +5864,16 @@ echo "file reference check placeholder"
 
 set -euo pipefail
 
-COPILOT_LOG_DIR="${COPILOT_LOG_DIR:-${AI_LOG_DIR:-.ai-logs}}"
-COPILOT_CONTEXT_DIR="${COPILOT_CONTEXT_DIR:-.repomix-context}"
-COPILOT_SESSION_DIR="${COPILOT_SESSION_DIR:-${COPILOT_LOG_DIR}/sessions}"
-COPILOT_SNAPSHOT_DIR="${COPILOT_SNAPSHOT_DIR:-${COPILOT_LOG_DIR}/snapshots}"
-COPILOT_EVENT_LOG="${COPILOT_EVENT_LOG:-${AI_EVENT_LOG:-${COPILOT_LOG_DIR}/tool-usage.jsonl}}"
+AI_LOG_DIR="${AI_LOG_DIR:-${COPILOT_LOG_DIR:-.ai-logs}}"
+COPILOT_LOG_DIR="${COPILOT_LOG_DIR:-$AI_LOG_DIR}"
+AI_CONTEXT_DIR="${AI_CONTEXT_DIR:-${COPILOT_CONTEXT_DIR:-.repomix-context}}"
+COPILOT_CONTEXT_DIR="${COPILOT_CONTEXT_DIR:-$AI_CONTEXT_DIR}"
+AI_SESSION_DIR="${AI_SESSION_DIR:-${COPILOT_SESSION_DIR:-${AI_LOG_DIR}/sessions}}"
+COPILOT_SESSION_DIR="${COPILOT_SESSION_DIR:-$AI_SESSION_DIR}"
+AI_SNAPSHOT_DIR="${AI_SNAPSHOT_DIR:-${COPILOT_SNAPSHOT_DIR:-${AI_LOG_DIR}/snapshots}}"
+COPILOT_SNAPSHOT_DIR="${COPILOT_SNAPSHOT_DIR:-$AI_SNAPSHOT_DIR}"
+AI_EVENT_LOG="${AI_EVENT_LOG:-${COPILOT_EVENT_LOG:-${AI_LOG_DIR}/tool-usage.jsonl}}"
+COPILOT_EVENT_LOG="${COPILOT_EVENT_LOG:-$AI_EVENT_LOG}"
 AI_SESSION_GENERATED_DIR="${AI_SESSION_GENERATED_DIR:-docs/ai/generated/sessions}"
 
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 2 ]]; then
@@ -5790,21 +5938,21 @@ log_json() {
         payload_json="$(jq -cn --arg raw "$payload" '{raw:$raw}')"
     fi
 
-        entry="$(jq -cn \
-                --arg event_version "2.0" \
-                --arg event_type "$event" \
-                --arg trace_id "${TRACE_ID:-unknown}" \
-                --arg session_id "${SESSION_ID:-unknown}" \
-                --arg task_id "${TASK_ID:-unknown}" \
-                --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-                --arg actor_id "${ACTOR_ID:-$caller}" \
-                --arg delegated_by "${DELEGATED_BY:-}" \
-                --arg tool_name "$caller" \
-                --arg repo_root "$(git_root 2>/dev/null || pwd)" \
-                --arg git_branch "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown')" \
-                --arg git_commit "$(git rev-parse HEAD 2>/dev/null || printf 'unknown')" \
-                --argjson data "$payload_json" \
-                '{
+    entry="$(jq -cn \
+        --arg event_version "2.0" \
+        --arg event_type "$event" \
+        --arg trace_id "${TRACE_ID:-unknown}" \
+        --arg session_id "${SESSION_ID:-unknown}" \
+        --arg task_id "${TASK_ID:-unknown}" \
+        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --arg actor_id "${ACTOR_ID:-$caller}" \
+        --arg delegated_by "${DELEGATED_BY:-}" \
+        --arg tool_name "$caller" \
+        --arg repo_root "$(git_root 2>/dev/null || pwd)" \
+        --arg git_branch "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown')" \
+        --arg git_commit "$(git rev-parse HEAD 2>/dev/null || printf 'unknown')" \
+        --argjson data "$payload_json" \
+        '{
                     event_version: $event_version,
                     event_type: $event_type,
                     trace_id: $trace_id,
@@ -5858,7 +6006,7 @@ log_json() {
                     details: (if ($data | type) == "object" then $data else {raw: $data} end)
                 }')"
 
-        append_log_entry "$entry"
+    append_log_entry "$entry"
 }
 
 log_info() { printf '%b[INFO]%b  %s\n' "$_C_CYAN" "$_C_RESET" "$*" >&2; }
@@ -5931,15 +6079,15 @@ emit_envelope() {
     parsed_errors="$(jq -c . <<<"$errors" 2>/dev/null || printf '[]')"
     parsed_truncated="$(jq -c . <<<"$truncated" 2>/dev/null || printf 'false')"
     jq -cn \
-      --arg schema "1" \
-      --arg status "$status" \
-      --arg tool "$tool" \
-      --arg content_raw "$parsed_content" \
-      --arg warnings_raw "$parsed_warnings" \
-      --arg errors_raw "$parsed_errors" \
-      --arg elapsed_raw "$elapsed" \
-      --arg truncated_raw "$parsed_truncated" \
-      '{
+        --arg schema "1" \
+        --arg status "$status" \
+        --arg tool "$tool" \
+        --arg content_raw "$parsed_content" \
+        --arg warnings_raw "$parsed_warnings" \
+        --arg errors_raw "$parsed_errors" \
+        --arg elapsed_raw "$elapsed" \
+        --arg truncated_raw "$parsed_truncated" \
+        '{
         schema: ($schema|tonumber),
         status: $status,
         tool: $tool,
@@ -5984,39 +6132,44 @@ repo_root() {
 classify_command() {
     local tool="${1:-}" sub="${2:-}"
     case "$tool" in
-        rg|fd|fdfind|cat|bat|sed|awk|jq|yq) echo read ;;
-        rm|rmdir|mv|truncate|dd) echo destructive ;;
-        curl|wget|ssh|scp|rsync) echo network ;;
-        brew|apt|apt-get|winget|choco) echo install ;;
-        npm)
-            case "$sub" in
-                install|add|update|remove|upgrade|require|global) echo install ;;
-                test|run|exec|lint|validate|check) echo write ;;
-                *) echo unknown ;;
-            esac ;;
-        git)
-            case "$sub" in
-                status|diff|show|log|grep|rev-parse|ls-files|branch) echo read ;;
-                reset|clean|checkout|restore|push|pull|commit) echo destructive ;;
-                *) echo unknown ;;
-            esac ;;
-        php|node|python|python3|bash|sh|zsh|make|just) echo write ;;
+    rg | fd | fdfind | cat | bat | sed | awk | jq | yq) echo read ;;
+    rm | rmdir | mv | truncate | dd) echo destructive ;;
+    curl | wget | ssh | scp | rsync) echo network ;;
+    brew | apt | apt-get | winget | choco) echo install ;;
+    npm)
+        case "$sub" in
+        install | add | update | remove | upgrade | require | global) echo install ;;
+        test | run | exec | lint | validate | check) echo write ;;
         *) echo unknown ;;
+        esac
+        ;;
+    git)
+        case "$sub" in
+        status | diff | show | log | grep | rev-parse | ls-files | branch) echo read ;;
+        reset | clean | checkout | restore | push | pull | commit) echo destructive ;;
+        *) echo unknown ;;
+        esac
+        ;;
+    php | node | python | python3 | bash | sh | zsh | make | just) echo write ;;
+    *) echo unknown ;;
     esac
 }
 
 approval_env_for_category() {
     case "${1:-}" in
-        destructive) echo AI_APPROVE_DESTRUCTIVE ;;
-        network) echo AI_APPROVE_NETWORK ;;
-        install) echo AI_APPROVE_INSTALL ;;
-        unknown) echo AI_APPROVE_UNKNOWN_COMMAND ;;
-        *) echo "" ;;
+    destructive) echo AI_APPROVE_DESTRUCTIVE ;;
+    network) echo AI_APPROVE_NETWORK ;;
+    install) echo AI_APPROVE_INSTALL ;;
+    unknown) echo AI_APPROVE_UNKNOWN_COMMAND ;;
+    *) echo "" ;;
     esac
 }
 
 command_basename() {
-    [[ -n "${1:-}" ]] || { echo ""; return 0; }
+    [[ -n "${1:-}" ]] || {
+        echo ""
+        return 0
+    }
     basename "$1"
 }
 
@@ -6030,14 +6183,20 @@ realpath_safe() {
 }
 
 assert_inside_repo() {
-    local p="$(realpath_safe "${1:?path required}")"
-    local root="$(repo_root)"
+    local p
+    local root
+
+    p="$(realpath_safe "${1:?path required}")"
+    root="$(repo_root)"
     [[ "$p" == "$root" || "$p" == "$root"/* ]] || die "path outside repo: $p"
 }
 
 repo_relative_path() {
-    local p="$(realpath_safe "${1:?path required}")"
-    local root="$(repo_root)"
+    local p
+    local root
+
+    p="$(realpath_safe "${1:?path required}")"
+    root="$(repo_root)"
     if [[ "$p" == "$root" ]]; then
         echo "."
     else
@@ -6056,8 +6215,8 @@ assert_relative_safe_path() {
 path_matches_protected_pattern() {
     local p="${1,,}"
     case "$p" in
-        .env|.env.*|*.key|*.pem|*.crt|*.p12|*.pfx|*secret*|agents.md|.github/*|docs/ai/generated/*) return 0 ;;
-        *) return 1 ;;
+    .env | .env.* | *.key | *.pem | *.crt | *.p12 | *.pfx | *secret* | agents.md | .github/* | docs/ai/generated/*) return 0 ;;
+    *) return 1 ;;
     esac
 }
 
@@ -6086,19 +6245,24 @@ require_approval() {
 }
 
 enforce_command_policy() {
-    local action="${1:-cmd}"; shift || true
+    local action="${1:-cmd}"
+
+    shift || true
     local tool="${1:-}"
     local sub="${2:-}"
     local category
     category="$(classify_command "$tool" "$sub")"
     case "$category" in
-        read) return 0 ;;
-        destructive|network|install|unknown)
-            require_approval "$action" "$(approval_env_for_category "$category")"
-            ;;
-        write)
-            [[ -n "${AI_TASK_SCOPE:-}" ]] || { log_error "AI_TASK_SCOPE required for write commands"; exit 2; }
-            ;;
+    read) return 0 ;;
+    destructive | network | install | unknown)
+        require_approval "$action" "$(approval_env_for_category "$category")"
+        ;;
+    write)
+        [[ -n "${AI_TASK_SCOPE:-}" ]] || {
+            log_error "AI_TASK_SCOPE required for write commands"
+            exit 2
+        }
+        ;;
     esac
 }
 
@@ -6913,7 +7077,7 @@ install_linux() {
 
     # gitleaks (required by advisor + secret-scan strict mode)
     if ! need_cmd gitleaks; then
-        if run_cmd bash -c 'mkdir -p "$HOME/.local/bin" && curl -L --fail https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz -o /tmp/gitleaks.tar.gz && tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks && install -m 0755 /tmp/gitleaks "$HOME/.local/bin/gitleaks"'; then
+        if run_cmd bash -c "mkdir -p \"$HOME/.local/bin\" && curl -L --fail https://github.com/gitleaks/gitleaks/releases/latest/download/gitleaks_linux_x64.tar.gz -o \"${TMPDIR:-/tmp}/gitleaks.tar.gz\" && tar -xzf \"${TMPDIR:-/tmp}/gitleaks.tar.gz\" -C \"${TMPDIR:-/tmp}\" gitleaks && install -m 0755 \"${TMPDIR:-/tmp}/gitleaks\" \"$HOME/.local/bin/gitleaks\""; then
             :
         else
             printf 'Warning: failed to install gitleaks from release archive.\n' >&2
@@ -6922,12 +7086,12 @@ install_linux() {
 
     # ast-grep via npm (user-local prefix to avoid sudo)
     if ! need_cmd ast-grep; then
-        run_cmd bash -c 'mkdir -p "$HOME/.local" && npm config set prefix "$HOME/.local" && npm install -g @ast-grep/cli'
+        run_cmd bash -c "mkdir -p \"$HOME/.local\" && npm config set prefix \"$HOME/.local\" && npm install -g @ast-grep/cli"
     fi
 
     # fd alias if package shipped as fdfind
     if ! need_cmd fd && need_cmd fdfind; then
-        run_cmd bash -c 'mkdir -p "$HOME/.local/bin" && ln -sf "$(command -v fdfind)" "$HOME/.local/bin/fd"'
+        run_cmd bash -c "mkdir -p \"$HOME/.local/bin\" && ln -sf \"$(command -v fdfind)\" \"$HOME/.local/bin/fd\""
     fi
 
     run_cmd npm install -g repomix
@@ -7008,10 +7172,10 @@ EOF
 backend="${1:-auto}"
 
 case "$backend" in
-auto|repomix|files-to-prompt|code2prompt)
+auto | repomix | files-to-prompt | code2prompt)
     shift || true
     ;;
---help|-h)
+--help | -h)
     usage
     exit 0
     ;;
@@ -7037,7 +7201,7 @@ args_contain_output() {
     local arg
     for arg in "$@"; do
         case "$arg" in
-        --output|--output=*)
+        --output | --output=*)
             return 0
             ;;
         esac
@@ -7151,6 +7315,7 @@ jq -n \
 
 log_json "context.pack.manual" "$(cat "$manifest")"
 printf '%s\n' "$OUTPUT_FILE"
+
 ```
 
 ## FILE: scripts/ai/post-tool-use.sh
@@ -7192,7 +7357,7 @@ authorization_decision() {
     approval_missing)
         printf 'ask\n'
         ;;
-    authorization_denied|unsafe_mutation_blocked)
+    authorization_denied | unsafe_mutation_blocked)
         printf 'denied\n'
         ;;
     *)
@@ -7330,8 +7495,8 @@ append_log_entry "$entry"
 #!/usr/bin/env bash
 set -euo pipefail
 
-POLICY_FILE="${COPILOT_POLICY_FILE:-policies/copilot/policy.yaml}"
-MAINTENANCE_STATE_FILE="${COPILOT_MAINTENANCE_STATE_FILE:-.ai-logs/maintenance-mode.json}"
+POLICY_FILE="${AI_POLICY_FILE:-${COPILOT_POLICY_FILE:-policies/copilot/policy.yaml}}"
+MAINTENANCE_STATE_FILE="${AI_MAINTENANCE_STATE_FILE:-${COPILOT_MAINTENANCE_STATE_FILE:-.ai-logs/maintenance-mode.json}}"
 # maintenance mode allows repository-delivered scripts only
 
 deny() {
@@ -7348,31 +7513,54 @@ tool_args_raw="$(jq -c '.toolArgs // .toolArgsRaw // .tool_input // {}' <<<"$inp
 
 is_terminal_tool() {
     case "$1" in
-        bash|runTerminalCommand|execute/runInTerminal)
-            return 0
-            ;;
-        *)
-            return 1
-            ;;
+    bash | runTerminalCommand | execute/runInTerminal)
+        return 0
+        ;;
+    *)
+        return 1
+        ;;
     esac
 }
 
-allow_registered_script() {
+executed_script_token() {
     local compact="$1"
-    local registry_file="${COPILOT_SCRIPT_REGISTRY_FILE:-docs/ai/script-registry.json}"
-    local path escaped
+    local token next_token
+    local tokens=()
+    local index
+
+    read -r -a tokens <<<"$compact"
+    for ((index = 0; index < ${#tokens[@]}; index++)); do
+        token="${tokens[$index]}"
+
+        if [[ "$token" == "env" ]]; then
+            continue
+        fi
+
+        if [[ "$token" =~ ^[A-Za-z_][A-Za-z0-9_]*= ]]; then
+            continue
+        fi
+
+        if [[ "$token" == "bash" || "$token" == "sh" || "$token" == "zsh" ]]; then
+            next_token="${tokens[$((index + 1))]:-}"
+            [[ -n "$next_token" ]] && printf '%s\n' "$next_token"
+            return 0
+        fi
+
+        printf '%s\n' "$token"
+        return 0
+    done
+
+    return 1
+}
+
+registered_script_paths() {
+    local registry_file="${AI_SCRIPT_REGISTRY_FILE:-${COPILOT_SCRIPT_REGISTRY_FILE:-docs/ai/script-registry.json}}"
 
     if ! command -v jq >/dev/null 2>&1 || [[ ! -f "$registry_file" ]]; then
         return 1
     fi
 
-    while IFS= read -r path; do
-        [[ -n "$path" ]] || continue
-        escaped="$(printf '%s' "$path" | sed 's/[][.^$*+?(){}|\\]/\\&/g')"
-        if grep -Eq "^(bash[[:space:]]+)?(\./)?${escaped}([[:space:]]|$)" <<<"$compact"; then
-            return 0
-        fi
-    done < <(jq -r '
+    jq -r '
         [
           (.scripts // {} | to_entries[]?.value.installed_path),
           (.scripts // {} | to_entries[]?.value.source_path),
@@ -7381,7 +7569,33 @@ allow_registered_script() {
         | flatten
         | map(select(type == "string" and . != ""))
         | unique[]
-    ' "$registry_file" 2>/dev/null)
+    ' "$registry_file" 2>/dev/null
+}
+
+maintenance_mode_active() {
+    [[ -f "$MAINTENANCE_STATE_FILE" ]] || return 1
+    command -v jq >/dev/null 2>&1 || return 1
+
+    jq -e '(.enabled // false) == true and ((.expires_at_epoch // 0) > now)' "$MAINTENANCE_STATE_FILE" >/dev/null 2>&1
+}
+
+allow_registered_script() {
+    local compact="$1"
+    local path executed_script
+
+    executed_script="$(executed_script_token "$compact" || true)"
+    [[ -n "$executed_script" ]] || return 1
+
+    if ! command -v jq >/dev/null 2>&1; then
+        return 1
+    fi
+
+    while IFS= read -r path; do
+        [[ -n "$path" ]] || continue
+        if [[ "$executed_script" == "$path" || "$executed_script" == "./$path" ]]; then
+            return 0
+        fi
+    done < <(registered_script_paths)
 
     return 1
 }
@@ -7410,7 +7624,7 @@ evaluate_policy_yaml() {
         fi
     done < <(yq -r '.deny[]? | @base64' "$POLICY_FILE" 2>/dev/null || true)
 
-    if [[ "${COPILOT_STRICT_ALLOWLIST:-0}" != '1' ]]; then
+    if [[ "${AI_STRICT_ALLOWLIST:-${COPILOT_STRICT_ALLOWLIST:-0}}" != '1' ]]; then
         while IFS= read -r encoded; do
             [[ -n "$encoded" ]] || continue
             rule="$(printf '%s' "$encoded" | base64 -d)"
@@ -7442,9 +7656,22 @@ fi
 
 command="$(jq -r '.command // .commandLine // .text // empty' <<<"$tool_args_raw")"
 compact="$(tr -s '[:space:]' ' ' <<<"$command" | sed 's/^ //; s/ $//')"
-strict_allowlist="${COPILOT_STRICT_ALLOWLIST:-0}"
+strict_allowlist="${AI_STRICT_ALLOWLIST:-${COPILOT_STRICT_ALLOWLIST:-0}}"
 
 evaluate_policy_yaml "$compact" || true
+
+if maintenance_mode_active; then
+    executed_script="$(executed_script_token "$compact" || true)"
+    if [[ -n "$executed_script" ]] && [[ "$executed_script" == *.sh || "$executed_script" == */* ]]; then
+        if allow_registered_script "$compact"; then
+            allow
+        else
+            jq -cn --arg reason 'maintenance mode allows only approved repository scripts' \
+                '{permissionDecision:"ask", permissionDecisionReason:$reason}'
+        fi
+        exit 0
+    fi
+fi
 
 if grep -Eq '(^|[[:space:]])(sudo|su -|mkfs|dd|shutdown|reboot|halt|poweroff|mount|umount)([[:space:]]|$)' <<<"$compact"; then
     deny 'dangerous system command blocked by repo policy'
@@ -7476,15 +7703,10 @@ if grep -Eq '(curl|wget|nc|ncat|netcat)[[:space:]].*(-d|--data|--upload-file|--d
     exit 0
 fi
 
-if grep -Eq '(^|[[:space:]])(cat|bat|less|head|tail)([[:space:]]|$)' <<<"$compact" \
-    && grep -Eq '(^|[[:space:]])[^[:space:]]*\.env([^[:space:]]*)?([[:space:]]|$)' <<<"$compact" \
-    && ! grep -Eq '(^|[[:space:]])[^[:space:]]*\.env\.example([[:space:]]|$)' <<<"$compact"; then
+if grep -Eq '(^|[[:space:]])(cat|bat|less|head|tail)([[:space:]]|$)' <<<"$compact" &&
+    grep -Eq '(^|[[:space:]])[^[:space:]]*\.env([^[:space:]]*)?([[:space:]]|$)' <<<"$compact" &&
+    ! grep -Eq '(^|[[:space:]])[^[:space:]]*\.env\.example([[:space:]]|$)' <<<"$compact"; then
     deny 'direct .env secret extraction blocked by repo policy'
-    exit 0
-fi
-
-if allow_registered_script "$compact"; then
-    allow
     exit 0
 fi
 
@@ -7503,8 +7725,8 @@ if grep -Eq '^gh[[:space:]]+(pr[[:space:]]+(view|list|checks|diff)|issue[[:space
     exit 0
 fi
 
-if grep -Eq '^ast-grep[[:space:]]+run([[:space:]]|$)' <<<"$compact" \
-    && ! grep -Eq '(^|[[:space:]])--(rewrite|update-all|U)([[:space:]]|$)' <<<"$compact"; then
+if grep -Eq '^ast-grep[[:space:]]+run([[:space:]]|$)' <<<"$compact" &&
+    ! grep -Eq '(^|[[:space:]])--(rewrite|update-all|U)([[:space:]]|$)' <<<"$compact"; then
     allow
     exit 0
 fi
@@ -7605,7 +7827,17 @@ if grep -Eq '^just[[:space:]]+context-(clean|purge)\b' <<<"$compact"; then
     exit 0
 fi
 
-# Tier 1: pure read-only copilot scripts
+if grep -Eq '^(bash[[:space:]]+)?(\./)?scripts/ai/watch-loop\.sh\b' <<<"$compact"; then
+    deny 'watch-loop requires review of the delegated command before execution'
+    exit 0
+fi
+
+if allow_registered_script "$compact"; then
+    allow
+    exit 0
+fi
+
+# Tier 1: pure read-only AI workflow scripts
 if grep -Eq '^(bash[[:space:]]+)?(\./)?scripts/ai/(ai-search|ai-verify|preview-file|fd-files|rg-code|git-forensics|repo-stats|query-usage)\.sh\b' <<<"$compact"; then
     allow
     exit 0
@@ -7658,11 +7890,11 @@ if [[ "$strict_allowlist" == '1' ]]; then
         exit 0
     fi
 
-    if grep -Eq '^(rg|fd|fzf|bat|jq|yq|ast-grep|semgrep|delta|eza|ls|wc|cut|sort|uniq|tr|stat|file|du|tree|pwd|whoami|id|uname|date|env|printenv|echo|printf)([[:space:]]|$)' <<<"$compact" \
-        || grep -Eq '^git([[:space:]]+--no-pager)?[[:space:]]+(grep|log|blame|show|diff|status|rev-parse|symbolic-ref|describe|ls-files|range-diff)([[:space:]]|$)' <<<"$compact" \
-        || grep -Eq '^git([[:space:]]+--no-pager)?[[:space:]]+worktree[[:space:]]+list([[:space:]]|$)' <<<"$compact" \
-        || grep -Eq '^gh[[:space:]]+(issue[[:space:]]+(view|list)|pr[[:space:]]+(view|list|checks)|repo[[:space:]]+view|search[[:space:]]+(issues|prs)|workflow[[:space:]]+view|run[[:space:]]+(view|list))([[:space:]]|$)' <<<"$compact" \
-        || grep -Eq '^(bash[[:space:]]+)?(\./)?scripts/ai/(rg-code|fd-files|preview-file|git-forensics|gh-pr-context|ast-search|ai-search|ai-verify|repo-stats|query-usage|pack-context|repomix-context-tree|repomix-scc-router)\.sh([[:space:]]|$)' <<<"$compact"; then
+    if grep -Eq '^(rg|fd|fzf|bat|jq|yq|ast-grep|semgrep|delta|eza|ls|wc|cut|sort|uniq|tr|stat|file|du|tree|pwd|whoami|id|uname|date|env|printenv|echo|printf)([[:space:]]|$)' <<<"$compact" ||
+        grep -Eq '^git([[:space:]]+--no-pager)?[[:space:]]+(grep|log|blame|show|diff|status|rev-parse|symbolic-ref|describe|ls-files|range-diff)([[:space:]]|$)' <<<"$compact" ||
+        grep -Eq '^git([[:space:]]+--no-pager)?[[:space:]]+worktree[[:space:]]+list([[:space:]]|$)' <<<"$compact" ||
+        grep -Eq '^gh[[:space:]]+(issue[[:space:]]+(view|list)|pr[[:space:]]+(view|list|checks)|repo[[:space:]]+view|search[[:space:]]+(issues|prs)|workflow[[:space:]]+view|run[[:space:]]+(view|list))([[:space:]]|$)' <<<"$compact" ||
+        grep -Eq '^(bash[[:space:]]+)?(\./)?scripts/ai/(rg-code|fd-files|preview-file|git-forensics|gh-pr-context|ast-search|ai-search|ai-verify|repo-stats|query-usage|pack-context|repomix-context-tree|repomix-scc-router)\.sh([[:space:]]|$)' <<<"$compact"; then
         allow
         exit 0
     fi
@@ -7710,9 +7942,9 @@ parse_size() {
     if [[ "$raw" =~ ^([0-9]+)([KkMmGg])$ ]]; then
         local n="${BASH_REMATCH[1]}"
         case "${BASH_REMATCH[2],,}" in
-            k) echo $((n * 1024)) ;;
-            m) echo $((n * 1024 * 1024)) ;;
-            g) echo $((n * 1024 * 1024 * 1024)) ;;
+        k) echo $((n * 1024)) ;;
+        m) echo $((n * 1024 * 1024)) ;;
+        g) echo $((n * 1024 * 1024 * 1024)) ;;
         esac
     else
         echo "$raw"
@@ -7734,32 +7966,83 @@ max_columns=200
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --help|-h) usage; exit 0 ;;
-        --plain) plain=1; shift ;;
-        --dry-run) dry_run=1; shift ;;
-        --force) force=1; shift ;;
-        --lines) lines="${2:-}"; shift 2 ;;
-        --lines=*) lines="${1#*=}"; shift ;;
-        --range) range="${2:-}"; shift 2 ;;
-        --range=*) range="${1#*=}"; shift ;;
-        --around) around="${2:-}"; shift 2 ;;
-        --around=*) around="${1#*=}"; shift ;;
-        --context) context="${2:-3}"; shift 2 ;;
-        --context=*) context="${1#*=}"; shift ;;
-        --max-bytes) max_bytes_raw="${2:-65536}"; shift 2 ;;
-        --max-bytes=*) max_bytes_raw="${1#*=}"; shift ;;
-        --max-columns) max_columns="${2:-200}"; shift 2 ;;
-        --max-columns=*) max_columns="${1#*=}"; shift ;;
-        --*)
-            if [[ "$json_mode" == "json" ]]; then
-                emit_json "error" "" "" "[\"unknown option: $1\"]"
-                exit 1
-            fi
-            die "unknown option: $1"
-            ;;
-        *)
-            if [[ -z "$file" ]]; then file="$1"; shift; else die "unexpected arg: $1"; fi
-            ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    --plain)
+        plain=1
+        shift
+        ;;
+    --dry-run)
+        dry_run=1
+        shift
+        ;;
+    --force)
+        force=1
+        shift
+        ;;
+    --lines)
+        lines="${2:-}"
+        shift 2
+        ;;
+    --lines=*)
+        lines="${1#*=}"
+        shift
+        ;;
+    --range)
+        range="${2:-}"
+        shift 2
+        ;;
+    --range=*)
+        range="${1#*=}"
+        shift
+        ;;
+    --around)
+        around="${2:-}"
+        shift 2
+        ;;
+    --around=*)
+        around="${1#*=}"
+        shift
+        ;;
+    --context)
+        context="${2:-3}"
+        shift 2
+        ;;
+    --context=*)
+        context="${1#*=}"
+        shift
+        ;;
+    --max-bytes)
+        max_bytes_raw="${2:-65536}"
+        shift 2
+        ;;
+    --max-bytes=*)
+        max_bytes_raw="${1#*=}"
+        shift
+        ;;
+    --max-columns)
+        max_columns="${2:-200}"
+        shift 2
+        ;;
+    --max-columns=*)
+        max_columns="${1#*=}"
+        shift
+        ;;
+    --*)
+        if [[ "$json_mode" == "json" ]]; then
+            emit_json "error" "" "" "[\"unknown option: $1\"]"
+            exit 1
+        fi
+        die "unknown option: $1"
+        ;;
+    *)
+        if [[ -z "$file" ]]; then
+            file="$1"
+            shift
+        else die "unexpected arg: $1"; fi
+        ;;
     esac
 done
 
@@ -7800,7 +8083,7 @@ if [[ "$dry_run" == "1" ]]; then
 fi
 
 size="$(wc -c <"$file" | tr -d ' ')"
-if (( size > max_bytes )) && [[ "$force" != "1" ]]; then
+if ((size > max_bytes)) && [[ "$force" != "1" ]]; then
     if [[ "$json_mode" == "json" ]]; then
         emit_json "error" "$file" "" '["max-bytes exceeded"]'
     else
@@ -7811,7 +8094,7 @@ fi
 
 # Real binary detection: count NUL bytes via tr (avoid bash $'\x00' empty-string bug).
 nul_count="$(LC_ALL=C tr -cd '\000' <"$file" | wc -c | tr -d ' ')"
-if (( nul_count > 0 )) && [[ "$force" != "1" ]]; then
+if ((nul_count > 0)) && [[ "$force" != "1" ]]; then
     if [[ "$json_mode" == "json" ]]; then
         emit_json "error" "$file" "" '["binary file blocked"]'
     else
@@ -7838,8 +8121,9 @@ if [[ -n "$range" ]]; then
         fi
         exit 1
     fi
-    start="${BASH_REMATCH[1]}"; end="${BASH_REMATCH[2]}"
-    if (( start > end )); then
+    start="${BASH_REMATCH[1]}"
+    end="${BASH_REMATCH[2]}"
+    if ((start > end)); then
         if [[ "$json_mode" == "json" ]]; then
             emit_json "error" "$file" "" '["invalid --range"]'
         else
@@ -7857,8 +8141,9 @@ elif [[ -n "$around" ]]; then
         echo "[ERROR] invalid --context" >&2
         exit 1
     fi
-    start=$((around-context)); ((start<1)) && start=1
-    end=$((around+context))
+    start=$((around - context))
+    ((start < 1)) && start=1
+    end=$((around + context))
     content="$(sed -n "${start},${end}p" "$file")"
 elif [[ -n "$lines" ]]; then
     content="$(sed -n "1,${lines}p" "$file")"
@@ -7995,7 +8280,7 @@ include_candidates=0
 manifest_path=".ai-install-manifest.json"
 
 set_mode() {
-    if (( mode_set == 1 )); then
+    if ((mode_set == 1)); then
         printf '[ERROR] only one of --list/--dry-run/--apply may be given\n' >&2
         exit 4
     fi
@@ -8005,19 +8290,43 @@ set_mode() {
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --help|-h) usage; exit 0 ;;
-        --list) set_mode list; shift ;;
-        --dry-run) set_mode dry-run; shift ;;
-        --apply) set_mode apply; shift ;;
-        --force) force=1; shift ;;
-        --include-candidates) include_candidates=1; shift ;;
-        --manifest) manifest_path="${2:?--manifest requires value}"; shift 2 ;;
-        --manifest=*) manifest_path="${1#*=}"; shift ;;
-        *)
-            printf '[ERROR] unknown argument: %s\n' "$1" >&2
-            usage >&2
-            exit 4
-            ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    --list)
+        set_mode list
+        shift
+        ;;
+    --dry-run)
+        set_mode dry-run
+        shift
+        ;;
+    --apply)
+        set_mode apply
+        shift
+        ;;
+    --force)
+        force=1
+        shift
+        ;;
+    --include-candidates)
+        include_candidates=1
+        shift
+        ;;
+    --manifest)
+        manifest_path="${2:?--manifest requires value}"
+        shift 2
+        ;;
+    --manifest=*)
+        manifest_path="${1#*=}"
+        shift
+        ;;
+    *)
+        printf '[ERROR] unknown argument: %s\n' "$1" >&2
+        usage >&2
+        exit 4
+        ;;
     esac
 done
 
@@ -8044,9 +8353,12 @@ collect_entries() {
     ' "$manifest_path"
 }
 
-mapfile -t ENTRIES < <(collect_entries)
+ENTRIES=()
+while IFS= read -r entry; do
+    ENTRIES+=("$entry")
+done < <(collect_entries)
 
-if (( ${#ENTRIES[@]} == 0 )); then
+if ((${#ENTRIES[@]} == 0)); then
     printf '[WARN] manifest has no entries where source != key; nothing to do\n' >&2
 fi
 
@@ -8090,24 +8402,29 @@ path_size_bytes() {
 
 # ---- --dry-run mode -----------------------------------------------------
 if [[ "$mode" == "dry-run" ]]; then
-    declare -A PACK_FILES PACK_BYTES
+    summary_file="$(mktemp)"
     total_bytes=0
     total_files=0
     for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
         path="${line%%$'\t'*}"
         pack="${line#*$'\t'}"
         bytes="$(path_size_bytes "$path")"
-        PACK_FILES[$pack]=$(( ${PACK_FILES[$pack]:-0} + 1 ))
-        PACK_BYTES[$pack]=$(( ${PACK_BYTES[$pack]:-0} + bytes ))
-        total_bytes=$(( total_bytes + bytes ))
-        total_files=$(( total_files + 1 ))
+        printf '%s\t%s\n' "$pack" "$bytes" >>"$summary_file"
+        total_bytes=$((total_bytes + bytes))
+        total_files=$((total_files + 1))
     done
 
     printf '\n%-40s %8s %12s\n' "PACK" "FILES" "BYTES" >&2
     printf '%-40s %8s %12s\n' "----" "-----" "-----" >&2
-    for pack in "${!PACK_FILES[@]}"; do
-        printf '%-40s %8d %12d\n' "$pack" "${PACK_FILES[$pack]}" "${PACK_BYTES[$pack]}" >&2
-    done
+    awk -F'\t' '
+        { files[$1]++; bytes[$1] += $2 }
+        END {
+            for (pack in files) {
+                printf "%-40s %8d %12d\n", pack, files[pack], bytes[pack]
+            }
+        }
+    ' "$summary_file" | sort >&2
+    rm -f "$summary_file"
     printf '%-40s %8s %12s\n' "----" "-----" "-----" >&2
     printf '%-40s %8d %12d\n' "TOTAL" "$total_files" "$total_bytes" >&2
     printf 'total_bytes=%d\n' "$total_bytes"
@@ -8141,8 +8458,14 @@ backup_root="$repo_root_path/.ai-backups/prune-shipped-$ts"
 log_dir="$repo_root_path/.ai-logs"
 log_file="$log_dir/prune-$ts.jsonl"
 
-mkdir -p "$backup_root" || { printf '[ERROR] cannot mkdir %s\n' "$backup_root" >&2; exit 4; }
-mkdir -p "$log_dir" || { printf '[ERROR] cannot mkdir %s\n' "$log_dir" >&2; exit 4; }
+mkdir -p "$backup_root" || {
+    printf '[ERROR] cannot mkdir %s\n' "$backup_root" >&2
+    exit 4
+}
+mkdir -p "$log_dir" || {
+    printf '[ERROR] cannot mkdir %s\n' "$log_dir" >&2
+    exit 4
+}
 
 printf '[INFO] backup root: %s\n' "$backup_root" >&2
 printf '[INFO] audit log:   %s\n' "$log_file" >&2
@@ -8203,7 +8526,7 @@ for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
 done
 
 # 5) Candidate paths (only when explicitly requested AND in --apply mode)
-if (( include_candidates == 1 )); then
+if ((include_candidates == 1)); then
     for cand in "${CANDIDATE_PATHS[@]}"; do
         if path_is_refused "$cand"; then
             printf '[ERROR] candidate %s matches refuse-list; refusing\n' "$cand" >&2
@@ -8246,14 +8569,39 @@ fi
 
 while (($# > 0)); do
     case "$1" in
-    --multiplier) MULTIPLIER="$2"; shift 2 ;;
-    --multiplier=*) MULTIPLIER="${1#*=}"; shift ;;
-    --multiplier-label) LABEL="$2"; shift 2 ;;
-    --multiplier-label=*) LABEL="${1#*=}"; shift ;;
-    --reserved-output) RESERVED_OUTPUT="$2"; shift 2 ;;
-    --reserved-output=*) RESERVED_OUTPUT="${1#*=}"; shift ;;
-    --help | -h) usage; exit 0 ;;
-    *) echo "Unknown option: $1" >&2; usage; exit 2 ;;
+    --multiplier)
+        MULTIPLIER="$2"
+        shift 2
+        ;;
+    --multiplier=*)
+        MULTIPLIER="${1#*=}"
+        shift
+        ;;
+    --multiplier-label)
+        LABEL="$2"
+        shift 2
+        ;;
+    --multiplier-label=*)
+        LABEL="${1#*=}"
+        shift
+        ;;
+    --reserved-output)
+        RESERVED_OUTPUT="$2"
+        shift 2
+        ;;
+    --reserved-output=*)
+        RESERVED_OUTPUT="${1#*=}"
+        shift
+        ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    *)
+        echo "Unknown option: $1" >&2
+        usage
+        exit 2
+        ;;
     esac
 done
 
@@ -8268,7 +8616,7 @@ if [[ -d "$TARGET" ]]; then
         BYTES="$(rg --files "$TARGET" 2>/dev/null | xargs -I{} sh -c 'wc -c <"$1"' _ {} 2>/dev/null | awk '{s+=$1} END{print s+0}')"
     fi
 else
-    BYTES="$(wc -c < "$TARGET")"
+    BYTES="$(wc -c <"$TARGET")"
 fi
 
 RAW_TOKENS="$(awk -v b="$BYTES" 'BEGIN { printf "%d", int((b + 3) / 4) }')"
@@ -8307,6 +8655,7 @@ ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 PHP_BIN="${PHP_BIN:-php}"
 
 exec "$PHP_BIN" "$ROOT/tools/ai/repo-tool-inventory.php" "$@"
+
 ```
 
 ## FILE: scripts/ai/repomix-context-tree.sh
@@ -8484,42 +8833,150 @@ SAFETY_FACTOR=0.85
 
 while (($# > 0)); do
     case "$1" in
-    --output-dir) OUTPUT_DIR="$2"; shift 2 ;;
-    --output-dir=*) OUTPUT_DIR="${1#*=}"; shift ;;
-    --depth) DEPTH="$2"; shift 2 ;;
-    --depth=*) DEPTH="${1#*=}"; shift ;;
-    --top) TOP="$2"; shift 2 ;;
-    --top=*) TOP="${1#*=}"; shift ;;
-    --min-code) MIN_CODE="$2"; shift 2 ;;
-    --min-code=*) MIN_CODE="${1#*=}"; shift ;;
-    --min-files) MIN_FILES="$2"; shift 2 ;;
-    --min-files=*) MIN_FILES="${1#*=}"; shift ;;
-    --min-score) MIN_SCORE="$2"; shift 2 ;;
-    --min-score=*) MIN_SCORE="${1#*=}"; shift ;;
-    --min-complexity) MIN_COMPLEXITY="$2"; shift 2 ;;
-    --min-complexity=*) MIN_COMPLEXITY="${1#*=}"; shift ;;
-    --changed-since) CHANGED_SINCE="$2"; shift 2 ;;
-    --changed-since=*) CHANGED_SINCE="${1#*=}"; shift ;;
-    --churn-count) CHURN_COUNT="$2"; shift 2 ;;
-    --churn-count=*) CHURN_COUNT="${1#*=}"; shift ;;
-    --style) STYLE="$2"; shift 2 ;;
-    --style=*) STYLE="${1#*=}"; shift ;;
-    --split-size) SPLIT_SIZE="$2"; shift 2 ;;
-    --split-size=*) SPLIT_SIZE="${1#*=}"; shift ;;
-    --compress) COMPRESS=1; shift ;;
-    --include-logs) INCLUDE_LOGS=1; shift ;;
-    --include-logs-count) INCLUDE_LOGS_COUNT="$2"; shift 2 ;;
-    --include-logs-count=*) INCLUDE_LOGS_COUNT="${1#*=}"; shift ;;
-    --include-diffs) INCLUDE_DIFFS=1; shift ;;
-    --context-window) CONTEXT_WINDOW="$2"; shift 2 ;;
-    --context-window=*) CONTEXT_WINDOW="${1#*=}"; shift ;;
-    --reserved-output) RESERVED_OUTPUT="$2"; shift 2 ;;
-    --reserved-output=*) RESERVED_OUTPUT="${1#*=}"; shift ;;
-    --instruction-overhead) INSTRUCTION_OVERHEAD="$2"; shift 2 ;;
-    --instruction-overhead=*) INSTRUCTION_OVERHEAD="${1#*=}"; shift ;;
-    --safety-factor) SAFETY_FACTOR="$2"; shift 2 ;;
-    --safety-factor=*) SAFETY_FACTOR="${1#*=}"; shift ;;
-    --help | -h) usage; exit 0 ;;
+    --output-dir)
+        OUTPUT_DIR="$2"
+        shift 2
+        ;;
+    --output-dir=*)
+        OUTPUT_DIR="${1#*=}"
+        shift
+        ;;
+    --depth)
+        DEPTH="$2"
+        shift 2
+        ;;
+    --depth=*)
+        DEPTH="${1#*=}"
+        shift
+        ;;
+    --top)
+        TOP="$2"
+        shift 2
+        ;;
+    --top=*)
+        TOP="${1#*=}"
+        shift
+        ;;
+    --min-code)
+        MIN_CODE="$2"
+        shift 2
+        ;;
+    --min-code=*)
+        MIN_CODE="${1#*=}"
+        shift
+        ;;
+    --min-files)
+        MIN_FILES="$2"
+        shift 2
+        ;;
+    --min-files=*)
+        MIN_FILES="${1#*=}"
+        shift
+        ;;
+    --min-score)
+        MIN_SCORE="$2"
+        shift 2
+        ;;
+    --min-score=*)
+        MIN_SCORE="${1#*=}"
+        shift
+        ;;
+    --min-complexity)
+        MIN_COMPLEXITY="$2"
+        shift 2
+        ;;
+    --min-complexity=*)
+        MIN_COMPLEXITY="${1#*=}"
+        shift
+        ;;
+    --changed-since)
+        CHANGED_SINCE="$2"
+        shift 2
+        ;;
+    --changed-since=*)
+        CHANGED_SINCE="${1#*=}"
+        shift
+        ;;
+    --churn-count)
+        CHURN_COUNT="$2"
+        shift 2
+        ;;
+    --churn-count=*)
+        CHURN_COUNT="${1#*=}"
+        shift
+        ;;
+    --style)
+        STYLE="$2"
+        shift 2
+        ;;
+    --style=*)
+        STYLE="${1#*=}"
+        shift
+        ;;
+    --split-size)
+        SPLIT_SIZE="$2"
+        shift 2
+        ;;
+    --split-size=*)
+        SPLIT_SIZE="${1#*=}"
+        shift
+        ;;
+    --compress)
+        COMPRESS=1
+        shift
+        ;;
+    --include-logs)
+        INCLUDE_LOGS=1
+        shift
+        ;;
+    --include-logs-count)
+        INCLUDE_LOGS_COUNT="$2"
+        shift 2
+        ;;
+    --include-logs-count=*)
+        INCLUDE_LOGS_COUNT="${1#*=}"
+        shift
+        ;;
+    --include-diffs)
+        INCLUDE_DIFFS=1
+        shift
+        ;;
+    --context-window)
+        CONTEXT_WINDOW="$2"
+        shift 2
+        ;;
+    --context-window=*)
+        CONTEXT_WINDOW="${1#*=}"
+        shift
+        ;;
+    --reserved-output)
+        RESERVED_OUTPUT="$2"
+        shift 2
+        ;;
+    --reserved-output=*)
+        RESERVED_OUTPUT="${1#*=}"
+        shift
+        ;;
+    --instruction-overhead)
+        INSTRUCTION_OVERHEAD="$2"
+        shift 2
+        ;;
+    --instruction-overhead=*)
+        INSTRUCTION_OVERHEAD="${1#*=}"
+        shift
+        ;;
+    --safety-factor)
+        SAFETY_FACTOR="$2"
+        shift 2
+        ;;
+    --safety-factor=*)
+        SAFETY_FACTOR="${1#*=}"
+        shift
+        ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
     *) die "unknown option '$1'" ;;
     esac
 done
@@ -8588,11 +9045,7 @@ ensure_actionable_route() {
     local usable="$1"
     local fallback_row=''
     local fallback_group=''
-    local fallback_files=''
-    local fallback_code=''
-    local fallback_complexity=''
     local fallback_bytes=''
-    local fallback_score=''
     local fallback_tokens=''
     local fallback_decision=''
     local fallback_type=''
@@ -8607,7 +9060,7 @@ ensure_actionable_route() {
     fallback_row="$(tail -n +2 "$ROUTER_FOLDER_METRICS" | awk -F'\t' '$1 != "" && $4 + 0 > 0 { print; exit }')"
     [[ -n "$fallback_row" ]] || return 0
 
-    IFS=$'\t' read -r fallback_group fallback_files _fallback_lines fallback_code _fallback_comments _fallback_blanks fallback_complexity fallback_bytes _fallback_churn _fallback_code_share _fallback_complexity_share _fallback_file_share _fallback_byte_share _fallback_churn_share fallback_score <<<"$fallback_row"
+    IFS=$'\t' read -r fallback_group _fallback_files _fallback_lines _fallback_code _fallback_comments _fallback_blanks _fallback_complexity fallback_bytes _fallback_churn _fallback_code_share _fallback_complexity_share _fallback_file_share _fallback_byte_share _fallback_churn_share _fallback_score <<<"$fallback_row"
 
     fallback_tokens="$(estimate_tokens "$fallback_bytes")"
     if ((fallback_tokens <= usable)); then
@@ -8738,18 +9191,18 @@ build_plan() {
     ' "$TREE_PLAN_TSV" >"$TREE_PLAN_JSON"
 
     jq -n \
-      --arg root "$ROOT" \
-      --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-      --argjson context_window "$CONTEXT_WINDOW" \
-      --argjson reserved_output "$RESERVED_OUTPUT" \
-      --argjson instruction_overhead "$INSTRUCTION_OVERHEAD" \
-      --argjson safety_factor "$SAFETY_FACTOR" \
-      --argjson usable_budget "$usable" \
-      --arg style "$STYLE" \
-      --arg compress "$COMPRESS" \
-      --arg changed_since "$CHANGED_SINCE" \
-      --slurpfile plan "$TREE_PLAN_JSON" \
-      '{
+        --arg root "$ROOT" \
+        --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --argjson context_window "$CONTEXT_WINDOW" \
+        --argjson reserved_output "$RESERVED_OUTPUT" \
+        --argjson instruction_overhead "$INSTRUCTION_OVERHEAD" \
+        --argjson safety_factor "$SAFETY_FACTOR" \
+        --argjson usable_budget "$usable" \
+        --arg style "$STYLE" \
+        --arg compress "$COMPRESS" \
+        --arg changed_since "$CHANGED_SINCE" \
+        --slurpfile plan "$TREE_PLAN_JSON" \
+        '{
         root: $root,
         generated_at: $generated_at,
         budget: {
@@ -8790,7 +9243,8 @@ build_human_index() {
         printf '## Wiring Locations\n\n'
         printf '%s\n' '- `AGENTS.md`'
         printf '%s\n' '- `.github/copilot-instructions.md`'
-        printf '%s\n' '- `docs/ai/copilot-tooling.md`'
+        printf '%s\n' '- `.opencode/opencode.json`'
+        printf '%s\n' '- `docs/ai/adapter-contract.md`'
         printf '%s\n\n' '- `docs/ai/context-packing.md`'
         printf '## Machine Files\n\n'
         printf '%s\n' '- `tree-plan.tsv`'
@@ -8894,7 +9348,10 @@ pack) run_pack ;;
 all) run_all ;;
 clean) run_clean ;;
 purge) run_purge ;;
-*) usage; die "unknown command '$COMMAND'" ;;
+*)
+    usage
+    die "unknown command '$COMMAND'"
+    ;;
 esac
 
 ```
@@ -9055,9 +9512,9 @@ group_for_path() {
     local requested_depth="$2"
     path="${path//\\//}"
     local directory="${path%/*}"
-    local IFS='/'
     local parts=()
     local group_parts=()
+    local group=''
     local index=0
 
     if [[ "$path" != */* ]]; then
@@ -9065,7 +9522,7 @@ group_for_path() {
         return 0
     fi
 
-    read -r -a parts <<<"$directory"
+    mapfile -td '/' parts < <(printf '%s/' "$directory")
     for part in "${parts[@]}"; do
         [[ -n "$part" ]] || continue
         group_parts+=("$part")
@@ -9078,8 +9535,8 @@ group_for_path() {
     if ((${#group_parts[@]} == 0)); then
         printf '_root\n'
     else
-        local IFS='/'
-        printf '%s\n' "${group_parts[*]}"
+        printf -v group '%s/' "${group_parts[@]}"
+        printf '%s\n' "${group%/}"
     fi
 }
 
@@ -9760,7 +10217,7 @@ Usage:
 
 Modes: default | all | tracked | php | js | blade | kotlin | config
 Output: --json | --files | --count
-Options: --context N | --type EXT[,EXT] | --mode MODE
+Options: --context N | --type EXT[,EXT] | --mode MODE | --ignore-case
 EOF
 }
 
@@ -9777,6 +10234,7 @@ MODE="default"
 CONTEXT_LINES=0
 OUT_MODE="matches"
 EXTRA_TYPES=()
+IGNORE_CASE=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -9804,6 +10262,10 @@ while [[ $# -gt 0 ]]; do
         IFS=',' read -ra EXTRA_TYPES <<<"${1#*=}"
         shift
         ;;
+    --ignore-case | -i)
+        IGNORE_CASE=1
+        shift
+        ;;
     --json)
         OUT_MODE="json"
         shift
@@ -9824,6 +10286,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+case_args=()
+if [[ "$IGNORE_CASE" == "1" ]] || [[ ! "$pattern" =~ [[:upper:]] ]]; then
+    case_args=(-i)
+fi
+
 BASE_EXCLUDES=(
     -g '!vendor'
     -g '!node_modules'
@@ -9842,7 +10309,7 @@ case "$MODE" in
 default) mode_args=(--hidden) ;;
 all) mode_args=(-uuu) ;;
 tracked)
-    git -C "$root" grep -n "$pattern"
+    git -C "$root" grep "${case_args[@]}" -n "$pattern"
     exit $?
     ;;
 php) mode_args=(--hidden -g '*.php') ;;
@@ -9863,7 +10330,7 @@ fi
 
 case "$OUT_MODE" in
 json)
-    rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" \
+    rg "${case_args[@]}" "${mode_args[@]}" "${BASE_EXCLUDES[@]}" \
         --json -n "$pattern" "$root" |
         jq -sc '[.[] | select(.type == "match") | {
           file: .data.path.text,
@@ -9873,13 +10340,13 @@ json)
         }]'
     ;;
 files)
-    rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -l -n "$pattern" "$root"
+    rg "${case_args[@]}" "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -l -n "$pattern" "$root"
     ;;
 count)
-    rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -c -n "$pattern" "$root"
+    rg "${case_args[@]}" "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -c -n "$pattern" "$root"
     ;;
 matches)
-    rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -n "$pattern" "$root"
+    rg "${case_args[@]}" "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -n "$pattern" "$root"
     ;;
 esac
 
@@ -9937,8 +10404,19 @@ run_job() {
     LOGS+=("$log")
 }
 
-run_job "php-paratest-root" \
-    "$PHP_BIN" vendor/bin/paratest --configuration phpunit.xml.dist --processes="$PARATEST_PROCS" --runner=WrapperRunner
+run_job "php-root-tests" \
+    bash -lc '
+if [[ -x vendor/bin/paratest ]]; then
+    exec "$1" vendor/bin/paratest --configuration phpunit.xml.dist --processes="$2" --runner=WrapperRunner
+fi
+
+if [[ -x vendor/bin/phpunit ]]; then
+    exec "$1" vendor/bin/phpunit --configuration phpunit.xml.dist
+fi
+
+echo "ERROR: neither vendor/bin/paratest nor vendor/bin/phpunit is available" >&2
+exit 1
+' _ "$PHP_BIN" "$PARATEST_PROCS"
 
 run_job "script-tests" \
     bash tests/scripts/ai/run-all-tests.sh
@@ -9947,7 +10425,7 @@ if command -v bats >/dev/null 2>&1 && [[ -d tests/shell ]]; then
     if file tests/shell/*.bats 2>/dev/null | grep -q 'CRLF'; then
         echo "==> skip: bats-shell-tests (CRLF checkout; normalize *.bats to LF to run under Bash/Bats)"
     else
-    run_job "bats-shell-tests" bats tests/shell
+        run_job "bats-shell-tests" bats tests/shell
     fi
 else
     echo "==> skip: bats-shell-tests (bats not installed or tests/shell missing)"
@@ -9957,9 +10435,9 @@ if [[ -f packages/ai-kit-tests/phpunit.xml.dist ]] && [[ -d packages/ai-kit-test
     if find packages/ai-kit-tests/tests -type f -name '*Test.php' -print -quit | grep -q .; then
         run_job "php-paratest-package" \
             "$PHP_BIN" packages/ai-kit-tests/vendor/bin/paratest \
-                --configuration packages/ai-kit-tests/phpunit.xml.dist \
-                --processes="$PARATEST_PROCS" \
-                --runner=WrapperRunner
+            --configuration packages/ai-kit-tests/phpunit.xml.dist \
+            --processes="$PARATEST_PROCS" \
+            --runner=WrapperRunner
     else
         echo "==> skip: php-paratest-package (no package Test.php files yet)"
     fi
@@ -10026,11 +10504,13 @@ Defaults:
 Examples:
   scripts/ai/run-repomix-context.sh .
   scripts/ai/run-repomix-context.sh . --depth 2 --top 20
+  SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh /Users/example-user/Workspaces/example-app \
+    --depth 3 --top 0 --min-code 0 --min-files 0 --context-window 128000
 EOF
 }
 
 case "${1:-}" in
---help|-h)
+--help | -h)
     usage
     exit 0
     ;;
@@ -10111,6 +10591,7 @@ Manifest:
 Bundles:
   .repomix-context/tree-context/bundles/
 EOF
+
 ```
 
 ## FILE: scripts/ai/session-checkpoint.sh
@@ -10139,7 +10620,7 @@ EOF
 }
 
 case "${1:-}" in
---help|-h)
+--help | -h)
     usage
     exit 0
     ;;
@@ -10727,6 +11208,364 @@ class AdvisorTokenBudgetTest extends TestCase
         } else {
             $this->assertTrue(true, 'Token budget may be skipped when secret scan blocks pack stage.');
         }
+    }
+}
+
+```
+
+## FILE: tests/php/AgentPermissionPolicyTest.php
+
+```text
+<?php
+
+declare(strict_types=1);
+
+namespace Tests;
+
+use PHPUnit\Framework\TestCase;
+
+/**
+ * Regression coverage for OpenCode agent bash permissions.
+ *
+ * The policy intentionally keeps read-only agents small. Only mutating agents
+ * get explicit `ask` entries that promote safe workflows from silent deny to a
+ * human prompt. Package/dependency install or add commands remain prompt-gated.
+ */
+class AgentPermissionPolicyTest extends TestCase
+{
+    private static string $repoRoot;
+
+    /** @var list<string> */
+    private const MUTATING_ROLE_GIT_ASK_PATTERNS = [
+        'git add',
+        'git commit',
+        'git restore',
+        'git stash push',
+        'git stash pop',
+        'git stash apply',
+        'git stash drop',
+    ];
+
+    /** @var list<string> */
+    private const IMPLEMENTER_EXTRA_ASK_PATTERNS = [
+        'git fetch',
+        'git merge',
+        'git pull',
+        'git checkout',
+        'git switch',
+        'git tag',
+        'git cherry-pick',
+        'git revert',
+        'install-mandatory-tools.sh',
+        'composer install',
+        'composer update',
+        'composer require',
+        'npm install',
+        'npm ci',
+        'pnpm install',
+        'pnpm add',
+        'yarn install',
+        'yarn add',
+        'bun install',
+        'bun add',
+    ];
+
+    /** @var list<string> */
+    private const READ_ONLY_ALLOW_PATTERNS = [
+        'git status',
+        'git diff',
+        'git log',
+    ];
+
+    /** @var list<string> */
+    private const FORBIDDEN_ALLOW_PATTERNS = [
+        'git push',
+        'git reset --hard',
+        'git clean -f',
+        'git rebase',
+        'sudo ',
+        'rm -rf',
+    ];
+
+    /** @var list<string> */
+    private const READ_ONLY_STRICT_DENY_AGENTS = [
+        '.opencode/agents/architect.md',
+        '.opencode/agents/release-auditor.md',
+        '.opencode/agents/researcher.md',
+        '.opencode/agents/reviewer.md',
+        '.opencode/agents/workflow-auditor.md',
+        'packages/ai-universal-rules/templates/core/agents/architect.md',
+        'packages/ai-universal-rules/templates/core/agents/release-auditor.md',
+        'packages/ai-universal-rules/templates/core/agents/researcher.md',
+        'packages/ai-universal-rules/templates/core/agents/reviewer.md',
+        'packages/ai-universal-rules/templates/core/agents/workflow-auditor.md',
+    ];
+
+    /** @var list<string> */
+    private const GIT_MUTATING_AGENT_FILES = [
+        '.opencode/agents/bootstrapper.md',
+        '.opencode/agents/config-maintainer.md',
+        '.opencode/agents/implementer.md',
+        '.opencode/agents/refactorer.md',
+        'packages/ai-universal-rules/templates/core/agents/bootstrapper.md',
+        'packages/ai-universal-rules/templates/core/agents/config-maintainer.md',
+        'packages/ai-universal-rules/templates/core/agents/implementer.md',
+        'packages/ai-universal-rules/templates/core/agents/refactorer.md',
+    ];
+
+    /** @var list<string> */
+    private const IMPLEMENTER_AGENT_FILES = [
+        '.opencode/agents/implementer.md',
+        'packages/ai-universal-rules/templates/core/agents/implementer.md',
+    ];
+
+    /** @var list<string> */
+    private const ASK_DEFAULT_AGENTS = [
+        '.opencode/agents/repository-researcher.md',
+        '.opencode/agents/repository-reviewer.md',
+        'packages/ai-universal-rules/templates/core/agents/repository-researcher.md',
+        'packages/ai-universal-rules/templates/core/agents/repository-reviewer.md',
+    ];
+
+    public static function setUpBeforeClass(): void
+    {
+        $root = realpath(dirname(__DIR__, 2));
+        if ($root === false) {
+            throw new \RuntimeException('Could not resolve repo root from tests/php/');
+        }
+
+        self::$repoRoot = $root;
+    }
+
+    /** @return list<array{0:string}> */
+    public static function allAgentProvider(): array
+    {
+        $root = realpath(dirname(__DIR__, 2));
+        if ($root === false) {
+            return [];
+        }
+
+        $cases = [];
+        foreach ([$root . '/.opencode/agents/*.md', $root . '/packages/ai-universal-rules/templates/core/agents/*.md'] as $glob) {
+            foreach (glob($glob) ?: [] as $file) {
+                $relative = ltrim(substr($file, strlen($root)), '/');
+                $cases[$relative] = [$relative];
+            }
+        }
+        ksort($cases);
+
+        return array_values($cases);
+    }
+
+    /** @return list<array{0:string}> */
+    public static function gitMutatingAgentProvider(): array
+    {
+        return array_map(static fn (string $path): array => [$path], self::GIT_MUTATING_AGENT_FILES);
+    }
+
+    /** @return list<array{0:string}> */
+    public static function implementerAgentProvider(): array
+    {
+        return array_map(static fn (string $path): array => [$path], self::IMPLEMENTER_AGENT_FILES);
+    }
+
+    /** @return list<array{0:string}> */
+    public static function readOnlyStrictDenyAgentProvider(): array
+    {
+        return array_map(static fn (string $path): array => [$path], self::READ_ONLY_STRICT_DENY_AGENTS);
+    }
+
+    /** @return list<array{0:string}> */
+    public static function projectConfigProvider(): array
+    {
+        return [
+            ['.opencode/opencode.json'],
+            ['packages/ai-universal-rules/templates/core/opencode.json'],
+        ];
+    }
+
+    /**
+     * @dataProvider gitMutatingAgentProvider
+     */
+    public function testGitMutatingAgentsAskBeforeLocalGitMutations(string $relativePath): void
+    {
+        $contents = $this->loadFrontmatter($relativePath);
+
+        $missing = [];
+        foreach (self::MUTATING_ROLE_GIT_ASK_PATTERNS as $needle) {
+            if (!$this->isPatternAskOrAllow($contents, $needle)) {
+                $missing[] = $needle;
+            }
+        }
+
+        self::assertSame([], $missing, sprintf('%s is missing git mutation ask entries: %s', $relativePath, implode(', ', $missing)));
+    }
+
+    /**
+     * @dataProvider implementerAgentProvider
+     */
+    public function testImplementerAsksBeforeBranchAndDependencyMutations(string $relativePath): void
+    {
+        $contents = $this->loadFrontmatter($relativePath);
+
+        $missing = [];
+        foreach (self::IMPLEMENTER_EXTRA_ASK_PATTERNS as $needle) {
+            if (!$this->isPatternAskOrAllow($contents, $needle)) {
+                $missing[] = $needle;
+            }
+        }
+
+        self::assertSame([], $missing, sprintf('%s is missing implementer ask entries: %s', $relativePath, implode(', ', $missing)));
+    }
+
+    /**
+     * @dataProvider readOnlyStrictDenyAgentProvider
+     */
+    public function testReadOnlyAgentsDoNotCarryMutationAskBlock(string $relativePath): void
+    {
+        $contents = $this->loadFrontmatter($relativePath);
+
+        $violations = [];
+        foreach (array_merge(self::MUTATING_ROLE_GIT_ASK_PATTERNS, self::IMPLEMENTER_EXTRA_ASK_PATTERNS) as $needle) {
+            if ($this->isPatternAskOrAllow($contents, $needle)) {
+                $violations[] = $needle;
+            }
+        }
+
+        self::assertSame([], $violations, sprintf('%s should stay read-only and compact, but contains mutation entries: %s', $relativePath, implode(', ', $violations)));
+    }
+
+    /**
+     * @dataProvider allAgentProvider
+     */
+    public function testStrictDenyAgentsAllowBasicReadOnlyGitInspection(string $relativePath): void
+    {
+        if (in_array($relativePath, self::ASK_DEFAULT_AGENTS, true)) {
+            $this->markTestSkipped(sprintf('%s defaults to ask.', $relativePath));
+        }
+
+        $contents = $this->loadFrontmatter($relativePath);
+        if (!$this->usesStrictDeny($contents)) {
+            $this->markTestSkipped(sprintf('%s does not use strict bash deny.', $relativePath));
+        }
+
+        $missing = [];
+        foreach (self::READ_ONLY_ALLOW_PATTERNS as $needle) {
+            if (!$this->isPatternAllow($contents, $needle)) {
+                $missing[] = $needle;
+            }
+        }
+
+        self::assertSame([], $missing, sprintf('%s is missing read-only git allow entries: %s', $relativePath, implode(', ', $missing)));
+    }
+
+    /**
+     * @dataProvider allAgentProvider
+     */
+    public function testAgentNeverAllowsForbiddenPatterns(string $relativePath): void
+    {
+        $contents = $this->loadFrontmatter($relativePath);
+
+        $violations = [];
+        foreach (self::FORBIDDEN_ALLOW_PATTERNS as $needle) {
+            if ($this->isPatternAllow($contents, $needle)) {
+                $violations[] = $needle;
+            }
+        }
+
+        self::assertSame([], $violations, sprintf('%s allows forbidden patterns: %s', $relativePath, implode(', ', $violations)));
+    }
+
+    /**
+     * @dataProvider allAgentProvider
+     */
+    public function testAgentFrontmatterIsParseable(string $relativePath): void
+    {
+        $full = self::$repoRoot . '/' . $relativePath;
+        self::assertFileExists($full);
+
+        $raw = file_get_contents($full);
+        self::assertNotFalse($raw, "Could not read $relativePath");
+        self::assertStringStartsWith('---', $raw, sprintf('%s must begin with YAML frontmatter.', $relativePath));
+        self::assertNotFalse(strpos($raw, "\n---", 4), sprintf('%s frontmatter has no terminating delimiter.', $relativePath));
+    }
+
+    /**
+     * @dataProvider projectConfigProvider
+     */
+    public function testProjectConfigAsksBeforeInstallApply(string $relativePath): void
+    {
+        $bash = $this->loadProjectBashPermissions($relativePath);
+
+        foreach (['php tools/ai/ai.php install * --apply', 'php tools/ai/install-ai-kit.php *'] as $pattern) {
+            self::assertSame('ask', $bash[$pattern] ?? null, sprintf('%s must ask for %s', $relativePath, $pattern));
+        }
+    }
+
+    /**
+     * @dataProvider projectConfigProvider
+     */
+    public function testProjectConfigNeverAllowsForbiddenPatterns(string $relativePath): void
+    {
+        $bash = $this->loadProjectBashPermissions($relativePath);
+
+        $violations = [];
+        foreach (self::FORBIDDEN_ALLOW_PATTERNS as $needle) {
+            foreach ($bash as $pattern => $decision) {
+                if ($decision === 'allow' && str_contains($pattern, $needle)) {
+                    $violations[] = "$pattern => allow";
+                }
+            }
+        }
+
+        self::assertSame([], $violations, sprintf('%s contains forbidden allow patterns: %s', $relativePath, implode('; ', $violations)));
+    }
+
+    private function loadFrontmatter(string $relativePath): string
+    {
+        $raw = file_get_contents(self::$repoRoot . '/' . $relativePath);
+        if ($raw === false) {
+            throw new \RuntimeException("Could not read $relativePath");
+        }
+
+        if (!str_starts_with($raw, '---')) {
+            return $raw;
+        }
+
+        $end = strpos($raw, "\n---", 4);
+        return $end === false ? $raw : substr($raw, 0, $end);
+    }
+
+    /** @return array<string,string> */
+    private function loadProjectBashPermissions(string $relativePath): array
+    {
+        $raw = file_get_contents(self::$repoRoot . '/' . $relativePath);
+        self::assertNotFalse($raw);
+
+        $data = json_decode($raw, true);
+        self::assertIsArray($data, sprintf('%s must be valid JSON', $relativePath));
+        self::assertIsArray($data['permission']['bash'] ?? null, sprintf('%s must declare permission.bash', $relativePath));
+
+        /** @var array<string,string> $bash */
+        $bash = $data['permission']['bash'];
+        return $bash;
+    }
+
+    private function usesStrictDeny(string $haystack): bool
+    {
+        return (bool) preg_match('/[\'\"]\*[\'\"]\s*:\s*[\'\"]?deny[\'\"]?/', $haystack);
+    }
+
+    private function isPatternAskOrAllow(string $haystack, string $needle): bool
+    {
+        $escaped = preg_quote($needle, '/');
+        return (bool) preg_match('/[\'\"][^\'\"]*' . $escaped . '(?:[\s\*\'\"])[^\'\"]*[\'\"]\s*:\s*[\'\"]?(?:ask|allow)[\'\"]?/m', $haystack);
+    }
+
+    private function isPatternAllow(string $haystack, string $needle): bool
+    {
+        $escaped = preg_quote($needle, '/');
+        return (bool) preg_match('/[\'\"][^\'\"]*' . $escaped . '(?:[\s\*\'\"])[^\'\"]*[\'\"]\s*:\s*[\'\"]?allow[\'\"]?/m', $haystack);
     }
 }
 
@@ -11560,8 +12399,24 @@ class CliToolsTest extends TestCase
         $this->assertSame(0, $result['exit'], "ai.php adapter-validate exited non-zero:\n" . $result['stderr']);
     }
 
+    private function skipIfToolchainMissing(array $tools): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/toolchain.php';
+        $missing = [];
+        foreach ($tools as $tool) {
+            if (!aiInstallerCommandExists($tool)) {
+                $missing[] = $tool;
+            }
+        }
+        if ($missing !== []) {
+            $this->markTestSkipped('required toolchain not installed: ' . implode(', ', $missing));
+        }
+    }
+
     private function refreshRepoStructureBaseline(): void
     {
+        $this->skipIfToolchainMissing(['scc']);
+
         $result = $this->runTool('php tools/ai/generate-repo-structure.php --with-scc');
 
         $this->assertSame(
@@ -12313,6 +13168,25 @@ class InstallerSafetyTest extends TestCase
         return $path;
     }
 
+    /**
+     * Skip a test when external tools the installer hard-requires are absent.
+     * Uses the installer's own detector so the check matches what the install
+     * subprocess will see. Tests still run in CI where the toolchain is present.
+     */
+    private function skipIfToolchainMissing(array $tools): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/toolchain.php';
+        $missing = [];
+        foreach ($tools as $tool) {
+            if (!aiInstallerCommandExists($tool)) {
+                $missing[] = $tool;
+            }
+        }
+        if ($missing !== []) {
+            $this->markTestSkipped('required toolchain not installed: ' . implode(', ', $missing));
+        }
+    }
+
     /** @return list<string> */
     private function relativeGlob(string $pattern): array
     {
@@ -12466,6 +13340,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerBackupArchivesExistingManagedFiles(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_backup_' . uniqid('', true);
         $promptDir = $target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'prompts';
         $outputJson = $target . DIRECTORY_SEPARATOR . 'install-output.json';
@@ -12521,6 +13397,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerCopilotInstallMakesInstalledSurfaceVisible(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_copilot_visible_' . uniqid('', true);
         mkdir($target, 0700, true);
 
@@ -12572,6 +13450,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerOpenCodeInstallMakesInstalledSurfaceVisible(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_opencode_visible_' . uniqid('', true);
         mkdir($target, 0700, true);
 
@@ -12629,6 +13509,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerFullGovernanceBackupInstallShipsAllCoreSurfaces(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_' . uniqid('', true);
         $outputJson = $target . DIRECTORY_SEPARATOR . 'install-output.json';
         $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
@@ -12664,7 +13546,7 @@ class InstallerSafetyTest extends TestCase
 
             $packs = $decoded['selected_packs'] ?? [];
             $this->assertIsArray($packs);
-            foreach (['base', 'adapter-copilot', 'adapter-opencode', 'scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'capabilities-extended-full'] as $pack) {
+            foreach (['base', 'adapter-copilot', 'adapter-opencode', 'scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'capabilities-governance'] as $pack) {
                 $this->assertContains($pack, $packs, 'full-governance install should include pack ' . $pack);
             }
 
@@ -12714,6 +13596,8 @@ class InstallerSafetyTest extends TestCase
 
     public function testDirectInstallerFullGovernanceOpencodeOnlyValidatesAsInstalledTarget(): void
     {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_opencode_' . uniqid('', true);
 
         mkdir($target, 0700, true);
@@ -13542,6 +14426,7 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 SCRIPT="$REPO_ROOT/scripts/ai/ai-diff-context.sh"
 cd "$REPO_ROOT"
 BASH_BIN="${BASH_BIN:-$(command -v bash)}"
+TIMEOUT_BIN="$(command -v gtimeout || command -v timeout || true)"
 
 PASS=0 FAIL=0 SKIP=0
 TMP="$(mktemp -d)"
@@ -13576,6 +14461,21 @@ test_since_no_ref() {
     ! AI_CONTEXT_DIR="$TMP/ctx7" "$BASH_BIN" "$SCRIPT" since 2>/dev/null
 }
 run_test "since without ref fails" test_since_no_ref
+
+test_since_dry_run_no_tests_finishes() {
+    [[ -n "$TIMEOUT_BIN" ]] || return 2
+
+    local out
+    out="$(AI_SESSION_DURABLE_LOG=0 "$TIMEOUT_BIN" 5 "$BASH_BIN" "$SCRIPT" since HEAD~1 --dry-run --no-tests 2>/dev/null)"
+
+    grep -q '"dry_run": true' <<<"$out"
+}
+
+if [[ -n "$TIMEOUT_BIN" ]]; then
+    run_test "since dry-run no-tests finishes and prints dry-run JSON" test_since_dry_run_no_tests_finishes
+else
+    skip_test "since dry-run no-tests finishes and prints dry-run JSON" "no timeout binary"
+fi
 
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
@@ -13810,9 +14710,15 @@ AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh text "XYZZY_NO_MATCH_4f7a2b9c
 AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh tracked AGENTS . --fixed | jq -e '.status=="ok" and (.matches|length)>0' >/dev/null
 AI_LANG=php AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh struct '$A' tools --fixed | jq -e '.status=="ok" or .status=="no_matches"' >/dev/null
 
+tmp_search_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir" "$tmp_search_dir"' EXIT
+printf 'AlphaBeta\n' >"$tmp_search_dir/case.txt"
+AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh text alphabeta "$tmp_search_dir" --fixed | jq -e '.status=="ok" and (.matches|length)==1' >/dev/null
+AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh text ALPHABETA "$tmp_search_dir" --fixed | jq -e '.status=="no_matches" and (.matches|length)==0' >/dev/null
+AI_OUTPUT=json "$BASH_BIN" scripts/ai/ai-search.sh text ALPHABETA "$tmp_search_dir" --fixed --ignore-case | jq -e '.status=="ok" and (.matches|length)==1' >/dev/null
+
 repo_root="$(git rev-parse --show-toplevel)"
 tmp_dir="$(mktemp -d)"
-trap 'rm -rf "$tmp_dir"' EXIT
 (cd "$tmp_dir" && AI_OUTPUT=json "$BASH_BIN" "$repo_root/scripts/ai/ai-search.sh" changed "ai-search" "$repo_root" --fixed | jq -e '.status=="ok" or .status=="no_matches"' >/dev/null)
 echo "ai-search tests passed"
 
@@ -16372,6 +17278,28 @@ test_basic() {
 }
 run_test "basic pattern search finds matches" test_basic
 
+test_smart_case_default() {
+    printf 'AlphaBeta\n' > "$TMP/src/case.txt"
+    local out
+    out="$($BASH_BIN "$SCRIPT" "alphabeta" "$TMP/src")"
+    [[ "$out" == *"AlphaBeta"* ]]
+}
+run_test "lowercase query uses smart-case matching" test_smart_case_default
+
+test_uppercase_stays_case_sensitive() {
+    local out
+    out="$($BASH_BIN "$SCRIPT" "ALPHABETA" "$TMP/src" 2>/dev/null || true)"
+    [[ -z "$out" ]]
+}
+run_test "uppercase query stays case-sensitive by default" test_uppercase_stays_case_sensitive
+
+test_ignore_case_flag() {
+    local out
+    out="$($BASH_BIN "$SCRIPT" "ALPHABETA" "$TMP/src" --ignore-case)"
+    [[ "$out" == *"AlphaBeta"* ]]
+}
+run_test "--ignore-case forces case-insensitive matches" test_ignore_case_flag
+
 # JSON output
 test_json() {
     local out
@@ -16509,6 +17437,14 @@ printf 'run-repomix-context.sh\n'
 # --help
 test_help() { "$BASH_BIN" "$SCRIPT" --help 2>&1 | grep -q 'Usage'; }
 run_test "help flag works" test_help
+
+test_help_examples() {
+    local out
+    out="$($BASH_BIN "$SCRIPT" --help 2>&1)"
+    [[ "$out" == *"/Users/example-user/Workspaces/example-app"* ]]
+    [[ "$out" == *"--context-window 128000"* ]]
+}
+run_test "help shows obfuscated advanced example" test_help_examples
 
 # Delegates to repomix-context-tree.sh
 if command -v scc >/dev/null 2>&1 && command -v repomix >/dev/null 2>&1; then
@@ -19108,7 +20044,23 @@ function aiCliGitValue(string $root, string $command): string
 {
     $output = [];
     $exit = 0;
+    // On Windows, cmd.exe cannot use a UNC working directory and prints
+    // "UNC paths are not supported" before each spawned command. This call
+    // already targets the repo via `git -C`, so run it from a non-UNC cwd.
+    $cwdPrev = null;
+    if (PHP_OS_FAMILY === 'Windows') {
+        $cwd = getcwd();
+        if ($cwd !== false && str_starts_with($cwd, '\\\\')) {
+            $tmp = sys_get_temp_dir();
+            if ($tmp !== '' && is_dir($tmp) && @chdir($tmp)) {
+                $cwdPrev = $cwd;
+            }
+        }
+    }
     exec('git -C ' . escapeshellarg($root) . ' ' . $command . ' 2>' . escapeshellarg(aiCliNullDevice()), $output, $exit);
+    if ($cwdPrev !== null) {
+        @chdir($cwdPrev);
+    }
     if ($exit !== 0 || $output === []) {
         return 'unknown';
     }
@@ -21123,6 +22075,8 @@ function aiCollectTemplateChecksums(string $root): array
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../install/toolchain.php';
+
 function aiRunPreflight(string $root): int
 {
     $checks = [];
@@ -21134,7 +22088,9 @@ function aiRunPreflight(string $root): int
 
     $gitOut = [];
     $gitExit = 0;
+    $gitSafePrev = aiInstallerSafeCwdEnter();
     exec('git --version', $gitOut, $gitExit);
+    aiInstallerSafeCwdLeave($gitSafePrev);
     $checks[] = ['name' => 'git', 'status' => $gitExit === 0 ? 'passed' : 'failed'];
 
     $generated = aiCliGeneratedDir($root);
@@ -21254,7 +22210,9 @@ function aiRunAuditInstructions(string $root): int
     }
 
     $extra = [];
+    $auditSafePrev = aiInstallerSafeCwdEnter();
     exec('git -C ' . escapeshellarg($root) . ' ls-files ".github/instructions/*.instructions.md" ".opencode/**"', $extra);
+    aiInstallerSafeCwdLeave($auditSafePrev);
     foreach ($extra as $path) {
         $found[] = ['path' => $path, 'ownership_hint' => 'runtime_adapter'];
     }
@@ -21722,7 +22680,7 @@ function aiRunInstallWizard(string $root): int
     if (!$allFeatures) {
         $customize = aiPromptYesNo('Customize optional packs?', true);
         if ($customize || $profile === 'custom') {
-            foreach (['scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'evidence-pack', 'docs-reference-pack', 'capabilities-extended-full', 'delivery-pack', 'optional-agents-pack', 'optional-prompts-pack'] as $pack) {
+            foreach (['scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'evidence-pack', 'docs-reference-pack', 'capabilities-governance', 'delivery-pack', 'optional-agents-pack', 'optional-prompts-pack'] as $pack) {
                 if (aiPromptYesNo('Install ' . $pack . '?', true)) {
                     $with[] = $pack;
                 }
@@ -26083,16 +27041,7 @@ function aiInstallerRun(array $argv): int
         aiInstallerWriteManifest($config['targetRoot'], $manifest);
 
         if (!empty($config['verifyAfter'])) {
-            $verify = aiInstallerRunTargetCommand($config['targetRoot'], [PHP_BINARY, 'tools/ai/ai.php', 'verify']);
-            if ($verify['stdout'] !== '') {
-                fwrite(STDOUT, $verify['stdout']);
-            }
-            if ($verify['stderr'] !== '') {
-                fwrite(STDERR, $verify['stderr']);
-            }
-            if ($verify['exit'] !== 0) {
-                throw new RuntimeException('post-install verification failed; inspect target docs/ai/generated/verify.json');
-            }
+            aiInstallerRunPostInstallVerification($config['targetRoot']);
         }
     }
 
@@ -26259,6 +27208,28 @@ function aiInstallerRunTargetCommand(string $targetRoot, array $command): array
     fclose($pipes[2]);
     $exit = proc_close($process);
     return ['stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit];
+}
+
+function aiInstallerRunPostInstallVerification(string $targetRoot): void
+{
+    $commands = [
+        [PHP_BINARY, 'tools/ai/validate-ai-config.php'],
+        [PHP_BINARY, 'tools/ai/validate-install-surface.php', '--strict'],
+        [PHP_BINARY, 'tools/ai/validate-ai-catalog.php'],
+    ];
+
+    foreach ($commands as $command) {
+        $verify = aiInstallerRunTargetCommand($targetRoot, $command);
+        if ($verify['stdout'] !== '') {
+            fwrite(STDOUT, $verify['stdout']);
+        }
+        if ($verify['stderr'] !== '') {
+            fwrite(STDERR, $verify['stderr']);
+        }
+        if ($verify['exit'] !== 0) {
+            throw new RuntimeException('post-install verification failed; inspect target validator output');
+        }
+    }
 }
 
 function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
@@ -27432,12 +28403,13 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-search/SKILL.md', 'target' => '.opencode/skills/ai-search/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md', 'target' => '.opencode/skills/ai-scripts/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
-        'capabilities-extended-lite' => [
+        'capabilities-extended' => [
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/bug-regression', 'target' => 'docs/ai/capabilities/bug-regression', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/release-safety', 'target' => 'docs/ai/capabilities/release-safety', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
-        'capabilities-extended-full' => [
+        'capabilities-governance' => [
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/dependency-upgrade', 'target' => 'docs/ai/capabilities/dependency-upgrade', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/mentor-mode', 'target' => 'docs/ai/capabilities/mentor-mode', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
         'policy-pack' => [
             ['type' => 'file', 'source' => 'docs/ai/command-risk-taxonomy.md', 'target' => 'docs/ai/command-risk-taxonomy.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
@@ -27496,8 +28468,6 @@ function aiInstallerPackRegistry(): array
         ],
         'ci-pack' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/github/workflows/validate-ai-surface.yml', 'target' => '.github/workflows/validate-ai-surface.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/github/workflows/test-external-install.yml', 'target' => '.github/workflows/test-external-install.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/github/workflows/export-ai-universal-rules-preview.yml', 'target' => '.github/workflows/export-ai-universal-rules-preview.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/validation.md', 'target' => 'docs/ai/validation.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
         ],
         'evidence-pack' => [
@@ -27552,14 +28522,12 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'packages/ai-universal-rules/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'packages/ai-universal-rules/docs', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'packages/ai-universal-rules/policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates', 'target' => 'packages/ai-universal-rules/templates', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/install', 'target' => 'tools/ai/install', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/commands', 'target' => 'tools/ai/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai.php', 'target' => 'tools/ai/ai.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai_catalog_lib.php', 'target' => 'tools/ai/ai_catalog_lib.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai_output_lib.php', 'target' => 'tools/ai/ai_output_lib.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/build-context-pack.php', 'target' => 'tools/ai/build-context-pack.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'tools/ai/export-ai-universal-rules.php', 'target' => 'tools/ai/export-ai-universal-rules.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/full-install-validation.php', 'target' => 'tools/ai/full-install-validation.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/generate-ai-catalog.php', 'target' => 'tools/ai/generate-ai-catalog.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/generate-ai-file-standards.php', 'target' => 'tools/ai/generate-ai-file-standards.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -27567,7 +28535,6 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'tools/ai/install-ai-kit.php', 'target' => 'tools/ai/install-ai-kit.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/maintenance-mode.php', 'target' => 'tools/ai/maintenance-mode.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/render-agent-permissions.php', 'target' => 'tools/ai/render-agent-permissions.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'tools/ai/repo-tool-inventory.php', 'target' => 'tools/ai/repo-tool-inventory.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/secret-scan.php', 'target' => 'tools/ai/secret-scan.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/suggest-verification.php', 'target' => 'tools/ai/suggest-verification.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-adapter-drift.php', 'target' => 'tools/ai/validate-adapter-drift.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -27609,6 +28576,14 @@ function aiInstallerPackRegistry(): array
             // Root-level PLACEHOLDERS.md index so validate-placeholders.php
             // running from the installed target does not error out.
             ['type' => 'file', 'source' => 'PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+        ],
+        // Kit-authoring / re-distribution assets. Not needed by consumer
+        // projects; opt in via --with kit-authoring-pack or --all-features.
+        'kit-authoring-pack' => [
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates', 'target' => 'packages/ai-universal-rules/templates', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'tools/ai/export-ai-universal-rules.php', 'target' => 'tools/ai/export-ai-universal-rules.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/github/workflows/test-external-install.yml', 'target' => '.github/workflows/test-external-install.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/github/workflows/export-ai-universal-rules-preview.yml', 'target' => '.github/workflows/export-ai-universal-rules-preview.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
         ],
     ];
 }
@@ -27861,10 +28836,10 @@ function aiInstallerProfileDefinitions(): array
         'minimal' => ['base', 'setup-docs', 'capabilities-core'],
         'copilot' => ['minimal', 'adapter-copilot', 'scripts-pack', 'policy-pack', 'hooks-pack'],
         'opencode' => ['minimal', 'adapter-opencode', 'scripts-pack', 'policy-pack', 'hooks-pack'],
-        'dual' => ['minimal', 'adapter-copilot', 'adapter-opencode', 'capabilities-extended-lite', 'scripts-pack', 'policy-pack', 'hooks-pack'],
+        'dual' => ['minimal', 'adapter-copilot', 'adapter-opencode', 'capabilities-extended', 'scripts-pack', 'policy-pack', 'hooks-pack'],
         'guarded' => ['dual', 'policy-pack', 'hooks-pack', 'evidence-pack'],
         'accelerated' => ['dual', 'scripts-pack', 'policy-pack', 'evidence-pack'],
-        'full-governance' => ['accelerated', 'capabilities-extended-full', 'hooks-pack', 'ci-pack', 'docs-reference-pack', 'delivery-pack', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'preview-environments-pack', 'evaluation-pack', 'service-boundary-pack', 'mcp-boundaries-pack', 'advisor-pack', 'target-tools-pack', 'shared-templates-pack', 'package-source-pack'],
+        'full-governance' => ['accelerated', 'capabilities-governance', 'hooks-pack', 'ci-pack', 'docs-reference-pack', 'delivery-pack', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'preview-environments-pack', 'evaluation-pack', 'service-boundary-pack', 'mcp-boundaries-pack', 'advisor-pack', 'target-tools-pack', 'shared-templates-pack'],
         'docs-reference' => ['docs-reference-pack'],
         'custom' => [],
     ];
@@ -27876,8 +28851,8 @@ function aiInstallerAllFeaturePacks(): array
         'base',
         'setup-docs',
         'capabilities-core',
-        'capabilities-extended-lite',
-        'capabilities-extended-full',
+        'capabilities-extended',
+        'capabilities-governance',
         'adapter-copilot',
         'adapter-opencode',
         'scripts-pack',
@@ -27897,6 +28872,7 @@ function aiInstallerAllFeaturePacks(): array
         'target-tools-pack',
         'shared-templates-pack',
         'package-source-pack',
+        'kit-authoring-pack',
     ];
 }
 
@@ -28547,6 +29523,35 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/toolchain-registry.php';
 
+/**
+ * Windows cmd.exe cannot use a UNC path (e.g. \\wsl.localhost\...) as its
+ * working directory and prints "UNC paths are not supported" before every
+ * spawned command. These tool-detection calls are PATH-based and cwd-agnostic,
+ * so temporarily switch to a non-UNC directory around them. No-op elsewhere.
+ */
+function aiInstallerSafeCwdEnter(): ?string
+{
+    if (PHP_OS_FAMILY !== 'Windows') {
+        return null;
+    }
+    $cwd = getcwd();
+    if ($cwd === false || !str_starts_with($cwd, '\\\\')) {
+        return null;
+    }
+    $tmp = sys_get_temp_dir();
+    if ($tmp !== '' && is_dir($tmp) && @chdir($tmp)) {
+        return $cwd;
+    }
+    return null;
+}
+
+function aiInstallerSafeCwdLeave(?string $prev): void
+{
+    if ($prev !== null) {
+        @chdir($prev);
+    }
+}
+
 function aiInstallerPlatformKey(): string
 {
     $family = PHP_OS_FAMILY;
@@ -28706,7 +29711,9 @@ function aiInstallerCommandExists(string $cmd): bool
     $out = [];
     $exit = 0;
     if (PHP_OS_FAMILY === 'Windows') {
+        $safePrev = aiInstallerSafeCwdEnter();
         exec('where ' . escapeshellarg($cmd) . ' >NUL 2>&1', $out, $exit);
+        aiInstallerSafeCwdLeave($safePrev);
         if ($exit === 0) {
             return true;
         }
@@ -33814,6 +34821,203 @@ function validateScriptsPackCoverage(array $packs, array $scripts, array &$error
         }
     }
 }
+
+```
+
+## FILE: tools/ai/validate-mentor-parity.php
+
+```text
+<?php
+
+declare(strict_types=1);
+
+/**
+ * validate-mentor-parity.php
+ *
+ * Enforces the mentor-mode single-source-of-truth invariant so policy numbers
+ * cannot drift across files the way help-fading ceilings did in earlier designs.
+ *
+ *   1. The canonical and packaged config.example.json must normalize identically,
+ *      so the two committed copies cannot diverge.
+ *   2. No mentor-mode markdown file (except reference.md, which holds research
+ *      citations) may restate a tunable policy number from config.example.json.
+ *      Rung identifiers (L0-L5) and markdown ordered-list markers are allowed.
+ *
+ * Usage:
+ *   php tools/ai/validate-mentor-parity.php             # scan the repo
+ *   php tools/ai/validate-mentor-parity.php --self-test # prove the detector works
+ *
+ * Exit codes: 0 = ok, 1 = violations found, 2 = usage or IO error.
+ */
+
+const MENTOR_CAP_DIRS = [
+    'docs/ai/capabilities/mentor-mode',
+    'packages/ai-universal-rules/templates/capabilities/mentor-mode',
+];
+
+function mentor_repo_root(): string
+{
+    return dirname(__DIR__, 2);
+}
+
+function mentor_fail(string $msg): void
+{
+    fwrite(STDERR, "ERROR: {$msg}\n");
+}
+
+/** Collect every integer value present in the decoded config (by magnitude). */
+function mentor_policy_numbers(array $config): array
+{
+    $nums = [];
+    array_walk_recursive($config, static function ($v) use (&$nums): void {
+        if (is_int($v)) {
+            $nums[abs($v)] = true;
+        }
+    });
+
+    return array_keys($nums);
+}
+
+/** Find policy-number leaks in a markdown body. Returns array of [line, value, text]. */
+function mentor_find_leaks(string $body, array $policy): array
+{
+    $leaks = [];
+    $policySet = array_flip($policy);
+    $lines = preg_split('/\R/', $body) ?: [];
+    foreach ($lines as $i => $line) {
+        // Strip a leading markdown ordered-list marker: "1." or "1)".
+        $stripped = preg_replace('/^\s*\d+[.)]\s/', '', $line);
+        // Remove rung identifiers like L0..L5 (an L followed by digits).
+        $stripped = preg_replace('/\bL\d+\b/', '', (string) $stripped);
+        if (preg_match_all('/\b\d+\b/', (string) $stripped, $m)) {
+            foreach ($m[0] as $tok) {
+                if (isset($policySet[(int) $tok])) {
+                    $leaks[] = [$i + 1, (int) $tok, trim($line)];
+                }
+            }
+        }
+    }
+
+    return $leaks;
+}
+
+function mentor_load_config(string $path): ?array
+{
+    if (!is_file($path)) {
+        return null;
+    }
+    $data = json_decode((string) file_get_contents($path), true);
+
+    return is_array($data) ? $data : null;
+}
+
+function mentor_normalize(array $data): string
+{
+    $sort = static function (&$v) use (&$sort): void {
+        if (is_array($v)) {
+            $isList = array_keys($v) === range(0, count($v) - 1);
+            if (!$isList && $v !== []) {
+                ksort($v);
+            }
+            foreach ($v as &$child) {
+                $sort($child);
+            }
+        }
+    };
+    $sort($data);
+
+    return (string) json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+}
+
+function mentor_scan(string $root): int
+{
+    $violations = 0;
+    $configs = [];
+
+    foreach (MENTOR_CAP_DIRS as $rel) {
+        $dir = $root . '/' . $rel;
+        if (!is_dir($dir)) {
+            mentor_fail("missing capability directory: {$rel}");
+            $violations++;
+            continue;
+        }
+        $cfg = mentor_load_config("{$dir}/config.example.json");
+        if ($cfg === null) {
+            mentor_fail("missing or invalid config.example.json in {$rel}");
+            $violations++;
+            continue;
+        }
+        $configs[$rel] = $cfg;
+        $policy = mentor_policy_numbers($cfg);
+        foreach (glob("{$dir}/*.md") ?: [] as $md) {
+            if (basename($md) === 'reference.md') {
+                continue; // research citations legitimately contain numbers
+            }
+            foreach (mentor_find_leaks((string) file_get_contents($md), $policy) as [$ln, $val, $text]) {
+                $shown = str_replace($root . '/', '', str_replace('\\', '/', $md));
+                mentor_fail(sprintf(
+                    '%s:%d restates policy number %d (keep numbers in config.example.json): %s',
+                    $shown,
+                    $ln,
+                    $val,
+                    $text
+                ));
+                $violations++;
+            }
+        }
+    }
+
+    if (count($configs) > 1) {
+        $norms = array_map('mentor_normalize', $configs);
+        $first = reset($norms);
+        foreach ($norms as $rel => $n) {
+            if ($n !== $first) {
+                mentor_fail("config.example.json drift between mentor-mode copies (see {$rel})");
+                $violations++;
+            }
+        }
+    }
+
+    return $violations;
+}
+
+function mentor_self_test(): int
+{
+    $policy = [0, 1, 2, 3, 4, 5];
+    $clean = "The learn ceiling is configured in config.example.json.\n- drop to L2 when unsure\n1. first step";
+    $dirty = 'The learn ceiling is 4 in this doc.';
+
+    if (mentor_find_leaks($clean, $policy) !== []) {
+        mentor_fail('self-test: false positive on clean text');
+
+        return 1;
+    }
+    if (mentor_find_leaks($dirty, $policy) === []) {
+        mentor_fail('self-test: failed to detect planted duplicate number');
+
+        return 1;
+    }
+    fwrite(STDOUT, "self-test OK: detector flags planted duplicates and passes clean text\n");
+
+    return 0;
+}
+
+$arg = $argv[1] ?? '';
+if ($arg === '--self-test') {
+    exit(mentor_self_test());
+}
+if ($arg !== '' && $arg !== '--scan') {
+    fwrite(STDERR, "usage: validate-mentor-parity.php [--scan|--self-test]\n");
+    exit(2);
+}
+
+$violations = mentor_scan(mentor_repo_root());
+if ($violations > 0) {
+    fwrite(STDERR, "FAIL: {$violations} mentor-mode parity violation(s)\n");
+    exit(1);
+}
+fwrite(STDOUT, "OK: mentor-mode policy numbers live only in config.example.json; copies are in sync\n");
+exit(0);
 
 ```
 

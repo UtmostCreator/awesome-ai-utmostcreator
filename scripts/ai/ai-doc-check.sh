@@ -78,7 +78,7 @@ links)
 drift)
     run_drift
     ;;
---help|-h)
+--help | -h)
     usage
     ;;
 *)

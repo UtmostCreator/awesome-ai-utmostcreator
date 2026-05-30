@@ -55,6 +55,28 @@ test_basic() {
 }
 run_test "basic pattern search finds matches" test_basic
 
+test_smart_case_default() {
+    printf 'AlphaBeta\n' > "$TMP/src/case.txt"
+    local out
+    out="$($BASH_BIN "$SCRIPT" "alphabeta" "$TMP/src")"
+    [[ "$out" == *"AlphaBeta"* ]]
+}
+run_test "lowercase query uses smart-case matching" test_smart_case_default
+
+test_uppercase_stays_case_sensitive() {
+    local out
+    out="$($BASH_BIN "$SCRIPT" "ALPHABETA" "$TMP/src" 2>/dev/null || true)"
+    [[ -z "$out" ]]
+}
+run_test "uppercase query stays case-sensitive by default" test_uppercase_stays_case_sensitive
+
+test_ignore_case_flag() {
+    local out
+    out="$($BASH_BIN "$SCRIPT" "ALPHABETA" "$TMP/src" --ignore-case)"
+    [[ "$out" == *"AlphaBeta"* ]]
+}
+run_test "--ignore-case forces case-insensitive matches" test_ignore_case_flag
+
 # JSON output
 test_json() {
     local out

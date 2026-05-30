@@ -109,7 +109,7 @@ include_candidates=0
 manifest_path=".ai-install-manifest.json"
 
 set_mode() {
-    if (( mode_set == 1 )); then
+    if ((mode_set == 1)); then
         printf '[ERROR] only one of --list/--dry-run/--apply may be given\n' >&2
         exit 4
     fi
@@ -119,19 +119,43 @@ set_mode() {
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --help|-h) usage; exit 0 ;;
-        --list) set_mode list; shift ;;
-        --dry-run) set_mode dry-run; shift ;;
-        --apply) set_mode apply; shift ;;
-        --force) force=1; shift ;;
-        --include-candidates) include_candidates=1; shift ;;
-        --manifest) manifest_path="${2:?--manifest requires value}"; shift 2 ;;
-        --manifest=*) manifest_path="${1#*=}"; shift ;;
-        *)
-            printf '[ERROR] unknown argument: %s\n' "$1" >&2
-            usage >&2
-            exit 4
-            ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    --list)
+        set_mode list
+        shift
+        ;;
+    --dry-run)
+        set_mode dry-run
+        shift
+        ;;
+    --apply)
+        set_mode apply
+        shift
+        ;;
+    --force)
+        force=1
+        shift
+        ;;
+    --include-candidates)
+        include_candidates=1
+        shift
+        ;;
+    --manifest)
+        manifest_path="${2:?--manifest requires value}"
+        shift 2
+        ;;
+    --manifest=*)
+        manifest_path="${1#*=}"
+        shift
+        ;;
+    *)
+        printf '[ERROR] unknown argument: %s\n' "$1" >&2
+        usage >&2
+        exit 4
+        ;;
     esac
 done
 
@@ -158,9 +182,12 @@ collect_entries() {
     ' "$manifest_path"
 }
 
-mapfile -t ENTRIES < <(collect_entries)
+ENTRIES=()
+while IFS= read -r entry; do
+    ENTRIES+=("$entry")
+done < <(collect_entries)
 
-if (( ${#ENTRIES[@]} == 0 )); then
+if ((${#ENTRIES[@]} == 0)); then
     printf '[WARN] manifest has no entries where source != key; nothing to do\n' >&2
 fi
 
@@ -204,24 +231,29 @@ path_size_bytes() {
 
 # ---- --dry-run mode -----------------------------------------------------
 if [[ "$mode" == "dry-run" ]]; then
-    declare -A PACK_FILES PACK_BYTES
+    summary_file="$(mktemp)"
     total_bytes=0
     total_files=0
     for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
         path="${line%%$'\t'*}"
         pack="${line#*$'\t'}"
         bytes="$(path_size_bytes "$path")"
-        PACK_FILES[$pack]=$(( ${PACK_FILES[$pack]:-0} + 1 ))
-        PACK_BYTES[$pack]=$(( ${PACK_BYTES[$pack]:-0} + bytes ))
-        total_bytes=$(( total_bytes + bytes ))
-        total_files=$(( total_files + 1 ))
+        printf '%s\t%s\n' "$pack" "$bytes" >>"$summary_file"
+        total_bytes=$((total_bytes + bytes))
+        total_files=$((total_files + 1))
     done
 
     printf '\n%-40s %8s %12s\n' "PACK" "FILES" "BYTES" >&2
     printf '%-40s %8s %12s\n' "----" "-----" "-----" >&2
-    for pack in "${!PACK_FILES[@]}"; do
-        printf '%-40s %8d %12d\n' "$pack" "${PACK_FILES[$pack]}" "${PACK_BYTES[$pack]}" >&2
-    done
+    awk -F'\t' '
+        { files[$1]++; bytes[$1] += $2 }
+        END {
+            for (pack in files) {
+                printf "%-40s %8d %12d\n", pack, files[pack], bytes[pack]
+            }
+        }
+    ' "$summary_file" | sort >&2
+    rm -f "$summary_file"
     printf '%-40s %8s %12s\n' "----" "-----" "-----" >&2
     printf '%-40s %8d %12d\n' "TOTAL" "$total_files" "$total_bytes" >&2
     printf 'total_bytes=%d\n' "$total_bytes"
@@ -255,8 +287,14 @@ backup_root="$repo_root_path/.ai-backups/prune-shipped-$ts"
 log_dir="$repo_root_path/.ai-logs"
 log_file="$log_dir/prune-$ts.jsonl"
 
-mkdir -p "$backup_root" || { printf '[ERROR] cannot mkdir %s\n' "$backup_root" >&2; exit 4; }
-mkdir -p "$log_dir" || { printf '[ERROR] cannot mkdir %s\n' "$log_dir" >&2; exit 4; }
+mkdir -p "$backup_root" || {
+    printf '[ERROR] cannot mkdir %s\n' "$backup_root" >&2
+    exit 4
+}
+mkdir -p "$log_dir" || {
+    printf '[ERROR] cannot mkdir %s\n' "$log_dir" >&2
+    exit 4
+}
 
 printf '[INFO] backup root: %s\n' "$backup_root" >&2
 printf '[INFO] audit log:   %s\n' "$log_file" >&2
@@ -317,7 +355,7 @@ for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
 done
 
 # 5) Candidate paths (only when explicitly requested AND in --apply mode)
-if (( include_candidates == 1 )); then
+if ((include_candidates == 1)); then
     for cand in "${CANDIDATE_PATHS[@]}"; do
         if path_is_refused "$cand"; then
             printf '[ERROR] candidate %s matches refuse-list; refusing\n' "$cand" >&2

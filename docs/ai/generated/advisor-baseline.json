@@ -1,11 +1,11 @@
 {
-    "saved_at": "2026-05-29T02:22:22+00:00",
-    "overall": 78,
+    "saved_at": "2026-05-29T23:45:35+00:00",
+    "overall": 81,
     "scores": {
         "ai_surface_coverage": 100,
         "test_readiness": 100,
         "script_safety": 100,
-        "toolchain_readiness": 83,
+        "toolchain_readiness": 100,
         "complexity_risk": 0,
         "generated_doc_hygiene": 85
     }

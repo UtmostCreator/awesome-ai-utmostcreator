@@ -34,7 +34,7 @@ authorization_decision() {
     approval_missing)
         printf 'ask\n'
         ;;
-    authorization_denied|unsafe_mutation_blocked)
+    authorization_denied | unsafe_mutation_blocked)
         printf 'denied\n'
         ;;
     *)

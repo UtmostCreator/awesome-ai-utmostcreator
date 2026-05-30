@@ -21,7 +21,7 @@ EOF
 }
 
 case "${1:-}" in
---help|-h)
+--help | -h)
     usage
     exit 0
     ;;

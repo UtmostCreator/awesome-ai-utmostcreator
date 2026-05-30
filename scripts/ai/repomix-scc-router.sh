@@ -151,9 +151,9 @@ group_for_path() {
     local requested_depth="$2"
     path="${path//\\//}"
     local directory="${path%/*}"
-    local IFS='/'
     local parts=()
     local group_parts=()
+    local group=''
     local index=0
 
     if [[ "$path" != */* ]]; then
@@ -161,7 +161,7 @@ group_for_path() {
         return 0
     fi
 
-    read -r -a parts <<<"$directory"
+    mapfile -td '/' parts < <(printf '%s/' "$directory")
     for part in "${parts[@]}"; do
         [[ -n "$part" ]] || continue
         group_parts+=("$part")
@@ -174,8 +174,8 @@ group_for_path() {
     if ((${#group_parts[@]} == 0)); then
         printf '_root\n'
     else
-        local IFS='/'
-        printf '%s\n' "${group_parts[*]}"
+        printf -v group '%s/' "${group_parts[@]}"
+        printf '%s\n' "${group%/}"
     fi
 }
 
