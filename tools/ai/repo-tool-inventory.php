@@ -2,61 +2,86 @@
 
 declare(strict_types=1);
 
-$root = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
+function repoToolInventoryMain(array $argv): int
+{
+    $root = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
 
-if ($root === false || !is_dir($root)) {
-    fwrite(STDERR, "ERROR: repository root not found\n");
-    exit(1);
+    if ($root === false || !is_dir($root)) {
+        fwrite(STDERR, "ERROR: repository root not found\n");
+        return 1;
+    }
+
+    $checkOnly = in_array('--check', $argv, true);
+    $write = in_array('--write', $argv, true) || (!$checkOnly && !in_array('--check', $argv, true));
+    $outputPath = cliArg($argv, 'output') ?? 'docs/ai/repo-required-tools.md';
+
+    if ($checkOnly) {
+        return repoToolInventoryCheckOutput($root, $outputPath);
+    }
+
+    if ($write) {
+        $changed = repoToolInventoryWriteOutput($root, $outputPath);
+        fwrite(STDOUT, $changed ? "OK: regenerated {$outputPath}\n" : "OK: {$outputPath} is up to date\n");
+        return 0;
+    }
+
+    fwrite(STDERR, "ERROR: unsupported mode\n");
+    return 1;
 }
 
-$checkOnly = in_array('--check', $argv, true);
-$write = in_array('--write', $argv, true) || (!$checkOnly && !in_array('--check', $argv, true));
-$outputPath = cliArg($argv, 'output') ?? 'docs/ai/repo-required-tools.md';
+function repoToolInventoryInstalledTargetMode(string $root): bool
+{
+    return is_file($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json')
+        && !is_dir($root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'templates');
+}
 
-$inventory = buildRepoToolInventory($root);
-$expected = renderRepoRequiredToolsMarkdown($inventory);
-$absoluteOutputPath = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $outputPath);
-
-if ($checkOnly) {
+function repoToolInventoryCheckOutput(string $root, string $outputPath): int
+{
+    $absoluteOutputPath = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $outputPath);
     if (!is_file($absoluteOutputPath)) {
         fwrite(STDERR, "ERROR: {$outputPath} is missing\n");
-        exit(1);
+        return 1;
     }
 
     $current = normalizeGeneratedContent((string) file_get_contents($absoluteOutputPath));
+    $expected = normalizeGeneratedContent(renderRepoRequiredToolsMarkdown(buildRepoToolInventory($root)));
 
-    if ($current !== normalizeGeneratedContent($expected)) {
+    if ($current !== $expected) {
+        if (repoToolInventoryInstalledTargetMode($root)) {
+            fwrite(STDOUT, "WARN: {$outputPath} is out of date for this installed target. Run: php tools/ai/repo-tool-inventory.php --write\n");
+            return 0;
+        }
         fwrite(STDERR, "ERROR: {$outputPath} is out of date. Run: php tools/ai/repo-tool-inventory.php --write\n");
-        exit(1);
+        return 1;
     }
 
     fwrite(STDOUT, "OK: {$outputPath} is up to date\n");
-    exit(0);
+    return 0;
 }
 
-if ($write) {
+function repoToolInventoryWriteOutput(string $root, string $outputPath = 'docs/ai/repo-required-tools.md'): bool
+{
+    $absoluteOutputPath = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $outputPath);
     $dir = dirname($absoluteOutputPath);
 
     if (!is_dir($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
-        fwrite(STDERR, "ERROR: unable to create directory {$dir}\n");
-        exit(1);
+        throw new RuntimeException("unable to create directory {$dir}");
     }
 
     $existing = is_file($absoluteOutputPath) ? normalizeGeneratedContent((string) file_get_contents($absoluteOutputPath)) : null;
-    $normalizedExpected = normalizeGeneratedContent($expected);
+    $normalizedExpected = normalizeGeneratedContent(renderRepoRequiredToolsMarkdown(buildRepoToolInventory($root)));
 
     if ($existing === $normalizedExpected) {
-        fwrite(STDOUT, "OK: {$outputPath} is up to date\n");
-        exit(0);
+        return false;
     }
 
     file_put_contents($absoluteOutputPath, $normalizedExpected);
-    fwrite(STDOUT, "OK: regenerated {$outputPath}\n");
-    exit(0);
+    return true;
 }
 
-fwrite(STDERR, "ERROR: unsupported mode\n");
-exit(1);
+if (realpath((string) ($_SERVER['SCRIPT_FILENAME'] ?? '')) === __FILE__) {
+    exit(repoToolInventoryMain($argv));
+}
 
 function cliArg(array $argv, string $name): ?string
 {
