@@ -10,16 +10,75 @@ source "$SCRIPT_DIR/common.sh"
 usage() {
     cat <<'EOF'
 Usage:
-  ai-doc-check.sh [all|markdownlint|links|drift]
+  ai-doc-check.sh [all|markdownlint|links|drift] [paths...]
+  ai-doc-check.sh --check [paths...]
 
 Environment:
   DOC_PATHS="README.md docs/**/*.md"
 EOF
 }
 
-mode="${1:-all}"
+mode="all"
 DOC_PATHS="${DOC_PATHS:-README.md docs/**/*.md}"
 failures=0
+
+if (($# > 0)); then
+    case "$1" in
+    all | markdownlint | links | drift)
+        mode="$1"
+        shift
+        ;;
+    --check)
+        shift
+        ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    esac
+fi
+
+shopt -s nullglob globstar
+
+resolve_doc_paths() {
+    local -a resolved=()
+
+    if (($# > 0)); then
+        local candidate
+        for candidate in "$@"; do
+            [[ -e "$candidate" ]] || continue
+            resolved+=("$candidate")
+        done
+    else
+        local pattern
+        for pattern in $DOC_PATHS; do
+            if [[ -e "$pattern" ]]; then
+                resolved+=("$pattern")
+                continue
+            fi
+            case "$pattern" in
+            *[*?[]*) ;;
+            *)
+                continue
+                ;;
+            esac
+            local -a matches=( $pattern )
+            if ((${#matches[@]} == 0)); then
+                continue
+            fi
+            resolved+=("${matches[@]}")
+        done
+    fi
+
+    if ((${#resolved[@]} == 0)); then
+        log_warn "no documentation paths found; skipping"
+        return 0
+    fi
+
+    printf '%s\n' "${resolved[@]}"
+}
+
+mapfile -t DOC_PATH_LIST < <(resolve_doc_paths "$@")
 
 agent_session_init "ai-doc-check"
 
@@ -36,18 +95,22 @@ run_step() {
 }
 
 run_markdownlint() {
+    if ((${#DOC_PATH_LIST[@]} == 0)); then
+        return 0
+    fi
     if command -v markdownlint >/dev/null 2>&1; then
-        # shellcheck disable=SC2086
-        run_step "markdownlint" markdownlint $DOC_PATHS
+        run_step "markdownlint" markdownlint "${DOC_PATH_LIST[@]}"
     else
         log_warn "markdownlint not installed; skipping"
     fi
 }
 
 run_links() {
+    if ((${#DOC_PATH_LIST[@]} == 0)); then
+        return 0
+    fi
     if command -v lychee >/dev/null 2>&1; then
-        # shellcheck disable=SC2086
-        run_step "lychee" lychee $DOC_PATHS
+        run_step "lychee" lychee "${DOC_PATH_LIST[@]}"
     else
         log_warn "lychee not installed; skipping"
     fi
