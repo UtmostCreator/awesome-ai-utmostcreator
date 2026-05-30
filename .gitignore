@@ -15,4 +15,7 @@
 # Not tracked so each environment produces fresh output and avoids merge conflicts.
 # Tests still validate them via regenerate-then-check (see tests/php/CliToolsTest.php).
 docs/ai/generated/
+# Export bundle output: produced by `php tools/ai/export-ai-universal-rules.php`
+# and uploaded as a CI artifact (see export-ai-universal-rules-preview.yml). Not tracked.
+/dist/
 /composer.phar
