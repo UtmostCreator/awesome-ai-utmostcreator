@@ -226,14 +226,14 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`root-doc`|agent-ops-checklist|`docs/ai/agent-ops-checklist.md`|Phased verification checklist for auditing AI workflow integration in the live repo.|
 |`root-doc`|agent-ops|`docs/ai/agent-ops.md`|Agent operations model for observability, evaluation, optimization, IAM, and architecture routing.|
 |`root-doc`|agents|`docs/ai/agents.md`|Durable live-agent reference plus package-agent index for later lookup.|
-|`root-doc`|agent-evidence-schema|`docs/ai/capabilities/agent-observability-and-evidence/EVENT_SCHEMA.md`|Structured evidence event model for traceable agent runs on supported runtimes.|
-|`root-doc`|agent-failure-taxonomy|`docs/ai/capabilities/agent-observability-and-evidence/FAILURE_TAXONOMY.md`|Normalized failure categories for agent evidence events and taxonomy mapping guidance.|
-|`root-doc`|evaluation-golden-tasks|`docs/ai/capabilities/evaluation-and-regression/GOLDEN_TASKS.md`|Golden-task patterns for behavior-regression checks in agent workflows.|
-|`root-doc`|evaluation-human-review-rules|`docs/ai/capabilities/evaluation-and-regression/HUMAN_REVIEW_RULES.md`|Human-review triggers and decision record expectations for risky agent outcomes.|
-|`root-doc`|evaluation-replay-rules|`docs/ai/capabilities/evaluation-and-regression/REPLAY_RULES.md`|Replay rules for reproducing and classifying failed or ambiguous agent runs.|
-|`root-doc`|preview-checklist|`docs/ai/capabilities/preview-environments/CHECKLIST.md`|Checklist for preview-environment readiness, evidence, and cleanup.|
-|`root-doc`|preview-data-and-secrets|`docs/ai/capabilities/preview-environments/DATA_AND_SECRET_RULES.md`|Data and secret isolation rules for preview environments.|
-|`root-doc`|preview-lifecycle|`docs/ai/capabilities/preview-environments/LIFECYCLE.md`|Vendor-neutral lifecycle and TTL expectations for temporary preview environments.|
+|`root-doc`|agent-evidence-schema|`docs/ai/capabilities/agent-observability-and-evidence/event-schema.md`|Structured evidence event model for traceable agent runs on supported runtimes.|
+|`root-doc`|agent-failure-taxonomy|`docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md`|Normalized failure categories for agent evidence events and taxonomy mapping guidance.|
+|`root-doc`|evaluation-golden-tasks|`docs/ai/capabilities/evaluation-and-regression/golden-tasks.md`|Golden-task patterns for behavior-regression checks in agent workflows.|
+|`root-doc`|evaluation-human-review-rules|`docs/ai/capabilities/evaluation-and-regression/human-review-rules.md`|Human-review triggers and decision record expectations for risky agent outcomes.|
+|`root-doc`|evaluation-replay-rules|`docs/ai/capabilities/evaluation-and-regression/replay-rules.md`|Replay rules for reproducing and classifying failed or ambiguous agent runs.|
+|`root-doc`|preview-checklist|`docs/ai/capabilities/preview-environments/checklist.md`|Checklist for preview-environment readiness, evidence, and cleanup.|
+|`root-doc`|preview-data-and-secrets|`docs/ai/capabilities/preview-environments/data-and-secret-rules.md`|Data and secret isolation rules for preview environments.|
+|`root-doc`|preview-lifecycle|`docs/ai/capabilities/preview-environments/lifecycle.md`|Vendor-neutral lifecycle and TTL expectations for temporary preview environments.|
 |`root-doc`|failure-handling|`docs/ai/failure-handling.md`|Failure taxonomy, retry policy, corrected usage guidance, and logging contract.|
 |`root-doc`|integration-matrix|`docs/ai/integration-matrix.md`|Coverage map that tracks which AI workflow concepts are covered, partial, or missing.|
 |`root-doc`|project-context-doc|`docs/ai/project-context.md`|Durable repository context for instructions, capabilities, and runtime adapters.|
