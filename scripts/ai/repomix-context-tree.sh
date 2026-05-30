@@ -170,42 +170,150 @@ SAFETY_FACTOR=0.85
 
 while (($# > 0)); do
     case "$1" in
-    --output-dir) OUTPUT_DIR="$2"; shift 2 ;;
-    --output-dir=*) OUTPUT_DIR="${1#*=}"; shift ;;
-    --depth) DEPTH="$2"; shift 2 ;;
-    --depth=*) DEPTH="${1#*=}"; shift ;;
-    --top) TOP="$2"; shift 2 ;;
-    --top=*) TOP="${1#*=}"; shift ;;
-    --min-code) MIN_CODE="$2"; shift 2 ;;
-    --min-code=*) MIN_CODE="${1#*=}"; shift ;;
-    --min-files) MIN_FILES="$2"; shift 2 ;;
-    --min-files=*) MIN_FILES="${1#*=}"; shift ;;
-    --min-score) MIN_SCORE="$2"; shift 2 ;;
-    --min-score=*) MIN_SCORE="${1#*=}"; shift ;;
-    --min-complexity) MIN_COMPLEXITY="$2"; shift 2 ;;
-    --min-complexity=*) MIN_COMPLEXITY="${1#*=}"; shift ;;
-    --changed-since) CHANGED_SINCE="$2"; shift 2 ;;
-    --changed-since=*) CHANGED_SINCE="${1#*=}"; shift ;;
-    --churn-count) CHURN_COUNT="$2"; shift 2 ;;
-    --churn-count=*) CHURN_COUNT="${1#*=}"; shift ;;
-    --style) STYLE="$2"; shift 2 ;;
-    --style=*) STYLE="${1#*=}"; shift ;;
-    --split-size) SPLIT_SIZE="$2"; shift 2 ;;
-    --split-size=*) SPLIT_SIZE="${1#*=}"; shift ;;
-    --compress) COMPRESS=1; shift ;;
-    --include-logs) INCLUDE_LOGS=1; shift ;;
-    --include-logs-count) INCLUDE_LOGS_COUNT="$2"; shift 2 ;;
-    --include-logs-count=*) INCLUDE_LOGS_COUNT="${1#*=}"; shift ;;
-    --include-diffs) INCLUDE_DIFFS=1; shift ;;
-    --context-window) CONTEXT_WINDOW="$2"; shift 2 ;;
-    --context-window=*) CONTEXT_WINDOW="${1#*=}"; shift ;;
-    --reserved-output) RESERVED_OUTPUT="$2"; shift 2 ;;
-    --reserved-output=*) RESERVED_OUTPUT="${1#*=}"; shift ;;
-    --instruction-overhead) INSTRUCTION_OVERHEAD="$2"; shift 2 ;;
-    --instruction-overhead=*) INSTRUCTION_OVERHEAD="${1#*=}"; shift ;;
-    --safety-factor) SAFETY_FACTOR="$2"; shift 2 ;;
-    --safety-factor=*) SAFETY_FACTOR="${1#*=}"; shift ;;
-    --help | -h) usage; exit 0 ;;
+    --output-dir)
+        OUTPUT_DIR="$2"
+        shift 2
+        ;;
+    --output-dir=*)
+        OUTPUT_DIR="${1#*=}"
+        shift
+        ;;
+    --depth)
+        DEPTH="$2"
+        shift 2
+        ;;
+    --depth=*)
+        DEPTH="${1#*=}"
+        shift
+        ;;
+    --top)
+        TOP="$2"
+        shift 2
+        ;;
+    --top=*)
+        TOP="${1#*=}"
+        shift
+        ;;
+    --min-code)
+        MIN_CODE="$2"
+        shift 2
+        ;;
+    --min-code=*)
+        MIN_CODE="${1#*=}"
+        shift
+        ;;
+    --min-files)
+        MIN_FILES="$2"
+        shift 2
+        ;;
+    --min-files=*)
+        MIN_FILES="${1#*=}"
+        shift
+        ;;
+    --min-score)
+        MIN_SCORE="$2"
+        shift 2
+        ;;
+    --min-score=*)
+        MIN_SCORE="${1#*=}"
+        shift
+        ;;
+    --min-complexity)
+        MIN_COMPLEXITY="$2"
+        shift 2
+        ;;
+    --min-complexity=*)
+        MIN_COMPLEXITY="${1#*=}"
+        shift
+        ;;
+    --changed-since)
+        CHANGED_SINCE="$2"
+        shift 2
+        ;;
+    --changed-since=*)
+        CHANGED_SINCE="${1#*=}"
+        shift
+        ;;
+    --churn-count)
+        CHURN_COUNT="$2"
+        shift 2
+        ;;
+    --churn-count=*)
+        CHURN_COUNT="${1#*=}"
+        shift
+        ;;
+    --style)
+        STYLE="$2"
+        shift 2
+        ;;
+    --style=*)
+        STYLE="${1#*=}"
+        shift
+        ;;
+    --split-size)
+        SPLIT_SIZE="$2"
+        shift 2
+        ;;
+    --split-size=*)
+        SPLIT_SIZE="${1#*=}"
+        shift
+        ;;
+    --compress)
+        COMPRESS=1
+        shift
+        ;;
+    --include-logs)
+        INCLUDE_LOGS=1
+        shift
+        ;;
+    --include-logs-count)
+        INCLUDE_LOGS_COUNT="$2"
+        shift 2
+        ;;
+    --include-logs-count=*)
+        INCLUDE_LOGS_COUNT="${1#*=}"
+        shift
+        ;;
+    --include-diffs)
+        INCLUDE_DIFFS=1
+        shift
+        ;;
+    --context-window)
+        CONTEXT_WINDOW="$2"
+        shift 2
+        ;;
+    --context-window=*)
+        CONTEXT_WINDOW="${1#*=}"
+        shift
+        ;;
+    --reserved-output)
+        RESERVED_OUTPUT="$2"
+        shift 2
+        ;;
+    --reserved-output=*)
+        RESERVED_OUTPUT="${1#*=}"
+        shift
+        ;;
+    --instruction-overhead)
+        INSTRUCTION_OVERHEAD="$2"
+        shift 2
+        ;;
+    --instruction-overhead=*)
+        INSTRUCTION_OVERHEAD="${1#*=}"
+        shift
+        ;;
+    --safety-factor)
+        SAFETY_FACTOR="$2"
+        shift 2
+        ;;
+    --safety-factor=*)
+        SAFETY_FACTOR="${1#*=}"
+        shift
+        ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
     *) die "unknown option '$1'" ;;
     esac
 done
@@ -274,11 +382,7 @@ ensure_actionable_route() {
     local usable="$1"
     local fallback_row=''
     local fallback_group=''
-    local fallback_files=''
-    local fallback_code=''
-    local fallback_complexity=''
     local fallback_bytes=''
-    local fallback_score=''
     local fallback_tokens=''
     local fallback_decision=''
     local fallback_type=''
@@ -293,7 +397,7 @@ ensure_actionable_route() {
     fallback_row="$(tail -n +2 "$ROUTER_FOLDER_METRICS" | awk -F'\t' '$1 != "" && $4 + 0 > 0 { print; exit }')"
     [[ -n "$fallback_row" ]] || return 0
 
-    IFS=$'\t' read -r fallback_group fallback_files _fallback_lines fallback_code _fallback_comments _fallback_blanks fallback_complexity fallback_bytes _fallback_churn _fallback_code_share _fallback_complexity_share _fallback_file_share _fallback_byte_share _fallback_churn_share fallback_score <<<"$fallback_row"
+    IFS=$'\t' read -r fallback_group _fallback_files _fallback_lines _fallback_code _fallback_comments _fallback_blanks _fallback_complexity fallback_bytes _fallback_churn _fallback_code_share _fallback_complexity_share _fallback_file_share _fallback_byte_share _fallback_churn_share _fallback_score <<<"$fallback_row"
 
     fallback_tokens="$(estimate_tokens "$fallback_bytes")"
     if ((fallback_tokens <= usable)); then
@@ -424,18 +528,18 @@ build_plan() {
     ' "$TREE_PLAN_TSV" >"$TREE_PLAN_JSON"
 
     jq -n \
-      --arg root "$ROOT" \
-      --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-      --argjson context_window "$CONTEXT_WINDOW" \
-      --argjson reserved_output "$RESERVED_OUTPUT" \
-      --argjson instruction_overhead "$INSTRUCTION_OVERHEAD" \
-      --argjson safety_factor "$SAFETY_FACTOR" \
-      --argjson usable_budget "$usable" \
-      --arg style "$STYLE" \
-      --arg compress "$COMPRESS" \
-      --arg changed_since "$CHANGED_SINCE" \
-      --slurpfile plan "$TREE_PLAN_JSON" \
-      '{
+        --arg root "$ROOT" \
+        --arg generated_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+        --argjson context_window "$CONTEXT_WINDOW" \
+        --argjson reserved_output "$RESERVED_OUTPUT" \
+        --argjson instruction_overhead "$INSTRUCTION_OVERHEAD" \
+        --argjson safety_factor "$SAFETY_FACTOR" \
+        --argjson usable_budget "$usable" \
+        --arg style "$STYLE" \
+        --arg compress "$COMPRESS" \
+        --arg changed_since "$CHANGED_SINCE" \
+        --slurpfile plan "$TREE_PLAN_JSON" \
+        '{
         root: $root,
         generated_at: $generated_at,
         budget: {
@@ -476,7 +580,8 @@ build_human_index() {
         printf '## Wiring Locations\n\n'
         printf '%s\n' '- `AGENTS.md`'
         printf '%s\n' '- `.github/copilot-instructions.md`'
-        printf '%s\n' '- `docs/ai/copilot-tooling.md`'
+        printf '%s\n' '- `.opencode/opencode.json`'
+        printf '%s\n' '- `docs/ai/adapter-contract.md`'
         printf '%s\n\n' '- `docs/ai/context-packing.md`'
         printf '## Machine Files\n\n'
         printf '%s\n' '- `tree-plan.tsv`'
@@ -580,5 +685,8 @@ pack) run_pack ;;
 all) run_all ;;
 clean) run_clean ;;
 purge) run_purge ;;
-*) usage; die "unknown command '$COMMAND'" ;;
+*)
+    usage
+    die "unknown command '$COMMAND'"
+    ;;
 esac

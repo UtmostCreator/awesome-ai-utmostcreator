@@ -16,6 +16,7 @@ INCLUDE_DIFFS="${INCLUDE_DIFFS:-0}"
 DRY_RUN="${DRY_RUN:-0}"
 STRICT_TOKENS="${STRICT_TOKENS:-0}"
 SPLIT_OUTPUT="${SPLIT_OUTPUT:-}"
+COMMON_OPTION_CONSUMED=0
 
 usage() {
     cat <<'EOF'
@@ -49,41 +50,52 @@ EOF
 }
 
 parse_common_option() {
+    COMMON_OPTION_CONSUMED=0
+
     case "${1:-}" in
     --include-diffs)
         INCLUDE_DIFFS=1
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --no-tests)
         INCLUDE_TESTS=0
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --no-secrets-scan)
         SECRETS_SCAN=0
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --dry-run)
         DRY_RUN=1
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --strict)
         STRICT_TOKENS=1
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --token-budget)
         TOKEN_BUDGET="${2:?token budget required}"
-        return 2
+        COMMON_OPTION_CONSUMED=2
+        return 0
         ;;
     --token-budget=*)
         TOKEN_BUDGET="${1#*=}"
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --split)
         SPLIT_OUTPUT="${2:?split size required}"
-        return 2
+        COMMON_OPTION_CONSUMED=2
+        return 0
         ;;
     --split=*)
         SPLIT_OUTPUT="${1#*=}"
+        COMMON_OPTION_CONSUMED=1
         return 0
         ;;
     --help | -h)
@@ -134,11 +146,11 @@ regex_escape_lines() {
 build_stem_regex() {
     local stems=("$@")
 
-    printf '%s\n' "${stems[@]}" \
-        | sed '/^$/d' \
-        | sort -u \
-        | regex_escape_lines \
-        | paste -sd'|' -
+    printf '%s\n' "${stems[@]}" |
+        sed '/^$/d' |
+        sort -u |
+        regex_escape_lines |
+        paste -sd'|' -
 }
 
 collect_file_stems() {
@@ -434,7 +446,7 @@ cmd_since() {
         arg="$1"
         shift_by=0
         if parse_common_option "$arg" "${2:-}"; then
-            shift_by=$?
+            shift_by="$COMMON_OPTION_CONSUMED"
             shift "$shift_by"
         else
             positional+=("$arg")
@@ -466,7 +478,7 @@ cmd_unstaged() {
     while (($# > 0)); do
         shift_by=0
         if parse_common_option "$1" "${2:-}"; then
-            shift_by=$?
+            shift_by="$COMMON_OPTION_CONSUMED"
             shift "$shift_by"
         else
             die "unknown option: $1"
@@ -501,7 +513,7 @@ cmd_pr() {
         arg="$1"
         shift_by=0
         if parse_common_option "$arg" "${2:-}"; then
-            shift_by=$?
+            shift_by="$COMMON_OPTION_CONSUMED"
             shift "$shift_by"
         else
             positional+=("$arg")
@@ -545,7 +557,7 @@ cmd_recent() {
         *)
             shift_by=0
             if parse_common_option "$1" "${2:-}"; then
-                shift_by=$?
+                shift_by="$COMMON_OPTION_CONSUMED"
                 shift "$shift_by"
             else
                 die "unknown option: $1"
@@ -578,7 +590,7 @@ cmd_touched() {
         arg="$1"
         shift_by=0
         if parse_common_option "$arg" "${2:-}"; then
-            shift_by=$?
+            shift_by="$COMMON_OPTION_CONSUMED"
             shift "$shift_by"
         else
             positional+=("$arg")

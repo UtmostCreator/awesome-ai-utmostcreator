@@ -2,6 +2,16 @@
 
 Use the narrowest verification that proves the changed behavior, then escalate only when risk requires it.
 
+## Test Prerequisite
+
+Before running PHPUnit, ParaTest, or the repo-wide test runner from a fresh clone, run:
+
+```bash
+composer install
+```
+
+The PHP test and validation commands in this repository depend on Composer-managed binaries and autoloaded packages under `vendor/`. Without `composer install`, commands such as `vendor/bin/phpunit`, `vendor/bin/paratest`, and `bash scripts/ai/run-repo-tests.sh` will not function correctly.
+
 ## Parallel-First Test Entry Point
 
 Use the single repo-wide runner when you need to prove all existing repository tests:

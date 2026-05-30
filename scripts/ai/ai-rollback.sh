@@ -52,9 +52,9 @@ resolve_snapshot() {
 
     match="$(
         find "$SNAPSHOT_DIR" -maxdepth 1 \
-            \( -name "${input}*.manifest.json" -o -name "${input}*.patch" -o -name "${input}*.ref" \) \
-            | sort -r \
-            | head -1
+            \( -name "${input}*.manifest.json" -o -name "${input}*.patch" -o -name "${input}*.ref" \) |
+            sort -r |
+            head -1
     )"
 
     [[ -n "$match" ]] || die "no snapshot found matching: $input"
@@ -108,8 +108,8 @@ cmd_list() {
         count=$((count + 1))
     done < <(
         find "$SNAPSHOT_DIR" -maxdepth 1 \
-            \( -name '*.manifest.json' -o -name '*.patch' -o -name '*.ref' \) \
-            | sort -r
+            \( -name '*.manifest.json' -o -name '*.patch' -o -name '*.ref' \) |
+            sort -r
     )
 
     printf '\n%d snapshot artifact(s) found\n' "$count"

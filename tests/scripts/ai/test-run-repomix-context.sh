@@ -23,6 +23,14 @@ printf 'run-repomix-context.sh\n'
 test_help() { "$BASH_BIN" "$SCRIPT" --help 2>&1 | grep -q 'Usage'; }
 run_test "help flag works" test_help
 
+test_help_examples() {
+    local out
+    out="$($BASH_BIN "$SCRIPT" --help 2>&1)"
+    [[ "$out" == *"/Users/example-user/Workspaces/example-app"* ]]
+    [[ "$out" == *"--context-window 128000"* ]]
+}
+run_test "help shows obfuscated advanced example" test_help_examples
+
 # Delegates to repomix-context-tree.sh
 if command -v scc >/dev/null 2>&1 && command -v repomix >/dev/null 2>&1; then
     test_runs() {

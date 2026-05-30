@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "verify.json",
-    "generated_at": "2026-05-29T02:22:26+00:00",
+    "generated_at": "2026-05-29T23:45:40+00:00",
     "command": "php tools/ai/ai.php verify --changed",
-    "based_on_commit": "2426a1a",
+    "based_on_commit": "ce1b0c7",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "failed",
@@ -14,13 +14,12 @@
         "status": "failed",
         "mode": "default",
         "summary": {
-            "errors": 5,
-            "warnings": 10,
-            "info": 17
+            "errors": 3,
+            "warnings": 12,
+            "info": 12
         },
         "check_count": 7,
         "failed_checks": [
-            "generate-repo-structure-check",
             "verify-install-placeholders"
         ],
         "results": [
@@ -30,7 +29,7 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260529-022223/validate-ai-config.log"
+                "log": "docs/ai/generated/logs/verify-20260529-234539/validate-ai-config.log"
             },
             {
                 "name": "validate-ai-catalog",
@@ -38,7 +37,7 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260529-022223/validate-ai-catalog.log"
+                "log": "docs/ai/generated/logs/verify-20260529-234539/validate-ai-catalog.log"
             },
             {
                 "name": "generate-ai-catalog-check",
@@ -46,23 +45,23 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260529-022223/generate-ai-catalog-check.log"
+                "log": "docs/ai/generated/logs/verify-20260529-234539/generate-ai-catalog-check.log"
             },
             {
                 "name": "generate-repo-structure-check",
                 "command": "php tools/ai/generate-repo-structure.php --check --with-scc",
-                "exit": 1,
-                "passed": false,
+                "exit": 0,
+                "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260529-022223/generate-repo-structure-check.log"
+                "log": "docs/ai/generated/logs/verify-20260529-234539/generate-repo-structure-check.log"
             },
             {
                 "name": "install-docs-check",
                 "command": "php tools/ai/ai.php install-docs --check",
                 "exit": 0,
                 "passed": true,
-                "auto_fix_applied": true,
-                "log": "docs/ai/generated/logs/verify-20260529-022223/install-docs-check.log"
+                "auto_fix_applied": false,
+                "log": "docs/ai/generated/logs/verify-20260529-234539/install-docs-check.log"
             },
             {
                 "name": "advisor-check",
@@ -70,7 +69,7 @@
                 "exit": 0,
                 "passed": true,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260529-022223/advisor-check.log"
+                "log": "docs/ai/generated/logs/verify-20260529-234539/advisor-check.log"
             },
             {
                 "name": "verify-install-placeholders",
@@ -78,17 +77,10 @@
                 "exit": 1,
                 "passed": false,
                 "auto_fix_applied": false,
-                "log": "docs/ai/generated/logs/verify-20260529-022223/verify-install-placeholders.log"
+                "log": "docs/ai/generated/logs/verify-20260529-234539/verify-install-placeholders.log"
             }
         ],
         "findings": [
-            {
-                "severity": "ERROR",
-                "code": "CHECK_FAILED",
-                "file": null,
-                "message": "Verification check failed: generate-repo-structure-check",
-                "suggested_fix": "Inspect docs/ai/generated logs and rerun verify."
-            },
             {
                 "severity": "ERROR",
                 "code": "CHECK_FAILED",
@@ -98,6 +90,20 @@
             },
             {
                 "severity": "WARNING",
+                "code": "UNFILLED_REQUIRED_PLACEHOLDER",
+                "file": "docs/ai",
+                "message": "Unresolved placeholders detected.",
+                "suggested_fix": "Run php tools/ai/ai.php placeholders --fail and update placeholders."
+            },
+            {
+                "severity": "INFO",
+                "code": "UNFILLED_OPTIONAL_PLACEHOLDER",
+                "file": "docs/ai",
+                "message": "Optional placeholders may remain unresolved.",
+                "suggested_fix": "Review placeholder list and fill values as needed for strict mode."
+            },
+            {
+                "severity": "WARNING",
                 "code": "HASH_DRIFT_MANAGED_FILE",
                 "file": ".github/hooks/scripts/tool-guardian.ps1",
                 "message": "Managed file hash drift detected.",
@@ -135,6 +141,20 @@
                 "severity": "INFO",
                 "code": "CUSTOMISED_MANAGED_FILE",
                 "file": ".opencode/agents-optional",
+                "message": "Managed file appears customized locally.",
+                "suggested_fix": "Keep or merge local changes intentionally."
+            },
+            {
+                "severity": "WARNING",
+                "code": "HASH_DRIFT_MANAGED_FILE",
+                "file": ".github/agents",
+                "message": "Managed file hash drift detected.",
+                "suggested_fix": "Review local customization and merge with source updates."
+            },
+            {
+                "severity": "INFO",
+                "code": "CUSTOMISED_MANAGED_FILE",
+                "file": ".github/agents",
                 "message": "Managed file appears customized locally.",
                 "suggested_fix": "Keep or merge local changes intentionally."
             },
@@ -235,62 +255,6 @@
                 "file": "docs/ai/capabilities/evidence-first-execution",
                 "message": "Managed file appears customized locally.",
                 "suggested_fix": "Keep or merge local changes intentionally."
-            },
-            {
-                "severity": "ERROR",
-                "code": "MISSING_REQUIRED_TOOL",
-                "file": "scripts/ai",
-                "message": "Required tool missing: scc",
-                "suggested_fix": "Install required scripts-pack dependency."
-            },
-            {
-                "severity": "INFO",
-                "code": "MISSING_OPTIONAL_TOOL",
-                "file": "scripts/ai",
-                "message": "Optional tool missing: fd",
-                "suggested_fix": "Install optional tooling for faster workflows."
-            },
-            {
-                "severity": "INFO",
-                "code": "MISSING_OPTIONAL_TOOL",
-                "file": "scripts/ai",
-                "message": "Optional tool missing: gh",
-                "suggested_fix": "Install optional tooling for faster workflows."
-            },
-            {
-                "severity": "INFO",
-                "code": "MISSING_OPTIONAL_TOOL",
-                "file": "scripts/ai",
-                "message": "Optional tool missing: bat",
-                "suggested_fix": "Install optional tooling for faster workflows."
-            },
-            {
-                "severity": "INFO",
-                "code": "MISSING_OPTIONAL_TOOL",
-                "file": "scripts/ai",
-                "message": "Optional tool missing: delta",
-                "suggested_fix": "Install optional tooling for faster workflows."
-            },
-            {
-                "severity": "INFO",
-                "code": "MISSING_OPTIONAL_TOOL",
-                "file": "scripts/ai",
-                "message": "Optional tool missing: yq",
-                "suggested_fix": "Install optional tooling for faster workflows."
-            },
-            {
-                "severity": "INFO",
-                "code": "MISSING_OPTIONAL_TOOL",
-                "file": "scripts/ai",
-                "message": "Optional tool missing: semgrep",
-                "suggested_fix": "Install optional tooling for faster workflows."
-            },
-            {
-                "severity": "INFO",
-                "code": "MISSING_OPTIONAL_TOOL",
-                "file": "scripts/ai",
-                "message": "Optional tool missing: ast-grep",
-                "suggested_fix": "Install optional tooling for faster workflows."
             },
             {
                 "severity": "ERROR",
@@ -307,6 +271,6 @@
                 "suggested_fix": "Run chmod +x on hook script files."
             }
         ],
-        "log_dir": "docs/ai/generated/logs/verify-20260529-022223"
+        "log_dir": "docs/ai/generated/logs/verify-20260529-234539"
     }
 }

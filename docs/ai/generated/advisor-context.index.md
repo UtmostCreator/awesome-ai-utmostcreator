@@ -60,6 +60,7 @@
 - `tests/php/AdvisorSchemaTest.php`
 - `tests/php/AdvisorSecretScanTest.php`
 - `tests/php/AdvisorTokenBudgetTest.php`
+- `tests/php/AgentPermissionPolicyTest.php`
 - `tests/php/AiCatalogLibIoTest.php`
 - `tests/php/AiCatalogLibTest.php`
 - `tests/php/CliToolsTest.php`
@@ -209,6 +210,7 @@
 - `tools/ai/validate-command-policy.php`
 - `tools/ai/validate-generated-artifacts.php`
 - `tools/ai/validate-install-surface.php`
+- `tools/ai/validate-mentor-parity.php`
 - `tools/ai/validate-placeholders.php`
 - `tools/ai/verify-full-install.php`
 - `tools/ai/verify-install-placeholders.php`

@@ -99,7 +99,7 @@ command_for_test() {
             printf 'vendor/bin/phpunit %s\n' "$test_file"
         fi
         ;;
-    *.js|*.ts|*.jsx|*.tsx|*.vue)
+    *.js | *.ts | *.jsx | *.tsx | *.vue)
         if [[ -f pnpm-lock.yaml ]]; then
             printf 'pnpm test -- %s\n' "$test_file"
         elif [[ -f package.json ]]; then
@@ -196,7 +196,7 @@ json)
     select_for_files "${files[@]+${files[@]}}"
     ;;
 
---help|-h)
+--help | -h)
     usage
     ;;
 

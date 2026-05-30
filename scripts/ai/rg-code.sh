@@ -14,7 +14,7 @@ Usage:
 
 Modes: default | all | tracked | php | js | blade | kotlin | config
 Output: --json | --files | --count
-Options: --context N | --type EXT[,EXT] | --mode MODE
+Options: --context N | --type EXT[,EXT] | --mode MODE | --ignore-case
 EOF
 }
 
@@ -31,6 +31,7 @@ MODE="default"
 CONTEXT_LINES=0
 OUT_MODE="matches"
 EXTRA_TYPES=()
+IGNORE_CASE=0
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -58,6 +59,10 @@ while [[ $# -gt 0 ]]; do
         IFS=',' read -ra EXTRA_TYPES <<<"${1#*=}"
         shift
         ;;
+    --ignore-case | -i)
+        IGNORE_CASE=1
+        shift
+        ;;
     --json)
         OUT_MODE="json"
         shift
@@ -78,6 +83,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+case_args=()
+if [[ "$IGNORE_CASE" == "1" ]] || [[ ! "$pattern" =~ [[:upper:]] ]]; then
+    case_args=(-i)
+fi
+
 BASE_EXCLUDES=(
     -g '!vendor'
     -g '!node_modules'
@@ -96,7 +106,7 @@ case "$MODE" in
 default) mode_args=(--hidden) ;;
 all) mode_args=(-uuu) ;;
 tracked)
-    git -C "$root" grep -n "$pattern"
+    git -C "$root" grep "${case_args[@]}" -n "$pattern"
     exit $?
     ;;
 php) mode_args=(--hidden -g '*.php') ;;
@@ -117,7 +127,7 @@ fi
 
 case "$OUT_MODE" in
 json)
-    rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" \
+    rg "${case_args[@]}" "${mode_args[@]}" "${BASE_EXCLUDES[@]}" \
         --json -n "$pattern" "$root" |
         jq -sc '[.[] | select(.type == "match") | {
           file: .data.path.text,
@@ -127,12 +137,12 @@ json)
         }]'
     ;;
 files)
-    rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -l -n "$pattern" "$root"
+    rg "${case_args[@]}" "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -l -n "$pattern" "$root"
     ;;
 count)
-    rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -c -n "$pattern" "$root"
+    rg "${case_args[@]}" "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -c -n "$pattern" "$root"
     ;;
 matches)
-    rg "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -n "$pattern" "$root"
+    rg "${case_args[@]}" "${mode_args[@]}" "${BASE_EXCLUDES[@]}" -n "$pattern" "$root"
     ;;
 esac

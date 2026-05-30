@@ -47,8 +47,19 @@ run_job() {
     LOGS+=("$log")
 }
 
-run_job "php-paratest-root" \
-    "$PHP_BIN" vendor/bin/paratest --configuration phpunit.xml.dist --processes="$PARATEST_PROCS" --runner=WrapperRunner
+run_job "php-root-tests" \
+    bash -lc '
+if [[ -x vendor/bin/paratest ]]; then
+    exec "$1" vendor/bin/paratest --configuration phpunit.xml.dist --processes="$2" --runner=WrapperRunner
+fi
+
+if [[ -x vendor/bin/phpunit ]]; then
+    exec "$1" vendor/bin/phpunit --configuration phpunit.xml.dist
+fi
+
+echo "ERROR: neither vendor/bin/paratest nor vendor/bin/phpunit is available" >&2
+exit 1
+' _ "$PHP_BIN" "$PARATEST_PROCS"
 
 run_job "script-tests" \
     bash tests/scripts/ai/run-all-tests.sh
@@ -57,7 +68,7 @@ if command -v bats >/dev/null 2>&1 && [[ -d tests/shell ]]; then
     if file tests/shell/*.bats 2>/dev/null | grep -q 'CRLF'; then
         echo "==> skip: bats-shell-tests (CRLF checkout; normalize *.bats to LF to run under Bash/Bats)"
     else
-    run_job "bats-shell-tests" bats tests/shell
+        run_job "bats-shell-tests" bats tests/shell
     fi
 else
     echo "==> skip: bats-shell-tests (bats not installed or tests/shell missing)"
@@ -67,9 +78,9 @@ if [[ -f packages/ai-kit-tests/phpunit.xml.dist ]] && [[ -d packages/ai-kit-test
     if find packages/ai-kit-tests/tests -type f -name '*Test.php' -print -quit | grep -q .; then
         run_job "php-paratest-package" \
             "$PHP_BIN" packages/ai-kit-tests/vendor/bin/paratest \
-                --configuration packages/ai-kit-tests/phpunit.xml.dist \
-                --processes="$PARATEST_PROCS" \
-                --runner=WrapperRunner
+            --configuration packages/ai-kit-tests/phpunit.xml.dist \
+            --processes="$PARATEST_PROCS" \
+            --runner=WrapperRunner
     else
         echo "==> skip: php-paratest-package (no package Test.php files yet)"
     fi

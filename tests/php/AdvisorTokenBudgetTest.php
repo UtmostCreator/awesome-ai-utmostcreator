@@ -8,14 +8,45 @@ use PHPUnit\Framework\TestCase;
 
 class AdvisorTokenBudgetTest extends TestCase
 {
+    private function removeTree(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $items = scandir($path);
+        if ($items === false) {
+            return;
+        }
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $child = $path . DIRECTORY_SEPARATOR . $item;
+            if (is_dir($child)) {
+                $this->removeTree($child);
+            } else {
+                @unlink($child);
+            }
+        }
+
+        @rmdir($path);
+    }
+
     public function testAdvisorTokenBudgetArtifactExistsAfterAll(): void
     {
         $root = realpath(dirname(__DIR__, 2));
         $this->assertNotFalse($root);
         $php = escapeshellarg((string) PHP_BINARY);
+        $generated = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'advisor-budget-' . uniqid('', true);
+        mkdir($generated, 0777, true);
 
         $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-        $process = proc_open($php . ' tools/ai/ai.php advisor --all', $descriptors, $pipes, (string) $root);
+        $env = $_ENV;
+        $env['AI_ADVISOR_GENERATED_DIR'] = $generated;
+        $process = proc_open($php . ' tools/ai/ai.php advisor --all', $descriptors, $pipes, (string) $root, $env);
         $this->assertIsResource($process);
         fclose($pipes[0]);
         stream_get_contents($pipes[1]);
@@ -25,7 +56,7 @@ class AdvisorTokenBudgetTest extends TestCase
         $exit = proc_close($process);
         $this->assertContains($exit, [0, 1]);
 
-        $artifact = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR . 'advisor-token-budget.json';
+        $artifact = $generated . DIRECTORY_SEPARATOR . 'advisor-token-budget.json';
         if (is_file($artifact)) {
             $decoded = json_decode((string) file_get_contents($artifact), true);
             $this->assertIsArray($decoded);
@@ -34,5 +65,7 @@ class AdvisorTokenBudgetTest extends TestCase
         } else {
             $this->assertTrue(true, 'Token budget may be skipped when secret scan blocks pack stage.');
         }
+
+        $this->removeTree($generated);
     }
 }

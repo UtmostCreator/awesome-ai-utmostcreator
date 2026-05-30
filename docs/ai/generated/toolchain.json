@@ -1,9 +1,9 @@
 {
     "schema_version": 1,
     "artifact": "toolchain.json",
-    "generated_at": "2026-05-29T02:22:23+00:00",
+    "generated_at": "2026-05-29T23:45:37+00:00",
     "command": "php tools/ai/ai.php toolchain",
-    "based_on_commit": "2426a1a",
+    "based_on_commit": "ce1b0c7",
     "based_on_branch": "main",
     "input_hashes": {},
     "status": "ok",
@@ -33,7 +33,7 @@
                 "tool": "bash",
                 "label": "Bash",
                 "present": true,
-                "version": "GNU bash, version 5.3.9(1)-release (x86_64-pc-linux-gnu)",
+                "version": "GNU bash, version 3.2.57(1)-release (arm64-apple-darwin25)",
                 "safe_auto_install": false,
                 "requires_before_install": [],
                 "install_hints": [],
@@ -43,7 +43,7 @@
                 "tool": "git",
                 "label": "Git",
                 "present": true,
-                "version": "git version 2.53.0",
+                "version": "git version 2.50.1 (Apple Git-155)",
                 "safe_auto_install": false,
                 "requires_before_install": [],
                 "install_hints": {
@@ -57,7 +57,7 @@
                 "tool": "jq",
                 "label": "jq",
                 "present": true,
-                "version": "jq-1.8.1",
+                "version": "jq-1.7.1-apple",
                 "safe_auto_install": false,
                 "requires_before_install": [],
                 "install_hints": {
@@ -70,8 +70,8 @@
             {
                 "tool": "rg",
                 "label": "ripgrep",
-                "present": true,
-                "version": "ripgrep 15.1.0",
+                "present": false,
+                "version": "unknown",
                 "safe_auto_install": false,
                 "requires_before_install": [],
                 "install_hints": {
@@ -98,8 +98,8 @@
             {
                 "tool": "repomix",
                 "label": "Repomix",
-                "present": true,
-                "version": "1.14.0",
+                "present": false,
+                "version": "unknown",
                 "safe_auto_install": true,
                 "requires_before_install": [
                     "node",
@@ -134,6 +134,11 @@
         ],
         "install_actions": [
             {
+                "tool": "rg",
+                "hint": "brew install ripgrep",
+                "safe_auto_install": false
+            },
+            {
                 "tool": "fd",
                 "hint": "manual install required",
                 "safe_auto_install": false
@@ -144,13 +149,24 @@
                 "safe_auto_install": false
             },
             {
+                "tool": "repomix",
+                "hint": "npm install -g repomix",
+                "safe_auto_install": true
+            },
+            {
                 "tool": "scc",
-                "hint": "Install scc from your package manager or release binary",
+                "hint": "brew install scc",
                 "safe_auto_install": false
             }
         ],
         "apply_results": [
             {
+                "tool": "rg",
+                "status": "blocked",
+                "reason": "auto-install not approved",
+                "hint": "brew install ripgrep"
+            },
+            {
                 "tool": "fd",
                 "status": "blocked",
                 "reason": "auto-install not approved",
@@ -163,10 +179,15 @@
                 "hint": "manual install required"
             },
             {
+                "tool": "repomix",
+                "status": "blocked",
+                "reason": "missing prerequisite tools: node, npm"
+            },
+            {
                 "tool": "scc",
                 "status": "blocked",
                 "reason": "auto-install not approved",
-                "hint": "Install scc from your package manager or release binary"
+                "hint": "brew install scc"
             }
         ]
     }

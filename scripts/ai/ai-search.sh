@@ -6,7 +6,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 usage() {
     cat <<'EOF'
 Usage:
-  ai-search.sh MODE QUERY [root] [--fixed] [--dry-run]
+    ai-search.sh MODE QUERY [root] [--fixed] [--ignore-case] [--dry-run]
 
 Modes:
   changed | staged | tracked | text | files | struct | docs | doctor | unsafe-all
@@ -57,13 +57,27 @@ root="${3:-.}"
 shift 3 2>/dev/null || true
 
 fixed=0
+ignore_case=0
 dry_run=0
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --fixed) fixed=1; shift ;;
-        --dry-run) dry_run=1; shift ;;
-        --help|-h) usage; exit 0 ;;
-        *) shift ;;
+    --fixed)
+        fixed=1
+        shift
+        ;;
+    --ignore-case | -i)
+        ignore_case=1
+        shift
+        ;;
+    --dry-run)
+        dry_run=1
+        shift
+        ;;
+    --help | -h)
+        usage
+        exit 0
+        ;;
+    *) shift ;;
     esac
 done
 
@@ -85,6 +99,11 @@ if [[ -z "$query" ]]; then
     exit 1
 fi
 
+case_args=()
+if [[ "$ignore_case" == "1" ]] || [[ ! "$query" =~ [[:upper:]] ]]; then
+    case_args=(-i)
+fi
+
 if [[ "$dry_run" == "1" ]]; then
     if [[ "$json_mode" == "json" ]]; then
         emit_json "dry_run" "[]"
@@ -96,9 +115,9 @@ fi
 
 run_text() {
     if [[ "$fixed" == "1" ]]; then
-        rg -n --fixed-strings -- "$query" "$root" 2>/dev/null || true
+        rg "${case_args[@]}" -n --fixed-strings -- "$query" "$root" 2>/dev/null || true
     else
-        rg -n -- "$query" "$root" 2>/dev/null || true
+        rg "${case_args[@]}" -n -- "$query" "$root" 2>/dev/null || true
     fi
 }
 
@@ -113,40 +132,40 @@ run_files() {
 }
 
 case "$mode" in
-    changed)
-        out="$(git -C "$root" diff --name-only 2>/dev/null | tr -d '\r' || true)"
-        ;;
-    staged)
-        out="$(git -C "$root" diff --name-only --cached 2>/dev/null | tr -d '\r' || true)"
-        ;;
-    tracked)
-        if [[ "$fixed" == "1" ]]; then
-            out="$(git -C "$root" grep -n --fixed-strings -- "$query" 2>/dev/null || true)"
-        else
-            out="$(git -C "$root" grep -n -- "$query" 2>/dev/null || true)"
-        fi
-        ;;
-    text|docs)
-        out="$(run_text)"
-        ;;
-    files)
-        out="$(run_files)"
-        ;;
-    struct)
-        if command_exists ast-grep; then
-            out="$(ast-grep run --lang "${AI_LANG:-php}" --pattern "$query" "$root" 2>/dev/null || true)"
-        else
-            out=""
-        fi
-        ;;
-    *)
-        if [[ "$json_mode" == "json" ]]; then
-            emit_json "error" "[]" '["unknown mode"]'
-        else
-            echo "[ERROR] unknown mode: $mode" >&2
-        fi
-        exit 1
-        ;;
+changed)
+    out="$(git -C "$root" diff --name-only 2>/dev/null | tr -d '\r' || true)"
+    ;;
+staged)
+    out="$(git -C "$root" diff --name-only --cached 2>/dev/null | tr -d '\r' || true)"
+    ;;
+tracked)
+    if [[ "$fixed" == "1" ]]; then
+        out="$(git -C "$root" grep "${case_args[@]}" -n --fixed-strings -- "$query" 2>/dev/null || true)"
+    else
+        out="$(git -C "$root" grep "${case_args[@]}" -n -- "$query" 2>/dev/null || true)"
+    fi
+    ;;
+text | docs)
+    out="$(run_text)"
+    ;;
+files)
+    out="$(run_files)"
+    ;;
+struct)
+    if command_exists ast-grep; then
+        out="$(ast-grep run --lang "${AI_LANG:-php}" --pattern "$query" "$root" 2>/dev/null || true)"
+    else
+        out=""
+    fi
+    ;;
+*)
+    if [[ "$json_mode" == "json" ]]; then
+        emit_json "error" "[]" '["unknown mode"]'
+    else
+        echo "[ERROR] unknown mode: $mode" >&2
+    fi
+    exit 1
+    ;;
 esac
 
 if [[ "$json_mode" == "json" ]]; then
