@@ -113,7 +113,7 @@ permission:
     'markdownlint-cli2 *': allow
     'php tools/ai/validate-*.php *': allow
     'php tools/ai/generate-*.php --check*': allow
-    # --- shipped CLI tool access ---
+    # --- shipped CLI tool access (shared snippet: agent-tools-execute) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow

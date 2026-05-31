@@ -87,7 +87,7 @@ permission:
     'shellcheck *': allow
     'php -l *': allow
     'php tools/ai/validate-*.php *': allow
-    # --- shipped CLI tool access ---
+    # --- shipped CLI tool access (shared snippet: agent-tools-execute) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow

@@ -134,6 +134,10 @@ run_drift() {
     if [[ -f tools/ai/validate-generated-artifacts.php ]]; then
         run_step "validate-generated-artifacts" php tools/ai/validate-generated-artifacts.php
     fi
+
+    if [[ -f tools/ai/generate-agent-snippets.php ]]; then
+        run_step "agent-snippets --check" php tools/ai/generate-agent-snippets.php --check
+    fi
 }
 
 case "$mode" in

@@ -81,7 +81,7 @@ permission:
     "gh issue view*": allow
     "gh repo view*": allow
     "scc --no-complexity --no-cocomo *": allow
-    # --- shipped CLI tool access ---
+    # --- shipped CLI tool access (shared snippet: agent-tools-readonly) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow

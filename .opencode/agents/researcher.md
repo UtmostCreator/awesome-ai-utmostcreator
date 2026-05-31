@@ -80,8 +80,8 @@ permission:
     'gh issue list*': allow
     'gh issue view*': allow
     'gh repo view*': allow
+    # --- shipped CLI tool access (shared snippet: agent-tools-readonly) ---
     'scc *': allow
-    # --- shipped CLI tool access ---
     'tokei *': allow
     'ast-grep *': allow
     'bat *': allow
