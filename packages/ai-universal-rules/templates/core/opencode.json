@@ -89,6 +89,7 @@
         "bash scripts/ai/repomix-context-tree.sh *": "ask",
         "bash scripts/ai/repomix-scc-router.sh *": "ask",
         "bash scripts/ai/repomix-freshness.sh *": "allow",
+        "bash scripts/ai/repomix-ensure-fresh.sh *": "ask",
         "bash scripts/ai/ai-edit.sh *": "ask",
         "bash scripts/ai/ai-rollback.sh *": "ask",
         "bash scripts/ai/install-mandatory-tools.sh *": "ask",
