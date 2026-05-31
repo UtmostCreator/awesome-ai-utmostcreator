@@ -166,6 +166,22 @@ permission:
     'markdownlint-cli2 *': allow
     'php tools/ai/validate-*.php *': allow
     'php tools/ai/generate-*.php --check*': allow
+    # --- shipped CLI tool access ---
+    'scc *': allow
+    'tokei *': allow
+    'ast-grep *': allow
+    'bat *': allow
+    'fx *': allow
+    'glow *': allow
+    'difft *': allow
+    'delta *': allow
+    'lychee *': allow
+    'actionlint*': allow
+    'shfmt -d *': allow
+    'semgrep *': allow
+    'repomix *': ask
+    'files-to-prompt *': ask
+    'code2prompt *': ask
 ---
 
 # Implementer Agent
@@ -227,7 +243,7 @@ Use: `Not run: <command> — <reason>` and `Recommended: <command> — <why>`.
 
 ## Stop Conditions
 
-Stop and hand off when instruction specificity is below 50/100, architecture redesign is needed, target artifact or owner is unclear, acceptance criteria are missing for risky change, implementation would touch more than 6 unrelated files, diff grows beyond planned slice, similar logic exists and replacement needs approval, tests fail outside the slice, secrets would need inspection, or package install/dependency update/migration/deployment/broad formatting/destructive git operation is required.
+Stop and hand off when: specificity is below 50/100, redesign is needed, owner or target is unclear, acceptance criteria are missing for risky change, the diff exceeds ~6 files or the planned slice, similar logic needs approval to replace, tests fail outside the slice, secrets need inspection, or any install/upgrade/migration/deploy/destructive-git operation is required.
 
 ## Final Output
 

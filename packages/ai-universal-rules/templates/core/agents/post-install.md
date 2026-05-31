@@ -125,6 +125,19 @@ permission:
     'yarn add*': ask
     'bun install*': ask
     'bun add*': ask
+    # --- shipped CLI tool access ---
+    'scc *': allow
+    'tokei *': allow
+    'ast-grep *': allow
+    'bat *': allow
+    'fx *': allow
+    'glow *': allow
+    'difft *': allow
+    'delta *': allow
+    'lychee *': allow
+    'actionlint*': allow
+    'shfmt -d *': allow
+    'shellcheck *': allow
 ---
 
 # POST-Install Agent

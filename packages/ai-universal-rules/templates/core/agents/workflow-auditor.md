@@ -44,6 +44,19 @@ permission:
     'bash scripts/ai/git-forensics.sh *': allow
     'bash scripts/ai/ai-doc-check.sh --check*': allow
     'php tools/ai/validate-*.php *': allow
+    # --- shipped CLI tool access ---
+    'scc *': allow
+    'tokei *': allow
+    'ast-grep *': allow
+    'bat *': allow
+    'fx *': allow
+    'glow *': allow
+    'difft *': allow
+    'delta *': allow
+    'lychee *': allow
+    'actionlint*': allow
+    'shfmt -d *': allow
+    'shellcheck *': allow
 ---
 
 # Workflow Auditor Agent

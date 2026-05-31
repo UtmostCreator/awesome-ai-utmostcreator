@@ -80,6 +80,18 @@ permission:
     'gh issue view*': allow
     'gh repo view*': allow
     'scc *': allow
+    # --- shipped CLI tool access ---
+    'tokei *': allow
+    'ast-grep *': allow
+    'bat *': allow
+    'fx *': allow
+    'glow *': allow
+    'difft *': allow
+    'delta *': allow
+    'lychee *': allow
+    'actionlint*': allow
+    'shfmt -d *': allow
+    'shellcheck *': allow
 ---
 
 # Researcher Agent
