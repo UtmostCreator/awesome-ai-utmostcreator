@@ -26,3 +26,10 @@ For non-trivial work, follow `docs/ai/execution-protocol.md`.
 3. broader repository verification
 4. build or smoke proof when relevant
 5. release-safety proof for medium or high-risk work
+
+## Correctness And Context
+
+Apply these alongside every step above:
+
+- Ground claims and resolve conflicts using the evidence ordering in `docs/ai/source-of-truth.md`; label anything not proven by code, tests, schemas, or runtime with `[unverified]`.
+- Keep context bounded using `docs/ai/context-economy.md`: scope searches and command output, prefer bounded reads, and pack context only when a bounded read is insufficient.
