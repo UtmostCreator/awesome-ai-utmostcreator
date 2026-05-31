@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -166,9 +167,7 @@ class AgentPermissionPolicyTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider gitMutatingAgentProvider
-     */
+    #[DataProvider('gitMutatingAgentProvider')]
     public function testGitMutatingAgentsAskBeforeLocalGitMutations(string $relativePath): void
     {
         $contents = $this->loadFrontmatter($relativePath);
@@ -183,9 +182,7 @@ class AgentPermissionPolicyTest extends TestCase
         self::assertSame([], $missing, sprintf('%s is missing git mutation ask entries: %s', $relativePath, implode(', ', $missing)));
     }
 
-    /**
-     * @dataProvider implementerAgentProvider
-     */
+    #[DataProvider('implementerAgentProvider')]
     public function testImplementerAsksBeforeBranchAndDependencyMutations(string $relativePath): void
     {
         $contents = $this->loadFrontmatter($relativePath);
@@ -200,9 +197,7 @@ class AgentPermissionPolicyTest extends TestCase
         self::assertSame([], $missing, sprintf('%s is missing implementer ask entries: %s', $relativePath, implode(', ', $missing)));
     }
 
-    /**
-     * @dataProvider readOnlyStrictDenyAgentProvider
-     */
+    #[DataProvider('readOnlyStrictDenyAgentProvider')]
     public function testReadOnlyAgentsDoNotCarryMutationAskBlock(string $relativePath): void
     {
         $contents = $this->loadFrontmatter($relativePath);
@@ -217,9 +212,7 @@ class AgentPermissionPolicyTest extends TestCase
         self::assertSame([], $violations, sprintf('%s should stay read-only and compact, but contains mutation entries: %s', $relativePath, implode(', ', $violations)));
     }
 
-    /**
-     * @dataProvider allAgentProvider
-     */
+    #[DataProvider('allAgentProvider')]
     public function testStrictDenyAgentsAllowBasicReadOnlyGitInspection(string $relativePath): void
     {
         if (in_array($relativePath, self::ASK_DEFAULT_AGENTS, true)) {
@@ -241,9 +234,7 @@ class AgentPermissionPolicyTest extends TestCase
         self::assertSame([], $missing, sprintf('%s is missing read-only git allow entries: %s', $relativePath, implode(', ', $missing)));
     }
 
-    /**
-     * @dataProvider allAgentProvider
-     */
+    #[DataProvider('allAgentProvider')]
     public function testAgentNeverAllowsForbiddenPatterns(string $relativePath): void
     {
         $contents = $this->loadFrontmatter($relativePath);
@@ -258,9 +249,7 @@ class AgentPermissionPolicyTest extends TestCase
         self::assertSame([], $violations, sprintf('%s allows forbidden patterns: %s', $relativePath, implode(', ', $violations)));
     }
 
-    /**
-     * @dataProvider allAgentProvider
-     */
+    #[DataProvider('allAgentProvider')]
     public function testAgentFrontmatterIsParseable(string $relativePath): void
     {
         $full = self::$repoRoot . '/' . $relativePath;
@@ -272,9 +261,7 @@ class AgentPermissionPolicyTest extends TestCase
         self::assertNotFalse(strpos($raw, "\n---", 4), sprintf('%s frontmatter has no terminating delimiter.', $relativePath));
     }
 
-    /**
-     * @dataProvider projectConfigProvider
-     */
+    #[DataProvider('projectConfigProvider')]
     public function testProjectConfigAsksBeforeInstallApply(string $relativePath): void
     {
         $bash = $this->loadProjectBashPermissions($relativePath);
@@ -284,9 +271,7 @@ class AgentPermissionPolicyTest extends TestCase
         }
     }
 
-    /**
-     * @dataProvider projectConfigProvider
-     */
+    #[DataProvider('projectConfigProvider')]
     public function testProjectConfigNeverAllowsForbiddenPatterns(string $relativePath): void
     {
         $bash = $this->loadProjectBashPermissions($relativePath);
