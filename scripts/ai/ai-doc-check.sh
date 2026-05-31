@@ -35,6 +35,14 @@ if (($# > 0)); then
         usage
         exit 0
         ;;
+    *)
+        # A first argument that is neither a known mode/flag nor an existing
+        # path is an unknown mode. Existing paths fall through as [paths...].
+        if [[ ! -e "$1" ]]; then
+            usage >&2
+            die "unknown mode: $1"
+        fi
+        ;;
     esac
 fi
 
@@ -62,6 +70,8 @@ resolve_doc_paths() {
                 continue
                 ;;
             esac
+            # Intentional glob expansion (globstar + nullglob enabled above).
+            # shellcheck disable=SC2206
             local -a matches=( $pattern )
             if ((${#matches[@]} == 0)); then
                 continue

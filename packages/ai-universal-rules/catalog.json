@@ -64,7 +64,7 @@
         "root:opencode-command": 19,
         "root:opencode-skill": 19,
         "root:php-reference": 3,
-        "root:root-doc": 16,
+        "root:root-doc": 19,
         "root:schema": 1,
         "root:validator": 4,
         "root:verifier": 2
@@ -604,7 +604,7 @@
             "name": "ui-builder",
             "path": "packages/ai-universal-rules/templates/optional/agents/ui-builder.md",
             "runtime": "optional",
-            "description": "Use when implementing UI work while preserving repository interaction patterns and accessibility rules"
+            "description": "UI builder for <PROJECT_NAME>. Builds UI changes that follow existing product patterns and accessibility expectations."
         },
         {
             "scope": "package",
@@ -1556,7 +1556,7 @@
             "name": "service-boundary-patterns",
             "path": "docs/ai/capabilities/service-boundary-patterns/CAPABILITY.md",
             "runtime": "canonical",
-            "description": "Respect adapter, API, and package boundaries. Do not introduce parallel contracts without approval."
+            "description": "Use this capability when a change crosses repository, package, API, adapter, data, or internal tooling boundaries."
         },
         {
             "scope": "root",
@@ -2629,6 +2629,30 @@
             "path": "docs/ai/capabilities/preview-environments/lifecycle.md",
             "runtime": "canonical",
             "description": "Vendor-neutral lifecycle and TTL expectations for temporary preview environments."
+        },
+        {
+            "scope": "root",
+            "type": "root-doc",
+            "name": "service-data-boundaries",
+            "path": "docs/ai/capabilities/service-boundary-patterns/data-boundaries.md",
+            "runtime": "canonical",
+            "description": "Data ownership, generated artifact, fixture, and secret boundary rules."
+        },
+        {
+            "scope": "root",
+            "type": "root-doc",
+            "name": "internal-tool-surfaces",
+            "path": "docs/ai/capabilities/service-boundary-patterns/internal-tool-surfaces.md",
+            "runtime": "canonical",
+            "description": "Boundary rules for scripts, validators, installers, command policies, and AI runtime adapters."
+        },
+        {
+            "scope": "root",
+            "type": "root-doc",
+            "name": "service-boundaries",
+            "path": "docs/ai/capabilities/service-boundary-patterns/service-boundaries.md",
+            "runtime": "canonical",
+            "description": "Service/package/API/adapter ownership rules for cross-boundary changes."
         },
         {
             "scope": "root",

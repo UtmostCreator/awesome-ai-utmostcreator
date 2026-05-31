@@ -191,9 +191,26 @@ IGNORE_PATTERNS=()
 COLLECTED_FILES=()
 COLLECTED_CHANGED_FILES=()
 
+# Hardcoded safety excludes: ephemeral/runtime/generated state that must never
+# enter a context plan even when .repomixignore is missing or edited. These use
+# the recursive directory form that path_is_ignored() now understands, so they
+# apply in both the git and non-git collection branches.
+AI_CONTEXT_HARD_EXCLUDES=(
+    ".git"
+    ".ai-backups"
+    ".ai-logs"
+    ".repomix-context"
+    "node_modules"
+    "vendor"
+    "dist"
+    "build"
+    "coverage"
+)
+
 load_ignore_patterns() {
     local ignore_file="$ROOT/.repomixignore"
     local relative_output_dir="$OUTPUT_DIR_REL"
+    local hard
 
     IGNORE_PATTERNS=()
     if [[ -f "$ignore_file" ]]; then
@@ -206,15 +223,41 @@ load_ignore_patterns() {
     fi
 
     IGNORE_PATTERNS+=("$relative_output_dir/**")
+
+    # Always append the hardcoded safety excludes so a missing or edited
+    # .repomixignore cannot leak ephemeral state into the context plan.
+    for hard in "${AI_CONTEXT_HARD_EXCLUDES[@]}"; do
+        IGNORE_PATTERNS+=("$hard")
+    done
 }
 
 path_is_ignored() {
     local path="$1"
-    local pattern
+    local pat norm
 
-    for pattern in "${IGNORE_PATTERNS[@]}"; do
-        # shellcheck disable=SC2053
-        if [[ "$path" == $pattern ]] || [[ "./$path" == $pattern ]]; then
+    # Strip a leading ./ from the path so "./foo" and "foo" compare equally.
+    path="${path#./}"
+
+    for pat in "${IGNORE_PATTERNS[@]}"; do
+        [[ -n "$pat" ]] || continue
+
+        # Glob patterns (already containing *) are matched as-is, before any
+        # trailing-slash normalization, so forms like "generated/**" keep working.
+        if [[ "$pat" == *"*"* ]]; then
+            # shellcheck disable=SC2053
+            if [[ "$path" == $pat ]]; then
+                return 0
+            fi
+            continue
+        fi
+
+        # Normalize directory patterns: strip a trailing slash so "foo/" behaves
+        # like "foo" and matches nested files via the prefix check below.
+        norm="${pat%/}"
+        [[ -n "$norm" ]] || continue
+
+        # Exact match, nested-file match (foo/bar...), or ./-prefixed nested match.
+        if [[ "$path" == "$norm" || "$path" == "$norm"/* || "$path" == "./$norm"/* ]]; then
             return 0
         fi
     done

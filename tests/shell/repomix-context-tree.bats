@@ -102,3 +102,43 @@ teardown() {
     run bash -n "$RUNNER_SCRIPT"
     [ "$status" -eq 0 ]
 }
+
+@test "trailing-slash dir pattern excludes nested files (P0)" {
+    backup_dir="$TMP_REPO/.ai-backups/install-x/files"
+    mkdir -p "$backup_dir"
+    printf '%s\n' '# backup snapshot' >"$backup_dir/y.md"
+
+    cat >"$TMP_REPO/.repomixignore" <<'EOF'
+generated/**
+.ai-backups/
+EOF
+
+    git -C "$TMP_REPO" add -A
+    git -C "$TMP_REPO" commit --quiet -m "add backup dir"
+
+    run bash "$TREE_SCRIPT" plan "$TMP_REPO" --style xml
+    [ "$status" -eq 0 ]
+
+    # No route or plan row should reference the ignored backup directory.
+    run grep -F ".ai-backups" "$TMP_REPO/.repomix-context/tree-context/tree-plan.tsv"
+    [ "$status" -ne 0 ]
+}
+
+@test "hardcoded excludes apply with missing .repomixignore (P1)" {
+    rm -f "$TMP_REPO/.repomixignore"
+    mkdir -p "$TMP_REPO/.ai-backups/install-x/files" "$TMP_REPO/.ai-logs" "$TMP_REPO/.repomix-context/leftover"
+    printf '%s\n' '# snapshot' >"$TMP_REPO/.ai-backups/install-x/files/y.md"
+    printf '%s\n' '{"run":1}' >"$TMP_REPO/.ai-logs/run.jsonl"
+    printf '%s\n' '{"old":1}' >"$TMP_REPO/.repomix-context/leftover/old.json"
+
+    git -C "$TMP_REPO" add -A
+    git -C "$TMP_REPO" commit --quiet -m "add ephemeral state without repomixignore"
+
+    run bash "$TREE_SCRIPT" plan "$TMP_REPO" --style xml
+    [ "$status" -eq 0 ]
+
+    run grep -F ".ai-backups" "$TMP_REPO/.repomix-context/tree-context/tree-plan.tsv"
+    [ "$status" -ne 0 ]
+    run grep -F ".ai-logs" "$TMP_REPO/.repomix-context/tree-context/tree-plan.tsv"
+    [ "$status" -ne 0 ]
+}

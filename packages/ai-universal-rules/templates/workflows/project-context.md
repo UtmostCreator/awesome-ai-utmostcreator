@@ -22,22 +22,11 @@ I provide durable repository context for `<PROJECT_NAME>` and point to the suppo
 
 ## Read Alongside
 
-- `docs/ai/capabilities/project-context/CAPABILITY.md`
-- `docs/ai/capabilities/project-context/gotchas.md`
-- `docs/ai/capabilities/project-context/examples.md`
-- `.github/instructions/context-gate.instructions.md`
-- `.github/instructions/architecture.instructions.md`
-- `.github/instructions/targets.instructions.md`
+Read `docs/ai/capabilities/project-context/CAPABILITY.md`, its support files, and relevant context-gate, architecture, or target instructions.
 
 ## Task Context Sources
 
-Load the smallest relevant task context first when available:
-
-- `docs/ai/generated/task-context/latest.md`
-- `php tools/ai/compile-task-context.php`
-- `php tools/ai/impact.php`
-
-If no task context exists yet, stay read-only and produce the missing ownership, path, target, and verification map.
+Load the smallest relevant task context first when available. If none exists, stay read-only and produce the missing ownership, path, target, and verification map.
 
 ## Project Shape
 
@@ -68,9 +57,7 @@ If no task context exists yet, stay read-only and produce the missing ownership,
 
 ## Change Hygiene
 
-- Before changing code, config, docs, or workflow logic, search for similar existing patterns in the touched area and nearby owners and report the closest overlap as a percentage.
-- If overlap is roughly `>=75%`, flag reuse or replacement immediately and recommend updating the existing pattern instead of adding a duplicate.
-- After completing the change, run a touched-scope stale sweep on edited files and nearby references for stale methods, stale data assumptions, stale commands/paths, outdated docs, unresolved placeholders, and generated-output drift.
+Search for nearby patterns before changing code, config, docs, or workflow logic; reuse when overlap is roughly `>=75%`; after changes, sweep edited files and nearby references for stale paths, placeholders, and generated-output drift.
 
 ## Approval Boundaries
 

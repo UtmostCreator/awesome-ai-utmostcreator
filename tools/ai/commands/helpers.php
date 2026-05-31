@@ -181,6 +181,61 @@ function aiParseArg(array $args, string $name): ?string
     return null;
 }
 
+function aiGitRefExists(string $root, string $ref): bool
+{
+    if ($ref === '') {
+        return false;
+    }
+    $command = 'rev-parse --verify --quiet ' . escapeshellarg($ref . '^{commit}');
+    return aiGitLines($root, $command) !== [];
+}
+
+/**
+ * Resolve the base ref to diff against, in priority order:
+ *   1. explicit --base value (honoured verbatim when non-empty)
+ *   2. the remote default branch via origin/HEAD symbolic-ref
+ *   3. the first existing of origin/main, origin/master, main, master, develop, trunk
+ *   4. the immediate parent commit (HEAD~1) when one exists
+ *   5. the empty-tree object so callers still get a usable diff in a fresh repo
+ *
+ * Avoids hardcoding "main" so the tooling works on repos whose default branch
+ * is master/develop/trunk or whose branch was cut from a non-main base.
+ */
+function aiResolveBaseRef(string $root, ?string $explicit = null): string
+{
+    $explicit = $explicit !== null ? trim($explicit) : '';
+    if ($explicit !== '') {
+        return $explicit;
+    }
+
+    $originHead = '';
+    $lines = aiGitLines($root, 'symbolic-ref --quiet --short refs/remotes/origin/HEAD');
+    if ($lines !== []) {
+        $originHead = $lines[0];
+    }
+    if ($originHead !== '' && aiGitRefExists($root, $originHead)) {
+        return $originHead;
+    }
+
+    foreach (['origin/main', 'origin/master', 'main', 'master', 'develop', 'trunk'] as $candidate) {
+        if (aiGitRefExists($root, $candidate)) {
+            return $candidate;
+        }
+    }
+
+    if (aiGitRefExists($root, 'HEAD~1')) {
+        return 'HEAD~1';
+    }
+
+    // Git's well-known empty-tree object id: diffs the entire tree as a fallback.
+    return '4b825dc642cb6eb9a060e54bf8d69288fbee4904';
+}
+
+function aiBaseRefFromArgs(string $root, array $args): string
+{
+    return aiResolveBaseRef($root, aiParseArg($args, 'base'));
+}
+
 function aiLoadArtifactData(string $root, string $artifactName): ?array
 {
     $path = aiCliGeneratedDir($root) . DIRECTORY_SEPARATOR . $artifactName;

@@ -117,7 +117,7 @@ function aiRunEstimate(string $root, array $args): int
 
 function aiRunImpact(string $root, array $args): int
 {
-    $base = aiParseArg($args, 'base') ?? 'main';
+    $base = aiBaseRefFromArgs($root, $args);
     $gitResult = aiRunCommand(
         $root,
         'git -C ' . escapeshellarg($root) . ' diff --name-only ' . escapeshellarg($base) . '...HEAD'

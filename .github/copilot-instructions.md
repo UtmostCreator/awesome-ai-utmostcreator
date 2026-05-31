@@ -24,42 +24,11 @@ If task context is missing, perform read-only research only.
 
 ## Canonical Docs
 
-Use these as source of truth:
-
-- `docs/ai/project-context.md`
-- `docs/ai/workflow.md`
-- `docs/ai/AI-GUARDRAILS.md`
-- `docs/ai/approval-boundaries.md`
-- `docs/ai/source-of-truth.md`
-- `docs/ai/ai-file-standards.md`
-- `docs/ai/execution-protocol.md`
-- `docs/ai/generated-artifacts.md`
-- `docs/ai/adapter-contract.md`
-- `docs/ai/failure-handling.md`
-- `docs/ai/script-registry.md`
-- `docs/ai/script-registry.json`
-- `docs/ai/agent-ops-checklist.md`
-- `docs/ai/integration-matrix.md`
-- `docs/ai/capabilities/agent-observability-and-evidence/CAPABILITY.md`
-- `docs/ai/capabilities/evaluation-and-regression/CAPABILITY.md`
-- `docs/ai/capabilities/preview-environments/CAPABILITY.md`
-- `reference/php/design-patterns/`, `reference/php/design-principles/`, `reference/php/php-built-ins/`
+Use `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/execution-protocol.md`, `docs/ai/ai-file-standards.md`, `docs/ai/failure-handling.md`, `docs/ai/agent-ops-checklist.md`, `docs/ai/integration-matrix.md`, approval/generated-artifact docs, adapter contracts, script registries, and relevant capability files including `docs/ai/capabilities/agent-observability-and-evidence/CAPABILITY.md`, `docs/ai/capabilities/evaluation-and-regression/CAPABILITY.md`, and `docs/ai/capabilities/preview-environments/CAPABILITY.md`.
 
 ## Targeted Instructions
 
-Apply relevant targeted files:
-
-- `.github/instructions/architecture.instructions.md`
-- `.github/instructions/frontend.instructions.md`
-- `.github/instructions/targets.instructions.md`
-- `.github/instructions/testing.instructions.md`
-- `.github/instructions/approval-boundaries.instructions.md`
-- `.github/instructions/generated-artifacts.instructions.md`
-- `.github/instructions/security.instructions.md`
-- `.github/instructions/ai-workflow.instructions.md`
-- `.github/instructions/ai-file-standards.instructions.md`
-- `.github/instructions/tools.instructions.md`
-- `.github/instructions/copilot-script-enforcement.instructions.md`
+Apply relevant files under `.github/instructions/`, especially context gate, tools, script enforcement, execution protocol, AI file standards, testing, and security instructions.
 
 ## Copilot-Specific: Shell Script Enforcement
 

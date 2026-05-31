@@ -47,6 +47,8 @@ run_job() {
     LOGS+=("$log")
 }
 
+# Inner $1/$2/$PHP_BIN are expanded by the inner `bash -lc`, not the outer shell.
+# shellcheck disable=SC2016
 run_job "php-root-tests" \
     bash -lc '
 if [[ -x vendor/bin/paratest ]]; then

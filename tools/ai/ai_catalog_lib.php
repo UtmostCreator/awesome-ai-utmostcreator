@@ -230,6 +230,9 @@ function aiCollectRootResources(string $root): array
         'docs/ai/capabilities/preview-environments/lifecycle.md' => ['root-doc', 'preview-lifecycle', 'Vendor-neutral lifecycle and TTL expectations for temporary preview environments.'],
         'docs/ai/capabilities/preview-environments/data-and-secret-rules.md' => ['root-doc', 'preview-data-and-secrets', 'Data and secret isolation rules for preview environments.'],
         'docs/ai/capabilities/preview-environments/checklist.md' => ['root-doc', 'preview-checklist', 'Checklist for preview-environment readiness, evidence, and cleanup.'],
+        'docs/ai/capabilities/service-boundary-patterns/service-boundaries.md' => ['root-doc', 'service-boundaries', 'Service/package/API/adapter ownership rules for cross-boundary changes.'],
+        'docs/ai/capabilities/service-boundary-patterns/data-boundaries.md' => ['root-doc', 'service-data-boundaries', 'Data ownership, generated artifact, fixture, and secret boundary rules.'],
+        'docs/ai/capabilities/service-boundary-patterns/internal-tool-surfaces.md' => ['root-doc', 'internal-tool-surfaces', 'Boundary rules for scripts, validators, installers, command policies, and AI runtime adapters.'],
     ];
 
     foreach ($rootDocMap as $relativePath => [$type, $name, $description]) {
