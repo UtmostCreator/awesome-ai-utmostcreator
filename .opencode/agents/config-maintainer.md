@@ -82,6 +82,22 @@ permission:
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
+    # --- shipped CLI tool access ---
+    'scc *': allow
+    'tokei *': allow
+    'ast-grep *': allow
+    'bat *': allow
+    'fx *': allow
+    'glow *': allow
+    'difft *': allow
+    'delta *': allow
+    'lychee *': allow
+    'actionlint*': allow
+    'shfmt -d *': allow
+    'semgrep *': allow
+    'repomix *': ask
+    'files-to-prompt *': ask
+    'code2prompt *': ask
 ---
 
 # Config Maintainer Agent
