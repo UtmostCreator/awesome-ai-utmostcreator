@@ -13,6 +13,7 @@ capabilities:
   - docs-sync
   - verify-change
 permission:
+  todowrite: allow
   edit: deny
   bash:
     '*': deny

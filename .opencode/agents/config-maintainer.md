@@ -9,6 +9,7 @@ capabilities:
   - verify-change
   - docs-sync
 permission:
+  todowrite: allow
   edit:
     'configs/**': allow
     '.editorconfig': allow

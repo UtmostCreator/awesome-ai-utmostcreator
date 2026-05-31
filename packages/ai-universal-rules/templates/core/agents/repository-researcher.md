@@ -4,6 +4,7 @@ description: Strict script-first repository researcher using ai-search before ra
 mode: subagent
 hidden: false
 permission:
+  todowrite: allow
   edit: deny
   bash:
     '*': ask

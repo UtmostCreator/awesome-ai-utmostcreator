@@ -11,6 +11,7 @@ capabilities:
   - service-boundary-patterns
   - config-change-safety
 permission:
+  todowrite: allow
   edit:
     'src/**': allow
     'app/**': allow

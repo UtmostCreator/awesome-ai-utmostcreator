@@ -12,6 +12,7 @@ capabilities:
   - review-diff
   - verify-change
 permission:
+  todowrite: allow
   edit: deny
   bash:
     "*": deny
