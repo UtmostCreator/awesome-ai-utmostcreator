@@ -71,7 +71,6 @@ $dirs = [
 ];
 
 $startRe = '/^\s*#\s*---\s*shipped CLI tool access(?: \(shared snippet: [a-z-]+\))?\s*---\s*$/m';
-$freshnessLine = "    'bash scripts/ai/repomix-freshness.sh *': allow";
 
 $drift = [];
 $rewritten = [];
@@ -90,20 +89,40 @@ foreach ($dirs as $dir) {
             continue;
         }
 
-        // Locate the existing block: from the start marker through the
-        // freshness allow line (the canonical end of the shared block).
+        // Locate the existing block: from the start marker, consume the
+        // contiguous run of block lines (indented permission entries and
+        // '# ---' comment lines). Stop at the first line that is not part of
+        // the block (e.g. the closing '---' or an unindented/blank line).
         if (preg_match($startRe, $raw, $m, PREG_OFFSET_CAPTURE) !== 1) {
             $missingBlock[] = relPath($root, $file);
             continue;
         }
         $blockStart = $m[0][1];
-        $freshPos = strpos($raw, $freshnessLine, $blockStart);
-        if ($freshPos === false) {
-            $missingBlock[] = relPath($root, $file);
-            continue;
+
+        // Walk lines from the marker forward.
+        $cursor = $blockStart;
+        $len = strlen($raw);
+        $blockEnd = $blockStart;
+        $firstLine = true;
+        while ($cursor < $len) {
+            $nl = strpos($raw, "\n", $cursor);
+            $lineEnd = $nl === false ? $len : $nl;
+            $line = substr($raw, $cursor, $lineEnd - $cursor);
+            $isMarker = (bool) preg_match('/^\s*#\s*---/', $line);
+            $isEntry = (bool) preg_match('/^\s+[\'"][^\'"]+[\'"]\s*:\s*(?:allow|ask|deny)\s*$/', $line);
+            if ($firstLine) {
+                // first line is the start marker itself
+                $firstLine = false;
+            } elseif (!$isMarker && !$isEntry) {
+                break; // left the block
+            }
+            $blockEnd = $lineEnd;
+            if ($nl === false) {
+                break;
+            }
+            $cursor = $nl + 1;
         }
-        $blockEnd = $freshPos + strlen($freshnessLine);
-        // include a trailing newline if present
+        // include the trailing newline of the last block line if present
         if (($raw[$blockEnd] ?? '') === "\n") {
             $blockEnd++;
         }

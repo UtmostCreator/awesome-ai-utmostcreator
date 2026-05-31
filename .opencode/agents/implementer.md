@@ -174,6 +174,7 @@ permission:
     'code2prompt *': ask
     # --- repomix freshness check ---
     'bash scripts/ai/repomix-freshness.sh *': allow
+    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
 ---
 
 # Implementer Agent

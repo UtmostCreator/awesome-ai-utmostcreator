@@ -20,6 +20,7 @@
     "repomix-tree": {"source_path":"scripts/ai/repomix-context-tree.sh","installed_path":"scripts/ai/repomix-context-tree.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "repomix-scc-router": {"source_path":"scripts/ai/repomix-scc-router.sh","installed_path":"scripts/ai/repomix-scc-router.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "repomix-freshness": {"source_path":"scripts/ai/repomix-freshness.sh","installed_path":"scripts/ai/repomix-freshness.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
+    "repomix-ensure-fresh": {"source_path":"scripts/ai/repomix-ensure-fresh.sh","installed_path":"scripts/ai/repomix-ensure-fresh.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"act_with_approval"},
     "pack-context": {"source_path":"scripts/ai/pack-context.sh","installed_path":"scripts/ai/pack-context.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "ai-structured": {"source_path":"scripts/ai/ai-structured.sh","installed_path":"scripts/ai/ai-structured.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "ai-task": {"source_path":"scripts/ai/ai-task.sh","installed_path":"scripts/ai/ai-task.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},

@@ -71,6 +71,7 @@ permission:
     'shellcheck *': allow
     # --- repomix freshness check ---
     'bash scripts/ai/repomix-freshness.sh *': allow
+    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
 ---
 
 # Release Auditor Agent

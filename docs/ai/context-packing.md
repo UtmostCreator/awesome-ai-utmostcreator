@@ -24,3 +24,20 @@ SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh .
 ```
 
 Prefer `run-repomix-context.sh` over calling `repomix` directly so compression and bounded styling are applied consistently.
+
+## One-Step Freshness Gate (Preferred For Agents)
+
+Instead of checking freshness and regenerating as separate steps, call the single ask-gated wrapper:
+
+```bash
+bash scripts/ai/repomix-ensure-fresh.sh .
+```
+
+Behaviour (never silent, root-only regeneration):
+
+- fresh: exits `0`, does nothing.
+- stale: exits `0`, recommends regeneration (only regenerates if permitted).
+- expired/missing: regenerates only with `--regen` or `REPOMIX_AUTO_REGEN=1`; otherwise exits non-zero with the exact regeneration command.
+- non-interactive without opt-in: never prompts; prints the recommended command and exits.
+
+Agents should call this wrapper rather than reading `.repomix-context` bundles directly, so stale context is caught before it reaches the model. Regeneration stays approval-gated by tool policy and always runs against the repository root only.

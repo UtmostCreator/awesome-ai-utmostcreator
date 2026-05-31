@@ -190,6 +190,40 @@ class CliToolsTest extends TestCase
         }
     }
 
+    // ---- repomix-ensure-fresh.sh shipping contract ----
+
+    public function testRepomixEnsureFreshScriptIsShippedAndRegistered(): void
+    {
+        $script = self::$repoRoot . '/scripts/ai/repomix-ensure-fresh.sh';
+        $this->assertFileExists($script, 'repomix-ensure-fresh.sh must exist');
+
+        $registryJson = self::$repoRoot . '/docs/ai/script-registry.json';
+        $decoded = json_decode((string) file_get_contents($registryJson), true);
+        $this->assertIsArray($decoded);
+        $this->assertArrayHasKey(
+            'repomix-ensure-fresh',
+            $decoded['scripts'] ?? [],
+            'repomix-ensure-fresh must be registered in docs/ai/script-registry.json'
+        );
+
+        $packs = (string) file_get_contents(self::$repoRoot . '/tools/ai/install/packs.php');
+        $this->assertStringContainsString(
+            'scripts/ai/repomix-ensure-fresh.sh',
+            $packs,
+            'repomix-ensure-fresh.sh must be shipped by scripts-pack'
+        );
+    }
+
+    public function testRepomixEnsureFreshHasNoSyntaxErrors(): void
+    {
+        $result = $this->runTool('bash -n scripts/ai/repomix-ensure-fresh.sh');
+        $this->assertSame(
+            0,
+            $result['exit'],
+            "repomix-ensure-fresh.sh has shell syntax errors:\n" . $result['stderr']
+        );
+    }
+
     // ---- export-ai-universal-rules.php --check ----
 
     public function testExportAiUniversalRulesCheckModeExitsZero(): void
