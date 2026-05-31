@@ -15,18 +15,7 @@ function aiGitLines(string $root, string $args): array
 
 function aiRunDiffSummary(string $root, array $args): int
 {
-    $base = 'main';
-    for ($i = 0; $i < count($args); $i++) {
-        $arg = $args[$i];
-        if ($arg === '--base') {
-            $base = (string) ($args[$i + 1] ?? $base);
-            $i++;
-            continue;
-        }
-        if (str_starts_with($arg, '--base=')) {
-            $base = (string) substr($arg, 7);
-        }
-    }
+    $base = aiBaseRefFromArgs($root, $args);
 
     $changed = aiGitLines($root, 'diff --name-only ' . escapeshellarg($base) . '...HEAD');
     $staged = aiGitLines($root, 'diff --name-only --cached');
@@ -84,18 +73,7 @@ function aiRunDiffSummary(string $root, array $args): int
 
 function aiRunRisk(string $root, array $args): int
 {
-    $base = 'main';
-    for ($i = 0; $i < count($args); $i++) {
-        $arg = $args[$i];
-        if ($arg === '--base') {
-            $base = (string) ($args[$i + 1] ?? $base);
-            $i++;
-            continue;
-        }
-        if (str_starts_with($arg, '--base=')) {
-            $base = (string) substr($arg, 7);
-        }
-    }
+    $base = aiBaseRefFromArgs($root, $args);
 
     $changed = aiGitLines($root, 'diff --name-only ' . escapeshellarg($base) . '...HEAD');
 

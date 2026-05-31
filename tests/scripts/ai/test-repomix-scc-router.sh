@@ -48,6 +48,26 @@ test_unknown_cmd() {
 }
 run_test "unknown command fails" test_unknown_cmd
 
+# path_is_ignored matcher: trailing-slash dir patterns must match nested files
+# (P0) and known glob forms must keep working. Source only the matcher into a
+# clean subshell so we exercise the real function logic.
+matcher_check() {
+    "$BASH_BIN" -c '
+        shopt -s extglob
+        ((BASH_VERSINFO[0] >= 4)) && shopt -s globstar
+        source <(sed -n "/^path_is_ignored() {/,/^}/p" "$1")
+        check() { IGNORE_PATTERNS=("$2"); path_is_ignored "$3"; }
+        check x ".ai-backups/" ".ai-backups/install-x/files/y.md" || exit 1
+        check x ".ai-logs/" ".ai-logs/run.jsonl" || exit 1
+        check x "vendor/" "vendor/pkg/file.php" || exit 1
+        check x "node_modules/" "node_modules/pkg/index.js" || exit 1
+        check x "generated/**" "generated/cache.json" || exit 1
+        # a non-matching path must NOT be ignored
+        if check x "src/" "other/app.js"; then exit 1; fi
+    ' _ "$SCRIPT"
+}
+run_test "path_is_ignored matches nested files under trailing-slash dirs" matcher_check
+
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
 ((FAIL == 0)) && printf '\033[0;32mPASSED\033[0m\n' || { printf '\033[0;31mFAILED\033[0m\n'; exit 1; }

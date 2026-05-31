@@ -64,6 +64,16 @@ function aiInstallerRun(array $argv): int
         aiInstallerLog('backup created: ' . $backupInfo['backup_dir']);
     }
 
+    // Ensure runtime/generated state is gitignored in the target repo. Apply
+    // flow only; skip on dry-run to mirror the backup gating above.
+    if (!$config['dryRun']) {
+        aiInstallerEnsureGitignoreEntries($config['targetRoot'], [
+            '.ai-backups/',
+            '.ai-logs/',
+            '.repomix-context/',
+        ]);
+    }
+
     $applied = [];
     $seenDirTargets = [];
     foreach ($plan as $item) {
@@ -631,6 +641,70 @@ function aiInstallerCopyDir(string $src, string $dest, bool $cleanFirst = false)
             throw new RuntimeException('failed to copy file: ' . $item->getPathname());
         }
     }
+}
+
+/**
+ * Ensure the target-root .gitignore contains the given entries.
+ *
+ * Idempotent and content-preserving: creates .gitignore if missing, never
+ * sorts or removes existing rules, and only appends entries that are not
+ * already covered. Duplicate detection tolerates trailing-slash and glob
+ * variants (e.g. ".ai-logs", ".ai-logs/", ".ai-logs/*", ".ai-logs/**").
+ *
+ * @param list<string> $entries
+ */
+function aiInstallerEnsureGitignoreEntries(string $targetRoot, array $entries): void
+{
+    $gitignorePath = rtrim($targetRoot, '/\\') . DIRECTORY_SEPARATOR . '.gitignore';
+
+    $existing = is_file($gitignorePath) ? (string) file_get_contents($gitignorePath) : '';
+
+    // Build a set of already-covered roots from existing lines, normalizing
+    // away trailing slashes and trailing /* or /** glob suffixes.
+    $covered = [];
+    foreach (preg_split('/\R/', $existing) ?: [] as $line) {
+        $line = trim($line);
+        if ($line === '' || str_starts_with($line, '#')) {
+            continue;
+        }
+        $covered[aiInstallerNormalizeGitignoreEntry($line)] = true;
+    }
+
+    $missing = [];
+    foreach ($entries as $entry) {
+        $norm = aiInstallerNormalizeGitignoreEntry($entry);
+        if ($norm === '' || isset($covered[$norm])) {
+            continue;
+        }
+        $covered[$norm] = true; // guard against duplicate entries within $entries
+        $missing[] = rtrim($entry, '/') . '/';
+    }
+
+    if ($missing === []) {
+        return;
+    }
+
+    $append = '';
+    if ($existing !== '' && !str_ends_with($existing, "\n")) {
+        $append .= "\n";
+    }
+    $append .= "# AI workflow runtime/generated files\n";
+    $append .= implode("\n", $missing) . "\n";
+
+    file_put_contents($gitignorePath, $existing . $append);
+}
+
+/**
+ * Normalize a .gitignore entry to a bare root for duplicate detection.
+ * Strips a leading slash and any trailing slash or /* or /** glob suffix.
+ */
+function aiInstallerNormalizeGitignoreEntry(string $entry): string
+{
+    $entry = trim($entry);
+    $entry = ltrim($entry, '/');
+    $entry = preg_replace('#/\*\*$#', '', $entry) ?? $entry;
+    $entry = preg_replace('#/\*$#', '', $entry) ?? $entry;
+    return rtrim($entry, '/');
 }
 
 function aiInstallerCreateBackup(string $targetRoot, array $plan): array

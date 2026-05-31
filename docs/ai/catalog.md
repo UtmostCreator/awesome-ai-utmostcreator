@@ -44,7 +44,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / opencode-command` - 19
 - `root / opencode-skill` - 19
 - `root / php-reference` - 3
-- `root / root-doc` - 16
+- `root / root-doc` - 19
 - `root / schema` - 1
 - `root / validator` - 4
 - `root / verifier` - 2
@@ -99,7 +99,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`capability`|project-context|`docs/ai/capabilities/project-context/CAPABILITY.md`|Provide durable repository context that other capabilities, agents, and prompts can rely on before planning, implementing, reviewing, or verifying changes.|
 |`capability`|release-safety|`docs/ai/capabilities/release-safety/CAPABILITY.md`|Assess rollout, rollback, observability, and compatibility posture for changes whose risk extends beyond local correctness.|
 |`capability`|review-diff|`docs/ai/capabilities/review-diff/CAPABILITY.md`|Review a change set from the diff first, then expand only as needed to assess correctness, regression risk, policy fit, and missing verification.|
-|`capability`|service-boundary-patterns|`docs/ai/capabilities/service-boundary-patterns/CAPABILITY.md`|Respect adapter, API, and package boundaries. Do not introduce parallel contracts without approval.|
+|`capability`|service-boundary-patterns|`docs/ai/capabilities/service-boundary-patterns/CAPABILITY.md`|Use this capability when a change crosses repository, package, API, adapter, data, or internal tooling boundaries.|
 |`capability`|verify-change|`docs/ai/capabilities/verify-change/CAPABILITY.md`|Choose and run the smallest relevant verification flow for a change, then report evidence clearly.|
 |`cli`|ai|`tools/ai/ai.php`|Main AI workflow CLI dispatcher.|
 |`exporter`|export-ai-universal-rules|`tools/ai/export-ai-universal-rules.php`|Builds starter-profile release bundles under dist/.|
@@ -234,6 +234,9 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`root-doc`|preview-checklist|`docs/ai/capabilities/preview-environments/checklist.md`|Checklist for preview-environment readiness, evidence, and cleanup.|
 |`root-doc`|preview-data-and-secrets|`docs/ai/capabilities/preview-environments/data-and-secret-rules.md`|Data and secret isolation rules for preview environments.|
 |`root-doc`|preview-lifecycle|`docs/ai/capabilities/preview-environments/lifecycle.md`|Vendor-neutral lifecycle and TTL expectations for temporary preview environments.|
+|`root-doc`|service-data-boundaries|`docs/ai/capabilities/service-boundary-patterns/data-boundaries.md`|Data ownership, generated artifact, fixture, and secret boundary rules.|
+|`root-doc`|internal-tool-surfaces|`docs/ai/capabilities/service-boundary-patterns/internal-tool-surfaces.md`|Boundary rules for scripts, validators, installers, command policies, and AI runtime adapters.|
+|`root-doc`|service-boundaries|`docs/ai/capabilities/service-boundary-patterns/service-boundaries.md`|Service/package/API/adapter ownership rules for cross-boundary changes.|
 |`root-doc`|failure-handling|`docs/ai/failure-handling.md`|Failure taxonomy, retry policy, corrected usage guidance, and logging contract.|
 |`root-doc`|integration-matrix|`docs/ai/integration-matrix.md`|Coverage map that tracks which AI workflow concepts are covered, partial, or missing.|
 |`root-doc`|project-context-doc|`docs/ai/project-context.md`|Durable repository context for instructions, capabilities, and runtime adapters.|
@@ -316,7 +319,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in <PROJECT_NAME>|
 |`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in <PROJECT_NAME>|
 |`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>|
-|`optional-template`|ui-builder|`packages/ai-universal-rules/templates/optional/agents/ui-builder.md`|Use when implementing UI work while preserving repository interaction patterns and accessibility rules|
+|`optional-template`|ui-builder|`packages/ai-universal-rules/templates/optional/agents/ui-builder.md`|UI builder for <PROJECT_NAME>. Builds UI changes that follow existing product patterns and accessibility expectations.|
 |`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades carefully in <PROJECT_NAME>|
 |`optional-template`|Optional Delivery Pack|`packages/ai-universal-rules/templates/optional/delivery/README.md`|Use this pack when you want a lightweight slice card for non-trivial work.|
 |`optional-template`|Slice Card|`packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md`|- User outcome:|

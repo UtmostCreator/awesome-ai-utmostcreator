@@ -176,12 +176,6 @@ Execute one clearly bounded slice with the smallest safe change. Do not redesign
 
 Implement the agreed change, prove it with focused verification, and hand off a review-ready diff.
 
-## Shell Governance
-
-Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer.
-When the active runtime supports repository hooks, these scripts must remain authoritative through `.github/hooks/tool-policy.json` and emit local evidence under `.ai-logs/` as documented in `.ai-logs/README.md`.
-When the runtime does not auto-load repository hooks, preserve the same boundary manually: stay inside the bash allowlist, prefer approved registry scripts, and do not claim automatic hook enforcement.
-
 ## Hard Rules
 
 - Implement only one bounded slice.
@@ -196,77 +190,34 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Separate completed verification from recommended verification.
 - Use `unknown` when evidence does not prove a claim.
 
-## Project Binding
-
-If installed into a different project, required project inputs are: project name, purpose, primary runtime stack, active implementation paths, protected/generated/vendor/cache/lock paths, canonical docs and ownership rules, focused verification commands, test locations and fixture policy, schema/API/config/database/generated-artifact contracts, secret and sensitive file patterns, release-risk thresholds, and adapter surfaces.
-
-If missing project input affects correctness, stop and request it.
-
 ## Canonical References
 
-Load only what is relevant: `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/adapter-contract.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/scripts-reference.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`.
+Load only relevant project docs: `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/execution-protocol.md`, approval/generated-artifact docs, scripts references, verification matrix, and capability index.
 
 ## Incoming Handoff Contract
 
 Prefer this intake order: researcher handoff, architect plan, reviewer findings, user request, active repository evidence.
 
-Use researcher output for relevant paths, artifact usage, entrypoints, execution path, contracts and boundaries, tests read, risks or unknowns.
-
-Use architect output for scope, risk level, affected areas, design, contracts, edge cases, acceptance criteria, release safety, migration strategy.
-
 If handoffs disagree, trust active repository evidence and report the conflict.
 
 ## Instruction Specificity
 
-Score 0–100 before editing across target clarity, outcome clarity, scope boundary, contract clarity, verification clarity, and risk clarity.
-
-|  Score | Action                                             |
-| -----: | -------------------------------------------------- |
-| 90–100 | implement                                          |
-|  70–89 | implement with stated assumptions                  |
-|  50–69 | bounded discovery, then implement only safe subset |
-|  30–49 | hand off to researcher or architect                |
-|   0–29 | stop and ask user                                  |
-
-For scores below 50/100, do not implement.
+Score 0–100 across target, outcome, scope, contract, verification, and risk clarity. Implement at 90–100; implement with assumptions at 70–89; do bounded discovery and only safe subset at 50–69; below 50, hand off or ask.
 
 ## Capability Routing
 
-| Capability                          | Load when implementation involves                           |
-| ----------------------------------- | ----------------------------------------------------------- |
-| `adapter-drift`                     | provider parity, adapter templates, instruction generation  |
-| `agent-observability-and-evidence`  | evidence logs, proof format, session notes                  |
-| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, allow/deny policy, sensitive operations |
-| `bug-regression`                    | bug fix, reproduction, regression coverage                  |
-| `config-change-safety`              | YAML/JSON config, policies, runtime flags                   |
-| `dependency-upgrade`                | package versions, lockfiles, compatibility                  |
-| `docs-sync`                         | docs/capabilities/README alignment                          |
-| `evaluation-and-regression`         | eval checks, regression scoring                             |
-| `preview-environments`              | previews or smoke checks                                    |
-| `project-context`                   | context compiler, repo map, AI context                      |
-| `release-safety`                    | rollback, disable path, rollout risk                        |
-| `review-diff`                       | reviewer feedback or review-ready handoff                   |
-| `service-boundary-patterns`         | APIs, integrations, cross-package contracts                 |
-| `verify-change`                     | focused verification and proof                              |
+Load relevant capabilities only: `project-context` for ownership/context; `service-boundary-patterns` for APIs, integrations, packages, or adapter contracts; `docs-sync` for documentation alignment; `config-change-safety` for config/policy changes; `bug-regression` for bug fixes; `verify-change` for proof; `release-safety` for medium/high risk; `review-diff` for review handoff.
 
 Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`, `reference.md`.
 
 ## Required Flow
 
-1. Inspect `git status` and `git diff`.
-2. Confirm bounded target and acceptance criteria.
-3. Confirm target files exist and are editable.
-4. Search for existing patterns and duplication.
-5. Inspect nearby tests, fixtures, schemas, and docs.
-6. Load relevant capabilities.
-7. Implement.
-8. Run focused verification.
-9. Inspect final diff.
-10. Produce reviewer-ready handoff.
-
-## Similarity And Reuse Rule
-
-Before adding non-trivial logic, search for similar functions, commands, schemas, validators, policies, tests, and output shapes. If overlap is roughly `>=75%`, reuse or adapt existing logic. Do not create parallel implementations of the same contract unless explicitly planned.
+1. Inspect status, diff, target files, nearby tests, schemas, and docs.
+2. Confirm acceptance criteria and approval boundaries.
+3. Search for existing patterns and reuse when overlap is roughly `>=75%`.
+4. Implement the smallest safe patch.
+5. Run focused verification.
+6. Inspect final diff and produce reviewer-ready handoff.
 
 ## Verification Rules
 
@@ -280,32 +231,4 @@ Stop and hand off when instruction specificity is below 50/100, architecture red
 
 ## Final Output
 
-Use only sections with evidence:
-
-```md
-## Instruction Specificity
-
-## Instruction Gate
-
-## Capabilities Used
-
-## Pre-Implementation Grounding
-
-## Changes Made
-
-## Reuse / Duplication Check
-
-## Verification Run
-
-## Evidence
-
-## Assumptions
-
-## Remaining Risks Or Follow-Up
-
-## Handoff Context For Next Agent
-
-## Recommended Next Step
-```
-
-When recommending reviewer, write: `reviewer means reviewer agent handoff using OpenCode command: /review-diff`.
+Report only evidenced sections: specificity, capabilities used, grounding, changes, reuse check, verification, assumptions, risks, handoff, and recommended next step. When recommending reviewer, write: `reviewer means reviewer agent handoff using OpenCode command: /review-diff`.

@@ -452,7 +452,7 @@ class InstallerSafetyTest extends TestCase
             $this->assertSame($expectedCommandNames, $installedCommandNames, 'OpenCode install should expose every workflow and command under .opencode/commands/');
             $this->assertGreaterThanOrEqual(count($sourceWorkflows), count($installedSkills), 'OpenCode install should expose workflow skills');
 
-            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'opencode.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'opencode.jsonc');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'AGENTS.md');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated-artifacts.md');
 
@@ -531,7 +531,7 @@ class InstallerSafetyTest extends TestCase
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'copilot-instructions.md');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'hooks' . DIRECTORY_SEPARATOR . 'tool-policy.json');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'workflows' . DIRECTORY_SEPARATOR . 'validate-ai-surface.yml');
-            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'opencode.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'opencode.jsonc');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'hooks' . DIRECTORY_SEPARATOR . 'pre-commit.sh');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'hooks' . DIRECTORY_SEPARATOR . 'commit-msg.sh');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'ai-file-freshness.sh');
@@ -681,7 +681,7 @@ class InstallerSafetyTest extends TestCase
             $this->assertNotContains('adapter-copilot', $manifest['packs'] ?? []);
             $this->assertNotContains('optional-agents-copilot-pack', $manifest['packs'] ?? []);
 
-            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'opencode.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'opencode.jsonc');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'verify-install-placeholders.php');
             $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'copilot-instructions.md');
             $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'instructions');
@@ -870,6 +870,80 @@ class InstallerSafetyTest extends TestCase
             $this->assertSame(0, $result['exit'], $result['stderr']);
             $this->assertFileDoesNotExist($docsDir . DIRECTORY_SEPARATOR . 'failure-handling-upgrade.md');
             $this->assertStringContainsString('skip_identical_existing', $result['stdout']);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testEnsureGitignoreEntriesCreatesFileWhenMissing(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_gitignore_create_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            aiInstallerEnsureGitignoreEntries($target, ['.ai-backups/', '.ai-logs/', '.repomix-context/']);
+
+            $gitignore = $target . DIRECTORY_SEPARATOR . '.gitignore';
+            $this->assertFileExists($gitignore);
+            $content = (string) file_get_contents($gitignore);
+            $this->assertStringContainsString('# AI workflow runtime/generated files', $content);
+            $this->assertStringContainsString('.ai-backups/', $content);
+            $this->assertStringContainsString('.ai-logs/', $content);
+            $this->assertStringContainsString('.repomix-context/', $content);
+            $this->assertStringEndsWith("\n", $content);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testEnsureGitignoreEntriesIsIdempotent(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_gitignore_idem_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            $entries = ['.ai-backups/', '.ai-logs/', '.repomix-context/'];
+            aiInstallerEnsureGitignoreEntries($target, $entries);
+            $first = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.gitignore');
+            aiInstallerEnsureGitignoreEntries($target, $entries);
+            $second = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.gitignore');
+
+            $this->assertSame($first, $second, 'second run must not change .gitignore');
+            $this->assertSame(1, substr_count($second, '.ai-logs/'), 'no duplicate .ai-logs entry');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testEnsureGitignoreEntriesPreservesContentAndDedupesVariants(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_gitignore_variants_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            // Pre-existing user rules including tolerant variants of two roots.
+            $original = "node_modules/\n.ai-logs\n.repomix-context/**\n";
+            file_put_contents($target . DIRECTORY_SEPARATOR . '.gitignore', $original);
+
+            aiInstallerEnsureGitignoreEntries($target, ['.ai-backups/', '.ai-logs/', '.repomix-context/']);
+            $content = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.gitignore');
+
+            // Existing content preserved verbatim at the top.
+            $this->assertStringStartsWith($original, $content);
+            $this->assertStringContainsString("node_modules/\n", $content);
+
+            // Variant-covered roots are not re-added.
+            $this->assertSame(1, substr_count($content, '.ai-logs'), 'existing .ai-logs variant not duplicated');
+            $this->assertSame(1, substr_count($content, '.repomix-context'), 'existing .repomix-context variant not duplicated');
+
+            // Only the genuinely-missing entry is appended.
+            $this->assertStringContainsString('.ai-backups/', $content);
         } finally {
             $this->removeTree($target);
         }

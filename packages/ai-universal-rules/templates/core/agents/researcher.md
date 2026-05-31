@@ -132,14 +132,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 
 ## Capability Loading
 
-| Capability                          | Trigger                                                        |
-| ----------------------------------- | -------------------------------------------------------------- |
-| `project-context`                   | repo map, source of truth, context compiler, AI context output |
-| `adapter-drift`                     | Copilot/OpenCode/provider parity or adapter templates          |
-| `agent-observability-and-evidence`  | evidence logs, session notes, traceability                     |
-| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, allow/deny policy, sensitive operations |
-| `review-diff`                       | review surface, changed files, regression risk                 |
-| `verify-change`                     | verification surface or test selection                         |
+Load relevant capabilities only: `project-context` for repo maps and source of truth; `adapter-drift` for provider parity; `agent-observability-and-evidence` for evidence; `authorization-and-tool-governance` for permissions; `review-diff` for changed-file risk; `verify-change` for verification surface.
 
 Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`, `reference.md`.
 
