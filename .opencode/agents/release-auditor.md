@@ -69,6 +69,8 @@ permission:
     'actionlint*': allow
     'shfmt -d *': allow
     'shellcheck *': allow
+    # --- repomix freshness check ---
+    'bash scripts/ai/repomix-freshness.sh *': allow
 ---
 
 # Release Auditor Agent
