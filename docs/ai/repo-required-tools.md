@@ -75,6 +75,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/repo-stats.sh`
 - `scripts/ai/repo-tool-inventory.sh`
 - `scripts/ai/repomix-context-tree.sh`
+- `scripts/ai/repomix-ensure-fresh.sh`
 - `scripts/ai/repomix-freshness.sh`
 - `scripts/ai/repomix-scc-router.sh`
 - `scripts/ai/rg-code.sh`
