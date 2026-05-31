@@ -76,7 +76,6 @@ Deterministic catalog generated from installer registries.
 - `repo-stats` -> `scripts/ai/repo-stats.sh`
 - `repo-tool-inventory` -> `scripts/ai/repo-tool-inventory.sh`
 - `install-mandatory-tools` -> `scripts/ai/install-mandatory-tools.sh`
-- `setup-powershell-profile` -> `scripts/ai/setup-powershell-profile.ps1`
 - `watch-loop` -> `scripts/ai/watch-loop.sh`
 - `prune-shipped-targets` -> `scripts/ai/prune-shipped-targets.sh`
 
@@ -90,3 +89,12 @@ Deterministic catalog generated from installer registries.
 - `npm`
 - `repomix` (safe auto-install)
 - `scc`
+- `php`
+- `fd`
+- `ast-grep`
+- `gh`
+- `python3`
+- `date`
+- `shellcheck`
+- `gitleaks`
+- `yq`

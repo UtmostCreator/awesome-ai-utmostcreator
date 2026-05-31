@@ -33,7 +33,6 @@
     "repo-stats": {"source_path":"scripts/ai/repo-stats.sh","installed_path":"scripts/ai/repo-stats.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "repo-tool-inventory": {"source_path":"scripts/ai/repo-tool-inventory.sh","installed_path":"scripts/ai/repo-tool-inventory.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "install-mandatory-tools": {"source_path":"scripts/ai/install-mandatory-tools.sh","installed_path":"scripts/ai/install-mandatory-tools.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"},
-    "setup-powershell-profile": {"source_path":"scripts/ai/setup-powershell-profile.ps1","installed_path":"scripts/ai/setup-powershell-profile.ps1","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"},
     "watch-loop": {"source_path":"scripts/ai/watch-loop.sh","installed_path":"scripts/ai/watch-loop.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"act_with_approval"},
     "prune-shipped-targets": {"source_path":"scripts/ai/prune-shipped-targets.sh","installed_path":"scripts/ai/prune-shipped-targets.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"}
   }
