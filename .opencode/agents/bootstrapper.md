@@ -130,6 +130,8 @@ permission:
     'repomix *': ask
     'files-to-prompt *': ask
     'code2prompt *': ask
+    # --- repomix freshness check ---
+    'bash scripts/ai/repomix-freshness.sh *': allow
 ---
 
 # Bootstrapper Agent (Internal)
