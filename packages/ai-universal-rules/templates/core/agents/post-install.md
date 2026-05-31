@@ -126,7 +126,7 @@ permission:
     'yarn add*': ask
     'bun install*': ask
     'bun add*': ask
-    # --- shipped CLI tool access ---
+    # --- shipped CLI tool access (shared snippet: agent-tools-readonly) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow

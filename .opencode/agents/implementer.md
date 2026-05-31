@@ -156,7 +156,7 @@ permission:
     'php tools/ai/generate-*.php --check*': allow
     'bash scripts/ai/ai-doc-check.sh --check*': allow
     'bash scripts/ai/repo-tool-inventory.sh --check*': allow
-    # --- shipped CLI tool access ---
+    # --- shipped CLI tool access (shared snippet: agent-tools-execute) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow

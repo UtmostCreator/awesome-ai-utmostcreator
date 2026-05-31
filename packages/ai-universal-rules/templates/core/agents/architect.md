@@ -53,7 +53,7 @@ permission:
     'bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
-    # --- shipped CLI tool access ---
+    # --- shipped CLI tool access (shared snippet: agent-tools-readonly) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow

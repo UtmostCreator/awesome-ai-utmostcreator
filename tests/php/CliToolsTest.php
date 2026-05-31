@@ -160,6 +160,36 @@ class CliToolsTest extends TestCase
         $this->assertStringContainsString('OK', $combined);
     }
 
+    // ---- generate-agent-snippets.php --check ----
+
+    public function testAgentSnippetsCheckExitsZero(): void
+    {
+        $result = $this->runTool('php tools/ai/generate-agent-snippets.php --check');
+        $this->assertSame(
+            0,
+            $result['exit'],
+            "generate-agent-snippets.php --check exited non-zero (shared agent tool block drift):\n" . $result['stderr']
+        );
+    }
+
+    public function testShippedAgentsHaveNoUnexpandedIncludeMarkers(): void
+    {
+        $dirs = [
+            self::$repoRoot . '/.opencode/agents',
+            self::$repoRoot . '/packages/ai-universal-rules/templates/core/agents',
+        ];
+        foreach ($dirs as $dir) {
+            foreach (glob($dir . '/*.md') ?: [] as $file) {
+                $content = (string) file_get_contents($file);
+                $this->assertDoesNotMatchRegularExpression(
+                    '/\{\{.*?\}\}|@include\b/',
+                    $content,
+                    'Unexpanded include marker leaked into shipped agent: ' . $file
+                );
+            }
+        }
+    }
+
     // ---- export-ai-universal-rules.php --check ----
 
     public function testExportAiUniversalRulesCheckModeExitsZero(): void

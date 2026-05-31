@@ -45,7 +45,7 @@ permission:
     'bash scripts/ai/git-forensics.sh *': allow
     'bash scripts/ai/ai-doc-check.sh --check*': allow
     'php tools/ai/validate-*.php *': allow
-    # --- shipped CLI tool access ---
+    # --- shipped CLI tool access (shared snippet: agent-tools-readonly) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow

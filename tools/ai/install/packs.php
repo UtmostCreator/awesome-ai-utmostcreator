@@ -207,6 +207,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'tools/ai/full-install-validation.php', 'target' => 'tools/ai/full-install-validation.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/generate-ai-catalog.php', 'target' => 'tools/ai/generate-ai-catalog.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/generate-ai-file-standards.php', 'target' => 'tools/ai/generate-ai-file-standards.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'tools/ai/generate-agent-snippets.php', 'target' => 'tools/ai/generate-agent-snippets.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'tools/ai/generate-repo-structure.php', 'target' => 'tools/ai/generate-repo-structure.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/install-ai-kit.php', 'target' => 'tools/ai/install-ai-kit.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/maintenance-mode.php', 'target' => 'tools/ai/maintenance-mode.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],

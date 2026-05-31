@@ -114,7 +114,7 @@ permission:
     "php tools/ai/ai.php toolchain*": allow
     "php tools/ai/ai.php run-script *": allow
     "php tools/ai/ai.php hooks*": allow
-    # --- shipped CLI tool access ---
+    # --- shipped CLI tool access (shared snippet: agent-tools-execute) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow
