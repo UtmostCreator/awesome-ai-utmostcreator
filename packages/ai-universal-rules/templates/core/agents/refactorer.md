@@ -88,6 +88,7 @@ permission:
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-forensics.sh *': allow
     'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
     'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
     'bash -n scripts/*.sh': allow

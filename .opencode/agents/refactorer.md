@@ -88,6 +88,7 @@ permission:
     'bash scripts/ai/fd-files.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-forensics.sh *': allow
     'php -l *': allow
     'vendor/bin/phpunit *': allow
     './vendor/bin/phpunit *': allow
