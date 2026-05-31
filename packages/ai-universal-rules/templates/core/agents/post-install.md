@@ -10,6 +10,7 @@ capabilities:
   - verify-change
   - authorization-and-tool-governance
 permission:
+  todowrite: allow
   edit:
     'AGENTS.md': allow
     'README.md': allow

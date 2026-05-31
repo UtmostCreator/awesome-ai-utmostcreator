@@ -14,6 +14,7 @@ capabilities:
   - release-safety
   - docs-sync
 permission:
+  todowrite: allow
   edit: deny
   bash:
     '*': deny

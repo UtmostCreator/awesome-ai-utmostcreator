@@ -20,6 +20,7 @@ capabilities:
   - service-boundary-patterns
   - verify-change
 permission:
+  todowrite: allow
   edit:
     'src/**': allow
     'app/**': allow

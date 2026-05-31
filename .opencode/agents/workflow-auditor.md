@@ -9,6 +9,7 @@ capabilities:
   - project-context
   - agent-observability-and-evidence
 permission:
+  todowrite: allow
   edit: deny
   bash:
     '*': deny

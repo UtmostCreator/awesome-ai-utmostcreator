@@ -4,6 +4,7 @@ description: Strict script-first diff reviewer using ai-search and validator evi
 mode: subagent
 hidden: false
 permission:
+  todowrite: allow
   edit: deny
   bash:
     '*': ask

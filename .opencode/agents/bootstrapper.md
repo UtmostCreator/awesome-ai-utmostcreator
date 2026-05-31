@@ -11,6 +11,7 @@ capabilities:
   - verify-change
   - docs-sync
 permission:
+  todowrite: allow
   edit:
     "src/**": allow
     "app/**": allow

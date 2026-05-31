@@ -13,6 +13,7 @@ capabilities:
   - agent-observability-and-evidence
   - verify-change
 permission:
+  todowrite: allow
   edit: deny
   bash:
     '*': deny
