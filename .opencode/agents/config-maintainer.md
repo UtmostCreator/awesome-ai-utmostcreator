@@ -74,6 +74,11 @@ permission:
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'bash scripts/ai/rg-code.sh *': allow
+    'bash scripts/ai/fd-files.sh *': allow
+    'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-forensics.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
