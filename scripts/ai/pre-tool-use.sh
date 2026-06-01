@@ -5,6 +5,22 @@ POLICY_FILE="${AI_POLICY_FILE:-${COPILOT_POLICY_FILE:-policies/ai/policy.yaml}}"
 MAINTENANCE_STATE_FILE="${AI_MAINTENANCE_STATE_FILE:-${COPILOT_MAINTENANCE_STATE_FILE:-.ai-logs/maintenance-mode.json}}"
 # maintenance mode allows repository-delivered scripts only
 
+usage() {
+    cat <<'EOF'
+Usage:
+  pre-tool-use.sh < tool-request.json
+
+Reads a JSON tool request from stdin and emits a permission decision when policy applies.
+EOF
+}
+
+case "${1:-}" in
+--help | -h)
+    usage
+    exit 0
+    ;;
+esac
+
 deny() {
     jq -cn --arg reason "$1" '{permissionDecision:"deny", permissionDecisionReason:$reason}'
 }
@@ -14,6 +30,14 @@ allow() {
 }
 
 input="$(cat)"
+if [[ -z "$input" ]]; then
+    deny "JSON tool request required on stdin"
+    exit 1
+fi
+if ! jq -e . >/dev/null 2>&1 <<<"$input"; then
+    deny "invalid JSON tool request on stdin"
+    exit 1
+fi
 tool_name="$(jq -r '.toolName // .tool_name // empty' <<<"$input")"
 tool_args_raw="$(jq -c '.toolArgs // .toolArgsRaw // .tool_input // {}' <<<"$input")"
 

@@ -85,6 +85,13 @@ on_error() {
     exit "$exit_code"
 }
 
+case "${1:-}" in
+--help | -h)
+    usage
+    exit 0
+    ;;
+esac
+
 mode="${1:-}"
 [[ -n "$mode" ]] || {
     usage

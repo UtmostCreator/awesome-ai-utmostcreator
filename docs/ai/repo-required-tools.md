@@ -116,6 +116,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `tests/scripts/ai/test-rg-code.sh`
 - `tests/scripts/ai/test-run-repomix-context.sh`
 - `tests/scripts/ai/test-session-checkpoint.sh`
+- `tests/scripts/ai/test-validate-context-budgets.sh`
 - `tests/scripts/ai/test-watch-loop.sh`
 - `tools/ai/install-ai-kit.sh`
 - `tools/ai/install-copilot-kit.sh`

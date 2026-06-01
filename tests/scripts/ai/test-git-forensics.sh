@@ -18,7 +18,15 @@ run_test() {
 
 printf 'git-forensics.sh\n'
 
-# No --help flag; test usage via missing args
+# --help exits successfully and prints usage
+test_help() {
+    local out
+    out="$("$BASH_BIN" "$SCRIPT" --help 2>&1)"
+    [[ "$out" == *Usage* ]]
+}
+run_test "help flag exits successfully" test_help
+
+# Missing args fail with usage
 test_no_args() { ! "$BASH_BIN" "$SCRIPT" 2>/dev/null; }
 run_test "missing args fails" test_no_args
 

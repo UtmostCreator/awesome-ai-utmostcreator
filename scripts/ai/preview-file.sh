@@ -13,6 +13,9 @@ EOF
 
 emit_json() {
     local status="$1" path="$2" content="$3" errors="${4:-[]}" warnings="${5:-[]}"
+    # Optional metadata (defaults keep error/early-exit callers valid).
+    local range_start="${6:-}" range_end="${7:-}" total_lines="${8:-0}" truncated="${9:-false}"
+    local size_bytes="${10:-0}" max_bytes_lim="${11:-0}" max_columns_lim="${12:-0}"
     jq -cn \
         --arg schema "1" \
         --arg status "$status" \
@@ -21,7 +24,27 @@ emit_json() {
         --arg content "$content" \
         --argjson errors "$errors" \
         --argjson warnings "$warnings" \
-        '{schema:$schema,status:$status,tool:$tool,path:$path,content:$content,warnings:$warnings,errors:$errors}'
+        --arg range_start "$range_start" \
+        --arg range_end "$range_end" \
+        --argjson total_lines "$total_lines" \
+        --argjson truncated "$truncated" \
+        --argjson size_bytes "$size_bytes" \
+        --argjson max_bytes_lim "$max_bytes_lim" \
+        --argjson max_columns_lim "$max_columns_lim" \
+        '{
+            schema: $schema,
+            status: $status,
+            tool: $tool,
+            path: $path,
+            range: (if $range_start == "" then null else {start: ($range_start|tonumber), end: ($range_end|tonumber)} end),
+            total_lines: $total_lines,
+            truncated: $truncated,
+            content: $content,
+            limits: {max_bytes: $max_bytes_lim, max_columns: $max_columns_lim},
+            warnings: $warnings,
+            errors: $errors,
+            meta: {size_bytes: $size_bytes}
+        }'
 }
 
 parse_size() {
@@ -200,6 +223,8 @@ if [[ -n "$lines" ]] && ! [[ "$lines" =~ ^[0-9]+$ ]]; then
     exit 1
 fi
 
+total_lines="$(wc -l <"$file" | tr -d ' ')"
+
 if [[ -n "$range" ]]; then
     if ! [[ "$range" =~ ^([0-9]+):([0-9]+)$ ]]; then
         if [[ "$json_mode" == "json" ]]; then
@@ -234,16 +259,30 @@ elif [[ -n "$around" ]]; then
     end=$((around + context))
     content="$(sed -n "${start},${end}p" "$file")"
 elif [[ -n "$lines" ]]; then
+    start=1
+    end="$lines"
     content="$(sed -n "1,${lines}p" "$file")"
 else
+    start=1
+    end=200
     content="$(sed -n '1,200p' "$file")"
 fi
 
-# Column truncation (kept readable for plain output, JSON gets raw content).
+# Column truncation: apply to both plain and JSON output so --max-columns
+# bounds machine-readable payloads as documented.
 truncated_content="$(printf '%s\n' "$content" | awk -v m="$max_columns" '{ if (length($0)>m) { print substr($0,1,m) " ...truncated" } else print }')"
 
+# Flag when any displayed line was column-truncated.
+if [[ "$truncated_content" != "$content" ]]; then
+    truncated="true"
+else
+    truncated="false"
+fi
+
 if [[ "$json_mode" == "json" ]]; then
-    emit_json "ok" "$file" "$content"
+    emit_json "ok" "$file" "$truncated_content" '[]' '[]' \
+        "$start" "$end" "$total_lines" "$truncated" \
+        "$size" "$max_bytes" "$max_columns"
 else
     if [[ "$plain" == "0" ]] && command_exists bat; then
         printf '%s\n' "$truncated_content" | bat --paging=never --style=plain --color=always
