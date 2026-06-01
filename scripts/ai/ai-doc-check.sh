@@ -138,6 +138,10 @@ run_drift() {
     if [[ -f tools/ai/generate-agent-snippets.php ]]; then
         run_step "agent-snippets --check" php tools/ai/generate-agent-snippets.php --check
     fi
+
+    if [[ -f tools/ai/validate-context-budgets.php ]]; then
+        run_step "validate-context-budgets" php tools/ai/validate-context-budgets.php
+    fi
 }
 
 case "$mode" in
