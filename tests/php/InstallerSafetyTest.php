@@ -677,6 +677,21 @@ class InstallerSafetyTest extends TestCase
             $managedPaths = array_keys((array) ($firstManifest['files'] ?? []));
             sort($managedPaths);
             $this->assertNotEmpty($managedPaths, 'first install should record managed files');
+            $expectedBackupPaths = [];
+            foreach ($managedPaths as $path) {
+                $abs = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+                if (is_dir($abs)) {
+                    $iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($abs, \FilesystemIterator::SKIP_DOTS));
+                    foreach ($iterator as $item) {
+                        if ($item->isFile()) {
+                            $expectedBackupPaths[] = str_replace('\\', '/', $path . '/' . substr($item->getPathname(), strlen($abs) + 1));
+                        }
+                    }
+                    continue;
+                }
+                $expectedBackupPaths[] = $path;
+            }
+            sort($expectedBackupPaths);
 
             $secondCommand = implode(' ', [
                 escapeshellarg((string) PHP_BINARY),
@@ -710,10 +725,10 @@ class InstallerSafetyTest extends TestCase
             $backupPaths = array_map(static fn(array $entry): string => (string) ($entry['path'] ?? ''), $backupManifest['entries'] ?? []);
             sort($backupPaths);
 
-            $missingPaths = array_values(array_diff($managedPaths, $backupPaths));
+            $missingPaths = array_values(array_diff($expectedBackupPaths, $backupPaths));
             $this->assertSame([], $missingPaths, 'reinstall backup must capture every previously managed installed path');
 
-            foreach ($managedPaths as $path) {
+            foreach ($expectedBackupPaths as $path) {
                 $snapshotPath = $backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
                 $this->assertFileExists($snapshotPath, 'backup snapshot missing managed path: ' . $path);
             }
