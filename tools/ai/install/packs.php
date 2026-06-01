@@ -221,6 +221,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'tools/ai/validate-ai-catalog.php', 'target' => 'tools/ai/validate-ai-catalog.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-ai-config.php', 'target' => 'tools/ai/validate-ai-config.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-command-policy.php', 'target' => 'tools/ai/validate-command-policy.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'tools/ai/validate-context-budgets.php', 'target' => 'tools/ai/validate-context-budgets.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-generated-artifacts.php', 'target' => 'tools/ai/validate-generated-artifacts.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-install-surface.php', 'target' => 'tools/ai/validate-install-surface.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/verify-install-placeholders.php', 'target' => 'tools/ai/verify-install-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
