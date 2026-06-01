@@ -1,14 +1,14 @@
-# Repository Instructions For app-configs
+# Repository Instructions For awesome-ai-utmostcreator
 
 Use these instructions as the repository-wide baseline for GitHub Copilot.
 They should remain valid even if advanced agent features or prompt files are unavailable on the active surface.
 
 ## Project Context
 
-- Project: `app-configs`
+- Project: `awesome-ai-utmostcreator`
 - Type: `php project`
-- Summary: `AI workflow starter for app-configs`
-- Active paths: `.ai-install-manifest.json,.editorconfig,.gitattributes,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.schemas,.shellcheckrc,AGENTS.md,CLAUDE.md,README.md,composer.json,composer.lock,install-ai-kit.sh,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,tests,tools`
+- Summary: `AI workflow starter for awesome-ai-utmostcreator`
+- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,sh-commands-output.md,tests,tools`
 - Avoid by default: `unknown`
 - Primary entrypoints: `README.md, docs/ai/project-context.md`
 - Project context file: `docs/ai/project-context.md`

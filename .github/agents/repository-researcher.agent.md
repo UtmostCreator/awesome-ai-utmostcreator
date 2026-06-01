@@ -44,6 +44,14 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `bash scripts/ai/query-usage.sh *`
 - `bash scripts/ai/git-forensics.sh *`
 - `bash scripts/ai/ai-diff-context.sh *`
+- `git show*`
+- `git blame*`
+- `git ls-files*`
+- `git rev-parse*`
+- `git grep *`
+- `ls *`
+- `rg *`
+- `fd *`
 
 Do not run arbitrary shell commands. Do not run commands not in this list.
 Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.

@@ -57,11 +57,25 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `git blame*`
 - `git branch*`
 - `git rev-parse*`
+- `git stash list*`
+- `git stash show*`
 - `bash scripts/ai/ai-search.sh *`
+- `AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
 - `bash scripts/ai/rg-code.sh *`
 - `bash scripts/ai/fd-files.sh *`
 - `bash scripts/ai/preview-file.sh *`
+- `AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
 - `bash scripts/ai/query-usage.sh *`
+- `bash scripts/ai/git-forensics.sh *`
+- `AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *`
+- `env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *`
+- `bash -n scripts/*.sh`
+- `bash -n scripts/**/*.sh`
+- `bash -n scripts/doctor.sh`
+- `bash scripts/doctor.sh`
+- `bash scripts/doctor.sh *`
 - `php -l *`
 - `vendor/bin/phpunit *`
 - `./vendor/bin/phpunit *`
@@ -77,6 +91,20 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `shellcheck *`
 - `markdownlint-cli2 *`
 - `php tools/ai/validate-*.php *`
+- `php tools/ai/generate-*.php --check*`
+- `scc *`
+- `tokei *`
+- `ast-grep *`
+- `bat *`
+- `fx *`
+- `glow *`
+- `difft *`
+- `delta *`
+- `lychee *`
+- `actionlint*`
+- `shfmt -d *`
+- `semgrep *`
+- `bash scripts/ai/repomix-freshness.sh *`
 
 Do not run arbitrary shell commands. Do not run commands not in this list.
 Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.

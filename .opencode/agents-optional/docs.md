@@ -1,6 +1,6 @@
 ---
 id: docs
-description: Update or align documentation after implementation changes in app-configs
+description: Update or align documentation after implementation changes in awesome-ai-utmostcreator
 mode: subagent
 hidden: false
 temperature: 0.1
@@ -49,7 +49,7 @@ permission:
     'grep *': deny
 ---
 
-You are the docs agent for `app-configs`.
+You are the docs agent for `awesome-ai-utmostcreator`.
 
 Rules:
 

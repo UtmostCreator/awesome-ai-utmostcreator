@@ -199,6 +199,16 @@ function aiInstallerCopyDirAsOpenCodeAgents(string $src, string $dest): void
     if ($srcReal !== false && $destReal !== false && $srcReal === $destReal) {
         return;
     }
+    $preservedHiddenAgents = [];
+    if (is_dir($dest)) {
+        foreach (glob($dest . DIRECTORY_SEPARATOR . '*.md') ?: [] as $existingFile) {
+            $existingContent = (string) file_get_contents($existingFile);
+            if (aiAgentIsHiddenInternalOnly($existingContent)) {
+                $preservedHiddenAgents[basename($existingFile)] = $existingContent;
+            }
+        }
+    }
+
     if (file_exists($dest)) {
         aiInstallerDeleteTree($dest);
     }
@@ -212,6 +222,13 @@ function aiInstallerCopyDirAsOpenCodeAgents(string $src, string $dest): void
         $destFile = $dest . DIRECTORY_SEPARATOR . basename($srcFile);
         if (file_put_contents($destFile, $content) === false) {
             throw new RuntimeException('failed to copy agent: ' . $destFile);
+        }
+    }
+
+    foreach ($preservedHiddenAgents as $name => $content) {
+        $destFile = $dest . DIRECTORY_SEPARATOR . $name;
+        if (file_put_contents($destFile, $content) === false) {
+            throw new RuntimeException('failed to preserve hidden agent: ' . $destFile);
         }
     }
 }

@@ -1,6 +1,6 @@
 ---
 id: infra-auditor
-description: Use when auditing dependency, build, release, or compatibility risk in app-configs
+description: Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator
 mode: subagent
 hidden: false
 temperature: 0.0
@@ -43,7 +43,7 @@ permission:
     'grep *': ask
 ---
 
-You are the infra auditor for `app-configs`.
+You are the infra auditor for `awesome-ai-utmostcreator`.
 
 Use this role for:
 

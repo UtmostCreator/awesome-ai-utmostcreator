@@ -1,6 +1,6 @@
 ---
 id: bugfix
-description: Use when fixing a bug in app-configs, reproducing it first when practical, and keeping the fix minimal
+description: Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal
 mode: subagent
 hidden: false
 temperature: 0.1
@@ -77,7 +77,7 @@ permission:
     'grep *': deny
 ---
 
-You are the bugfix agent for `app-configs`.
+You are the bugfix agent for `awesome-ai-utmostcreator`.
 
 Use this role for bounded bug-fix work after the relevant repository facts are known.
 

@@ -66,7 +66,7 @@ Never sit idle waiting on a subprocess. Apply the following rules to every shell
    - focused unit test or single PHPUnit filter: 60s
    - full PHPUnit run (`composer test`): 180s
    - parallel test run (`composer test:fast`): 90s
-   - shell suite (`bash tests/scripts/ai/run-all-tests.sh`): 360s
+   - shell test suite (full bats/script harness for this project): 360s
    - repomix/scc/advisor pack or large generation: 240s
 2. If a command produces no output for more than its budget, kill it, report the freeze, and bisect: run smaller scopes (single test class, single test method, single file) until you find the offender.
 3. Do not run a command "to see if it eventually finishes" without a stated upper bound. State the budget in your plan and stop when it elapses.
@@ -79,7 +79,7 @@ Never sit idle waiting on a subprocess. Apply the following rules to every shell
 - `PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh` — all repo tests with parallel-first defaults
 - `composer test`         — full serial suite (~60s in this repo; use only when serial ordering matters)
 - `composer test:fast`    — paratest with 12 workers (~19-21s in this repo)
-- `composer test:profile` — emits a JUnit XML report under `docs/ai/generated/`
+- `composer test:profile` — emits `docs/ai/generated/phpunit.xml`
 - `composer test:slow [N]` — ranks the slowest N tests from the last profile
 
 Use `composer test:profile` followed by `composer test:slow` whenever a previously fast suite gets noticeably slower.

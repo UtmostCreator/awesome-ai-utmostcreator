@@ -36,11 +36,11 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / cli` - 1
 - `root / exporter` - 1
 - `root / generator` - 1
-- `root / github-copilot-agent` - 10
+- `root / github-copilot-agent` - 11
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 17
 - `root / github-copilot-skill` - 17
-- `root / opencode-agent` - 11
+- `root / opencode-agent` - 12
 - `root / opencode-command` - 19
 - `root / opencode-skill` - 19
 - `root / php-reference` - 3
@@ -107,6 +107,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-agent`|Architect|`.github/agents/architect.agent.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`github-copilot-agent`|Config Maintainer|`.github/agents/config-maintainer.agent.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`github-copilot-agent`|Implementer|`.github/agents/implementer.agent.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
+|`github-copilot-agent`|Post Install|`.github/agents/post-install.agent.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
 |`github-copilot-agent`|Refactorer|`.github/agents/refactorer.agent.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
 |`github-copilot-agent`|Release Auditor|`.github/agents/release-auditor.agent.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
 |`github-copilot-agent`|Repository Researcher|`.github/agents/repository-researcher.agent.md`|Strict script-first repository researcher using ai-search before raw search|
@@ -158,7 +159,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|dependency-upgrade|`.github/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`github-copilot-skill`|docs-sync|`.github/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`github-copilot-skill`|evidence-first-execution|`.github/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
-|`github-copilot-skill`|mentor-mode|`.github/skills/mentor-mode/SKILL.md`|Use when the human is coding in a skill they want to retain or grow and a full solution would otherwise be handed over by default. Defaults to the lowest assistance that unblocks and makes answer-delivery a deliberate, logged choice. Do not use for genuine commodity work or incidents (use deliver mode) or pure fact lookups (use the lookup bypass).|
+|`github-copilot-skill`|mentor-mode|`.github/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-skill`|new-feature|`.github/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-skill`|plan-slice|`.github/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`github-copilot-skill`|project-context|`.github/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
@@ -174,6 +175,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-agent`|bootstrapper|`.opencode/agents/bootstrapper.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|
 |`opencode-agent`|config-maintainer|`.opencode/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`opencode-agent`|implementer|`.opencode/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
+|`opencode-agent`|post-install|`.opencode/agents/post-install.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
 |`opencode-agent`|refactorer|`.opencode/agents/refactorer.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
 |`opencode-agent`|release-auditor|`.opencode/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
 |`opencode-agent`|repository-researcher|`.opencode/agents/repository-researcher.md`|Strict script-first repository researcher using ai-search before raw search|
@@ -207,7 +209,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|dependency-upgrade|`.opencode/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`opencode-skill`|docs-sync|`.opencode/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-skill`|evidence-first-execution|`.opencode/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
-|`opencode-skill`|mentor-mode|`.opencode/skills/mentor-mode/SKILL.md`|Use when the human is coding in a skill they want to retain or grow and a full solution would otherwise be handed over by default. Defaults to the lowest assistance that unblocks and makes answer-delivery a deliberate, logged choice. Do not use for genuine commodity work or incidents (use deliver mode) or pure fact lookups (use the lookup bypass).|
+|`opencode-skill`|mentor-mode|`.opencode/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-skill`|new-feature|`.opencode/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-skill`|plan-slice|`.opencode/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`opencode-skill`|project-context|`.opencode/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|

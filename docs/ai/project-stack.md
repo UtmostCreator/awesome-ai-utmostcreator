@@ -1,4 +1,4 @@
-# app-configs Project Stack
+# awesome-ai-utmostcreator Project Stack
 
 Compatibility note: `project-stack.template.md` remains for older installs.
 

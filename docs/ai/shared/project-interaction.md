@@ -1,6 +1,6 @@
 # System Architecture - How The Projects Interact
 
-This document is the canonical cross-repository overview for the multi-project workspace that includes `app-configs`.
+This document is the canonical cross-repository overview for the multi-project workspace that includes `awesome-ai-utmostcreator`.
 
 Replace the neutral repository labels in this file after install. Use `PROJECT-A`, `PROJECT-B`, and similar labels only until the owning team fills in the real names and contracts.
 

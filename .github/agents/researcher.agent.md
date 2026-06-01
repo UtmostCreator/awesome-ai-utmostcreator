@@ -18,9 +18,36 @@ Available tools: `search/changes`, `search/codebase`, `search/fileSearch`, `sear
 
 ## Shell Boundary
 
-Only use shell execution for approved scripts listed in `docs/ai/script-registry.md`, `docs/ai/script-registry.json`, and `docs/ai/scripts-reference.md`.
-Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer; if hooks are unsupported on the active surface, preserve the same boundary manually and treat `.ai-logs/README.md` as the checked-in evidence contract.
-Run scripts from the repository root using repository-root paths. Do not run arbitrary commands.
+You may use shell execution only for approved scripts from the repository registry. Before running any script:
+
+1. Confirm the script exists in the repository.
+2. Confirm it is listed in `docs/ai/script-registry.md` and `docs/ai/script-registry.json`.
+3. Confirm it is also documented in `docs/ai/scripts-reference.md`.
+4. Run it from the repository root using the repository-root path shown below.
+5. If any condition fails, stop and report `unknown`.
+
+Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer.
+When the active runtime supports repository hooks, these scripts must remain wired through `.github/hooks/tool-policy.json` and write local evidence under `.ai-logs/` as documented in `.ai-logs/README.md`.
+When the runtime does not auto-load repository hooks, preserve the same boundary manually and do not claim automatic enforcement.
+
+Approved scripts (run from the repository root using `scripts/ai`):
+
+- `scc *`
+- `tokei *`
+- `ast-grep *`
+- `bat *`
+- `fx *`
+- `glow *`
+- `difft *`
+- `delta *`
+- `lychee *`
+- `actionlint*`
+- `shfmt -d *`
+- `shellcheck *`
+- `bash scripts/ai/repomix-freshness.sh *`
+
+Do not run arbitrary shell commands. Do not run commands not in this list.
+Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
 
 # Researcher Agent
 
@@ -72,14 +99,7 @@ Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.m
 
 ## Capability Loading
 
-| Capability                          | Trigger                                                        |
-| ----------------------------------- | -------------------------------------------------------------- |
-| `project-context`                   | repo map, source of truth, context compiler, AI context output |
-| `adapter-drift`                     | Copilot/OpenCode/provider parity or adapter templates          |
-| `agent-observability-and-evidence`  | evidence logs, session notes, traceability                     |
-| `authorization-and-tool-governance` | autonomy levels, permissions, hooks, allow/deny policy, sensitive operations |
-| `review-diff`                       | review surface, changed files, regression risk                 |
-| `verify-change`                     | verification surface or test selection                         |
+Load relevant capabilities only: `project-context` for repo maps and source of truth; `adapter-drift` for provider parity; `agent-observability-and-evidence` for evidence; `authorization-and-tool-governance` for permissions; `review-diff` for changed-file risk; `verify-change` for verification surface.
 
 Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`, `reference.md`.
 

@@ -13,18 +13,18 @@ description: "Generated artifact drift routing, source-first regeneration policy
 
 Essential (consumed by other tools — do not delete between related commands):
 
-- `preflight.json`, `package-verify.json`, `install.json`, `verify.json`, `adapter-plan.json`, `advisor.json`
-- `advisor-context.md`, `advisor-prompt.md`, `advisor-drift.md`
-- `advisor-secret-findings.json`, `install-manifest.json`, `install-instructions.json`
-- `repo-structure.json`, `artifacts.json`
+- preflight.json, package-verify.json, install.json, verify.json, adapter-plan.json, advisor.json
+- advisor-context.md, advisor-prompt.md, advisor-drift.md
+- advisor-secret-findings.json, install-manifest.json, install-instructions.json
+- repo-structure.json, artifacts.json
 
 Ephemeral (informational only — safe to delete, regenerated on next run):
 
-- `analysis-*.json`, `workspace-*.json`, `decisions-*.json`, `git-*.json`, `next-*.json`
+- analysis snapshots, workspace diagnostics, decision logs, git summaries, and next-action suggestions
 
 ## Markdown Duplicates
 
-`.md` files in `docs/ai/generated/` are **not** written by default.
+Markdown files in `docs/ai/generated/` are **not** written by default.
 They are JSON wrapped in a markdown code block — no tool reads them.
 To generate them for manual inspection, set the env var before the command:
 

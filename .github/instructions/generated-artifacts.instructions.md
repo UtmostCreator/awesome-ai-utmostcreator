@@ -11,35 +11,21 @@ description: "Generated artifact drift routing, source-first regeneration policy
 
 ## Essential vs Ephemeral
 
-Essential (consumed by other tools, do not delete between related commands):
+Essential (consumed by other tools — do not delete between related commands):
 
-- docs/ai/generated/preflight.json
-- docs/ai/generated/package-verify.json
-- docs/ai/generated/install.json
-- docs/ai/generated/verify.json
-- docs/ai/generated/adapter-plan.json
-- docs/ai/generated/advisor.json
-- docs/ai/generated/advisor-context.md
-- docs/ai/generated/advisor-prompt.md
-- docs/ai/generated/advisor-drift.md
-- docs/ai/generated/advisor-secret-findings.json
-- docs/ai/generated/install-manifest.json
-- docs/ai/generated/install-instructions.json
-- docs/ai/generated/repo-structure.json
-- docs/ai/generated/artifacts.json
+- preflight.json, package-verify.json, install.json, verify.json, adapter-plan.json, advisor.json
+- advisor-context.md, advisor-prompt.md, advisor-drift.md
+- advisor-secret-findings.json, install-manifest.json, install-instructions.json
+- repo-structure.json, artifacts.json
 
-Ephemeral (informational only, safe to delete, regenerated on next run):
+Ephemeral (informational only — safe to delete, regenerated on next run):
 
-- docs/ai/generated/analysis-\*.json
-- docs/ai/generated/workspace-\*.json
-- docs/ai/generated/decisions-\*.json
-- docs/ai/generated/git-\*.json
-- docs/ai/generated/next-\*.json
+- analysis snapshots, workspace diagnostics, decision logs, git summaries, and next-action suggestions
 
 ## Markdown Duplicates
 
-Markdown duplicate files in docs/ai/generated/ are not written by default.
-They are JSON wrapped in a markdown code block; no tool reads them.
+Markdown files in `docs/ai/generated/` are **not** written by default.
+They are JSON wrapped in a markdown code block — no tool reads them.
 To generate them for manual inspection, set the env var before the command:
 
 ```bash
@@ -48,7 +34,11 @@ AI_ARTIFACTS_VERBOSE=1 php tools/ai/ai.php <command>
 
 ## Clean Up
 
-All files in docs/ai/generated/ are safe to delete and regenerate.
+All files in `docs/ai/generated/` are safe to delete:
+
+```bash
+rm -rf docs/ai/generated/*
+```
 
 Regenerate only what you need next.
 

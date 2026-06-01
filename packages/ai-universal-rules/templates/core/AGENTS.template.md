@@ -62,8 +62,11 @@ Ask for approval before making:
 Inspect the current implementation before making architectural or behavioral changes:
 
 - `<PRIMARY_ENTRYPOINTS>`
+- `docs/ai/agents.md` for live agent routing
 - `docs/ai/execution-protocol.md` for non-trivial execution and verification flow
+- `docs/ai/failure-handling.md` for blocked, failed, or partial work
 - `docs/ai/ai-file-standards.md` before adding or expanding AI workflow files
+- `docs/ai/agent-ops-checklist.md` and `docs/ai/integration-matrix.md` for agent operations and compatibility checks
 
 ## Architecture Notes
 
@@ -152,7 +155,7 @@ Minimum flow:
 ## Common Gotchas
 
 - `<KNOWN_GOTCHA_THEMES>`
-- Capture recurring failure modes in capability `gotchas.md` files instead of bloating global policy.
+- Capture recurring failure modes in capability gotchas files instead of bloating global policy.
 
 ## Documentation Rules
 
