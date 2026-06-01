@@ -6,23 +6,50 @@
 # Usage:
 #   bash install-ai-kit.sh /path/to/your-project
 #   bash install-ai-kit.sh /path/to/your-project "my-project-name"
+#   bash install-ai-kit.sh /path/to/your-project "my-project-name" --force
+#   bash install-ai-kit.sh /path/to/your-project --force
+#
+# Options:
+#   --force   Overwrite existing files. Use on reinstalls to push updated
+#             templates to a target that was previously installed.
+#             Core base policy files are protected and will NOT be overwritten
+#             unless you also pass --allow-core-overwrite to the PHP installer
+#             directly.
 #
 # Examples:
 #   bash install-ai-kit.sh /Users/you/Herd/project-name
 #   bash install-ai-kit.sh /Users/you/Herd/project-name project-name
+#   bash install-ai-kit.sh /Users/you/Herd/project-name --force
+#   bash install-ai-kit.sh /Users/you/Herd/project-name project-name --force
 # =============================================================================
 set -euo pipefail
 
 # ── Arguments ────────────────────────────────────────────────────────────────
 TARGET="${1:-}"
-PROJECT_NAME="${2:-}"
+PROJECT_NAME=""
+FORCE_FLAG=""
+
+# Parse optional arguments after the target path
+for arg in "${@:2}"; do
+    case "$arg" in
+        --force) FORCE_FLAG="--force" ;;
+        --*)     ;; # ignore unknown flags for forward-compatibility
+        *)       PROJECT_NAME="$arg" ;;
+    esac
+done
 
 if [[ -z "$TARGET" ]]; then
-    echo "Usage: bash install-ai-kit.sh /path/to/project [project-name]"
+    echo "Usage: bash install-ai-kit.sh /path/to/project [project-name] [--force]"
+    echo ""
+    echo "Options:"
+    echo "  --force   Overwrite existing managed files in the target."
+    echo "            Use on reinstalls to pick up updated templates."
     echo ""
     echo "Examples:"
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name"
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name project-name"
+    echo "  bash install-ai-kit.sh /Users/you/Herd/project-name --force"
+    echo "  bash install-ai-kit.sh /Users/you/Herd/project-name project-name --force"
     exit 1
 fi
 
@@ -100,7 +127,8 @@ php tools/ai/install-ai-kit.php \
     --project-name "$PROJECT_NAME" \
     --backup \
     --verify-after \
-    --non-interactive
+    --non-interactive \
+    ${FORCE_FLAG}
 
 # ── Validate install surface ──────────────────────────────────────────────────
 echo ""
@@ -111,10 +139,8 @@ php tools/ai/validate-install-surface.php --strict --target "$TARGET" 2>/dev/nul
 # ── Validate config and catalog ───────────────────────────────────────────────
 echo ""
 echo "==> Validating AI config and catalog..."
-php tools/ai/validate-ai-config.php --target "$TARGET" 2>/dev/null || \
-    php tools/ai/validate-ai-config.php
-php tools/ai/validate-ai-catalog.php --target "$TARGET" 2>/dev/null || \
-    php tools/ai/validate-ai-catalog.php
+php tools/ai/validate-ai-config.php --target="$TARGET"
+php tools/ai/validate-ai-catalog.php --target="$TARGET"
 
 # ── Checking installed target surface (paths present) ────────────────────────
 echo ""
@@ -210,4 +236,12 @@ echo "       cd $TARGET && lefthook install"
 echo ""
 echo "  5. Full post-install checklist:"
 echo "       cat $TARGET/docs/ai/POST-INSTALL.md"
+echo ""
+echo "  Reinstall tip: if files were skipped (skip_identical_existing / skip_existing_unmanaged)"
+echo "  and you want to push updated templates, rerun with --force:"
+echo "       bash install-ai-kit.sh $TARGET $PROJECT_NAME --force"
+echo ""
+echo "  Manual repomix + advisor run (already run above when tools are present):"
+echo "       cd $TARGET && SECRETS_SCAN=0 MAX_BUNDLE_TOKENS=100000 bash scripts/ai/run-repomix-context.sh . --depth 3 --top 120 --min-code 800 --min-files 3"
+echo "       cd $TARGET && php tools/ai/ai.php advisor --all"
 echo ""

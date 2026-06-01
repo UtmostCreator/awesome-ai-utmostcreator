@@ -191,6 +191,17 @@ $opencodeCommands = array_merge(
     glob($root . '/packages/ai-universal-rules/templates/workflows/*.md') ?: [],
     glob($root . '/packages/ai-universal-rules/templates/commands/*.md') ?: []
 );
+
+$advertisedPostInstallSetupSources = [
+    'packages/ai-universal-rules/templates/workflows/post-install-setup.md',
+    'packages/ai-universal-rules/templates/commands/post-install-setup.md',
+];
+foreach ($advertisedPostInstallSetupSources as $relativePath) {
+    if (!is_file($root . '/' . $relativePath)) {
+        $errors[] = "missing advertised post-install helper source: {$relativePath}";
+    }
+}
+
 foreach ($opencodeCommands as $commandFile) {
     $content = (string) file_get_contents($commandFile);
     $agent = frontmatterField($content, 'agent');

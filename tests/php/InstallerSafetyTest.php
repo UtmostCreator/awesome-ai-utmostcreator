@@ -634,6 +634,14 @@ class InstallerSafetyTest extends TestCase
             $this->assertNotEmpty($opencodeCommands);
             $this->assertNotEmpty($opencodeSkills);
 
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'prompts' . DIRECTORY_SEPARATOR . 'post-install-setup.prompt.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'skills' . DIRECTORY_SEPARATOR . 'post-install-setup' . DIRECTORY_SEPARATOR . 'SKILL.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'commands' . DIRECTORY_SEPARATOR . 'post-install-setup.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'skills' . DIRECTORY_SEPARATOR . 'post-install-setup' . DIRECTORY_SEPARATOR . 'SKILL.md');
+
+            $opencodePostInstallCommand = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'commands' . DIRECTORY_SEPARATOR . 'post-install-setup.md');
+            $this->assertStringContainsString('Use this command immediately after installation or re-installation.', $opencodePostInstallCommand, 'installed OpenCode post-install command should use the command-specific template');
+
             $postInstall = (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'POST-INSTALL.md');
             $this->assertStringContainsString('post-install-setup', $postInstall, 'generated post-install checklist should advertise the shipped setup helper');
         } finally {
@@ -794,6 +802,163 @@ class InstallerSafetyTest extends TestCase
                 $validate = $this->runTool('cd ' . escapeshellarg($target) . ' && ' . $targetCommand);
                 $this->assertSame(0, $validate['exit'], $targetCommand . "\n" . $validate['stdout'] . $validate['stderr']);
             }
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testDirectInstallerVerifyAfterUsesCurrentSourceValidatorsWhenTargetValidatorsAreStale(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_stale_target_validators_' . uniqid('', true);
+        $toolsDir = $target . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'ai';
+
+        mkdir($toolsDir, 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
+        file_put_contents($toolsDir . DIRECTORY_SEPARATOR . 'validate-ai-config.php', "<?php fwrite(STDERR, 'stale target validate-ai-config' . PHP_EOL); exit(99);\n");
+        file_put_contents($toolsDir . DIRECTORY_SEPARATOR . 'validate-ai-catalog.php', "<?php fwrite(STDERR, 'stale target validate-ai-catalog' . PHP_EOL); exit(98);\n");
+        file_put_contents($toolsDir . DIRECTORY_SEPARATOR . 'validate-install-surface.php', "<?php fwrite(STDERR, 'stale target validate-install-surface' . PHP_EOL); exit(97);\n");
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--project-name',
+                'headless-cms',
+                '--backup',
+                '--verify-after',
+                '--non-interactive',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stdout'] . $result['stderr']);
+            $this->assertStringNotContainsString('stale target validate-ai-config', $result['stdout'] . $result['stderr']);
+            $this->assertStringNotContainsString('stale target validate-ai-catalog', $result['stdout'] . $result['stderr']);
+            $this->assertStringNotContainsString('stale target validate-install-surface', $result['stdout'] . $result['stderr']);
+            $this->assertStringContainsString('OK: target AI config validation passed', $result['stdout'] . $result['stderr']);
+            $this->assertStringContainsString('OK: target install surface validation passed', $result['stdout'] . $result['stderr']);
+            $this->assertStringContainsString('OK: target AI catalog validation passed', $result['stdout'] . $result['stderr']);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testDirectInstallerVerifyAfterPrunesStaleManifestFileEntries(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_stale_manifest_' . uniqid('', true);
+
+        mkdir($target, 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
+        file_put_contents(
+            $target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json',
+            json_encode([
+                'schema_version' => 1,
+                'installer_version' => '0.1.0',
+                'installed_at' => gmdate('c'),
+                'updated_at' => gmdate('c'),
+                'profile' => 'full-governance',
+                'package' => ['name' => 'ai-universal-rules'],
+                'packs' => ['base'],
+                'files' => [
+                    'tests/scripts/ai/test-preview-file.sh' => [
+                        'pack' => 'scripts-pack',
+                        'source' => 'tests/scripts/ai/test-preview-file.sh',
+                        'source_hash' => 'sha256:stale',
+                        'installed_hash' => 'unknown',
+                        'managed' => true,
+                        'merge_strategy' => 'replace',
+                        'required' => true,
+                    ],
+                ],
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL
+        );
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--project-name',
+                'headless-cms',
+                '--backup',
+                '--verify-after',
+                '--non-interactive',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stdout'] . $result['stderr']);
+
+            $manifest = json_decode((string) file_get_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+            $this->assertIsArray($manifest);
+            $this->assertArrayNotHasKey('tests/scripts/ai/test-preview-file.sh', $manifest['files'] ?? [], 'reinstall should prune stale manifest entries for files no longer shipped');
+            $this->assertStringContainsString('OK: target install surface validation passed', $result['stdout'] . $result['stderr']);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testDirectInstallerVerifyAfterSucceedsOnNoOpReinstallWithManagedManifest(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_noop_reinstall_' . uniqid('', true);
+
+        mkdir($target, 0700, true);
+
+        try {
+            $firstCommand = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--project-name',
+                'headless-cms',
+                '--backup',
+                '--non-interactive',
+            ]);
+            $first = $this->runTool($firstCommand);
+            $this->assertSame(0, $first['exit'], $first['stdout'] . $first['stderr']);
+
+            $secondCommand = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--project-name',
+                'headless-cms',
+                '--backup',
+                '--verify-after',
+                '--non-interactive',
+            ]);
+            $second = $this->runTool($secondCommand);
+            $this->assertSame(0, $second['exit'], $second['stdout'] . $second['stderr']);
+            $this->assertStringContainsString('OK: target install surface validation passed', $second['stdout'] . $second['stderr']);
+
+            $manifest = json_decode((string) file_get_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+            $this->assertIsArray($manifest);
+            $this->assertNotEmpty($manifest['files'] ?? [], 'no-op reinstall should preserve managed manifest entries for identical installed files');
         } finally {
             $this->removeTree($target);
         }

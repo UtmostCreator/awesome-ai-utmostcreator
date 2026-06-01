@@ -277,13 +277,18 @@ collect_files() {
             fi
         done < <(git -C "$ROOT" ls-files -co --exclude-standard)
     else
+        local relative_path
         while IFS= read -r path; do
             [[ -n "$path" ]] || continue
-            [[ -f "$ROOT/$path" ]] || continue
-            if ! path_is_ignored "$path"; then
-                COLLECTED_FILES+=("$path")
+            relative_path="${path#./}"
+            [[ -f "$ROOT/$relative_path" ]] || continue
+            if ! path_is_ignored "$relative_path"; then
+                COLLECTED_FILES+=("$relative_path")
             fi
-        done < <(rg --files --hidden "$ROOT")
+        done < <(
+            cd "$ROOT"
+            rg --files --hidden .
+        )
     fi
 
     ((${#COLLECTED_FILES[@]} > 0)) || die "no files available after applying ignore rules"

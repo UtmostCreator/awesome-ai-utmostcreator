@@ -22,9 +22,13 @@ From a local clone of this repository, run the root installer and point it at yo
 bash install-ai-kit.sh /path/to/your-project
 # or with explicit project name:
 bash install-ai-kit.sh /path/to/your-project "your-project-name"
+# reinstall / push updated templates — add --force to overwrite existing managed files:
+bash install-ai-kit.sh /path/to/your-project "your-project-name" --force
 ```
 
-The script validates this source checkout first, then runs the full install with backup and post-install validation. It does not clone or clean up another checkout for you.
+The script validates this source checkout first, then runs the full install with backup and post-install validation. It then automatically runs repomix context packing and the AI workflow advisor. It does not clone or clean up another checkout for you.
+
+> **When to use `--force`**: By default the installer skips files that already exist in the target. Pass `--force` on reinstalls to push updated templates into the target. Core base policy files are still protected unless you separately pass `--allow-core-overwrite`.
 
 **One-time workstation tools (run once, not per project):**
 
@@ -34,7 +38,7 @@ bash scripts/ai/install-mandatory-tools.sh   # rg, fd, jq, scc, etc.
 npm install -g repomix                        # context packing
 ```
 
-**Manual step-by-step** (if you prefer a local clone):
+**Manual step-by-step** (if you prefer calling the PHP installer directly):
 
 ```bash
 # 1. Install prerequisites
@@ -47,12 +51,39 @@ php tools/ai/ai.php preflight
 php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime both --dry-run
 
 # 4. Apply installation
-php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime both --project-name "your-project-name" --backup --verify-after --non-interactive
+php tools/ai/install-ai-kit.php \
+  --target /path/to/your-project \
+  --profile full-governance \
+  --runtime both \
+  --project-name "your-project-name" \
+  --backup \
+  --verify-after \
+  --non-interactive
+
+# Reinstall / push updated templates — add --force to overwrite existing managed files
+php tools/ai/install-ai-kit.php \
+  --target /path/to/your-project \
+  --profile full-governance \
+  --runtime both \
+  --project-name "your-project-name" \
+  --backup \
+  --verify-after \
+  --non-interactive \
+  --force
 
 # OpenCode-only full install, excluding GitHub Copilot adapter surfaces
 php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime opencode --without optional-agents-copilot-pack --project-name "your-project-name" --backup --verify-after --non-interactive
 
-# 5. Audit placeholders
+# 5. Generate repomix context bundle + run advisor (run inside the target repo)
+#    These run automatically when using the bash wrapper above.
+#    When calling the PHP installer directly, run them manually:
+cd /path/to/your-project
+SECRETS_SCAN=0 MAX_BUNDLE_TOKENS=100000 bash scripts/ai/run-repomix-context.sh . \
+  --depth 3 --top 120 --min-code 800 --min-files 3
+php tools/ai/ai.php advisor --all
+cd -
+
+# 6. Audit placeholders
 php tools/ai/ai.php placeholders --fail
 ```
 
