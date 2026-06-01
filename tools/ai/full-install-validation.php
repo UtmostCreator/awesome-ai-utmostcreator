@@ -80,6 +80,7 @@ if ($runApply && !$smokeMode) {
     } else {
         $report['backup_id'] = $backupId;
         runRequired($report, 'install-apply', $root, normalizePhp($phpBin, "php tools/ai/ai.php install --apply --profile {$profile} --mode {$mode} --force --allow-core-overwrite --reinstall --backup {$backupId}"), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $retryCount, $cancelFlag, $liveLog);
+        runRequired($report, 'post-install-catalog-refresh', $root, normalizePhp($phpBin, 'php tools/ai/generate-ai-catalog.php --write'), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $retryCount, $cancelFlag, $liveLog);
     }
 }
 

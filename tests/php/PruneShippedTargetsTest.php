@@ -138,7 +138,16 @@ class PruneShippedTargetsTest extends TestCase
     {
         $r = $this->runBash(['--list']);
         $this->assertSame(0, $r['exit'], "--list exited non-zero. stderr:\n" . $r['stderr']);
-        $this->assertNotSame('', trim($r['stdout']), '--list produced no output');
+        $expected = array_filter(
+            $this->manifestEntries(),
+            static fn(array $entry, string $path): bool => $entry['source'] !== $path,
+            ARRAY_FILTER_USE_BOTH
+        );
+        if ($expected !== []) {
+            $this->assertNotSame('', trim($r['stdout']), '--list produced no output');
+        } else {
+            $this->assertSame('', trim($r['stdout']), '--list should be empty when manifest has no duplicate shipped paths');
+        }
     }
 
     // ---- 2: every --list line is a manifest key with source != key --
@@ -149,6 +158,16 @@ class PruneShippedTargetsTest extends TestCase
         $this->assertSame(0, $r['exit']);
         $lines   = array_values(array_filter(array_map('trim', explode("\n", $r['stdout'])), 'strlen'));
         $entries = $this->manifestEntries();
+
+        $expected = array_filter(
+            $entries,
+            static fn(array $entry, string $path): bool => $entry['source'] !== $path,
+            ARRAY_FILTER_USE_BOTH
+        );
+        if ($expected === []) {
+            $this->assertSame([], $lines, '--list should be empty when manifest has no duplicate shipped paths');
+            return;
+        }
 
         $this->assertNotEmpty($lines, '--list should print at least one path');
         foreach ($lines as $line) {
