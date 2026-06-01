@@ -16,7 +16,7 @@ Deterministic catalog generated from installer registries.
 
 ## Packs
 
-- `setup-docs` (24 items)
+- `setup-docs` (25 items)
 - `capabilities-core` (5 items)
 - `base` (14 items)
 - `adapter-copilot` (9 items)
