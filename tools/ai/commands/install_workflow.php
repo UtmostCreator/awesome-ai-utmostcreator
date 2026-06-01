@@ -129,84 +129,20 @@ function aiRunInstallWorkflow(string $root, array $args): int
     $backupOnly = in_array('--backup-only', $args, true);
     if ($backupOnly) {
         $planData = aiLoadArtifactData($root, 'adapter-plan.json');
-        $creates = $planData['data']['create'] ?? [];
-        $modifies = $planData['data']['modify'] ?? [];
-        $targets = [];
-        foreach ([$creates, $modifies] as $list) {
-            if (!is_array($list)) {
-                continue;
-            }
-            foreach ($list as $item) {
-                if (!is_string($item) || $item === '') {
-                    continue;
-                }
-                $targets[] = $item;
-            }
+        $actions = $planData['data']['actions'] ?? [];
+        if (!is_array($actions)) {
+            $actions = [];
         }
-        $targets = array_values(array_unique($targets));
-
-        $backupRoot = $root . DIRECTORY_SEPARATOR . '.ai-backups';
-        if (!is_dir($backupRoot)) {
-            mkdir($backupRoot, AI_DIR_MODE, true);
-        }
-        $backupId = 'install-' . gmdate('Ymd-His');
-        $dir = $backupRoot . DIRECTORY_SEPARATOR . $backupId;
-        mkdir($dir, AI_DIR_MODE, true);
-
-        $zipPath = $dir . DIRECTORY_SEPARATOR . 'backup.zip';
-        $filesDir = $dir . DIRECTORY_SEPARATOR . 'files';
-        $zipStatus = 'skipped';
-        $dirStatus = 'skipped';
-        if (class_exists('ZipArchive')) {
-            $zip = new ZipArchive();
-            if ($zip->open($zipPath, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
-                foreach ($targets as $rel) {
-                    $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, rtrim($rel, '/'));
-                    if (is_file($abs)) {
-                        $zip->addFile($abs, str_replace('\\', '/', rtrim($rel, '/')));
-                    }
-                }
-                $zip->close();
-                $zipStatus = 'created';
-            }
-        }
-
-        if ($zipStatus !== 'created') {
-            if (!is_dir($filesDir)) {
-                mkdir($filesDir, AI_DIR_MODE, true);
-            }
-            foreach ($targets as $rel) {
-                $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, rtrim($rel, '/'));
-                $snapshot = $filesDir . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, rtrim($rel, '/'));
-                if (is_file($abs)) {
-                    $parent = dirname($snapshot);
-                    if (!is_dir($parent)) {
-                        mkdir($parent, AI_DIR_MODE, true);
-                    }
-                    copy($abs, $snapshot);
-                }
-            }
-            $dirStatus = 'created';
-        }
-
-        $manifest = [
-            'backup_id' => $backupId,
-            'created_at_utc' => gmdate('c'),
-            'zip_status' => $zipStatus,
-            'directory_status' => $dirStatus,
-            'targets' => $targets,
-        ];
-        file_put_contents($dir . DIRECTORY_SEPARATOR . 'manifest.json', json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+        $backup = aiInstallBackupCreate($root, $actions, $root, 'install');
 
         $data = [
             'status' => 'ok',
             'mode' => $mode,
             'runtime_mode' => $runtimeMode,
-            'backup_id' => $backupId,
-            'backup_dir' => '.ai-backups/' . $backupId,
-            'zip_status' => $zipStatus,
-            'directory_status' => $dirStatus,
-            'target_count' => count($targets),
+            'backup_id' => $backup['backup_id'],
+            'backup_dir' => $backup['backup_dir'],
+            'schema' => $backup['schema'],
+            'target_count' => $backup['entry_count'],
         ];
         $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install --backup-only', $data, 'ok', null, 'Backup created; proceed to install --apply once transaction apply is enabled.');
         fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
@@ -271,6 +207,15 @@ function aiRunInstallWorkflow(string $root, array $args): int
 
     $run = aiRunCommand($root, $cmd);
     $status = $run['exit'] === 0 ? 'ok' : 'failed';
+    if ($backupId !== '') {
+        if ($status === 'ok') {
+            $planData = aiLoadArtifactData($root, 'adapter-plan.json');
+            $actions = $planData['data']['actions'] ?? [];
+            aiInstallBackupRecordAfter($root, $backupId, is_array($actions) ? $actions : [], $root, 'applied');
+        } else {
+            aiInstallBackupUpdateState($root, $backupId, 'failed', 'installer command failed');
+        }
+    }
 
     $postInstallScript = ['requested' => $installConfig['runAfterInstall'] ?? null, 'executed' => false, 'reason' => null, 'exit' => null];
     if ($status === 'ok') {
@@ -718,56 +663,9 @@ function aiRunRollbackWorkflow(string $root, array $args): int
     }
 
     $dryRun = in_array('--dry-run', $args, true) || !in_array('--apply', $args, true);
-    $base = $root . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
-    $manifestPath = $base . DIRECTORY_SEPARATOR . 'manifest.json';
-    if (!is_file($manifestPath)) {
-        throw new RuntimeException('backup manifest not found for backup id: ' . $backupId);
-    }
-    $manifest = json_decode((string) file_get_contents($manifestPath), true);
-    if (!is_array($manifest)) {
-        throw new RuntimeException('invalid backup manifest JSON for backup id: ' . $backupId);
-    }
-
-    $targets = $manifest['targets'] ?? [];
-    $zipPath = $base . DIRECTORY_SEPARATOR . 'backup.zip';
-    $filesDir = $base . DIRECTORY_SEPARATOR . 'files';
-    $restored = [];
-    if (!$dryRun && is_file($zipPath) && class_exists('ZipArchive')) {
-        $zip = new ZipArchive();
-        if ($zip->open($zipPath) === true) {
-            $zip->extractTo($root);
-            $zip->close();
-            $restored = is_array($targets) ? $targets : [];
-        }
-    }
-    if (!$dryRun && $restored === [] && is_dir($filesDir)) {
-        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($filesDir, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
-        foreach ($it as $item) {
-            $rel = str_replace('\\', '/', substr($item->getPathname(), strlen($filesDir) + 1));
-            $dest = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-            if ($item->isDir()) {
-                if (!is_dir($dest)) {
-                    mkdir($dest, AI_DIR_MODE, true);
-                }
-                continue;
-            }
-            $parent = dirname($dest);
-            if (!is_dir($parent)) {
-                mkdir($parent, AI_DIR_MODE, true);
-            }
-            copy($item->getPathname(), $dest);
-            $restored[] = $rel;
-        }
-    }
-
-    $data = [
-        'status' => 'ok',
-        'backup' => $backupId,
-        'dry_run' => $dryRun,
-        'target_count' => is_array($targets) ? count($targets) : 0,
-        'restored_targets' => $restored,
-    ];
-    $written = aiCliWriteArtifact($root, 'rollback', 'php tools/ai/ai.php rollback --backup ' . $backupId, $data, 'ok', null, $dryRun ? 'Dry-run complete; use --apply to restore from backup.' : 'Rollback applied from backup snapshot.');
+    $data = aiInstallBackupRollback($root, $backupId, !$dryRun, in_array('--force', $args, true), aiInstallBackupParseOnlyArgs($args));
+    $artifactStatus = ($data['status'] ?? 'ok') === 'blocked' ? 'blocked' : 'ok';
+    $written = aiCliWriteArtifact($root, 'rollback', 'php tools/ai/ai.php rollback --backup ' . $backupId, $data, $artifactStatus, null, $dryRun ? 'Dry-run complete; use --apply to restore from backup.' : ($artifactStatus === 'blocked' ? 'Rollback blocked by conflicts; rerun with --force only if intentional.' : 'Rollback applied from backup snapshot.'));
     fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
-    return 0;
+    return ($data['status'] ?? 'ok') === 'blocked' ? 1 : 0;
 }

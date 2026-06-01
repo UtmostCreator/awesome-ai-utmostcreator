@@ -19,6 +19,7 @@
 - Placeholders: `php tools/ai/ai.php placeholders --fail`
 - Upgrade preview: `php tools/ai/ai.php upgrade --dry-run`
 - Rollback: `php tools/ai/ai.php rollback --backup <backup-id> --apply`
+- Specific-file rollback: `php tools/ai/ai.php rollback --backup <backup-id> --only path/to/file --apply`
 
 ## Hook Wiring
 

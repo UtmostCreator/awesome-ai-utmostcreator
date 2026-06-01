@@ -338,8 +338,8 @@ class InstallerSafetyTest extends TestCase
             $backupDir = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) ($backup['backup_dir'] ?? ''));
             $this->assertDirectoryExists($backupDir);
             $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'manifest.json');
-            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'prompts' . DIRECTORY_SEPARATOR . 'legacy.prompt.md');
-            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . '.ai-install-manifest.json');
+            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before' . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'prompts' . DIRECTORY_SEPARATOR . 'legacy.prompt.md');
+            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before' . DIRECTORY_SEPARATOR . '.ai-install-manifest.json');
 
             $installedAgents = glob($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents' . DIRECTORY_SEPARATOR . '*.agent.md') ?: [];
             $installedPrompts = glob($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'prompts' . DIRECTORY_SEPARATOR . '*.prompt.md') ?: [];
@@ -349,10 +349,93 @@ class InstallerSafetyTest extends TestCase
             $manifest = json_decode((string) file_get_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json'), true);
             $this->assertIsArray($manifest);
             $paths = array_map(static fn(array $entry): string => (string) ($entry['path'] ?? ''), $manifest['entries'] ?? []);
-            $this->assertContains('.github/prompts', $paths);
+            $this->assertContains('.github/prompts/legacy.prompt.md', $paths);
             $this->assertContains('.ai-install-manifest.json', $paths);
         } finally {
             $this->removeTree($target);
+        }
+    }
+
+    public function testCanonicalBackupRollbackSupportsSpecificCreatedFile(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/backup.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_specific_rollback_' . uniqid('', true);
+        $source = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_specific_source_' . uniqid('', true);
+
+        try {
+            mkdir($target . DIRECTORY_SEPARATOR . 'docs', 0700, true);
+            mkdir($source . DIRECTORY_SEPARATOR . 'templates', 0700, true);
+            file_put_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'existing.md', "before\n");
+            file_put_contents($source . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'existing.md', "after\n");
+            file_put_contents($source . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'created.md', "created\n");
+
+            $plan = [[
+                'type' => 'dir',
+                'source' => 'templates',
+                'target' => 'docs',
+                'action' => 'OVERWRITE_MANAGED',
+            ]];
+
+            $backup = aiInstallBackupCreate($target, $plan, $source, 'test');
+            $backupId = (string) $backup['backup_id'];
+
+            file_put_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'existing.md', "after\n");
+            file_put_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'created.md', "created\n");
+            aiInstallBackupRecordAfter($target, $backupId, $plan, $source, 'applied');
+
+            $dryRun = aiInstallBackupRollback($target, $backupId, false, false, ['docs/created.md']);
+            $this->assertSame('ok', $dryRun['status']);
+            $this->assertSame(['docs/created.md'], $dryRun['delete']);
+            $this->assertSame([], $dryRun['restore']);
+
+            $applied = aiInstallBackupRollback($target, $backupId, true, false, ['docs/created.md']);
+            $this->assertSame('ok', $applied['status']);
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'created.md');
+            $this->assertSame("after\n", file_get_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'existing.md'));
+        } finally {
+            $this->removeTree($target);
+            $this->removeTree($source);
+        }
+    }
+
+    public function testCanonicalBackupRollbackBlocksUserEditedCreatedFile(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/backup.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_conflict_rollback_' . uniqid('', true);
+        $source = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_conflict_source_' . uniqid('', true);
+
+        try {
+            mkdir($target . DIRECTORY_SEPARATOR . 'docs', 0700, true);
+            mkdir($source . DIRECTORY_SEPARATOR . 'templates', 0700, true);
+            file_put_contents($source . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'created.md', "created\n");
+
+            $plan = [[
+                'type' => 'dir',
+                'source' => 'templates',
+                'target' => 'docs',
+                'action' => 'CREATE',
+            ]];
+
+            $backup = aiInstallBackupCreate($target, $plan, $source, 'test');
+            $backupId = (string) $backup['backup_id'];
+            file_put_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'created.md', "created\n");
+            aiInstallBackupRecordAfter($target, $backupId, $plan, $source, 'applied');
+
+            file_put_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'created.md', "user edit\n");
+
+            $blocked = aiInstallBackupRollback($target, $backupId, true, false, []);
+            $this->assertSame('blocked', $blocked['status']);
+            $this->assertNotEmpty($blocked['conflicts']);
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'created.md');
+
+            $forced = aiInstallBackupRollback($target, $backupId, true, true, []);
+            $this->assertSame('ok', $forced['status']);
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'created.md');
+        } finally {
+            $this->removeTree($target);
+            $this->removeTree($source);
         }
     }
 
@@ -516,7 +599,7 @@ class InstallerSafetyTest extends TestCase
             $backupDir = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) ($backup['backup_dir'] ?? ''));
             $this->assertDirectoryExists($backupDir);
             $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'manifest.json');
-            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'failure-handling.md');
+            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'failure-handling.md');
             $manifest = json_decode((string) file_get_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json'), true);
             $this->assertIsArray($manifest);
             $paths = array_map(static fn(array $entry): string => (string) ($entry['path'] ?? ''), $manifest['entries'] ?? []);
@@ -631,7 +714,7 @@ class InstallerSafetyTest extends TestCase
             $this->assertSame([], $missingPaths, 'reinstall backup must capture every previously managed installed path');
 
             foreach ($managedPaths as $path) {
-                $snapshotPath = $backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+                $snapshotPath = $backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
                 $this->assertFileExists($snapshotPath, 'backup snapshot missing managed path: ' . $path);
             }
         } finally {
