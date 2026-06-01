@@ -10,6 +10,7 @@ require_once __DIR__ . '/docs.php';
 require_once __DIR__ . '/toolchain.php';
 require_once __DIR__ . '/script-runner.php';
 require_once __DIR__ . '/copilot-agent-renderer.php';
+require_once __DIR__ . '/backup.php';
 
 function aiInstallerRun(array $argv): int
 {
@@ -60,7 +61,7 @@ function aiInstallerRun(array $argv): int
     aiInstallerAssertPlanSourcesExist($config, $plan);
     $backupInfo = null;
     if (!$config['dryRun'] && ($config['backup'] ?? false)) {
-        $backupInfo = aiInstallerCreateBackup($config['targetRoot'], $plan);
+        $backupInfo = aiInstallBackupCreate($config['targetRoot'], $plan, $config['sourceRoot'], 'install-ai-kit');
         aiInstallerLog('backup created: ' . $backupInfo['backup_dir']);
     }
 
@@ -115,6 +116,9 @@ function aiInstallerRun(array $argv): int
     ];
 
     if (!$config['dryRun']) {
+        if (is_array($backupInfo) && is_string($backupInfo['backup_id'] ?? null)) {
+            aiInstallBackupUpdateState($config['targetRoot'], (string) $backupInfo['backup_id'], 'applying');
+        }
         aiInstallerApplyPlaceholders(
             $config['targetRoot'],
             $config['projectName'],
@@ -135,8 +139,15 @@ function aiInstallerRun(array $argv): int
         $manifest['placeholders'] = $placeholderStatus;
         aiInstallerWriteManifest($config['targetRoot'], $manifest);
 
+        if (is_array($backupInfo) && is_string($backupInfo['backup_id'] ?? null)) {
+            aiInstallBackupRecordAfter($config['targetRoot'], (string) $backupInfo['backup_id'], $plan, $config['sourceRoot'], 'applied');
+        }
+
         if (!empty($config['verifyAfter'])) {
             aiInstallerRunPostInstallVerification($config['targetRoot']);
+            if (is_array($backupInfo) && is_string($backupInfo['backup_id'] ?? null)) {
+                aiInstallBackupUpdateState($config['targetRoot'], (string) $backupInfo['backup_id'], 'validated');
+            }
         }
     }
 

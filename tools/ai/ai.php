@@ -65,6 +65,7 @@ Commands:
   upgrade        Preview or apply manifest-aware upgrades (planned)
   adapter-validate Validate installed adapter state and managed assets
   rollback       Restore from installer backup artifacts
+                 Use --only <path> to rollback a specific file or directory prefix
   packs          List installer profiles and packs
   placeholders   Scan and manage unresolved placeholders
   hooks          Hook wiring and status helpers (compatibility surface)

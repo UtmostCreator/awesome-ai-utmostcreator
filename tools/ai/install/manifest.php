@@ -190,6 +190,7 @@ function aiInstallerWriteSetupDocs(string $targetRoot, array $manifest): void
     $postInstall .= "- Placeholders: `php tools/ai/ai.php placeholders --fail`\n";
     $postInstall .= "- Upgrade preview: `php tools/ai/ai.php upgrade --dry-run`\n";
     $postInstall .= "- Rollback: `php tools/ai/ai.php rollback --backup <backup-id> --apply`\n";
+    $postInstall .= "- Specific-file rollback: `php tools/ai/ai.php rollback --backup <backup-id> --only path/to/file --apply`\n";
     $postInstall .= "\n## Hook Wiring\n\n";
     $postInstall .= "- Hook scripts are installed when `hooks-pack` is selected; wiring remains explicit.\n";
     $postInstall .= "- Wire hooks with: `php tools/ai/ai.php hooks install --driver husky|lefthook|native`.\n";
