@@ -38,3 +38,4 @@ Shell output enters context verbatim, so cap or scope it before running:
 - `docs/ai/context-packing.md` - Repomix bundles, freshness, and regeneration.
 - `docs/ai/source-of-truth.md` - evidence ordering and context authority.
 - `docs/ai/handoff-contract.md` - handoff content before compaction or task switch.
+- `docs/ai/opencode-models.md` - provider-agnostic model selection and prompt caching.
