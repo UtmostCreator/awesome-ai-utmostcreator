@@ -21,7 +21,13 @@ if ((PARATEST_PROCS > MAX_PARATEST_PROCS)); then
 fi
 
 if [[ -z "$PHP_BIN" ]]; then
-    if command -v php.exe >/dev/null 2>&1; then
+    # Prefer a native (Unix) php. Under WSL the Windows php.exe is on PATH but
+    # cannot resolve the \\wsl.localhost\ UNC working directory, so CMD.EXE
+    # rejects it and paratest workers crash. Only fall back to php.exe when no
+    # native php exists (e.g. Git Bash on real Windows).
+    if command -v php >/dev/null 2>&1; then
+        PHP_BIN="php"
+    elif command -v php.exe >/dev/null 2>&1; then
         PHP_BIN="php.exe"
     else
         PHP_BIN="php"
@@ -66,9 +72,16 @@ exit 1
 run_job "script-tests" \
     bash tests/scripts/ai/run-all-tests.sh
 
-if command -v bats >/dev/null 2>&1 && [[ -d tests/shell ]]; then
+bats_path="$(command -v bats 2>/dev/null || true)"
+if [[ -n "$bats_path" ]] && [[ -d tests/shell ]]; then
     if file tests/shell/*.bats 2>/dev/null | grep -q 'CRLF'; then
         echo "==> skip: bats-shell-tests (CRLF checkout; normalize *.bats to LF to run under Bash/Bats)"
+    elif [[ "$bats_path" == /mnt/c/* || "$bats_path" == *.exe ]]; then
+        # A Windows-hosted bats on PATH (common under WSL) has a CRLF shebang
+        # and cannot run Linux test files; skip instead of failing the suite.
+        echo "==> skip: bats-shell-tests (Windows bats at $bats_path is unusable under WSL; install a native bats)"
+    elif ! bats --version >/dev/null 2>&1; then
+        echo "==> skip: bats-shell-tests (bats smoke check failed; install a native bats)"
     else
         run_job "bats-shell-tests" bats tests/shell
     fi

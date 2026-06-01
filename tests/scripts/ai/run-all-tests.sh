@@ -5,7 +5,7 @@
 #
 # Environment:
 #   SUITE_TIMEOUT=120   Per-suite timeout in seconds (default: 120). Set 0 to disable.
-#   SCRIPT_TEST_JOBS=8  Number of shell test suites to run concurrently.
+#   SCRIPT_TEST_JOBS=1  Number of shell test suites to run concurrently (default: serial; set >1 to opt into parallel).
 
 set -euo pipefail
 
@@ -20,7 +20,7 @@ FAIL=0
 SKIP=0
 TIMEOUT_COUNT=0
 FAILED_SUITES=()
-SCRIPT_TEST_JOBS="${SCRIPT_TEST_JOBS:-8}"
+SCRIPT_TEST_JOBS="${SCRIPT_TEST_JOBS:-1}"
 
 run_suite() {
     local name="$1"
@@ -103,6 +103,10 @@ SUITES=(
     "ai-edit.sh|tests/scripts/ai/test-ai-edit.sh"
     "ai-rollback.sh|tests/scripts/ai/test-ai-rollback.sh"
     "install-mandatory-tools.sh|tests/scripts/ai/test-install-mandatory-tools.sh"
+    "check-file-refs.sh|tests/scripts/ai/test-check-file-refs.sh"
+    "prune-shipped-targets.sh|tests/scripts/ai/test-prune-shipped-targets.sh"
+    "repomix-freshness.sh|tests/scripts/ai/test-repomix-freshness.sh"
+    "misc-wrappers|tests/scripts/ai/test-misc-wrappers.sh"
 )
 
 run_suite_with_timeout() {
@@ -132,7 +136,7 @@ run_suite_with_timeout() {
 }
 
 run_parallel_suites() {
-    local idx=0 entry name file log rc
+    local idx=0 entry name file log rc suite_slug suite_tmp
     local pids=() names=() logs=()
 
     PARALLEL_TMP_DIR="$(mktemp -d)"
@@ -152,9 +156,24 @@ run_parallel_suites() {
             continue
         fi
 
-        log="$PARALLEL_TMP_DIR/${name//[^A-Za-z0-9_.-]/_}.log"
+        suite_slug="${name//[^A-Za-z0-9_.-]/_}"
+        suite_tmp="$PARALLEL_TMP_DIR/$suite_slug"
+        log="$suite_tmp/suite.log"
+        mkdir -p "$suite_tmp"
         printf '\n\033[1m━━━ %s (queued) ━━━\033[0m\n' "$name"
-        (run_suite_with_timeout "$file") >"$log" 2>&1 &
+        (
+            export AI_LOG_DIR="$suite_tmp/ai-logs"
+            export COPILOT_LOG_DIR="$suite_tmp/copilot-logs"
+            export AI_EVENT_LOG="$suite_tmp/ai-logs/events.jsonl"
+            export COPILOT_EVENT_LOG="$suite_tmp/copilot-logs/events.jsonl"
+            export AI_SESSION_DIR="$suite_tmp/ai-sessions"
+            export COPILOT_SESSION_DIR="$suite_tmp/copilot-sessions"
+            export AI_SNAPSHOT_DIR="$suite_tmp/ai-snapshots"
+            export COPILOT_SNAPSHOT_DIR="$suite_tmp/copilot-snapshots"
+            export AI_CONTEXT_DIR="$suite_tmp/ai-context"
+            export COPILOT_CONTEXT_DIR="$suite_tmp/copilot-context"
+            run_suite_with_timeout "$file"
+        ) >"$log" 2>&1 &
         pids[idx]=$!
         names[idx]="$name"
         logs[idx]="$log"

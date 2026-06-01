@@ -21,6 +21,26 @@ run_test() {
 
 printf 'post-tool-use.sh\n'
 
+# Missing stdin fails with a friendly error and no raw jq parse output
+test_missing_stdin() {
+    local out rc=0
+    out="$(AI_LOG_DIR="$TMP/logs-missing" AI_EVENT_LOG="$TMP/logs-missing/events.jsonl" "$BASH_BIN" "$SCRIPT" </dev/null 2>&1)" || rc=$?
+    ((rc != 0))
+    [[ "$out" == *"JSON tool event required on stdin"* ]]
+    [[ "$out" != *"jq:"* ]]
+}
+run_test "missing stdin has friendly error" test_missing_stdin
+
+# Invalid stdin fails with a friendly error and no raw jq parse output
+test_invalid_stdin() {
+    local out rc=0
+    out="$(printf '{not-json' | AI_LOG_DIR="$TMP/logs-invalid" AI_EVENT_LOG="$TMP/logs-invalid/events.jsonl" "$BASH_BIN" "$SCRIPT" 2>&1)" || rc=$?
+    ((rc != 0))
+    [[ "$out" == *"invalid JSON tool event on stdin"* ]]
+    [[ "$out" != *"jq:"* ]]
+}
+run_test "invalid stdin has friendly error" test_invalid_stdin
+
 # Success event produces tool.result
 test_success_event() {
     local input out

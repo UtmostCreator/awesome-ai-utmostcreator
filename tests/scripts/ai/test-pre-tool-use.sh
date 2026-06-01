@@ -33,6 +33,30 @@ check_decision() {
 
 printf 'pre-tool-use.sh\n'
 
+# Missing stdin denies with JSON policy output
+test_missing_stdin_denied() {
+    local out rc=0 decision reason
+    out="$("$BASH_BIN" "$SCRIPT" </dev/null 2>/dev/null)" || rc=$?
+    ((rc != 0))
+    decision="$(echo "$out" | jq -r '.permissionDecision')"
+    reason="$(echo "$out" | jq -r '.permissionDecisionReason')"
+    [[ "$decision" == "deny" ]]
+    [[ "$reason" == "JSON tool request required on stdin" ]]
+}
+run_test "missing stdin is denied" test_missing_stdin_denied
+
+# Invalid stdin denies with JSON policy output
+test_invalid_stdin_denied() {
+    local out rc=0 decision reason
+    out="$(printf '{not-json' | "$BASH_BIN" "$SCRIPT" 2>/dev/null)" || rc=$?
+    ((rc != 0))
+    decision="$(echo "$out" | jq -r '.permissionDecision')"
+    reason="$(echo "$out" | jq -r '.permissionDecisionReason')"
+    [[ "$decision" == "deny" ]]
+    [[ "$reason" == "invalid JSON tool request on stdin" ]]
+}
+run_test "invalid stdin is denied" test_invalid_stdin_denied
+
 # Non-terminal tools pass through
 test_non_terminal() {
     local input out

@@ -47,6 +47,20 @@ AI_OUTPUT=json "$BASH_BIN" "$script" "$tmp/app/UserService.php" --lines 4 \
         and (.errors | type == "array")
     ' >/dev/null
 
+# JSON range/total_lines/limits/meta contract.
+AI_OUTPUT=json "$BASH_BIN" "$script" "$tmp/app/UserService.php" --range 3:5 \
+    | jq -e '
+        .range.start == 3
+        and .range.end == 5
+        and .total_lines == 10
+        and .truncated == false
+        and (.limits.max_bytes | type == "number")
+        and (.limits.max_columns | type == "number")
+        and (.meta.size_bytes | type == "number")
+        and (.meta.size_bytes > 0)
+        and (.content | contains("login"))
+    ' >/dev/null
+
 # Dry run.
 AI_OUTPUT=json "$BASH_BIN" "$script" "$tmp/app/UserService.php" --around 4 --dry-run \
     | jq -e '.status == "dry_run" and .content == ""' >/dev/null
@@ -93,6 +107,16 @@ fi
 # Long line truncation.
 "$BASH_BIN" "$script" "$tmp/app/large.txt" --force --max-bytes 10K --max-columns 20 --lines 1 \
     | grep -q 'truncated'
+
+# JSON mode must honor --max-columns (content bounded + truncated flag set).
+AI_OUTPUT=json "$BASH_BIN" "$script" "$tmp/app/large.txt" --force --max-bytes 10K --max-columns 20 --lines 1 \
+    | jq -e '
+        .status == "ok"
+        and .truncated == true
+        and (.limits.max_columns == 20)
+        and (.content | contains("truncated"))
+        and (.content | length < 100)
+    ' >/dev/null
 
 # Generated/vendor path warning.
 AI_OUTPUT=json "$BASH_BIN" "$script" "$tmp/node_modules/pkg/index.js" --force 2>/dev/null \

@@ -20,8 +20,20 @@ Modes:
 EOF
 }
 
-mode="${1:?mode required}"
-search_target="${2:?target required}"
+case "${1:-}" in
+--help | -h)
+    usage
+    exit 0
+    ;;
+esac
+
+if [[ $# -lt 2 ]]; then
+    usage >&2
+    die "mode and target required"
+fi
+
+mode="$1"
+search_target="$2"
 file="${3:-}"
 
 if [[ -n "$file" ]] && [[ "$file" == --* ]]; then
@@ -39,10 +51,6 @@ while [[ $# -gt 0 ]]; do
     --json)
         OUTPUT_JSON=1
         shift
-        ;;
-    --help | -h)
-        usage
-        exit 0
         ;;
     *) die "unknown option: $1" ;;
     esac

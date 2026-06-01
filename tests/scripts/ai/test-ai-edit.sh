@@ -22,8 +22,8 @@ skip_test() { SKIP=$((SKIP+1)); printf '  \033[0;33m⊘\033[0m %s (skipped: %s)\
 
 printf 'ai-edit.sh\n'
 
-# --help (exits non-zero but prints usage)
-test_help() { ("$BASH_BIN" "$SCRIPT" --help 2>&1 || true) | grep -q 'Usage'; }
+# --help exits successfully and prints usage
+test_help() { "$BASH_BIN" "$SCRIPT" --help 2>&1 | grep -q 'Usage'; }
 run_test "help flag works" test_help
 
 # Missing mode fails

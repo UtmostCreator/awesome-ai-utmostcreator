@@ -3,8 +3,26 @@ set -euo pipefail
 # shellcheck source=scripts/ai/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
+usage() {
+    cat <<'EOF'
+Usage:
+  post-tool-use.sh < tool-event.json
+
+Reads a JSON tool result event from stdin and appends a normalized event log entry.
+EOF
+}
+
+case "${1:-}" in
+--help | -h)
+    usage
+    exit 0
+    ;;
+esac
+
 mkdir -p "$COPILOT_LOG_DIR"
 input="$(cat)"
+[[ -n "$input" ]] || die "JSON tool event required on stdin"
+jq -e . >/dev/null 2>&1 <<<"$input" || die "invalid JSON tool event on stdin"
 SESSION_ID="${SESSION_ID:-post-tool-use-$(date +%Y%m%d-%H%M%S)-$$}"
 TRACE_ID="${TRACE_ID:-trc-${SESSION_ID}}"
 TASK_ID="${TASK_ID:-tsk-${SESSION_ID}}"
