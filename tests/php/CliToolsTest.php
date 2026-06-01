@@ -75,6 +75,104 @@ class CliToolsTest extends TestCase
         return $command;
     }
 
+    /**
+     * @return array{stdout: string, stderr: string, exit: int}
+     */
+    private function runCommandInCwd(string $command, string $cwd): array
+    {
+        $descriptors = [
+            0 => ['pipe', 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+
+        $env = [
+            'HOME'              => sys_get_temp_dir(),
+            'XDG_CONFIG_HOME'   => sys_get_temp_dir(),
+            'GIT_CONFIG_GLOBAL' => '/dev/null',
+            'PATH'              => (string) getenv('PATH'),
+        ];
+
+        $command = $this->normalizePhpCommand($command);
+        $process = proc_open($command, $descriptors, $pipes, $cwd, $env);
+
+        $this->assertIsResource($process, "proc_open failed for: $command");
+
+        fclose($pipes[0]);
+        $stdout = (string) stream_get_contents($pipes[1]);
+        $stderr = (string) stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exit = proc_close($process);
+
+        return ['stdout' => $stdout, 'stderr' => $stderr, 'exit' => $exit];
+    }
+
+    private function makeInstalledTargetFixture(bool $includeCatalog): string
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_target_validator_' . uniqid('', true);
+
+        mkdir($target . '/tools/ai', 0777, true);
+        mkdir($target . '/docs/ai', 0777, true);
+        mkdir($target . '/scripts/ai', 0777, true);
+        mkdir($target . '/tests/php', 0777, true);
+
+        copy(self::$repoRoot . '/tools/ai/validate-ai-config.php', $target . '/tools/ai/validate-ai-config.php');
+        copy(self::$repoRoot . '/tools/ai/validate-ai-catalog.php', $target . '/tools/ai/validate-ai-catalog.php');
+        copy(self::$repoRoot . '/tools/ai/ai_catalog_lib.php', $target . '/tools/ai/ai_catalog_lib.php');
+
+        file_put_contents($target . '/AGENTS.md', "# Agent rules\n");
+        file_put_contents($target . '/docs/ai/project-context.md', "# Project context\n");
+        file_put_contents($target . '/docs/ai/POST-INSTALL.md', "# Post install\n");
+        file_put_contents($target . '/scripts/ai/ai-search.sh', "#!/usr/bin/env bash\n");
+        file_put_contents($target . '/tools/ai/validate-install-surface.php', "<?php\n");
+        file_put_contents($target . '/tests/php/CliToolsTest.php', "<?php\n");
+
+        file_put_contents(
+            $target . '/.ai-install-manifest.json',
+            json_encode([
+                'profile' => 'full-governance',
+                'packs' => ['base'],
+                'files' => [
+                    'AGENTS.md' => ['installed_hash' => 'sha256:test'],
+                ],
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL
+        );
+
+        if ($includeCatalog) {
+            file_put_contents($target . '/docs/ai/catalog.json', "{}\n");
+            file_put_contents($target . '/docs/ai/manifest.json', "{}\n");
+        }
+
+        return $target;
+    }
+
+    private function removeTree(string $path): void
+    {
+        if (is_file($path) || is_link($path)) {
+            @unlink($path);
+            return;
+        }
+
+        if (!is_dir($path)) {
+            return;
+        }
+
+        $items = scandir($path);
+        if ($items === false) {
+            return;
+        }
+
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+            $this->removeTree($path . DIRECTORY_SEPARATOR . $item);
+        }
+
+        @rmdir($path);
+    }
+
     // ---- validate-ai-config.php (no flags; runs unconditionally) ----
 
     public function testValidateAiConfigExitsZero(): void
@@ -111,6 +209,32 @@ class CliToolsTest extends TestCase
         $result = $this->runTool('php tools/ai/validate-ai-catalog.php');
         $combined = $result['stdout'] . $result['stderr'];
         $this->assertStringContainsString('OK', $combined);
+    }
+
+    public function testInstalledTargetValidateAiConfigIgnoresLocalCliToolsTestMarker(): void
+    {
+        $target = $this->makeInstalledTargetFixture(false);
+
+        try {
+            $result = $this->runCommandInCwd('php tools/ai/validate-ai-config.php', $target);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+            $this->assertStringContainsString('OK: target AI config validation passed', $result['stdout'] . $result['stderr']);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testInstalledTargetValidateAiCatalogIgnoresLocalCliToolsTestMarker(): void
+    {
+        $target = $this->makeInstalledTargetFixture(true);
+
+        try {
+            $result = $this->runCommandInCwd('php tools/ai/validate-ai-catalog.php', $target);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+            $this->assertStringContainsString('OK: target AI catalog validation passed', $result['stdout'] . $result['stderr']);
+        } finally {
+            $this->removeTree($target);
+        }
     }
 
     // ---- generate-ai-catalog.php --check ----

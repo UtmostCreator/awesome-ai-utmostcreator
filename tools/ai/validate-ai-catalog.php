@@ -12,7 +12,7 @@ foreach ($argv as $arg) {
 }
 
 $candidateRoot = dirname(__DIR__, 2);
-$sourceRepoMode = is_file($candidateRoot . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
+$sourceRepoMode = is_dir($candidateRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'templates');
 if ($targetArg !== null || (!$sourceRepoMode && is_file($candidateRoot . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
     $targetRoot = $targetArg !== null ? realpath($targetArg) : realpath(dirname(__DIR__, 2));
     if ($targetRoot === false) {

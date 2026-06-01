@@ -1,0 +1,50 @@
+---
+name: post-install-setup
+description: Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first
+argument-hint: "Describe the installed repo and any remaining setup blocker or validation failure"
+---
+
+## What I Do
+
+I guide the first safe setup pass after install: fill required placeholders, point to the canonical checklist, and choose the smallest validation steps that prove the installed AI surface is usable.
+
+## When To Use Me
+
+- right after installing the AI workflow kit into a repository
+- when placeholders still remain in `docs/ai/project-context.md`
+- when instruction globs still need to be filled
+- when install-generated docs or setup state may be stale
+
+## Read Alongside
+
+- `docs/ai/POST-INSTALL.md`
+- `docs/ai/project-context.md`
+- `docs/ai/project-context-placeholders.md`
+- `docs/ai/validation.md`
+
+## Workflow
+
+1. open `docs/ai/POST-INSTALL.md` and use it as the setup checklist
+2. fill required values in `docs/ai/project-context.md`
+3. replace `<FRONTEND_PATH_GLOB>` and `<TEST_PATH_GLOB>` in the installed instruction files when those surfaces exist
+4. run `php tools/ai/ai.php placeholders --fail` to confirm required placeholders are resolved
+5. run the installed validators before broad repo verification:
+   - `php tools/ai/validate-ai-config.php`
+   - `php tools/ai/validate-install-surface.php --strict`
+   - `php tools/ai/validate-ai-catalog.php`
+6. run `php tools/ai/ai.php advisor --all` for guided follow-up if the repo supports it
+7. only recommend broad repo verification after the setup-specific checks are green
+
+## Output
+
+- unresolved setup blockers
+- files that still need human edits
+- commands run
+- results
+- safest next step
+
+## Gotchas
+
+- do not treat broad application lint, typecheck, or security findings as install-surface failures unless the installed AI files actually caused them
+- do not leave `docs/ai/project-context.md` in placeholder form before using write-capable AI flows
+- do not assume internal source-repo-only agents such as `bootstrapper` are shipped to installed projects

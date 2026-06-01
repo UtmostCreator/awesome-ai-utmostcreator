@@ -135,7 +135,7 @@ function aiInstallerRun(array $argv): int
             throw new RuntimeException('unresolved required placeholders found for strict profile; rerun with --allow-placeholders only when intentional');
         }
 
-        $manifest = aiInstallerBuildManifest($config, $packs, $applied);
+        $manifest = aiInstallerBuildManifest($config, $packs, $plan);
         $manifest['placeholders'] = $placeholderStatus;
         aiInstallerWriteManifest($config['targetRoot'], $manifest);
 
@@ -326,10 +326,15 @@ function aiInstallerRunTargetCommand(string $targetRoot, array $command): array
 
 function aiInstallerRunPostInstallVerification(string $targetRoot): void
 {
+    $validatorRoot = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..');
+    if ($validatorRoot === false) {
+        throw new RuntimeException('could not resolve validator root for post-install verification');
+    }
+
     $commands = [
-        [PHP_BINARY, 'tools/ai/validate-ai-config.php'],
-        [PHP_BINARY, 'tools/ai/validate-install-surface.php', '--strict'],
-        [PHP_BINARY, 'tools/ai/validate-ai-catalog.php'],
+        [PHP_BINARY, $validatorRoot . DIRECTORY_SEPARATOR . 'validate-ai-config.php', '--target=' . $targetRoot],
+        [PHP_BINARY, $validatorRoot . DIRECTORY_SEPARATOR . 'validate-install-surface.php', '--strict', '--target=' . $targetRoot],
+        [PHP_BINARY, $validatorRoot . DIRECTORY_SEPARATOR . 'validate-ai-catalog.php', '--target=' . $targetRoot],
     ];
 
     foreach ($commands as $command) {

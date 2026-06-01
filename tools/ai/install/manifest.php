@@ -30,11 +30,16 @@ function aiInstallerWriteManifest(string $targetRoot, array $manifest): void
     file_put_contents($derived, $json);
 }
 
-function aiInstallerBuildManifest(array $config, array $packs, array $applied): array
+function aiInstallerBuildManifest(array $config, array $packs, array $plan): array
 {
     $existingManifest = aiInstallerReadExistingManifest($config['targetRoot']);
-    $files = is_array($existingManifest['files'] ?? null) ? $existingManifest['files'] : [];
-    foreach ($applied as $item) {
+    $files = [];
+    foreach ($plan as $item) {
+        $action = (string) ($item['action'] ?? '');
+        if (in_array($action, ['SKIP_EXISTING_UNMANAGED', 'SKIP_PROTECTED_CORE'], true)) {
+            continue;
+        }
+
         $rel = $item['target'];
         $abs = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
         $hash = aiInstallerHashPath($abs);
@@ -51,8 +56,7 @@ function aiInstallerBuildManifest(array $config, array $packs, array $applied): 
         ];
     }
 
-    $existingPacks = is_array($existingManifest['packs'] ?? null) ? $existingManifest['packs'] : [];
-    $mergedPacks = array_values(array_unique(array_merge($existingPacks, $packs)));
+    $mergedPacks = array_values(array_unique($packs));
 
     $pendingConfiguration = [
         'Fill docs/ai/project-context.md',

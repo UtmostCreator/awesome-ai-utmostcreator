@@ -162,7 +162,11 @@ npm install -g repomix                        # context packing
 bash install-ai-kit.sh /path/to/your-project
 # or with an explicit project name:
 bash install-ai-kit.sh /path/to/your-project "your-project-name"
+# reinstall / push updated templates — use --force to overwrite existing managed files:
+bash install-ai-kit.sh /path/to/your-project "your-project-name" --force
 ```
+
+> **When to use `--force`**: By default the installer skips files that already exist in the target (`skip_existing_unmanaged`, `skip_identical_existing`). Pass `--force` on reinstalls to push updated templates into the target. Core base policy files are still protected unless you separately pass `--allow-core-overwrite` to the PHP installer directly.
 
 ---
 
@@ -191,6 +195,18 @@ php tools/ai/install-ai-kit.php \
   --verify-after \
   --non-interactive
 
+# Reinstall / push updated templates — add --force to overwrite existing managed files
+# (safe: core base policy files are still protected without --allow-core-overwrite)
+php tools/ai/install-ai-kit.php \
+  --target /path/to/your-project \
+  --profile full-governance \
+  --runtime both \
+  --project-name "your-project-name" \
+  --backup \
+  --verify-after \
+  --non-interactive \
+  --force
+
 # OpenCode-only full install — excludes GitHub Copilot adapter files
 php tools/ai/install-ai-kit.php \
   --target /path/to/your-project \
@@ -202,12 +218,23 @@ php tools/ai/install-ai-kit.php \
   --verify-after \
   --non-interactive
 
-# 4. Audit remaining placeholders
+# 4. Generate repomix context bundle + run advisor (run from inside the target repo)
+#    These run automatically when using the bash wrapper (install-ai-kit.sh).
+#    When using the PHP installer directly, run them manually:
+cd /path/to/your-project
+SECRETS_SCAN=0 MAX_BUNDLE_TOKENS=100000 bash scripts/ai/run-repomix-context.sh . \
+  --depth 3 --top 120 --min-code 800 --min-files 3
+php tools/ai/ai.php advisor --all
+cd -
+
+# 5. Audit remaining placeholders
 php tools/ai/ai.php placeholders --fail
 
-# 5. Open the post-install guide for required follow-up steps
+# 6. Open the post-install guide for required follow-up steps
 cat /path/to/your-project/docs/ai/POST-INSTALL.md
 ```
+
+> **Note**: When you use `bash install-ai-kit.sh`, steps 4–6 above (repomix, advisor, tool inventory) run automatically as part of the wrapper. When you call the PHP installer directly, you must run them yourself.
 
 ### Required Flags Reference
 
