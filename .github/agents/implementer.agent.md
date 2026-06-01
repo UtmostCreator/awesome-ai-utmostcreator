@@ -68,12 +68,23 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `git stash list*`
 - `git stash show*`
 - `bash scripts/ai/ai-search.sh *`
+- `AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
 - `bash scripts/ai/rg-code.sh *`
 - `bash scripts/ai/fd-files.sh *`
 - `bash scripts/ai/preview-file.sh *`
+- `AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
 - `bash scripts/ai/query-usage.sh *`
 - `bash scripts/ai/git-forensics.sh *`
 - `bash scripts/ai/ai-verify.sh *`
+- `AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *`
+- `env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *`
+- `bash -n scripts/*.sh`
+- `bash -n scripts/**/*.sh`
+- `bash -n scripts/doctor.sh`
+- `bash scripts/doctor.sh`
+- `bash scripts/doctor.sh *`
 - `bash scripts/ai/ai-doc-check.sh --check*`
 - `bash scripts/ai/ai-file-freshness.sh *`
 - `bash scripts/ai/ai-install-coverage.sh *`
@@ -98,6 +109,20 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `shellcheck *`
 - `markdownlint-cli2 *`
 - `php tools/ai/validate-*.php *`
+- `php tools/ai/generate-*.php --check*`
+- `scc *`
+- `tokei *`
+- `ast-grep *`
+- `bat *`
+- `fx *`
+- `glow *`
+- `difft *`
+- `delta *`
+- `lychee *`
+- `actionlint*`
+- `shfmt -d *`
+- `semgrep *`
+- `bash scripts/ai/repomix-freshness.sh *`
 
 Do not run arbitrary shell commands. Do not run commands not in this list.
 Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
@@ -161,7 +186,7 @@ Use: `Not run: <command> — <reason>` and `Recommended: <command> — <why>`.
 
 ## Stop Conditions
 
-Stop and hand off when instruction specificity is below 50/100, architecture redesign is needed, target artifact or owner is unclear, acceptance criteria are missing for risky change, implementation would touch more than 6 unrelated files, diff grows beyond planned slice, similar logic exists and replacement needs approval, tests fail outside the slice, secrets would need inspection, or package install/dependency update/migration/deployment/broad formatting/destructive git operation is required.
+Stop and hand off when: specificity is below 50/100, redesign is needed, owner or target is unclear, acceptance criteria are missing for risky change, the diff exceeds ~6 files or the planned slice, similar logic needs approval to replace, tests fail outside the slice, secrets need inspection, or any install/upgrade/migration/deploy/destructive-git operation is required.
 
 ## Final Output
 

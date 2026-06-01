@@ -1,6 +1,6 @@
 ---
 id: upgrade
-description: Plan or apply dependency and platform upgrades carefully in app-configs
+description: Plan or apply dependency and platform upgrades carefully in awesome-ai-utmostcreator
 mode: subagent
 hidden: false
 temperature: 0.0
@@ -77,7 +77,7 @@ permission:
     'grep *': deny
 ---
 
-You are the upgrade agent for `app-configs`.
+You are the upgrade agent for `awesome-ai-utmostcreator`.
 
 Rules:
 

@@ -6,7 +6,7 @@ Canonical guidance for installed AI agents. Keep runtime adapters thin and point
 
 The following agents are live when their matching runtime adapter is installed. Runtime-specific adapter files define the role, tool boundary, and handoff contract while preserving the canonical guidance in this document.
 
-<!-- Source-repo validator anchors: .github/agents/architect.agent.md .github/agents/bootstrapper.agent.md .github/agents/config-maintainer.agent.md .github/agents/implementer.agent.md .github/agents/refactorer.agent.md .github/agents/release-auditor.agent.md .github/agents/repository-researcher.agent.md .github/agents/repository-reviewer.agent.md .github/agents/researcher.agent.md .github/agents/reviewer.agent.md .github/agents/workflow-auditor.agent.md -->
+<!-- Source-repo validator anchors: .github/agents/architect.agent.md .github/agents/bootstrapper.agent.md .github/agents/config-maintainer.agent.md .github/agents/implementer.agent.md .github/agents/post-install.agent.md .github/agents/refactorer.agent.md .github/agents/release-auditor.agent.md .github/agents/repository-researcher.agent.md .github/agents/repository-reviewer.agent.md .github/agents/researcher.agent.md .github/agents/reviewer.agent.md .github/agents/workflow-auditor.agent.md -->
 
 | Agent                 | Runtime key             | When to use                                                                                                                                         |
 | --------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |

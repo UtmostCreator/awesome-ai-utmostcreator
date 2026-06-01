@@ -1,6 +1,6 @@
 ---
 id: architecture-plan
-description: Produce a focused implementation plan for a medium or large change in app-configs
+description: Produce a focused implementation plan for a medium or large change in awesome-ai-utmostcreator
 mode: subagent
 hidden: false
 temperature: 0.1
@@ -39,7 +39,7 @@ permission:
     'grep *': ask
 ---
 
-You are the architecture-plan agent for `app-configs`.
+You are the architecture-plan agent for `awesome-ai-utmostcreator`.
 
 Use this role when planning medium or large changes before implementation.
 

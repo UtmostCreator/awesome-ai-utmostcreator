@@ -6,7 +6,7 @@ argument-hint: 'Describe what you are planning or reviewing in this repository'
 
 ## What I Do
 
-I provide durable repository context for `app-configs` and point to the support files that other workflows should read next.
+I provide durable repository context for `awesome-ai-utmostcreator` and point to the support files that other workflows should read next.
 
 ## When To Use Me
 
@@ -31,10 +31,10 @@ Load the smallest relevant task context first when available. If none exists, st
 ## Project Shape
 
 - Project type: `php project`
-- Summary: `AI workflow starter for app-configs`
+- Summary: `AI workflow starter for awesome-ai-utmostcreator`
 - Primary language: `unknown`
 - Primary runtime: `unknown`
-- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.eslintrc.json,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.husky,.lefthook.yml,.markdownlint-cli2.yaml,.opencode,.prettierrc.json,.repomixignore,.schemas,.shellcheckrc,.stylelintrc.json,AGENTS.md,CLAUDE.md,CONTRIBUTING.md,README.md,SECURITY.md,SUPPORT.md,composer.json,composer.lock,configs,docs,instruction improvements,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,scripts,tests,tools`
+- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,sh-commands-output.md,tests,tools`
 - Inactive paths: `unknown`
 - Targets: `unknown`
 

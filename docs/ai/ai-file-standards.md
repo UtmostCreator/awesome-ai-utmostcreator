@@ -1,6 +1,6 @@
-# AI File Standards
+# awesome-ai-utmostcreator AI File Standards
 
-Use this file as the canonical content and size contract for AI workflow files in this repository and in installed target repositories.
+Use this file as the installed repository's canonical content and size contract for AI workflow files.
 
 ## Purpose
 

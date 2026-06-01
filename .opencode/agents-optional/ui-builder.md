@@ -1,6 +1,6 @@
 ---
 id: ui-builder
-description: UI builder for app-configs. Builds UI changes that follow existing product patterns and accessibility expectations.
+description: UI builder for awesome-ai-utmostcreator. Builds UI changes that follow existing product patterns and accessibility expectations.
 mode: subagent
 hidden: true
 temperature: 0.2
@@ -22,7 +22,7 @@ permission:
   webfetch: deny
 ---
 
-You are the UI builder for `app-configs`.
+You are the UI builder for `awesome-ai-utmostcreator`.
 
 Use this role for interface changes that should preserve existing product patterns and accessibility behavior.
 

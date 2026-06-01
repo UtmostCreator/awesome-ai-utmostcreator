@@ -1,23 +1,14 @@
 # AI Setup
 
-- Installed at: `2026-05-10T15:25:11+00:00`
+- Installed at: `2026-06-01T01:20:22+00:00`
 - Profile: `full-governance`
 - Package: `ai-universal-rules`
 
 ## Installed Packs
 
-- `capabilities-extended-full`
+- `capabilities-governance`
 - `hooks-pack`
 - `ci-pack`
-- `scripts-pack`
-- `policy-pack`
-- `evidence-pack`
-- `adapter-copilot`
-- `adapter-opencode`
-- `capabilities-extended-lite`
-- `base`
-- `setup-docs`
-- `capabilities-core`
 - `docs-reference-pack`
 - `delivery-pack`
 - `optional-agents-opencode-pack`
@@ -29,8 +20,15 @@
 - `advisor-pack`
 - `target-tools-pack`
 - `shared-templates-pack`
-- `capabilities-governance`
+- `scripts-pack`
+- `policy-pack`
+- `evidence-pack`
+- `adapter-copilot`
+- `adapter-opencode`
 - `capabilities-extended`
+- `base`
+- `setup-docs`
+- `capabilities-core`
 
 ## Next Steps
 

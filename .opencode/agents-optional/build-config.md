@@ -1,6 +1,6 @@
 ---
 id: build-config
-description: Update build, packaging, or verification configuration in app-configs
+description: Update build, packaging, or verification configuration in awesome-ai-utmostcreator
 mode: subagent
 hidden: false
 temperature: 0.0
@@ -77,7 +77,7 @@ permission:
     'grep *': deny
 ---
 
-You are the build-config agent for `app-configs`.
+You are the build-config agent for `awesome-ai-utmostcreator`.
 
 Rules:
 

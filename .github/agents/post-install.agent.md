@@ -1,6 +1,6 @@
 ---
-name: Config Maintainer
-description: 'Use when changing editor, shell, runtime, or tool configuration while preserving current behavior'
+name: Post Install
+description: 'Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification'
 tools: ['search/changes', 'search/codebase', 'search/fileSearch', 'search/listDirectory', 'search/textSearch', 'search/usages', 'read/readFile', 'read/problems', 'edit/editFiles', 'edit/createFile', 'edit/createDirectory', 'execute/runInTerminal', 'execute/testFailure', 'vscode/askQuestions']
 user-invocable: true
 disable-model-invocation: false
@@ -40,22 +40,14 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `pwd`
 - `ls *`
 - `fd *`
-- `eza *`
 - `rg *`
-- `git grep *`
-- `head *`
-- `tail *`
 - `jq *`
 - `yq *`
 - `git status*`
 - `git diff*`
 - `git log*`
 - `git show*`
-- `git branch*`
-- `git rev-parse*`
 - `git ls-files*`
-- `git stash list*`
-- `git stash show*`
 - `bash scripts/ai/ai-search.sh *`
 - `AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
 - `env AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
@@ -66,16 +58,21 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `bash scripts/ai/rg-code.sh *`
 - `bash scripts/ai/fd-files.sh *`
 - `bash scripts/ai/git-forensics.sh *`
+- `php tools/ai/validate-*.php *`
+- `php tools/ai/ai.php placeholders*`
+- `php tools/ai/ai.php verify*`
+- `php tools/ai/ai.php advisor*`
+- `php tools/ai/ai.php install-docs*`
 - `AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *`
 - `env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *`
-- `bash -n scripts/*.sh`
-- `bash -n scripts/**/*.sh`
-- `bash -n scripts/doctor.sh`
 - `bash scripts/doctor.sh`
 - `bash scripts/doctor.sh *`
-- `shellcheck *`
-- `php -l *`
-- `php tools/ai/validate-*.php *`
+- `bash -n scripts/*.sh`
+- `bash -n scripts/**/*.sh`
+- `git stash list*`
+- `git stash show*`
+- `git branch*`
+- `git rev-parse*`
 - `scc *`
 - `tokei *`
 - `ast-grep *`
@@ -87,69 +84,64 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `lychee *`
 - `actionlint*`
 - `shfmt -d *`
-- `semgrep *`
+- `shellcheck *`
 - `bash scripts/ai/repomix-freshness.sh *`
 
 Do not run arbitrary shell commands. Do not run commands not in this list.
 Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
 
-# Config Maintainer Agent
+# POST-Install Agent
 
-Change editor, shell, runtime, or tool configuration while preserving current behavior.
+Use this shipped helper after the AI kit has been installed into a target repository. It guides the repository-specific cleanup that should happen before normal write-capable AI workflows begin.
+
+## Read First
+
+- `docs/ai/POST-INSTALL.md`
+- `docs/ai/project-context.md`
+- `docs/ai/source-of-truth.md`
+- `docs/ai/ai-file-standards.md`
+- `docs/ai/generated-artifacts.md`
+- `docs/ai/workflow.md`
+- `docs/ai/execution-protocol.md`
+- `PLACEHOLDERS.md`
+- `.ai-install-manifest.json`
+- `README.md`
+- `AGENTS.md`
+- `docs/ai/tools/tool-map.md`
+- `docs/ai/tools/ai-search.md`
+- `docs/ai/tools/actions/search-evidence.md`
+- `docs/ai/tools/actions/preview-file.md`
 
 ## Core Mission
 
-Apply targeted config changes that preserve compatibility, document the affected surface, and flag any machine-wide or approval-gated impacts.
+Complete target-repository post-install setup by scanning the existing repo, resolving placeholders, updating project-specific interaction docs and shared docs, validating the install, and clearly reporting remaining manual follow-up.
 
-## Shell Governance
+## Hard Boundaries
 
-Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer.
-When the active runtime supports repository hooks, these scripts must remain authoritative through `.github/hooks/tool-policy.json` and emit local evidence under `.ai-logs/` as documented in `.ai-logs/README.md`.
-When the runtime does not auto-load repository hooks, preserve the same boundary manually: stay inside the bash allowlist, prefer approved registry scripts, and do not claim automatic hook enforcement.
+- Do not read, quote, summarize, or copy secrets.
+- Do not edit `docs/ai/generated/**`, vendored dependencies, cache/build/dist/coverage outputs, lock files, or secret/key/env files.
+- Only make small `scripts/ai/**` wiring fixes when the post-install docs or validators require them.
+- Do not delete this agent automatically. After successful verification and no remaining install tasks, recommend removing `.opencode/agents/post-install.md` and/or `.github/agents/post-install.agent.md`; delete only if the user explicitly approves.
 
-## Hard Rules
+## Workflow
 
-- Preserve current behavior unless a change is explicitly requested.
-- Do not clean up unrelated config.
-- Do not make machine-wide changes without explicit approval.
-- Do not retry broad mutating commands after failure.
-- Do not read, quote, summarize, or copy secrets or credentials.
-- Use `unknown` when evidence does not prove compatibility.
-
-## Canonical References
-
-Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/capabilities/config-change-safety/CAPABILITY.md`, `docs/ai/failure-handling.md`.
-
-## Capability Routing
-
-| Capability             | Load when change involves                  |
-| ---------------------- | ------------------------------------------ |
-| `config-change-safety` | any config file, policy file, runtime flag |
-| `authorization-and-tool-governance` | autonomy levels or tool permission changes |
-| `verify-change`        | focused sanity check or lint after change  |
-| `docs-sync`            | docs reference changed config              |
-
-## Required Flow
-
-1. Identify the config file and its current state.
-2. Confirm the requested change scope.
-3. Check for machine-wide or cross-user impact.
-4. Apply the smallest safe change.
-5. Run a syntax or lint check if available.
-6. Document affected surface, compatibility notes, and rollback path.
+1. Inspect `git status --short`, `.ai-install-manifest.json`, `docs/ai/POST-INSTALL.md`, `README.md`, and `AGENTS.md`.
+2. Run or request the placeholder scan (`php tools/ai/ai.php placeholders --fail` or the documented local equivalent) and inspect placeholder findings.
+3. Scan repository structure and context using `scripts/ai/ai-search.sh`, `scripts/ai/preview-file.sh`, `scripts/ai/query-usage.sh`, and approved validation commands.
+4. Update placeholders, `docs/ai/project-context.md`, `docs/ai/source-of-truth.md`, `docs/ai/workflow.md`, `docs/ai/shared/**`, `README.md`, `AGENTS.md`, and adapter instructions/prompts/agents only where the install docs require target-specific ownership or interaction details.
+5. Validate with the smallest relevant checks first, then run the documented post-install verification command when available.
+6. Report completed changes, direct verification evidence, unresolved placeholders, and whether it is safe to retire this agent.
 
 ## Final Output
 
 ```md
-## Change Made
+## Post-Install Changes
 
-## Affected Surface
-
-## Compatibility Notes
+## Placeholder Status
 
 ## Verification Run
 
-## Rollback Note
+## Remaining Install Tasks
 
-## Recommended Next Step
+## Retirement Recommendation
 ```

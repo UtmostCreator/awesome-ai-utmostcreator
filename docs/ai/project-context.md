@@ -1,11 +1,11 @@
-# app-configs Project Context
+# awesome-ai-utmostcreator Project Context
 
 Use this file as durable, canonical project context for instructions, agents, prompts, and capabilities.
 
 ## 1) Project Identity
 
 - Project type: `php project`
-- Summary: `AI workflow starter for app-configs`
+- Summary: `AI workflow starter for awesome-ai-utmostcreator`
 - Primary language: `unknown`
 - Primary runtime: `unknown`
 - Supported targets: `unknown`
@@ -14,7 +14,7 @@ Use this file as durable, canonical project context for instructions, agents, pr
 
 ## 2) Scope and Ownership
 
-- Active paths: `.ai-install-manifest.json,.editorconfig,.gitattributes,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.shellcheckrc,AGENTS.md,CLAUDE.md,README.md,composer.json,composer.lock,install-ai-kit.sh,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,schemas,tests,tools`
+- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,sh-commands-output.md,tests,tools`
 - Inactive/legacy paths: `unknown`
 - Primary entrypoints: `README.md, docs/ai/project-context.md`
 - Architecture notes: `Keep policy and capability docs canonical; keep runtime adapters thin.`

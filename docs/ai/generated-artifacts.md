@@ -3,12 +3,6 @@
 `docs/ai/generated/` holds machine-generated files produced by `php tools/ai/ai.php` subcommands.
 Files here are **not** tracked in git and are safe to delete and regenerate.
 
-## Commit Policy
-
-Do not commit files from `docs/ai/generated/`.
-
-These artifacts are runtime outputs for local verification and advisor workflows, not source-of-truth files. If a command regenerates tracked files outside `docs/ai/generated/` such as catalog or repository-structure documentation, commit those tracked outputs when their source inputs changed and the regenerated result is intentional.
-
 ## When to Read What
 
 | If you want to...                | Read this file                            |

@@ -1,24 +1,15 @@
-# app-configs - Repository Instructions
+# awesome-ai-utmostcreator - Repository Instructions
 
 ## Project Summary
 
-- Project: `app-configs`
+- Project: `awesome-ai-utmostcreator`
 - Type: `php project`
-- Summary: `AI workflow starter for app-configs`
+- Summary: `AI workflow starter for awesome-ai-utmostcreator`
 - Primary language: `unknown`
 - Primary runtime: `unknown`
-- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.eslintrc.json,.gitattributes,.github,.gitignore,.husky,.lefthook.yml,.markdownlint-cli2.yaml,.opencode,.prettierrc.json,.repomixignore,.schemas,.shellcheckrc,.stylelintrc.json,AGENTS.md,CLAUDE.md,CONTRIBUTING.md,README.md,SECURITY.md,SUPPORT.md,composer.json,composer.lock,configs,docs,justfile,llms.txt,packages,phpunit.xml.dist,policies,scripts,tests,tools`
+- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,sh-commands-output.md,tests,tools`
 - Inactive or legacy paths: `unknown`
 - Primary entrypoints: `README.md, docs/ai/project-context.md`
-
-## OpenCode Script-First Rule
-
-- Start every non-trivial OpenCode session with `git status --short`, then collect evidence in this order: `AI_OUTPUT=json bash scripts/ai/ai-search.sh changed QUERY . --fixed`, `staged`, then `tracked` before broad modes.
-- Read files through `AI_OUTPUT=json bash scripts/ai/preview-file.sh PATH --around LINE --context 30` or `--range A:B`; do not use raw `cat`, `sed`, `awk`, `grep`, `rg`, `find`, `fd`, glob, or list before the approved wrappers unless explicitly approved.
-- Discover usage with `bash scripts/ai/query-usage.sh SYMBOL_OR_PATH` before adding parallel logic or changing contracts.
-- Verify with `bash scripts/ai/ai-verify.sh .` when behavior or wiring changes; for `ai-search` changes also run `AI_OUTPUT=json bash scripts/ai/ai-search.sh doctor` and the focused ai-search tests when available.
-- Escalate to `bash scripts/ai/pack-context.sh` or repomix context scripts only when bounded evidence is insufficient and the human approves the larger context pack.
-- Approval is required for `unsafe-all`, reading or editing secrets, `AI_ALLOW_UNLIMITED=1`, `ai-edit`, `ai-rollback`, `install-mandatory-tools`, destructive git, generated artifact edits, or any command that can delete, overwrite, install, deploy, or expose credentials.
 
 ## Default Workflow
 
@@ -26,24 +17,22 @@ Use this default workflow unless the task is clearly trivial:
 
 - `research when the owner is unclear -> plan for multi-step or risky work -> implement the bounded slice -> review in fresh context -> verify with evidence -> add release audit for medium or high risk`
 
-Default evidence command:
-
-`AI_OUTPUT=json bash scripts/ai/ai-search.sh MODE QUERY . --fixed`
-
 File preview rule:
 
-`AI_OUTPUT=json bash scripts/ai/preview-file.sh PATH --around LINE --context 30`
+`AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30`
 
-After `ai-search.sh` finds a relevant file or line, inspect it with `preview-file.sh`. Do not use raw `cat` for large, unknown, generated, binary-looking, or vendored files. Prefer `--around` when a line number is known, `--range` when a block range is known, and JSON mode for evidence pipelines.
+After search finds a relevant file or line, inspect it with `preview-file.sh`. Do not use raw `cat` for large, unknown, generated, binary-looking, or vendored files. Prefer `--around` when a line number is known, `--range` when a block range is known, and JSON mode for evidence pipelines.
 
 Workflow rules:
 
 - Prefer the smallest safe change.
+- Before planning, editing, or reviewing, load task context from `docs/ai/generated/task-context/latest.md`, `php tools/ai/compile-task-context.php`, or `php tools/ai/impact.php` when available. If no task context exists, stay read-only until ownership and verification surface are clear.
 - Before changing code, config, docs, or workflow logic, search for similar existing patterns in the touched area and nearby owners and report the closest overlap as a percentage.
 - If overlap is roughly `>=75%`, flag reuse or replacement immediately and recommend updating the existing pattern instead of adding a duplicate.
 - After completing the change, run a touched-scope stale sweep on edited files and nearby references for stale methods, stale data assumptions, stale commands/paths, outdated docs, unresolved placeholders, and generated-output drift.
 - When the repository includes a tool map or command wrappers, load that routing first and prefer `rg`, `fd`, `ast-grep`/`sg`, and structured queries over raw `grep`, `find`, or broad file dumps.
 - Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer; when a surface cannot auto-load repository hooks, preserve the same boundary manually and use `.ai-logs/` as the canonical local evidence root.
+- Document and flag any command, tool, verification failure, or permission block immediately in the completion report with exact command and status; do not silently omit failed checks.
 - Keep stable policy here and move procedural depth into capabilities, prompts, commands, or staged agents.
 - For non-trivial work, classify risk as `low`, `medium`, or `high` to choose review and verification depth.
 - Ground decisions in active code and configuration, not aspiration.
@@ -73,9 +62,11 @@ Ask for approval before making:
 Inspect the current implementation before making architectural or behavioral changes:
 
 - `README.md, docs/ai/project-context.md`
+- `docs/ai/agents.md` for live agent routing
 - `docs/ai/execution-protocol.md` for non-trivial execution and verification flow
+- `docs/ai/failure-handling.md` for blocked, failed, or partial work
 - `docs/ai/ai-file-standards.md` before adding or expanding AI workflow files
-- `docs/ai/agents.md, docs/ai/failure-handling.md, docs/ai/agent-ops-checklist.md, docs/ai/integration-matrix.md`
+- `docs/ai/agent-ops-checklist.md` and `docs/ai/integration-matrix.md` for agent operations and compatibility checks
 
 ## Architecture Notes
 
@@ -138,9 +129,9 @@ Minimum flow:
 
 ## Verification Rules
 
-- Primary verification command: `bash scripts/ai/ai-verify.sh .` (or `php tools/ai/ai.php verify --changed` for the PHP CLI)
-- Primary build command: `unknown` (this is a tooling repo, not a build target)
-- Primary test command: `PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh`; for PHP-only use `composer test:fast` (paratest, ~19-21s). Use serial `composer test` only when serial ordering matters.
+- Primary verification command: `unknown`
+- Primary build command: `unknown`
+- Primary test command: `unknown`
 - Profile slow tests: `composer test:profile` then `composer test:slow [N]`
 - Preferred narrow-first verification pattern: `start with the narrowest repo-local check and escalate only if needed`
 - Verification ladder: focused proof first -> affected layer tests second -> broader repository verification third -> build as a smoke check when relevant -> release-safety review only when risk warrants it.
@@ -155,6 +146,7 @@ Minimum flow:
 - For behavior changes, name the focused test, flow, or assertion that proves the result.
 - For `medium` and `high` risk work, state rollback path and success signal alongside verification.
 - Do not report recommendations, assumptions, or unrun checks as completed work.
+- When listing runnable commands for users, print one command per line with no ordered/unordered list markers so each line is copy-paste ready.
 
 ## Review Priorities
 
@@ -163,7 +155,7 @@ Minimum flow:
 ## Common Gotchas
 
 - `stale paths, broad edits without evidence, guessed behavior`
-- Capture recurring failure modes in capability-specific `docs/ai/capabilities/*/gotchas.md` files instead of bloating global policy.
+- Capture recurring failure modes in capability gotchas files instead of bloating global policy.
 
 ## Documentation Rules
 

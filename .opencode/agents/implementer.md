@@ -127,13 +127,26 @@ permission:
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
-    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
-    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/rg-code.sh *': allow
     'bash scripts/ai/fd-files.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
+    'bash scripts/ai/ai-verify.sh *': allow
+    'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
+    'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
+    'bash -n scripts/*.sh': allow
+    'bash -n scripts/**/*.sh': allow
+    'bash -n scripts/doctor.sh': allow
+    'bash scripts/doctor.sh': allow
+    'bash scripts/doctor.sh *': allow
+    'bash scripts/ai/ai-doc-check.sh --check*': allow
+    'bash scripts/ai/ai-file-freshness.sh *': allow
+    'bash scripts/ai/ai-install-coverage.sh *': allow
+    'bash scripts/ai/check-file-refs.sh *': allow
+    'bash scripts/ai/repo-tool-inventory.sh --check*': allow
     'php -l *': allow
     'vendor/bin/phpunit *': allow
     './vendor/bin/phpunit *': allow
@@ -154,8 +167,6 @@ permission:
     'markdownlint-cli2 *': allow
     'php tools/ai/validate-*.php *': allow
     'php tools/ai/generate-*.php --check*': allow
-    'bash scripts/ai/ai-doc-check.sh --check*': allow
-    'bash scripts/ai/repo-tool-inventory.sh --check*': allow
     # --- shipped CLI tool access (shared snippet: agent-tools-execute) ---
     'scc *': allow
     'tokei *': allow
@@ -236,7 +247,7 @@ Use: `Not run: <command> — <reason>` and `Recommended: <command> — <why>`.
 
 ## Stop Conditions
 
-Stop and hand off when instruction specificity is below 50/100, architecture redesign is needed, target artifact or owner is unclear, acceptance criteria are missing for risky change, implementation would touch more than 6 unrelated files, diff grows beyond planned slice, similar logic exists and replacement needs approval, tests fail outside the slice, secrets would need inspection, or package install/dependency update/migration/deployment/broad formatting/destructive git operation is required.
+Stop and hand off when: specificity is below 50/100, redesign is needed, owner or target is unclear, acceptance criteria are missing for risky change, the diff exceeds ~6 files or the planned slice, similar logic needs approval to replace, tests fail outside the slice, secrets need inspection, or any install/upgrade/migration/deploy/destructive-git operation is required.
 
 ## Final Output
 

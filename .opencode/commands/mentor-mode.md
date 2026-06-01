@@ -18,7 +18,6 @@ I set the active agent into Mentor Mode for the current task. I am a mode-setter
 
 ## Read Alongside
 
-- `.opencode/skills/mentor-mode/SKILL.md`
 - `docs/ai/capabilities/mentor-mode/CAPABILITY.md`
 - `docs/ai/capabilities/mentor-mode/config.example.json`
 
