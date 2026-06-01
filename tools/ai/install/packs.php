@@ -18,6 +18,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/session-reentry.md', 'target' => 'docs/ai/session-reentry.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/source-of-truth.md', 'target' => 'docs/ai/source-of-truth.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/context-economy.md', 'target' => 'docs/ai/context-economy.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'docs/ai/opencode-models.md', 'target' => 'docs/ai/opencode-models.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/tool-policy.md', 'target' => 'docs/ai/tool-policy.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/verification-matrix.md', 'target' => 'docs/ai/verification-matrix.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/ownership.md', 'target' => 'docs/ai/ownership.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
