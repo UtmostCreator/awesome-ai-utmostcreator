@@ -64,6 +64,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/common.sh`
 - `scripts/ai/fd-files.sh`
 - `scripts/ai/gh-pr-context.sh`
+- `scripts/ai/git-branch-origin.sh`
 - `scripts/ai/git-forensics.sh`
 - `scripts/ai/install-mandatory-tools.sh`
 - `scripts/ai/pack-context.sh`
@@ -104,6 +105,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `tests/scripts/ai/test-common.sh`
 - `tests/scripts/ai/test-fd-files.sh`
 - `tests/scripts/ai/test-gh-pr-context.sh`
+- `tests/scripts/ai/test-git-branch-origin.sh`
 - `tests/scripts/ai/test-git-forensics.sh`
 - `tests/scripts/ai/test-install-mandatory-tools.sh`
 - `tests/scripts/ai/test-misc-wrappers.sh`
