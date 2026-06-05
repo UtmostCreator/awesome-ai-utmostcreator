@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/ai_catalog_lib.php';
+
 $root = realpath(__DIR__ . '/..' . '/..');
 if ($root === false) {
     fwrite(STDERR, "ERROR: repository root not found\n");
     exit(1);
 }
 
-$placeholdersDoc = $root . '/packages/ai-universal-rules/PLACEHOLDERS.md';
+$placeholdersDoc = $root . '/' . aiResolvePackageBase($root) . 'PLACEHOLDERS.md';
 if (!is_file($placeholdersDoc)) {
     $placeholdersDoc = $root . '/PLACEHOLDERS.md';
 }

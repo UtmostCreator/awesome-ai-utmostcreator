@@ -25,6 +25,39 @@ function aiAbsolutePath(string $root, string $relativePath): string
     return $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
 }
 
+/**
+ * Resolve the base prefix at which the ai-universal-rules package descriptors
+ * live for a given root.
+ *
+ * Returns an empty string when descriptors live at the root (new consumer
+ * installs), otherwise a prefix WITH a trailing slash. The result composes via
+ * aiAbsolutePath($root, aiResolvePackageBase($root) . 'manifest.json').
+ */
+function aiResolvePackageBase(string $root): string
+{
+    if (is_dir($root . '/packages/ai-universal-rules/templates')) {
+        return 'packages/ai-universal-rules/';
+    }
+    if (is_file($root . '/manifest.json') && is_file($root . '/.ai-install-manifest.json')) {
+        return '';
+    }
+    if (is_file($root . '/packages/ai-universal-rules/manifest.json')) {
+        return 'packages/ai-universal-rules/';
+    }
+    return 'packages/ai-universal-rules/';
+}
+
+/**
+ * Resolve the base prefix at which the ai-universal-rules package docs live for
+ * a given root. Returns a prefix WITH a trailing slash.
+ */
+function aiResolvePackageDocsBase(string $root): string
+{
+    return aiResolvePackageBase($root) === 'packages/ai-universal-rules/'
+        ? 'packages/ai-universal-rules/docs/'
+        : 'docs/ai/package/';
+}
+
 function aiNormalizeGeneratedContent(string $content): string
 {
     return str_replace("\r\n", "\n", $content);
@@ -158,7 +191,7 @@ function aiResource(
 
 function aiCollectCatalog(string $root): array
 {
-    $manifest = aiLoadJson($root, 'packages/ai-universal-rules/manifest.json');
+    $manifest = aiLoadJson($root, aiResolvePackageBase($root) . 'manifest.json');
     $resources = [];
 
     foreach (aiCollectRootResources($root) as $resource) {
@@ -835,7 +868,7 @@ function aiValidateManifest(array $manifest, string $root): array
 
 function aiReadManifestYamlSummary(string $root): array
 {
-    $content = aiReadFile($root, 'packages/ai-universal-rules/manifest.yml');
+    $content = aiReadFile($root, aiResolvePackageBase($root) . 'manifest.yml');
     $summary = [];
 
     foreach (preg_split('/\r?\n/', $content) ?: [] as $line) {

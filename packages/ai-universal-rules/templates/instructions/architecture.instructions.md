@@ -10,10 +10,9 @@ Apply these rules before proposing or editing architecture-sensitive code.
 ## Required Context
 
 - Read the current implementation before proposing structural changes.
-- Load task context first when available:
-  - `docs/ai/generated/task-context/latest.md`
-  - output from `php tools/ai/compile-task-context.php`
-  - output from `php tools/ai/impact.php`
+- Establish task context first:
+  - `docs/ai/generated/task-context/latest.md` (if a task-context generator has produced it)
+  - otherwise read-only discovery via `scripts/ai/ai-search.sh` plus `git status --short` and `git diff`
 - If task context is missing, perform read-only research before planning implementation.
 
 ## Source Of Truth

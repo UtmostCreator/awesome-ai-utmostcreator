@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/ai_catalog_lib.php';
+
 $root = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
 
 if ($root === false || !is_dir($root)) {
@@ -9,14 +11,17 @@ if ($root === false || !is_dir($root)) {
     exit(1);
 }
 
+$packageBase = aiResolvePackageBase($root);
+$packageDocsBase = aiResolvePackageDocsBase($root);
+
 $sourceRepoMode = is_file($root . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
 $existenceOnly = in_array('--existence-only', $argv, true) || !$sourceRepoMode;
 $write = in_array('--write', $argv, true) || in_array('--fix', $argv, true);
 
 $required = [
     'docs/ai/catalog.md' => 'php tools/ai/generate-ai-catalog.php --check',
-    'packages/ai-universal-rules/catalog.json' => 'php tools/ai/generate-ai-catalog.php --check',
-    'packages/ai-universal-rules/docs/BROWSE.md' => 'php tools/ai/generate-ai-catalog.php --check',
+    $packageBase . 'catalog.json' => 'php tools/ai/generate-ai-catalog.php --check',
+    $packageDocsBase . 'BROWSE.md' => 'php tools/ai/generate-ai-catalog.php --check',
     'llms.txt' => 'php tools/ai/generate-ai-catalog.php --check',
     'docs/ai/repo-required-tools.md' => 'php tools/ai/repo-tool-inventory.php --check',
 ];

@@ -22,6 +22,8 @@ Before planning, editing, or reviewing, apply:
 
 If task context is missing, perform read-only research only.
 
+Establish scope in order: user description, then `git diff` / `git status --short`, then a branch-name ticket id (`[A-Z]+-[0-9]+`) looked up in `docs/tickets/`. Ask for the ticket if none is provided or found, and ask one clarifying question if scope stays unclear. Flag any change — including pre-existing working-tree changes — that looks outside the stated scope, and suggest removing already-present data that is now out of scope (suggest only; deletion stays approval-gated).
+
 ## Canonical Docs
 
 Use `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/execution-protocol.md`, `docs/ai/ai-file-standards.md`, `docs/ai/failure-handling.md`, `docs/ai/agent-ops-checklist.md`, `docs/ai/integration-matrix.md`, approval/generated-artifact docs, adapter contracts, script registries, and relevant capability files including `docs/ai/capabilities/agent-observability-and-evidence/CAPABILITY.md`, `docs/ai/capabilities/evaluation-and-regression/CAPABILITY.md`, and `docs/ai/capabilities/preview-environments/CAPABILITY.md`.
@@ -111,7 +113,8 @@ Stop and ask or report a blocker when:
 - ownership is unclear
 - test failures are unexplained
 - task context is missing for implementation
-- the diff exceeds approved scope
+- a ticket id is referenced but no ticket description is provided or found in `docs/tickets/`
+- the diff exceeds approved scope, or pre-existing working-tree changes fall outside it
 - destructive action is needed
 - generated artifacts drift unexpectedly
 

@@ -495,10 +495,19 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
         // The shipped package source must stay verbatim so kit-level tools
         // (generate-ai-catalog, validate-ai-catalog, package-verify) keep
         // working in installed targets. PLACEHOLDERS.md is also informational
-        // and must not be rewritten.
+        // and must not be rewritten. Consumer installs now relocate the package
+        // descriptors to the root and to docs/ai/package + policies, so those
+        // relocated targets must also skip placeholder rewriting (rewriting a
+        // descriptor or its docs/policies would corrupt JSON/lock/policy data).
         if (
             $target === 'PLACEHOLDERS.md'
+            || $target === 'manifest.json'
+            || $target === 'manifest.yml'
+            || $target === 'catalog.json'
+            || $target === 'package-lock.ai.json'
             || str_starts_with($target, 'packages/ai-universal-rules/')
+            || str_starts_with($target, 'docs/ai/package/')
+            || str_starts_with($target, 'policies/')
         ) {
             continue;
         }

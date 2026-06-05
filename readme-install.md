@@ -453,6 +453,22 @@ When you install `full-governance` into a target repo, these files are created:
 | `docs/ai/capabilities/*/`      | Reusable procedure packages              |
 | `docs/ai/script-registry.md`   | Approved script allowlist                |
 | `docs/ai/script-registry.json` | Machine-readable script registry         |
+| `docs/ai/package/`             | Package reference docs (foundations, operations, workflows) |
+
+### Package Descriptors — Target Root
+
+Named-profile installs place the package descriptors at the **target repository root** (via `target-tools-pack`), not under a `packages/` folder. A consumer install never receives a `packages/` directory.
+
+| Installed File          | Purpose                                       |
+| ----------------------- | --------------------------------------------- |
+| `manifest.json`         | Installed-file manifest (machine-readable)    |
+| `manifest.yml`          | Installed-file manifest (YAML mirror)         |
+| `catalog.json`          | Cataloged asset metadata                      |
+| `package-lock.ai.json`  | Pinned package content hashes                 |
+| `PLACEHOLDERS.md`       | Placeholder reference                         |
+| `policies/`             | Governance command policies                   |
+
+> Package reference docs land under `docs/ai/package/` (not `packages/ai-universal-rules/docs/`). The source-repo-only `README.md` and `QUICKSTART.md` are **not** shipped to consumers. The `packages/ai-universal-rules/templates/` tree is only installed by the opt-in `kit-authoring-pack`.
 
 ### `scripts/ai/` — Bash Scripts
 
@@ -832,6 +848,7 @@ php tools/ai/maintenance-mode.php disable
 | `.eslintrc.json`, `.prettierrc.json`, `.stylelintrc.json` reference frameworks not present | Reference configs | Not a bug — they serve as starter configs for target projects                                                                                                                      |
 | `docs/ai/project-context.md` has `unknown` values                                          | Intentional       | Template defaults — filled in per-project during install                                                                                                                           |
 | VS Code sandbox `deniedDomains` warning                                                    | Fixed             | Disappears after VS Code restart                                                                                                                                                   |
+| Copilot `git` commands fail in the sandbox, then re-prompt to run without sandbox (wastes tokens) | Fixed             | `.vscode/settings.json` no longer denies writes to `./.git/`, so `git` can refresh its index/locks inside the sandbox; read-only `git` verbs are also terminal auto-approved. Restart VS Code after install. |
 | `~/.gitignore_global` may block `git add`                                                  | Per-user          | Use `git add -f <file>` for files in `.vscode/`, `scripts/`, `.github/`, `docs/`                                                                                                   |
 | Windows Git not in PATH                                                                    | Known             | `$env:Path = "C:\Program Files\Git\cmd;$env:Path"`                                                                                                                                 |
 | `repomix` not found                                                                        | Missing tool      | `npm i -g repomix`                                                                                                                                                                 |
