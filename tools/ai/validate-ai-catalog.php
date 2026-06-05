@@ -20,7 +20,7 @@ if ($targetArg !== null || (!$sourceRepoMode && is_file($candidateRoot . DIRECTO
         exit(1);
     }
     $errors = [];
-    foreach (['docs/ai/catalog.json', 'docs/ai/manifest.json', '.ai-install-manifest.json'] as $candidate) {
+    foreach (['catalog.json', 'manifest.json', '.ai-install-manifest.json'] as $candidate) {
         $path = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $candidate);
         if (is_file($path) && json_decode((string) file_get_contents($path), true) === null) {
             $errors[] = "invalid JSON: {$candidate}";
@@ -38,7 +38,7 @@ if ($targetArg !== null || (!$sourceRepoMode && is_file($candidateRoot . DIRECTO
 $root = aiRepoRoot();
 $errors = [];
 $warnings = [];
-$manifest = aiLoadJson($root, 'packages/ai-universal-rules/manifest.json');
+$manifest = aiLoadJson($root, aiResolvePackageBase($root) . 'manifest.json');
 
 foreach (aiValidateManifest($manifest, $root) as $error) {
     $errors[] = $error;
@@ -52,7 +52,7 @@ foreach (['name', 'version', 'description'] as $key) {
     }
 }
 
-$catalog = aiLoadJson($root, 'packages/ai-universal-rules/catalog.json');
+$catalog = aiLoadJson($root, aiResolvePackageBase($root) . 'catalog.json');
 
 foreach (['generated_by', 'repository', 'package', 'counts', 'resources', 'starter_profiles'] as $key) {
     if (!array_key_exists($key, $catalog)) {

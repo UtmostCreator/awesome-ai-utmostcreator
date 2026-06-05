@@ -77,11 +77,10 @@ git diff --name-only
 rg -n "target|keyword|entrypoint"
 ```
 
-When available:
+When a pre-compiled task context exists, read it instead of scanning broadly:
 
 ```bash
-php tools/ai/compile-task-context.php
-php tools/ai/impact.php
+bash scripts/ai/preview-file.sh docs/ai/generated/task-context/latest.md
 ```
 
 Context guide: [`tools/ai/tools/actions/ai-context-packing.md`](tools/ai/tools/actions/ai-context-packing.md)

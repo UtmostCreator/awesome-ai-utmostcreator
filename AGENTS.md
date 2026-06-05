@@ -26,7 +26,10 @@ After search finds a relevant file or line, inspect it with `preview-file.sh`. D
 Workflow rules:
 
 - Prefer the smallest safe change.
-- Before planning, editing, or reviewing, load task context from `docs/ai/generated/task-context/latest.md`, `php tools/ai/compile-task-context.php`, or `php tools/ai/impact.php` when available. If no task context exists, stay read-only until ownership and verification surface are clear.
+- Before planning, editing, or reviewing, establish task context from `docs/ai/generated/task-context/latest.md` when a task-context generator has produced it, otherwise from read-only discovery via `scripts/ai/ai-search.sh` plus `git status --short` and `git diff`. If no task context exists, stay read-only until ownership and verification surface are clear.
+- Establish task scope before editing: user description first, then `git diff` / `git status --short`, then a branch-name ticket id (`[A-Z]+-[0-9]+`) looked up in `docs/tickets/`. If no ticket is provided or found, ask for it; if scope or ownership stays unclear, ask one clarifying question and stay read-only. See `.github/instructions/context-gate.instructions.md`.
+- Flag any change, including a change already present in the working tree, that looks outside the stated task or ticket scope; pause for confirmation before keeping or extending it.
+- When making a new change, sweep already-present data in the touched area and suggest removing anything now outside scope (suggest only; deletion stays approval-gated).
 - Before changing code, config, docs, or workflow logic, search for similar existing patterns in the touched area and nearby owners and report the closest overlap as a percentage.
 - If overlap is roughly `>=75%`, flag reuse or replacement immediately and recommend updating the existing pattern instead of adding a duplicate.
 - After completing the change, run a touched-scope stale sweep on edited files and nearby references for stale methods, stale data assumptions, stale commands/paths, outdated docs, unresolved placeholders, and generated-output drift.

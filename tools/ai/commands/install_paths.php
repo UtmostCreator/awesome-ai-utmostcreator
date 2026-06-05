@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../ai_catalog_lib.php';
+
 function aiPackageLockPath(string $root): string
 {
-    return $root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'package-lock.ai.json';
+    return aiAbsolutePath($root, aiResolvePackageBase($root) . 'package-lock.ai.json');
 }
 
 function aiInstallManifestPath(string $root): string

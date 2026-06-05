@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/ai_catalog_lib.php';
+
 $root = resolveRoot($argv);
-$policyPath = $root . '/packages/ai-universal-rules/policies/ai-file-standards.json';
+$packageBase = aiResolvePackageBase($root);
+$packageDocsBase = aiResolvePackageDocsBase($root);
+$policyPath = $root . '/' . $packageBase . 'policies/ai-file-standards.json';
 
 $policy = loadPolicy($policyPath);
 if ($policy === null) {
@@ -37,7 +41,7 @@ foreach ($lineLimits as $rule) {
     foreach ($patterns as $pattern) {
         foreach (matchingFiles($root, (string) $pattern) as $path) {
             $relativePath = relativePath($root, $path);
-            if (isGeneratedPath($relativePath)) {
+            if (isGeneratedPath($relativePath, $packageBase, $packageDocsBase)) {
                 continue;
             }
 
@@ -158,7 +162,7 @@ function relativePath(string $root, string $path): string
     return $normalized;
 }
 
-function isGeneratedPath(string $relativePath): bool
+function isGeneratedPath(string $relativePath, string $packageBase, string $packageDocsBase): bool
 {
     if (str_starts_with($relativePath, 'docs/ai/generated/')) {
         return true;
@@ -166,9 +170,9 @@ function isGeneratedPath(string $relativePath): bool
 
     return in_array($relativePath, [
         'docs/ai/catalog.md',
-        'packages/ai-universal-rules/catalog.json',
-        'packages/ai-universal-rules/docs/BROWSE.md',
-        'packages/ai-universal-rules/docs/INSTALL-CATALOG.md',
+        $packageBase . 'catalog.json',
+        $packageDocsBase . 'BROWSE.md',
+        $packageDocsBase . 'INSTALL-CATALOG.md',
         'llms.txt',
     ], true);
 }

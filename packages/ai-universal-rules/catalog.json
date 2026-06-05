@@ -40,13 +40,13 @@
         "package:core-template": 24,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
-        "package:opencode-command-template": 3,
+        "package:opencode-command-template": 4,
         "package:operations-doc": 6,
         "package:optional-template": 9,
         "package:package-capability": 42,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
-        "package:workflow-template": 17,
+        "package:workflow-template": 18,
         "root:adapter-doc": 1,
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
@@ -485,6 +485,14 @@
             "path": "packages/ai-universal-rules/templates/instructions/tools.instructions.md",
             "runtime": "github-copilot",
             "description": "Tool selection and script enforcement \u2014 use rg/fd/approved scripts; never use bare grep/find"
+        },
+        {
+            "scope": "package",
+            "type": "opencode-command-template",
+            "name": "post-install-setup",
+            "path": "packages/ai-universal-rules/templates/commands/post-install-setup.md",
+            "runtime": "opencode",
+            "description": "Guided post-install setup for installed projects"
         },
         {
             "scope": "package",
@@ -1109,6 +1117,14 @@
             "path": "packages/ai-universal-rules/templates/workflows/plan-slice.md",
             "runtime": "dual-runtime",
             "description": "Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "post-install-setup",
+            "path": "packages/ai-universal-rules/templates/workflows/post-install-setup.md",
+            "runtime": "dual-runtime",
+            "description": "Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first"
         },
         {
             "scope": "package",

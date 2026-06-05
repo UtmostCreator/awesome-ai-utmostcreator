@@ -192,15 +192,13 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'schemas/ai/advisor-recommendation.schema.json', 'target' => 'schemas/ai/advisor-recommendation.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'target-tools-pack' => [
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/README.md', 'target' => 'packages/ai-universal-rules/README.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/QUICKSTART.md', 'target' => 'packages/ai-universal-rules/QUICKSTART.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'packages/ai-universal-rules/manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'packages/ai-universal-rules/manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'packages/ai-universal-rules/package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'packages/ai-universal-rules/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'packages/ai-universal-rules/docs', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'packages/ai-universal-rules/policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'docs/ai/package', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'tools/ai/install', 'target' => 'tools/ai/install', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/commands', 'target' => 'tools/ai/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai.php', 'target' => 'tools/ai/ai.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -246,17 +244,13 @@ function aiInstallerPackRegistry(): array
         // targets can run generate-ai-catalog/validate-generated-artifacts and
         // package-verify without re-downloading the source repo.
         'package-source-pack' => [
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'packages/ai-universal-rules/manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'packages/ai-universal-rules/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'packages/ai-universal-rules/manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'packages/ai-universal-rules/package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/README.md', 'target' => 'packages/ai-universal-rules/README.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'packages/ai-universal-rules/docs', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'packages/ai-universal-rules/policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            // Root-level PLACEHOLDERS.md index so validate-placeholders.php
-            // running from the installed target does not error out.
-            ['type' => 'file', 'source' => 'PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'docs/ai/package', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
         ],
         // Kit-authoring / re-distribution assets. Not needed by consumer
         // projects; opt in via --with kit-authoring-pack or --all-features.

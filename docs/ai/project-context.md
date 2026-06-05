@@ -38,11 +38,10 @@ Stale markdown must not override code evidence.
 
 ## 4) Task-Context Gate
 
-Load one before planning/editing:
+Establish one before planning/editing:
 
-- `docs/ai/generated/task-context/latest.md`
-- `php tools/ai/compile-task-context.php`
-- `php tools/ai/impact.php`
+- `docs/ai/generated/task-context/latest.md` (if a task-context generator has produced it)
+- otherwise read-only discovery via `scripts/ai/ai-search.sh` plus `git status --short` and `git diff`
 
 If missing, perform read-only discovery first and produce a plan before edits.
 

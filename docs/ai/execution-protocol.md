@@ -79,7 +79,7 @@ Never sit idle waiting on a subprocess. Apply the following rules to every shell
 - `PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh` — all repo tests with parallel-first defaults
 - `composer test`         — full serial suite (~60s in this repo; use only when serial ordering matters)
 - `composer test:fast`    — paratest with 12 workers (~19-21s in this repo)
-- `composer test:profile` — emits `docs/ai/generated/phpunit.xml`
+- `composer test:profile` — emits a PHPUnit profile artifact under `docs/ai/generated/`
 - `composer test:slow [N]` — ranks the slowest N tests from the last profile
 
 Use `composer test:profile` followed by `composer test:slow` whenever a previously fast suite gets noticeably slower.

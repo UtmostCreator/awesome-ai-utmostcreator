@@ -20,13 +20,13 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / core-template` - 24
 - `package / foundation-doc` - 6
 - `package / github-copilot-instruction-template` - 22
-- `package / opencode-command-template` - 3
+- `package / opencode-command-template` - 4
 - `package / operations-doc` - 6
 - `package / optional-template` - 9
 - `package / package-capability` - 42
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
-- `package / workflow-template` - 17
+- `package / workflow-template` - 18
 - `root / adapter-doc` - 1
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
@@ -307,6 +307,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-instruction-template`|Target Rules|`packages/ai-universal-rules/templates/instructions/targets.instructions.md`|Target, runtime, platform, adapter, and deployment-surface adaptation guidance|
 |`github-copilot-instruction-template`|Testing Rules|`packages/ai-universal-rules/templates/instructions/testing.instructions.md`|Testing, verification ladder, regression coverage, and deterministic proof rules|
 |`github-copilot-instruction-template`|Tool Selection Rules|`packages/ai-universal-rules/templates/instructions/tools.instructions.md`|Tool selection and script enforcement — use rg/fd/approved scripts; never use bare grep/find|
+|`opencode-command-template`|post-install-setup|`packages/ai-universal-rules/templates/commands/post-install-setup.md`|Guided post-install setup for installed projects|
 |`opencode-command-template`|search-evidence|`packages/ai-universal-rules/templates/commands/search-evidence.md`|Collect script-first repository evidence using ai-search|
 |`opencode-command-template`|verify-ai-wiring|`packages/ai-universal-rules/templates/commands/verify-ai-wiring.md`|Verify OpenCode script-first AI wiring|
 |`opencode-command-template`|verify|`packages/ai-universal-rules/templates/commands/verify.md`|Compatibility command that runs the verification workflow; prefer the verify-change skill for reusable guidance|
@@ -385,6 +386,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-template`|mentor-mode|`packages/ai-universal-rules/templates/workflows/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`workflow-template`|new-feature|`packages/ai-universal-rules/templates/workflows/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`workflow-template`|plan-slice|`packages/ai-universal-rules/templates/workflows/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
+|`workflow-template`|post-install-setup|`packages/ai-universal-rules/templates/workflows/post-install-setup.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
 |`workflow-template`|project-context|`packages/ai-universal-rules/templates/workflows/project-context.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`workflow-template`|regression-test|`packages/ai-universal-rules/templates/workflows/regression-test.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`workflow-template`|release-safety|`packages/ai-universal-rules/templates/workflows/release-safety.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|

@@ -75,6 +75,31 @@ jobs:
           after_hash="$(sha256sum "$file" | cut -d' ' -f1)"
           test "${{ steps.prehash.outputs.hash }}" = "$after_hash"
 
+      - name: Verify no packages directory for named-profile install
+        run: |
+          set -euo pipefail
+          target="${{ steps.fixture.outputs.repo_path }}"
+          test ! -d "$target/packages"
+
+      - name: Verify relocated consumer layout (full-governance)
+        run: |
+          set -euo pipefail
+          fg_dir="$(mktemp -d)"
+          fg_target="$(bash "tests/fixtures/repos/blank-generic/setup.sh" "$fg_dir")"
+          php tools/ai/install-ai-kit.php \
+            --profile=full-governance \
+            --source=. \
+            --target="$fg_target" \
+            --non-interactive \
+            --allow-placeholders \
+            --output-json="$fg_target/install-result.json"
+          test ! -d "$fg_target/packages"
+          test -f "$fg_target/manifest.json"
+          test -f "$fg_target/catalog.json"
+          test -f "$fg_target/package-lock.ai.json"
+          test -f "$fg_target/PLACEHOLDERS.md"
+          test -d "$fg_target/docs/ai/package"
+
       - name: Upload install result artifacts
         uses: actions/upload-artifact@v4
         with:
