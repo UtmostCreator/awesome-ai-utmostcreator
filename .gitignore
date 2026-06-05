@@ -19,3 +19,7 @@ docs/ai/generated/
 # and uploaded as a CI artifact (see export-ai-universal-rules-preview.yml). Not tracked.
 /dist/
 /composer.phar
+# Draft agent: super-implementer.md is held back pending an id-collision fix
+# (its frontmatter id currently duplicates implementer.md). Ignored so it is
+# not committed or surfaced as untracked until that is resolved.
+.opencode/agents/super-implementer.md
