@@ -13,10 +13,123 @@ VERIFY_TIMEOUT="${VERIFY_TIMEOUT:-180}"
 SHELLCHECK_ARGS="${SHELLCHECK_ARGS:--x -e SC1091}"
 AI_VERIFY_SCOPE="${AI_VERIFY_SCOPE:-ai}"
 VERIFY_SECRETS="${VERIFY_SECRETS:-${SECRETS_SCAN:-1}}"
+# Base ref used by the "branch" scope to diff the current branch against its
+# divergence point. Override when your trunk is not origin/main.
+VERIFY_BASE_REF="${VERIFY_BASE_REF:-}"
+# Optional author filter for the "branch" scope. When set (e.g. your git email),
+# only files from commits authored by you (plus uncommitted work) are scoped.
+VERIFY_AUTHOR="${VERIFY_AUTHOR:-}"
+# Link checking is OFF by default because it can reach the network and hit
+# production URLs embedded in docs. Set VERIFY_LINKS=1 to enable it. Even then,
+# lychee runs with --offline (local file links only) unless VERIFY_LINKS_NETWORK=1
+# is also set, so a verify run never dials production endpoints by accident.
+VERIFY_LINKS="${VERIFY_LINKS:-0}"
+VERIFY_LINKS_NETWORK="${VERIFY_LINKS_NETWORK:-0}"
 
 failures=0
 
 cd "$root"
+
+# Resolve the merge-base between HEAD and the branch this branch was created from.
+# Prints the merge-base commit, or nothing if it cannot be determined.
+#
+# Detection order:
+#   1. explicit VERIFY_BASE_REF override
+#   2. scripts/ai/git-branch-origin.sh (closest-merge-base + release-pattern aware)
+#   3. fallback trunk list (origin/main -> origin/master -> main -> master)
+resolve_branch_base() {
+    local candidate base
+    local origin_script
+    local detected=""
+
+    # 1. Explicit override always wins.
+    if [[ -n "$VERIFY_BASE_REF" ]]; then
+        git rev-parse --verify --quiet "$VERIFY_BASE_REF^{commit}" >/dev/null 2>&1 || return 1
+        base="$(git merge-base HEAD "$VERIFY_BASE_REF" 2>/dev/null || true)"
+        [[ -n "$base" ]] && printf '%s\n' "$base" && return 0
+        return 1
+    fi
+
+    # 2. Prefer the smarter branch-origin detector when available.
+    origin_script="$(dirname "${BASH_SOURCE[0]}")/git-branch-origin.sh"
+    if [[ -f "$origin_script" ]]; then
+        detected="$(bash "$origin_script" --field base 2>/dev/null || true)"
+        if [[ -n "$detected" ]]; then
+            printf '%s\n' "$detected"
+            return 0
+        fi
+    fi
+
+    # 3. Fallback trunk list.
+    for candidate in origin/main origin/master main master; do
+        git rev-parse --verify --quiet "$candidate^{commit}" >/dev/null 2>&1 || continue
+        if base="$(git merge-base HEAD "$candidate" 2>/dev/null)" && [[ -n "$base" ]]; then
+            printf '%s\n' "$base"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+# Files changed by the current branch since it diverged from its base, plus any
+# uncommitted, staged, or untracked work. Respects $1 as a pathspec glob.
+# Stops at the merge-base: shared history before the divergence is never touched.
+branch_scoped_files() {
+    local glob="${1:?glob required}"
+    local base=""
+
+    base="$(resolve_branch_base || true)"
+
+    {
+        if [[ -n "$base" ]]; then
+            if [[ -n "$VERIFY_AUTHOR" ]]; then
+                # Only files from commits authored by VERIFY_AUTHOR on this branch.
+                local sha
+                while IFS= read -r sha; do
+                    [[ -n "$sha" ]] || continue
+                    git show --no-patch --format= --name-only --diff-filter=ACMRT "$sha" -- "$glob"
+                done < <(git rev-list --author="$VERIFY_AUTHOR" "$base..HEAD" 2>/dev/null)
+            else
+                git diff --name-only --diff-filter=ACMRT "$base"...HEAD -- "$glob"
+            fi
+        fi
+        # Always include local in-progress work regardless of authorship.
+        git diff --name-only --diff-filter=ACMRT -- "$glob"
+        git diff --cached --name-only --diff-filter=ACMRT -- "$glob"
+        git ls-files --others --exclude-standard -- "$glob"
+    } | sort -u
+}
+
+# Emit existing changed PHP files according to AI_VERIFY_SCOPE.
+# - branch: merge-base diff of the current branch + local work
+# - changed: local working-tree/staged/untracked work only
+# Returns no output for the project-wide scopes (ai/all), signalling callers to
+# run the PHP tools project-wide as before.
+scoped_php_files() {
+    local source_fn
+    case "$AI_VERIFY_SCOPE" in
+    branch) source_fn=branch ;;
+    changed) source_fn=changed ;;
+    *) return 0 ;;
+    esac
+
+    {
+        if [[ "$source_fn" == branch ]]; then
+            branch_scoped_files '*.php'
+        else
+            git diff --name-only --diff-filter=ACMRT -- '*.php'
+            git diff --cached --name-only --diff-filter=ACMRT -- '*.php'
+            git ls-files --others --exclude-standard -- '*.php'
+        fi
+    } |
+        sort -u |
+        while IFS= read -r f; do
+            [[ -n "$f" ]] || continue
+            [[ -f "$f" ]] || continue
+            printf '%s\n' "$f"
+        done
+}
 
 if [[ "${AI_VERIFY_TEST_MODE:-0}" == "1" ]]; then
     echo "==> repository"
@@ -79,6 +192,14 @@ tracked_existing_shell_files() {
                 printf '%s\n' "$script"
             done
         ;;
+    branch)
+        branch_scoped_files '*.sh' |
+            while IFS= read -r script; do
+                [[ -f "$script" ]] || continue
+                [[ "$script" == scripts/ai/check-batch*.sh ]] && continue
+                printf '%s\n' "$script"
+            done
+        ;;
     all)
         git ls-files -co --exclude-standard '*.sh' |
             while IFS= read -r script; do
@@ -114,12 +235,20 @@ if command -v actionlint >/dev/null 2>&1 && [[ -d .github/workflows ]]; then
     run_step 'actionlint' actionlint
 fi
 
-if command -v lychee >/dev/null 2>&1; then
+if [[ "$VERIFY_LINKS" == "1" ]] && command -v lychee >/dev/null 2>&1; then
     if [[ -f scripts/run-link-check.sh ]]; then
         run_step 'bash scripts/run-link-check.sh' bash scripts/run-link-check.sh
-    else
+    elif [[ "$VERIFY_LINKS_NETWORK" == "1" ]]; then
+        # Explicit network link check requested. This CAN reach production URLs
+        # embedded in docs; only enable when that is intended.
         run_step 'lychee README.md docs/**/*.md' lychee README.md docs/**/*.md
+    else
+        # Offline by default: validate local file links only, never dial the
+        # network (so production URLs in docs are not contacted).
+        run_step 'lychee --offline README.md docs/**/*.md' lychee --offline README.md docs/**/*.md
     fi
+else
+    log_warn "Skipping link check. Use VERIFY_LINKS=1 (offline) or VERIFY_LINKS=1 VERIFY_LINKS_NETWORK=1 (network)."
 fi
 
 if [[ -f composer.json ]]; then
@@ -128,16 +257,71 @@ if [[ -f composer.json ]]; then
         run_step 'composer audit' composer audit
     fi
 
+    # Determine whether the PHP linters/analysers should be narrowed to the
+    # files changed on this branch, or run project-wide.
+    #
+    # Default (including the "ai" scope): narrow to changed files. With no local
+    # changes we fall back to files unique to the current feature branch via its
+    # merge-base (git-branch-origin.sh), so pint/phpstan/psalm never lint the
+    # whole project unless the caller explicitly asks with AI_VERIFY_SCOPE=all.
+    php_scoped=0
+    php_files=()
+    php_scope_source="$AI_VERIFY_SCOPE"
+    case "$AI_VERIFY_SCOPE" in
+    all)
+        # Explicit project-wide request: leave php_scoped=0 so the linters run
+        # across every file.
+        ;;
+    changed)
+        php_scoped=1
+        ;;
+    *)
+        # ai (default) and branch both resolve to branch-aware scoping.
+        php_scoped=1
+        php_scope_source="branch"
+        ;;
+    esac
+
+    if ((php_scoped)); then
+        while IFS= read -r f; do
+            [[ -n "$f" ]] && php_files+=("$f")
+        done < <(AI_VERIFY_SCOPE="$php_scope_source" scoped_php_files)
+    fi
+
     if [[ -x vendor/bin/pint ]]; then
-        run_step 'vendor/bin/pint --test' vendor/bin/pint --test
+        if ((php_scoped)); then
+            if ((${#php_files[@]} > 0)); then
+                run_step "vendor/bin/pint --test (${#php_files[@]} changed file(s))" vendor/bin/pint --test "${php_files[@]}"
+            else
+                log_warn "No changed PHP files in scope ($AI_VERIFY_SCOPE); skipping pint."
+            fi
+        else
+            run_step 'vendor/bin/pint --test' vendor/bin/pint --test
+        fi
     fi
 
     if [[ -x vendor/bin/phpstan ]]; then
-        run_step 'vendor/bin/phpstan analyse --memory-limit=1G' vendor/bin/phpstan analyse --memory-limit=1G
+        if ((php_scoped)); then
+            if ((${#php_files[@]} > 0)); then
+                run_step "vendor/bin/phpstan analyse (${#php_files[@]} changed file(s))" vendor/bin/phpstan analyse --memory-limit=1G "${php_files[@]}"
+            else
+                log_warn "No changed PHP files in scope ($AI_VERIFY_SCOPE); skipping phpstan."
+            fi
+        else
+            run_step 'vendor/bin/phpstan analyse --memory-limit=1G' vendor/bin/phpstan analyse --memory-limit=1G
+        fi
     fi
 
     if [[ -x vendor/bin/psalm ]]; then
-        run_step 'vendor/bin/psalm --no-cache' vendor/bin/psalm --no-cache
+        if ((php_scoped)); then
+            if ((${#php_files[@]} > 0)); then
+                run_step "vendor/bin/psalm (${#php_files[@]} changed file(s))" vendor/bin/psalm --no-cache "${php_files[@]}"
+            else
+                log_warn "No changed PHP files in scope ($AI_VERIFY_SCOPE); skipping psalm."
+            fi
+        else
+            run_step 'vendor/bin/psalm --no-cache' vendor/bin/psalm --no-cache
+        fi
     fi
 
     if [[ "$VERIFY_FULL" == "1" ]]; then
