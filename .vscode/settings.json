@@ -5,16 +5,16 @@
   "chat.tools.terminal.blockDetectedFileWrites": true,
   "chat.tools.terminal.autoApprove": {
     "/^bash scripts\\/ai\\/(ai-search|ai-verify|ai-doc-check|ai-file-freshness|ai-install-coverage|preview-file|fd-files|rg-code|git-forensics|query-usage|ai-diff-context|pack-context|gh-pr-context|repomix-context-tree|repomix-scc-router|check-file-refs|repo-stats)\\.sh(\\s|$)/": true,
+    "/^git\\s+(status|diff|log|show|rev-parse|ls-files|blame|branch|tag|remote|describe|shortlog|merge-base|rev-list|config\\s+--get|cat-file|symbolic-ref|for-each-ref)\\b/": true,
     "/\\brm\\b|\\bdel\\b|\\brmdir\\b|\\bgit\\s+push\\b|\\bgit\\s+reset\\b|\\bsudo\\b|curl\\s+.*\\|\\s*(sh|bash|zsh|python|python3|php|node|ruby)|wget\\s+.*\\|\\s*(sh|bash|zsh|python|python3|php|node|ruby)/": false
   },
-  "chat.agent.sandbox.enabled": true,
+  "chat.agent.sandbox.enabled": "on",
   "chat.agent.networkFilter": true,
   "chat.agent.sandbox.FileSystem.mac": {
     "allowWrite": [
       "."
     ],
     "denyWrite": [
-      "./.git/",
       "./vendor/",
       "./node_modules/",
       "./.env",
@@ -26,7 +26,6 @@
       "."
     ],
     "denyWrite": [
-      "./.git/",
       "./vendor/",
       "./node_modules/",
       "./.env",
