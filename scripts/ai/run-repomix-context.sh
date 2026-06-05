@@ -21,6 +21,10 @@ Examples:
   scripts/ai/run-repomix-context.sh . --depth 2 --top 20
   SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh /Users/example-user/Workspaces/example-app \
     --depth 3 --top 0 --min-code 0 --min-files 0 --context-window 128000
+
+  # Bundle a git-ignored folder (for example a JSON cache under storage/tmp):
+  SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh storage/tmp \
+    --include-ignored --min-code 0 --min-files 1
 EOF
 }
 

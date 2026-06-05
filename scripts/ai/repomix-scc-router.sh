@@ -40,6 +40,9 @@ Options:
   --include-logs              Include git logs in bundles
   --include-logs-count <n>    Commit count for --include-logs (default: 20)
   --include-diffs             Include git diffs in bundles
+  --include-ignored           Include git-ignored files: bypass git's
+                              --exclude-standard during collection and pass
+                              --no-gitignore to repomix during packing
   --help                      Show this help
 
 Examples:
@@ -269,13 +272,20 @@ collect_files() {
     local path
     COLLECTED_FILES=()
     if git -C "$ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+        local -a ls_files_args=(ls-files -co)
+        # By default git's --exclude-standard hides .gitignore'd files. With
+        # --include-ignored we drop it so ignored folders (e.g. a JSON cache
+        # under storage/tmp) can still be collected for analysis.
+        if [[ "$INCLUDE_IGNORED" != "1" ]]; then
+            ls_files_args+=(--exclude-standard)
+        fi
         while IFS= read -r path; do
             [[ -n "$path" ]] || continue
             [[ -f "$ROOT/$path" ]] || continue
             if ! path_is_ignored "$path"; then
                 COLLECTED_FILES+=("$path")
             fi
-        done < <(git -C "$ROOT" ls-files -co --exclude-standard)
+        done < <(git -C "$ROOT" "${ls_files_args[@]}")
     else
         local relative_path
         while IFS= read -r path; do
@@ -599,6 +609,9 @@ pack_group() {
     mkdir -p "$(dirname "$bundle_abs")"
 
     repomix_args=(--output "$bundle_abs" --style "$STYLE")
+    if [[ "$INCLUDE_IGNORED" == "1" ]]; then
+        repomix_args+=(--no-gitignore)
+    fi
     if [[ "$COMPRESS" == "1" ]]; then
         repomix_args+=(--compress)
     fi
@@ -712,6 +725,7 @@ COMPRESS=0
 INCLUDE_LOGS=0
 INCLUDE_LOGS_COUNT=20
 INCLUDE_DIFFS=0
+INCLUDE_IGNORED=0
 
 while (($# > 0)); do
     case "$1" in
@@ -821,6 +835,10 @@ while (($# > 0)); do
         ;;
     --include-diffs)
         INCLUDE_DIFFS=1
+        shift
+        ;;
+    --include-ignored)
+        INCLUDE_IGNORED=1
         shift
         ;;
     --help | -h)

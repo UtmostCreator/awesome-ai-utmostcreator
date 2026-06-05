@@ -35,6 +35,8 @@ Options:
   --include-logs
   --include-logs-count <n>
   --include-diffs
+  --include-ignored           Include git-ignored files (bypass git
+                              --exclude-standard and repomix .gitignore)
   --context-window <n>        Context window estimate (default: 128000)
   --reserved-output <n>       Reserved output tokens (default: 4000)
   --instruction-overhead <n>  Instruction overhead tokens (default: 8000)
@@ -163,6 +165,7 @@ COMPRESS=0
 INCLUDE_LOGS=0
 INCLUDE_LOGS_COUNT=20
 INCLUDE_DIFFS=0
+INCLUDE_IGNORED=0
 CONTEXT_WINDOW=128000
 RESERVED_OUTPUT=4000
 INSTRUCTION_OVERHEAD=8000
@@ -278,6 +281,10 @@ while (($# > 0)); do
         INCLUDE_DIFFS=1
         shift
         ;;
+    --include-ignored)
+        INCLUDE_IGNORED=1
+        shift
+        ;;
     --context-window)
         CONTEXT_WINDOW="$2"
         shift 2
@@ -351,6 +358,7 @@ router_args=("$ROUTER_SCRIPT" stats . --output-dir "$TREE_DIR" --depth "$DEPTH" 
 [[ "$COMPRESS" == "1" ]] && router_args+=(--compress)
 [[ "$INCLUDE_LOGS" == "1" ]] && router_args+=(--include-logs)
 [[ "$INCLUDE_DIFFS" == "1" ]] && router_args+=(--include-diffs)
+[[ "$INCLUDE_IGNORED" == "1" ]] && router_args+=(--include-ignored)
 
 ensure_tree_outputs() {
     mkdir -p "$TREE_DIR" "$BUNDLES_DIR" "$INDEXES_DIR"
@@ -617,6 +625,7 @@ pack_route() {
     local repomix_args=(--output "$out_abs" --style "$STYLE")
 
     mkdir -p "$(dirname "$out_abs")"
+    [[ "$INCLUDE_IGNORED" == "1" ]] && repomix_args+=(--no-gitignore)
     [[ "$COMPRESS" == "1" ]] && repomix_args+=(--compress)
     [[ -n "$SPLIT_SIZE" ]] && repomix_args+=(--split-output "$SPLIT_SIZE")
     [[ "$INCLUDE_LOGS" == "1" ]] && repomix_args+=(--include-logs --include-logs-count "$INCLUDE_LOGS_COUNT")

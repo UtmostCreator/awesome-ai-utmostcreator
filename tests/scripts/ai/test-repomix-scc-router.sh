@@ -68,6 +68,52 @@ matcher_check() {
 }
 run_test "path_is_ignored matches nested files under trailing-slash dirs" matcher_check
 
+# --include-ignored: collect_files must skip a .gitignore'd file by default and
+# include it when INCLUDE_IGNORED=1. Source only collect_files + path_is_ignored
+# into a clean subshell and run them against a throwaway git repo.
+collect_ignored_check() {
+    local want="$1" # "default" (exclude) or "ignored" (include)
+    local repo
+    repo="$(mktemp -d)"
+    (
+        cd "$repo"
+        git init -q
+        printf 'storage/\n' >.gitignore
+        printf 'tracked\n' >tracked.txt
+        mkdir -p storage/tmp
+        printf '{"a":1}\n' >storage/tmp/data.json
+    )
+
+    # shellcheck disable=SC2016
+    "$BASH_BIN" -c '
+        set -euo pipefail
+        shopt -s extglob
+        ((BASH_VERSINFO[0] >= 4)) && shopt -s globstar
+        source <(sed -n "/^path_is_ignored() {/,/^}/p;/^collect_files() {/,/^}/p" "$1")
+        ROOT="$2"
+        IGNORE_PATTERNS=(".git")
+        INCLUDE_IGNORED="$3"
+        collect_files
+        printf "%s\n" "${COLLECTED_FILES[@]}"
+    ' _ "$SCRIPT" "$repo" "$([[ "$want" == "ignored" ]] && echo 1 || echo 0)" >"$repo/.out"
+
+    local rc=0
+    if [[ "$want" == "ignored" ]]; then
+        grep -q 'storage/tmp/data.json' "$repo/.out" || rc=1
+    else
+        grep -q 'storage/tmp/data.json' "$repo/.out" && rc=1
+        grep -q 'tracked.txt' "$repo/.out" || rc=1
+    fi
+    rm -rf "$repo"
+    return "$rc"
+}
+if command -v git >/dev/null 2>&1; then
+    run_test "collect_files excludes git-ignored files by default" collect_ignored_check default
+    run_test "collect_files includes git-ignored files with --include-ignored" collect_ignored_check ignored
+else
+    skip_test "collect_files include-ignored behavior" "git not installed"
+fi
+
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
 ((FAIL == 0)) && printf '\033[0;32mPASSED\033[0m\n' || { printf '\033[0;31mFAILED\033[0m\n'; exit 1; }
