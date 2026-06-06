@@ -51,14 +51,46 @@ permission:
     'wc *': allow
     'jq *': allow
     'yq *': allow
+    # --- full AI script access (write tier); see docs/ai/agent-script-access.md ---
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
-    'bash scripts/ai/preview-file.sh *': allow
+    'bash scripts/ai/rg-code.sh *': allow
+    'bash scripts/ai/fd-files.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-branch-origin.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
+    'bash scripts/ai/gh-pr-context.sh *': deny
+    'bash scripts/ai/repo-stats.sh *': allow
+    'bash scripts/ai/repo-tool-inventory.sh *': allow
+    'bash scripts/ai/ai-file-freshness.sh *': allow
+    'bash scripts/ai/ai-install-coverage.sh *': allow
+    'bash scripts/ai/check-file-refs.sh *': allow
+    'bash scripts/ai/pack-context.sh *': ask
+    'bash scripts/ai/run-repomix-context.sh *': ask
+    'bash scripts/ai/repomix-context-tree.sh *': ask
+    'bash scripts/ai/repomix-scc-router.sh *': ask
+    'bash scripts/ai/repomix-freshness.sh *': allow
+    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
+    'bash scripts/ai/ai-diff-context.sh *': allow
+    'bash scripts/ai/ai-doc-check.sh *': allow
+    'bash scripts/ai/ai-verify.sh *': ask
+    'bash scripts/ai/ai-test-select.sh *': allow
+    'bash scripts/ai/run-repo-tests.sh*': allow
+    'bash scripts/ai/ai-structured.sh *': allow
+    'bash scripts/ai/ai-task.sh *': deny
+    'bash scripts/ai/ai-edit.sh *': ask
+    'bash scripts/ai/ai-rollback.sh *': ask
+    'bash scripts/ai/session-checkpoint.sh *': ask
+    'bash scripts/ai/pre-tool-use.sh *': deny
+    'bash scripts/ai/post-tool-use.sh *': deny
+    'bash scripts/ai/install-mandatory-tools.sh *': ask
+    'bash scripts/ai/prune-shipped-targets.sh *': deny
+    'bash scripts/ai/watch-loop.sh *': deny
+    'bash scripts/ai/common.sh*': deny
     'php -l *': allow
     'php tools/ai/validate-*.php *': allow
     'composer validate*': allow
@@ -73,11 +105,21 @@ permission:
     'npm ci*': ask
     'pnpm install*': ask
     'yarn install*': ask
-    'bash scripts/ai/install-mandatory-tools.sh *': ask
     'grep *': deny
 ---
 
 You are the build-config agent for `<PROJECT_NAME>`.
+
+## Script Access
+
+Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write tier. Use:
+
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the config change; expect hits, file content, usage maps.
+- `ai-diff-context.sh` / `ai-install-coverage.sh` — to frame the change and check install coverage; expect a diff bundle and coverage findings.
+- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to prove the change; expect pass/fail evidence.
+- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when a native path-scoped `edit:` is insufficient; `session-checkpoint.sh` (`ask`) for continuity.
+
+Edits normally use the native path-scoped `edit:` permission. Denied: `ai-task`, `gh-pr-context`, `pre/post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
 
 Rules:
 

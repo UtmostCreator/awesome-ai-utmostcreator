@@ -11,15 +11,46 @@ permission:
     'git status*': allow
     'git diff*': allow
     'git log*': allow
+    # --- full AI script access; see docs/ai/agent-script-access.md ---
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'bash scripts/ai/rg-code.sh *': allow
+    'bash scripts/ai/fd-files.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-branch-origin.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
+    'bash scripts/ai/gh-pr-context.sh *': deny
+    'bash scripts/ai/repo-stats.sh *': allow
+    'bash scripts/ai/repo-tool-inventory.sh *': allow
+    'bash scripts/ai/ai-file-freshness.sh *': allow
+    'bash scripts/ai/ai-install-coverage.sh *': deny
+    'bash scripts/ai/check-file-refs.sh *': allow
+    'bash scripts/ai/pack-context.sh *': ask
+    'bash scripts/ai/run-repomix-context.sh *': ask
+    'bash scripts/ai/repomix-context-tree.sh *': ask
+    'bash scripts/ai/repomix-scc-router.sh *': ask
+    'bash scripts/ai/repomix-freshness.sh *': allow
+    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
     'bash scripts/ai/ai-diff-context.sh *': allow
+    'bash scripts/ai/ai-doc-check.sh *': allow
+    'bash scripts/ai/ai-verify.sh *': deny
+    'bash scripts/ai/ai-test-select.sh *': deny
+    'bash scripts/ai/run-repo-tests.sh*': deny
+    'bash scripts/ai/ai-structured.sh *': allow
+    'bash scripts/ai/ai-task.sh *': deny
+    'bash scripts/ai/ai-edit.sh *': deny
+    'bash scripts/ai/ai-rollback.sh *': deny
+    'bash scripts/ai/session-checkpoint.sh *': deny
+    'bash scripts/ai/pre-tool-use.sh *': deny
+    'bash scripts/ai/post-tool-use.sh *': deny
+    'bash scripts/ai/install-mandatory-tools.sh *': deny
+    'bash scripts/ai/prune-shipped-targets.sh *': deny
+    'bash scripts/ai/watch-loop.sh *': deny
+    'bash scripts/ai/common.sh*': deny
     'git show*': allow
     'git blame*': allow
     'git ls-files*': allow
@@ -40,6 +71,17 @@ permission:
 Read-only evidence collection only. Do not edit files, run installers, mutate git state, or inspect secrets.
 
 Never emit ad-hoc Python or shell edit scripts, inline patches, or mutation commands. If evidence now supports a bounded code or config change, hand off to `implementer`. If ownership, scope, or contract boundaries remain unclear, hand off to `architect`.
+
+## Script Access
+
+Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. This role is read-only. Use:
+
+- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — script-first evidence; expect hits, file content, usage maps.
+- `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — history and current change; expect blame, branch base, diff bundle.
+- `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` — repo shape and doc drift.
+- repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
+
+Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host scripts (`ai-verify`, `ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Collect evidence only; do not verify or mutate.
 
 ## Mandatory sequence
 

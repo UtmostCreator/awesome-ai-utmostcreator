@@ -89,28 +89,51 @@ permission:
     "git stash pop*": ask
     "git stash apply*": ask
     "git stash drop*": ask
-    "bash scripts/ai/ai-search.sh *": allow
-    "AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
-    "env AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
-    "bash scripts/ai/rg-code.sh *": allow
-    "bash scripts/ai/fd-files.sh *": allow
-    "bash scripts/ai/preview-file.sh *": allow
-    "AI_OUTPUT=json bash scripts/ai/preview-file.sh *": allow
-    "env AI_OUTPUT=json bash scripts/ai/preview-file.sh *": allow
-    "bash scripts/ai/query-usage.sh *": allow
-    "bash scripts/ai/git-forensics.sh *": allow
-    "bash scripts/ai/ai-verify.sh *": allow
-    "AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *": allow
-    "env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *": allow
+    # --- full AI script access (write/build tier); see docs/ai/agent-script-access.md ---
+    'bash scripts/ai/ai-search.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/preview-file.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
+    'bash scripts/ai/rg-code.sh *': allow
+    'bash scripts/ai/fd-files.sh *': allow
+    'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-branch-origin.sh *': allow
+    'bash scripts/ai/git-forensics.sh *': allow
+    'bash scripts/ai/gh-pr-context.sh *': deny
+    'bash scripts/ai/repo-stats.sh *': allow
+    'bash scripts/ai/repo-tool-inventory.sh *': allow
+    'bash scripts/ai/ai-file-freshness.sh *': allow
+    'bash scripts/ai/ai-install-coverage.sh *': allow
+    'bash scripts/ai/check-file-refs.sh *': allow
+    'bash scripts/ai/pack-context.sh *': ask
+    'bash scripts/ai/run-repomix-context.sh *': ask
+    'bash scripts/ai/repomix-context-tree.sh *': ask
+    'bash scripts/ai/repomix-scc-router.sh *': ask
+    'bash scripts/ai/ai-diff-context.sh *': allow
+    'bash scripts/ai/ai-doc-check.sh *': allow
+    'bash scripts/ai/ai-verify.sh *': ask
+    'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
+    'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
+    'bash scripts/ai/ai-test-select.sh *': allow
+    'bash scripts/ai/run-repo-tests.sh*': allow
+    'bash scripts/ai/ai-structured.sh *': allow
+    'bash scripts/ai/ai-task.sh *': deny
+    'bash scripts/ai/ai-edit.sh *': ask
+    'bash scripts/ai/ai-rollback.sh *': ask
+    'bash scripts/ai/session-checkpoint.sh *': ask
+    'bash scripts/ai/pre-tool-use.sh *': deny
+    'bash scripts/ai/post-tool-use.sh *': deny
+    'bash scripts/ai/install-mandatory-tools.sh *': ask
+    'bash scripts/ai/prune-shipped-targets.sh *': deny
+    'bash scripts/ai/watch-loop.sh *': deny
+    'bash scripts/ai/common.sh*': deny
     "bash -n scripts/*.sh": allow
     "bash -n scripts/**/*.sh": allow
     "bash -n scripts/doctor.sh": allow
     "bash scripts/doctor.sh": allow
     "bash scripts/doctor.sh *": allow
-    "bash scripts/ai/ai-doc-check.sh --check*": allow
-    "bash scripts/ai/ai-file-freshness.sh *": allow
-    "bash scripts/ai/ai-install-coverage.sh *": allow
-    "bash scripts/ai/check-file-refs.sh *": allow
     "php -l *": allow
     "vendor/bin/phpunit *": allow
     "./vendor/bin/phpunit *": allow
@@ -178,6 +201,18 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Report missing environment prerequisites before claiming install failure.
 - Do not weaken validators, line-budget checks, or install-surface rules to get green output.
 - Do not inspect or print secrets.
+
+## Script Access
+
+Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write/build tier. Use:
+
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground install scope; expect hits, file content, usage maps.
+- `ai-diff-context.sh` — to inspect the current change; expect a diff bundle.
+- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.
+- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the path-scoped `edit:` permission is insufficient; expect a tracked, reversible edit.
+- `session-checkpoint.sh` (`ask`) — for continuity across a long install run.
+
+Edits normally go through the native path-scoped `edit:` permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre/post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
 
 ## Canonical References
 
