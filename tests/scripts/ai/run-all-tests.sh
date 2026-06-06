@@ -104,6 +104,7 @@ SUITES=(
     "ai-rollback.sh|tests/scripts/ai/test-ai-rollback.sh"
     "install-mandatory-tools.sh|tests/scripts/ai/test-install-mandatory-tools.sh"
     "check-file-refs.sh|tests/scripts/ai/test-check-file-refs.sh"
+    "validate-agent-spec.php|tests/scripts/ai/test-validate-agent-spec.sh"
     "prune-shipped-targets.sh|tests/scripts/ai/test-prune-shipped-targets.sh"
     "repomix-freshness.sh|tests/scripts/ai/test-repomix-freshness.sh"
     "misc-wrappers|tests/scripts/ai/test-misc-wrappers.sh"

@@ -22,7 +22,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / github-copilot-instruction-template` - 22
 - `package / opencode-command-template` - 4
 - `package / operations-doc` - 6
-- `package / optional-template` - 9
+- `package / optional-template` - 14
 - `package / package-capability` - 42
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
@@ -40,7 +40,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 17
 - `root / github-copilot-skill` - 17
-- `root / opencode-agent` - 12
+- `root / opencode-agent` - 13
 - `root / opencode-command` - 19
 - `root / opencode-skill` - 19
 - `root / php-reference` - 3
@@ -182,6 +182,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-agent`|repository-reviewer|`.opencode/agents/repository-reviewer.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`opencode-agent`|researcher|`.opencode/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`opencode-agent`|reviewer|`.opencode/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
+|`opencode-agent`|super-implementer|`.opencode/agents/super-implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
 |`opencode-agent`|workflow-auditor|`.opencode/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`opencode-command`|architecture-plan|`.opencode/commands/architecture-plan.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`opencode-command`|bug-regression|`.opencode/commands/bug-regression.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
@@ -317,6 +318,11 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`operations-doc`|Maintenance|`packages/ai-universal-rules/docs/operations/MAINTENANCE.md`|Treat this package like workflow infrastructure, not throwaway prompts.|
 |`operations-doc`|MCP Boundaries|`packages/ai-universal-rules/docs/operations/MCP-BOUNDARIES.md`|MCP extends capability, but also risk.|
 |`operations-doc`|Troubleshooting|`packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md`|- unresolved placeholders|
+|`optional-template`|Agent Creator Runtime Guardian|`packages/ai-universal-rules/templates/optional/agents/agent-creator-runtime-guardian.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in <PROJECT_NAME>|
+|`optional-template`|Agent Creator Semantic Verifier|`packages/ai-universal-rules/templates/optional/agents/agent-creator-semantic-verifier.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in <PROJECT_NAME>|
+|`optional-template`|Agent Creator Static Validator|`packages/ai-universal-rules/templates/optional/agents/agent-creator-static-validator.md`|Use under the supervisor to run the deterministic AgentSpec static validator for <PROJECT_NAME> and report pass/fail with exact errors|
+|`optional-template`|Agent Creator Supervisor|`packages/ai-universal-rules/templates/optional/agents/agent-creator-supervisor.md`|Use to request a new agent in <PROJECT_NAME>; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
+|`optional-template`|Agent Creator|`packages/ai-universal-rules/templates/optional/agents/agent-creator.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for <PROJECT_NAME>; never emits free-text agents directly|
 |`optional-template`|architecture-plan|`packages/ai-universal-rules/templates/optional/agents/architecture-plan.md`|Produce a focused implementation plan for a medium or large change in <PROJECT_NAME>|
 |`optional-template`|bugfix|`packages/ai-universal-rules/templates/optional/agents/bugfix.md`|Use when fixing a bug in <PROJECT_NAME>, reproducing it first when practical, and keeping the fix minimal|
 |`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in <PROJECT_NAME>|

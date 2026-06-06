@@ -142,6 +142,10 @@ run_drift() {
     if [[ -f tools/ai/validate-context-budgets.php ]]; then
         run_step "validate-context-budgets" php tools/ai/validate-context-budgets.php
     fi
+
+    if [[ -f tools/ai/validate-agent-spec.php ]]; then
+        run_step "validate-agent-spec --self-test" php tools/ai/validate-agent-spec.php --self-test
+    fi
 }
 
 case "$mode" in
