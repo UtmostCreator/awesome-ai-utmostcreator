@@ -42,7 +42,7 @@
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 4,
         "package:operations-doc": 6,
-        "package:optional-template": 9,
+        "package:optional-template": 14,
         "package:package-capability": 42,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
@@ -60,7 +60,7 @@
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 17,
         "root:github-copilot-skill": 17,
-        "root:opencode-agent": 12,
+        "root:opencode-agent": 13,
         "root:opencode-command": 19,
         "root:opencode-skill": 19,
         "root:php-reference": 3,
@@ -565,6 +565,46 @@
             "path": "packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md",
             "runtime": "canonical",
             "description": "- unresolved placeholders"
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
+            "name": "Agent Creator Runtime Guardian",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-runtime-guardian.md",
+            "runtime": "optional",
+            "description": "Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in <PROJECT_NAME>"
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
+            "name": "Agent Creator Semantic Verifier",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-semantic-verifier.md",
+            "runtime": "optional",
+            "description": "Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in <PROJECT_NAME>"
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
+            "name": "Agent Creator Static Validator",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-static-validator.md",
+            "runtime": "optional",
+            "description": "Use under the supervisor to run the deterministic AgentSpec static validator for <PROJECT_NAME> and report pass/fail with exact errors"
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
+            "name": "Agent Creator Supervisor",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-supervisor.md",
+            "runtime": "optional",
+            "description": "Use to request a new agent in <PROJECT_NAME>; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility"
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
+            "name": "Agent Creator",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator.md",
+            "runtime": "optional",
+            "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for <PROJECT_NAME>; never emits free-text agents directly"
         },
         {
             "scope": "package",
@@ -2229,6 +2269,14 @@
             "path": ".opencode/agents/reviewer.md",
             "runtime": "opencode",
             "description": "Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "super-implementer",
+            "path": ".opencode/agents/super-implementer.md",
+            "runtime": "opencode",
+            "description": "Use when a bounded implementation slice is clear and focused verification should happen in this repository"
         },
         {
             "scope": "root",

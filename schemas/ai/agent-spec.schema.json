@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-configs.local/schemas/agent-spec.schema.json",
+  "title": "Agent Creator Edition AgentSpec",
+  "description": "Structured contract emitted by the Agent Creator and enforced by the deterministic Static Validator before an agent is rendered to a repo-native OpenCode/Copilot agent file. The Creator must produce this spec, not free-text instructions.",
+  "type": "object",
+  "required": [
+    "spec_version",
+    "name",
+    "purpose",
+    "mode",
+    "risk_level",
+    "allowed_tasks",
+    "forbidden_tasks",
+    "tools",
+    "capabilities",
+    "output_format",
+    "success_criteria",
+    "autonomy",
+    "approval"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "spec_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "name": {
+      "type": "string",
+      "description": "Lowercase, hyphen-separated agent id. Becomes the rendered agent filename.",
+      "pattern": "^[a-z][a-z0-9-]{2,48}[a-z0-9]$"
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 12,
+      "maxLength": 240
+    },
+    "mode": {
+      "type": "string",
+      "description": "OpenCode agent mode. Primary roles use 'all'; specialists use 'subagent'.",
+      "enum": ["all", "subagent"]
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["low", "medium", "high"]
+    },
+    "allowed_tasks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 20,
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "forbidden_tasks": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 30,
+      "description": "Explicit deny list. Must include the non-negotiable baseline forbidden tasks enforced by the Static Validator.",
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "tools": {
+      "type": "array",
+      "description": "Allow-listed tool ids the agent may use. Empty array means a text-only agent (no tool/file/network access).",
+      "maxItems": 24,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_.:-]+$"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "description": "Repo capability folder names the agent loads. Validated against docs/ai/capabilities.",
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9-]+$"
+      }
+    },
+    "output_format": {
+      "type": "string",
+      "enum": ["structured_markdown", "structured_json", "diff", "plain_text"]
+    },
+    "success_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 12,
+      "items": {
+        "type": "string",
+        "minLength": 6
+      }
+    },
+    "autonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_steps", "self_modification", "may_create_agents", "network_access", "file_write"],
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "self_modification": {
+          "type": "boolean",
+          "description": "Must be false. Agents may not rewrite their own spec or governance files."
+        },
+        "may_create_agents": {
+          "type": "boolean",
+          "description": "Must be false for created agents. Only the permanent Supervisor + Creator pipeline may produce agents."
+        },
+        "network_access": {
+          "type": "boolean"
+        },
+        "file_write": {
+          "type": "boolean"
+        }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requires_human_approval", "approved_by"],
+      "properties": {
+        "requires_human_approval": {
+          "type": "boolean",
+          "description": "Must be true. The hard gate requires explicit human approval before an agent ships."
+        },
+        "approved_by": {
+          "type": ["string", "null"],
+          "description": "Approver identity once granted; null while pending approval."
+        }
+      }
+    },
+    "runtime_guardrails": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input_guardrails": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "tool_call_guardrails": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "output_guardrails": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3 }
+        },
+        "stop_conditions": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 3 }
+        }
+      }
+    }
+  }
+}
