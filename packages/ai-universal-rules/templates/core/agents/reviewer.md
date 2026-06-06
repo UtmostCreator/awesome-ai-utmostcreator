@@ -45,17 +45,44 @@ permission:
     'git blame*': allow
     'git branch*': allow
     'git rev-parse*': allow
+    # --- full AI script access (review/audit tier); see docs/ai/agent-script-access.md ---
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/rg-code.sh *': allow
     'bash scripts/ai/fd-files.sh *': allow
-    'bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-branch-origin.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
-    'bash scripts/ai/ai-doc-check.sh --check*': allow
+    'bash scripts/ai/gh-pr-context.sh *': allow
+    'bash scripts/ai/repo-stats.sh *': allow
+    'bash scripts/ai/repo-tool-inventory.sh *': allow
+    'bash scripts/ai/ai-file-freshness.sh *': allow
+    'bash scripts/ai/ai-install-coverage.sh *': allow
+    'bash scripts/ai/check-file-refs.sh *': allow
+    'bash scripts/ai/pack-context.sh *': ask
+    'bash scripts/ai/run-repomix-context.sh *': ask
+    'bash scripts/ai/repomix-context-tree.sh *': ask
+    'bash scripts/ai/repomix-scc-router.sh *': ask
+    'bash scripts/ai/ai-diff-context.sh *': allow
+    'bash scripts/ai/ai-doc-check.sh *': allow
+    'bash scripts/ai/ai-verify.sh *': ask
+    'bash scripts/ai/ai-test-select.sh *': allow
+    'bash scripts/ai/run-repo-tests.sh*': allow
+    'bash scripts/ai/ai-structured.sh *': allow
+    'bash scripts/ai/ai-task.sh *': deny
+    'bash scripts/ai/ai-edit.sh *': deny
+    'bash scripts/ai/ai-rollback.sh *': deny
+    'bash scripts/ai/session-checkpoint.sh *': deny
+    'bash scripts/ai/pre-tool-use.sh *': deny
+    'bash scripts/ai/post-tool-use.sh *': deny
+    'bash scripts/ai/install-mandatory-tools.sh *': deny
+    'bash scripts/ai/prune-shipped-targets.sh *': deny
+    'bash scripts/ai/watch-loop.sh *': deny
+    'bash scripts/ai/common.sh*': deny
     'php -l *': allow
     'vendor/bin/phpunit *': allow
     './vendor/bin/phpunit *': allow
@@ -106,6 +133,17 @@ Find issues before merge. Prioritize correctness, regression risk, security, con
 - Use active repository evidence over planning notes.
 - Duplicate-logic screening is required before PASS.
 - Use `unknown` when evidence does not prove a claim.
+
+## Script Access
+
+Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Review/audit tier = read + proof. Use:
+
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground findings; expect hits, file content, usage maps.
+- `git-forensics.sh` / `git-branch-origin.sh` / `gh-pr-context.sh` — for review/PR/release context; expect blame, branch base, PR metadata.
+- `ai-diff-context.sh` / `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to confirm proof; expect diff bundle and test results.
+- `ai-doc-check.sh` / `check-file-refs.sh` / `ai-file-freshness.sh` — to catch drift; expect lint and freshness results.
+
+Denied: write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Reviewer inspects and verifies; it does not mutate.
 
 ## Canonical References
 

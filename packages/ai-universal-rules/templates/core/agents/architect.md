@@ -43,16 +43,44 @@ permission:
     'git blame*': allow
     'git branch*': allow
     'git rev-parse*': allow
+    # --- full AI script access (read-only design tier); see docs/ai/agent-script-access.md ---
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/rg-code.sh *': allow
     'bash scripts/ai/fd-files.sh *': allow
-    'bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-branch-origin.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
+    'bash scripts/ai/gh-pr-context.sh *': deny
+    'bash scripts/ai/repo-stats.sh *': allow
+    'bash scripts/ai/repo-tool-inventory.sh *': allow
+    'bash scripts/ai/ai-file-freshness.sh *': allow
+    'bash scripts/ai/ai-install-coverage.sh *': deny
+    'bash scripts/ai/check-file-refs.sh *': allow
+    'bash scripts/ai/pack-context.sh *': ask
+    'bash scripts/ai/run-repomix-context.sh *': ask
+    'bash scripts/ai/repomix-context-tree.sh *': ask
+    'bash scripts/ai/repomix-scc-router.sh *': ask
+    'bash scripts/ai/ai-diff-context.sh *': allow
+    'bash scripts/ai/ai-doc-check.sh *': allow
+    'bash scripts/ai/ai-verify.sh *': deny
+    'bash scripts/ai/ai-test-select.sh *': deny
+    'bash scripts/ai/run-repo-tests.sh*': deny
+    'bash scripts/ai/ai-structured.sh *': allow
+    'bash scripts/ai/ai-task.sh *': deny
+    'bash scripts/ai/ai-edit.sh *': deny
+    'bash scripts/ai/ai-rollback.sh *': deny
+    'bash scripts/ai/session-checkpoint.sh *': deny
+    'bash scripts/ai/pre-tool-use.sh *': deny
+    'bash scripts/ai/post-tool-use.sh *': deny
+    'bash scripts/ai/install-mandatory-tools.sh *': deny
+    'bash scripts/ai/prune-shipped-targets.sh *': deny
+    'bash scripts/ai/watch-loop.sh *': deny
+    'bash scripts/ai/common.sh*': deny
     # --- shipped CLI tool access (shared snippet: agent-tools-readonly) ---
     'scc *': allow
     'tokei *': allow
@@ -93,6 +121,18 @@ Define exact scope, non-goals, affected paths, source-of-truth files, contracts 
 - Prefer provider-neutral architecture over provider-specific duplication.
 - Do not create parallel implementations unless the repository explicitly requires them.
 - Use `unknown` when evidence does not prove a claim.
+
+## Script Access
+
+Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Design tier = read-only. Use:
+
+- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to ground scope; expect hits, file content, usage maps.
+- `git-forensics.sh` / `git-branch-origin.sh` — for ownership/history; expect blame and branch base.
+- `ai-diff-context.sh` / `ai-doc-check.sh` / `check-file-refs.sh` — to assess current change and doc drift; expect diff bundle and lint results.
+- repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
+- `ai-structured.sh` — to emit a structured design/handoff; expect structured JSON.
+
+Denied: all verify/test/write/hook/host scripts (`ai-verify`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Architect designs; it does not run or mutate.
 
 ## Canonical References
 

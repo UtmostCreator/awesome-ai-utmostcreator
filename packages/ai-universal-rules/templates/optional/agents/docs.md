@@ -36,13 +36,46 @@ permission:
     'tail *': allow
     'wc *': allow
     'jq *': allow
+    # --- full AI script access (write tier); see docs/ai/agent-script-access.md ---
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
-    'bash scripts/ai/preview-file.sh *': allow
-    'bash scripts/ai/ai-doc-check.sh --check*': allow
+    'bash scripts/ai/rg-code.sh *': allow
+    'bash scripts/ai/fd-files.sh *': allow
+    'bash scripts/ai/query-usage.sh *': allow
+    'bash scripts/ai/git-branch-origin.sh *': allow
+    'bash scripts/ai/git-forensics.sh *': allow
+    'bash scripts/ai/gh-pr-context.sh *': deny
+    'bash scripts/ai/repo-stats.sh *': allow
+    'bash scripts/ai/repo-tool-inventory.sh *': allow
+    'bash scripts/ai/ai-file-freshness.sh *': allow
+    'bash scripts/ai/ai-install-coverage.sh *': deny
+    'bash scripts/ai/check-file-refs.sh *': allow
+    'bash scripts/ai/pack-context.sh *': ask
+    'bash scripts/ai/run-repomix-context.sh *': ask
+    'bash scripts/ai/repomix-context-tree.sh *': ask
+    'bash scripts/ai/repomix-scc-router.sh *': ask
+    'bash scripts/ai/repomix-freshness.sh *': allow
+    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
+    'bash scripts/ai/ai-diff-context.sh *': allow
+    'bash scripts/ai/ai-doc-check.sh *': allow
+    'bash scripts/ai/ai-verify.sh *': ask
+    'bash scripts/ai/ai-test-select.sh *': deny
+    'bash scripts/ai/run-repo-tests.sh*': deny
+    'bash scripts/ai/ai-structured.sh *': allow
+    'bash scripts/ai/ai-task.sh *': deny
+    'bash scripts/ai/ai-edit.sh *': ask
+    'bash scripts/ai/ai-rollback.sh *': ask
+    'bash scripts/ai/session-checkpoint.sh *': ask
+    'bash scripts/ai/pre-tool-use.sh *': deny
+    'bash scripts/ai/post-tool-use.sh *': deny
+    'bash scripts/ai/install-mandatory-tools.sh *': ask
+    'bash scripts/ai/prune-shipped-targets.sh *': deny
+    'bash scripts/ai/watch-loop.sh *': deny
+    'bash scripts/ai/common.sh*': deny
     'markdownlint-cli2 *': allow
     'git add*': ask
     'git commit*': ask
@@ -50,6 +83,17 @@ permission:
 ---
 
 You are the docs agent for `<PROJECT_NAME>`.
+
+## Script Access
+
+Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write tier (docs only). Use:
+
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground doc updates against current code; expect hits, file content, usage maps.
+- `ai-doc-check.sh` / `check-file-refs.sh` — to catch doc drift and broken references; expect lint and drift results.
+- `ai-diff-context.sh` — to align docs with the implementation change; expect a diff bundle.
+- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when a native path-scoped `edit:` is insufficient; `session-checkpoint.sh` (`ask`) for continuity.
+
+This role does not run tests (`ai-test-select`, `run-repo-tests` denied). Edits normally use the native path-scoped `edit:` permission. Denied also: `ai-task`, `gh-pr-context`, `pre/post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
 
 Rules:
 
