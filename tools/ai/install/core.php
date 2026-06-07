@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/markers.php';
 require_once __DIR__ . '/project-yaml.php';
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/packs.php';
@@ -886,8 +887,8 @@ function aiInstallerEnsureAgentsMarkedSectionForSkippedUserFile(string $targetRo
     }
 
     $content = (string) file_get_contents($path);
-    $begin = '<!-- BEGIN ai-kit -->';
-    $end = '<!-- END ai-kit -->';
+    $begin = AI_MARKER_HTML_BEGIN;
+    $end = AI_MARKER_HTML_END;
     $section = implode("\n", [
         $begin,
         'AI kit instructions are installed for this repository. Keep your project-specific guidance outside this managed block.',
@@ -1241,8 +1242,8 @@ function aiInstallerEnsureGitignoreEntries(string $targetRoot, array $entries): 
     $gitignorePath = rtrim($targetRoot, '/\\') . DIRECTORY_SEPARATOR . '.gitignore';
 
     $existing = is_file($gitignorePath) ? (string) file_get_contents($gitignorePath) : '';
-    $begin = '# BEGIN ai-kit';
-    $end = '# END ai-kit';
+    $begin = AI_MARKER_HASH_BEGIN;
+    $end = AI_MARKER_HASH_END;
 
     $blockEntries = [];
     foreach ($entries as $entry) {
