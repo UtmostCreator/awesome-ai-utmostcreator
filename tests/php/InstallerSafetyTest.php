@@ -162,6 +162,31 @@ class InstallerSafetyTest extends TestCase
         mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
     }
 
+    private function makeAiCliIntegrationRoot(string $target, bool $withGit = true): void
+    {
+        mkdir($target, 0700, true);
+        if ($withGit) {
+            mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
+        }
+
+        foreach (['tools', 'packages'] as $dir) {
+            $source = self::$repoRoot . DIRECTORY_SEPARATOR . $dir;
+            $link = $target . DIRECTORY_SEPARATOR . $dir;
+            if (!@symlink($source, $link)) {
+                $this->markTestSkipped('symlink support is required for isolated ai.php integration tests');
+            }
+        }
+    }
+
+    /** @return array<string,mixed> */
+    private function readTargetArtifact(string $target, string $name): array
+    {
+        $path = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR . $name;
+        $decoded = json_decode((string) file_get_contents($path), true);
+        $this->assertIsArray($decoded, 'artifact should decode as array: ' . $name);
+        return $decoded;
+    }
+
     /** @return list<string> */
     private function relativeGlob(string $pattern): array
     {
@@ -566,6 +591,168 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testAiCliInstallApplyForwardsAdoptAndAllowNonGitToSubprocess(): void
+    {
+        $this->skipIfToolchainMissing(['git']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_cli_install_apply_flags_' . uniqid('', true);
+        $this->makeAiCliIntegrationRoot($target, false);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'opencode.jsonc', "{\"user\":true}\n");
+
+        try {
+            $result = $this->runTool(
+                'php tools/ai/ai.php install --apply --force --mode sidecar-only --targets opencode --adopt --allow-non-git --no-interaction',
+                ['AI_CLI_REPO_ROOT' => $target]
+            );
+
+            $this->assertSame(0, $result['exit'], "ai.php install --apply should succeed against isolated non-git target:\n" . $result['stderr']);
+            $sourceJson = self::$repoRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'opencode.json';
+            $this->assertSame(
+                (string) file_get_contents($sourceJson),
+                (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'opencode.jsonc'),
+                'orchestrator install --apply must pass --adopt so foreign opencode.jsonc is adopted by the subprocess'
+            );
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'project.yml');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'manifest.lock.json');
+            $manifest = json_decode((string) file_get_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+            $this->assertIsArray($manifest);
+            $this->assertSame('template', $manifest['files']['.ai/project.yml']['ownership'] ?? null, '.ai/project.yml must be recorded as template/user-owned');
+            $lock = json_decode((string) file_get_contents($target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'manifest.lock.json'), true);
+            $this->assertIsArray($lock);
+            $this->assertSame(1, $lock['schemaVersion'] ?? null);
+            $this->assertIsArray($lock['createdDirs'] ?? null);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testProjectYmlValuesRenderManagedPlaceholders(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_project_yml_render_' . uniqid('', true);
+        mkdir($target . DIRECTORY_SEPARATOR . '.ai', 0700, true);
+        mkdir($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai', 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'project.yml', implode("\n", [
+            'schemaVersion: "1"',
+            'projectName: "Custom App"',
+            'projectType: "php service"',
+            'projectSummary: "Custom summary"',
+            'primaryLanguage: "php"',
+            'primaryRuntime: "php 8.4"',
+            'primaryEntrypoints: "src/App.php"',
+            'primaryVerifyCommand: "composer test:fast"',
+            'primaryBuildCommand: "composer build"',
+            'primaryTestCommand: "composer test"',
+        ]) . "\n");
+        file_put_contents(
+            $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'sample.md',
+            '<PROJECT_NAME>|<PROJECT_TYPE>|<PROJECT_SUMMARY>|<PRIMARY_LANGUAGE>|<PRIMARY_RUNTIME>|<PRIMARY_ENTRYPOINTS>|<PRIMARY_VERIFY_COMMAND>|<PRIMARY_BUILD_COMMAND>|<PRIMARY_TEST_COMMAND>'
+        );
+
+        try {
+            aiInstallerApplyPlaceholders($target, 'Fallback App', [[
+                'target' => 'docs/ai/sample.md',
+                'action' => 'CREATE',
+            ]]);
+
+            $this->assertSame(
+                'Custom App|php service|Custom summary|php|php 8.4|src/App.php|composer test:fast|composer build|composer test',
+                (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'sample.md')
+            );
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testExistingUserAgentsFileGetsManagedPointerSection(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_agents_marker_' . uniqid('', true);
+        mkdir($target, 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'AGENTS.md', "# User instructions\n\nDo not remove me.\n");
+
+        try {
+            aiInstallerEnsureAgentsMarkedSectionForSkippedUserFile($target, [[
+                'target' => 'AGENTS.md',
+                'action' => 'SKIP_EXISTING_UNMANAGED',
+            ]]);
+            aiInstallerEnsureAgentsMarkedSectionForSkippedUserFile($target, [[
+                'target' => 'AGENTS.md',
+                'action' => 'SKIP_EXISTING_UNMANAGED',
+            ]]);
+
+            $content = (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'AGENTS.md');
+            $this->assertStringStartsWith("# User instructions\n\nDo not remove me.\n", $content);
+            $this->assertSame(1, substr_count($content, '<!-- BEGIN ai-kit -->'), 'managed section must be idempotent');
+            $this->assertSame(1, substr_count($content, '<!-- END ai-kit -->'), 'managed section must be idempotent');
+            $this->assertStringContainsString('docs/ai/project-context.md', $content);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testAiCliUpgradeApplyRefreshesOwnedFileThroughOrchestrator(): void
+    {
+        $this->skipIfToolchainMissing(['git']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_cli_upgrade_apply_' . uniqid('', true);
+        $this->makeAiCliIntegrationRoot($target, true);
+
+        try {
+            $install = $this->runTool(
+                'php tools/ai/ai.php install --apply --force --mode sidecar-only --targets opencode --no-interaction',
+                ['AI_CLI_REPO_ROOT' => $target]
+            );
+            $this->assertSame(0, $install['exit'], "initial ai.php install --apply failed:\n" . $install['stderr']);
+
+            $oldKitBytes = "{\"old-kit\":true}\n";
+            $targetJson = $target . DIRECTORY_SEPARATOR . 'opencode.jsonc';
+            file_put_contents($targetJson, $oldKitBytes);
+            $oldHash = 'sha256:' . hash('sha256', $oldKitBytes);
+
+            $manifestPath = $target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json';
+            $manifest = json_decode((string) file_get_contents($manifestPath), true);
+            $this->assertIsArray($manifest);
+            $this->assertIsArray($manifest['files']['opencode.jsonc'] ?? null);
+            $manifest['files']['opencode.jsonc']['installed_hash'] = $oldHash;
+            $manifest['files']['opencode.jsonc']['source_hash'] = $oldHash;
+            $manifest['files']['opencode.jsonc']['ownership'] = 'owned';
+            file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+
+            $backupId = 'upgrade-test-backup';
+            $backupDir = $target . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+            mkdir($backupDir, 0700, true);
+            file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json', json_encode([
+                'schema' => 'ai-install-backup/v1',
+                'backup_id' => $backupId,
+                'transaction_id' => $backupId,
+                'created_at' => gmdate('c'),
+                'updated_at' => gmdate('c'),
+                'state' => 'backed_up',
+                'entries' => [],
+                'integrity' => ['manifest_sha256' => null, 'snapshots_sha256' => []],
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+
+            $upgrade = $this->runTool(
+                'php tools/ai/ai.php upgrade --apply --backup ' . escapeshellarg($backupId),
+                ['AI_CLI_REPO_ROOT' => $target]
+            );
+            $this->assertSame(0, $upgrade['exit'], "ai.php upgrade --apply failed:\n" . $upgrade['stderr']);
+
+            $sourceJson = self::$repoRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'opencode.json';
+            $this->assertSame(
+                (string) file_get_contents($sourceJson),
+                (string) file_get_contents($targetJson),
+                'upgrade --apply must force reinstall through the orchestrator so owned source-updated files refresh'
+            );
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testDirectInstallerFullGovernanceBackupInstallShipsAllCoreSurfaces(): void
     {
         $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
@@ -577,7 +764,10 @@ class InstallerSafetyTest extends TestCase
         mkdir($docsDir, 0700, true);
         mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
         file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
+        // Template (skip-if-exists) file: must be PRESERVED under --force, not overwritten.
         file_put_contents($docsDir . DIRECTORY_SEPARATOR . 'failure-handling.md', "# existing local copy\n");
+        // Owned (replace) file: will be overwritten under --force, so it must be backed up.
+        file_put_contents($docsDir . DIRECTORY_SEPARATOR . 'agents.md', "# existing owned agents\n");
 
         try {
             $command = implode(' ', [
@@ -615,11 +805,19 @@ class InstallerSafetyTest extends TestCase
             $backupDir = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) ($backup['backup_dir'] ?? ''));
             $this->assertDirectoryExists($backupDir);
             $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'manifest.json');
-            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'failure-handling.md');
+            // Owned file overwritten under --force is backed up.
+            $this->assertFileExists($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'agents.md');
             $manifest = json_decode((string) file_get_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json'), true);
             $this->assertIsArray($manifest);
             $paths = array_map(static fn(array $entry): string => (string) ($entry['path'] ?? ''), $manifest['entries'] ?? []);
-            $this->assertContains('docs/ai/failure-handling.md', $paths);
+            $this->assertContains('docs/ai/agents.md', $paths);
+
+            // Template (skip-if-exists) file must be preserved byte-for-byte under --force.
+            $this->assertSame(
+                "# existing local copy\n",
+                (string) file_get_contents($docsDir . DIRECTORY_SEPARATOR . 'failure-handling.md'),
+                'template (skip-if-exists) file must be preserved under --force, not overwritten'
+            );
 
             $placeholders = $decoded['placeholders'] ?? [];
             $this->assertIsArray($placeholders);
@@ -1171,7 +1369,8 @@ class InstallerSafetyTest extends TestCase
             $gitignore = $target . DIRECTORY_SEPARATOR . '.gitignore';
             $this->assertFileExists($gitignore);
             $content = (string) file_get_contents($gitignore);
-            $this->assertStringContainsString('# AI workflow runtime/generated files', $content);
+            $this->assertStringContainsString('# BEGIN ai-kit', $content);
+            $this->assertStringContainsString('# END ai-kit', $content);
             $this->assertStringContainsString('.ai-backups/', $content);
             $this->assertStringContainsString('.ai-logs/', $content);
             $this->assertStringContainsString('.repomix-context/', $content);
@@ -1221,12 +1420,45 @@ class InstallerSafetyTest extends TestCase
             $this->assertStringStartsWith($original, $content);
             $this->assertStringContainsString("node_modules/\n", $content);
 
-            // Variant-covered roots are not re-added.
-            $this->assertSame(1, substr_count($content, '.ai-logs'), 'existing .ai-logs variant not duplicated');
-            $this->assertSame(1, substr_count($content, '.repomix-context'), 'existing .repomix-context variant not duplicated');
-
-            // Only the genuinely-missing entry is appended.
+            // Managed rules live in a replaceable ai-kit block; user rules remain outside it.
+            $this->assertStringContainsString('# BEGIN ai-kit', $content);
+            $this->assertStringContainsString('# END ai-kit', $content);
             $this->assertStringContainsString('.ai-backups/', $content);
+            $this->assertStringContainsString('.ai-logs/', $content);
+            $this->assertStringContainsString('.repomix-context/', $content);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testGitignoreEntriesAreEffectiveBeforeBackupWrites(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $this->skipIfToolchainMissing(['git']);
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_gitignore_effective_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            $init = $this->runTool('git init ' . escapeshellarg($target));
+            $this->assertSame(0, $init['exit'], $init['stderr']);
+
+            aiInstallerEnsureGitignoreEntries($target, ['.ai-backups/', '.ai/conflicts/', 'docs/ai/generated/', '.ai/install.lock', '*.tmp']);
+            aiInstallerAssertGitignoreEffective($target, ['.ai-backups/probe', '.ai/conflicts/probe', 'docs/ai/generated/probe.json', '.ai/install.lock', 'scratch.tmp']);
+
+            $check = $this->runTool('git -C ' . escapeshellarg($target) . ' check-ignore -- .ai-backups/probe .ai/conflicts/probe docs/ai/generated/probe.json .ai/install.lock scratch.tmp');
+            $this->assertSame(0, $check['exit'], $check['stderr']);
+
+            // File-style and glob entries must NOT be rewritten with a trailing slash,
+            // otherwise git treats them as directories and never ignores the real file.
+            $content = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.gitignore');
+            $this->assertStringContainsString("\n.ai/install.lock\n", $content, 'file-style ignore entry must not gain a trailing slash');
+            $this->assertStringContainsString("\n*.tmp\n", $content, 'glob ignore entry must stay verbatim');
+            $this->assertStringNotContainsString('.ai/install.lock/', $content);
+
+            // Project values + lock files must remain trackable (not ignored).
+            $notIgnored = $this->runTool('git -C ' . escapeshellarg($target) . ' check-ignore -- .ai/project.yml .ai/manifest.lock.json');
+            $this->assertSame(1, $notIgnored['exit'], '.ai/project.yml and .ai/manifest.lock.json must stay trackable');
         } finally {
             $this->removeTree($target);
         }
@@ -1444,14 +1676,14 @@ class InstallerSafetyTest extends TestCase
                 'opencode',
             ];
 
-            // Default: foreign AGENTS.md preserved (not clobbered).
+            // Default: foreign AGENTS.md user content preserved; installer adds only its marked
+            // pointer section so the kit is discoverable without clobbering user instructions.
             $result = $this->runTool(implode(' ', $base));
             $this->assertSame(0, $result['exit'], $result['stderr']);
-            $this->assertSame(
-                $userAgents,
-                (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'AGENTS.md'),
-                'foreign AGENTS.md must be preserved by default'
-            );
+            $agentsAfterDefault = (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'AGENTS.md');
+            $this->assertStringStartsWith($userAgents, $agentsAfterDefault, 'foreign AGENTS.md user content must be preserved by default');
+            $this->assertSame(1, substr_count($agentsAfterDefault, '<!-- BEGIN ai-kit -->'));
+            $this->assertStringContainsString('docs/ai/project-context.md', $agentsAfterDefault);
 
             // With --adopt: kit overwrites it.
             $resultAdopt = $this->runTool(implode(' ', array_merge($base, ['--adopt'])));

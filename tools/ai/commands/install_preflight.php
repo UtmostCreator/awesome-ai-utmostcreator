@@ -6,19 +6,7 @@ require_once __DIR__ . '/../install/toolchain.php';
 
 function aiRunPreflight(string $root): int
 {
-    $checks = [];
-
-    $checks[] = ['name' => 'php_version', 'status' => version_compare(PHP_VERSION, '8.1.0', '>=') ? 'passed' : 'failed', 'required' => '>=8.1'];
-    $checks[] = ['name' => 'ext_json', 'status' => extension_loaded('json') ? 'passed' : 'failed'];
-    $checks[] = ['name' => 'ext_mbstring', 'status' => extension_loaded('mbstring') ? 'passed' : 'failed'];
-    $checks[] = ['name' => 'ext_zip', 'status' => extension_loaded('zip') ? 'passed' : 'warning', 'reason' => extension_loaded('zip') ? null : 'ZipArchive unavailable; directory backup fallback will be used'];
-
-    $gitOut = [];
-    $gitExit = 0;
-    $gitSafePrev = aiInstallerSafeCwdEnter();
-    exec('git --version', $gitOut, $gitExit);
-    aiInstallerSafeCwdLeave($gitSafePrev);
-    $checks[] = ['name' => 'git', 'status' => $gitExit === 0 ? 'passed' : 'failed'];
+    $checks = aiInstallerEnvironmentChecks($root, true, false);
 
     $generated = aiCliGeneratedDir($root);
     $checks[] = ['name' => 'generated_dir_writable', 'status' => is_dir($generated) && is_writable($generated) ? 'passed' : 'failed'];
@@ -46,19 +34,8 @@ function aiRunPreflight(string $root): int
  */
 function aiRunDoctor(string $root): int
 {
-    $checks = [];
-
     // Environment prerequisites (same baseline as preflight).
-    $checks[] = ['name' => 'php_version', 'category' => 'env', 'status' => version_compare(PHP_VERSION, '8.1.0', '>=') ? 'passed' : 'failed', 'detail' => PHP_VERSION];
-    $checks[] = ['name' => 'ext_json', 'category' => 'env', 'status' => extension_loaded('json') ? 'passed' : 'failed'];
-    $checks[] = ['name' => 'ext_mbstring', 'category' => 'env', 'status' => extension_loaded('mbstring') ? 'passed' : 'failed'];
-
-    $gitOut = [];
-    $gitExit = 0;
-    $gitSafePrev = aiInstallerSafeCwdEnter();
-    exec('git --version', $gitOut, $gitExit);
-    aiInstallerSafeCwdLeave($gitSafePrev);
-    $checks[] = ['name' => 'git', 'category' => 'env', 'status' => $gitExit === 0 ? 'passed' : 'failed'];
+    $checks = aiInstallerEnvironmentChecks($root, false, true);
 
     // Git repository root (the installer refuses non-git targets without --allow-non-git).
     $isGitRepo = is_dir($root . DIRECTORY_SEPARATOR . '.git') || is_file($root . DIRECTORY_SEPARATOR . '.git');
@@ -106,6 +83,38 @@ function aiRunDoctor(string $root): int
 
     // Read-only diagnostic: only hard environment failures are non-zero; warnings are exit 0.
     return $failed === [] ? 0 : 1;
+}
+
+/**
+ * Shared environment checks consumed by preflight and doctor so their common baseline cannot drift.
+ *
+ * @return list<array<string,mixed>>
+ */
+function aiInstallerEnvironmentChecks(string $root, bool $includeZip, bool $withCategory): array
+{
+    $category = $withCategory ? ['category' => 'env'] : [];
+
+    $checks = [];
+    $checks[] = array_merge(
+        ['name' => 'php_version', 'status' => version_compare(PHP_VERSION, '8.1.0', '>=') ? 'passed' : 'failed', 'required' => '>=8.1'],
+        $category,
+        $withCategory ? ['detail' => PHP_VERSION] : []
+    );
+    $checks[] = array_merge(['name' => 'ext_json', 'status' => extension_loaded('json') ? 'passed' : 'failed'], $category);
+    $checks[] = array_merge(['name' => 'ext_mbstring', 'status' => extension_loaded('mbstring') ? 'passed' : 'failed'], $category);
+
+    if ($includeZip) {
+        $checks[] = ['name' => 'ext_zip', 'status' => extension_loaded('zip') ? 'passed' : 'warning', 'reason' => extension_loaded('zip') ? null : 'ZipArchive unavailable; directory backup fallback will be used'];
+    }
+
+    $gitOut = [];
+    $gitExit = 0;
+    $gitSafePrev = aiInstallerSafeCwdEnter();
+    exec('git --version', $gitOut, $gitExit);
+    aiInstallerSafeCwdLeave($gitSafePrev);
+    $checks[] = array_merge(['name' => 'git', 'status' => $gitExit === 0 ? 'passed' : 'failed'], $category);
+
+    return $checks;
 }
 
 function aiRunPackageLock(string $root, array $args): int

@@ -26,6 +26,7 @@ final class UpgradeOwnershipTest extends TestCase
             throw new \RuntimeException('Could not resolve repo root');
         }
         self::$repoRoot = $root;
+        require_once $root . '/tools/ai/install/planner.php';
         require_once $root . '/tools/ai/commands/install_workflow.php';
     }
 
@@ -103,5 +104,54 @@ final class UpgradeOwnershipTest extends TestCase
         $preserved = aiUpgradePreserveOwnedConflicts($root, []);
         $this->assertSame([], $preserved);
         $this->assertDirectoryDoesNotExist($root . DIRECTORY_SEPARATOR . '.ai');
+    }
+
+    public function testUpgradeApplyReinstallArgsForceOwnedFileRefresh(): void
+    {
+        $this->assertTrue(
+            function_exists('aiUpgradeBuildApplyInstallArgs'),
+            'upgrade apply install args must be testable'
+        );
+
+        $args = aiUpgradeBuildApplyInstallArgs('sidecar-only', 'backup-123', ['--agent', '--ci']);
+
+        $this->assertContains('--apply', $args);
+        $this->assertContains('--reinstall', $args);
+        $this->assertContains('--force', $args, 'upgrade --apply must force reinstall so owned files are refreshed after conflict preservation');
+        $this->assertContains('--agent', $args);
+        $this->assertContains('--ci', $args);
+    }
+
+    public function testForcePreservesSkipIfExistsTemplatesInPlan(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'upgrade_force_template_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root . DIRECTORY_SEPARATOR . 'source', 0700, true);
+        mkdir($root . DIRECTORY_SEPARATOR . 'target', 0700, true);
+
+        $source = $root . DIRECTORY_SEPARATOR . 'source' . DIRECTORY_SEPARATOR . 'template.md';
+        $target = $root . DIRECTORY_SEPARATOR . 'target' . DIRECTORY_SEPARATOR . 'template.md';
+        file_put_contents($source, "# kit template\n");
+        file_put_contents($target, "# user template edit\n");
+
+        $plan = aiInstallerBuildPlan([
+            'sourceRoot' => $root . DIRECTORY_SEPARATOR . 'source',
+            'targetRoot' => $root . DIRECTORY_SEPARATOR . 'target',
+            'force' => true,
+            'adopt' => false,
+            'allowCoreOverwrite' => false,
+            'upgradeSuffix' => '',
+        ], [
+            'template-pack' => [[
+                'type' => 'file',
+                'source' => 'template.md',
+                'target' => 'template.md',
+                'merge_strategy' => 'skip-if-exists',
+                'core' => false,
+            ]],
+        ], ['template-pack']);
+
+        $this->assertSame('SKIP_EXISTING_UNMANAGED', $plan[0]['action'] ?? null);
+        $this->assertSame('template (skip-if-exists) preserved under force', $plan[0]['reason'] ?? null);
     }
 }

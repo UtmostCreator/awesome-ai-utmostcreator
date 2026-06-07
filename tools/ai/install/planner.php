@@ -40,7 +40,21 @@ function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs):
                     $action = 'SKIP_EXISTING_UNMANAGED';
                 }
             } elseif ($exists && $config['force']) {
-                $action = 'OVERWRITE_MANAGED';
+                // Force overwrites kit-managed files, but template files (skip-if-exists) are
+                // user-owned once installed: never clobber them on force/upgrade unless the
+                // caller explicitly adopts. This keeps "template untouched on upgrade" true even
+                // when --force is used to refresh owned files.
+                if (($item['merge_strategy'] ?? '') === 'skip-if-exists' && !$adopt) {
+                    if (aiInstallerPathsAreIdentical($absSource, $absTarget)) {
+                        $action = 'SKIP_IDENTICAL_EXISTING';
+                        $reason = 'template target matches source';
+                    } else {
+                        $action = 'SKIP_EXISTING_UNMANAGED';
+                        $reason = 'template (skip-if-exists) preserved under force';
+                    }
+                } else {
+                    $action = 'OVERWRITE_MANAGED';
+                }
             }
             if ($exists && $config['force'] && (($item['core'] ?? false) === true) && !$config['allowCoreOverwrite']) {
                 $action = 'SKIP_PROTECTED_CORE';

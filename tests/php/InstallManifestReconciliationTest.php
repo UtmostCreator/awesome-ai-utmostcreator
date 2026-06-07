@@ -102,6 +102,7 @@ final class InstallManifestReconciliationTest extends TestCase
         $this->assertArrayHasKey('AGENTS.md', $merged['files']);
         $this->assertArrayHasKey('opencode.jsonc', $merged['files']);
         $this->assertTrue($merged['files']['AGENTS.md']['managed']);
+        $this->assertSame('owned', $merged['files']['AGENTS.md']['ownership'], 'fallback files{} entries must satisfy the install-manifest schema');
 
         // Empty path entries are filtered out of the derived managed_paths list and files{}.
         $this->assertArrayNotHasKey('', $merged['files']);
@@ -122,5 +123,25 @@ final class InstallManifestReconciliationTest extends TestCase
 
         $this->assertArrayHasKey('real/file.md', $merged['files']);
         $this->assertArrayNotHasKey('fake/override.md', $merged['files'], 'workflow layer must not replace files{}');
+    }
+
+    public function testSubprocessInstallCommandForwardsSafetyOverrideFlags(): void
+    {
+        $this->assertTrue(
+            function_exists('aiInstallerBuildSubprocessInstallCommand'),
+            'orchestrator subprocess command builder must be testable'
+        );
+
+        $cmd = aiInstallerBuildSubprocessInstallCommand('opencode', 'minimal', 'sidecar-only', [
+            'force' => true,
+            'adopt' => true,
+            'allowNonGit' => true,
+            'withPacks' => ['adapter-opencode'],
+        ]);
+
+        $this->assertStringContainsString('--force', $cmd);
+        $this->assertStringContainsString('--adopt', $cmd, 'install --apply must forward --adopt to the installer subprocess');
+        $this->assertStringContainsString('--allow-non-git', $cmd, 'install --apply must forward --allow-non-git to the installer subprocess');
+        $this->assertStringContainsString('--no-base', $cmd, 'sidecar-only mode must still suppress base pack');
     }
 }

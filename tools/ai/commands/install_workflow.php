@@ -27,7 +27,7 @@ function aiInstallerMergeWorkflowManifest(array $canonical, array $workflowField
         $canonical['files'] = [];
         foreach ($managedPaths as $managedPath) {
             if (is_string($managedPath) && $managedPath !== '') {
-                $canonical['files'][$managedPath] = ['managed' => true];
+                $canonical['files'][$managedPath] = ['managed' => true, 'ownership' => 'owned'];
             }
         }
     }
@@ -223,28 +223,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
     aiCliWriteArtifact($root, 'install-transaction', 'php tools/ai/ai.php install --apply', $tx, 'ok', null, 'Transaction prepared; apply command execution follows.');
 
     $runtime = (string) $installConfig['runtime'];
-    $cmd = 'php tools/ai/install-ai-kit.php --target . --runtime ' . escapeshellarg($runtime) . ' --profile ' . escapeshellarg((string) $installConfig['profile']);
-    if ($mode === 'sidecar-only') {
-        $cmd .= ' --no-base';
-    }
-    if (!empty($installConfig['force'])) {
-        $cmd .= ' --force';
-    }
-    if (!empty($installConfig['allowCoreOverwrite'])) {
-        $cmd .= ' --allow-core-overwrite';
-    }
-    if (!empty($installConfig['allFeatures'])) {
-        $cmd .= ' --all-features';
-    }
-    if (!empty($installConfig['withPacks'])) {
-        $cmd .= ' --with ' . escapeshellarg(implode(',', $installConfig['withPacks']));
-    }
-    if (!empty($installConfig['withoutPacks'])) {
-        $cmd .= ' --without ' . escapeshellarg(implode(',', $installConfig['withoutPacks']));
-    }
-    if (!empty($installConfig['allowPlaceholders'])) {
-        $cmd .= ' --allow-placeholders';
-    }
+    $cmd = aiInstallerBuildSubprocessInstallCommand($runtime, (string) $installConfig['profile'], $mode, $installConfig);
 
     $run = aiRunCommand($root, $cmd);
     $status = $run['exit'] === 0 ? 'ok' : 'failed';
@@ -356,6 +335,41 @@ function aiRunInstallWorkflow(string $root, array $args): int
     $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install --apply', $data, $status, null, $status === 'ok' ? 'Install apply completed; run adapter-validate next.' : 'Inspect installer output and rerun install after fixing errors.');
     fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $status === 'ok' ? 0 : 1;
+}
+
+/** @param array<string,mixed> $installConfig */
+function aiInstallerBuildSubprocessInstallCommand(string $runtime, string $profile, string $mode, array $installConfig): string
+{
+    $cmd = 'php tools/ai/install-ai-kit.php --target . --runtime ' . escapeshellarg($runtime) . ' --profile ' . escapeshellarg($profile);
+    if ($mode === 'sidecar-only') {
+        $cmd .= ' --no-base';
+    }
+    if (!empty($installConfig['force'])) {
+        $cmd .= ' --force';
+    }
+    if (!empty($installConfig['allowCoreOverwrite'])) {
+        $cmd .= ' --allow-core-overwrite';
+    }
+    if (!empty($installConfig['adopt'])) {
+        $cmd .= ' --adopt';
+    }
+    if (!empty($installConfig['allowNonGit'])) {
+        $cmd .= ' --allow-non-git';
+    }
+    if (!empty($installConfig['allFeatures'])) {
+        $cmd .= ' --all-features';
+    }
+    if (!empty($installConfig['withPacks'])) {
+        $cmd .= ' --with ' . escapeshellarg(implode(',', $installConfig['withPacks']));
+    }
+    if (!empty($installConfig['withoutPacks'])) {
+        $cmd .= ' --without ' . escapeshellarg(implode(',', $installConfig['withoutPacks']));
+    }
+    if (!empty($installConfig['allowPlaceholders'])) {
+        $cmd .= ' --allow-placeholders';
+    }
+
+    return $cmd;
 }
 
 function aiRunInstallWizard(string $root): int
@@ -585,6 +599,8 @@ function aiUpgradePreserveOwnedConflicts(string $root, array $fileActions): arra
 
 function aiRunUpgradeWorkflow(string $root, array $args): int
 {
+    aiInstallerAssertLockCompatible($root);
+
     $manifestPath = aiInstallManifestPath($root);
     if (!is_file($manifestPath)) {
         $data = [
@@ -712,13 +728,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
     // Template files are preserved by the installer itself (skip-if-exists) and are not touched.
     $preserved = aiUpgradePreserveOwnedConflicts($root, $fileActions);
 
-    $installArgs = ['--apply', '--reinstall', '--mode', $mode, '--backup', $backupId, '--no-interaction'];
-    if (in_array('--agent', $args, true)) {
-        $installArgs[] = '--agent';
-    }
-    if (in_array('--ci', $args, true)) {
-        $installArgs[] = '--ci';
-    }
+    $installArgs = aiUpgradeBuildApplyInstallArgs($mode, $backupId, $args);
     $exit = aiRunInstallWorkflow($root, $installArgs);
     $install = aiLoadArtifactData($root, 'install.json');
     $status = $exit === 0 ? 'ok' : 'failed';
@@ -734,6 +744,23 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
     $written = aiCliWriteArtifact($root, 'upgrade', 'php tools/ai/ai.php upgrade --apply', $data, $status, null, $status === 'ok' ? 'Upgrade apply completed; run adapter-validate.' : 'Upgrade apply failed; inspect install artifact.');
     fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $exit;
+}
+
+/** @param list<string> $args @return list<string> */
+function aiUpgradeBuildApplyInstallArgs(string $mode, string $backupId, array $args): array
+{
+    // Force the reinstall so owned/auto-update files are actually rewritten with the new kit
+    // version. Without --force the planner marks differing files SKIP_EXISTING_UNMANAGED and the
+    // upgrade becomes a no-op. User edits to owned files are already preserved above.
+    $installArgs = ['--apply', '--reinstall', '--force', '--mode', $mode, '--backup', $backupId, '--no-interaction'];
+    if (in_array('--agent', $args, true)) {
+        $installArgs[] = '--agent';
+    }
+    if (in_array('--ci', $args, true)) {
+        $installArgs[] = '--ci';
+    }
+
+    return $installArgs;
 }
 
 function aiRunAdapterValidate(string $root): int
@@ -775,6 +802,8 @@ function aiRunAdapterValidate(string $root): int
  */
 function aiRunUninstallWorkflow(string $root, array $args): int
 {
+    aiInstallerAssertLockCompatible($root);
+
     $manifestPath = aiInstallManifestPath($root);
     if (!is_file($manifestPath)) {
         $data = ['status' => 'blocked', 'reason' => 'no install manifest found; nothing to uninstall'];

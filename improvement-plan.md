@@ -24,36 +24,36 @@ Test suite: 265 → 293 passing, 0 failures.
 > behaviors are inert via the user-facing `ai.php` orchestrator, and uninstall can delete
 > user files inside kit-owned directories.
 
-- [ ] **RF-1 (high) — orchestrator does not forward `--adopt`/`--allow-non-git`.**
+- [x] **RF-1 (high) — orchestrator does not forward `--adopt`/`--allow-non-git`.**
       `tools/ai/commands/install_workflow.php:226-247` builds the subprocess command and omits
       these flags; `aiInstallerConfigFromAiArgs` (install_preflight.php:229) does not even parse
       them. So `ai.php install --apply --adopt` still aborts on `CONFLICT_FOREIGN`. The new
       adopt/non-git flow only works calling `install-ai-kit.php` directly (which the tests do).
       Fix: parse + forward both flags; add an orchestrator-path test.
-- [ ] **RF-2 (high) — upgrade `--apply` is a no-op for source updates.**
+- [x] **RF-2 (high) — upgrade `--apply` is a no-op for source updates.**
       `install_workflow.php:715` builds reinstall args without `--force`; without it the planner
       marks differing files `SKIP_EXISTING_UNMANAGED` and skips them, so `owned` auto-update
       files are never rewritten and the Phase 2 preserve-then-update flow never updates. (The
       missing `--force` is pre-existing at `e8fdf87`, but Phase 2 made the comment/intent false.)
-      Fix: pass `--force` (and `--adopt`) into the reinstall AFTER the `.ai/conflicts/`
+      Fix: pass `--force` into the reinstall AFTER the `.ai/conflicts/`
       preservation step; add an end-to-end upgrade-apply test asserting an owned source-updated
       file is actually rewritten and the user edit is preserved in conflicts.
-- [ ] **RF-3 (medium, data-loss) — uninstall recursively deletes owned directory entries.**
+- [x] **RF-3 (medium, data-loss) — uninstall recursively deletes owned directory entries.**
       `install_workflow.php:819-820` calls `aiInstallerDeleteTree` on `dir`-type manifest entries
       (`.opencode/agents`, `.opencode/commands`, `.opencode/skills`, capability dirs). A user file
       added alongside kit files (e.g. `.opencode/agents/my-agent.md`) is deleted. Violates the
       "never delete directories / user bytes are sacred" invariant.
       Fix: delete only manifest-recorded files; refuse to recursively delete a directory that
       contains unrecorded entries; add a `repo-with-user-ai-content` uninstall test.
-- [ ] **RF-4 (medium) — missing orchestrator/upgrade-apply integration tests.**
+- [x] **RF-4 (medium) — missing orchestrator/upgrade-apply integration tests.**
       Every install integration test invokes `install-ai-kit.php` directly, so the orchestrator
       wiring (RF-1, RF-2) is unverified. Add `ai.php install --apply` and `ai.php upgrade --apply`
       tests.
-- [ ] **RF-5 (low) — `aiRunDoctor` duplicates the preflight env-check block** (~60-70%).
+- [x] **RF-5 (low) — `aiRunDoctor` duplicates the preflight env-check block** (~60-70%).
       Extract a shared `aiInstallerEnvironmentChecks()` helper consumed by both.
-- [ ] **RF-6 (low) — `aiInstallerResolveRuntimes` substring matching** misclassifies future
+- [x] **RF-6 (low) — `aiInstallerResolveRuntimes` substring matching** misclassifies future
       pack names containing both `copilot`/`opencode`. Prefer an explicit per-pack runtime map.
-- [ ] **RF-7 (low, latent) — schema gap:** `aiInstallerMergeWorkflowManifest` synthesises minimal
+- [x] **RF-7 (low, latent) — schema gap:** `aiInstallerMergeWorkflowManifest` synthesises minimal
       `['managed'=>true]` entries without `ownership` when canonical `files{}` is absent; such a
       manifest would fail `ai-install-manifest.schema.json` (requires `ownership`). Add `ownership`
       to synthesized entries or relax the schema for the fallback.
@@ -94,11 +94,11 @@ rename, 8 profiles, 6 security docs, merging the two secret-scan files, blind-me
 
 - [ ] Ownership classes (final, five stored + one implicit): `owned`, `rendered`, `template`,
       `patch-managed`, implicit `foreign`; `deprecated` is **computed at plan time**, never stored
-- [ ] Lock file (`.ai/manifest.lock.json`) entries: `path, ownership, component, runtimes, source,
+- [x] Lock file (`.ai/manifest.lock.json`) entries: `path, ownership, component, runtimes, source,
       generator, sha256, mode, lineEnding, kitVersion, schemaVersion`
-- [ ] Lock records `createdDirs: []` (only these may be removed when empty)
+- [x] Lock records `createdDirs: []` (only these may be removed when empty)
 - [ ] `schemaVersion` on every authored machine-readable file
-- [ ] Refuse operation when lock `schemaVersion` > CLI support (forward-compat guard, M3)
+- [x] Refuse operation when lock `schemaVersion` > CLI support (forward-compat guard, M3)
 
 **Gates:** manifest 100% classified · lock schema valid in CI · newer-lock rejection tested.
 
@@ -107,19 +107,19 @@ rename, 8 profiles, 6 security docs, merging the two secret-scan files, blind-me
 > Mostly landed (d898180): git-root guard, opencode.jsonc adopt-or-conflict, `--adopt`. Remaining:
 > RF-1 orchestrator forwarding; `AGENTS.md` marked-section/pointer mode; checksum-set adoption.
 
-- [ ] Fix RF-1: forward `--adopt`/`--allow-non-git` through the orchestrator
+- [x] Fix RF-1: forward `--adopt`/`--allow-non-git` through the orchestrator
 - [ ] Classify against any known kit checksum → adopt into lock
-- [ ] Existing `AGENTS.md`: marked-section or pointer mode (`.ai/generated/AGENTS.md`)
+- [x] Existing `AGENTS.md`: marked-section or pointer mode (`.ai/generated/AGENTS.md`)
 
 **Gates:** existing user files preserved · foreign overwrite requires explicit flag · jsonc never
 merged · out-of-root rejected · orchestrator path tested.
 
 ## Phase 2 — Patch-Managed Root Files
 
-- [ ] `.gitignore` managed block (insert/update/remove inside markers only):
+- [x] `.gitignore` managed block (insert/update/remove inside markers only):
       `.ai/logs/ .ai/backups/ .ai/conflicts/ .ai/templates-new/ .ai/local-manifest.json
       .ai/install.lock .repomix-context/ *.tmp *.bak`
-- [ ] Enforce invariant 3: ignore patched + `git check-ignore` verified before any backup write
+- [x] Enforce invariant 3: ignore patched + `git check-ignore` verified before any backup write
 - [ ] Marker syntax frozen/versioned (invariant 5)
 
 **Gates:** block idempotent · user gitignore content untouched · `BackupNeverWrittenBeforeIgnoreEffectiveTest` green.
@@ -130,7 +130,7 @@ merged · out-of-root rejected · orchestrator path tested.
 > reinstall so updates actually apply; deprecated/incoming routing; migrations; idempotency
 > (incl. the pre-existing SKIP_PROTECTED_CORE drift); createdDirs-only dir removal.
 
-- [ ] Fix RF-2: reinstall with `--force` (and `--adopt`) after preservation so owned/auto-update
+- [x] Fix RF-2: reinstall with `--force` after preservation so owned/auto-update
       files are actually rewritten
 - [ ] Upgrade per class: `owned` unchanged → update · `owned` user-modified → conflict (or
       `--force-owned`) · `rendered` → regenerate from `project.yml` · `template` → untouched
@@ -138,7 +138,7 @@ merged · out-of-root rejected · orchestrator path tested.
 - [ ] Computed `deprecated`: unchanged → delete (already in backup) · modified →
       `conflicts/<ts>/removed/` — explicitly covers stale hooks/policies
 - [ ] Incoming-path collision with foreign file → kit file to `conflicts/<ts>/incoming/`
-- [ ] `migrations/<version>/` run in order between installed and target version
+- [x] `migrations/<version>/` run in order between installed and target version
 - [ ] Install idempotent: second run with no changes → zero diff (fixes SKIP_PROTECTED_CORE drift)
 - [ ] Empty-dir removal only from lock `createdDirs`; no recursive directory deletes anywhere
 
@@ -150,9 +150,9 @@ obsolete-modified routed to conflicts · upgrade actually updates.
 > Uninstall landed (ac5cdf4) but has RF-3 (recursive dir delete). Remaining: fix RF-3; project.yml;
 > restore.
 
-- [ ] Fix RF-3: uninstall removes manifest-recorded files only; never recursively deletes a
+- [x] Fix RF-3: uninstall removes manifest-recorded files only; never recursively deletes a
       directory that contains unrecorded (user) entries
-- [ ] `.ai/project.yml` (`template` class): single target-side values file; renderers consume it;
+- [x] `.ai/project.yml` (`template` class): single target-side values file; renderers consume it;
       upgrades re-render with same values → zero re-customization
 - [ ] Consolidate existing placeholder tokens to read from `project.yml`
 - [ ] `restore --from <ts> [--path]`: checksum-gated copy-back, logged to `.ai/logs/`

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-configs.local/schemas/ai-manifest-lock.schema.json",
+  "title": "AI Manifest Lock",
+  "type": "object",
+  "required": ["schemaVersion", "createdDirs", "entries"],
+  "properties": {
+    "schemaVersion": {"type": "integer", "minimum": 1},
+    "generatedAt": {"type": "string"},
+    "createdDirs": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "ownership", "component", "runtimes", "source", "generator", "sha256", "mode", "lineEnding", "kitVersion", "schemaVersion"],
+        "properties": {
+          "path": {"type": "string"},
+          "ownership": {"type": "string", "enum": ["owned", "template", "rendered", "patch-managed"]},
+          "component": {"type": "string"},
+          "runtimes": {"type": "array", "items": {"type": "string"}},
+          "source": {"type": "string"},
+          "generator": {"type": "string"},
+          "sha256": {"type": "string"},
+          "mode": {"type": "string"},
+          "lineEnding": {"type": "string", "enum": ["lf", "crlf", "none"]},
+          "kitVersion": {"type": "string"},
+          "schemaVersion": {"type": "integer", "minimum": 1}
+        }
+      }
+    }
+  }
+}

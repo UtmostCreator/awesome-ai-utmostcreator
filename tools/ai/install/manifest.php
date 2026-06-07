@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../repo-tool-inventory.php';
 
+const AI_INSTALLER_LOCK_SCHEMA_VERSION = 1;
+
 function aiInstallerCanonicalManifestPath(string $targetRoot): string
 {
     return $targetRoot . DIRECTORY_SEPARATOR . '.ai-install-manifest.json';
@@ -12,6 +14,11 @@ function aiInstallerCanonicalManifestPath(string $targetRoot): string
 function aiInstallerDerivedManifestPath(string $targetRoot): string
 {
     return $targetRoot . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated' . DIRECTORY_SEPARATOR . 'install-manifest.json';
+}
+
+function aiInstallerLockManifestPath(string $targetRoot): string
+{
+    return $targetRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'manifest.lock.json';
 }
 
 function aiInstallerWriteManifest(string $targetRoot, array $manifest): void
@@ -28,6 +35,7 @@ function aiInstallerWriteManifest(string $targetRoot, array $manifest): void
     $json = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
     file_put_contents($canonical, $json);
     file_put_contents($derived, $json);
+    aiInstallerWriteManifestLock($targetRoot, $manifest);
 }
 
 function aiInstallerBuildManifest(array $config, array $packs, array $plan): array
@@ -37,6 +45,10 @@ function aiInstallerBuildManifest(array $config, array $packs, array $plan): arr
     foreach ($plan as $item) {
         $action = (string) ($item['action'] ?? '');
         if (in_array($action, ['SKIP_EXISTING_UNMANAGED', 'SKIP_PROTECTED_CORE', 'CONFLICT_FOREIGN'], true)) {
+            $rel = (string) ($item['target'] ?? '');
+            if ($rel !== '' && is_array($existingManifest['files'][$rel] ?? null) && $action !== 'CONFLICT_FOREIGN') {
+                $files[$rel] = $existingManifest['files'][$rel];
+            }
             continue;
         }
 
@@ -59,6 +71,37 @@ function aiInstallerBuildManifest(array $config, array $packs, array $plan): arr
             'component' => $pack,
             'runtimes' => aiInstallerResolveRuntimes($pack),
         ];
+    }
+
+    $projectValuesPath = $config['targetRoot'] . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'project.yml';
+    if (is_file($projectValuesPath)) {
+        $files['.ai/project.yml'] = [
+            'pack' => 'project-values',
+            'source' => '.ai/project.yml',
+            'source_hash' => 'generated',
+            'installed_hash' => aiInstallerHashPath($projectValuesPath),
+            'managed' => true,
+            'merge_strategy' => 'skip-if-exists',
+            'required' => false,
+            'ownership' => 'template',
+            'component' => 'project-values',
+            'runtimes' => ['both'],
+        ];
+    }
+
+    $createdDirs = [];
+    foreach ($plan as $item) {
+        if (($item['type'] ?? '') !== 'dir') {
+            continue;
+        }
+        $action = (string) ($item['action'] ?? '');
+        if (in_array($action, ['SKIP_EXISTING_UNMANAGED', 'SKIP_PROTECTED_CORE', 'CONFLICT_FOREIGN'], true)) {
+            continue;
+        }
+        $target = (string) ($item['target'] ?? '');
+        if ($target !== '') {
+            $createdDirs[] = $target;
+        }
     }
 
     $mergedPacks = array_values(array_unique($packs));
@@ -90,8 +133,95 @@ function aiInstallerBuildManifest(array $config, array $packs, array $plan): arr
         'package' => $package,
         'packs' => $mergedPacks,
         'files' => $files,
+        'created_dirs' => array_values(array_unique($createdDirs)),
         'pending_configuration' => $pendingConfiguration,
     ];
+}
+
+function aiInstallerAssertLockCompatible(string $targetRoot): void
+{
+    $path = aiInstallerLockManifestPath($targetRoot);
+    if (!is_file($path)) {
+        return;
+    }
+
+    $decoded = json_decode((string) file_get_contents($path), true);
+    if (!is_array($decoded)) {
+        throw new RuntimeException('invalid lock JSON at .ai/manifest.lock.json');
+    }
+
+    $schemaVersion = (int) ($decoded['schemaVersion'] ?? 0);
+    if ($schemaVersion > AI_INSTALLER_LOCK_SCHEMA_VERSION) {
+        throw new RuntimeException('install lock schemaVersion ' . $schemaVersion . ' is newer than this CLI supports (' . AI_INSTALLER_LOCK_SCHEMA_VERSION . ')');
+    }
+}
+
+function aiInstallerWriteManifestLock(string $targetRoot, array $manifest): void
+{
+    $lockPath = aiInstallerLockManifestPath($targetRoot);
+    aiInstallerMkdir(dirname($lockPath));
+    $lock = aiInstallerBuildManifestLock($targetRoot, $manifest);
+    file_put_contents($lockPath, json_encode($lock, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+}
+
+/** @return array<string,mixed> */
+function aiInstallerBuildManifestLock(string $targetRoot, array $manifest): array
+{
+    $entries = [];
+    foreach (($manifest['files'] ?? []) as $path => $meta) {
+        if (!is_string($path) || !is_array($meta)) {
+            continue;
+        }
+        $abs = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+        $entries[] = [
+            'path' => $path,
+            'ownership' => (string) ($meta['ownership'] ?? 'owned'),
+            'component' => (string) ($meta['component'] ?? ($meta['pack'] ?? 'unknown')),
+            'runtimes' => array_values(array_map('strval', is_array($meta['runtimes'] ?? null) ? $meta['runtimes'] : ['both'])),
+            'source' => (string) ($meta['source'] ?? ''),
+            'generator' => (string) ($meta['generator'] ?? 'installer'),
+            'sha256' => (string) ($meta['installed_hash'] ?? aiInstallerHashPath($abs)),
+            'mode' => aiInstallerPathMode($abs),
+            'lineEnding' => aiInstallerLineEnding($abs),
+            'kitVersion' => (string) ($manifest['package']['installed_version'] ?? $manifest['installer_version'] ?? 'unknown'),
+            'schemaVersion' => AI_INSTALLER_LOCK_SCHEMA_VERSION,
+        ];
+    }
+
+    usort($entries, static fn(array $a, array $b): int => strcmp((string) $a['path'], (string) $b['path']));
+
+    return [
+        'schemaVersion' => AI_INSTALLER_LOCK_SCHEMA_VERSION,
+        'generatedAt' => gmdate('c'),
+        'createdDirs' => array_values(array_map('strval', is_array($manifest['created_dirs'] ?? null) ? $manifest['created_dirs'] : [])),
+        'entries' => $entries,
+    ];
+}
+
+function aiInstallerPathMode(string $path): string
+{
+    $perms = @fileperms($path);
+    if ($perms === false) {
+        return 'unknown';
+    }
+
+    return substr(sprintf('%o', $perms), -4);
+}
+
+function aiInstallerLineEnding(string $path): string
+{
+    if (!is_file($path)) {
+        return 'none';
+    }
+    $content = (string) file_get_contents($path);
+    if (str_contains($content, "\r\n")) {
+        return 'crlf';
+    }
+    if (str_contains($content, "\n")) {
+        return 'lf';
+    }
+
+    return 'none';
 }
 
 /**
@@ -125,11 +255,15 @@ function aiInstallerResolveOwnership(array $item, string $mergeStrategy): string
  */
 function aiInstallerResolveRuntimes(string $pack): array
 {
-    if (str_contains($pack, 'copilot')) {
-        return ['github-copilot'];
-    }
-    if (str_contains($pack, 'opencode')) {
-        return ['opencode'];
+    $runtimeByPack = [
+        'adapter-copilot' => ['github-copilot'],
+        'optional-agents-copilot-pack' => ['github-copilot'],
+        'adapter-opencode' => ['opencode'],
+        'optional-agents-opencode-pack' => ['opencode'],
+    ];
+
+    if (isset($runtimeByPack[$pack])) {
+        return $runtimeByPack[$pack];
     }
 
     return ['both'];
