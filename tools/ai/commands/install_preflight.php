@@ -39,6 +39,75 @@ function aiRunPreflight(string $root): int
     return $failed === [] ? 0 : 1;
 }
 
+/**
+ * Read-only health check: environment prerequisites, required tools, and install state.
+ * Composes the preflight environment checks with install-manifest awareness so a user can
+ * answer "is my environment ready and is the kit installed/healthy here?" in one command.
+ */
+function aiRunDoctor(string $root): int
+{
+    $checks = [];
+
+    // Environment prerequisites (same baseline as preflight).
+    $checks[] = ['name' => 'php_version', 'category' => 'env', 'status' => version_compare(PHP_VERSION, '8.1.0', '>=') ? 'passed' : 'failed', 'detail' => PHP_VERSION];
+    $checks[] = ['name' => 'ext_json', 'category' => 'env', 'status' => extension_loaded('json') ? 'passed' : 'failed'];
+    $checks[] = ['name' => 'ext_mbstring', 'category' => 'env', 'status' => extension_loaded('mbstring') ? 'passed' : 'failed'];
+
+    $gitOut = [];
+    $gitExit = 0;
+    $gitSafePrev = aiInstallerSafeCwdEnter();
+    exec('git --version', $gitOut, $gitExit);
+    aiInstallerSafeCwdLeave($gitSafePrev);
+    $checks[] = ['name' => 'git', 'category' => 'env', 'status' => $gitExit === 0 ? 'passed' : 'failed'];
+
+    // Git repository root (the installer refuses non-git targets without --allow-non-git).
+    $isGitRepo = is_dir($root . DIRECTORY_SEPARATOR . '.git') || is_file($root . DIRECTORY_SEPARATOR . '.git');
+    $checks[] = ['name' => 'git_repo_root', 'category' => 'env', 'status' => $isGitRepo ? 'passed' : 'warning', 'reason' => $isGitRepo ? null : 'not a git repo root; install needs --allow-non-git here'];
+
+    // Recommended tools used by the AI workflow scripts.
+    foreach (['rg', 'jq', 'fd', 'git'] as $tool) {
+        $present = aiInstallerCommandExists($tool);
+        $checks[] = ['name' => "tool_{$tool}", 'category' => 'tools', 'status' => $present ? 'passed' : 'warning', 'reason' => $present ? null : "{$tool} not found on PATH"];
+    }
+
+    // Install state.
+    $manifestPath = $root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json';
+    $installed = is_file($manifestPath);
+    $manifest = $installed ? json_decode((string) file_get_contents($manifestPath), true) : null;
+    $fileCount = is_array($manifest) && is_array($manifest['files'] ?? null) ? count($manifest['files']) : 0;
+    $checks[] = [
+        'name' => 'install_manifest',
+        'category' => 'install',
+        'status' => $installed ? 'passed' : 'warning',
+        'reason' => $installed ? null : 'kit not installed in this repo (run install)',
+        'detail' => $installed ? "{$fileCount} managed files" : null,
+    ];
+
+    $failed = array_values(array_filter($checks, static fn(array $c): bool => ($c['status'] ?? 'failed') === 'failed'));
+    $warnings = array_values(array_filter($checks, static fn(array $c): bool => ($c['status'] ?? '') === 'warning'));
+    $status = $failed !== [] ? 'failed' : ($warnings !== [] ? 'warning' : 'ok');
+
+    $next = $failed !== []
+        ? 'Resolve failed environment checks before installing.'
+        : ($installed ? 'Environment ready; kit installed.' : 'Environment ready; run install to set up the kit.');
+
+    $data = [
+        'status' => $status,
+        'installed' => $installed,
+        'managed_file_count' => $fileCount,
+        'checks' => $checks,
+        'failed_count' => count($failed),
+        'warning_count' => count($warnings),
+        'recommended_next_action' => $next,
+    ];
+
+    $written = aiCliWriteArtifact($root, 'doctor', 'php tools/ai/ai.php doctor', $data, $status, null, $next);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+
+    // Read-only diagnostic: only hard environment failures are non-zero; warnings are exit 0.
+    return $failed === [] ? 0 : 1;
+}
+
 function aiRunPackageLock(string $root, array $args): int
 {
     $update = in_array('--update', $args, true);
