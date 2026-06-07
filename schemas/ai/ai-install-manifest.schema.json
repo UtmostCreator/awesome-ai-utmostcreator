@@ -86,9 +86,10 @@
             "enum": [
               "owned",
               "template",
-              "rendered"
+              "rendered",
+              "patch-managed"
             ],
-            "description": "owned: kit-managed, overwritten on upgrade. template: installed once then user-owned. rendered: regenerated from project values."
+            "description": "owned: kit-managed, overwritten on upgrade. template: installed once then user-owned. rendered: regenerated from project values. patch-managed: root files patched inside markers only (e.g. .gitignore), upgrade updates only the managed block."
           },
           "component": {
             "type": "string"

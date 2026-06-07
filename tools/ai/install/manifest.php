@@ -228,9 +228,11 @@ function aiInstallerLineEnding(string $path): string
  * Resolve the ownership class for an installed file.
  *
  * Ownership classes drive upgrade/reinstall/uninstall behaviour:
- *  - owned:    kit-managed; overwritten freely on upgrade (checksum-tracked).
- *  - template: installed once, then user-owned; never overwritten on upgrade.
- *  - rendered: regenerated each install/upgrade from project values.
+ *  - owned:         kit-managed; overwritten freely on upgrade (checksum-tracked).
+ *  - template:      installed once, then user-owned; never overwritten on upgrade.
+ *  - rendered:      regenerated each install/upgrade from project values.
+ *  - patch-managed: root files patched inside markers only (e.g. .gitignore); upgrade
+ *                   updates only the managed block, never user content outside markers.
  *
  * Derivation rule (no per-entry annotation required): an explicit `ownership` on the
  * registry entry always wins; otherwise `skip-if-exists` files are treated as `template`
@@ -241,7 +243,7 @@ function aiInstallerLineEnding(string $path): string
 function aiInstallerResolveOwnership(array $item, string $mergeStrategy): string
 {
     $explicit = $item['ownership'] ?? null;
-    if (is_string($explicit) && in_array($explicit, ['owned', 'template', 'rendered'], true)) {
+    if (is_string($explicit) && in_array($explicit, ['owned', 'template', 'rendered', 'patch-managed'], true)) {
         return $explicit;
     }
 
