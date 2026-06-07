@@ -638,6 +638,9 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
         '<PROJECT_SECURITY_RULES>' => 'unknown',
     ];
     $map = array_merge($map, aiInstallerProjectValuesPlaceholderMap($projectValues));
+    // Inject the user-owned extra-docs list from .ai/project.yml context.extraDocs.
+    // It is regenerated from project.yml on every install, so user pointers survive re-render.
+    $map['<EXTRA_DOCS>'] = aiInstallerRenderExtraDocsBlock(aiInstallerLoadProjectExtraDocs($targetRoot));
 
     foreach ($plan as $item) {
         $target = (string) ($item['target'] ?? '');
@@ -774,6 +777,78 @@ function aiInstallerProjectValuesPlaceholderMap(array $values): array
         '<PRIMARY_BUILD_COMMAND>' => $values['primaryBuildCommand'] ?? '',
         '<PRIMARY_TEST_COMMAND>' => $values['primaryTestCommand'] ?? '',
     ];
+}
+
+/**
+ * Read the optional `context.extraDocs:` list from .ai/project.yml. These are user-owned pointers
+ * to additional project docs the AI should reference. They live in project.yml (not in rendered
+ * files), so they survive every re-render: the installer regenerates the <EXTRA_DOCS> block from
+ * this list each time.
+ *
+ * @return list<string>
+ */
+function aiInstallerLoadProjectExtraDocs(string $targetRoot): array
+{
+    $path = aiInstallerProjectValuesPath($targetRoot);
+    if (!is_file($path)) {
+        return [];
+    }
+
+    $docs = [];
+    $inContext = false;
+    $inExtra = false;
+    foreach (file($path, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+        if (trim($line) === '' || str_starts_with(ltrim($line), '#')) {
+            continue;
+        }
+        $indent = strlen($line) - strlen(ltrim($line));
+        $trimmed = trim($line);
+
+        if ($indent === 0) {
+            $inContext = ($trimmed === 'context:');
+            $inExtra = false;
+            continue;
+        }
+        if (!$inContext) {
+            continue;
+        }
+        if (preg_match('/^extraDocs:\s*(\[\])?\s*$/', $trimmed) === 1) {
+            $inExtra = true;
+            continue;
+        }
+        if ($inExtra && !str_starts_with($trimmed, '- ') && str_ends_with($trimmed, ':')) {
+            $inExtra = false;
+            continue;
+        }
+        if ($inExtra && str_starts_with($trimmed, '- ')) {
+            $value = aiInstallerProjectYamlUnquote(trim(substr($trimmed, 2)));
+            if ($value !== '') {
+                $docs[] = $value;
+            }
+        }
+    }
+
+    return array_values(array_unique($docs));
+}
+
+/**
+ * Render the <EXTRA_DOCS> placeholder value: a markdown bullet list of user-listed extra docs,
+ * or a neutral note when none are configured. Safe to inject into any rendered markdown.
+ *
+ * @param list<string> $docs
+ */
+function aiInstallerRenderExtraDocsBlock(array $docs): string
+{
+    if ($docs === []) {
+        return '_No additional project docs configured. Add paths under `context.extraDocs` in `.ai/project.yml`._';
+    }
+
+    $lines = [];
+    foreach ($docs as $doc) {
+        $lines[] = '- [`' . $doc . '`](' . $doc . ')';
+    }
+
+    return implode("\n", $lines);
 }
 
 function aiInstallerProjectYamlQuote(string $value): string
