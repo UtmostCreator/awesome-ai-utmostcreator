@@ -660,6 +660,65 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testInstallerCompilesCommandPolicyWithSafeLocalOverride(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_compile_policy_ok_' . uniqid('', true);
+        mkdir($target . '/.ai', 0700, true);
+        mkdir($target . '/docs/ai', 0700, true);
+        mkdir($target . '/.github/hooks/scripts', 0700, true);
+        copy(self::$repoRoot . '/docs/ai/command-policy.tiers.yaml', $target . '/docs/ai/command-policy.tiers.yaml');
+        file_put_contents($target . '/.ai/project.yml', "projectName: \"x\"\npolicy:\n  allow:\n    - \"pnpm run build\"\n");
+
+        try {
+            aiInstallerCompileCommandPolicy($target);
+
+            $out = $target . '/.github/hooks/scripts/command-policy.compiled.sh';
+            $this->assertFileExists($out, 'installer must compile the command policy');
+            $this->assertStringContainsString('pnpm run build', (string) file_get_contents($out), 'safe local override must be compiled in');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testInstallerFailsOnMaliciousLocalPolicyOverride(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_compile_policy_bad_' . uniqid('', true);
+        mkdir($target . '/.ai', 0700, true);
+        mkdir($target . '/docs/ai', 0700, true);
+        mkdir($target . '/.github/hooks/scripts', 0700, true);
+        copy(self::$repoRoot . '/docs/ai/command-policy.tiers.yaml', $target . '/docs/ai/command-policy.tiers.yaml');
+        file_put_contents($target . '/.ai/project.yml', "projectName: \"x\"\npolicy:\n  allow:\n    - \"rm file\"\n");
+
+        try {
+            $this->expectException(\RuntimeException::class);
+            $this->expectExceptionMessage('command policy compilation failed');
+            aiInstallerCompileCommandPolicy($target);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testCompileCommandPolicyNoOpsWithoutHooksSurface(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_compile_policy_noop_' . uniqid('', true);
+        mkdir($target . '/docs/ai', 0700, true);
+        copy(self::$repoRoot . '/docs/ai/command-policy.tiers.yaml', $target . '/docs/ai/command-policy.tiers.yaml');
+
+        try {
+            // No .github/hooks/scripts dir -> must no-op, not throw.
+            aiInstallerCompileCommandPolicy($target);
+            $this->assertDirectoryDoesNotExist($target . '/.github');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testProjectYmlValuesRenderManagedPlaceholders(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/core.php';

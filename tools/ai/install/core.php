@@ -179,6 +179,9 @@ function aiInstallerRun(array $argv): int
         aiInstallerEnsureAgentsMarkedSectionForSkippedUserFile($config['targetRoot'], $plan);
         // Re-inject preserved user blocks into freshly rendered files (byte-for-byte).
         aiInstallerRestoreUserSections($config['targetRoot'], $userSections);
+        // Recompile the dependency-free command policy from the target's tiers + local overrides
+        // so .ai/project.yml policy.allow takes effect (and downgrade attempts fail the install).
+        aiInstallerCompileCommandPolicy((string) $config['targetRoot']);
         $placeholderStatus = aiInstallerCollectPlaceholderStatus($config['targetRoot']);
 
         $strictProfiles = ['guarded', 'accelerated', 'full-governance'];
@@ -903,6 +906,48 @@ function aiInstallerAssertNoCaseCollisions(array $plan): void
         }
         $seen[$key] = $normalized;
     }
+}
+
+/**
+ * Recompile the dependency-free command policy in the target repo when the necessary inputs are
+ * present (tiers file + hooks scripts dir). Honors .ai/project.yml policy.allow[] via the compiler
+ * and re-throws downgrade/wildcard violations so a malicious local override fails the install.
+ * No-ops silently when the target did not receive the policy/hooks surfaces.
+ */
+function aiInstallerCompileCommandPolicy(string $targetRoot): void
+{
+    $tiers = $targetRoot . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'command-policy.tiers.yaml';
+    $outDir = $targetRoot . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'hooks' . DIRECTORY_SEPARATOR . 'scripts';
+    if (!is_file($tiers) || !is_dir($outDir)) {
+        return;
+    }
+
+    $compiler = __DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'compile-command-policy.php';
+    if (!is_file($compiler)) {
+        return;
+    }
+    require_once $compiler;
+
+    $out = $outDir . DIRECTORY_SEPARATOR . 'command-policy.compiled.sh';
+    $projectValues = $targetRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'project.yml';
+
+    // The compiler prints its own OK/ERROR lines; capture them so installer logging stays clean,
+    // and surface the captured detail only when compilation fails.
+    ob_start();
+    $exit = aiPolicyCompileMain([
+        'compile-command-policy.php',
+        '--in=' . $tiers,
+        '--out=' . $out,
+        '--project-values=' . $projectValues,
+    ]);
+    $compilerOutput = trim((string) ob_get_clean());
+
+    if ($exit !== 0) {
+        throw new RuntimeException('command policy compilation failed (check .ai/project.yml policy.allow for downgrade/wildcard violations)'
+            . ($compilerOutput !== '' ? ': ' . $compilerOutput : ''));
+    }
+
+    aiInstallerLog('compiled command policy: ' . str_replace($targetRoot . DIRECTORY_SEPARATOR, '', $out));
 }
 
 /**
