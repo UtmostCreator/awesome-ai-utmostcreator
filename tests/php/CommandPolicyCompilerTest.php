@@ -41,6 +41,22 @@ final class CommandPolicyCompilerTest extends TestCase
         $this->assertSame(['rm *'], $parsed['deny']);
     }
 
+    public function testSharedProjectYamlListParser(): void
+    {
+        // Shared helper backs both extraDocs and policy.allow parsing.
+        $yaml = "top:\n  unrelated: x\npolicy:\n  allow:\n    - \"a b\"\n    - 'c d'\n    - bare\n  deny: []\nother:\n  allow:\n    - ignored\n";
+        $this->assertSame(['a b', 'c d', 'bare'], aiInstallerParseProjectYamlList($yaml, 'policy', 'allow'));
+
+        // Sibling key ends the list; empty/missing returns [].
+        $this->assertSame([], aiInstallerParseProjectYamlList("policy:\n  deny:\n    - x\n", 'policy', 'allow'));
+        $this->assertSame([], aiInstallerParseProjectYamlList("", 'policy', 'allow'));
+
+        // Quote handling parity (double + single stripped, bare kept).
+        $this->assertSame('a b', aiInstallerProjectYamlUnquote('"a b"'));
+        $this->assertSame('c d', aiInstallerProjectYamlUnquote("'c d'"));
+        $this->assertSame('bare', aiInstallerProjectYamlUnquote('bare'));
+    }
+
     public function testPatternToCaseGlobQuotesLiteralsAndKeepsWildcard(): void
     {
         $this->assertSame('"rm "*', aiPolicyPatternToCaseGlob('rm *'));

@@ -19,6 +19,8 @@ declare(strict_types=1);
  * (so CI can detect drift), and writes nothing.
  */
 
+require_once __DIR__ . '/install/project-yaml.php';
+
 function aiPolicyCompileMain(array $argv): int
 {
     $root = realpath(__DIR__ . '/../..');
@@ -258,44 +260,8 @@ function aiPolicyShSingleQuote(string $value): string
  */
 function aiPolicyParseLocalAllows(string $yaml): array
 {
-    $allows = [];
-    $inPolicy = false;
-    $inAllow = false;
-
-    foreach (preg_split('/\R/', $yaml) ?: [] as $line) {
-        if ($line === '' || ltrim($line)[0] === '#') {
-            continue;
-        }
-        $indent = strlen($line) - strlen(ltrim($line));
-        $trimmed = trim($line);
-
-        if ($indent === 0) {
-            // Any top-level key other than the policy block ends policy scope.
-            $inPolicy = ($trimmed === 'policy:');
-            $inAllow = false;
-            continue;
-        }
-        if (!$inPolicy) {
-            continue;
-        }
-        if (preg_match('/^allow:\s*(\[\])?\s*$/', $trimmed) === 1) {
-            $inAllow = true;
-            continue;
-        }
-        // A sibling key under policy ends the allow list.
-        if ($inAllow && !str_starts_with($trimmed, '- ') && str_ends_with($trimmed, ':')) {
-            $inAllow = false;
-            continue;
-        }
-        if ($inAllow && str_starts_with($trimmed, '- ')) {
-            $value = trim(trim(substr($trimmed, 2)), "\"'");
-            if ($value !== '') {
-                $allows[] = $value;
-            }
-        }
-    }
-
-    return array_values(array_unique($allows));
+    // Reuse the shared project.yml two-level list parser (policy: -> allow: -> - "item").
+    return aiInstallerParseProjectYamlList($yaml, 'policy', 'allow');
 }
 
 /**
