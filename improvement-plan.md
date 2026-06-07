@@ -110,12 +110,14 @@ rename, 8 profiles, 6 security docs, merging the two secret-scan files, blind-me
 > install-manifest schema exist. Remaining: 5-class model, `.ai/manifest.lock.json`, createdDirs,
 > schemaVersion everywhere, forward-compat guard.
 
-- [ ] Ownership classes (final, five stored + one implicit): `owned`, `rendered`, `template`,
+- [x] Ownership classes (final, five stored + one implicit): `owned`, `rendered`, `template`,
       `patch-managed`, implicit `foreign`; `deprecated` is **computed at plan time**, never stored
+      (963dd8c, a9a3d96)
 - [x] Lock file (`.ai/manifest.lock.json`) entries: `path, ownership, component, runtimes, source,
       generator, sha256, mode, lineEnding, kitVersion, schemaVersion`
 - [x] Lock records `createdDirs: []` (only these may be removed when empty)
-- [ ] `schemaVersion` on every authored machine-readable file
+- [x] `schemaVersion` on every authored machine-readable YAML config (d6a123e; JSON schemas use
+      `$schema` by design)
 - [x] Refuse operation when lock `schemaVersion` > CLI support (forward-compat guard, M3)
 
 **Gates:** manifest 100% classified · lock schema valid in CI · newer-lock rejection tested.
@@ -126,7 +128,7 @@ rename, 8 profiles, 6 security docs, merging the two secret-scan files, blind-me
 > RF-1 orchestrator forwarding; `AGENTS.md` marked-section/pointer mode; checksum-set adoption.
 
 - [x] Fix RF-1: forward `--adopt`/`--allow-non-git` through the orchestrator
-- [ ] Classify against any known kit checksum → adopt into lock
+- [x] Classify against any known kit checksum → adopt into lock (30ad5e3; `ADOPT_KNOWN_KIT`)
 - [x] Existing `AGENTS.md`: marked-section or pointer mode (`.ai/generated/AGENTS.md`)
 
 **Gates:** existing user files preserved · foreign overwrite requires explicit flag · jsonc never
@@ -138,7 +140,7 @@ merged · out-of-root rejected · orchestrator path tested.
       `.ai/logs/ .ai/backups/ .ai/conflicts/ .ai/templates-new/ .ai/local-manifest.json
       .ai/install.lock .repomix-context/ *.tmp *.bak`
 - [x] Enforce invariant 3: ignore patched + `git check-ignore` verified before any backup write
-- [ ] Marker syntax frozen/versioned (invariant 5)
+- [x] Marker syntax frozen/versioned (invariant 5) (6a7979d; `markers.php` + freeze test)
 
 **Gates:** block idempotent · user gitignore content untouched · `BackupNeverWrittenBeforeIgnoreEffectiveTest` green.
 
@@ -150,15 +152,17 @@ merged · out-of-root rejected · orchestrator path tested.
 
 - [x] Fix RF-2: reinstall with `--force` after preservation so owned/auto-update
       files are actually rewritten
-- [ ] Upgrade per class: `owned` unchanged → update · `owned` user-modified → conflict (or
+- [x] Upgrade per class: `owned` unchanged → update · `owned` user-modified → conflict (or
       `--force-owned`) · `rendered` → regenerate from `project.yml` · `template` → untouched
-      (`--reset-templates` only) · `foreign` → invisible
-- [ ] Computed `deprecated`: unchanged → delete (already in backup) · modified →
-      `conflicts/<ts>/removed/` — explicitly covers stale hooks/policies
-- [ ] Incoming-path collision with foreign file → kit file to `conflicts/<ts>/incoming/`
+      (`--reset-templates` only) · `foreign` → invisible (3a4e6ee; `aiUpgradeResolveFileAction`)
+- [x] Computed `deprecated`: unchanged → delete (already in backup) · modified →
+      `conflicts/<ts>/removed/` — explicitly covers stale hooks/policies (a9a3d96, 430131f)
+- [x] Incoming-path collision with foreign file → kit file to `conflicts/<ts>/incoming/` (ad59285)
 - [x] `migrations/<version>/` run in order between installed and target version
-- [ ] Install idempotent: second run with no changes → zero diff (fixes SKIP_PROTECTED_CORE drift)
-- [ ] Empty-dir removal only from lock `createdDirs`; no recursive directory deletes anywhere
+- [x] Install idempotent: second run with no changes → zero diff (fixes SKIP_PROTECTED_CORE drift)
+      (a9d4a6d)
+- [x] Empty-dir removal only from lock `createdDirs`; no recursive directory deletes anywhere
+      (252b95f)
 
 **Gates:** idempotency · user-modified preserved · templates preserved · stale hooks pruned ·
 obsolete-modified routed to conflicts · upgrade actually updates.
@@ -172,8 +176,9 @@ obsolete-modified routed to conflicts · upgrade actually updates.
       directory that contains unrecorded (user) entries
 - [x] `.ai/project.yml` (`template` class): single target-side values file; renderers consume it;
       upgrades re-render with same values → zero re-customization
-- [ ] Consolidate existing placeholder tokens to read from `project.yml`
-- [ ] `restore --from <ts> [--path]`: checksum-gated copy-back, logged to `.ai/logs/`
+- [x] Consolidate existing placeholder tokens to read from `project.yml` (39d49cf; 18 project-fact
+      tokens, unset keys keep base defaults)
+- [ ] `restore --from <ts> [--path]`: checksum-gated copy-back, logged to `.ai/logs/` (in progress)
 
 **Gates:** uninstall never deletes user content · dry-runs write nothing · restore round-trips ·
 checksum gate enforced.
@@ -261,19 +266,32 @@ regression tests green · no over-claimed enforcement.
 
 # Remaining Open Items (must-have phases 0-10)
 
-Consolidated list of what is still genuinely incomplete after the re-verification above:
+## Landed this session (verified, tested, committed)
 
-- [ ] **P0:** `schemaVersion` on every authored machine-readable file (lock + manifest + project.yml
-      done; tiers.yaml and some schemas still lack it)
-- [ ] **P0:** Final 5-class ownership model surfaced everywhere (`patch-managed` + computed
-      `deprecated` not yet first-class in upgrade routing)
-- [ ] **P1:** Classify against any known kit checksum → adopt into lock
-- [ ] **P2:** Marker syntax frozen/versioned (invariant 5)
-- [ ] **P3:** Per-class upgrade routing (deprecated delete/route, rendered regen, incoming-collision
-      → `conflicts/<ts>/incoming/`); full idempotency (SKIP_PROTECTED_CORE second-run zero-diff);
-      empty-dir removal only from lock `createdDirs`
-- [ ] **P4:** Consolidate remaining placeholder tokens to read from `project.yml`; `restore --from
-      <ts>` checksum-gated copy-back
+> Continuation work after `2257e03`. Each slice shipped with focused tests; full fast suite
+> grew 366 → 408 passing, 6 skipped. Commits on `main`.
+
+| Commit | Item | Work |
+|---|---|---|
+| `d6a123e` | **P0-a** | `schemaVersion` on `command-policy.tiers.yaml` + `policies/ai/policy.yaml`; `validate-ai-config.php` asserts it (negative test via temp repo clone). JSON Schemas excluded by design (`$schema` anchor). |
+| `963dd8c` | **P0-b/1** | `patch-managed` first-class ownership (resolver + surface validator + manifest schema enum). |
+| `a9a3d96` | **P0-b/2** | Computed `deprecated` at plan time (`aiUpgradeComputeDeprecated`, never stored); surfaced in upgrade dry-run report. |
+| `3a4e6ee` | **P0-b/3, P3-a/b** | Per-class upgrade routing extracted to `aiUpgradeResolveFileAction` (rendered→regenerate, patch-managed→update-managed-block, owned→conflict/auto-update, `--force-owned`). |
+| `430131f` | **P0-b/4, P3-b** | Apply-path `aiUpgradeRemoveDeprecated`: unchanged→delete (backed up), user-modified→`conflicts/<ts>/removed/`; recorded-files-only; end-to-end orchestrator test. |
+| `30ad5e3` | **P1** | Checksum-set adoption: `tools/ai/known-kit-checksums.json` + `ADOPT_KNOWN_KIT` planner action (matches prior kit hash → adopt, not foreign-conflict). |
+| `a9d4a6d` | **P3-d** | Full idempotency: identical core file under force → `SKIP_IDENTICAL_EXISTING` (was `SKIP_PROTECTED_CORE` drift). End-to-end zero-diff double-install test. |
+| `252b95f` | **P3-e** | Empty-dir removal gated to lock `createdDirs`; `aiInstallerReadLockCreatedDirs`; never removes pre-existing/non-empty dirs. |
+| `6a7979d` | **P2** | Marker syntax frozen/versioned: `tools/ai/install/markers.php` constants + `AI_MARKER_SCHEMA_VERSION` + freeze test pinning exact bytes. |
+| `ad59285` | **P3-c** | Incoming foreign-collision → `aiInstallerOfferIncomingConflict` writes kit version to `conflicts/<ts>/incoming/`; foreign file never overwritten. |
+| `39d49cf` | **P4-a** | 18 customizable project-fact placeholder tokens sourced from `.ai/project.yml`; unset keys keep base defaults; deterministic re-render. |
+| `2dc5210` | (scope) | Out-of-scope VS Code extension installer isolated into its own commit before plan work. |
+
+## Still genuinely incomplete
+
+- [ ] **P0:** `schemaVersion` on remaining JSON schemas (decision: schemas use `$schema`; tiers.yaml +
+      policy.yaml done. Revisit only if a schema authoring-version is required.)
+- [ ] **P4-b:** `restore --from <ts> [--path]` checksum-gated copy-back, logged to `.ai/logs/`,
+      dry-run writes nothing; wire into `ai.php` final surfaces
 - [ ] **P5:** Ship `docs/ai/project/` 3 templates; `.ai/local-manifest.json` informational writer;
       unified `0700` private structure (`<ts>-<op>` subdirs incl. `incoming`/`removed`)
 - [ ] **P6:** SIGINT/SIGTERM rollback or marked-recoverable; `verify` detects incomplete
