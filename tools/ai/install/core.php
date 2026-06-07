@@ -225,6 +225,9 @@ function aiInstallerRun(array $argv): int
         );
         $manifest['placeholders'] = $placeholderStatus;
         aiInstallerWriteManifest($config['targetRoot'], $manifest);
+        // P5-b: informational-only summary for the user. NOT a write allowlist — the
+        // canonical manifest files{} and the lock remain authoritative for all writes.
+        aiInstallerWriteLocalManifest($config['targetRoot'], $manifest);
 
         if (is_array($backupInfo) && is_string($backupInfo['backup_id'] ?? null)) {
             aiInstallBackupRecordAfter($config['targetRoot'], (string) $backupInfo['backup_id'], $plan, $config['sourceRoot'], 'applied');
@@ -717,6 +720,46 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
 function aiInstallerProjectValuesPath(string $targetRoot): string
 {
     return $targetRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'project.yml';
+}
+
+/**
+ * P5-b: write the informational-only `.ai/local-manifest.json`.
+ *
+ * This is a gitignored, human-facing summary of what the kit installed. It is NEVER read
+ * back to decide writes or deletes — the canonical `.ai-install-manifest.json` files{} map
+ * and the lock are the only write allowlist. The self-describing flags make that explicit.
+ *
+ * @param array<string,mixed> $manifest The canonical install manifest.
+ */
+function aiInstallerWriteLocalManifest(string $targetRoot, array $manifest): void
+{
+    $files = [];
+    foreach (($manifest['files'] ?? []) as $path => $meta) {
+        if (!is_string($path) || !is_array($meta)) {
+            continue;
+        }
+        $files[$path] = [
+            'ownership' => (string) ($meta['ownership'] ?? 'owned'),
+            'installed_hash' => (string) ($meta['installed_hash'] ?? ''),
+        ];
+    }
+    ksort($files);
+
+    $local = [
+        'schemaVersion' => 1,
+        'informational' => true,
+        'not_a_write_allowlist' => true,
+        'note' => 'Informational summary only. The canonical .ai-install-manifest.json files{} '
+            . 'and .ai/manifest.lock.json are the authoritative write allowlist. Safe to delete.',
+        'generatedAt' => gmdate('c'),
+        'installed_version' => (string) ($manifest['package']['installed_version']
+            ?? $manifest['installer_version'] ?? 'unknown'),
+        'files' => $files,
+    ];
+
+    $path = $targetRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'local-manifest.json';
+    aiInstallerMkdir(dirname($path));
+    file_put_contents($path, json_encode($local, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
 }
 
 function aiInstallerEnsureProjectValuesFile(string $targetRoot, string $projectName): void
