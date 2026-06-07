@@ -660,6 +660,38 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testTemplateRefreshChannelSurfacesUpstreamChangesWithoutOverwrite(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_tmpl_refresh_' . uniqid('', true);
+        mkdir($root . '/src/docs', 0700, true);
+        mkdir($root . '/tgt/docs', 0700, true);
+        file_put_contents($root . '/src/docs/t.md', "NEW upstream template\n");
+        file_put_contents($root . '/tgt/docs/t.md', "USER edited copy\n");
+
+        $config = ['sourceRoot' => $root . '/src', 'targetRoot' => $root . '/tgt'];
+        $item = ['type' => 'file', 'source' => 'docs/t.md', 'target' => 'docs/t.md', 'action' => 'SKIP_EXISTING_UNMANAGED'];
+
+        try {
+            // Upstream changed: surface a template-new copy, leave the user file intact.
+            $rel = aiInstallerOfferTemplateRefresh($config, $item);
+            $this->assertSame('.ai/templates-new/docs/t.md', $rel);
+            $this->assertSame("NEW upstream template\n", (string) file_get_contents($root . '/tgt/.ai/templates-new/docs/t.md'));
+            $this->assertSame("USER edited copy\n", (string) file_get_contents($root . '/tgt/docs/t.md'), 'user file must never be overwritten');
+
+            // When the user's copy already matches upstream, there is nothing to refresh.
+            file_put_contents($root . '/tgt/docs/t.md', "NEW upstream template\n");
+            $this->assertNull(aiInstallerOfferTemplateRefresh($config, $item));
+
+            // Missing user file (fresh install) -> no refresh (normal copy handles it).
+            unlink($root . '/tgt/docs/t.md');
+            $this->assertNull(aiInstallerOfferTemplateRefresh($config, $item));
+        } finally {
+            $this->removeTree($root);
+        }
+    }
+
     public function testExtraDocsFromProjectYmlRenderAndSurviveReRender(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/core.php';
