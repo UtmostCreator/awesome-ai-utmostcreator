@@ -110,6 +110,24 @@ class AgentPermissionPolicyTest extends TestCase
         'packages/ai-universal-rules/templates/core/agents/repository-reviewer.md',
     ];
 
+    /** @var list<string> */
+    private const REVIEWER_AGENT_FILES = [
+        '.opencode/agents/reviewer.md',
+        '.opencode/agents/repository-reviewer.md',
+        'packages/ai-universal-rules/templates/core/agents/reviewer.md',
+        'packages/ai-universal-rules/templates/core/agents/repository-reviewer.md',
+    ];
+
+    /** @var list<string> */
+    private const REVIEWER_GIT_REVIEW_ALLOW_PATTERNS = [
+        'git merge-base',
+        'git range-diff',
+        'git diff-tree',
+        'git cherry',
+        'git for-each-ref',
+        'git config --get-regexp ^alias\\\\.',
+    ];
+
     public static function setUpBeforeClass(): void
     {
         $root = realpath(dirname(__DIR__, 2));
@@ -165,6 +183,12 @@ class AgentPermissionPolicyTest extends TestCase
             ['opencode.jsonc'],
             ['packages/ai-universal-rules/templates/core/opencode.json'],
         ];
+    }
+
+    /** @return list<array{0:string}> */
+    public static function reviewerAgentProvider(): array
+    {
+        return array_map(static fn (string $path): array => [$path], self::REVIEWER_AGENT_FILES);
     }
 
     #[DataProvider('gitMutatingAgentProvider')]
@@ -247,6 +271,30 @@ class AgentPermissionPolicyTest extends TestCase
         }
 
         self::assertSame([], $violations, sprintf('%s allows forbidden patterns: %s', $relativePath, implode(', ', $violations)));
+    }
+
+    #[DataProvider('reviewerAgentProvider')]
+    public function testReviewerAgentsAllowReadOnlyReviewGitWithoutBroadBranchMutation(string $relativePath): void
+    {
+        $contents = $this->loadFrontmatter($relativePath);
+
+        self::assertFalse(
+            $this->isExactPatternAllow($contents, 'git branch*'),
+            sprintf('%s must not allow broad git branch* because it can match destructive branch deletion.', $relativePath)
+        );
+        self::assertFalse(
+            $this->isExactPatternAllow($contents, 'git cherry*'),
+            sprintf('%s must not allow broad git cherry* because it can match mutating cherry-pick.', $relativePath)
+        );
+
+        $missing = [];
+        foreach (self::REVIEWER_GIT_REVIEW_ALLOW_PATTERNS as $needle) {
+            if (!$this->isPatternAllow($contents, $needle) && !$this->isExactPatternAllow($contents, $needle)) {
+                $missing[] = $needle;
+            }
+        }
+
+        self::assertSame([], $missing, sprintf('%s is missing read-only review git allow entries: %s', $relativePath, implode(', ', $missing)));
     }
 
     #[DataProvider('allAgentProvider')]
@@ -333,5 +381,11 @@ class AgentPermissionPolicyTest extends TestCase
     {
         $escaped = preg_quote($needle, '/');
         return (bool) preg_match('/[\'\"][^\'\"]*' . $escaped . '(?:[\s\*\'\"])[^\'\"]*[\'\"]\s*:\s*[\'\"]?allow[\'\"]?/m', $haystack);
+    }
+
+    private function isExactPatternAllow(string $haystack, string $pattern): bool
+    {
+        $escaped = preg_quote($pattern, '/');
+        return (bool) preg_match('/[\'\"]' . $escaped . '[\'\"]\s*:\s*[\'\"]?allow[\'\"]?/m', $haystack);
     }
 }

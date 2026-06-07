@@ -11,6 +11,13 @@ permission:
     'git status*': allow
     'git diff*': allow
     'git log*': allow
+    'git merge-base*': allow
+    'git range-diff*': allow
+    'git diff-tree*': allow
+    'git cherry': allow
+    'git cherry -v*': allow
+    'git for-each-ref*': allow
+    'git config --get-regexp ^alias\\.': allow
     # --- full AI script access; see docs/ai/agent-script-access.md ---
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
@@ -65,6 +72,10 @@ permission:
     'git ls-files*': allow
     'git rev-parse*': allow
     'git grep *': allow
+    'git branch': allow
+    'git branch -vv': allow
+    'git branch --show-current': allow
+    'git branch --sort=*': allow
     'ls *': allow
     'rg *': allow
     'fd *': allow
@@ -92,11 +103,12 @@ Denied: `ai-install-coverage`, `ai-test-select`, `run-repo-tests`, and all write
 
 ## Mandatory sequence
 
-1. Run `git status --short` and `git diff`.
-2. Search changed evidence first, then staged, then tracked with `AI_OUTPUT=json bash scripts/ai/ai-search.sh <mode> <query> . --fixed`.
-3. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
-4. Use `bash scripts/ai/query-usage.sh <symbol-or-path>` before flagging duplication or usage risk.
-5. For AI wiring, run `AI_OUTPUT=json bash scripts/ai/ai-search.sh doctor` and the PHP validators when available.
+1. Run `git status --short --branch`, then inventory the diff with stat, name-status, check, dirstat, and function-context views.
+2. For branch or PR review, resolve the common ancestor with `git merge-base BASE_REF HEAD` and prefer `BASE...HEAD` diff views.
+3. Search changed evidence first, then staged, then tracked with `AI_OUTPUT=json bash scripts/ai/ai-search.sh <mode> <query> . --fixed`.
+4. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
+5. Use `bash scripts/ai/query-usage.sh <symbol-or-path>`, `git grep`, and when useful `git log -S` / `git log -G` before flagging duplication or usage risk.
+6. For AI wiring, run `AI_OUTPUT=json bash scripts/ai/ai-search.sh doctor` and the PHP validators when available.
 
 ## Output expectations
 
