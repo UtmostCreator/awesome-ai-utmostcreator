@@ -1055,8 +1055,10 @@ function aiInstallerCopyFile(string $src, string $dest): void
         return;
     }
     aiInstallerMkdir(dirname($dest));
-    if (!copy($src, $dest)) {
-        throw new RuntimeException('failed to copy file: ' . $src);
+    // Suppress the native warning; a clean RuntimeException is thrown on failure (e.g. a
+    // read-only destination) so callers get one well-formed error, not raw PHP warning noise.
+    if (!@copy($src, $dest)) {
+        throw new RuntimeException('failed to copy file: ' . $src . ' -> ' . $dest);
     }
     $mode = @fileperms($src);
     if ($mode !== false) {
