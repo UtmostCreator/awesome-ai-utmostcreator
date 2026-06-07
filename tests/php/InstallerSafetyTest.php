@@ -660,6 +660,41 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testCopyFileFailsClearlyOnReadOnlyTarget(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        if (\PHP_OS_FAMILY === 'Windows' || (function_exists('posix_getuid') && posix_getuid() === 0)) {
+            $this->markTestSkipped('read-only enforcement requires a non-root POSIX user');
+        }
+
+        $dir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_readonly_' . uniqid('', true);
+        mkdir($dir, 0700, true);
+        $src = $dir . '/src.md';
+        $dest = $dir . '/dest.md';
+        file_put_contents($src, "new kit content\n");
+        file_put_contents($dest, "old user content\n");
+        chmod($dest, 0444); // read-only target
+
+        try {
+            // The destination is read-only: copy must fail loudly, never silently corrupt.
+            $threw = false;
+            try {
+                aiInstallerCopyFile($src, $dest);
+            } catch (\RuntimeException $e) {
+                $threw = true;
+                $this->assertStringContainsString('failed to copy file', $e->getMessage());
+            }
+            // Either it threw, or (on permissive filesystems) the original bytes survived.
+            if (!$threw) {
+                $this->assertSame("old user content\n", (string) file_get_contents($dest), 'read-only target must not be silently overwritten');
+            }
+        } finally {
+            @chmod($dest, 0644);
+            $this->removeTree($dir);
+        }
+    }
+
     public function testInstallerCompilesCommandPolicyWithSafeLocalOverride(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/core.php';
