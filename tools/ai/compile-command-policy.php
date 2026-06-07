@@ -29,15 +29,28 @@ function aiPolicyCompileMain(array $argv): int
 
     $in = $root . '/docs/ai/command-policy.tiers.yaml';
     $out = $root . '/.github/hooks/scripts/command-policy.compiled.sh';
+    $projectValues = null;
     $check = false;
     foreach (array_slice($argv, 1) as $arg) {
         if (str_starts_with($arg, '--in=')) {
             $in = substr($arg, 5);
         } elseif (str_starts_with($arg, '--out=')) {
             $out = substr($arg, 6);
+        } elseif (str_starts_with($arg, '--project-values=')) {
+            $projectValues = substr($arg, 17);
         } elseif ($arg === '--check') {
             $check = true;
         }
+    }
+
+    // Local overrides live in the TARGET repo (the one whose hooks we compile), derived from
+    // the --out location (.../<targetRoot>/.github/hooks/scripts/...). Falls back to the kit
+    // root only when --out is the kit's own path. An explicit --project-values wins.
+    if ($projectValues === null) {
+        $outDir = dirname($out);
+        // .github/hooks/scripts -> up 3 == target repo root
+        $targetRoot = dirname($outDir, 3);
+        $projectValues = $targetRoot . '/.ai/project.yml';
     }
 
     if (!is_file($in)) {
@@ -46,6 +59,20 @@ function aiPolicyCompileMain(array $argv): int
     }
 
     $tiers = aiPolicyParseTiersYaml((string) file_get_contents($in));
+
+    // Minimal local overrides: .ai/project.yml may add policy.allow[] entries. These can only
+    // widen allow; they can never downgrade a global deny or a tier>=3 (ask) command, and
+    // wildcards are rejected. Invalid local allows fail the compile loudly.
+    if (is_file($projectValues)) {
+        $localAllows = aiPolicyParseLocalAllows((string) file_get_contents($projectValues));
+        $violations = aiPolicyValidateLocalAllows($localAllows, $tiers);
+        if ($violations !== []) {
+            fwrite(STDERR, "ERROR: invalid local policy overrides in .ai/project.yml:\n - " . implode("\n - ", $violations) . "\n");
+            return 1;
+        }
+        $tiers['allow'] = array_values(array_unique(array_merge($tiers['allow'], $localAllows)));
+    }
+
     $compiled = aiPolicyRenderCompiledSh($tiers);
 
     if ($check) {
@@ -221,6 +248,113 @@ function aiPolicyRenderCaseBranches(array $patterns, string $decision): string
 function aiPolicyShSingleQuote(string $value): string
 {
     return "'" . str_replace("'", "'\\''", $value) . "'";
+}
+
+/**
+ * Parse a `policy:`/`  allow:` block of simple `- "pattern"` entries from .ai/project.yml.
+ * Only entries under the top-level `policy:` -> `allow:` key are considered.
+ *
+ * @return list<string>
+ */
+function aiPolicyParseLocalAllows(string $yaml): array
+{
+    $allows = [];
+    $inPolicy = false;
+    $inAllow = false;
+
+    foreach (preg_split('/\R/', $yaml) ?: [] as $line) {
+        if ($line === '' || ltrim($line)[0] === '#') {
+            continue;
+        }
+        $indent = strlen($line) - strlen(ltrim($line));
+        $trimmed = trim($line);
+
+        if ($indent === 0) {
+            // Any top-level key other than the policy block ends policy scope.
+            $inPolicy = ($trimmed === 'policy:');
+            $inAllow = false;
+            continue;
+        }
+        if (!$inPolicy) {
+            continue;
+        }
+        if (preg_match('/^allow:\s*(\[\])?\s*$/', $trimmed) === 1) {
+            $inAllow = true;
+            continue;
+        }
+        // A sibling key under policy ends the allow list.
+        if ($inAllow && !str_starts_with($trimmed, '- ') && str_ends_with($trimmed, ':')) {
+            $inAllow = false;
+            continue;
+        }
+        if ($inAllow && str_starts_with($trimmed, '- ')) {
+            $value = trim(trim(substr($trimmed, 2)), "\"'");
+            if ($value !== '') {
+                $allows[] = $value;
+            }
+        }
+    }
+
+    return array_values(array_unique($allows));
+}
+
+/**
+ * Enforce the local-override safety contract:
+ *  - no wildcards (`*`) in a local allow (prevents broad self-grants),
+ *  - a local allow must not match (or be matched by) any global deny pattern,
+ *  - a local allow must not equal a tier>=3 (ask) command (no silent privilege downgrade).
+ *
+ * @param list<string> $localAllows
+ * @param array{allow:list<string>,ask:list<string>,deny:list<string>} $tiers
+ * @return list<string> human-readable violation messages (empty == valid)
+ */
+function aiPolicyValidateLocalAllows(array $localAllows, array $tiers): array
+{
+    $violations = [];
+    foreach ($localAllows as $allow) {
+        if (str_contains($allow, '*')) {
+            $violations[] = "wildcard not permitted in local allow: '{$allow}'";
+            continue;
+        }
+        foreach ($tiers['deny'] as $deny) {
+            if (aiPolicyPatternsOverlap($allow, $deny)) {
+                $violations[] = "local allow '{$allow}' would downgrade global deny '{$deny}'";
+                break;
+            }
+        }
+        foreach ($tiers['ask'] as $ask) {
+            if (aiPolicyPatternsOverlap($allow, $ask)) {
+                $violations[] = "local allow '{$allow}' would downgrade tier>=3 confirm '{$ask}'";
+                break;
+            }
+        }
+    }
+
+    return $violations;
+}
+
+/**
+ * True if a concrete local allow command would be captured by a (possibly globbed) policy
+ * pattern, or vice versa. Used to detect downgrade attempts. `*` in the policy pattern is a
+ * trailing/embedded wildcard; matching is done with fnmatch in both directions.
+ */
+function aiPolicyPatternsOverlap(string $localAllow, string $policyPattern): bool
+{
+    if ($localAllow === $policyPattern) {
+        return true;
+    }
+    // The policy pattern may contain globs; does it capture the concrete local allow?
+    if (fnmatch($policyPattern, $localAllow)) {
+        return true;
+    }
+    // Defense in depth: would the local allow (treated literally) be a prefix of the policy's
+    // non-glob stem? e.g. local "git reset" vs deny "git reset --hard *".
+    $stem = rtrim((string) strstr($policyPattern, '*', true) ?: $policyPattern);
+    if ($stem !== '' && str_starts_with($localAllow, $stem)) {
+        return true;
+    }
+
+    return false;
 }
 
 if (PHP_SAPI === 'cli' && isset($argv) && realpath($argv[0]) === realpath(__FILE__)) {
