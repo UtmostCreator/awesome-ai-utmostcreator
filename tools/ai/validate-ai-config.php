@@ -571,6 +571,26 @@ foreach ($previewRequiredSnippets as $snippet) {
     }
 }
 
+// P0-a: every authored machine-readable config file must declare an integer
+// top-level `schemaVersion` so the forward-compat guard (M3) and migrations have
+// a stable version anchor. Scope: authored YAML config (JSON Schema files carry
+// their own `$schema` meta-anchor and are excluded by design).
+$schemaVersionRequiredFiles = [
+    'docs/ai/command-policy.tiers.yaml',
+    'policies/ai/policy.yaml',
+];
+foreach ($schemaVersionRequiredFiles as $relativePath) {
+    $content = safeRead($root, $relativePath);
+    if ($content === null) {
+        // Presence is already enforced by the required-file checks above; only
+        // assert the field when the file exists in this repo mode.
+        continue;
+    }
+    if (preg_match('/^schemaVersion:\s*\d+\s*$/m', $content) !== 1) {
+        $errors[] = "missing integer top-level schemaVersion in {$relativePath}";
+    }
+}
+
 $opencodeConfig = loadJsonFile($root, 'opencode.jsonc', $errors);
 if (is_array($opencodeConfig)) {
     validateOpenCodePermissions($opencodeConfig, $errors);
