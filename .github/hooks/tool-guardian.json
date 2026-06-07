@@ -4,6 +4,7 @@
     "preToolUse": [
       {
         "type": "command",
+        "command": ".github/hooks/scripts/tool-guardian.sh",
         "powershell": ".github/hooks/scripts/tool-guardian.ps1",
         "cwd": ".",
         "env": {
