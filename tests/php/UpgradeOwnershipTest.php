@@ -220,4 +220,75 @@ final class UpgradeOwnershipTest extends TestCase
 
         $this->assertSame([], $deprecated, 'a deprecated file already absent from disk needs no action');
     }
+
+    // ---- P0-b Slice 3: per-class upgrade action routing ----
+
+    public function testResolveFileActionMissingTarget(): void
+    {
+        $r = aiUpgradeResolveFileAction('owned', false, false, true, false);
+        $this->assertSame('missing', $r['status']);
+        $this->assertSame('restore or remove from manifest', $r['action']);
+    }
+
+    public function testResolveFileActionTemplateAlwaysPreserved(): void
+    {
+        $unchanged = aiUpgradeResolveFileAction('template', false, true, false, false);
+        $this->assertSame('template-unchanged', $unchanged['status']);
+        $this->assertSame('preserve', $unchanged['action']);
+
+        $modified = aiUpgradeResolveFileAction('template', true, true, false, false);
+        $this->assertSame('template-user-owned', $modified['status']);
+        $this->assertSame('preserve', $modified['action'], 'template files are never overwritten on upgrade');
+    }
+
+    public function testResolveFileActionRenderedAlwaysRegenerates(): void
+    {
+        $r = aiUpgradeResolveFileAction('rendered', false, false, false, false);
+        $this->assertSame('rendered', $r['status']);
+        $this->assertSame('regenerate', $r['action'], 'rendered files regenerate from project.yml each upgrade');
+
+        // Even when the user touched it, rendered regenerates (user sections preserved by renderer).
+        $modified = aiUpgradeResolveFileAction('rendered', true, false, false, false);
+        $this->assertSame('regenerate', $modified['action']);
+    }
+
+    public function testResolveFileActionPatchManagedUpdatesBlock(): void
+    {
+        $r = aiUpgradeResolveFileAction('patch-managed', true, true, false, false);
+        $this->assertSame('patch-managed', $r['status']);
+        $this->assertSame('update-managed-block', $r['action'], 'patch-managed updates only the marker block, never user content outside it');
+    }
+
+    public function testResolveFileActionOwnedUserModifiedConflicts(): void
+    {
+        $r = aiUpgradeResolveFileAction('owned', true, false, false, false);
+        $this->assertSame('owned-user-modified', $r['status']);
+        $this->assertSame('conflict-preserve-user', $r['action']);
+
+        $both = aiUpgradeResolveFileAction('owned', true, true, false, false);
+        $this->assertSame('owned-both-changed', $both['status']);
+        $this->assertSame('conflict-preserve-user', $both['action']);
+    }
+
+    public function testResolveFileActionOwnedForceOverwritesInPlace(): void
+    {
+        // --force-owned: user-modified owned file is preserved to conflicts then overwritten.
+        $r = aiUpgradeResolveFileAction('owned', true, true, false, true);
+        $this->assertSame('owned-force-overwrite', $r['status']);
+        $this->assertSame('force-overwrite', $r['action'], '--force-owned overwrites in place after preserving user bytes');
+    }
+
+    public function testResolveFileActionOwnedSourceUpdatedAutoUpdates(): void
+    {
+        $r = aiUpgradeResolveFileAction('owned', false, true, false, false);
+        $this->assertSame('source-updated', $r['status']);
+        $this->assertSame('auto-update', $r['action']);
+    }
+
+    public function testResolveFileActionUnchangedSkips(): void
+    {
+        $r = aiUpgradeResolveFileAction('owned', false, false, false, false);
+        $this->assertSame('unchanged', $r['status']);
+        $this->assertSame('skip', $r['action']);
+    }
 }
