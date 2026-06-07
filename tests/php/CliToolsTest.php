@@ -524,6 +524,35 @@ class CliToolsTest extends TestCase
         );
     }
 
+    public function testAiCliDoctorRunsReadOnlyAndReportsState(): void
+    {
+        $repoRoot = realpath(dirname(__DIR__, 2));
+        $this->assertIsString($repoRoot);
+
+        $result = $this->runTool('php tools/ai/ai.php doctor');
+        $this->assertContains(
+            $result['exit'],
+            [0, 1],
+            "ai.php doctor exited with unexpected code:\n" . $result['stderr']
+        );
+
+        $artifact = $repoRoot . '/docs/ai/generated/doctor.json';
+        $this->assertFileExists($artifact);
+        $decoded = json_decode((string) file_get_contents($artifact), true);
+        $this->assertIsArray($decoded);
+
+        $data = $decoded['data'] ?? [];
+        $this->assertIsArray($data['checks'] ?? null, 'doctor must report a checks array');
+        $this->assertArrayHasKey('installed', $data);
+        $this->assertContains($decoded['status'] ?? null, ['ok', 'warning', 'failed']);
+
+        // Doctor must include environment, tools, and install categories.
+        $categories = array_unique(array_map(static fn(array $c): string => (string) ($c['category'] ?? ''), $data['checks']));
+        $this->assertContains('env', $categories);
+        $this->assertContains('tools', $categories);
+        $this->assertContains('install', $categories);
+    }
+
     public function testAiCliPackageVerifyExitsZeroOrFailed(): void
     {
         $result = $this->runTool('php tools/ai/ai.php package-verify');

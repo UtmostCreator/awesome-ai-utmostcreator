@@ -56,6 +56,7 @@ Commands:
   find           Search tracked files by deterministic path/content match
   symbols        Extract top-level code symbols from tracked source files
   preflight      Check installer prerequisites and environment readiness
+  doctor         Read-only health check: environment, tools, and install state
   package-lock   Check or update source template checksum lock
   package-verify Verify source templates against checksum lock
   audit-instructions Audit local instruction surfaces and ownership hints
@@ -190,6 +191,8 @@ try {
             exit(aiRunSymbols($root, $args));
         case 'preflight':
             exit(aiRunPreflight($root));
+        case 'doctor':
+            exit(aiRunDoctor($root));
         case 'package-lock':
             exit(aiRunPackageLock($root, $args));
         case 'package-verify':
