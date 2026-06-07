@@ -802,7 +802,11 @@ function aiRunUninstallWorkflow(string $root, array $args): int
             $preserved[] = ['file' => $rel, 'reason' => 'template (user-owned); use --purge to remove'];
             continue;
         }
-        $toRemove[] = ['file' => $rel, 'ownership' => $ownership];
+        $toRemove[] = [
+            'file' => $rel,
+            'ownership' => $ownership,
+            'installed_hash' => is_array($meta) ? (string) ($meta['installed_hash'] ?? '') : '',
+        ];
     }
 
     $removed = [];
@@ -817,9 +821,22 @@ function aiRunUninstallWorkflow(string $root, array $args): int
                     $removedDirs[dirname($abs)] = true;
                 }
             } elseif (is_dir($abs)) {
-                aiInstallerDeleteTree($abs);
-                $removed[] = $entry['file'];
-                $removedDirs[dirname($abs)] = true;
+                // Never blindly recursive-delete a kit-installed directory: it may now contain
+                // user-added files. Only remove it when its current fingerprint still matches the
+                // hash recorded at install time (i.e. it is pristine kit content). Otherwise
+                // preserve the whole directory and surface it for manual review.
+                $expected = (string) $entry['installed_hash'];
+                $current = aiHashPath($abs);
+                if ($expected !== '' && str_starts_with($expected, 'sha256:') && $current === $expected) {
+                    aiInstallerDeleteTree($abs);
+                    $removed[] = $entry['file'];
+                    $removedDirs[dirname($abs)] = true;
+                } else {
+                    $preserved[] = [
+                        'file' => $entry['file'],
+                        'reason' => 'directory contains changes since install (possibly user-added files); preserved for manual review',
+                    ];
+                }
             } else {
                 $missing[] = $entry['file'];
             }

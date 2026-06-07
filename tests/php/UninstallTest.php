@@ -127,6 +127,74 @@ final class UninstallTest extends TestCase
         $this->assertDirectoryDoesNotExist($root . '/.ai', '.ai state removed with --purge');
     }
 
+    public function testUninstallPreservesDirectoryWithUserAddedFiles(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'uninstall_userdir_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated', 0700, true);
+
+        // Kit installs a directory of agents.
+        $agentsDir = $root . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents';
+        mkdir($agentsDir, 0700, true);
+        file_put_contents($agentsDir . DIRECTORY_SEPARATOR . 'architect.md', "# kit agent\n");
+
+        // Record the manifest dir entry with the hash of the PRISTINE kit directory.
+        require_once self::$repoRoot . '/tools/ai/commands/install_paths.php';
+        $pristineHash = aiHashPath($agentsDir);
+
+        // Now the user adds their own agent into the same directory AFTER install.
+        file_put_contents($agentsDir . DIRECTORY_SEPARATOR . 'my-custom.md', "# user's own agent\n");
+
+        $manifest = [
+            'schema_version' => 1,
+            'profile' => 'opencode',
+            'packs' => ['adapter-opencode'],
+            'files' => [
+                '.opencode/agents' => ['managed' => true, 'ownership' => 'owned', 'installed_hash' => $pristineHash],
+            ],
+        ];
+        file_put_contents($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json', json_encode($manifest));
+
+        ob_start();
+        aiRunUninstallWorkflow($root, ['--apply']);
+        ob_end_clean();
+
+        // The directory must NOT be recursively deleted because it changed since install.
+        $this->assertFileExists($agentsDir . DIRECTORY_SEPARATOR . 'my-custom.md', "user's file must survive uninstall");
+        $this->assertDirectoryExists($agentsDir, 'kit directory with user content must be preserved');
+    }
+
+    public function testUninstallRemovesPristineKitDirectory(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'uninstall_pristinedir_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated', 0700, true);
+
+        $agentsDir = $root . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents';
+        mkdir($agentsDir, 0700, true);
+        file_put_contents($agentsDir . DIRECTORY_SEPARATOR . 'architect.md', "# kit agent\n");
+
+        require_once self::$repoRoot . '/tools/ai/commands/install_paths.php';
+        $pristineHash = aiHashPath($agentsDir);
+
+        $manifest = [
+            'schema_version' => 1,
+            'profile' => 'opencode',
+            'packs' => ['adapter-opencode'],
+            'files' => [
+                '.opencode/agents' => ['managed' => true, 'ownership' => 'owned', 'installed_hash' => $pristineHash],
+            ],
+        ];
+        file_put_contents($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json', json_encode($manifest));
+
+        ob_start();
+        aiRunUninstallWorkflow($root, ['--apply']);
+        ob_end_clean();
+
+        // Pristine kit directory (unchanged since install) is removed.
+        $this->assertDirectoryDoesNotExist($agentsDir, 'pristine kit directory should be removed');
+    }
+
     public function testUninstallWithoutManifestIsBlocked(): void
     {
         $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'uninstall_none_' . uniqid('', true);
