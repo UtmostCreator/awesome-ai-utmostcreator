@@ -178,7 +178,7 @@ obsolete-modified routed to conflicts · upgrade actually updates.
       upgrades re-render with same values → zero re-customization
 - [x] Consolidate existing placeholder tokens to read from `project.yml` (39d49cf; 18 project-fact
       tokens, unset keys keep base defaults)
-- [ ] `restore --from <ts> [--path]`: checksum-gated copy-back, logged to `.ai/logs/` (in progress)
+- [x] `restore --from <ts> [--path]`: checksum-gated copy-back, logged to `.ai/logs/` (59cb762)
 
 **Gates:** uninstall never deletes user content · dry-runs write nothing · restore round-trips ·
 checksum gate enforced.
@@ -290,8 +290,8 @@ regression tests green · no over-claimed enforcement.
 
 - [ ] **P0:** `schemaVersion` on remaining JSON schemas (decision: schemas use `$schema`; tiers.yaml +
       policy.yaml done. Revisit only if a schema authoring-version is required.)
-- [ ] **P4-b:** `restore --from <ts> [--path]` checksum-gated copy-back, logged to `.ai/logs/`,
-      dry-run writes nothing; wire into `ai.php` final surfaces
+- [x] **P4-b:** `restore --from <ts> [--path]` checksum-gated copy-back, logged to `.ai/logs/`,
+      dry-run writes nothing; wired into `ai.php` (59cb762)
 - [ ] **P5:** Ship `docs/ai/project/` 3 templates; `.ai/local-manifest.json` informational writer;
       unified `0700` private structure (`<ts>-<op>` subdirs incl. `incoming`/`removed`)
 - [ ] **P6:** SIGINT/SIGTERM rollback or marked-recoverable; `verify` detects incomplete
