@@ -170,6 +170,10 @@ run_drift() {
     if [[ -f tools/ai/validate-stub-surfaces.php ]]; then
         run_step "validate-stub-surfaces" php tools/ai/validate-stub-surfaces.php --root=.
     fi
+
+    if [[ -f tools/ai/validate-catalog-drift.php ]]; then
+        run_step "validate-catalog-drift" php tools/ai/validate-catalog-drift.php --root=.
+    fi
 }
 
 case "$mode" in
