@@ -2,6 +2,47 @@
 
 declare(strict_types=1);
 
+/**
+ * Merge workflow-level install metadata onto the canonical manifest written by the
+ * subprocess installer (install-ai-kit.php -> manifest.php).
+ *
+ * The subprocess is the single source of truth for the rich per-file `files{}` map
+ * (which carries per-file ownership/merge metadata). The orchestrator must augment that
+ * manifest with workflow-level fields (mode, runtime, toolchain, post_install_script,
+ * package_lock_sha256, managed_paths) WITHOUT discarding `files{}`. Previously the
+ * orchestrator overwrote the canonical manifest with a flat `managed_paths` shape, which
+ * silently dropped the per-file map on the `ai.php install --apply` path.
+ *
+ * @param array<string,mixed> $canonical Canonical manifest read back from disk (may be empty).
+ * @param array<string,mixed> $workflowFields Workflow-level fields to layer on top.
+ * @param list<string>        $managedPaths Flat list of managed target paths (fallback only).
+ * @return array<string,mixed> Merged manifest with `files{}` preserved.
+ */
+function aiInstallerMergeWorkflowManifest(array $canonical, array $workflowFields, array $managedPaths): array
+{
+    // Preserve the authoritative per-file map. If the subprocess did not produce one
+    // (e.g. its shape changed), synthesise a minimal map so downstream ownership/upgrade
+    // logic still has a per-file structure to rely on.
+    if (!is_array($canonical['files'] ?? null)) {
+        $canonical['files'] = [];
+        foreach ($managedPaths as $managedPath) {
+            if (is_string($managedPath) && $managedPath !== '') {
+                $canonical['files'][$managedPath] = ['managed' => true];
+            }
+        }
+    }
+
+    $merged = array_merge($canonical, $workflowFields);
+    // `files` must never be replaced by the workflow layer.
+    $merged['files'] = $canonical['files'];
+    $merged['managed_paths'] = array_values(array_filter(
+        $managedPaths,
+        static fn($p): bool => is_string($p) && $p !== ''
+    ));
+
+    return $merged;
+}
+
 function aiRunAdapterPlan(string $root, array $args): int
 {
     $planConfig = aiInstallerConfigFromAiArgs($root, $args, true);
@@ -228,15 +269,27 @@ function aiRunInstallWorkflow(string $root, array $args): int
                 }
             }
         }
-        $manifest = [
-            'schema_version' => 1,
-            'installer_version' => '0.2.0',
-            'installed_at' => gmdate('c'),
+        // The subprocess installer (install-ai-kit.php -> manifest.php) is the canonical
+        // manifest writer: it emits the rich per-file `files{}` map. The orchestrator must
+        // augment that manifest with workflow-level metadata, never overwrite it with a flat
+        // `managed_paths` list (which would silently drop per-file ownership/merge metadata).
+        $canonicalManifest = [];
+        if (is_file($manifestPath)) {
+            $decodedManifest = json_decode((string) file_get_contents($manifestPath), true);
+            if (is_array($decodedManifest)) {
+                $canonicalManifest = $decodedManifest;
+            }
+        }
+
+        $manifest = aiInstallerMergeWorkflowManifest($canonicalManifest, [
+            'schema_version' => $canonicalManifest['schema_version'] ?? 1,
+            'installer_version' => $canonicalManifest['installer_version'] ?? '0.2.0',
+            'installed_at' => (string) ($canonicalManifest['installed_at'] ?? gmdate('c')),
             'updated_at' => gmdate('c'),
             'profile' => (string) $installConfig['profile'],
             'mode' => $mode,
             'runtime' => $runtime,
-            'package' => [
+            'package' => is_array($canonicalManifest['package'] ?? null) ? $canonicalManifest['package'] : [
                 'name' => 'ai-universal-rules',
                 'distribution' => 'git-tag',
                 'source_repository' => 'UtmostCreator/app-configs',
@@ -245,7 +298,6 @@ function aiRunInstallWorkflow(string $root, array $args): int
                 'source_commit' => 'unknown',
                 'installed_version' => 'unknown',
             ],
-            'managed_paths' => $managed,
             'packs' => $selectedPacks,
             'toolchain' => [
                 'checked' => !empty($installConfig['toolchainCheck']),
@@ -254,7 +306,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
             ],
             'post_install_script' => $postInstallScript,
             'package_lock_sha256' => is_file(aiPackageLockPath($root)) ? 'sha256:' . hash_file('sha256', aiPackageLockPath($root)) : 'unknown',
-        ];
+        ], $managed);
         $manifestJson = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
         file_put_contents($manifestPath, $manifestJson);
         $derivedDir = dirname(aiInstallDerivedManifestPath($root));
