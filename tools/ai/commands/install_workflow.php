@@ -1062,9 +1062,11 @@ function aiRunUninstallWorkflow(string $root, array $args): int
                 $missing[] = $entry['file'];
             }
         }
-        // Best-effort prune of now-empty parent directories.
+        // Best-effort prune of now-empty parent directories, gated to lock createdDirs so
+        // only kit-created directories can be removed (never pre-existing user directories).
+        $createdDirs = aiInstallerReadLockCreatedDirs($root);
         foreach (array_keys($removedDirs) as $dir) {
-            aiUninstallPruneEmptyParents($dir, $root);
+            aiUninstallPruneEmptyParents($dir, $root, $createdDirs);
         }
         // Remove the manifest itself last (and .ai/ state when purging).
         @unlink($manifestPath);
@@ -1095,12 +1097,29 @@ function aiRunUninstallWorkflow(string $root, array $args): int
 
 /**
  * Remove empty directories upward from $dir until reaching (but not removing) $root.
+ *
+ * P3-e: a directory is only pruned when it is empty AND the kit recorded it in the lock's
+ * createdDirs allowlist. A pre-existing user directory that merely became empty is preserved,
+ * and a non-empty directory is never touched. This is a single-level rmdir walk, never a
+ * recursive delete.
+ *
+ * @param list<string> $createdDirs Repo-relative directory paths the kit created (lock createdDirs).
  */
-function aiUninstallPruneEmptyParents(string $dir, string $root): void
+function aiUninstallPruneEmptyParents(string $dir, string $root, array $createdDirs = []): void
 {
     $root = rtrim($root, '/\\');
     $dir = rtrim($dir, '/\\');
+    $allowed = array_fill_keys(array_map(
+        static fn(string $d): string => trim(str_replace('\\', '/', $d), '/'),
+        $createdDirs
+    ), true);
+
     while ($dir !== '' && $dir !== $root && str_starts_with($dir, $root) && is_dir($dir)) {
+        $rel = trim(str_replace('\\', '/', substr($dir, strlen($root))), '/');
+        if (!isset($allowed[$rel])) {
+            // Not a kit-created directory: never remove it, even if empty.
+            return;
+        }
         $entries = @scandir($dir);
         if ($entries === false) {
             return;
