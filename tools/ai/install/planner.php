@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs): array
 {
+    // Known prior-kit checksums let install adopt files placed by an older kit version
+    // instead of flagging them foreign. Tests may inject the map directly; real callers
+    // load it from the shipped source registry.
+    $knownKitChecksums = is_array($config['knownKitChecksums'] ?? null)
+        ? $config['knownKitChecksums']
+        : aiInstallerLoadKnownKitChecksums((string) ($config['sourceRoot'] ?? ''));
+
     $plan = [];
     foreach ($packs as $packId) {
         foreach ($packRegistry[$packId] ?? [] as $item) {
@@ -27,6 +34,11 @@ function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs):
                     // --backup to snapshot the displaced user content first.
                     $action = 'OVERWRITE_MANAGED';
                     $reason = 'foreign target adopted via --adopt';
+                } elseif (aiInstallerMatchesKnownKitChecksum($target, $absTarget, $knownKitChecksums)) {
+                    // The on-disk file matches a known prior kit version: it is ours, not the
+                    // user's. Adopt it into the lock and refresh from the current source.
+                    $action = 'ADOPT_KNOWN_KIT';
+                    $reason = 'target matches a known prior kit checksum; adopting into lock';
                 } elseif ($neverAutoMerge) {
                     // Files such as opencode.jsonc must never be auto-merged or silently
                     // skipped: surface a conflict and stop so the user decides.
@@ -74,6 +86,65 @@ function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs):
         }
     }
     return $plan;
+}
+
+/**
+ * Load the known historical kit-checksum registry shipped with the source kit.
+ *
+ * Returns a map of target path -> list of historical sha256 strings (bare or sha256:-prefixed).
+ * Missing or malformed registries yield an empty map (adoption simply never triggers).
+ *
+ * @return array<string,list<string>>
+ */
+function aiInstallerLoadKnownKitChecksums(string $sourceRoot): array
+{
+    $path = $sourceRoot . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'ai'
+        . DIRECTORY_SEPARATOR . 'known-kit-checksums.json';
+    if (!is_file($path)) {
+        return [];
+    }
+    $decoded = json_decode((string) file_get_contents($path), true);
+    if (!is_array($decoded) || !is_array($decoded['checksums'] ?? null)) {
+        return [];
+    }
+
+    $map = [];
+    foreach ($decoded['checksums'] as $target => $hashes) {
+        if (!is_array($hashes)) {
+            continue;
+        }
+        $map[(string) $target] = array_values(array_filter(
+            array_map('strval', $hashes),
+            static fn(string $h): bool => $h !== ''
+        ));
+    }
+
+    return $map;
+}
+
+/**
+ * True when the on-disk file at $absTarget matches any recorded historical kit checksum
+ * for its $target path. Such a file was installed by a prior kit version and is safe to
+ * adopt (overwrite/refresh) rather than treat as a foreign conflict.
+ *
+ * @param array<string,list<string>> $knownChecksums
+ */
+function aiInstallerMatchesKnownKitChecksum(string $target, string $absTarget, array $knownChecksums): bool
+{
+    $hashes = $knownChecksums[$target] ?? null;
+    if (!is_array($hashes) || $hashes === [] || !is_file($absTarget)) {
+        return false;
+    }
+
+    $actual = hash_file('sha256', $absTarget);
+    foreach ($hashes as $known) {
+        $normalized = str_starts_with($known, 'sha256:') ? substr($known, 7) : $known;
+        if (hash_equals($normalized, $actual)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 function aiInstallerPathsAreIdentical(string $source, string $target): bool
