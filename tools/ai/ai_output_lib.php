@@ -17,6 +17,16 @@ function aiCliArtifactSummary(array $written): string
 
 function aiCliRepoRoot(): string
 {
+    $override = (string) getenv('AI_CLI_REPO_ROOT');
+    if ($override !== '') {
+        $root = realpath($override);
+        if ($root === false || !is_dir($root)) {
+            throw new RuntimeException('AI_CLI_REPO_ROOT does not resolve to a directory.');
+        }
+
+        return $root;
+    }
+
     $root = realpath(__DIR__ . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . '..');
     if ($root === false) {
         throw new RuntimeException('Could not resolve repository root.');

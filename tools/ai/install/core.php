@@ -11,6 +11,7 @@ require_once __DIR__ . '/toolchain.php';
 require_once __DIR__ . '/script-runner.php';
 require_once __DIR__ . '/copilot-agent-renderer.php';
 require_once __DIR__ . '/backup.php';
+require_once __DIR__ . '/migrations.php';
 
 function aiInstallerRun(array $argv): int
 {
@@ -19,6 +20,7 @@ function aiInstallerRun(array $argv): int
         aiInstallerUsage();
         return 0;
     }
+    aiInstallerAssertLockCompatible((string) $config['targetRoot']);
 
     aiInstallerBootstrapPath();
 
@@ -67,22 +69,35 @@ function aiInstallerRun(array $argv): int
         aiInstallerAssertNoForeignConflicts($plan);
     }
 
+    // Ensure runtime/generated state is gitignored in the target repo. Apply
+    // flow only; skip on dry-run. This must happen before backups/conflicts are
+    // written so transient safety artifacts are ignored before they exist.
+    if (!$config['dryRun']) {
+        aiInstallerEnsureGitignoreEntries($config['targetRoot'], [
+            '.ai/backups/',
+            '.ai/logs/',
+            '.ai-backups/',
+            '.ai-logs/',
+            '.ai/conflicts/',
+            '.ai/templates-new/',
+            '.ai/local-manifest.json',
+            '.ai/install.lock',
+            '.repomix-context/',
+            '*.tmp',
+            '*.bak',
+            'docs/ai/generated/',
+        ]);
+        aiInstallerAssertGitignoreEffective($config['targetRoot'], [
+            '.ai-backups/install-ai-kit-probe',
+            '.ai/conflicts/probe',
+            'docs/ai/generated/probe.json',
+        ]);
+    }
+
     $backupInfo = null;
     if (!$config['dryRun'] && ($config['backup'] ?? false)) {
         $backupInfo = aiInstallBackupCreate($config['targetRoot'], $plan, $config['sourceRoot'], 'install-ai-kit');
         aiInstallerLog('backup created: ' . $backupInfo['backup_dir']);
-    }
-
-    // Ensure runtime/generated state is gitignored in the target repo. Apply
-    // flow only; skip on dry-run to mirror the backup gating above.
-    if (!$config['dryRun']) {
-        aiInstallerEnsureGitignoreEntries($config['targetRoot'], [
-            '.ai-backups/',
-            '.ai-logs/',
-            '.ai/conflicts/',
-            '.repomix-context/',
-            'docs/ai/generated/',
-        ]);
     }
 
     $applied = [];
@@ -135,12 +150,14 @@ function aiInstallerRun(array $argv): int
         if (is_array($backupInfo) && is_string($backupInfo['backup_id'] ?? null)) {
             aiInstallBackupUpdateState($config['targetRoot'], (string) $backupInfo['backup_id'], 'applying');
         }
+        aiInstallerEnsureProjectValuesFile($config['targetRoot'], $config['projectName']);
         aiInstallerApplyPlaceholders(
             $config['targetRoot'],
             $config['projectName'],
             $plan,
             aiInstallerIsSelfTargetInstall($config)
         );
+        aiInstallerEnsureAgentsMarkedSectionForSkippedUserFile($config['targetRoot'], $plan);
         $placeholderStatus = aiInstallerCollectPlaceholderStatus($config['targetRoot']);
 
         $strictProfiles = ['guarded', 'accelerated', 'full-governance'];
@@ -152,6 +169,12 @@ function aiInstallerRun(array $argv): int
         }
 
         $manifest = aiInstallerBuildManifest($config, $packs, $plan);
+        $manifest['migrations'] = aiInstallerRunMigrations(
+            (string) $config['sourceRoot'],
+            (string) $config['targetRoot'],
+            (string) ($manifest['package']['installed_version'] ?? 'unknown'),
+            (string) ($manifest['installer_version'] ?? 'unknown')
+        );
         $manifest['placeholders'] = $placeholderStatus;
         aiInstallerWriteManifest($config['targetRoot'], $manifest);
 
@@ -479,6 +502,7 @@ function aiInstallerExtractPlaceholders(string $content): array
 
 function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, array $plan, bool $allowSkippedUnmanaged = false): void
 {
+    $projectValues = aiInstallerLoadProjectValues($targetRoot, $projectName);
     $map = [
         '<PROJECT_NAME>' => $projectName,
         '<PROJECT_SUMMARY>' => 'AI workflow starter for ' . $projectName,
@@ -538,6 +562,7 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
         '<PROJECT_FORBIDDEN_SCRIPTS>' => 'unknown',
         '<PROJECT_SECURITY_RULES>' => 'unknown',
     ];
+    $map = array_merge($map, aiInstallerProjectValuesPlaceholderMap($projectValues));
 
     foreach ($plan as $item) {
         $target = (string) ($item['target'] ?? '');
@@ -585,6 +610,156 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
             file_put_contents($file->getPathname(), str_replace(array_keys($map), array_values($map), $content));
         }
     }
+}
+
+function aiInstallerProjectValuesPath(string $targetRoot): string
+{
+    return $targetRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'project.yml';
+}
+
+function aiInstallerEnsureProjectValuesFile(string $targetRoot, string $projectName): void
+{
+    $path = aiInstallerProjectValuesPath($targetRoot);
+    if (is_file($path)) {
+        return;
+    }
+
+    aiInstallerMkdir(dirname($path));
+    $values = [
+        'schemaVersion' => '1',
+        'projectName' => $projectName,
+        'projectType' => aiInstallerDetectProjectType($targetRoot),
+        'projectSummary' => 'AI workflow starter for ' . $projectName,
+        'primaryLanguage' => 'unknown',
+        'primaryRuntime' => 'unknown',
+        'primaryEntrypoints' => 'README.md, docs/ai/project-context.md',
+        'primaryVerifyCommand' => 'unknown',
+        'primaryBuildCommand' => 'unknown',
+        'primaryTestCommand' => 'unknown',
+    ];
+
+    $lines = [
+        '# AI kit project values. Template/user-owned: edit values here, then rerun install/upgrade to re-render managed files.',
+    ];
+    foreach ($values as $key => $value) {
+        $lines[] = $key . ': ' . aiInstallerProjectYamlQuote($value);
+    }
+
+    file_put_contents($path, implode("\n", $lines) . "\n");
+}
+
+/** @return array<string,string> */
+function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): array
+{
+    $defaults = [
+        'projectName' => $projectName,
+        'projectType' => aiInstallerDetectProjectType($targetRoot),
+        'projectSummary' => 'AI workflow starter for ' . $projectName,
+        'primaryLanguage' => 'unknown',
+        'primaryRuntime' => 'unknown',
+        'primaryEntrypoints' => 'README.md, docs/ai/project-context.md',
+        'primaryVerifyCommand' => 'unknown',
+        'primaryBuildCommand' => 'unknown',
+        'primaryTestCommand' => 'unknown',
+    ];
+
+    $path = aiInstallerProjectValuesPath($targetRoot);
+    if (!is_file($path)) {
+        return $defaults;
+    }
+
+    foreach (file($path, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+        $trimmed = trim((string) $line);
+        if ($trimmed === '' || str_starts_with($trimmed, '#') || !str_contains($trimmed, ':')) {
+            continue;
+        }
+        [$key, $value] = explode(':', $trimmed, 2);
+        $key = trim($key);
+        $value = trim($value);
+        if ($key === '' || !array_key_exists($key, $defaults)) {
+            continue;
+        }
+        $defaults[$key] = aiInstallerProjectYamlUnquote($value);
+    }
+
+    return $defaults;
+}
+
+/** @param array<string,string> $values @return array<string,string> */
+function aiInstallerProjectValuesPlaceholderMap(array $values): array
+{
+    return [
+        '<PROJECT_NAME>' => $values['projectName'] ?? '',
+        '<PROJECT_TYPE>' => $values['projectType'] ?? '',
+        '<PROJECT_SUMMARY>' => $values['projectSummary'] ?? '',
+        '<PRIMARY_LANGUAGE>' => $values['primaryLanguage'] ?? '',
+        '<PRIMARY_RUNTIME>' => $values['primaryRuntime'] ?? '',
+        '<PRIMARY_ENTRYPOINTS>' => $values['primaryEntrypoints'] ?? '',
+        '<PRIMARY_VERIFY_COMMAND>' => $values['primaryVerifyCommand'] ?? '',
+        '<PRIMARY_BUILD_COMMAND>' => $values['primaryBuildCommand'] ?? '',
+        '<PRIMARY_TEST_COMMAND>' => $values['primaryTestCommand'] ?? '',
+    ];
+}
+
+function aiInstallerProjectYamlQuote(string $value): string
+{
+    return '"' . str_replace(['\\', '"'], ['\\\\', '\\"'], $value) . '"';
+}
+
+function aiInstallerProjectYamlUnquote(string $value): string
+{
+    if (strlen($value) >= 2 && $value[0] === '"' && $value[strlen($value) - 1] === '"') {
+        $value = substr($value, 1, -1);
+        return str_replace(['\\"', '\\\\'], ['"', '\\'], $value);
+    }
+
+    return $value;
+}
+
+function aiInstallerEnsureAgentsMarkedSectionForSkippedUserFile(string $targetRoot, array $plan): void
+{
+    $shouldPatch = false;
+    foreach ($plan as $item) {
+        if (($item['target'] ?? '') === 'AGENTS.md' && ($item['action'] ?? '') === 'SKIP_EXISTING_UNMANAGED') {
+            $shouldPatch = true;
+            break;
+        }
+    }
+    if (!$shouldPatch) {
+        return;
+    }
+
+    $path = $targetRoot . DIRECTORY_SEPARATOR . 'AGENTS.md';
+    if (!is_file($path)) {
+        return;
+    }
+
+    $content = (string) file_get_contents($path);
+    $begin = '<!-- BEGIN ai-kit -->';
+    $end = '<!-- END ai-kit -->';
+    $section = implode("\n", [
+        $begin,
+        'AI kit instructions are installed for this repository. Keep your project-specific guidance outside this managed block.',
+        '',
+        '- Canonical project context: `docs/ai/project-context.md`',
+        '- Workflow defaults: `docs/ai/workflow.md`',
+        '- Execution protocol: `docs/ai/execution-protocol.md`',
+        $end,
+    ]);
+
+    $pattern = '/<!-- BEGIN ai-kit -->.*?<!-- END ai-kit -->/s';
+    if (preg_match($pattern, $content) === 1) {
+        $updated = preg_replace($pattern, $section, $content);
+        if (is_string($updated) && $updated !== $content) {
+            file_put_contents($path, $updated);
+        }
+        return;
+    }
+
+    if ($content !== '' && !str_ends_with($content, "\n")) {
+        $content .= "\n";
+    }
+    file_put_contents($path, $content . "\n" . $section . "\n");
 }
 
 function aiInstallerDetectProjectType(string $targetRoot): string
@@ -739,40 +914,70 @@ function aiInstallerEnsureGitignoreEntries(string $targetRoot, array $entries): 
     $gitignorePath = rtrim($targetRoot, '/\\') . DIRECTORY_SEPARATOR . '.gitignore';
 
     $existing = is_file($gitignorePath) ? (string) file_get_contents($gitignorePath) : '';
+    $begin = '# BEGIN ai-kit';
+    $end = '# END ai-kit';
 
-    // Build a set of already-covered roots from existing lines, normalizing
-    // away trailing slashes and trailing /* or /** glob suffixes.
-    $covered = [];
-    foreach (preg_split('/\R/', $existing) ?: [] as $line) {
-        $line = trim($line);
-        if ($line === '' || str_starts_with($line, '#')) {
-            continue;
-        }
-        $covered[aiInstallerNormalizeGitignoreEntry($line)] = true;
-    }
-
-    $missing = [];
+    $blockEntries = [];
     foreach ($entries as $entry) {
         $norm = aiInstallerNormalizeGitignoreEntry($entry);
-        if ($norm === '' || isset($covered[$norm])) {
+        if ($norm === '' || isset($blockEntries[$norm])) {
             continue;
         }
-        $covered[$norm] = true; // guard against duplicate entries within $entries
-        $missing[] = rtrim($entry, '/') . '/';
+        // Preserve the caller's entry form verbatim. Callers pass canonical patterns:
+        // directories end with '/', file rules (e.g. '.ai/install.lock') and globs
+        // (e.g. '*.tmp') must NOT get a trailing slash, or git would treat them as
+        // directories and fail to ignore the actual file.
+        $blockEntries[$norm] = trim($entry);
     }
 
-    if ($missing === []) {
+    if ($blockEntries === []) {
         return;
     }
 
-    $append = '';
-    if ($existing !== '' && !str_ends_with($existing, "\n")) {
+    $block = $begin . "\n" . implode("\n", array_values($blockEntries)) . "\n" . $end;
+    $pattern = '/^# BEGIN ai-kit\R.*?^# END ai-kit/ms';
+    if (preg_match($pattern, $existing) === 1) {
+        $updated = preg_replace($pattern, $block, $existing);
+        if (is_string($updated) && $updated !== $existing) {
+            file_put_contents($gitignorePath, $updated);
+        }
+        return;
+    }
+
+    $append = $existing;
+    if ($append !== '' && !str_ends_with($append, "\n")) {
         $append .= "\n";
     }
-    $append .= "# AI workflow runtime/generated files\n";
-    $append .= implode("\n", $missing) . "\n";
+    if ($append !== '') {
+        $append .= "\n";
+    }
+    $append .= $block . "\n";
 
-    file_put_contents($gitignorePath, $existing . $append);
+    file_put_contents($gitignorePath, $append);
+}
+
+/** @param list<string> $paths */
+function aiInstallerAssertGitignoreEffective(string $targetRoot, array $paths): void
+{
+    $gitDir = rtrim($targetRoot, '/\\') . DIRECTORY_SEPARATOR . '.git';
+    if (!is_dir($gitDir) && !is_file($gitDir)) {
+        return;
+    }
+
+    $repoCheckExit = 0;
+    exec('git -C ' . escapeshellarg($targetRoot) . ' rev-parse --is-inside-work-tree 2>/dev/null', $repoCheckOut, $repoCheckExit);
+    if ($repoCheckExit !== 0) {
+        return;
+    }
+
+    foreach ($paths as $path) {
+        $cmd = 'git -C ' . escapeshellarg($targetRoot) . ' check-ignore --quiet -- ' . escapeshellarg($path);
+        $exit = 0;
+        exec($cmd, $out, $exit);
+        if ($exit !== 0) {
+            throw new RuntimeException('gitignore entry is not effective before backup write: ' . $path);
+        }
+    }
 }
 
 /**

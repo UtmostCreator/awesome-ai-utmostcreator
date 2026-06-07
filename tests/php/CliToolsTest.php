@@ -553,6 +553,28 @@ class CliToolsTest extends TestCase
         $this->assertContains('install', $categories);
     }
 
+    public function testPreflightAndDoctorShareEnvironmentChecks(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/commands/install_preflight.php';
+
+        $preflightChecks = aiInstallerEnvironmentChecks(self::$repoRoot, true, false);
+        $doctorChecks = aiInstallerEnvironmentChecks(self::$repoRoot, false, true);
+
+        $preflightNames = array_map(static fn(array $check): string => (string) ($check['name'] ?? ''), $preflightChecks);
+        $doctorNames = array_map(static fn(array $check): string => (string) ($check['name'] ?? ''), $doctorChecks);
+
+        foreach (['php_version', 'ext_json', 'ext_mbstring', 'git'] as $name) {
+            $this->assertContains($name, $preflightNames, "preflight env checks should include {$name}");
+            $this->assertContains($name, $doctorNames, "doctor env checks should include {$name}");
+        }
+
+        $this->assertContains('ext_zip', $preflightNames, 'preflight includes installer backup zip warning check');
+        $this->assertNotContains('ext_zip', $doctorNames, 'doctor keeps the shared required env baseline concise');
+        foreach ($doctorChecks as $check) {
+            $this->assertSame('env', $check['category'] ?? null, 'doctor env checks must retain category metadata');
+        }
+    }
+
     public function testAiCliPackageVerifyExitsZeroOrFailed(): void
     {
         $result = $this->runTool('php tools/ai/ai.php package-verify');
