@@ -69,7 +69,15 @@ function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs):
                 }
             }
             if ($exists && $config['force'] && (($item['core'] ?? false) === true) && !$config['allowCoreOverwrite']) {
-                $action = 'SKIP_PROTECTED_CORE';
+                // Protect core files from force-overwrite, but an identical core file is an
+                // idempotent no-op: classifying it SKIP_IDENTICAL_EXISTING keeps a clean re-run
+                // zero-diff instead of reporting SKIP_PROTECTED_CORE drift every time.
+                if (aiInstallerPathsAreIdentical($absSource, $absTarget)) {
+                    $action = 'SKIP_IDENTICAL_EXISTING';
+                    $reason = 'core target matches source';
+                } else {
+                    $action = 'SKIP_PROTECTED_CORE';
+                }
             }
 
             $plan[] = array_merge($item, [

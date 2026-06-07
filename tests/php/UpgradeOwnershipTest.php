@@ -156,6 +156,50 @@ final class UpgradeOwnershipTest extends TestCase
         $this->assertSame('template (skip-if-exists) preserved under force', $plan[0]['reason'] ?? null);
     }
 
+    // ---- P3-d: install idempotency (no SKIP_PROTECTED_CORE drift on a clean re-run) ----
+
+    private function buildCorePlan(string $sourceBytes, string $targetBytes): array
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'idempotency_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root . DIRECTORY_SEPARATOR . 'source', 0700, true);
+        mkdir($root . DIRECTORY_SEPARATOR . 'target', 0700, true);
+        file_put_contents($root . DIRECTORY_SEPARATOR . 'source' . DIRECTORY_SEPARATOR . 'core.md', $sourceBytes);
+        file_put_contents($root . DIRECTORY_SEPARATOR . 'target' . DIRECTORY_SEPARATOR . 'core.md', $targetBytes);
+
+        return aiInstallerBuildPlan([
+            'sourceRoot' => $root . DIRECTORY_SEPARATOR . 'source',
+            'targetRoot' => $root . DIRECTORY_SEPARATOR . 'target',
+            'force' => true,
+            'adopt' => false,
+            'allowCoreOverwrite' => false,
+            'upgradeSuffix' => '',
+        ], [
+            'pack' => [[
+                'type' => 'file',
+                'source' => 'core.md',
+                'target' => 'core.md',
+                'merge_strategy' => 'replace',
+                'core' => true,
+            ]],
+        ], ['pack']);
+    }
+
+    public function testForceReinstallOfIdenticalCoreFileIsNoOp(): void
+    {
+        // Second run with no changes: an identical core file must be a true no-op, not
+        // SKIP_PROTECTED_CORE (which would report drift on every idempotent re-run).
+        $plan = $this->buildCorePlan("# core\n", "# core\n");
+        $this->assertSame('SKIP_IDENTICAL_EXISTING', $plan[0]['action'] ?? null, 'identical core file under force is an idempotent no-op');
+    }
+
+    public function testForceReinstallOfModifiedCoreFileStaysProtected()
+    {
+        // A genuinely differing core file is still protected unless --allow-core-overwrite.
+        $plan = $this->buildCorePlan("# new core\n", "# user changed core\n");
+        $this->assertSame('SKIP_PROTECTED_CORE', $plan[0]['action'] ?? null, 'differing core file remains protected');
+    }
+
     // ---- P0-b Slice 2: computed `deprecated` class (never stored) ----
 
     public function testComputeDeprecatedFlagsManifestFilesAbsentFromRegistry(): void
