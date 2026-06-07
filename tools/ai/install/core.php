@@ -72,6 +72,7 @@ function aiInstallerRun(array $argv): int
             '.ai-backups/',
             '.ai-logs/',
             '.repomix-context/',
+            'docs/ai/generated/',
         ]);
     }
 

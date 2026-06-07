@@ -114,6 +114,56 @@ else
     skip_test "collect_files include-ignored behavior" "git not installed"
 fi
 
+# --no-ignore / --include-repomixignored: load_ignore_patterns must DROP the
+# .repomixignore patterns under full bypass so a folder listed there is still
+# collectable, while .git and the output dir stay excluded. Source only
+# load_ignore_patterns + path_is_ignored + collect_files into a clean subshell.
+repomixignore_bypass_check() {
+    local want="$1" # "default" (exclude) or "bypass" (include)
+    local repo
+    repo="$(mktemp -d)"
+    (
+        cd "$repo"
+        git init -q
+        printf 'generated/\n' >.repomixignore
+        printf 'tracked\n' >tracked.txt
+        mkdir -p generated
+        printf '{"a":1}\n' >generated/out.json
+    )
+
+    # shellcheck disable=SC2016
+    "$BASH_BIN" -c '
+        set -euo pipefail
+        shopt -s extglob
+        ((BASH_VERSINFO[0] >= 4)) && shopt -s globstar
+        source <(sed -n "/^path_is_ignored() {/,/^}/p;/^load_ignore_patterns() {/,/^}/p;/^collect_files() {/,/^}/p" "$1")
+        ROOT="$2"
+        OUTPUT_DIR_REL=".repomix-context/tree-context"
+        AI_CONTEXT_HARD_EXCLUDES=(".git" ".repomix-context")
+        INCLUDE_IGNORED="$3"
+        INCLUDE_REPOMIXIGNORED="$3"
+        load_ignore_patterns
+        collect_files
+        printf "%s\n" "${COLLECTED_FILES[@]}"
+    ' _ "$SCRIPT" "$repo" "$([[ "$want" == "bypass" ]] && echo 1 || echo 0)" >"$repo/.out"
+
+    local rc=0
+    if [[ "$want" == "bypass" ]]; then
+        grep -q 'generated/out.json' "$repo/.out" || rc=1
+    else
+        grep -q 'generated/out.json' "$repo/.out" && rc=1
+        grep -q 'tracked.txt' "$repo/.out" || rc=1
+    fi
+    rm -rf "$repo"
+    return "$rc"
+}
+if command -v git >/dev/null 2>&1; then
+    run_test "load_ignore_patterns honors .repomixignore by default" repomixignore_bypass_check default
+    run_test "full bypass (--no-ignore) packs .repomixignore'd folder" repomixignore_bypass_check bypass
+else
+    skip_test "repomixignore bypass behavior" "git not installed"
+fi
+
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
 ((FAIL == 0)) && printf '\033[0;32mPASSED\033[0m\n' || { printf '\033[0;31mFAILED\033[0m\n'; exit 1; }

@@ -25,6 +25,11 @@ Examples:
   # Bundle a git-ignored folder (for example a JSON cache under storage/tmp):
   SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh storage/tmp \
     --include-ignored --min-code 0 --min-files 1
+
+  # Force-pack ANY selected folder even when blocked by .gitignore AND
+  # .repomixignore (full bypass; .git and the output dir stay excluded):
+  SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh docs/ai/generated \
+    --no-ignore --min-code 0 --min-files 1
 EOF
 }
 

@@ -21,6 +21,22 @@ need_cmd() {
     command -v "$1" >/dev/null 2>&1
 }
 
+# Require a package manager to be present. In --dry-run mode this never aborts:
+# it prints a dry-run marker describing what would be required, so the planned
+# steps can still be previewed on hosts that lack the manager (e.g. NixOS).
+require_pkg_manager() {
+    local manager="$1" platform="$2"
+    if need_cmd "$manager"; then
+        return 0
+    fi
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+        printf '[dry-run] would require %s for %s installs\n' "$manager" "$platform"
+        return 1
+    fi
+    printf 'Error: %s is required on %s.\n' "$manager" "$platform" >&2
+    exit 1
+}
+
 detect_os() {
     local uname_out
     uname_out="$(uname -s 2>/dev/null || true)"
@@ -45,10 +61,7 @@ detect_os() {
 }
 
 install_windows() {
-    need_cmd winget || {
-        printf 'Error: winget is required on Windows.\n' >&2
-        exit 1
-    }
+    require_pkg_manager winget Windows || return 0
 
     run_cmd winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements || true
     run_cmd winget install --id PHP.PHP.8.3 -e --accept-source-agreements --accept-package-agreements || true
@@ -65,10 +78,7 @@ install_windows() {
 }
 
 install_macos() {
-    need_cmd brew || {
-        printf 'Error: Homebrew is required on macOS.\n' >&2
-        exit 1
-    }
+    require_pkg_manager brew macOS || return 0
 
     run_cmd brew update
     run_cmd brew install git php ripgrep jq scc node
@@ -76,10 +86,7 @@ install_macos() {
 }
 
 install_linux() {
-    need_cmd apt-get || {
-        printf 'Error: this Linux installer targets Ubuntu/Debian (apt-get).\n' >&2
-        exit 1
-    }
+    require_pkg_manager apt-get 'Ubuntu/Debian Linux' || return 0
 
     run_cmd sudo apt-get update
     run_cmd sudo apt-get install -y git php-cli ripgrep jq nodejs npm fd-find shellcheck
@@ -123,6 +130,10 @@ verify_tools() {
     done
 
     if ((${#missing[@]} > 0)); then
+        if [[ "$DRY_RUN" -eq 1 ]]; then
+            printf '[dry-run] would verify tools; currently missing: %s\n' "${missing[*]}"
+            return 0
+        fi
         printf 'Missing required tools: %s\n' "${missing[*]}" >&2
         return 1
     fi
