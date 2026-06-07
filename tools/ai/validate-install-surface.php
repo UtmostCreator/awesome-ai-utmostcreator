@@ -46,7 +46,7 @@ if ($targetArg !== null || (is_file($root . '/.ai-install-manifest.json') && !is
         'docs/ai/generated/install-instructions.json',
         'docs/ai/generated/install-manifest.json',
     ];
-    $validOwnership = ['owned', 'template', 'rendered'];
+    $validOwnership = ['owned', 'template', 'rendered', 'patch-managed'];
     foreach ($files as $relative => $meta) {
         $path = $root . '/' . str_replace('\\', '/', (string) $relative);
         if (!file_exists($path)) {

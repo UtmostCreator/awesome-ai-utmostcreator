@@ -46,6 +46,17 @@ final class OwnershipClassesTest extends TestCase
         $this->assertSame('owned', aiInstallerResolveOwnership(['ownership' => 'bogus'], 'replace'));
     }
 
+    /**
+     * P0-b Slice 1: patch-managed is a first-class stored ownership class
+     * (root files patched inside markers only, e.g. .gitignore). It must be
+     * accepted as an explicit ownership value rather than falling back to owned.
+     */
+    public function testPatchManagedIsAcceptedAsExplicitOwnership(): void
+    {
+        $this->assertSame('patch-managed', aiInstallerResolveOwnership(['ownership' => 'patch-managed'], 'replace'));
+        $this->assertSame('patch-managed', aiInstallerResolveOwnership(['ownership' => 'patch-managed'], 'skip-if-exists'));
+    }
+
     public function testRuntimeDerivation(): void
     {
         $this->assertSame(['github-copilot'], aiInstallerResolveRuntimes('adapter-copilot'));
@@ -97,7 +108,7 @@ final class OwnershipClassesTest extends TestCase
         $this->assertSame('AI Install Manifest', $schema['title'] ?? null);
 
         $fileProps = $schema['properties']['files']['additionalProperties']['properties']['ownership']['enum'] ?? null;
-        $this->assertSame(['owned', 'template', 'rendered'], $fileProps, 'schema must pin the ownership enum');
+        $this->assertSame(['owned', 'template', 'rendered', 'patch-managed'], $fileProps, 'schema must pin the ownership enum');
 
         $required = $schema['properties']['files']['additionalProperties']['required'] ?? [];
         $this->assertContains('ownership', $required, 'every files{} entry must require ownership');
