@@ -130,10 +130,21 @@ function aiInstallerRun(array $argv): int
             // upstream version has changed, surface the new version under .ai/templates-new/<path>
             // so the user can diff/merge — the user's file is never overwritten.
             if (!$config['dryRun'] && $item['action'] === 'SKIP_EXISTING_UNMANAGED' && ($item['type'] ?? '') === 'file') {
-                $refreshed = aiInstallerOfferTemplateRefresh($config, $item);
-                if ($refreshed !== null) {
-                    $templateRefreshes[] = $refreshed;
-                    aiInstallerLog('template-new ' . $item['target'] . ' (upstream changed; see ' . $refreshed . ')');
+                if (($item['merge_strategy'] ?? '') === 'skip-if-exists') {
+                    // Template files get the refresh channel (.ai/templates-new/<path>).
+                    $refreshed = aiInstallerOfferTemplateRefresh($config, $item);
+                    if ($refreshed !== null) {
+                        $templateRefreshes[] = $refreshed;
+                        aiInstallerLog('template-new ' . $item['target'] . ' (upstream changed; see ' . $refreshed . ')');
+                    }
+                } else {
+                    // P3-c: a non-template kit file blocked by a foreign file is surfaced under
+                    // .ai/conflicts/<ts>/incoming/<path> so the user can diff; never overwritten.
+                    $incoming = aiInstallerOfferIncomingConflict($config, $item);
+                    if ($incoming !== null) {
+                        $templateRefreshes[] = $incoming;
+                        aiInstallerLog('incoming ' . $item['target'] . ' (foreign collision; see ' . $incoming . ')');
+                    }
                 }
             }
             aiInstallerLog('skip ' . $item['target'] . ' (' . strtolower($item['action']) . ')');
@@ -821,6 +832,41 @@ function aiInstallerOfferTemplateRefresh(array $config, array $item): ?string
     }
 
     $rel = '.ai/templates-new/' . $target;
+    $out = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+    aiInstallerMkdir(dirname($out));
+    if (!@copy($src, $out)) {
+        return null;
+    }
+
+    return $rel;
+}
+
+/**
+ * P3-c: surface an incoming kit file that collided with an existing foreign file.
+ *
+ * When a non-template kit file is skipped because a differing foreign (user-authored)
+ * file already occupies its target path, write the kit version to
+ * .ai/conflicts/<ts>/incoming/<path> so the user can diff/merge. The foreign file on
+ * disk is never overwritten. Returns the relative path of the incoming copy, or null
+ * when there is no collision (target missing) or the existing file already matches.
+ */
+function aiInstallerOfferIncomingConflict(array $config, array $item): ?string
+{
+    $source = (string) ($item['source'] ?? '');
+    $target = (string) ($item['target'] ?? '');
+    if ($source === '' || $target === '') {
+        return null;
+    }
+
+    $src = $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $source);
+    $dest = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $target);
+    // Only a genuine collision with an existing, differing foreign file is routed.
+    if (!is_file($src) || !is_file($dest) || aiInstallerPathsAreIdentical($src, $dest)) {
+        return null;
+    }
+
+    $stamp = gmdate('Ymd\THis\Z');
+    $rel = '.ai/conflicts/' . $stamp . '/incoming/' . $target;
     $out = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
     aiInstallerMkdir(dirname($out));
     if (!@copy($src, $out)) {
