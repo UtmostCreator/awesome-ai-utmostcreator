@@ -1,0 +1,5 @@
+{
+  "schemaVersion": 1,
+  "description": "Historical sha256 checksums of kit-shipped files, keyed by target path. A file on disk that matches any recorded historical hash for its target was installed by a prior kit version and is adopted into the lock on install instead of being treated as a foreign conflict. Release tooling appends the prior version's hashes here before shipping a new version. Values may be bare hex or sha256:-prefixed.",
+  "checksums": {}
+}
