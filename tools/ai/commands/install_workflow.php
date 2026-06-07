@@ -597,6 +597,72 @@ function aiUpgradePreserveOwnedConflicts(string $root, array $fileActions): arra
     return $preserved;
 }
 
+/**
+ * Flatten every target path the current pack registry ships, across all packs.
+ * Used to compute the `deprecated` class (manifest files no longer in this set).
+ *
+ * @return list<string>
+ */
+function aiUpgradeCurrentRegistryTargets(): array
+{
+    $targets = [];
+    foreach (aiInstallerPackRegistry() as $items) {
+        foreach ($items as $item) {
+            $target = (string) ($item['target'] ?? '');
+            if ($target !== '') {
+                $targets[$target] = true;
+            }
+        }
+    }
+
+    return array_keys($targets);
+}
+
+/**
+ * Compute the `deprecated` ownership class at plan time (never stored).
+ *
+ * A deprecated file is one recorded in the installed manifest but no longer shipped by the
+ * current pack registry (e.g. a stale hook or policy the kit dropped). Upgrade routes each:
+ *  - deprecated-unchanged     -> delete           (the byte-identical copy is already in backup)
+ *  - deprecated-user-modified -> route-to-removed (user edits go to conflicts/<ts>/removed/)
+ *
+ * Files already absent from disk produce no action. Invariant 1 (write-allowlist) holds:
+ * only manifest-recorded paths are ever considered, never foreign files.
+ *
+ * @param array<string,mixed> $manifestFiles  Canonical files{} map from the install manifest.
+ * @param list<string>        $registryTargets Target paths the current kit still ships.
+ * @return list<array{file:string,ownership:string,status:string,action:string}>
+ */
+function aiUpgradeComputeDeprecated(array $manifestFiles, array $registryTargets, string $root): array
+{
+    $shipped = array_fill_keys(array_map('strval', $registryTargets), true);
+    $deprecated = [];
+
+    foreach ($manifestFiles as $target => $meta) {
+        $target = (string) $target;
+        if (isset($shipped[$target])) {
+            continue;
+        }
+        $targetAbs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $target);
+        $currentHash = aiHashPath($targetAbs);
+        if ($currentHash === 'missing') {
+            // Already gone from disk: nothing to delete or route.
+            continue;
+        }
+        $installedHash = is_array($meta) ? (string) ($meta['installed_hash'] ?? 'unknown') : 'unknown';
+        $userModified = $currentHash !== $installedHash;
+
+        $deprecated[] = [
+            'file' => $target,
+            'ownership' => 'deprecated',
+            'status' => $userModified ? 'deprecated-user-modified' : 'deprecated-unchanged',
+            'action' => $userModified ? 'route-to-removed' : 'delete',
+        ];
+    }
+
+    return $deprecated;
+}
+
 function aiRunUpgradeWorkflow(string $root, array $args): int
 {
     aiInstallerAssertLockCompatible($root);
@@ -692,6 +758,18 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
         ];
     }
 
+    // Computed `deprecated` class (never stored): manifest files the current kit no longer
+    // ships. Surfaced here for the dry-run report; the apply path deletes/routes them.
+    $registryTargets = aiUpgradeCurrentRegistryTargets();
+    $deprecated = aiUpgradeComputeDeprecated($files, $registryTargets, $root);
+    if ($deprecated !== []) {
+        $changes[] = [
+            'type' => 'deprecated_files_present',
+            'count' => count($deprecated),
+            'action' => 'upgrade --apply removes unchanged deprecated files (backed up) and routes user-modified ones to .ai/conflicts/<ts>/removed/',
+        ];
+    }
+
     if ($dryRun) {
         $data = [
             'status' => $changes === [] ? 'ok' : 'warning',
@@ -703,6 +781,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
             'target_ref' => $targetRef !== '' ? $targetRef : null,
             'detected_changes' => $changes,
             'file_actions' => $fileActions,
+            'deprecated_files' => $deprecated,
             'package_verify_status' => $verify['status'] ?? 'unknown',
         ];
         $written = aiCliWriteArtifact($root, 'upgrade', 'php tools/ai/ai.php upgrade --dry-run', $data, $changes === [] ? 'ok' : 'warning', null, 'If changes look safe, run upgrade --apply.');
