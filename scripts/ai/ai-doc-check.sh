@@ -166,6 +166,10 @@ run_drift() {
     if [[ -f tools/ai/validate-agent-spec.php ]]; then
         run_step "validate-agent-spec --self-test" php tools/ai/validate-agent-spec.php --self-test
     fi
+
+    if [[ -f tools/ai/validate-stub-surfaces.php ]]; then
+        run_step "validate-stub-surfaces" php tools/ai/validate-stub-surfaces.php --root=.
+    fi
 }
 
 case "$mode" in
