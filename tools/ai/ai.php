@@ -67,6 +67,9 @@ Commands:
   adapter-validate Validate installed adapter state and managed assets
   rollback       Restore from installer backup artifacts
                  Use --only <path> to rollback a specific file or directory prefix
+  restore        Checksum-gated copy-back from a backup snapshot
+                 Use --from <ts> to select the backup and --path <p> for one file.
+                 Default is --dry-run; --apply logs to .ai/logs/.
   uninstall      Remove kit-installed files (owned/rendered); preserves template
                  files and .ai/ state unless --purge. Default is --dry-run.
   packs          List installer profiles and packs
@@ -213,6 +216,8 @@ try {
             exit(aiRunAdapterValidate($root));
         case 'rollback':
             exit(aiRunRollbackWorkflow($root, $args));
+        case 'restore':
+            exit(aiRunRestoreWorkflow($root, $args));
         case 'uninstall':
             exit(aiRunUninstallWorkflow($root, $args));
         case 'packs':
