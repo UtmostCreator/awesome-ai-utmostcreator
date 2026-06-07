@@ -46,10 +46,22 @@ if ($targetArg !== null || (is_file($root . '/.ai-install-manifest.json') && !is
         'docs/ai/generated/install-instructions.json',
         'docs/ai/generated/install-manifest.json',
     ];
+    $validOwnership = ['owned', 'template', 'rendered'];
     foreach ($files as $relative => $meta) {
         $path = $root . '/' . str_replace('\\', '/', (string) $relative);
         if (!file_exists($path)) {
             $errors[] = "managed install path is missing: {$relative}";
+        }
+        // Ownership contract: every managed file must declare a valid ownership class so
+        // upgrade/uninstall can decide overwrite vs preserve. See
+        // schemas/ai/ai-install-manifest.schema.json.
+        if (is_array($meta)) {
+            $ownership = (string) ($meta['ownership'] ?? '');
+            if ($ownership === '') {
+                $errors[] = "managed install file missing ownership class: {$relative}";
+            } elseif (!in_array($ownership, $validOwnership, true)) {
+                $errors[] = "managed install file has invalid ownership '{$ownership}': {$relative}";
+            }
         }
         $expected = is_array($meta) ? (string) ($meta['installed_hash'] ?? '') : '';
         if ($expected !== '' && str_starts_with($expected, 'sha256:') && is_file($path)) {

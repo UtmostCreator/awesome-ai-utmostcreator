@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-configs.local/schemas/ai-install-manifest.schema.json",
+  "title": "AI Install Manifest",
+  "description": "Schema for the installed-target manifest written to .ai-install-manifest.json. The per-file files{} map is the canonical record of what the kit installed, including ownership class used by upgrade/uninstall.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "installer_version",
+    "profile",
+    "packs",
+    "files"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "installer_version": {
+      "type": "string"
+    },
+    "installed_at": {
+      "type": "string"
+    },
+    "updated_at": {
+      "type": "string"
+    },
+    "profile": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "runtime": {
+      "type": "string"
+    },
+    "package": {
+      "type": "object"
+    },
+    "packs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "managed_paths": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Derived convenience list of installed target paths. Authoritative per-file metadata lives in files{}."
+    },
+    "files": {
+      "type": "object",
+      "description": "Canonical per-file install record keyed by target path.",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "managed",
+          "ownership"
+        ],
+        "properties": {
+          "pack": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "source_hash": {
+            "type": "string"
+          },
+          "installed_hash": {
+            "type": "string"
+          },
+          "managed": {
+            "type": "boolean"
+          },
+          "merge_strategy": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "ownership": {
+            "type": "string",
+            "enum": [
+              "owned",
+              "template",
+              "rendered"
+            ],
+            "description": "owned: kit-managed, overwritten on upgrade. template: installed once then user-owned. rendered: regenerated from project values."
+          },
+          "component": {
+            "type": "string"
+          },
+          "runtimes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "github-copilot",
+                "opencode",
+                "both"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "pending_configuration": {
+      "type": "array"
+    },
+    "toolchain": {
+      "type": "object"
+    },
+    "post_install_script": {
+      "type": "object"
+    },
+    "package_lock_sha256": {
+      "type": "string"
+    }
+  }
+}
