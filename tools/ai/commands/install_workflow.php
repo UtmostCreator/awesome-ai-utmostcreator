@@ -1135,6 +1135,73 @@ function aiUninstallPruneEmptyParents(string $dir, string $root, array $createdD
     }
 }
 
+/**
+ * P4-b: restore --from <ts> [--path <p>] — checksum-gated copy-back from a backup snapshot.
+ *
+ * Thin wrapper over the canonical (checksum-gated) backup rollback machinery: --from selects
+ * the backup id/timestamp, --path narrows to a single file (mapped to --only). Dry-run by
+ * default writes nothing; --apply restores and appends an audit entry to .ai/logs/.
+ */
+function aiRunRestoreWorkflow(string $root, array $args): int
+{
+    $from = aiParseArg($args, 'from') ?? '';
+    if ($from === '') {
+        throw new RuntimeException('restore requires --from <backup-id-or-timestamp>');
+    }
+
+    $dryRun = in_array('--dry-run', $args, true) || !in_array('--apply', $args, true);
+    $force = in_array('--force', $args, true);
+    $path = aiParseArg($args, 'path');
+    $only = $path !== null && $path !== '' ? [$path] : [];
+
+    $data = aiInstallBackupRollback($root, $from, !$dryRun, $force, $only);
+    $data['from'] = $from;
+    if ($path !== null && $path !== '') {
+        $data['path'] = $path;
+    }
+
+    $artifactStatus = ($data['status'] ?? 'ok') === 'blocked' ? 'blocked' : 'ok';
+
+    if (!$dryRun && $artifactStatus !== 'blocked') {
+        aiRestoreAppendAuditLog($root, $data);
+    }
+
+    $next = $dryRun
+        ? 'Dry-run complete; rerun with --apply to restore from the backup snapshot.'
+        : ($artifactStatus === 'blocked'
+            ? 'Restore blocked by checksum conflicts; rerun with --force only if intentional.'
+            : 'Restore applied from backup snapshot; see .ai/logs/ for the audit entry.');
+    $written = aiCliWriteArtifact($root, 'restore', 'php tools/ai/ai.php restore --from ' . $from, $data, $artifactStatus, null, $next);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+
+    return $artifactStatus === 'blocked' ? 1 : 0;
+}
+
+/**
+ * Append an append-only restore audit entry under .ai/logs/restore-<ts>.json.
+ *
+ * @param array<string,mixed> $data
+ */
+function aiRestoreAppendAuditLog(string $root, array $data): void
+{
+    $logsDir = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'logs';
+    if (!is_dir($logsDir)) {
+        mkdir($logsDir, AI_DIR_MODE, true);
+    }
+    $stamp = gmdate('Ymd\THis\Z');
+    $entry = [
+        'op' => 'restore',
+        'at' => gmdate('c'),
+        'from' => (string) ($data['from'] ?? ''),
+        'path' => $data['path'] ?? null,
+        'status' => (string) ($data['status'] ?? 'ok'),
+        'restored_targets' => array_values($data['restored_targets'] ?? []),
+        'deleted_targets' => array_values($data['deleted_targets'] ?? []),
+    ];
+    $file = $logsDir . DIRECTORY_SEPARATOR . 'restore-' . $stamp . '.json';
+    file_put_contents($file, json_encode($entry, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+}
+
 function aiRunRollbackWorkflow(string $root, array $args): int
 {
     $backupId = aiParseArg($args, 'backup') ?? '';
