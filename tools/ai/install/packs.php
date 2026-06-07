@@ -10,6 +10,7 @@ function aiInstallerPackRegistry(): array
         'setup-docs' => [
             ['type' => 'file', 'source' => 'PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/agents.md', 'target' => 'docs/ai/agents.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'docs/ai/agent-script-access.md', 'target' => 'docs/ai/agent-script-access.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/adapter-contract.md', 'target' => 'docs/ai/adapter-contract.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/approval-boundaries.md', 'target' => 'docs/ai/approval-boundaries.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/architecture-locks.md', 'target' => 'docs/ai/architecture-locks.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
