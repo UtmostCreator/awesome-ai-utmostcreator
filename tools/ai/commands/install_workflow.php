@@ -541,6 +541,48 @@ function aiRunInstallWizard(string $root): int
     return 0;
 }
 
+/**
+ * Copy user-modified owned files to .ai/conflicts/<timestamp>/ before an upgrade reinstall
+ * overwrites them, so the user's edits are recoverable. Returns the list of preserved files.
+ *
+ * @param list<array<string,mixed>> $fileActions
+ * @return list<array{file:string,preserved_to:string}>
+ */
+function aiUpgradePreserveOwnedConflicts(string $root, array $fileActions): array
+{
+    $conflicts = [];
+    foreach ($fileActions as $fa) {
+        if (($fa['action'] ?? '') === 'conflict-preserve-user') {
+            $conflicts[] = (string) ($fa['file'] ?? '');
+        }
+    }
+    $conflicts = array_values(array_filter($conflicts, static fn($f): bool => $f !== ''));
+    if ($conflicts === []) {
+        return [];
+    }
+
+    $stamp = gmdate('Ymd\THis\Z');
+    $conflictRoot = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'conflicts' . DIRECTORY_SEPARATOR . $stamp;
+
+    $preserved = [];
+    foreach ($conflicts as $rel) {
+        $srcAbs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+        if (!is_file($srcAbs)) {
+            continue;
+        }
+        $destAbs = $conflictRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+        $destDir = dirname($destAbs);
+        if (!is_dir($destDir)) {
+            mkdir($destDir, AI_DIR_MODE, true);
+        }
+        if (copy($srcAbs, $destAbs)) {
+            $preserved[] = ['file' => $rel, 'preserved_to' => '.ai/conflicts/' . $stamp . '/' . $rel];
+        }
+    }
+
+    return $preserved;
+}
+
 function aiRunUpgradeWorkflow(string $root, array $args): int
 {
     $manifestPath = aiInstallManifestPath($root);
@@ -601,26 +643,35 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
         $sourceAtInstall = (string) ($meta['source_hash'] ?? 'unknown');
         $targetCurrentHash = aiHashPath($targetAbs);
 
+        // Ownership drives upgrade behaviour. Default to 'owned' for manifests written before
+        // ownership classes existed, so legacy installs keep the previous (overwrite) behaviour.
+        $ownership = (string) ($meta['ownership'] ?? 'owned');
+        $userModified = $targetCurrentHash !== 'missing' && $targetCurrentHash !== $installedAtInstall;
+
         $status = 'unchanged';
         $action = 'skip';
         if ($targetCurrentHash === 'missing') {
             $status = 'missing';
             $action = 'restore or remove from manifest';
-        } elseif ($sourceCurrentHash !== $sourceAtInstall && $targetCurrentHash === $installedAtInstall) {
+        } elseif ($ownership === 'template') {
+            // Installed once, then user-owned: never overwrite on upgrade.
+            $status = $userModified ? 'template-user-owned' : 'template-unchanged';
+            $action = 'preserve';
+        } elseif ($ownership === 'owned' && $userModified) {
+            // Kit-managed file the user edited: do not silently clobber. Surface a conflict
+            // so the user's edits are routed to .ai/conflicts/ rather than overwritten.
+            $status = ($sourceCurrentHash !== $sourceAtInstall) ? 'owned-both-changed' : 'owned-user-modified';
+            $action = 'conflict-preserve-user';
+        } elseif ($sourceCurrentHash !== $sourceAtInstall && !$userModified) {
             $status = 'source-updated';
             $action = 'auto-update';
-        } elseif ($sourceCurrentHash === $sourceAtInstall && $targetCurrentHash !== $installedAtInstall) {
-            $status = 'local-customised';
-            $action = 'preserve and review';
-        } elseif ($sourceCurrentHash !== $sourceAtInstall && $targetCurrentHash !== $installedAtInstall) {
-            $status = 'both-changed';
-            $action = 'merge-required';
         }
 
         $fileActions[] = [
             'file' => (string) $target,
             'status' => $status,
             'action' => $action,
+            'ownership' => $ownership,
             'source' => $sourceRel,
         ];
     }
@@ -656,6 +707,11 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
         return 1;
     }
 
+    // Preserve user-modified owned files before the reinstall overwrites them. Their edits
+    // are copied to .ai/conflicts/<timestamp>/ so nothing is silently lost on upgrade.
+    // Template files are preserved by the installer itself (skip-if-exists) and are not touched.
+    $preserved = aiUpgradePreserveOwnedConflicts($root, $fileActions);
+
     $installArgs = ['--apply', '--reinstall', '--mode', $mode, '--backup', $backupId, '--no-interaction'];
     if (in_array('--agent', $args, true)) {
         $installArgs[] = '--agent';
@@ -672,6 +728,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
         'backup_id' => $backupId,
         'target_ref' => $targetRef !== '' ? $targetRef : null,
         'file_actions_preview' => $fileActions,
+        'preserved_conflicts' => $preserved,
         'install_status' => $install['status'] ?? 'unknown',
     ];
     $written = aiCliWriteArtifact($root, 'upgrade', 'php tools/ai/ai.php upgrade --apply', $data, $status, null, $status === 'ok' ? 'Upgrade apply completed; run adapter-validate.' : 'Upgrade apply failed; inspect install artifact.');
