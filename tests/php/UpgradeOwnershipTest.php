@@ -27,6 +27,7 @@ final class UpgradeOwnershipTest extends TestCase
         }
         self::$repoRoot = $root;
         require_once $root . '/tools/ai/install/planner.php';
+        require_once $root . '/tools/ai/commands/install_paths.php';
         require_once $root . '/tools/ai/commands/install_workflow.php';
     }
 
@@ -153,5 +154,70 @@ final class UpgradeOwnershipTest extends TestCase
 
         $this->assertSame('SKIP_EXISTING_UNMANAGED', $plan[0]['action'] ?? null);
         $this->assertSame('template (skip-if-exists) preserved under force', $plan[0]['reason'] ?? null);
+    }
+
+    // ---- P0-b Slice 2: computed `deprecated` class (never stored) ----
+
+    public function testComputeDeprecatedFlagsManifestFilesAbsentFromRegistry(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'upgrade_deprecated_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai', 0700, true);
+
+        // A stale file installed previously but no longer shipped by the kit.
+        $stale = 'docs/ai/stale-hook.md';
+        file_put_contents($root . DIRECTORY_SEPARATOR . $stale, "# installed bytes\n");
+        $staleHash = 'sha256:' . hash('sha256', "# installed bytes\n");
+
+        // A still-current file the kit continues to ship.
+        $current = 'docs/ai/workflow.md';
+        file_put_contents($root . DIRECTORY_SEPARATOR . $current, "# current\n");
+
+        $manifestFiles = [
+            $stale => ['ownership' => 'owned', 'installed_hash' => $staleHash],
+            $current => ['ownership' => 'owned', 'installed_hash' => 'sha256:' . hash('sha256', "# current\n")],
+        ];
+        $registryTargets = [$current];
+
+        $deprecated = aiUpgradeComputeDeprecated($manifestFiles, $registryTargets, $root);
+
+        $this->assertCount(1, $deprecated, 'only the unshipped manifest file is deprecated');
+        $this->assertSame($stale, $deprecated[0]['file']);
+        $this->assertSame('deprecated', $deprecated[0]['ownership']);
+        $this->assertSame('deprecated-unchanged', $deprecated[0]['status']);
+        $this->assertSame('delete', $deprecated[0]['action'], 'unchanged deprecated file is deleted (already in backup)');
+    }
+
+    public function testComputeDeprecatedRoutesUserModifiedToRemoved(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'upgrade_deprecated_mod_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai', 0700, true);
+
+        $stale = 'docs/ai/stale-policy.md';
+        file_put_contents($root . DIRECTORY_SEPARATOR . $stale, "# user edited the stale file\n");
+        // installed_hash differs from current bytes -> user modified.
+        $manifestFiles = [
+            $stale => ['ownership' => 'owned', 'installed_hash' => 'sha256:' . hash('sha256', "# original installed\n")],
+        ];
+
+        $deprecated = aiUpgradeComputeDeprecated($manifestFiles, [], $root);
+
+        $this->assertCount(1, $deprecated);
+        $this->assertSame('deprecated-user-modified', $deprecated[0]['status']);
+        $this->assertSame('route-to-removed', $deprecated[0]['action'], 'user-modified deprecated bytes must be routed to conflicts/removed/, never silently deleted');
+    }
+
+    public function testComputeDeprecatedIgnoresMissingFiles(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'upgrade_deprecated_missing_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root, 0700, true);
+
+        // File recorded in manifest but already gone from disk: nothing to delete or route.
+        $manifestFiles = ['docs/ai/gone.md' => ['ownership' => 'owned', 'installed_hash' => 'sha256:abc']];
+        $deprecated = aiUpgradeComputeDeprecated($manifestFiles, [], $root);
+
+        $this->assertSame([], $deprecated, 'a deprecated file already absent from disk needs no action');
     }
 }
