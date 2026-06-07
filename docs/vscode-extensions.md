@@ -75,6 +75,13 @@ xdebug.php-debug
 
 ## to install them use this:
 
+The repository tool installer reads the `code --install-extension` commands in
+this section and installs the same extensions after VS Code is installed:
+
+```bash
+bash scripts/ai/install-mandatory-tools.sh --dry-run
+```
+
 ```bash
 code --install-extension alefragnani.bookmarks
 code --install-extension amiralizadeh9480.laravel-extra-intellisense
