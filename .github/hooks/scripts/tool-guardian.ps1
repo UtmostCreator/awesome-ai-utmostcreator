@@ -50,7 +50,13 @@ $rules = @(
     @{ Pattern = '(curl|wget|nc|ncat|netcat)\s+.*(-d|--data|--upload-file|--data-binary)'; Message = 'Possible data exfiltration pattern detected. Review carefully before continuing.' },
     @{ Pattern = '(chmod|chown|chgrp)\s+'; Message = 'Avoid permission mutation by default. Review the target and approval posture first.' },
     @{ Pattern = '(cat|bat|less|head|tail)\s+.*\.env(?!\.example)'; Message = 'Avoid direct reading of .env files. Review secrets policy first.' },
-    @{ Pattern = '(\.env|credentials|secret|token|id_rsa)'; Message = 'This action may touch secrets or local credentials. Review carefully first.' }
+    @{ Pattern = '(\.env|credentials|secret|token|id_rsa)'; Message = 'This action may touch secrets or local credentials. Review carefully first.' },
+    @{ Pattern = '(~|\$home|/home/[^/\s]+|/users/[^/\s]+)/\.ssh(/|\s|$)'; Message = 'Avoid touching ~/.ssh. Private keys must never be read or exfiltrated.' },
+    @{ Pattern = '\.aws/credentials'; Message = 'Avoid touching ~/.aws/credentials. Cloud credentials must never be read or exfiltrated.' },
+    @{ Pattern = '(^|[^\w])\.npmrc([^\w]|$)'; Message = 'Avoid touching .npmrc. It commonly contains registry auth tokens.' },
+    @{ Pattern = '(^|[^\w])\.netrc([^\w]|$)'; Message = 'Avoid touching .netrc. It commonly contains plaintext credentials.' },
+    @{ Pattern = '\S+\.(pem|key)([^\w]|$)'; Message = 'Avoid touching private key material (*.pem / *.key). Review secrets policy first.' },
+    @{ Pattern = 'base64\s+(-d|--decode|-d\w*).*\|\s*(sh|bash|zsh|python|python3|php|node|ruby)'; Message = 'Blocked base64-decode piped to a shell (obfuscated execution).' }
 )
 
 $guardHits = @()

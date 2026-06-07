@@ -48,8 +48,10 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 
 ## Source Scripts
 
+- `.github/hooks/scripts/command-policy.compiled.sh`
 - `.github/hooks/scripts/tool-guardian.sh`
 - `install-ai-kit.sh`
+- `packages/ai-universal-rules/templates/github/hooks/scripts/command-policy.compiled.sh`
 - `packages/ai-universal-rules/templates/github/hooks/scripts/tool-guardian.sh`
 - `scripts/ai/ai-diff-context.sh`
 - `scripts/ai/ai-doc-check.sh`

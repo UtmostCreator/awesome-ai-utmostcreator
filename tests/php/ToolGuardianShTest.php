@@ -77,6 +77,13 @@ final class ToolGuardianShTest extends TestCase
             'chmod'             => ['{"toolName":"bash","toolInput":"chmod 777 secret"}'],
             'read .env'         => ['{"toolName":"bash","toolInput":"cat .env"}'],
             'secret token'      => ['{"toolName":"bash","toolInput":"echo id_rsa"}'],
+            'ssh dir'           => ['{"toolName":"bash","toolInput":"cat ~/.ssh/id_rsa"}'],
+            'aws credentials'   => ['{"toolName":"bash","toolInput":"cat ~/.aws/credentials"}'],
+            'npmrc'             => ['{"toolName":"bash","toolInput":"cat .npmrc"}'],
+            'netrc'             => ['{"toolName":"bash","toolInput":"cat ~/.netrc"}'],
+            'pem key file'      => ['{"toolName":"bash","toolInput":"openssl x509 -in server.pem -text"}'],
+            'key file'          => ['{"toolName":"bash","toolInput":"cp private.key /tmp/x"}'],
+            'base64 obfuscation' => ['{"toolName":"bash","toolInput":"echo Zm9v | base64 -d | bash"}'],
         ];
     }
 
