@@ -619,6 +619,59 @@ function aiUpgradeCurrentRegistryTargets(): array
 }
 
 /**
+ * Resolve the upgrade status/action for a single installed file by ownership class.
+ *
+ * Per-class routing (deprecated is computed separately by aiUpgradeComputeDeprecated):
+ *  - missing target      -> restore or remove from manifest
+ *  - template            -> preserve (never overwritten; --reset-templates handles refresh)
+ *  - rendered            -> regenerate from project.yml (user marker sections preserved)
+ *  - patch-managed       -> update-managed-block (only the marker block; user content kept)
+ *  - owned + user-modified + --force-owned -> force-overwrite (after preserving user bytes)
+ *  - owned + user-modified                 -> conflict-preserve-user
+ *  - owned + source-updated (clean)        -> auto-update
+ *  - otherwise                             -> skip (unchanged)
+ *
+ * @return array{status:string,action:string}
+ */
+function aiUpgradeResolveFileAction(
+    string $ownership,
+    bool $userModified,
+    bool $sourceUpdated,
+    bool $targetMissing,
+    bool $forceOwned
+): array {
+    if ($targetMissing) {
+        return ['status' => 'missing', 'action' => 'restore or remove from manifest'];
+    }
+    if ($ownership === 'template') {
+        return [
+            'status' => $userModified ? 'template-user-owned' : 'template-unchanged',
+            'action' => 'preserve',
+        ];
+    }
+    if ($ownership === 'rendered') {
+        return ['status' => 'rendered', 'action' => 'regenerate'];
+    }
+    if ($ownership === 'patch-managed') {
+        return ['status' => 'patch-managed', 'action' => 'update-managed-block'];
+    }
+    if ($ownership === 'owned' && $userModified) {
+        if ($forceOwned) {
+            return ['status' => 'owned-force-overwrite', 'action' => 'force-overwrite'];
+        }
+        return [
+            'status' => $sourceUpdated ? 'owned-both-changed' : 'owned-user-modified',
+            'action' => 'conflict-preserve-user',
+        ];
+    }
+    if ($sourceUpdated && !$userModified) {
+        return ['status' => 'source-updated', 'action' => 'auto-update'];
+    }
+
+    return ['status' => 'unchanged', 'action' => 'skip'];
+}
+
+/**
  * Compute the `deprecated` ownership class at plan time (never stored).
  *
  * A deprecated file is one recorded in the installed manifest but no longer shipped by the
@@ -685,6 +738,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
     }
 
     $dryRun = in_array('--dry-run', $args, true) || !in_array('--apply', $args, true);
+    $forceOwned = in_array('--force-owned', $args, true);
     $targetRef = aiParseArg($args, 'to') ?? '';
     $verifyExit = aiRunPackageVerify($root);
     $verify = aiLoadArtifactData($root, 'package-verify.json');
@@ -729,30 +783,20 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
         // ownership classes existed, so legacy installs keep the previous (overwrite) behaviour.
         $ownership = (string) ($meta['ownership'] ?? 'owned');
         $userModified = $targetCurrentHash !== 'missing' && $targetCurrentHash !== $installedAtInstall;
+        $sourceUpdated = $sourceCurrentHash !== $sourceAtInstall;
 
-        $status = 'unchanged';
-        $action = 'skip';
-        if ($targetCurrentHash === 'missing') {
-            $status = 'missing';
-            $action = 'restore or remove from manifest';
-        } elseif ($ownership === 'template') {
-            // Installed once, then user-owned: never overwrite on upgrade.
-            $status = $userModified ? 'template-user-owned' : 'template-unchanged';
-            $action = 'preserve';
-        } elseif ($ownership === 'owned' && $userModified) {
-            // Kit-managed file the user edited: do not silently clobber. Surface a conflict
-            // so the user's edits are routed to .ai/conflicts/ rather than overwritten.
-            $status = ($sourceCurrentHash !== $sourceAtInstall) ? 'owned-both-changed' : 'owned-user-modified';
-            $action = 'conflict-preserve-user';
-        } elseif ($sourceCurrentHash !== $sourceAtInstall && !$userModified) {
-            $status = 'source-updated';
-            $action = 'auto-update';
-        }
+        $resolved = aiUpgradeResolveFileAction(
+            $ownership,
+            $userModified,
+            $sourceUpdated,
+            $targetCurrentHash === 'missing',
+            $forceOwned
+        );
 
         $fileActions[] = [
             'file' => (string) $target,
-            'status' => $status,
-            'action' => $action,
+            'status' => $resolved['status'],
+            'action' => $resolved['action'],
             'ownership' => $ownership,
             'source' => $sourceRel,
         ];
