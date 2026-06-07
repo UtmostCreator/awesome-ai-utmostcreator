@@ -79,6 +79,7 @@ function aiInstallerRun(array $argv): int
         aiInstallerEnsureGitignoreEntries($config['targetRoot'], [
             '.ai-backups/',
             '.ai-logs/',
+            '.ai/conflicts/',
             '.repomix-context/',
             'docs/ai/generated/',
         ]);
