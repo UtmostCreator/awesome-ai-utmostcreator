@@ -666,6 +666,68 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testUserSectionsArePreservedByteForByteAcrossRender(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_user_section_' . uniqid('', true);
+        mkdir($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai', 0700, true);
+        $rel = 'docs/ai/managed.md';
+        $abs = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+
+        $userBlock = '<!-- BEGIN ai-kit:user -->' . "\n" . 'My custom $notes & <PROJECT_NAME> stay verbatim.' . "\n" . '<!-- END ai-kit:user -->';
+        file_put_contents($abs, "# old managed\n\n" . $userBlock . "\n");
+
+        $plan = [['type' => 'file', 'target' => $rel, 'action' => 'OVERWRITE_MANAGED']];
+
+        try {
+            // Capture from the pre-overwrite file.
+            $captured = aiInstallerCaptureUserSections($target, $plan);
+            $this->assertArrayHasKey($rel, $captured);
+
+            // Simulate the kit overwriting the file with a fresh template that has an empty block.
+            file_put_contents($abs, "# new managed kit content\n\n<!-- BEGIN ai-kit:user -->\n<!-- END ai-kit:user -->\n");
+
+            aiInstallerRestoreUserSections($target, $captured);
+
+            $result = (string) file_get_contents($abs);
+            $this->assertStringContainsString('# new managed kit content', $result, 'kit content must refresh');
+            $this->assertStringContainsString($userBlock, $result, 'user block must be restored byte-for-byte');
+            $this->assertSame(1, substr_count($result, '<!-- BEGIN ai-kit:user -->'), 'exactly one user block');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testBackupRetentionKeepsOnlyMostRecentFive(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/backup.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_backup_retention_' . uniqid('', true);
+        $base = $target . DIRECTORY_SEPARATOR . '.ai-backups';
+        mkdir($base, 0700, true);
+
+        // Seed 8 timestamp-ordered backup dirs.
+        $ids = [];
+        for ($i = 1; $i <= 8; $i++) {
+            $id = sprintf('install-ai-kit-20260101-0000%02d', $i);
+            mkdir($base . DIRECTORY_SEPARATOR . $id, 0700, true);
+            file_put_contents($base . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . 'manifest.json', '{}');
+            $ids[] = $id;
+        }
+
+        try {
+            aiInstallBackupPruneOld($target, 5);
+
+            $remaining = array_values(array_filter(scandir($base) ?: [], static fn(string $e): bool => $e !== '.' && $e !== '..'));
+            sort($remaining, SORT_STRING);
+            $this->assertCount(5, $remaining, 'retention must keep exactly 5 backups');
+            $this->assertSame(array_slice($ids, 3), $remaining, 'retention must keep the 5 most recent');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testExistingUserAgentsFileGetsManagedPointerSection(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/core.php';

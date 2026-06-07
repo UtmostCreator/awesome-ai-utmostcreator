@@ -67,12 +67,70 @@ function aiInstallBackupCreate(string $targetRoot, array $plan, string $sourceRo
     ];
     aiInstallBackupWriteManifest($backupDir, $manifest);
 
+    aiInstallBackupPruneOld($targetRoot, 5);
+
     return [
         'backup_id' => $backupId,
         'backup_dir' => '.ai-backups/' . $backupId,
         'entry_count' => count($entries),
         'schema' => 'ai-install-backup/v1',
     ];
+}
+
+/**
+ * Keep only the most recent $keep backup directories under .ai-backups, deleting older ones.
+ * Backup ids are timestamp-suffixed, so lexical sort matches chronological order.
+ */
+function aiInstallBackupPruneOld(string $targetRoot, int $keep): void
+{
+    if ($keep < 1) {
+        return;
+    }
+
+    $base = $targetRoot . DIRECTORY_SEPARATOR . '.ai-backups';
+    if (!is_dir($base)) {
+        return;
+    }
+
+    $dirs = [];
+    foreach (scandir($base) ?: [] as $entry) {
+        if ($entry === '.' || $entry === '..') {
+            continue;
+        }
+        $abs = $base . DIRECTORY_SEPARATOR . $entry;
+        if (is_dir($abs)) {
+            $dirs[] = $entry;
+        }
+    }
+
+    if (count($dirs) <= $keep) {
+        return;
+    }
+
+    sort($dirs, SORT_STRING);
+    $toDelete = array_slice($dirs, 0, count($dirs) - $keep);
+    foreach ($toDelete as $dir) {
+        aiInstallBackupDeleteTree($base . DIRECTORY_SEPARATOR . $dir);
+    }
+}
+
+function aiInstallBackupDeleteTree(string $path): void
+{
+    if (!is_dir($path)) {
+        if (is_file($path) || is_link($path)) {
+            @unlink($path);
+        }
+        return;
+    }
+
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::CHILD_FIRST
+    );
+    foreach ($it as $item) {
+        $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+    }
+    @rmdir($path);
 }
 
 function aiInstallBackupRecordAfter(string $targetRoot, string $backupId, array $plan = [], string $sourceRoot = '', string $state = 'applied'): array
