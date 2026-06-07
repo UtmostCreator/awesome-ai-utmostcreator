@@ -660,6 +660,47 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testExtraDocsFromProjectYmlRenderAndSurviveReRender(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_extradocs_' . uniqid('', true);
+        mkdir($target . '/.ai', 0700, true);
+        mkdir($target . '/docs/ai', 0700, true);
+        file_put_contents($target . '/.ai/project.yml', implode("\n", [
+            'projectName: "x"',
+            'context:',
+            '  extraDocs:',
+            '    - "docs/architecture.md"',
+            '    - "docs/runbook.md"',
+        ]) . "\n");
+
+        $rendered = $target . '/docs/ai/context.md';
+        $template = "# Context\n\n<EXTRA_DOCS>\n";
+        file_put_contents($rendered, $template);
+        $plan = [['type' => 'file', 'target' => 'docs/ai/context.md', 'action' => 'CREATE']];
+
+        try {
+            // Loader + renderer.
+            $this->assertSame(['docs/architecture.md', 'docs/runbook.md'], aiInstallerLoadProjectExtraDocs($target));
+            $this->assertStringContainsString('No additional project docs', aiInstallerRenderExtraDocsBlock([]));
+
+            // First render injects the extra-docs block.
+            aiInstallerApplyPlaceholders($target, 'x', $plan);
+            $first = (string) file_get_contents($rendered);
+            $this->assertStringContainsString('[`docs/architecture.md`](docs/architecture.md)', $first);
+            $this->assertStringContainsString('[`docs/runbook.md`](docs/runbook.md)', $first);
+
+            // Re-render from the shipped template again: pointers (held in project.yml) survive.
+            file_put_contents($rendered, $template);
+            aiInstallerApplyPlaceholders($target, 'x', $plan);
+            $second = (string) file_get_contents($rendered);
+            $this->assertStringContainsString('[`docs/architecture.md`](docs/architecture.md)', $second, 'extraDocs must survive re-render');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testCopyFileFailsClearlyOnReadOnlyTarget(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/core.php';

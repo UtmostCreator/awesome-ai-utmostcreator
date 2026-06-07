@@ -126,3 +126,10 @@ Fill and maintain these for each installed project:
 - Allowed scripts list: `<PROJECT_ALLOWED_SCRIPTS>`
 - Forbidden script patterns: `<PROJECT_FORBIDDEN_SCRIPTS>`
 - Additional security rules: `<PROJECT_SECURITY_RULES>`
+
+## 13) Additional Project Docs
+
+Extra project docs the AI should reference. Manage these under `context.extraDocs`
+in `.ai/project.yml`; the list is re-rendered here on every install/upgrade.
+
+<EXTRA_DOCS>

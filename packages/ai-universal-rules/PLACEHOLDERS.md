@@ -24,6 +24,7 @@ Use uppercase snake case for every token. Replace each token with repository-spe
 | `<PRIMARY_BUILD_COMMAND>`     | Smallest meaningful build command                     | `pnpm build`                                        | Core templates, snippets       |
 | `<PRIMARY_TEST_COMMAND>`      | Main focused test command                             | `pnpm test`                                         | Core templates, snippets       |
 | `<PROJECT_CONTEXT_PATH>`      | Location of the durable project context file          | `docs/ai/project-context.md`                        | Core templates                 |
+| `<EXTRA_DOCS>`                | Extra project docs (from `.ai/project.yml` `context.extraDocs`) | `- [\`docs/architecture.md\`](docs/architecture.md)` | Core templates (auto-rendered) |
 | `<AVAILABLE_CAPABILITIES>`    | Capability folders enabled in the repository          | `project-context, verify-change, review-diff`       | Core templates                 |
 | `<REVIEW_PRIORITIES>`         | Top correctness and regression review areas           | `state ownership, API contracts, data loss risk`    | Core templates, reviewer roles |
 | `<APPROVAL_REQUIRED_CHANGES>` | Changes that require approval before proceeding       | `schema changes, auth changes, dependency changes`  | Core templates                 |
