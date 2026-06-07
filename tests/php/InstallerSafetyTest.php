@@ -1122,6 +1122,72 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testAiCliUpgradeApplyRemovesDeprecatedFileThroughOrchestrator(): void
+    {
+        $this->skipIfToolchainMissing(['git']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_cli_upgrade_deprecated_' . uniqid('', true);
+        $this->makeAiCliIntegrationRoot($target, true);
+
+        try {
+            $install = $this->runTool(
+                'php tools/ai/ai.php install --apply --force --mode sidecar-only --targets opencode --no-interaction',
+                ['AI_CLI_REPO_ROOT' => $target]
+            );
+            $this->assertSame(0, $install['exit'], "initial ai.php install --apply failed:\n" . $install['stderr']);
+
+            // Inject a deprecated file: present in the manifest but NOT shipped by the
+            // current pack registry. It should be removed on upgrade --apply.
+            $deprecatedRel = 'docs/ai/stale-removed-hook.md';
+            $deprecatedAbs = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $deprecatedRel);
+            if (!is_dir(dirname($deprecatedAbs))) {
+                mkdir(dirname($deprecatedAbs), 0700, true);
+            }
+            $deprecatedBytes = "# stale hook the kit no longer ships\n";
+            file_put_contents($deprecatedAbs, $deprecatedBytes);
+            $deprecatedHash = 'sha256:' . hash('sha256', $deprecatedBytes);
+
+            $manifestPath = $target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json';
+            $manifest = json_decode((string) file_get_contents($manifestPath), true);
+            $this->assertIsArray($manifest);
+            $manifest['files'][$deprecatedRel] = [
+                'managed' => true,
+                'ownership' => 'owned',
+                'installed_hash' => $deprecatedHash,
+                'source_hash' => $deprecatedHash,
+                'source' => $deprecatedRel,
+            ];
+            file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+
+            $backupId = 'deprecated-test-backup';
+            $backupDir = $target . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+            mkdir($backupDir, 0700, true);
+            file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json', json_encode([
+                'schema' => 'ai-install-backup/v1',
+                'backup_id' => $backupId,
+                'transaction_id' => $backupId,
+                'created_at' => gmdate('c'),
+                'updated_at' => gmdate('c'),
+                'state' => 'backed_up',
+                'entries' => [],
+                'integrity' => ['manifest_sha256' => null, 'snapshots_sha256' => []],
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+
+            $upgrade = $this->runTool(
+                'php tools/ai/ai.php upgrade --apply --backup ' . escapeshellarg($backupId),
+                ['AI_CLI_REPO_ROOT' => $target]
+            );
+            $this->assertSame(0, $upgrade['exit'], "ai.php upgrade --apply failed:\n" . $upgrade['stderr']);
+
+            $this->assertFileDoesNotExist(
+                $deprecatedAbs,
+                'upgrade --apply must remove a deprecated (no-longer-shipped) manifest file'
+            );
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testDirectInstallerFullGovernanceBackupInstallShipsAllCoreSurfaces(): void
     {
         $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
