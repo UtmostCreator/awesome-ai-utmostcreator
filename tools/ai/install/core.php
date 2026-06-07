@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/project-yaml.php';
 require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/packs.php';
 require_once __DIR__ . '/planner.php';
@@ -794,41 +795,7 @@ function aiInstallerLoadProjectExtraDocs(string $targetRoot): array
         return [];
     }
 
-    $docs = [];
-    $inContext = false;
-    $inExtra = false;
-    foreach (file($path, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
-        if (trim($line) === '' || str_starts_with(ltrim($line), '#')) {
-            continue;
-        }
-        $indent = strlen($line) - strlen(ltrim($line));
-        $trimmed = trim($line);
-
-        if ($indent === 0) {
-            $inContext = ($trimmed === 'context:');
-            $inExtra = false;
-            continue;
-        }
-        if (!$inContext) {
-            continue;
-        }
-        if (preg_match('/^extraDocs:\s*(\[\])?\s*$/', $trimmed) === 1) {
-            $inExtra = true;
-            continue;
-        }
-        if ($inExtra && !str_starts_with($trimmed, '- ') && str_ends_with($trimmed, ':')) {
-            $inExtra = false;
-            continue;
-        }
-        if ($inExtra && str_starts_with($trimmed, '- ')) {
-            $value = aiInstallerProjectYamlUnquote(trim(substr($trimmed, 2)));
-            if ($value !== '') {
-                $docs[] = $value;
-            }
-        }
-    }
-
-    return array_values(array_unique($docs));
+    return aiInstallerParseProjectYamlList((string) file_get_contents($path), 'context', 'extraDocs');
 }
 
 /**
@@ -849,21 +816,6 @@ function aiInstallerRenderExtraDocsBlock(array $docs): string
     }
 
     return implode("\n", $lines);
-}
-
-function aiInstallerProjectYamlQuote(string $value): string
-{
-    return '"' . str_replace(['\\', '"'], ['\\\\', '\\"'], $value) . '"';
-}
-
-function aiInstallerProjectYamlUnquote(string $value): string
-{
-    if (strlen($value) >= 2 && $value[0] === '"' && $value[strlen($value) - 1] === '"') {
-        $value = substr($value, 1, -1);
-        return str_replace(['\\"', '\\\\'], ['"', '\\'], $value);
-    }
-
-    return $value;
 }
 
 function aiInstallerEnsureAgentsMarkedSectionForSkippedUserFile(string $targetRoot, array $plan): void
