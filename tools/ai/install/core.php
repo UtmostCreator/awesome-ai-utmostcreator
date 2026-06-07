@@ -66,6 +66,10 @@ function aiInstallerRun(array $argv): int
     // absolute paths, or symlinked parent directories. Runs before any write.
     aiInstallerAssertSafePlanTargets((string) $config['targetRoot'], $plan);
 
+    // Case-collision guard: two distinct targets that differ only by case would clobber
+    // each other on case-insensitive filesystems (macOS/Windows). Fail fast and explicitly.
+    aiInstallerAssertNoCaseCollisions($plan);
+
     // Adopt-or-conflict gate: files flagged never_auto_merge (e.g. opencode.jsonc) that
     // already exist and differ from the kit version must not be silently skipped or merged.
     // Fail fast before any writes so the install is all-or-nothing for the user's config.
@@ -873,6 +877,31 @@ function aiInstallerAssertSafePlanTargets(string $targetRoot, array $plan): void
                 throw new RuntimeException('PathGuard: install target escapes root via symlink: ' . $target);
             }
         }
+    }
+}
+
+/**
+ * Case-collision guard: detect distinct plan targets that map to the same path under a
+ * case-insensitive filesystem. Two such targets would overwrite each other unpredictably,
+ * so installs fail closed with a clear message listing the colliding pair.
+ */
+function aiInstallerAssertNoCaseCollisions(array $plan): void
+{
+    $seen = [];
+    foreach ($plan as $item) {
+        $target = (string) ($item['target'] ?? '');
+        if ($target === '') {
+            continue;
+        }
+        $normalized = str_replace('\\', '/', $target);
+        $key = strtolower($normalized);
+        if (isset($seen[$key]) && $seen[$key] !== $normalized) {
+            throw new RuntimeException(
+                'case-collision in install targets: "' . $seen[$key] . '" vs "' . $normalized
+                . '" would clobber each other on case-insensitive filesystems'
+            );
+        }
+        $seen[$key] = $normalized;
     }
 }
 
