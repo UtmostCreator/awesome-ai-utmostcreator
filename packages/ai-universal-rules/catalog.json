@@ -37,7 +37,7 @@
         ]
     },
     "counts": {
-        "package:core-template": 24,
+        "package:core-template": 27,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 4,
@@ -253,6 +253,30 @@
             "path": "packages/ai-universal-rules/templates/core/project-stack.template.md",
             "runtime": "canonical",
             "description": "Compatibility note: `project-stack.template.md` remains for older installs."
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "<PROJECT_NAME> \u2014 Project AI Notes",
+            "path": "packages/ai-universal-rules/templates/core/project/README.md",
+            "runtime": "canonical",
+            "description": "This directory holds **your** project-specific AI guidance. The AI kit installs these"
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "<PROJECT_NAME> \u2014 Conventions",
+            "path": "packages/ai-universal-rules/templates/core/project/conventions.md",
+            "runtime": "canonical",
+            "description": "User-owned. Durable conventions for this repository. The kit installs this once and never"
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "<PROJECT_NAME> \u2014 AI Interaction Guide",
+            "path": "packages/ai-universal-rules/templates/core/project/project-interaction.md",
+            "runtime": "canonical",
+            "description": "User-owned. Describe how you want AI agents to collaborate on this repository. The kit"
         },
         {
             "scope": "package",
