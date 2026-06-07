@@ -747,6 +747,19 @@ function aiInstallerEnsureProjectValuesFile(string $targetRoot, string $projectN
         $lines[] = $key . ': ' . aiInstallerProjectYamlQuote($value);
     }
 
+    // P4-a: optional project-fact keys. Uncomment and set to drive the matching placeholders
+    // from project.yml so they survive every re-render. Unset keys keep the kit defaults.
+    $optionalKeys = [
+        'targetPlatforms', 'sourceDirs', 'testDirs', 'testCommand', 'buildCommand',
+        'lintCommand', 'formatCommand', 'installCommand', 'packageManager', 'ciCommands',
+        'protectedPaths', 'generatedFiles', 'protectedFiles', 'reviewPriorities',
+        'riskAreas', 'approvalRequiredChanges', 'inactivePaths', 'availableCapabilities',
+    ];
+    $lines[] = '# Optional project-fact values (uncomment to override kit defaults):';
+    foreach ($optionalKeys as $key) {
+        $lines[] = '# ' . $key . ': unknown';
+    }
+
     file_put_contents($path, implode("\n", $lines) . "\n");
 }
 
@@ -763,6 +776,26 @@ function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): 
         'primaryVerifyCommand' => 'unknown',
         'primaryBuildCommand' => 'unknown',
         'primaryTestCommand' => 'unknown',
+        // P4-a: customizable project-fact values consolidated into project.yml so they
+        // survive every re-render. Unset keys stay 'unknown' (the placeholder default).
+        'targetPlatforms' => 'unknown',
+        'sourceDirs' => 'unknown',
+        'testDirs' => 'unknown',
+        'testCommand' => 'unknown',
+        'buildCommand' => 'unknown',
+        'lintCommand' => 'unknown',
+        'formatCommand' => 'unknown',
+        'installCommand' => 'unknown',
+        'packageManager' => 'unknown',
+        'ciCommands' => 'unknown',
+        'protectedPaths' => 'unknown',
+        'generatedFiles' => 'unknown',
+        'protectedFiles' => 'unknown',
+        'reviewPriorities' => 'unknown',
+        'riskAreas' => 'unknown',
+        'approvalRequiredChanges' => 'unknown',
+        'inactivePaths' => 'unknown',
+        'availableCapabilities' => 'unknown',
     ];
 
     $path = aiInstallerProjectValuesPath($targetRoot);
@@ -790,7 +823,9 @@ function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): 
 /** @param array<string,string> $values @return array<string,string> */
 function aiInstallerProjectValuesPlaceholderMap(array $values): array
 {
-    return [
+    // The original nine tokens always emit (their base-map defaults are 'unknown'/detected,
+    // so emitting the project value — even 'unknown' — is equivalent and back-compatible).
+    $map = [
         '<PROJECT_NAME>' => $values['projectName'] ?? '',
         '<PROJECT_TYPE>' => $values['projectType'] ?? '',
         '<PROJECT_SUMMARY>' => $values['projectSummary'] ?? '',
@@ -801,6 +836,38 @@ function aiInstallerProjectValuesPlaceholderMap(array $values): array
         '<PRIMARY_BUILD_COMMAND>' => $values['primaryBuildCommand'] ?? '',
         '<PRIMARY_TEST_COMMAND>' => $values['primaryTestCommand'] ?? '',
     ];
+
+    // P4-a: customizable project-fact tokens sourced from project.yml. Only emit one when the
+    // user supplied a concrete (non-empty, non-'unknown') value, so the richer base-map
+    // defaults (e.g. review priorities, risk areas) survive when project.yml leaves them unset.
+    $projectFactTokens = [
+        'targetPlatforms' => '<TARGET_PLATFORMS>',
+        'sourceDirs' => '<SOURCE_DIRS>',
+        'testDirs' => '<TEST_DIRS>',
+        'testCommand' => '<TEST_COMMAND>',
+        'buildCommand' => '<BUILD_COMMAND>',
+        'lintCommand' => '<LINT_COMMAND>',
+        'formatCommand' => '<FORMAT_COMMAND>',
+        'installCommand' => '<INSTALL_COMMAND>',
+        'packageManager' => '<PACKAGE_MANAGER>',
+        'ciCommands' => '<CI_COMMANDS>',
+        'protectedPaths' => '<PROTECTED_PATHS>',
+        'generatedFiles' => '<GENERATED_FILES>',
+        'protectedFiles' => '<PROTECTED_FILES>',
+        'reviewPriorities' => '<REVIEW_PRIORITIES>',
+        'riskAreas' => '<RISK_AREAS>',
+        'approvalRequiredChanges' => '<APPROVAL_REQUIRED_CHANGES>',
+        'inactivePaths' => '<INACTIVE_PATHS>',
+        'availableCapabilities' => '<AVAILABLE_CAPABILITIES>',
+    ];
+    foreach ($projectFactTokens as $key => $token) {
+        $value = (string) ($values[$key] ?? '');
+        if ($value !== '' && $value !== 'unknown') {
+            $map[$token] = $value;
+        }
+    }
+
+    return $map;
 }
 
 /**
