@@ -148,6 +148,20 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    /**
+     * Create a temp install target that looks like a git repository root.
+     *
+     * The installer refuses to write into a non-git directory (git-root guard) unless
+     * --allow-non-git is passed. Real installs happen inside git repos, so test targets
+     * mirror that by seeding a minimal `.git` directory. This also lets tests exercise the
+     * realistic .gitignore-patching path.
+     */
+    private function makeTargetRepo(string $target): void
+    {
+        mkdir($target, 0700, true);
+        mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
+    }
+
     /** @return list<string> */
     private function relativeGlob(string $pattern): array
     {
@@ -308,6 +322,7 @@ class InstallerSafetyTest extends TestCase
         $outputJson = $target . DIRECTORY_SEPARATOR . 'install-output.json';
 
         mkdir($promptDir, 0700, true);
+        mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
         file_put_contents($promptDir . DIRECTORY_SEPARATOR . 'legacy.prompt.md', "# legacy\n");
         file_put_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json', json_encode(['legacy' => true]));
 
@@ -444,7 +459,7 @@ class InstallerSafetyTest extends TestCase
         $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_copilot_visible_' . uniqid('', true);
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
 
         try {
             $command = implode(' ', [
@@ -497,7 +512,7 @@ class InstallerSafetyTest extends TestCase
         $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_opencode_visible_' . uniqid('', true);
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
 
         try {
             $command = implode(' ', [
@@ -560,6 +575,7 @@ class InstallerSafetyTest extends TestCase
         $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
 
         mkdir($docsDir, 0700, true);
+        mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
         file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
         file_put_contents($docsDir . DIRECTORY_SEPARATOR . 'failure-handling.md', "# existing local copy\n");
 
@@ -657,7 +673,7 @@ class InstallerSafetyTest extends TestCase
         $firstOutputJson = $target . DIRECTORY_SEPARATOR . 'install-first.json';
         $secondOutputJson = $target . DIRECTORY_SEPARATOR . 'install-second.json';
 
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
 
         try {
             $firstCommand = implode(' ', [
@@ -751,7 +767,7 @@ class InstallerSafetyTest extends TestCase
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_opencode_' . uniqid('', true);
 
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
         file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
 
         $git = $this->runTool('git init ' . escapeshellarg($target));
@@ -815,6 +831,7 @@ class InstallerSafetyTest extends TestCase
         $toolsDir = $target . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'ai';
 
         mkdir($toolsDir, 0700, true);
+        mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
         file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
         file_put_contents($toolsDir . DIRECTORY_SEPARATOR . 'validate-ai-config.php', "<?php fwrite(STDERR, 'stale target validate-ai-config' . PHP_EOL); exit(99);\n");
         file_put_contents($toolsDir . DIRECTORY_SEPARATOR . 'validate-ai-catalog.php', "<?php fwrite(STDERR, 'stale target validate-ai-catalog' . PHP_EOL); exit(98);\n");
@@ -856,7 +873,7 @@ class InstallerSafetyTest extends TestCase
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_stale_manifest_' . uniqid('', true);
 
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
         file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
         file_put_contents(
             $target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json',
@@ -917,7 +934,7 @@ class InstallerSafetyTest extends TestCase
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_noop_reinstall_' . uniqid('', true);
 
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
 
         try {
             $firstCommand = implode(' ', [
@@ -972,6 +989,7 @@ class InstallerSafetyTest extends TestCase
         $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
 
         mkdir($docsDir, 0700, true);
+        mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
         copy(
             self::$repoRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'project-context.template.md',
             $docsDir . DIRECTORY_SEPARATOR . 'project-context.md'
@@ -1075,6 +1093,7 @@ class InstallerSafetyTest extends TestCase
         $docsDir = $target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai';
 
         mkdir($docsDir, 0700, true);
+        mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
         file_put_contents($docsDir . DIRECTORY_SEPARATOR . 'failure-handling.md', "# local copy\n");
 
         try {
@@ -1111,6 +1130,7 @@ class InstallerSafetyTest extends TestCase
         $sourceFile = self::$repoRoot . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'failure-handling.md';
 
         mkdir($docsDir, 0700, true);
+        mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
         copy($sourceFile, $docsDir . DIRECTORY_SEPARATOR . 'failure-handling.md');
 
         try {
@@ -1143,7 +1163,7 @@ class InstallerSafetyTest extends TestCase
         require_once self::$repoRoot . '/tools/ai/install/core.php';
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_gitignore_create_' . uniqid('', true);
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
 
         try {
             aiInstallerEnsureGitignoreEntries($target, ['.ai-backups/', '.ai-logs/', '.repomix-context/']);
@@ -1166,7 +1186,7 @@ class InstallerSafetyTest extends TestCase
         require_once self::$repoRoot . '/tools/ai/install/core.php';
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_gitignore_idem_' . uniqid('', true);
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
 
         try {
             $entries = ['.ai-backups/', '.ai-logs/', '.repomix-context/'];
@@ -1187,7 +1207,7 @@ class InstallerSafetyTest extends TestCase
         require_once self::$repoRoot . '/tools/ai/install/core.php';
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_gitignore_variants_' . uniqid('', true);
-        mkdir($target, 0700, true);
+        $this->makeTargetRepo($target);
 
         try {
             // Pre-existing user rules including tolerant variants of two roots.
@@ -1207,6 +1227,240 @@ class InstallerSafetyTest extends TestCase
 
             // Only the genuinely-missing entry is appended.
             $this->assertStringContainsString('.ai-backups/', $content);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testInstallRefusesNonGitTargetWithoutOverride(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        // Deliberately NOT a git repo: no .git seeded.
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_nongit_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+                '--force',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertNotSame(0, $result['exit'], 'install into a non-git dir must fail without --allow-non-git');
+            $this->assertStringContainsString('not a git repository root', $result['stderr']);
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'AGENTS.md', 'no files should be written when the guard fires');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testInstallAllowsNonGitTargetWithOverride(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_nongit_override_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+                '--force',
+                '--allow-non-git',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'AGENTS.md');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testDryRunDoesNotRequireGitRoot(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_nongit_dryrun_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+                '--dry-run',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], 'dry-run must not be blocked by the git-root guard: ' . $result['stderr']);
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'AGENTS.md', 'dry-run writes nothing');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testForeignOpencodeJsoncCausesConflictAndStops(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_jsonc_conflict_' . uniqid('', true);
+        $this->makeTargetRepo($target);
+        // Pre-existing FOREIGN opencode.jsonc (user-authored, not the kit version).
+        $userConfig = "{\n  \"\$schema\": \"user\",\n  \"model\": \"my-model\"\n}\n";
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'opencode.jsonc', $userConfig);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertNotSame(0, $result['exit'], 'foreign opencode.jsonc must abort the install');
+            $this->assertStringContainsString('opencode.jsonc', $result['stderr']);
+            $this->assertStringContainsString('--adopt', $result['stderr']);
+            // User config preserved byte-for-byte; nothing clobbered.
+            $this->assertSame($userConfig, (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'opencode.jsonc'));
+            // Install aborted before writing the kit surface.
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'AGENTS.md', 'no kit files should be written when a foreign conflict aborts the install');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testForeignOpencodeJsoncAdoptedWithFlag(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_jsonc_adopt_' . uniqid('', true);
+        $this->makeTargetRepo($target);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'opencode.jsonc', "{\n  \"model\": \"my-model\"\n}\n");
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+                '--adopt',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], 'install with --adopt should succeed: ' . $result['stderr']);
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'AGENTS.md');
+            // opencode.jsonc now matches the kit version (adopted/overwritten).
+            $kitSource = self::$repoRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules'
+                . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'opencode.json';
+            $this->assertSame(
+                hash_file('sha256', $kitSource),
+                hash_file('sha256', $target . DIRECTORY_SEPARATOR . 'opencode.jsonc'),
+                'adopted opencode.jsonc should match the kit source'
+            );
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testIdenticalOpencodeJsoncIsAdoptedSilently(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_jsonc_identical_' . uniqid('', true);
+        $this->makeTargetRepo($target);
+        // Pre-seed the exact kit version: must be treated as identical, not a conflict.
+        $kitSource = self::$repoRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules'
+            . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . 'core' . DIRECTORY_SEPARATOR . 'opencode.json';
+        copy($kitSource, $target . DIRECTORY_SEPARATOR . 'opencode.jsonc');
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], 'identical opencode.jsonc must not conflict: ' . $result['stderr']);
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'AGENTS.md');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testForeignFilePreservedByDefaultButAdoptedWithFlag(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        // First install: pre-existing user AGENTS.md that is NOT the kit version.
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_adopt_default_' . uniqid('', true);
+        $this->makeTargetRepo($target);
+        $userAgents = "# My project AGENTS\n\nCustom user content.\n";
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'AGENTS.md', $userAgents);
+
+        try {
+            $base = [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+            ];
+
+            // Default: foreign AGENTS.md preserved (not clobbered).
+            $result = $this->runTool(implode(' ', $base));
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+            $this->assertSame(
+                $userAgents,
+                (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'AGENTS.md'),
+                'foreign AGENTS.md must be preserved by default'
+            );
+
+            // With --adopt: kit overwrites it.
+            $resultAdopt = $this->runTool(implode(' ', array_merge($base, ['--adopt'])));
+            $this->assertSame(0, $resultAdopt['exit'], $resultAdopt['stderr']);
+            $this->assertNotSame(
+                $userAgents,
+                (string) file_get_contents($target . DIRECTORY_SEPARATOR . 'AGENTS.md'),
+                '--adopt must overwrite the foreign AGENTS.md with the kit version'
+            );
         } finally {
             $this->removeTree($target);
         }

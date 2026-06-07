@@ -12,12 +12,26 @@ function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs):
             $absSource = $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $source);
             $absTarget = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $target);
             $exists = file_exists($absTarget);
+            $neverAutoMerge = ($item['never_auto_merge'] ?? false) === true;
+            $adopt = ($config['adopt'] ?? false) === true;
             $action = 'CREATE';
             $reason = $exists ? 'target exists' : 'target missing';
             if ($exists && !$config['force']) {
                 if (aiInstallerPathsAreIdentical($absSource, $absTarget)) {
+                    // Already matches the shipped kit file: adopt silently.
                     $action = 'SKIP_IDENTICAL_EXISTING';
                     $reason = 'target exists and already matches source';
+                } elseif ($adopt) {
+                    // --adopt: overwrite pre-existing foreign files at kit-claimed paths
+                    // (including never_auto_merge files such as opencode.jsonc). Pair with
+                    // --backup to snapshot the displaced user content first.
+                    $action = 'OVERWRITE_MANAGED';
+                    $reason = 'foreign target adopted via --adopt';
+                } elseif ($neverAutoMerge) {
+                    // Files such as opencode.jsonc must never be auto-merged or silently
+                    // skipped: surface a conflict and stop so the user decides.
+                    $action = 'CONFLICT_FOREIGN';
+                    $reason = 'target exists, differs from the kit version, and must not be auto-merged; rerun with --adopt to overwrite (a backup is recorded) or resolve manually';
                 } elseif (($config['upgradeSuffix'] ?? '') !== '') {
                     $target = aiInstallerResolveUpgradeTarget($config, $item, $target);
                     $action = 'CREATE_UPGRADE_COPY';

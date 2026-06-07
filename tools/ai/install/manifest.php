@@ -36,7 +36,7 @@ function aiInstallerBuildManifest(array $config, array $packs, array $plan): arr
     $files = [];
     foreach ($plan as $item) {
         $action = (string) ($item['action'] ?? '');
-        if (in_array($action, ['SKIP_EXISTING_UNMANAGED', 'SKIP_PROTECTED_CORE'], true)) {
+        if (in_array($action, ['SKIP_EXISTING_UNMANAGED', 'SKIP_PROTECTED_CORE', 'CONFLICT_FOREIGN'], true)) {
             continue;
         }
 
