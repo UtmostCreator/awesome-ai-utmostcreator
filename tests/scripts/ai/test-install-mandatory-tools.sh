@@ -44,9 +44,21 @@ test_lists_tools() {
 }
 run_test "lists tools to install" test_lists_tools
 
+test_lists_vscode_extensions() {
+    local out
+    out="$("$BASH_BIN" "$SCRIPT" --dry-run 2>&1)"
+    [[ "$out" == *"code --install-extension github.copilot"* ]]
+}
+run_test "lists VS Code extensions to install" test_lists_vscode_extensions
+
 # Without --dry-run, script would attempt real installs
 # We do NOT test that — only dry-run is safe
 
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
-((FAIL == 0)) && printf '\033[0;32mPASSED\033[0m\n' || { printf '\033[0;31mFAILED\033[0m\n'; exit 1; }
+if ((FAIL == 0)); then
+    printf '\033[0;32mPASSED\033[0m\n'
+else
+    printf '\033[0;31mFAILED\033[0m\n'
+    exit 1
+fi

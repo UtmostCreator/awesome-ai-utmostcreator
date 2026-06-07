@@ -4,6 +4,9 @@ set -euo pipefail
 # Installs mandatory CLI tools used by the repository's AI scripts.
 
 DRY_RUN=0
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+VSCODE_EXTENSIONS_DOC="$REPO_ROOT/docs/vscode-extensions.md"
 
 if [[ "${1:-}" == "--dry-run" ]]; then
     DRY_RUN=1
@@ -64,6 +67,7 @@ install_windows() {
     require_pkg_manager winget Windows || return 0
 
     run_cmd winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements || true
+    run_cmd winget install --id Microsoft.VisualStudioCode -e --accept-source-agreements --accept-package-agreements || true
     run_cmd winget install --id PHP.PHP.8.3 -e --accept-source-agreements --accept-package-agreements || true
     run_cmd winget install --id BurntSushi.ripgrep.MSVC -e --accept-source-agreements --accept-package-agreements || true
     run_cmd winget install --id jqlang.jq -e --accept-source-agreements --accept-package-agreements || true
@@ -81,6 +85,7 @@ install_macos() {
     require_pkg_manager brew macOS || return 0
 
     run_cmd brew update
+    run_cmd brew install --cask visual-studio-code || true
     run_cmd brew install git php ripgrep jq scc node
     run_cmd npm install -g repomix
 }
@@ -89,6 +94,7 @@ install_linux() {
     require_pkg_manager apt-get 'Ubuntu/Debian Linux' || return 0
 
     run_cmd sudo apt-get update
+    run_cmd sudo apt-get install -y code || printf 'Warning: failed to install VS Code via apt; install it manually before extension install.\n' >&2
     run_cmd sudo apt-get install -y git php-cli ripgrep jq nodejs npm fd-find shellcheck
 
     if run_cmd sudo apt-get install -y scc; then
@@ -119,6 +125,31 @@ install_linux() {
     fi
 
     run_cmd npm install -g repomix
+}
+
+install_vscode_extensions() {
+    if [[ ! -f "$VSCODE_EXTENSIONS_DOC" ]]; then
+        printf 'Warning: VS Code extension source not found: %s\n' "$VSCODE_EXTENSIONS_DOC" >&2
+        return 0
+    fi
+
+    if ! need_cmd code && [[ "$DRY_RUN" -eq 0 ]]; then
+        printf 'Warning: code CLI not found; skipping VS Code extension install.\n' >&2
+        return 0
+    fi
+
+    local extension count=0
+    while IFS= read -r extension; do
+        [[ -n "$extension" ]] || continue
+        run_cmd code --install-extension "$extension" || true
+        count=$((count + 1))
+    done < <(sed -n 's/^code --install-extension //p' "$VSCODE_EXTENSIONS_DOC")
+
+    if [[ "$count" -eq 0 ]]; then
+        printf 'Warning: no VS Code extensions found in %s\n' "$VSCODE_EXTENSIONS_DOC" >&2
+    else
+        printf 'VS Code extensions queued from %s: %d\n' "$VSCODE_EXTENSIONS_DOC" "$count"
+    fi
 }
 
 verify_tools() {
@@ -155,4 +186,5 @@ linux) install_linux ;;
     ;;
 esac
 
+install_vscode_extensions
 verify_tools
