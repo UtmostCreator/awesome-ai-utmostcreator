@@ -70,6 +70,110 @@ final class CommandPolicyCompilerTest extends TestCase
         $this->assertLessThan($allowPos, $askPos, 'ask must precede allow');
     }
 
+    public function testLocalAllowParserReadsPolicyAllowBlock(): void
+    {
+        $yaml = "projectName: \"x\"\npolicy:\n  allow:\n    - \"pnpm run build\"\n    - \"make test\"\nprimaryRuntime: \"node\"\n";
+        $this->assertSame(['pnpm run build', 'make test'], aiPolicyParseLocalAllows($yaml));
+
+        // No policy block -> empty.
+        $this->assertSame([], aiPolicyParseLocalAllows("projectName: \"x\"\n"));
+    }
+
+    public function testLocalAllowsRejectWildcards(): void
+    {
+        $tiers = ['allow' => [], 'ask' => [], 'deny' => ['rm *']];
+        $violations = aiPolicyValidateLocalAllows(['cat *'], $tiers);
+        $this->assertNotSame([], $violations);
+        $this->assertStringContainsString('wildcard not permitted', $violations[0]);
+    }
+
+    public function testLocalAllowsCannotDowngradeGlobalDeny(): void
+    {
+        $tiers = ['allow' => [], 'ask' => [], 'deny' => ['rm *', 'git reset --hard *']];
+
+        $this->assertNotSame([], aiPolicyValidateLocalAllows(['rm file.txt'], $tiers), 'must block downgrade of rm deny');
+        $this->assertNotSame([], aiPolicyValidateLocalAllows(['git reset --hard'], $tiers), 'must block downgrade of git reset deny');
+    }
+
+    public function testLocalAllowsCannotDowngradeTierAsk(): void
+    {
+        $tiers = ['allow' => [], 'ask' => ['git commit*'], 'deny' => []];
+        $violations = aiPolicyValidateLocalAllows(['git commit -m x'], $tiers);
+        $this->assertNotSame([], $violations);
+        $this->assertStringContainsString('downgrade tier>=3 confirm', $violations[0]);
+    }
+
+    public function testSafeLocalAllowsAreAccepted(): void
+    {
+        $tiers = ['allow' => ['git status*'], 'ask' => ['git commit*'], 'deny' => ['rm *']];
+        $this->assertSame([], aiPolicyValidateLocalAllows(['pnpm run build', 'make test'], $tiers));
+    }
+
+    public function testCompilerRejectsTargetLocalDowngradeOverride(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_policy_override_' . uniqid('', true);
+        mkdir($target . '/.ai', 0700, true);
+        mkdir($target . '/docs/ai', 0700, true);
+        mkdir($target . '/.github/hooks/scripts', 0700, true);
+        copy(self::$repoRoot . '/docs/ai/command-policy.tiers.yaml', $target . '/docs/ai/command-policy.tiers.yaml');
+        file_put_contents($target . '/.ai/project.yml', "projectName: \"x\"\npolicy:\n  allow:\n    - \"rm file\"\n");
+
+        try {
+            $cmd = escapeshellarg((string) PHP_BINARY) . ' ' . escapeshellarg(self::$compiler)
+                . ' --in=' . escapeshellarg($target . '/docs/ai/command-policy.tiers.yaml')
+                . ' --out=' . escapeshellarg($target . '/.github/hooks/scripts/command-policy.compiled.sh');
+            $result = $this->runCli($cmd);
+
+            $this->assertSame(1, $result['exit'], 'compiler must reject a downgrade override from the target repo');
+            $this->assertStringContainsString('would downgrade global deny', $result['stderr']);
+            $this->assertFileDoesNotExist($target . '/.github/hooks/scripts/command-policy.compiled.sh', 'no compiled output on rejected override');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testCompilerAcceptsTargetLocalSafeOverride(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_policy_override_ok_' . uniqid('', true);
+        mkdir($target . '/.ai', 0700, true);
+        mkdir($target . '/docs/ai', 0700, true);
+        mkdir($target . '/.github/hooks/scripts', 0700, true);
+        copy(self::$repoRoot . '/docs/ai/command-policy.tiers.yaml', $target . '/docs/ai/command-policy.tiers.yaml');
+        file_put_contents($target . '/.ai/project.yml', "projectName: \"x\"\npolicy:\n  allow:\n    - \"pnpm run build\"\n");
+
+        try {
+            $out = $target . '/.github/hooks/scripts/command-policy.compiled.sh';
+            $cmd = escapeshellarg((string) PHP_BINARY) . ' ' . escapeshellarg(self::$compiler)
+                . ' --in=' . escapeshellarg($target . '/docs/ai/command-policy.tiers.yaml')
+                . ' --out=' . escapeshellarg($out);
+            $result = $this->runCli($cmd);
+
+            $this->assertSame(0, $result['exit'], "safe override must compile:\n" . $result['stderr']);
+            $this->assertFileExists($out);
+            $this->assertStringContainsString('pnpm run build', (string) file_get_contents($out));
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    private function removeTree(string $path): void
+    {
+        if (!is_dir($path)) {
+            if (is_file($path)) {
+                @unlink($path);
+            }
+            return;
+        }
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($it as $item) {
+            $item->isDir() ? @rmdir($item->getPathname()) : @unlink($item->getPathname());
+        }
+        @rmdir($path);
+    }
+
     public function testCommittedCompiledArtifactIsUpToDate(): void
     {
         $result = $this->runCli(escapeshellarg((string) PHP_BINARY) . ' ' . escapeshellarg(self::$compiler) . ' --check');
