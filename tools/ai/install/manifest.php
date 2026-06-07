@@ -45,14 +45,19 @@ function aiInstallerBuildManifest(array $config, array $packs, array $plan): arr
         $hash = aiInstallerHashPath($abs);
         $sourceAbs = $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['source']);
         $sourceHash = aiInstallerHashPath($sourceAbs);
+        $mergeStrategy = $item['merge_strategy'] ?? 'skip-if-exists';
+        $pack = (string) ($item['pack'] ?? '');
         $files[$rel] = [
             'pack' => $item['pack'],
             'source' => $item['source'],
             'source_hash' => $sourceHash,
             'installed_hash' => $hash,
             'managed' => true,
-            'merge_strategy' => $item['merge_strategy'] ?? 'skip-if-exists',
+            'merge_strategy' => $mergeStrategy,
             'required' => true,
+            'ownership' => aiInstallerResolveOwnership($item, $mergeStrategy),
+            'component' => $pack,
+            'runtimes' => aiInstallerResolveRuntimes($pack),
         ];
     }
 
@@ -87,6 +92,47 @@ function aiInstallerBuildManifest(array $config, array $packs, array $plan): arr
         'files' => $files,
         'pending_configuration' => $pendingConfiguration,
     ];
+}
+
+/**
+ * Resolve the ownership class for an installed file.
+ *
+ * Ownership classes drive upgrade/reinstall/uninstall behaviour:
+ *  - owned:    kit-managed; overwritten freely on upgrade (checksum-tracked).
+ *  - template: installed once, then user-owned; never overwritten on upgrade.
+ *  - rendered: regenerated each install/upgrade from project values.
+ *
+ * Derivation rule (no per-entry annotation required): an explicit `ownership` on the
+ * registry entry always wins; otherwise `skip-if-exists` files are treated as `template`
+ * (the installer already preserves them when present) and everything else is `owned`.
+ *
+ * @param array<string,mixed> $item Registry/plan entry.
+ */
+function aiInstallerResolveOwnership(array $item, string $mergeStrategy): string
+{
+    $explicit = $item['ownership'] ?? null;
+    if (is_string($explicit) && in_array($explicit, ['owned', 'template', 'rendered'], true)) {
+        return $explicit;
+    }
+
+    return $mergeStrategy === 'skip-if-exists' ? 'template' : 'owned';
+}
+
+/**
+ * Resolve which runtimes an installed file belongs to, derived from its pack/component.
+ *
+ * @return list<string>
+ */
+function aiInstallerResolveRuntimes(string $pack): array
+{
+    if (str_contains($pack, 'copilot')) {
+        return ['github-copilot'];
+    }
+    if (str_contains($pack, 'opencode')) {
+        return ['opencode'];
+    }
+
+    return ['both'];
 }
 
 function aiInstallerReadExistingManifest(string $targetRoot): array
