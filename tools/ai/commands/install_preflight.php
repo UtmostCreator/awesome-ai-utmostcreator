@@ -60,6 +60,36 @@ function aiRunDoctor(string $root): int
         'detail' => $installed ? "{$fileCount} managed files" : null,
     ];
 
+    // Interrupted-install detection: a left-behind .ai/install.lock means a writing install
+    // did not release the lock (crash/SIGKILL). Read-only warning; never auto-removed here.
+    $lockPath = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'install.lock';
+    $lockPresent = is_file($lockPath);
+    $checks[] = [
+        'name' => 'install_lock',
+        'category' => 'install',
+        'status' => $lockPresent ? 'warning' : 'passed',
+        'reason' => $lockPresent ? 'stale .ai/install.lock present; a prior install may have been interrupted (no install running? remove it and rerun install)' : null,
+    ];
+
+    // Checksum drift: compare each managed file against its recorded installed_hash. Drifted or
+    // missing managed files are reported as warnings so the user can re-run install if needed.
+    if ($installed && is_array($manifest)) {
+        $driftResult = aiInstallerCollectChecksumDrift($root, $manifest);
+        $checks[] = [
+            'name' => 'checksum_integrity',
+            'category' => 'install',
+            'status' => ($driftResult['drifted'] === [] && $driftResult['missing'] === []) ? 'passed' : 'warning',
+            'reason' => ($driftResult['drifted'] === [] && $driftResult['missing'] === [])
+                ? null
+                : 'managed files changed since install: ' . count($driftResult['drifted']) . ' modified, ' . count($driftResult['missing']) . ' missing',
+            'detail' => [
+                'checked' => $driftResult['checked'],
+                'drifted' => $driftResult['drifted'],
+                'missing' => $driftResult['missing'],
+            ],
+        ];
+    }
+
     $failed = array_values(array_filter($checks, static fn(array $c): bool => ($c['status'] ?? 'failed') === 'failed'));
     $warnings = array_values(array_filter($checks, static fn(array $c): bool => ($c['status'] ?? '') === 'warning'));
     $status = $failed !== [] ? 'failed' : ($warnings !== [] ? 'warning' : 'ok');
@@ -83,6 +113,66 @@ function aiRunDoctor(string $root): int
 
     // Read-only diagnostic: only hard environment failures are non-zero; warnings are exit 0.
     return $failed === [] ? 0 : 1;
+}
+
+/**
+ * Compare managed files against their recorded installed_hash. Returns counts and the lists of
+ * drifted (content changed) and missing files. Installer-generated/volatile artifacts and
+ * user-owned template files are excluded so the check reflects real integrity drift only.
+ *
+ * @param array<string,mixed> $manifest
+ * @return array{checked:int,drifted:list<string>,missing:list<string>}
+ */
+function aiInstallerCollectChecksumDrift(string $root, array $manifest): array
+{
+    $skip = [
+        'docs/ai/POST-INSTALL.md',
+        'docs/ai/available-packs.md',
+        'docs/ai/SETUP.md',
+        'docs/ai/installed-files.md',
+        'docs/ai/project-configuration.md',
+        'docs/ai/generated/install-summary.md',
+        'docs/ai/generated/install-instructions.md',
+        'docs/ai/generated/install-instructions.json',
+        'docs/ai/generated/install-manifest.json',
+        '.ai/project.yml',
+    ];
+
+    $checked = 0;
+    $drifted = [];
+    $missing = [];
+
+    foreach (($manifest['files'] ?? []) as $rel => $meta) {
+        if (!is_string($rel) || !is_array($meta)) {
+            continue;
+        }
+        if (in_array($rel, $skip, true) || str_starts_with($rel, 'docs/ai/generated/')) {
+            continue;
+        }
+        // Only verify files whose content the kit owns; template files are user-editable.
+        if ((string) ($meta['ownership'] ?? 'owned') === 'template') {
+            continue;
+        }
+        $expected = (string) ($meta['installed_hash'] ?? '');
+        if ($expected === '' || !str_starts_with($expected, 'sha256:')) {
+            continue;
+        }
+        $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+        if (!is_file($abs)) {
+            $missing[] = $rel;
+            continue;
+        }
+        $checked++;
+        $actual = 'sha256:' . hash_file('sha256', $abs);
+        if ($actual !== $expected) {
+            $drifted[] = $rel;
+        }
+    }
+
+    sort($drifted, SORT_STRING);
+    sort($missing, SORT_STRING);
+
+    return ['checked' => $checked, 'drifted' => $drifted, 'missing' => $missing];
 }
 
 /**

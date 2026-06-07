@@ -575,6 +575,42 @@ class CliToolsTest extends TestCase
         }
     }
 
+    public function testChecksumDriftDetectsModifiedAndMissingManagedFiles(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/commands/install_preflight.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_checksum_drift_' . uniqid('', true);
+        mkdir($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai', 0700, true);
+
+        $clean = $target . DIRECTORY_SEPARATOR . 'docs/ai/clean.md';
+        $dirty = $target . DIRECTORY_SEPARATOR . 'docs/ai/dirty.md';
+        file_put_contents($clean, "clean content\n");
+        file_put_contents($dirty, "original content\n");
+
+        $manifest = [
+            'files' => [
+                'docs/ai/clean.md' => ['ownership' => 'owned', 'installed_hash' => 'sha256:' . hash('sha256', "clean content\n")],
+                'docs/ai/dirty.md' => ['ownership' => 'owned', 'installed_hash' => 'sha256:' . hash('sha256', "original content\n")],
+                'docs/ai/gone.md' => ['ownership' => 'owned', 'installed_hash' => 'sha256:' . hash('sha256', "x")],
+                // Template files are user-editable and must be excluded from drift.
+                '.ai/project.yml' => ['ownership' => 'template', 'installed_hash' => 'sha256:deadbeef'],
+            ],
+        ];
+
+        try {
+            // Mutate the dirty file after "install".
+            file_put_contents($dirty, "user edited this\n");
+
+            $result = aiInstallerCollectChecksumDrift($target, $manifest);
+
+            $this->assertSame(['docs/ai/dirty.md'], $result['drifted'], 'modified owned file must be flagged as drift');
+            $this->assertSame(['docs/ai/gone.md'], $result['missing'], 'missing owned file must be flagged');
+            $this->assertSame(2, $result['checked'], 'only present owned files are checksum-verified');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testAiCliPackageVerifyExitsZeroOrFailed(): void
     {
         $result = $this->runTool('php tools/ai/ai.php package-verify');

@@ -786,6 +786,30 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testCaseCollisionGuardRejectsTargetsDifferingOnlyByCase(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        // Distinct case-variant targets must be rejected.
+        try {
+            aiInstallerAssertNoCaseCollisions([
+                ['target' => 'docs/ai/Readme.md'],
+                ['target' => 'docs/ai/README.md'],
+            ]);
+            $this->fail('case-colliding targets must be rejected');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString('case-collision', $e->getMessage());
+        }
+
+        // Identical repeated targets (same case) are fine (idempotent dir entries, etc.).
+        aiInstallerAssertNoCaseCollisions([
+            ['target' => 'docs/ai/x.md'],
+            ['target' => 'docs/ai/x.md'],
+            ['target' => 'docs/ai/y.md'],
+        ]);
+        $this->addToAssertionCount(1);
+    }
+
     public function testInstallLockBlocksConcurrentHolderAndReleases(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/core.php';
