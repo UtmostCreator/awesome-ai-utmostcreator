@@ -672,6 +672,69 @@ function aiUpgradeResolveFileAction(
 }
 
 /**
+ * Apply-path removal of computed `deprecated` files (see aiUpgradeComputeDeprecated).
+ *
+ * Only operates on the deprecated entries it is given (each derived from the install
+ * manifest), so the write-allowlist invariant holds — foreign files are never touched.
+ *  - action `delete`          -> remove the file (a byte-identical copy is already in backup)
+ *  - action `route-to-removed` -> copy user bytes to .ai/conflicts/<ts>/removed/ then remove
+ *
+ * Files already absent from disk are skipped. Returns the list of files actually acted on.
+ *
+ * @param list<array{file:string,action:string}> $deprecated
+ * @return list<array{file:string,action:string,routed_to?:string}>
+ */
+function aiUpgradeRemoveDeprecated(string $root, array $deprecated): array
+{
+    if ($deprecated === []) {
+        return [];
+    }
+
+    $stamp = gmdate('Ymd\THis\Z');
+    $removedRoot = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'conflicts'
+        . DIRECTORY_SEPARATOR . $stamp . DIRECTORY_SEPARATOR . 'removed';
+
+    $acted = [];
+    foreach ($deprecated as $entry) {
+        $rel = (string) ($entry['file'] ?? '');
+        $action = (string) ($entry['action'] ?? '');
+        if ($rel === '') {
+            continue;
+        }
+        $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+        if (!is_file($abs)) {
+            // Already gone from disk: nothing to remove or route.
+            continue;
+        }
+
+        if ($action === 'route-to-removed') {
+            $destAbs = $removedRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+            $destDir = dirname($destAbs);
+            if (!is_dir($destDir)) {
+                mkdir($destDir, AI_DIR_MODE, true);
+            }
+            if (!copy($abs, $destAbs)) {
+                // Never delete user bytes we failed to preserve.
+                continue;
+            }
+            unlink($abs);
+            $acted[] = [
+                'file' => $rel,
+                'action' => $action,
+                'routed_to' => '.ai/conflicts/' . $stamp . '/removed/' . $rel,
+            ];
+            continue;
+        }
+
+        // Default: delete (deprecated-unchanged; already backed up).
+        unlink($abs);
+        $acted[] = ['file' => $rel, 'action' => 'delete'];
+    }
+
+    return $acted;
+}
+
+/**
  * Compute the `deprecated` ownership class at plan time (never stored).
  *
  * A deprecated file is one recorded in the installed manifest but no longer shipped by the
@@ -851,6 +914,11 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
     // Template files are preserved by the installer itself (skip-if-exists) and are not touched.
     $preserved = aiUpgradePreserveOwnedConflicts($root, $fileActions);
 
+    // Remove computed `deprecated` files (manifest-recorded, no longer shipped). The
+    // explicit backup ($backupId) already snapshotted them; user-modified ones are routed
+    // to .ai/conflicts/<ts>/removed/ before deletion. Only manifest paths are touched.
+    $removedDeprecated = aiUpgradeRemoveDeprecated($root, $deprecated);
+
     $installArgs = aiUpgradeBuildApplyInstallArgs($mode, $backupId, $args);
     $exit = aiRunInstallWorkflow($root, $installArgs);
     $install = aiLoadArtifactData($root, 'install.json');
@@ -862,6 +930,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
         'target_ref' => $targetRef !== '' ? $targetRef : null,
         'file_actions_preview' => $fileActions,
         'preserved_conflicts' => $preserved,
+        'removed_deprecated' => $removedDeprecated,
         'install_status' => $install['status'] ?? 'unknown',
     ];
     $written = aiCliWriteArtifact($root, 'upgrade', 'php tools/ai/ai.php upgrade --apply', $data, $status, null, $status === 'ok' ? 'Upgrade apply completed; run adapter-validate.' : 'Upgrade apply failed; inspect install artifact.');

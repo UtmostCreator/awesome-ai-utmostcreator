@@ -291,4 +291,69 @@ final class UpgradeOwnershipTest extends TestCase
         $this->assertSame('unchanged', $r['status']);
         $this->assertSame('skip', $r['action']);
     }
+
+    // ---- P0-b Slice 4: apply-path deprecated removal + route-to-removed ----
+
+    public function testRemoveDeprecatedDeletesUnchangedAndRoutesModified(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'upgrade_remove_dep_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai', 0700, true);
+
+        $unchanged = 'docs/ai/stale-hook.md';
+        $modified = 'docs/ai/stale-policy.md';
+        file_put_contents($root . DIRECTORY_SEPARATOR . $unchanged, "# stale\n");
+        file_put_contents($root . DIRECTORY_SEPARATOR . $modified, "# user edited stale\n");
+
+        $deprecated = [
+            ['file' => $unchanged, 'ownership' => 'deprecated', 'status' => 'deprecated-unchanged', 'action' => 'delete'],
+            ['file' => $modified, 'ownership' => 'deprecated', 'status' => 'deprecated-user-modified', 'action' => 'route-to-removed'],
+        ];
+
+        $result = aiUpgradeRemoveDeprecated($root, $deprecated);
+
+        // Unchanged deprecated file is deleted (already in backup).
+        $this->assertFileDoesNotExist($root . DIRECTORY_SEPARATOR . $unchanged);
+        // User-modified deprecated file is removed from its place but its bytes are routed.
+        $this->assertFileDoesNotExist($root . DIRECTORY_SEPARATOR . $modified);
+
+        $routed = null;
+        foreach ($result as $entry) {
+            if (($entry['file'] ?? '') === $modified) {
+                $routed = $entry;
+            }
+        }
+        $this->assertNotNull($routed, 'modified deprecated file must be reported as routed');
+        $this->assertArrayHasKey('routed_to', $routed);
+        $this->assertStringStartsWith('.ai/conflicts/', $routed['routed_to']);
+        $this->assertStringContainsString('/removed/', $routed['routed_to']);
+
+        $routedAbs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $routed['routed_to']);
+        $this->assertFileExists($routedAbs);
+        $this->assertSame("# user edited stale\n", (string) file_get_contents($routedAbs));
+    }
+
+    public function testRemoveDeprecatedIgnoresAlreadyMissingFiles(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'upgrade_remove_dep_missing_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root, 0700, true);
+
+        $result = aiUpgradeRemoveDeprecated($root, [
+            ['file' => 'docs/ai/gone.md', 'action' => 'delete'],
+        ]);
+
+        $this->assertSame([], $result, 'a deprecated file already gone needs no removal');
+        $this->assertDirectoryDoesNotExist($root . DIRECTORY_SEPARATOR . '.ai');
+    }
+
+    public function testRemoveDeprecatedDoesNothingForEmptyList(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'upgrade_remove_dep_empty_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root, 0700, true);
+
+        $this->assertSame([], aiUpgradeRemoveDeprecated($root, []));
+        $this->assertDirectoryDoesNotExist($root . DIRECTORY_SEPARATOR . '.ai');
+    }
 }
