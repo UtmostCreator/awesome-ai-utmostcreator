@@ -169,12 +169,45 @@ class InstallerSafetyTest extends TestCase
             mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
         }
 
-        foreach (['tools', 'packages'] as $dir) {
-            $source = self::$repoRoot . DIRECTORY_SEPARATOR . $dir;
-            $link = $target . DIRECTORY_SEPARATOR . $dir;
-            if (!@symlink($source, $link)) {
-                $this->markTestSkipped('symlink support is required for isolated ai.php integration tests');
+        // Copy (not symlink) the kit's source roots into the target so the install writes
+        // through real directories. Symlinks would (correctly) trip PathGuard's symlink-escape
+        // protection, since they resolve outside the target root. These roots cover every pack
+        // source surface (tools/packages/scripts/docs/schemas + a few root files).
+        foreach (['tools', 'packages', 'scripts', 'docs', 'schemas'] as $dir) {
+            $this->copyTreeForIntegration(self::$repoRoot . DIRECTORY_SEPARATOR . $dir, $target . DIRECTORY_SEPARATOR . $dir);
+        }
+        foreach (['.repomixignore', 'PLACEHOLDERS.md', 'llms.txt'] as $file) {
+            $src = self::$repoRoot . DIRECTORY_SEPARATOR . $file;
+            if (is_file($src)) {
+                copy($src, $target . DIRECTORY_SEPARATOR . $file);
             }
+        }
+    }
+
+    private function copyTreeForIntegration(string $src, string $dest): void
+    {
+        if (!is_dir($src)) {
+            return;
+        }
+        mkdir($dest, 0777, true);
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($src, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($it as $item) {
+            $rel = str_replace('\\', '/', substr($item->getPathname(), strlen($src) + 1));
+            // Skip volatile/generated artifacts that are not install sources.
+            if (str_contains($rel, '/generated/') || str_starts_with($rel, 'generated/') || str_contains($rel, '/.git/')) {
+                continue;
+            }
+            $targetPath = $dest . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+            if ($item->isDir()) {
+                if (!is_dir($targetPath)) {
+                    mkdir($targetPath, 0777, true);
+                }
+                continue;
+            }
+            copy($item->getPathname(), $targetPath);
         }
     }
 
@@ -694,6 +727,89 @@ class InstallerSafetyTest extends TestCase
             $this->assertStringContainsString('# new managed kit content', $result, 'kit content must refresh');
             $this->assertStringContainsString($userBlock, $result, 'user block must be restored byte-for-byte');
             $this->assertSame(1, substr_count($result, '<!-- BEGIN ai-kit:user -->'), 'exactly one user block');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testPathGuardRejectsTraversalAbsoluteAndSymlinkEscape(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_pathguard_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            // Clean targets pass.
+            aiInstallerAssertSafePlanTargets($target, [
+                ['target' => 'docs/ai/x.md'],
+                ['target' => '.opencode/agents/a.md'],
+            ]);
+            $this->addToAssertionCount(1);
+
+            // Traversal rejected.
+            try {
+                aiInstallerAssertSafePlanTargets($target, [['target' => '../escape.md']]);
+                $this->fail('traversal target must be rejected');
+            } catch (\RuntimeException $e) {
+                $this->assertStringContainsString('traversal', $e->getMessage());
+            }
+
+            // Absolute rejected.
+            try {
+                aiInstallerAssertSafePlanTargets($target, [['target' => '/etc/passwd']]);
+                $this->fail('absolute target must be rejected');
+            } catch (\RuntimeException $e) {
+                $this->assertStringContainsString('absolute', $e->getMessage());
+            }
+
+            // Symlink escape rejected.
+            $outside = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_pathguard_outside_' . uniqid('', true);
+            mkdir($outside, 0700, true);
+            $linkOk = @symlink($outside, $target . DIRECTORY_SEPARATOR . 'escaped');
+            if (!$linkOk) {
+                $this->markTestSkipped('symlink support required for symlink-escape assertion');
+            }
+            try {
+                try {
+                    aiInstallerAssertSafePlanTargets($target, [['target' => 'escaped/payload.md']]);
+                    $this->fail('symlink-escaping target must be rejected');
+                } catch (\RuntimeException $e) {
+                    $this->assertStringContainsString('symlink', $e->getMessage());
+                }
+            } finally {
+                @unlink($target . DIRECTORY_SEPARATOR . 'escaped');
+                $this->removeTree($outside);
+            }
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testInstallLockBlocksConcurrentHolderAndReleases(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_install_lock_' . uniqid('', true);
+        mkdir($target, 0700, true);
+
+        try {
+            $lock = aiInstallerAcquireInstallLock($target);
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'install.lock');
+
+            // A second acquire while held must fail.
+            try {
+                aiInstallerAcquireInstallLock($target);
+                $this->fail('second concurrent install lock acquire must fail');
+            } catch (\RuntimeException $e) {
+                $this->assertStringContainsString('another install is already running', $e->getMessage());
+            }
+
+            // After release, re-acquire succeeds.
+            aiInstallerReleaseInstallLock($lock);
+            $lock2 = aiInstallerAcquireInstallLock($target);
+            $this->addToAssertionCount(1);
+            aiInstallerReleaseInstallLock($lock2);
         } finally {
             $this->removeTree($target);
         }
