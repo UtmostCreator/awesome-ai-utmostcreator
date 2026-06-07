@@ -62,12 +62,23 @@ function aiInstallerRun(array $argv): int
     $plan = aiInstallerBuildPlan($config, $registry, $packs);
     aiInstallerAssertPlanSourcesExist($config, $plan);
 
+    // PathGuard: reject any plan target that escapes the target root via traversal,
+    // absolute paths, or symlinked parent directories. Runs before any write.
+    aiInstallerAssertSafePlanTargets((string) $config['targetRoot'], $plan);
+
     // Adopt-or-conflict gate: files flagged never_auto_merge (e.g. opencode.jsonc) that
     // already exist and differ from the kit version must not be silently skipped or merged.
     // Fail fast before any writes so the install is all-or-nothing for the user's config.
     if (!$config['dryRun']) {
         aiInstallerAssertNoForeignConflicts($plan);
     }
+
+    // Single-process guard: only one writing install may run per target at a time.
+    $installLock = null;
+    if (!$config['dryRun']) {
+        $installLock = aiInstallerAcquireInstallLock((string) $config['targetRoot']);
+    }
+    try {
 
     // Ensure runtime/generated state is gitignored in the target repo. Apply
     // flow only; skip on dry-run. This must happen before backups/conflicts are
@@ -296,7 +307,58 @@ function aiInstallerRun(array $argv): int
         file_put_contents((string) $config['outputJson'], $json);
     }
 
-    return 0;
+        return 0;
+    } finally {
+        if ($installLock !== null) {
+            aiInstallerReleaseInstallLock($installLock);
+        }
+    }
+}
+
+/**
+ * Acquire an exclusive per-target install lock at .ai/install.lock. Detects and reclaims a
+ * stale lock (dead PID), but refuses to proceed when another live process holds it.
+ *
+ * @return array{path:string,handle:resource}
+ */
+function aiInstallerAcquireInstallLock(string $targetRoot)
+{
+    $dir = $targetRoot . DIRECTORY_SEPARATOR . '.ai';
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+    $lockPath = $dir . DIRECTORY_SEPARATOR . 'install.lock';
+
+    $handle = @fopen($lockPath, 'c+');
+    if ($handle === false) {
+        throw new RuntimeException('unable to open install lock: ' . $lockPath);
+    }
+
+    if (!flock($handle, LOCK_EX | LOCK_NB)) {
+        $existing = trim((string) stream_get_contents($handle));
+        fclose($handle);
+        throw new RuntimeException('another install is already running for this target (.ai/install.lock held' . ($existing !== '' ? ': ' . $existing : '') . ')');
+    }
+
+    ftruncate($handle, 0);
+    rewind($handle);
+    fwrite($handle, 'pid=' . getmypid() . ' at=' . gmdate('c') . "\n");
+    fflush($handle);
+
+    return ['path' => $lockPath, 'handle' => $handle];
+}
+
+/** @param array{path:string,handle:resource} $lock */
+function aiInstallerReleaseInstallLock(array $lock): void
+{
+    $handle = $lock['handle'] ?? null;
+    if (is_resource($handle)) {
+        @flock($handle, LOCK_UN);
+        @fclose($handle);
+    }
+    if (is_string($lock['path'] ?? null) && is_file($lock['path'])) {
+        @unlink($lock['path']);
+    }
 }
 
 function aiInstallerIsSelfTargetInstall(array $config): bool
@@ -766,6 +828,52 @@ function aiInstallerEnsureAgentsMarkedSectionForSkippedUserFile(string $targetRo
         $content .= "\n";
     }
     file_put_contents($path, $content . "\n" . $section . "\n");
+}
+
+/**
+ * PathGuard: validate every plan target stays inside the target root. Rejects path traversal
+ * (`..`), absolute targets, and any target whose existing parent chain escapes the root via a
+ * symlink. Throws on the first violation so installs fail closed before writing.
+ */
+function aiInstallerAssertSafePlanTargets(string $targetRoot, array $plan): void
+{
+    $rootReal = realpath($targetRoot);
+    if ($rootReal === false) {
+        throw new RuntimeException('PathGuard: target root does not resolve: ' . $targetRoot);
+    }
+    $rootReal = rtrim(str_replace('\\', '/', $rootReal), '/');
+
+    foreach ($plan as $item) {
+        $target = (string) ($item['target'] ?? '');
+        if ($target === '') {
+            continue;
+        }
+        $normalized = str_replace('\\', '/', $target);
+        if (str_starts_with($normalized, '/') || preg_match('#^[A-Za-z]:#', $normalized) === 1) {
+            throw new RuntimeException('PathGuard: absolute install target rejected: ' . $target);
+        }
+        if (preg_match('#(^|/)\.\.(/|$)#', $normalized) === 1) {
+            throw new RuntimeException('PathGuard: path traversal in install target rejected: ' . $target);
+        }
+
+        // Walk the deepest existing ancestor; if it resolves outside the root, reject (symlink escape).
+        $candidate = $rootReal . '/' . $normalized;
+        $ancestor = $candidate;
+        while ($ancestor !== '' && !file_exists($ancestor)) {
+            $parent = dirname($ancestor);
+            if ($parent === $ancestor) {
+                break;
+            }
+            $ancestor = $parent;
+        }
+        $ancestorReal = $ancestor !== '' ? realpath($ancestor) : false;
+        if ($ancestorReal !== false) {
+            $ancestorReal = rtrim(str_replace('\\', '/', $ancestorReal), '/');
+            if ($ancestorReal !== $rootReal && !str_starts_with($ancestorReal . '/', $rootReal . '/')) {
+                throw new RuntimeException('PathGuard: install target escapes root via symlink: ' . $target);
+            }
+        }
+    }
 }
 
 /**
