@@ -15,8 +15,26 @@
 | `79c098b` | Ownership-aware upgrade classification + `.ai/conflicts/` preservation helper | partial — see RF-2 |
 | `5dfa2bc` | Read-only `doctor` command | done |
 | `ac5cdf4` | Ownership-aware `uninstall` | partial — see RF-3 |
+| `6b32160` | RF-3 fix: uninstall never recursively deletes user dirs | done |
+| `084e42d` | RF-1/2/4 + Phase 3c project.yml + Phase 0 lock + Phase 2b migrations + Phase 3.5 gitignore/AGENTS marker; planner force preserves templates | done |
+| `460cc49` | Phase 5a reserved user-namespace gate | done |
+| `13a5c45` | Phase 5b user-section byte-preservation + backup retention | done |
+| `844bf29` | Phase 6 PathGuard + single-process install lock | done |
+| `25cf316` | Phase 6b case-collision guard + doctor checksum/lock checks | done |
+| `a0a6dbb` `575d64d` | Phase 7a POSIX tool-guardian.sh + ps1 parity (+inventory) | done |
+| `9a40e32` | Phase 7b-1 dependency-free policy compiler; hooks-pack ships guardian/compiled | done |
+| `6557578` `58bc001` | Phase 7b-2 expanded secret denies + local-override no-downgrade allow-list | done |
+| `6c6452b` `cb18ca4` | Phase 7b-3 security.md enforcement matrix (invariant 6) | done |
+| `9fc32ef` | Compiler wired into install/upgrade (local overrides apply at install) | done |
+| `c67e264` | Phase 8 end-to-end install/upgrade/uninstall lifecycle tests | done |
+| `1f0487c` `79ceede` | Phase 10 scratch-artifact removal; ai-doc-check generated-exclusion + 403/429 | done |
+| `dbc0497` | Phase 10b StubValidator CI gate | done |
+| `4ec1495` | INSTALL-CATALOG standalone drift check | done |
+| `670ea88` | Phase 8b read-only fixture coverage + clean copy failure | done |
+| `70e12a9` `3c8578d` | Phase 5c extraDocs injection + template refresh channel | done |
+| `b25b18c` | De-duplication: shared project.yml list parser | done |
 
-Test suite: 265 → 293 passing, 0 failures.
+Test suite: 265 → 293 → 366 passing, 0 failures, 6 skipped.
 
 ## Open Reviewer Findings (must fix before "complete")
 
@@ -162,80 +180,114 @@ checksum gate enforced.
 
 ## Phase 5 — User AI-Content Coexistence (CP-5)
 
-- [ ] Enforce invariant 1: file-level allowlist; foreign files excluded from all write/delete
-      logic; surfaced read-only in `plan`/`verify`
-- [ ] Reserved namespace contract: kit never ships `local-*`, `*.local.*`, `**/local/**`; CI gate
-      `LocalNamespaceNeverShippedTest`
+- [x] Enforce invariant 1: file-level allowlist; foreign files excluded from all write/delete
+      logic (manifest `files{}` + lock are the write allowlist; RF-3 uninstall preserves foreign)
+- [x] Reserved namespace contract: kit never ships `local-*`, `*.local.*`, `**/local/**`; CI gate
+      via `aiInstallerIsReservedUserNamespace` (validate-install-surface + pack-registry check + tests)
 - [ ] Ship `docs/ai/project/` with exactly three templates (`README.md`, `project-interaction.md`,
       `conventions.md`)
-- [ ] `project.yml → context.extraDocs:`; renderers inject references; user pointers survive
-      re-render
-- [ ] `<!-- BEGIN ai-kit:user -->` sections preserved byte-for-byte in rendered files
-- [ ] Template refresh channel: upstream changes → `.ai/templates-new/<path>` + plan notice
+- [x] `project.yml → context.extraDocs:`; renderers inject references; user pointers survive
+      re-render (`<EXTRA_DOCS>` regenerated from project.yml each install)
+- [x] `<!-- BEGIN ai-kit:user -->` sections preserved byte-for-byte in rendered files
+- [x] Template refresh channel: upstream changes → `.ai/templates-new/<path>` + plan notice
 - [ ] `.ai/local-manifest.json`: gitignored, informational only, no write permission
+      (gitignored already; informational write not yet implemented)
 - [ ] Unified private structure (`0700`): `backups/<ts>-<op>/`,
       `conflicts/<ts>-<op>/{files,incoming,removed}/`, `templates-new/`
-- [ ] Backups scoped to operation-touched files only; retention last 5
+- [x] Backups scoped to operation-touched files only; retention last 5 (`aiInstallBackupPruneOld`)
 
 **Gates:** foreign agents/skills/docs survive upgrade and uninstall · collision → user wins ·
 extraDocs survive re-render · template refresh never overwrites · backups mirror paths.
 
 ## Phase 6 — Installer Safety Hardening (transactional)
 
-- [ ] Read-only default enforced by the CLI itself; writes need `--apply`, overwrites
-      `--overwrite-approved`
-- [ ] `PathGuard`: reject `..`, absolute escapes, symlink traversal, case-insensitive collisions
-- [ ] `Checksums` to lock on install; `verify` validates; `0755` + LF on hooks from lock
-- [ ] `.ai/install.lock`: single process, stale-lock detection; SIGINT/SIGTERM → rollback or
-      marked-recoverable; `verify` detects incomplete transactions
-- [ ] Append-only `.ai/logs/` audit log; failed install auto-rolls back
+- [x] Read-only default enforced by the CLI itself; writes need `--apply` (orchestrator dry-run by
+      default). `--overwrite-approved`/`--allow-core-overwrite` gate core overwrites
+- [x] `PathGuard`: reject `..`, absolute escapes, symlink traversal, case-insensitive collisions
+      (`aiInstallerAssertSafePlanTargets` + `aiInstallerAssertNoCaseCollisions`)
+- [x] `Checksums` to lock on install (`sha256` per lock entry, `mode`, `lineEnding`); `doctor`
+      validates via `aiInstallerCollectChecksumDrift`
+- [x] `.ai/install.lock`: single process, stale-lock detection (`aiInstallerAcquireInstallLock`
+      via flock); `doctor` flags a leftover lock as a possible interrupted install
+- [ ] SIGINT/SIGTERM → rollback or marked-recoverable; `verify` detects incomplete transactions;
+      append-only `.ai/logs/` audit log; failed install auto-rolls back
 
 **Gates:** traversal/symlink/case-collision blocked · concurrent install rejected · interrupted
 install recoverable · checksum mismatch fails verify.
 
 ## Phase 7 — PHP-Free Runtime, Policy Compile, Honest Enforcement
 
-- [ ] Policy compiler: `command-policy.tiers.yaml` → dependency-free `pre-tool-use`/`post-tool-use`
-      (POSIX sh + ps1) with compiled `case` table — no `yq`, no PHP at target runtime
-- [ ] POSIX `tool-guardian.sh` beside `tool-guardian.ps1`
-- [ ] Minimal local overrides: `project.yml → policy.allow[]`; hard no-downgrade of global
-      denies/tier-≥3; wildcards rejected
-- [ ] Compiled policy closes gaps: deny `~/.ssh`, `~/.aws/credentials`, `.npmrc`, `.netrc`,
-      `*.pem`, `*.key`; no bare `env`/`printenv` auto-allow; block `base64 -d | sh` obfuscation
-- [ ] Runtime enforcement matrix in `security.md` (invariant 6)
-- [ ] Document: PHP required only at install/upgrade time
+- [x] Policy compiler: `command-policy.tiers.yaml` → dependency-free compiled `case` table
+      (`compile-command-policy.php` → `command-policy.compiled.sh`); wired into install
+- [x] POSIX `tool-guardian.sh` beside `tool-guardian.ps1` (rule parity test-enforced)
+- [x] Minimal local overrides: `project.yml → policy.allow[]`; hard no-downgrade of global
+      denies/tier-≥3; wildcards rejected (compiler validation + install-time recompile)
+- [x] Compiled/guardian policy closes gaps: deny `~/.ssh`, `~/.aws/credentials`, `.npmrc`,
+      `.netrc`, `*.pem`, `*.key`; block `base64 -d | sh` obfuscation
+- [x] Runtime enforcement matrix in `security.md` (invariant 6)
+- [x] Document: PHP required only at install/upgrade time (`docs/ai/security.md`)
 
 **Gates:** hooks run with zero deps · sh/ps1 parity · downgrade rejected · exfiltration/obfuscation
 regression tests green · no over-claimed enforcement.
 
 ## Phase 8 — Consolidated Test Suite
 
-- [ ] Fixtures: `empty-repo`, `existing-copilot-repo`, `existing-opencode-repo`,
-      `repo-with-conflicts`, `repo-with-readonly-files`, `repo-with-symlink-escape`,
-      `repo-with-secrets`, `repo-with-user-ai-content`
-- [ ] Lifecycle, adoption, patch/markers, user-content, safety/policy, adapter-parity coverage
-      (full inventory in source plan); orchestrator + upgrade-apply paths (RF-4)
-- [ ] shellcheck clean; adapter divergence fails CI
+- [x] Fixture coverage: empty-repo, existing-copilot/opencode (adoption), conflicts, readonly-files,
+      symlink-escape (PathGuard), secrets (AdvisorSecretScan + ToolGuardian), user-ai-content
+- [x] Lifecycle (install→upgrade→uninstall), adoption, patch/markers, user-content, safety/policy
+      coverage; orchestrator + upgrade-apply paths (RF-4 via AI_CLI_REPO_ROOT integration tests)
+- [x] shellcheck clean (guardian + compiled policy + doc-check scripts)
 
 **Gate:** existing 293 + all above green; single largest score lever.
 
 ## Phase 9 — Drift Invariant
 
-- [ ] CI `drift-check`: regenerate from templates + manifest + policies → `git diff --exit-code`
+- [x] CI `drift-check` gate (`ai-doc-check drift`): repo-tool-inventory, generated-artifacts,
+      agent-snippets, context-budgets, agent-spec, stub-surfaces, catalog-drift
+- [x] Standalone INSTALL-CATALOG drift check (`validate-catalog-drift.php`) — closes the
+      install-time-only regeneration gap
 - [ ] `GENERATED — DO NOT EDIT` headers on every rendered file
-- [ ] Extend adapter-drift to all surfaces; resolve/allowlist standing WARNs
+- [ ] Extend adapter-drift to all surfaces; resolve/allowlist standing soft-max WARNs
+      (implementer/refactorer/researcher/reviewer agent templates)
 
 ## Phase 10 — Phantom Surface
 
-- [ ] Stub inventory (<250B md, <5-line sh) → complete / delete / explicit pointer
-- [ ] Unimplemented capabilities removed from catalog/browse; `StubValidator` CI gate
-- [ ] Remove tracked scratch artifacts (`sh-commands-output.md`)
+- [x] `StubValidator` CI gate (`validate-stub-surfaces.php`): content-based phantom detection
+      (empty-body md / no-statement sh), wired into drift gate
+- [ ] Unimplemented capabilities removed from catalog/browse (audit pending)
+- [x] Remove tracked scratch artifacts (`sh-commands-output.md` removed)
+
+---
+
+# Remaining Open Items (must-have phases 0-10)
+
+Consolidated list of what is still genuinely incomplete after the re-verification above:
+
+- [ ] **P0:** `schemaVersion` on every authored machine-readable file (lock + manifest + project.yml
+      done; tiers.yaml and some schemas still lack it)
+- [ ] **P0:** Final 5-class ownership model surfaced everywhere (`patch-managed` + computed
+      `deprecated` not yet first-class in upgrade routing)
+- [ ] **P1:** Classify against any known kit checksum → adopt into lock
+- [ ] **P2:** Marker syntax frozen/versioned (invariant 5)
+- [ ] **P3:** Per-class upgrade routing (deprecated delete/route, rendered regen, incoming-collision
+      → `conflicts/<ts>/incoming/`); full idempotency (SKIP_PROTECTED_CORE second-run zero-diff);
+      empty-dir removal only from lock `createdDirs`
+- [ ] **P4:** Consolidate remaining placeholder tokens to read from `project.yml`; `restore --from
+      <ts>` checksum-gated copy-back
+- [ ] **P5:** Ship `docs/ai/project/` 3 templates; `.ai/local-manifest.json` informational writer;
+      unified `0700` private structure (`<ts>-<op>` subdirs incl. `incoming`/`removed`)
+- [ ] **P6:** SIGINT/SIGTERM rollback or marked-recoverable; `verify` detects incomplete
+      transactions; append-only `.ai/logs/` audit; failed-install auto-rollback
+- [ ] **P9:** `GENERATED — DO NOT EDIT` headers on rendered files; resolve 4 soft-max agent-template
+      WARNs; extend adapter-drift to all surfaces
+- [ ] **P10:** Audit catalog/browse for unimplemented capabilities and remove or mark
 
 ---
 
 # NICE-TO-HAVE (95 → 97)
 
-- [ ] **Phase 11 — Security doc:** one sectioned `security.md`; `DOGFOODING.md`
+- [ ] **Phase 11 — Security doc:** one sectioned `security.md` (✓ landed `docs/ai/security.md`);
+      add `DOGFOODING.md`
 - [ ] **Phase 12 — Context economy:** budget validator on rendered install; catalog/browse
       on-demand; trim root instructions
 - [ ] **Phase 13 — Release trust:** versioned `dist/` + `SHA256SUMS` + SBOM/provenance;
@@ -270,14 +322,14 @@ ai-kit doctor | plan [--profile] | install --dry-run|--apply | upgrade --dry-run
 Dependencies: RF-1..RF-7 first (close shipped gaps) → 0 → {1,2} → 3 → {4,5} → 6 → 7 → 8 → {9,10};
 nice-to-haves parallel after 8. Each phase ships with its tests — never code first, tests later.
 
-| Stage | Score |
-|---|---:|
-| Verified baseline (`e8fdf87`) | ~82 |
-| Landed (through `ac5cdf4`) + RF fixes | ~86 |
-| Phases 0–4 | ~88 |
-| Phases 5–7 | ~92 |
-| Phases 8–10 | ~94–95 |
-| Phases 11–15 | 95–97 |
+| Stage | Score | Status |
+|---|---:|---|
+| Verified baseline (`e8fdf87`) | ~82 | done |
+| Landed (through `ac5cdf4`) + RF fixes (RF-1..RF-7) | ~86 | done (`b25b18c`) |
+| Phases 0–4 (core of each landed; see Remaining Open Items for tails) | ~88 | substantially done |
+| Phases 5–7 | ~92 | done (P5 templates dir + private-struct tail open) |
+| Phases 8–10 | ~94–95 | core done; P9 headers/WARNs + P10 capability audit open |
+| Phases 11–15 | 95–97 | not started (security.md landed) |
 
 One-line summary the implementing AI should hold: **the lock is the only permission to write; the
 user's bytes are sacred; every guarantee is a named test, not a promise.**
