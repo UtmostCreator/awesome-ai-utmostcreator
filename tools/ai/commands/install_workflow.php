@@ -764,6 +764,120 @@ function aiRunAdapterValidate(string $root): int
     return 0;
 }
 
+/**
+ * Remove kit-installed files using the manifest's ownership classes.
+ *
+ * - owned / rendered files: removed (they are kit-managed).
+ * - template files: preserved by default (user owns them); removed only with --purge.
+ * - .ai/project.yml and .ai/ runtime state: preserved unless --purge.
+ * Empty parent directories left behind by removed files are pruned best-effort.
+ * --dry-run (default) reports the plan and writes nothing.
+ */
+function aiRunUninstallWorkflow(string $root, array $args): int
+{
+    $manifestPath = aiInstallManifestPath($root);
+    if (!is_file($manifestPath)) {
+        $data = ['status' => 'blocked', 'reason' => 'no install manifest found; nothing to uninstall'];
+        $written = aiCliWriteArtifact($root, 'uninstall', 'php tools/ai/ai.php uninstall', $data, 'blocked', null, 'Install manifest absent; nothing to remove.');
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return 1;
+    }
+
+    $manifest = json_decode((string) file_get_contents($manifestPath), true);
+    if (!is_array($manifest) || !is_array($manifest['files'] ?? null)) {
+        throw new RuntimeException('Invalid install manifest JSON at .ai-install-manifest.json');
+    }
+
+    $apply = in_array('--apply', $args, true);
+    $dryRun = !$apply;
+    $purge = in_array('--purge', $args, true);
+
+    $toRemove = [];
+    $preserved = [];
+    foreach ($manifest['files'] as $rel => $meta) {
+        $rel = (string) $rel;
+        $ownership = is_array($meta) ? (string) ($meta['ownership'] ?? 'owned') : 'owned';
+        $isTemplate = $ownership === 'template';
+        if ($isTemplate && !$purge) {
+            $preserved[] = ['file' => $rel, 'reason' => 'template (user-owned); use --purge to remove'];
+            continue;
+        }
+        $toRemove[] = ['file' => $rel, 'ownership' => $ownership];
+    }
+
+    $removed = [];
+    $missing = [];
+    if ($apply) {
+        $removedDirs = [];
+        foreach ($toRemove as $entry) {
+            $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $entry['file']);
+            if (is_file($abs) || is_link($abs)) {
+                if (@unlink($abs)) {
+                    $removed[] = $entry['file'];
+                    $removedDirs[dirname($abs)] = true;
+                }
+            } elseif (is_dir($abs)) {
+                aiInstallerDeleteTree($abs);
+                $removed[] = $entry['file'];
+                $removedDirs[dirname($abs)] = true;
+            } else {
+                $missing[] = $entry['file'];
+            }
+        }
+        // Best-effort prune of now-empty parent directories.
+        foreach (array_keys($removedDirs) as $dir) {
+            aiUninstallPruneEmptyParents($dir, $root);
+        }
+        // Remove the manifest itself last (and .ai/ state when purging).
+        @unlink($manifestPath);
+        if ($purge) {
+            aiInstallerDeleteTree($root . DIRECTORY_SEPARATOR . '.ai');
+        }
+    }
+
+    $status = 'ok';
+    $data = [
+        'status' => $status,
+        'mode' => $dryRun ? 'dry-run' : 'apply',
+        'purge' => $purge,
+        'planned_removals' => array_map(static fn(array $e): string => $e['file'], $toRemove),
+        'preserved' => $preserved,
+        'removed' => $removed,
+        'missing' => $missing,
+        'removed_count' => count($removed),
+        'preserved_count' => count($preserved),
+    ];
+    $summaryNext = $dryRun
+        ? 'Dry-run only; rerun with --apply to remove. Add --purge to also remove template files and .ai/ state.'
+        : 'Uninstall applied. Template files preserved unless --purge was used.';
+    $written = aiCliWriteArtifact($root, 'uninstall', 'php tools/ai/ai.php uninstall', $data, $status, null, $summaryNext);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+    return 0;
+}
+
+/**
+ * Remove empty directories upward from $dir until reaching (but not removing) $root.
+ */
+function aiUninstallPruneEmptyParents(string $dir, string $root): void
+{
+    $root = rtrim($root, '/\\');
+    $dir = rtrim($dir, '/\\');
+    while ($dir !== '' && $dir !== $root && str_starts_with($dir, $root) && is_dir($dir)) {
+        $entries = @scandir($dir);
+        if ($entries === false) {
+            return;
+        }
+        $entries = array_diff($entries, ['.', '..']);
+        if ($entries !== []) {
+            return;
+        }
+        if (!@rmdir($dir)) {
+            return;
+        }
+        $dir = rtrim(dirname($dir), '/\\');
+    }
+}
+
 function aiRunRollbackWorkflow(string $root, array $args): int
 {
     $backupId = aiParseArg($args, 'backup') ?? '';
