@@ -43,6 +43,11 @@ Options:
   --include-ignored           Include git-ignored files: bypass git's
                               --exclude-standard during collection and pass
                               --no-gitignore to repomix during packing
+  --include-repomixignored,   Full bypass: also ignore .repomixignore and
+  --no-ignore                 repomix default patterns so an explicitly chosen
+                              folder is always packable. Implies
+                              --include-ignored. .git and the output dir stay
+                              excluded. Env: INCLUDE_REPOMIXIGNORED=1
   --help                      Show this help
 
 Examples:
@@ -216,6 +221,18 @@ load_ignore_patterns() {
     local hard
 
     IGNORE_PATTERNS=()
+
+    # Full bypass (--no-ignore / --include-repomixignored): skip .repomixignore
+    # and the soft hard-excludes so an explicitly selected folder is always
+    # packable. Only the unsafe-to-pack roots below stay excluded to avoid
+    # recursing into the output dir or leaking .git internals.
+    if [[ "$INCLUDE_REPOMIXIGNORED" == "1" ]]; then
+        IGNORE_PATTERNS+=("$relative_output_dir/**")
+        IGNORE_PATTERNS+=(".git")
+        IGNORE_PATTERNS+=(".repomix-context")
+        return
+    fi
+
     if [[ -f "$ignore_file" ]]; then
         while IFS= read -r line; do
             line="${line%$'\r'}"
@@ -612,6 +629,12 @@ pack_group() {
     if [[ "$INCLUDE_IGNORED" == "1" ]]; then
         repomix_args+=(--no-gitignore)
     fi
+    if [[ "$INCLUDE_REPOMIXIGNORED" == "1" ]]; then
+        # Also drop repomix's own ignore layers (.ignore files and built-in
+        # default patterns) so a deliberately selected folder is never filtered
+        # back out after the router already collected it.
+        repomix_args+=(--no-dot-ignore --no-default-patterns)
+    fi
     if [[ "$COMPRESS" == "1" ]]; then
         repomix_args+=(--compress)
     fi
@@ -725,7 +748,13 @@ COMPRESS=0
 INCLUDE_LOGS=0
 INCLUDE_LOGS_COUNT=20
 INCLUDE_DIFFS=0
-INCLUDE_IGNORED=0
+INCLUDE_IGNORED="${INCLUDE_IGNORED:-0}"
+# INCLUDE_REPOMIXIGNORED additionally bypasses .repomixignore patterns (and
+# repomix's own ignore layers) so an explicitly selected folder can be packed
+# even when listed there. Off by default; opt in via env key or --no-ignore /
+# --include-repomixignored. Implies INCLUDE_IGNORED so git-ignored files are
+# also collected. The .git and output directories stay excluded for safety.
+INCLUDE_REPOMIXIGNORED="${INCLUDE_REPOMIXIGNORED:-0}"
 
 while (($# > 0)); do
     case "$1" in
@@ -838,6 +867,13 @@ while (($# > 0)); do
         shift
         ;;
     --include-ignored)
+        INCLUDE_IGNORED=1
+        shift
+        ;;
+    --include-repomixignored | --no-ignore)
+        # Full bypass: ignore .repomixignore as well as .gitignore so an
+        # explicitly chosen folder is always packable when the key is passed.
+        INCLUDE_REPOMIXIGNORED=1
         INCLUDE_IGNORED=1
         shift
         ;;

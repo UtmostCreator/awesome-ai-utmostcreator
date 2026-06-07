@@ -149,8 +149,18 @@ run_step() {
 
     echo "==> $label"
 
-    if ! run_with_timeout "$VERIFY_TIMEOUT" "$@"; then
-        echo "FAIL: $label failed" >&2
+    # Run under the hang/freeze watchdog: a hard wall-clock ceiling plus
+    # idle-output + idle-CPU detection that kills a stuck process group. Set
+    # VERIFY_GUARD=0 to fall back to the plain wall-clock timeout wrapper.
+    local rc=0
+    if [[ "${VERIFY_GUARD:-1}" == "1" ]]; then
+        AI_GUARD_TIMEOUT="${AI_GUARD_TIMEOUT:-$VERIFY_TIMEOUT}" run_guarded "$label" "$@" || rc=$?
+    else
+        run_with_timeout "$VERIFY_TIMEOUT" "$@" || rc=$?
+    fi
+
+    if ((rc != 0)); then
+        echo "FAIL: $label failed (exit $rc)" >&2
         failures=$((failures + 1))
     fi
 }

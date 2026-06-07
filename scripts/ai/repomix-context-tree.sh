@@ -37,6 +37,10 @@ Options:
   --include-diffs
   --include-ignored           Include git-ignored files (bypass git
                               --exclude-standard and repomix .gitignore)
+  --include-repomixignored,   Full bypass: also ignore .repomixignore and
+  --no-ignore                 repomix default patterns so an explicitly chosen
+                              folder is always packable (implies
+                              --include-ignored). Env: INCLUDE_REPOMIXIGNORED=1
   --context-window <n>        Context window estimate (default: 128000)
   --reserved-output <n>       Reserved output tokens (default: 4000)
   --instruction-overhead <n>  Instruction overhead tokens (default: 8000)
@@ -165,7 +169,10 @@ COMPRESS=0
 INCLUDE_LOGS=0
 INCLUDE_LOGS_COUNT=20
 INCLUDE_DIFFS=0
-INCLUDE_IGNORED=0
+INCLUDE_IGNORED="${INCLUDE_IGNORED:-0}"
+# Full bypass of .repomixignore (and repomix default ignore layers). Off by
+# default; opt in via env key or --no-ignore / --include-repomixignored.
+INCLUDE_REPOMIXIGNORED="${INCLUDE_REPOMIXIGNORED:-0}"
 CONTEXT_WINDOW=128000
 RESERVED_OUTPUT=4000
 INSTRUCTION_OVERHEAD=8000
@@ -285,6 +292,11 @@ while (($# > 0)); do
         INCLUDE_IGNORED=1
         shift
         ;;
+    --include-repomixignored | --no-ignore)
+        INCLUDE_REPOMIXIGNORED=1
+        INCLUDE_IGNORED=1
+        shift
+        ;;
     --context-window)
         CONTEXT_WINDOW="$2"
         shift 2
@@ -359,6 +371,7 @@ router_args=("$ROUTER_SCRIPT" stats . --output-dir "$TREE_DIR" --depth "$DEPTH" 
 [[ "$INCLUDE_LOGS" == "1" ]] && router_args+=(--include-logs)
 [[ "$INCLUDE_DIFFS" == "1" ]] && router_args+=(--include-diffs)
 [[ "$INCLUDE_IGNORED" == "1" ]] && router_args+=(--include-ignored)
+[[ "$INCLUDE_REPOMIXIGNORED" == "1" ]] && router_args+=(--include-repomixignored)
 
 ensure_tree_outputs() {
     mkdir -p "$TREE_DIR" "$BUNDLES_DIR" "$INDEXES_DIR"
@@ -626,6 +639,7 @@ pack_route() {
 
     mkdir -p "$(dirname "$out_abs")"
     [[ "$INCLUDE_IGNORED" == "1" ]] && repomix_args+=(--no-gitignore)
+    [[ "$INCLUDE_REPOMIXIGNORED" == "1" ]] && repomix_args+=(--no-dot-ignore --no-default-patterns)
     [[ "$COMPRESS" == "1" ]] && repomix_args+=(--compress)
     [[ -n "$SPLIT_SIZE" ]] && repomix_args+=(--split-output "$SPLIT_SIZE")
     [[ "$INCLUDE_LOGS" == "1" ]] && repomix_args+=(--include-logs --include-logs-count "$INCLUDE_LOGS_COUNT")

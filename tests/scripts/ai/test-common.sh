@@ -822,9 +822,10 @@ test_estimate_tokens_custom_cmd() {
     local tmpd
     tmpd="$(test_tmpdir)"
     printf 'data' >"$tmpd/file.txt"
-    # Use a script that ignores its argument and prints 42
+    # Use a script that ignores its argument and prints 42. Use a portable
+    # env-based shebang so the test runs on systems without /bin/bash (e.g. NixOS).
     local script="$tmpd/estimator.sh"
-    printf '#!/bin/bash\necho 42\n' >"$script"
+    printf '#!/usr/bin/env bash\necho 42\n' >"$script"
     chmod +x "$script"
     local tokens
     TOKEN_ESTIMATOR_CMD="$script" tokens="$(estimate_tokens "$tmpd/file.txt")"
@@ -880,6 +881,52 @@ test_run_with_timeout_no_binary() {
     assert_eq "124" "$exit_code"
 }
 run_test "run_with_timeout: returns 124 when no timeout binary and AI_ALLOW_NO_TIMEOUT=0" test_run_with_timeout_no_binary
+
+# ── Section: run_guarded (hang/freeze watchdog) ───────────────────────────────
+
+printf '\nrun_guarded\n'
+
+# Fast command completes and its stdout is forwarded.
+test_run_guarded_success() {
+    local out
+    out="$(run_guarded fast echo hello)"
+    assert_eq "hello" "$out"
+}
+run_test "run_guarded: fast command succeeds and forwards output" test_run_guarded_success
+
+# Wall-clock ceiling kills a long sleep and returns 124.
+test_run_guarded_wallclock() {
+    assert_exit 124 env AI_GUARD_TIMEOUT=2 AI_GUARD_POLL=1 \
+        bash -c "source '$COMMON_SH'; run_guarded slow sleep 30"
+}
+run_test "run_guarded: wall-clock timeout returns 124" test_run_guarded_wallclock
+
+# Idle hang (no output + idle CPU) kills the process and returns 124.
+test_run_guarded_idle_hang() {
+    assert_exit 124 env AI_GUARD_TIMEOUT=60 AI_GUARD_IDLE_SECS=2 AI_GUARD_POLL=1 AI_GUARD_CPU_MIN=5 \
+        bash -c "source '$COMMON_SH'; run_guarded idle sleep 30"
+}
+if command -v ps >/dev/null 2>&1; then
+    run_test "run_guarded: idle (no output + idle CPU) returns 124" test_run_guarded_idle_hang
+else
+    skip_test "run_guarded: idle (no output + idle CPU) returns 124" "ps not available"
+fi
+
+# A silent BUT CPU-busy job must NOT be killed by the idle trigger (BOTH
+# no-output AND idle-CPU are required). Use a pure in-process arithmetic burn
+# (no forks) so the tracked PID genuinely pins CPU, then exit 0. awk is used for
+# a portable wall-clock-bounded busy loop.
+test_run_guarded_busy_survives() {
+    assert_exit 0 env AI_GUARD_TIMEOUT=60 AI_GUARD_IDLE_SECS=2 AI_GUARD_POLL=1 AI_GUARD_CPU_MIN=5 \
+        bash -c "source '$COMMON_SH'; run_guarded busy awk 'BEGIN{s=systime(); while(systime()-s<5){x++}}'"
+}
+# Only meaningful where /proc CPU sampling works; on platforms without it the
+# guard intentionally falls back to wall-clock only and would not kill here either.
+if [[ -r /proc/self/stat ]]; then
+    run_test "run_guarded: silent CPU-busy job survives idle window" test_run_guarded_busy_survives
+else
+    skip_test "run_guarded: silent CPU-busy job survives idle window" "/proc CPU sampling unavailable"
+fi
 
 # ── Section: secrets_scan ─────────────────────────────────────────────────────
 
