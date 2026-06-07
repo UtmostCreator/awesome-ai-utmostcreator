@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -190,6 +191,95 @@ class CliToolsTest extends TestCase
         $result = $this->runTool('php tools/ai/validate-ai-config.php');
         $combined = $result['stdout'] . $result['stderr'];
         $this->assertStringContainsString('OK', $combined);
+    }
+
+    // ---- P0-a: schemaVersion presence on authored machine-readable config ----
+
+    /**
+     * @return list<array{0: string}>
+     */
+    public static function schemaVersionRequiredFilesProvider(): array
+    {
+        return [
+            ['docs/ai/command-policy.tiers.yaml'],
+            ['policies/ai/policy.yaml'],
+        ];
+    }
+
+    /**
+     * Source-of-truth: every authored YAML config the validator gates must
+     * declare an integer top-level schemaVersion (P0-a foundation anchor).
+     */
+    #[DataProvider('schemaVersionRequiredFilesProvider')]
+    public function testAuthoredYamlConfigDeclaresSchemaVersion(string $relativePath): void
+    {
+        $absolute = self::$repoRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+        $content = (string) file_get_contents($absolute);
+        $this->assertSame(
+            1,
+            preg_match('/^schemaVersion:\s*\d+\s*$/m', $content),
+            "{$relativePath} must declare an integer top-level schemaVersion"
+        );
+    }
+
+    /**
+     * Gate-works: when schemaVersion is stripped from a gated YAML config, the
+     * validator must fail. Runs against a full temp clone of the repo so the
+     * live working tree is never mutated.
+     */
+    public function testValidateAiConfigFailsWhenSchemaVersionMissing(): void
+    {
+        $clone = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_schemaversion_clone_' . uniqid('', true);
+        $this->mirrorRepo(self::$repoRoot, $clone);
+
+        try {
+            $tiers = $clone . '/docs/ai/command-policy.tiers.yaml';
+            $original = (string) file_get_contents($tiers);
+            $stripped = preg_replace('/^schemaVersion:\s*\d+\s*\R/m', '', $original, 1);
+            $this->assertNotSame($original, $stripped, 'fixture must remove the schemaVersion line');
+            file_put_contents($tiers, (string) $stripped);
+
+            $result = $this->runCommandInCwd('php tools/ai/validate-ai-config.php', $clone);
+
+            $this->assertNotSame(0, $result['exit'], 'validator must fail when schemaVersion is missing');
+            $this->assertStringContainsString(
+                'missing integer top-level schemaVersion in docs/ai/command-policy.tiers.yaml',
+                $result['stdout'] . $result['stderr']
+            );
+        } finally {
+            $this->removeTree($clone);
+        }
+    }
+
+    private function mirrorRepo(string $source, string $dest): void
+    {
+        mkdir($dest, 0777, true);
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::SELF_FIRST
+        );
+        foreach ($iterator as $item) {
+            /** @var \SplFileInfo $item */
+            $relative = substr($item->getPathname(), strlen($source) + 1);
+            if (str_starts_with($relative, '.git' . DIRECTORY_SEPARATOR) || $relative === '.git') {
+                continue;
+            }
+            if (str_starts_with($relative, 'vendor' . DIRECTORY_SEPARATOR) || $relative === 'vendor') {
+                continue;
+            }
+            $targetPath = $dest . DIRECTORY_SEPARATOR . $relative;
+            if ($item->isDir()) {
+                if (!is_dir($targetPath)) {
+                    mkdir($targetPath, 0777, true);
+                }
+                continue;
+            }
+            $parent = dirname($targetPath);
+            if (!is_dir($parent)) {
+                mkdir($parent, 0777, true);
+            }
+            copy($item->getPathname(), $targetPath);
+        }
     }
 
     // ---- validate-ai-catalog.php (no flags; runs unconditionally) ----
