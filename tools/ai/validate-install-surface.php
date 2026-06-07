@@ -124,6 +124,9 @@ foreach ($packs as $packId => $items) {
         if (str_starts_with($target, '/') || str_starts_with($target, './') || str_contains($target, '..')) {
             $errors[] = "pack {$packId} item {$index} has non-normalized target {$target}";
         }
+        if ($target !== '' && aiInstallerIsReservedUserNamespace($target)) {
+            $errors[] = "pack {$packId} item {$index} ships into the reserved user namespace: {$target}";
+        }
     }
 }
 

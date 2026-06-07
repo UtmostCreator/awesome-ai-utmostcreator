@@ -278,9 +278,40 @@ function aiInstallerValidatePackRegistry(array $registry): array
                     $errors[] = "pack {$packId} item {$index} missing {$field}";
                 }
             }
+            $target = (string) ($item['target'] ?? '');
+            if ($target !== '' && aiInstallerIsReservedUserNamespace($target)) {
+                $errors[] = "pack {$packId} item {$index} ships into the reserved user namespace: {$target}";
+            }
         }
     }
     return $errors;
+}
+
+/**
+ * The kit reserves a private namespace for user-authored AI content so it never collides
+ * with shipped files: `local-*` basenames, `*.local.*` files, and any path under a `local/`
+ * directory. The kit must never ship into these.
+ */
+function aiInstallerIsReservedUserNamespace(string $path): bool
+{
+    $normalized = str_replace('\\', '/', trim($path));
+    if ($normalized === '') {
+        return false;
+    }
+
+    if (preg_match('#(^|/)local/#', $normalized) === 1) {
+        return true;
+    }
+
+    $basename = basename($normalized);
+    if (str_starts_with($basename, 'local-')) {
+        return true;
+    }
+    if (preg_match('/\.local\./', $basename) === 1) {
+        return true;
+    }
+
+    return false;
 }
 
 function aiInstallerResolveSelectedPacks(array $config, array $registry): array
