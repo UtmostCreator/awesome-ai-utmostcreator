@@ -122,8 +122,19 @@ function aiInstallerRun(array $argv): int
 
     $applied = [];
     $seenDirTargets = [];
+    $templateRefreshes = [];
     foreach ($plan as $item) {
         if ($item['action'] === 'SKIP_EXISTING_UNMANAGED' || $item['action'] === 'SKIP_PROTECTED_CORE' || $item['action'] === 'SKIP_IDENTICAL_EXISTING') {
+            // Template refresh channel: when a skip-if-exists template is preserved but the shipped
+            // upstream version has changed, surface the new version under .ai/templates-new/<path>
+            // so the user can diff/merge — the user's file is never overwritten.
+            if (!$config['dryRun'] && $item['action'] === 'SKIP_EXISTING_UNMANAGED' && ($item['type'] ?? '') === 'file') {
+                $refreshed = aiInstallerOfferTemplateRefresh($config, $item);
+                if ($refreshed !== null) {
+                    $templateRefreshes[] = $refreshed;
+                    aiInstallerLog('template-new ' . $item['target'] . ' (upstream changed; see ' . $refreshed . ')');
+                }
+            }
             aiInstallerLog('skip ' . $item['target'] . ' (' . strtolower($item['action']) . ')');
             continue;
         }
@@ -778,6 +789,44 @@ function aiInstallerProjectValuesPlaceholderMap(array $values): array
         '<PRIMARY_BUILD_COMMAND>' => $values['primaryBuildCommand'] ?? '',
         '<PRIMARY_TEST_COMMAND>' => $values['primaryTestCommand'] ?? '',
     ];
+}
+
+/**
+ * Template refresh channel. When a skip-if-exists template is preserved (the user already has the
+ * file) but the shipped source differs from the user's copy, write the new upstream version to
+ * `.ai/templates-new/<target>` so the user can review and merge. Never overwrites the user's file.
+ *
+ * @param array<string,mixed> $config
+ * @param array<string,mixed> $item
+ * @return string|null relative path of the written template-new file, or null when nothing to do
+ */
+function aiInstallerOfferTemplateRefresh(array $config, array $item): ?string
+{
+    $source = (string) ($item['source'] ?? '');
+    $target = (string) ($item['target'] ?? '');
+    if ($source === '' || $target === '') {
+        return null;
+    }
+
+    $src = $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $source);
+    $dest = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $target);
+    if (!is_file($src) || !is_file($dest)) {
+        return null;
+    }
+
+    // Only surface a refresh when the upstream template actually changed vs the user's copy.
+    if (aiInstallerPathsAreIdentical($src, $dest)) {
+        return null;
+    }
+
+    $rel = '.ai/templates-new/' . $target;
+    $out = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+    aiInstallerMkdir(dirname($out));
+    if (!@copy($src, $out)) {
+        return null;
+    }
+
+    return $rel;
 }
 
 /**
