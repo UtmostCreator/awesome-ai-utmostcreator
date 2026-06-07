@@ -102,6 +102,45 @@ final class InstallLifecycleTest extends TestCase
         $this->assertFileExists($target . '/.ai-install-manifest.json');
     }
 
+    public function testSecondForceInstallIsIdempotentZeroDiff(): void
+    {
+        // P3-d: a second --force install with no changes must not modify any kit-owned file
+        // (no SKIP_PROTECTED_CORE rewrite drift). Capture each managed file's bytes after the
+        // first install, run install again, and assert every file is byte-identical.
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_idempotent_' . uniqid('', true);
+        $this->tmpDirs[] = $target;
+        $this->makeTargetRepoWithSource($target);
+
+        $first = $this->runInRepo($target, 'php tools/ai/install-ai-kit.php --target . --runtime opencode --profile opencode --force');
+        $this->assertSame(0, $first['exit'], "first install failed:\n" . $first['stderr']);
+
+        $manifest = json_decode((string) file_get_contents($target . '/.ai-install-manifest.json'), true);
+        $this->assertIsArray($manifest);
+        $files = array_keys($manifest['files'] ?? []);
+        $this->assertNotEmpty($files, 'manifest must record installed files');
+
+        $before = [];
+        foreach ($files as $rel) {
+            $abs = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) $rel);
+            if (is_file($abs)) {
+                $before[$rel] = hash_file('sha256', $abs);
+            }
+        }
+
+        $second = $this->runInRepo($target, 'php tools/ai/install-ai-kit.php --target . --runtime opencode --profile opencode --force');
+        $this->assertSame(0, $second['exit'], "second install failed:\n" . $second['stderr']);
+
+        $drifted = [];
+        foreach ($before as $rel => $hash) {
+            $abs = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) $rel);
+            if (!is_file($abs) || hash_file('sha256', $abs) !== $hash) {
+                $drifted[] = $rel;
+            }
+        }
+
+        $this->assertSame([], $drifted, 'second force install must leave all kit-owned files byte-identical: ' . implode(', ', $drifted));
+    }
+
     // ---- helpers ----
 
     private function makeTargetRepoWithSource(string $target): void
