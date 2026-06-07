@@ -73,7 +73,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/instructions/execution-protocol.instructions.md', 'target' => '.github/instructions/execution-protocol.instructions.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
         'adapter-opencode' => [
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/core/opencode.json', 'target' => 'opencode.jsonc', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/core/opencode.json', 'target' => 'opencode.jsonc', 'core' => false, 'merge_strategy' => 'replace', 'required' => true, 'never_auto_merge' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/core/agents', 'target' => '.opencode/agents', 'install_type' => 'opencode-agents', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/workflows', 'target' => '.opencode/skills', 'install_type' => 'skill-dirs', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/workflows', 'target' => '.opencode/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],

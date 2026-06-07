@@ -59,6 +59,14 @@ function aiInstallerRun(array $argv): int
 
     $plan = aiInstallerBuildPlan($config, $registry, $packs);
     aiInstallerAssertPlanSourcesExist($config, $plan);
+
+    // Adopt-or-conflict gate: files flagged never_auto_merge (e.g. opencode.jsonc) that
+    // already exist and differ from the kit version must not be silently skipped or merged.
+    // Fail fast before any writes so the install is all-or-nothing for the user's config.
+    if (!$config['dryRun']) {
+        aiInstallerAssertNoForeignConflicts($plan);
+    }
+
     $backupInfo = null;
     if (!$config['dryRun'] && ($config['backup'] ?? false)) {
         $backupInfo = aiInstallBackupCreate($config['targetRoot'], $plan, $config['sourceRoot'], 'install-ai-kit');
@@ -81,6 +89,12 @@ function aiInstallerRun(array $argv): int
     foreach ($plan as $item) {
         if ($item['action'] === 'SKIP_EXISTING_UNMANAGED' || $item['action'] === 'SKIP_PROTECTED_CORE' || $item['action'] === 'SKIP_IDENTICAL_EXISTING') {
             aiInstallerLog('skip ' . $item['target'] . ' (' . strtolower($item['action']) . ')');
+            continue;
+        }
+        if ($item['action'] === 'CONFLICT_FOREIGN') {
+            // Surfaced and (for apply) already aborted by aiInstallerAssertNoForeignConflicts.
+            // On dry-run we only report it; never write.
+            aiInstallerLog('conflict ' . $item['target'] . ' (foreign; rerun with --adopt or resolve manually)');
             continue;
         }
         if ($config['dryRun']) {
@@ -287,6 +301,33 @@ function aiInstallerAssertPlanSourcesExist(array $config, array $plan): void
     }
 }
 
+/**
+ * Stop the install when any never_auto_merge target is in CONFLICT_FOREIGN state.
+ *
+ * @param list<array<string,mixed>> $plan
+ */
+function aiInstallerAssertNoForeignConflicts(array $plan): void
+{
+    $conflicts = [];
+    foreach ($plan as $item) {
+        if (($item['action'] ?? '') === 'CONFLICT_FOREIGN') {
+            $conflicts[] = (string) ($item['target'] ?? '');
+        }
+    }
+
+    if ($conflicts === []) {
+        return;
+    }
+
+    $list = implode(', ', array_filter($conflicts));
+    throw new RuntimeException(
+        'install aborted: existing file(s) conflict with the kit and must not be auto-merged: ' . $list . '. '
+        . 'These files are managed as adopt-or-conflict (e.g. opencode.jsonc). '
+        . 'Review them, then rerun with --adopt to overwrite (a backup is recorded with --backup) '
+        . 'or resolve the differences manually.'
+    );
+}
+
 function aiInstallerAssertAllowedTarget(array $config): void
 {
     $sourceRoot = str_replace('\\', '/', (string) ($config['sourceRoot'] ?? ''));
@@ -300,6 +341,19 @@ function aiInstallerAssertAllowedTarget(array $config): void
 
     if ($targetRoot === $reservedExampleRoot || str_starts_with($targetRoot . '/', $reservedExampleRoot . '/')) {
         throw new RuntimeException('installer target under packages/ai-universal-rules/examples is reserved; install into a dedicated external project directory instead');
+    }
+
+    // Git-root guard: refuse to install (and patch .gitignore) into a directory that is not
+    // a git repository root, unless explicitly overridden. This prevents accidental writes
+    // into arbitrary directories. Dry-run is exempt because it writes nothing.
+    if (empty($config['dryRun']) && empty($config['allowNonGit'])) {
+        $gitDir = rtrim((string) ($config['targetRoot'] ?? ''), '/\\') . DIRECTORY_SEPARATOR . '.git';
+        if (!is_dir($gitDir) && !is_file($gitDir)) {
+            throw new RuntimeException(
+                'installer target is not a git repository root (no .git found at ' . $config['targetRoot'] . '). '
+                . 'Run inside a git repo, or pass --allow-non-git to override.'
+            );
+        }
     }
 }
 

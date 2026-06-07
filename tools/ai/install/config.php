@@ -33,6 +33,8 @@ function aiInstallerParseArgs(array $argv): array
     $nonInteractive = false;
     $outputJson = '';
     $upgradeSuffix = '';
+    $allowNonGit = false;
+    $adopt = false;
 
     for ($i = 1; $i < count($argv); $i++) {
         $arg = $argv[$i];
@@ -50,6 +52,14 @@ function aiInstallerParseArgs(array $argv): array
         }
         if ($arg === '--apply') {
             $apply = true;
+            continue;
+        }
+        if ($arg === '--allow-non-git') {
+            $allowNonGit = true;
+            continue;
+        }
+        if ($arg === '--adopt') {
+            $adopt = true;
             continue;
         }
         if ($arg === '--wizard') {
@@ -293,6 +303,8 @@ function aiInstallerParseArgs(array $argv): array
         'nonInteractive' => $nonInteractive,
         'outputJson' => $outputJson,
         'upgradeSuffix' => $upgradeSuffix,
+        'allowNonGit' => $allowNonGit,
+        'adopt' => $adopt,
     ];
 }
 
@@ -317,6 +329,8 @@ Options:
   --runtime <name>    Runtime override: github-copilot|opencode|both
   --project-name <n>  Override inferred project name
   --force             Overwrite existing files
+  --adopt             Adopt pre-existing foreign files at kit-claimed paths (record + overwrite)
+  --allow-non-git     Permit install into a directory that is not a git repository root
   --no-base           Skip base-layer install
   --allow-core-overwrite  Permit force-overwrite of core base policy files
   --with <packs>      Add optional packs (comma-separated)
