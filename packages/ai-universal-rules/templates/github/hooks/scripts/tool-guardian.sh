@@ -53,6 +53,13 @@ add_hit '(curl|wget|nc|ncat|netcat)[[:space:]]+.*(-d|--data|--upload-file|--data
 add_hit '(chmod|chown|chgrp)[[:space:]]' 'Avoid permission mutation by default. Review the target and approval posture first.'
 add_hit '(cat|bat|less|head|tail)[[:space:]].*\.env([^.]|$)' 'Avoid direct reading of .env files. Review secrets policy first.'
 add_hit '(\.env|credentials|secret|token|id_rsa)' 'This action may touch secrets or local credentials. Review carefully first.'
+# shellcheck disable=SC2016 # literal $home is a regex alternative matched in the payload, not a shell var
+add_hit '(~|\$home|/home/[^/[:space:]]+|/users/[^/[:space:]]+)/\.ssh(/|[[:space:]]|$)' 'Avoid touching ~/.ssh. Private keys must never be read or exfiltrated.'
+add_hit '\.aws/credentials' 'Avoid touching ~/.aws/credentials. Cloud credentials must never be read or exfiltrated.'
+add_hit '(^|[^[:alnum:]_])\.npmrc([^[:alnum:]_]|$)' 'Avoid touching .npmrc. It commonly contains registry auth tokens.'
+add_hit '(^|[^[:alnum:]_])\.netrc([^[:alnum:]_]|$)' 'Avoid touching .netrc. It commonly contains plaintext credentials.'
+add_hit '[^[:space:]"]+\.(pem|key)([^[:alnum:]_]|$)' 'Avoid touching private key material (*.pem / *.key). Review secrets policy first.'
+add_hit 'base64[[:space:]]+(-d|--decode|-d[[:alpha:]]*).*\|[[:space:]]*(sh|bash|zsh|python|python3|php|node|ruby)' 'Blocked base64-decode piped to a shell (obfuscated execution).'
 
 if [ -z "$hits" ]; then
     exit 0
