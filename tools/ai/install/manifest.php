@@ -138,6 +138,26 @@ function aiInstallerBuildManifest(array $config, array $packs, array $plan): arr
     ];
 }
 
+/**
+ * Read the lock's createdDirs allowlist (directories the kit created and may prune when empty).
+ * Returns an empty list when the lock is absent or malformed.
+ *
+ * @return list<string>
+ */
+function aiInstallerReadLockCreatedDirs(string $targetRoot): array
+{
+    $path = aiInstallerLockManifestPath($targetRoot);
+    if (!is_file($path)) {
+        return [];
+    }
+    $decoded = json_decode((string) file_get_contents($path), true);
+    if (!is_array($decoded) || !is_array($decoded['createdDirs'] ?? null)) {
+        return [];
+    }
+
+    return array_values(array_map('strval', $decoded['createdDirs']));
+}
+
 function aiInstallerAssertLockCompatible(string $targetRoot): void
 {
     $path = aiInstallerLockManifestPath($targetRoot);
