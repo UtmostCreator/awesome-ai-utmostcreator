@@ -43,8 +43,18 @@ permission:
     'git show*': allow
     'git ls-files*': allow
     'git blame*': allow
-    'git branch*': allow
+    'git branch': allow
+    'git branch -vv': allow
+    'git branch --show-current': allow
+    'git branch --sort=*': allow
     'git rev-parse*': allow
+    'git merge-base*': allow
+    'git range-diff*': allow
+    'git diff-tree*': allow
+    'git cherry': allow
+    'git cherry -v*': allow
+    'git for-each-ref*': allow
+    'git config --get-regexp ^alias\\.': allow
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
@@ -106,6 +116,14 @@ Find issues before merge. Prioritize correctness, regression risk, security, con
 - Use active repository evidence over planning notes.
 - Duplicate-logic screening is required before PASS.
 - Use `unknown` when evidence does not prove a claim.
+
+## Git Review Flow
+
+For local uncommitted changes, establish scope with `git status --short --branch`, then inspect `git diff --stat --find-renames HEAD`, `git diff --name-status --find-renames HEAD`, `git diff --check HEAD`, `git diff --dirstat=files,10,cumulative HEAD`, `git diff --find-renames --find-copies --function-context HEAD`, and `git ls-files --others --exclude-standard` before deep reading.
+
+For branch or PR review, resolve the common ancestor with `git merge-base BASE_REF HEAD`, then review the patch with `BASE...HEAD` using stat, name-status, check, dirstat, and function-context diff views. Inspect the commit series with `git log --oneline --decorate --first-parent BASE..HEAD` when branch history affects review risk.
+
+For suspicious files or symbols, use file history and pickaxe evidence (`git log --follow`, `git blame -w -C -C`, `git log -S`, `git log -G`) before making ownership, regression, or duplication claims. Before PASS, run duplicate screening with `git grep` for changed symbols, config keys, permission names, scripts, or copied phrases.
 
 ## Canonical References
 

@@ -31,18 +31,22 @@ Review a change set from the diff first, then expand only as needed to assess co
 ## Workflow
 
 1. Start from the diff.
-2. Check whether risk classification fits the actual change.
-3. Inspect unchanged files only when needed to verify a concern.
-4. Require duplicate-logic screening before passing review.
-5. If overlap is roughly `>=75%`, flag potential reuse or replacement instead of allowing silent duplication.
-6. Prioritize correctness, contracts, regressions, and missing tests.
-7. Escalate review depth for `medium` and `high` risk changes.
+2. Establish review scope and branch context before judging risk.
+3. For branch or PR review, resolve the merge base and prefer `BASE...HEAD` diff views over two-dot ranges.
+4. Run cheap diff inventory first: stat, name-status, diff check, directory distribution, and function-context patch views.
+5. Check whether risk classification fits the actual change.
+6. Inspect unchanged files only when needed to verify a concern.
+7. Require duplicate-logic screening before passing review.
+8. If overlap is roughly `>=75%`, flag potential reuse or replacement instead of allowing silent duplication.
+9. Prioritize correctness, contracts, regressions, and missing tests.
+10. Escalate review depth for `medium` and `high` risk changes.
 
 ## Verification Expectations
 
 - Review is not a substitute for executed verification.
 - Findings should distinguish likely issues from confirmed failures.
 - Review should start from the diff and expand only when a concern justifies it.
+- Branch/PR findings should cite the base used for review, or report it as `unknown`.
 
 ## Output Contract
 

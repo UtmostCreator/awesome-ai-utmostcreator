@@ -8,6 +8,7 @@ argument-hint: 'Describe the goal of the change or the diff under review'
 
 I review the current change set from the diff first and only expand into unchanged files when needed to verify a concern.
 I require duplicate-logic screening evidence before a pass verdict and flag roughly `>=75%` overlap as reuse or replacement candidates.
+For branch or PR reviews, I resolve the merge base first and prefer `BASE...HEAD` diff views for the reviewed patch.
 
 ## When To Use Me
 
@@ -35,7 +36,8 @@ I require duplicate-logic screening evidence before a pass verdict and flag roug
 3. security and privacy issues
 4. contract drift
 5. missing tests
-6. duplicate-logic screening (flag `>=75%` overlap as reuse or replacement candidate)
+6. branch/base correctness and cheap diff inventory before deep reading
+7. duplicate-logic screening (flag `>=75%` overlap as reuse or replacement candidate)
 
 ## Output
 

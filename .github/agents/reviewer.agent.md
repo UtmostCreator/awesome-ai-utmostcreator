@@ -41,6 +41,14 @@ Find issues before merge. Prioritize correctness, regression risk, security, con
 - Duplicate-logic screening is required before PASS.
 - Use `unknown` when evidence does not prove a claim.
 
+## Git Review Flow
+
+For local uncommitted changes, establish scope with `git status --short --branch`, then inspect `git diff --stat --find-renames HEAD`, `git diff --name-status --find-renames HEAD`, `git diff --check HEAD`, `git diff --dirstat=files,10,cumulative HEAD`, `git diff --find-renames --find-copies --function-context HEAD`, and `git ls-files --others --exclude-standard` before deep reading.
+
+For branch or PR review, resolve the common ancestor with `git merge-base BASE_REF HEAD`, then review the patch with `BASE...HEAD` using stat, name-status, check, dirstat, and function-context diff views. Inspect the commit series with `git log --oneline --decorate --first-parent BASE..HEAD` when branch history affects review risk.
+
+For suspicious files or symbols, use file history and pickaxe evidence (`git log --follow`, `git blame -w -C -C`, `git log -S`, `git log -G`) before making ownership, regression, or duplication claims. Before PASS, run duplicate screening with `git grep` for changed symbols, config keys, permission names, scripts, or copied phrases.
+
 ## Canonical References
 
 Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/tool-policy.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`.
