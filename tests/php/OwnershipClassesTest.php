@@ -57,6 +57,36 @@ final class OwnershipClassesTest extends TestCase
         $this->assertSame(['both'], aiInstallerResolveRuntimes('future-copilot-opencode-pack'), 'runtime resolution must not infer from substrings in future pack names');
     }
 
+    public function testReservedUserNamespaceDetection(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/packs.php';
+
+        // Reserved: local- basenames, *.local.* files, anything under a local/ dir.
+        $this->assertTrue(aiInstallerIsReservedUserNamespace('docs/ai/local-notes.md'));
+        $this->assertTrue(aiInstallerIsReservedUserNamespace('.opencode/agents/my.local.md'));
+        $this->assertTrue(aiInstallerIsReservedUserNamespace('docs/ai/local/anything.md'));
+        $this->assertTrue(aiInstallerIsReservedUserNamespace('local/x'));
+
+        // Not reserved: normal kit paths.
+        $this->assertFalse(aiInstallerIsReservedUserNamespace('docs/ai/project-context.md'));
+        $this->assertFalse(aiInstallerIsReservedUserNamespace('AGENTS.md'));
+        $this->assertFalse(aiInstallerIsReservedUserNamespace('docs/ai/locally-sourced.md'), 'locally-* is not the reserved local- prefix');
+    }
+
+    public function testKitRegistryNeverShipsIntoReservedUserNamespace(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/packs.php';
+
+        $registry = aiInstallerPackRegistry();
+        $errors = aiInstallerValidatePackRegistry($registry);
+        $namespaceErrors = array_values(array_filter(
+            $errors,
+            static fn(string $e): bool => str_contains($e, 'reserved user namespace')
+        ));
+
+        $this->assertSame([], $namespaceErrors, 'kit must never ship into the reserved user namespace');
+    }
+
     public function testInstallManifestSchemaExistsAndIsValid(): void
     {
         $schemaPath = self::$repoRoot . '/schemas/ai/ai-install-manifest.schema.json';
