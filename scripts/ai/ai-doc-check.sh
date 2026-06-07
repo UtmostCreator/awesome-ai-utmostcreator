@@ -48,6 +48,18 @@ fi
 
 shopt -s nullglob globstar
 
+# Generated/aggregated docs are gitignored build artifacts, not authored documentation.
+# Their concatenated relative links resolve against the wrong base and produce false
+# broken-link errors, so they are excluded from doc checks.
+is_excluded_doc_path() {
+    case "$1" in
+    docs/ai/generated/* | ./docs/ai/generated/*)
+        return 0
+        ;;
+    esac
+    return 1
+}
+
 resolve_doc_paths() {
     local -a resolved=()
 
@@ -55,12 +67,14 @@ resolve_doc_paths() {
         local candidate
         for candidate in "$@"; do
             [[ -e "$candidate" ]] || continue
+            is_excluded_doc_path "$candidate" && continue
             resolved+=("$candidate")
         done
     else
         local pattern
         for pattern in $DOC_PATHS; do
             if [[ -e "$pattern" ]]; then
+                is_excluded_doc_path "$pattern" && continue
                 resolved+=("$pattern")
                 continue
             fi
@@ -76,7 +90,11 @@ resolve_doc_paths() {
             if ((${#matches[@]} == 0)); then
                 continue
             fi
-            resolved+=("${matches[@]}")
+            local match
+            for match in "${matches[@]}"; do
+                is_excluded_doc_path "$match" && continue
+                resolved+=("$match")
+            done
         done
     fi
 
@@ -120,7 +138,9 @@ run_links() {
         return 0
     fi
     if command -v lychee >/dev/null 2>&1; then
-        run_step "lychee" lychee "${DOC_PATH_LIST[@]}"
+        # Accept 403/429: these mean the resource exists but blocks automated checks
+        # (anti-bot / rate limiting), which must not be treated as a broken link.
+        run_step "lychee" lychee --accept "200..=299,403,429" "${DOC_PATH_LIST[@]}"
     else
         log_warn "lychee not installed; skipping"
     fi

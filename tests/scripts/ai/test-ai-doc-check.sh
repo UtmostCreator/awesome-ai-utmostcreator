@@ -44,6 +44,18 @@ test_all() {
 }
 run_test "all mode runs" test_all
 
+# Generated docs are excluded from link checks (gitignored aggregation artifacts).
+test_excludes_generated() {
+    "$BASH_BIN" -c '
+        source scripts/ai/ai-doc-check.sh 2>/dev/null
+        is_excluded_doc_path "docs/ai/generated/advisor-context.md" || exit 1
+        is_excluded_doc_path "./docs/ai/generated/repo-structure.md" || exit 1
+        ! is_excluded_doc_path "docs/ai/project-context.md" || exit 1
+        ! is_excluded_doc_path "README.md" || exit 1
+    '
+}
+run_test "excludes docs/ai/generated from doc checks" test_excludes_generated
+
 # markdownlint mode
 if command -v markdownlint >/dev/null 2>&1; then
     test_markdownlint() {
