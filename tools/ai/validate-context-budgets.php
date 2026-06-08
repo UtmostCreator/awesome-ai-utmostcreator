@@ -33,6 +33,7 @@ foreach ($lineLimits as $rule) {
     $patterns = $rule['patterns'] ?? null;
     $warnAbove = (int) ($rule['warn_above'] ?? 0);
     $failAbove = (int) ($rule['fail_above'] ?? 0);
+    $warnAllowlist = lineLimitWarnAllowlist($rule);
 
     if (!is_array($patterns) || $patterns === [] || $warnAbove < 1 || $failAbove < 1) {
         continue;
@@ -59,7 +60,7 @@ foreach ($lineLimits as $rule) {
                 continue;
             }
 
-            if ($lineCount > $warnAbove) {
+            if ($lineCount > $warnAbove && !isset($warnAllowlist[$relativePath])) {
                 $warnings[] = sprintf(
                     'WARN %s %s = %d lines > soft max %d; split or extract reusable guidance before this grows',
                     $id,
@@ -88,6 +89,19 @@ printf(
 );
 
 exit($failures === [] ? 0 : 1);
+
+/** @return array<string,string> */
+function lineLimitWarnAllowlist(array $rule): array
+{
+    $allowlist = [];
+    foreach (($rule['warn_allowlist'] ?? []) as $entry) {
+        if (!is_array($entry) || !is_string($entry['path'] ?? null)) {
+            continue;
+        }
+        $allowlist[str_replace('\\', '/', (string) $entry['path'])] = (string) ($entry['reason'] ?? 'allowlisted');
+    }
+    return $allowlist;
+}
 
 function resolveRoot(array $argv): string
 {

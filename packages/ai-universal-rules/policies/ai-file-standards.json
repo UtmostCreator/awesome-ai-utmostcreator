@@ -115,7 +115,17 @@
       "target_min": 80,
       "target_max": 170,
       "warn_above": 240,
-      "fail_above": 320
+      "fail_above": 320,
+      "warn_allowlist": [
+        {
+          "path": ".opencode/agents/implementer.md",
+          "reason": "Temporary parity with package implementer template while P9 tracks extraction of shared role guidance."
+        },
+        {
+          "path": ".opencode/agents/researcher.md",
+          "reason": "Temporary parity with package researcher template while P9 tracks extraction of shared role guidance."
+        }
+      ]
     },
     {
       "id": "opencode-commands",
@@ -181,7 +191,29 @@
       "target_min": 80,
       "target_max": 170,
       "warn_above": 240,
-      "fail_above": 320
+      "fail_above": 320,
+      "warn_allowlist": [
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/bootstrapper.md",
+          "reason": "Internal install agent is intentionally verbose until bootstrap procedure is split into support docs."
+        },
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/implementer.md",
+          "reason": "Temporary parity with installed implementer agent while P9 tracks extraction of shared role guidance."
+        },
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/refactorer.md",
+          "reason": "Temporary parity with installed refactorer agent while P9 tracks extraction of shared role guidance."
+        },
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/researcher.md",
+          "reason": "Temporary parity with installed researcher agent while P9 tracks extraction of shared role guidance."
+        },
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/reviewer.md",
+          "reason": "Temporary parity with installed reviewer agent while P9 tracks extraction of shared role guidance."
+        }
+      ]
     },
     {
       "id": "package-workflow-templates",

@@ -23,6 +23,24 @@ foreach (glob($root . '/.github/agents/*.md') ?: [] as $file) {
 foreach (glob($root . '/.github/instructions/*.md') ?: [] as $file) {
     $adapterFiles[] = str_replace('\\', '/', substr($file, strlen($root) + 1));
 }
+foreach (['prompts', 'prompts-optional', 'skills', 'workflows'] as $githubSurface) {
+    $surfaceRoot = $root . '/.github/' . $githubSurface;
+    if (!is_dir($surfaceRoot)) {
+        continue;
+    }
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($surfaceRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $entry) {
+        if ($entry->isFile() && str_ends_with($entry->getFilename(), '.md')) {
+            $path = str_replace('\\', '/', $entry->getPathname());
+            $adapterFiles[] = str_replace('\\', '/', substr($path, strlen($root) + 1));
+        }
+    }
+}
+foreach (['.github/pull_request_template.md'] as $githubFile) {
+    if (is_file($root . '/' . $githubFile)) {
+        $adapterFiles[] = $githubFile;
+    }
+}
 $opencodeRoot = $root . '/.opencode';
 if (is_dir($opencodeRoot)) {
     $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($opencodeRoot, FilesystemIterator::SKIP_DOTS));
@@ -32,6 +50,19 @@ if (is_dir($opencodeRoot)) {
             if (str_contains($path, '/node_modules/') || str_contains($path, '/agents-optional/')) {
                 continue;
             }
+            $adapterFiles[] = str_replace('\\', '/', substr($path, strlen($root) + 1));
+        }
+    }
+}
+foreach (['agents', 'commands', 'instructions', 'skills', 'workflows'] as $templateSurface) {
+    $surfaceRoot = $root . '/packages/ai-universal-rules/templates/' . $templateSurface;
+    if (!is_dir($surfaceRoot)) {
+        continue;
+    }
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($surfaceRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $entry) {
+        if ($entry->isFile() && str_ends_with($entry->getFilename(), '.md')) {
+            $path = str_replace('\\', '/', $entry->getPathname());
             $adapterFiles[] = str_replace('\\', '/', substr($path, strlen($root) + 1));
         }
     }

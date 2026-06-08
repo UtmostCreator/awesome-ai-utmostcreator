@@ -385,7 +385,7 @@ foreach (aiFileLineLimitRules($root, $errors) as $rule) {
         $relative = relativePath($root, $path);
         if ($lines > (int) $rule['hard']) {
             $errors[] = "{$relative} has {$lines} lines, above hard max {$rule['hard']} for {$rule['label']}";
-        } elseif ($lines > (int) $rule['soft']) {
+        } elseif ($lines > (int) $rule['soft'] && !isset($rule['warn_allowlist'][$relative])) {
             $warnings[] = "{$relative} has {$lines} lines, above soft max {$rule['soft']} for {$rule['label']}";
         }
     }
@@ -508,6 +508,7 @@ function aiFileLineLimitRules(string $root, array &$errors): array
         $label = (string) ($rule['label'] ?? $rule['id'] ?? 'line-limit rule');
         $soft = (int) ($rule['warn_above'] ?? 0);
         $hard = (int) ($rule['fail_above'] ?? 0);
+        $warnAllowlist = aiFileLineLimitWarnAllowlist($rule);
         foreach ($patterns as $pattern) {
             $pattern = (string) $pattern;
             if ($pattern === '') {
@@ -518,6 +519,7 @@ function aiFileLineLimitRules(string $root, array &$errors): array
                 'pattern' => $root . '/' . ltrim(str_replace('\\', '/', $pattern), '/'),
                 'soft' => $soft,
                 'hard' => $hard,
+                'warn_allowlist' => $warnAllowlist,
             ];
         }
     }
@@ -527,6 +529,19 @@ function aiFileLineLimitRules(string $root, array &$errors): array
     }
 
     return $rules;
+}
+
+/** @return array<string,string> */
+function aiFileLineLimitWarnAllowlist(array $rule): array
+{
+    $allowlist = [];
+    foreach (($rule['warn_allowlist'] ?? []) as $entry) {
+        if (!is_array($entry) || !is_string($entry['path'] ?? null)) {
+            continue;
+        }
+        $allowlist[str_replace('\\', '/', (string) $entry['path'])] = (string) ($entry['reason'] ?? 'allowlisted');
+    }
+    return $allowlist;
 }
 
 function validateScriptRegistryJsonParity(string $root, array $scripts, array &$errors): void

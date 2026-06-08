@@ -11,7 +11,7 @@ use PHPUnit\Framework\TestCase;
  *
  * When an incoming kit file would collide with an existing foreign (non-template,
  * user-authored) file and is therefore skipped, the kit version is surfaced under
- * .ai/conflicts/<ts>/incoming/<path> so the user can diff/merge. The foreign file
+ * .ai/conflicts/<ts>-install/incoming/<path> so the user can diff/merge. The foreign file
  * on disk is never overwritten.
  */
 final class IncomingConflictTest extends TestCase

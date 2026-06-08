@@ -265,7 +265,11 @@ function aiPromptYesNo(string $prompt, bool $defaultNo = true): bool
 
 function aiLatestBackupId(string $root): ?string
 {
-    $dir = $root . DIRECTORY_SEPARATOR . '.ai-backups';
+    $dir = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'backups';
+    if (!is_dir($dir)) {
+        $legacy = $root . DIRECTORY_SEPARATOR . '.ai-backups';
+        $dir = is_dir($legacy) ? $legacy : $dir;
+    }
     if (!is_dir($dir)) {
         return null;
     }

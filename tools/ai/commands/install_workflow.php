@@ -205,7 +205,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
         return 1;
     }
     if ($backupId !== '') {
-        $backupManifestPath = $root . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId . DIRECTORY_SEPARATOR . 'manifest.json';
+        $backupManifestPath = aiInstallBackupDir($root, $backupId) . DIRECTORY_SEPARATOR . 'manifest.json';
         if (!is_file($backupManifestPath)) {
             throw new RuntimeException('backup manifest not found for apply backup id: ' . $backupId);
         }
@@ -234,6 +234,24 @@ function aiRunInstallWorkflow(string $root, array $args): int
             aiInstallBackupRecordAfter($root, $backupId, is_array($actions) ? $actions : [], $root, 'applied');
         } else {
             aiInstallBackupUpdateState($root, $backupId, 'failed', 'installer command failed');
+            try {
+                $rollback = aiInstallBackupRollback($root, $backupId, true, true);
+                $rolledBack = (($rollback['status'] ?? null) === 'ok') && (($rollback['conflicts'] ?? []) === []);
+                aiInstallBackupUpdateState($root, $backupId, $rolledBack ? 'failed_rolled_back' : 'failed_recoverable', 'installer command failed');
+                aiInstallBackupAppendAudit($root, $rolledBack ? 'install_failed_auto_rollback' : 'install_failed_recoverable', [
+                    'backup_id' => $backupId,
+                    'reason' => 'installer command failed',
+                    'rollback_status' => $rollback['status'] ?? 'unknown',
+                    'rollback_conflicts' => $rollback['conflicts'] ?? [],
+                ]);
+            } catch (\Throwable $e) {
+                aiInstallBackupUpdateState($root, $backupId, 'failed_recoverable', $e->getMessage());
+                aiInstallBackupAppendAudit($root, 'install_failed_recoverable', [
+                    'backup_id' => $backupId,
+                    'reason' => 'installer command failed',
+                    'rollback_error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 
@@ -521,7 +539,7 @@ function aiRunInstallWizard(string $root): int
         aiRunInstallWorkflow($root, array_merge($planArgs, ['--backup-only', '--apply']));
         $backupId = aiLatestBackupId($root);
         if ($backupId !== null) {
-            fwrite(STDOUT, "OK: created backup .ai-backups/{$backupId}/\n");
+            fwrite(STDOUT, "OK: created backup .ai/backups/{$backupId}/\n");
         }
         return 0;
     }
@@ -556,7 +574,7 @@ function aiRunInstallWizard(string $root): int
 }
 
 /**
- * Copy user-modified owned files to .ai/conflicts/<timestamp>/ before an upgrade reinstall
+ * Copy user-modified owned files to .ai/conflicts/<timestamp>-upgrade/files/ before an upgrade reinstall
  * overwrites them, so the user's edits are recoverable. Returns the list of preserved files.
  *
  * @param list<array<string,mixed>> $fileActions
@@ -576,7 +594,7 @@ function aiUpgradePreserveOwnedConflicts(string $root, array $fileActions): arra
     }
 
     $stamp = gmdate('Ymd\THis\Z');
-    $conflictRoot = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'conflicts' . DIRECTORY_SEPARATOR . $stamp;
+    $conflictRoot = aiInstallerPrivateConflictDir($root, 'upgrade', 'files', $stamp);
 
     $preserved = [];
     foreach ($conflicts as $rel) {
@@ -587,10 +605,10 @@ function aiUpgradePreserveOwnedConflicts(string $root, array $fileActions): arra
         $destAbs = $conflictRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
         $destDir = dirname($destAbs);
         if (!is_dir($destDir)) {
-            mkdir($destDir, AI_DIR_MODE, true);
+            mkdir($destDir, aiInstallerPrivateDirMode(), true);
         }
         if (copy($srcAbs, $destAbs)) {
-            $preserved[] = ['file' => $rel, 'preserved_to' => '.ai/conflicts/' . $stamp . '/' . $rel];
+            $preserved[] = ['file' => $rel, 'preserved_to' => aiInstallerPrivateConflictRel('upgrade', 'files', $stamp) . '/' . $rel];
         }
     }
 
@@ -677,7 +695,7 @@ function aiUpgradeResolveFileAction(
  * Only operates on the deprecated entries it is given (each derived from the install
  * manifest), so the write-allowlist invariant holds — foreign files are never touched.
  *  - action `delete`          -> remove the file (a byte-identical copy is already in backup)
- *  - action `route-to-removed` -> copy user bytes to .ai/conflicts/<ts>/removed/ then remove
+ *  - action `route-to-removed` -> copy user bytes to .ai/conflicts/<ts>-upgrade/removed/ then remove
  *
  * Files already absent from disk are skipped. Returns the list of files actually acted on.
  *
@@ -691,8 +709,7 @@ function aiUpgradeRemoveDeprecated(string $root, array $deprecated): array
     }
 
     $stamp = gmdate('Ymd\THis\Z');
-    $removedRoot = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'conflicts'
-        . DIRECTORY_SEPARATOR . $stamp . DIRECTORY_SEPARATOR . 'removed';
+    $removedRoot = aiInstallerPrivateConflictDir($root, 'upgrade', 'removed', $stamp);
 
     $acted = [];
     foreach ($deprecated as $entry) {
@@ -711,7 +728,7 @@ function aiUpgradeRemoveDeprecated(string $root, array $deprecated): array
             $destAbs = $removedRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
             $destDir = dirname($destAbs);
             if (!is_dir($destDir)) {
-                mkdir($destDir, AI_DIR_MODE, true);
+                mkdir($destDir, aiInstallerPrivateDirMode(), true);
             }
             if (!copy($abs, $destAbs)) {
                 // Never delete user bytes we failed to preserve.
@@ -721,7 +738,7 @@ function aiUpgradeRemoveDeprecated(string $root, array $deprecated): array
             $acted[] = [
                 'file' => $rel,
                 'action' => $action,
-                'routed_to' => '.ai/conflicts/' . $stamp . '/removed/' . $rel,
+                'routed_to' => aiInstallerPrivateConflictRel('upgrade', 'removed', $stamp) . '/' . $rel,
             ];
             continue;
         }
@@ -740,7 +757,7 @@ function aiUpgradeRemoveDeprecated(string $root, array $deprecated): array
  * A deprecated file is one recorded in the installed manifest but no longer shipped by the
  * current pack registry (e.g. a stale hook or policy the kit dropped). Upgrade routes each:
  *  - deprecated-unchanged     -> delete           (the byte-identical copy is already in backup)
- *  - deprecated-user-modified -> route-to-removed (user edits go to conflicts/<ts>/removed/)
+ *  - deprecated-user-modified -> route-to-removed (user edits go to conflicts/<ts>-upgrade/removed/)
  *
  * Files already absent from disk produce no action. Invariant 1 (write-allowlist) holds:
  * only manifest-recorded paths are ever considered, never foreign files.
@@ -873,7 +890,7 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
         $changes[] = [
             'type' => 'deprecated_files_present',
             'count' => count($deprecated),
-            'action' => 'upgrade --apply removes unchanged deprecated files (backed up) and routes user-modified ones to .ai/conflicts/<ts>/removed/',
+            'action' => 'upgrade --apply removes unchanged deprecated files (backed up) and routes user-modified ones to .ai/conflicts/<ts>-upgrade/removed/',
         ];
     }
 
@@ -910,13 +927,13 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
     }
 
     // Preserve user-modified owned files before the reinstall overwrites them. Their edits
-    // are copied to .ai/conflicts/<timestamp>/ so nothing is silently lost on upgrade.
+    // are copied to .ai/conflicts/<timestamp>-upgrade/files/ so nothing is silently lost on upgrade.
     // Template files are preserved by the installer itself (skip-if-exists) and are not touched.
     $preserved = aiUpgradePreserveOwnedConflicts($root, $fileActions);
 
     // Remove computed `deprecated` files (manifest-recorded, no longer shipped). The
     // explicit backup ($backupId) already snapshotted them; user-modified ones are routed
-    // to .ai/conflicts/<ts>/removed/ before deletion. Only manifest paths are touched.
+    // to .ai/conflicts/<ts>-upgrade/removed/ before deletion. Only manifest paths are touched.
     $removedDeprecated = aiUpgradeRemoveDeprecated($root, $deprecated);
 
     $installArgs = aiUpgradeBuildApplyInstallArgs($mode, $backupId, $args);

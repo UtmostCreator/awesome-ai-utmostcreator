@@ -21,10 +21,12 @@ function aiInstallBackupDefaultExtraTargets(): array
 
 function aiInstallBackupCreate(string $targetRoot, array $plan, string $sourceRoot = '', string $prefix = 'install-ai-kit'): array
 {
-    $backupId = $prefix . '-' . gmdate('Ymd-His');
-    $backupDir = $targetRoot . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+    $op = aiInstallBackupOperationFromPrefix($prefix);
+    $stamp = gmdate('Ymd\THis\Z');
+    $backupId = $stamp . '-' . $op;
+    $backupDir = aiInstallBackupDir($targetRoot, $backupId);
     $filesDir = $backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before';
-    aiInstallBackupMkdir($filesDir);
+    aiInstallBackupMkdir($filesDir, 0700);
 
     $paths = aiInstallBackupCollectAffectedPaths($targetRoot, $plan, $sourceRoot);
     $entries = [];
@@ -35,7 +37,7 @@ function aiInstallBackupCreate(string $targetRoot, array $plan, string $sourceRo
         $snapshot = $exists ? 'files/before/' . $rel : null;
         if ($exists && is_string($snapshot)) {
             $snapshotAbs = $backupDir . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $snapshot);
-            aiInstallBackupMkdir(dirname($snapshotAbs));
+            aiInstallBackupMkdir(dirname($snapshotAbs), 0700);
             if (!copy($abs, $snapshotAbs)) {
                 throw new RuntimeException('failed to back up file: ' . $abs);
             }
@@ -71,14 +73,14 @@ function aiInstallBackupCreate(string $targetRoot, array $plan, string $sourceRo
 
     return [
         'backup_id' => $backupId,
-        'backup_dir' => '.ai-backups/' . $backupId,
+        'backup_dir' => '.ai/backups/' . $backupId,
         'entry_count' => count($entries),
         'schema' => 'ai-install-backup/v1',
     ];
 }
 
 /**
- * Keep only the most recent $keep backup directories under .ai-backups, deleting older ones.
+ * Keep only the most recent $keep backup directories under .ai/backups, deleting older ones.
  * Backup ids are timestamp-suffixed, so lexical sort matches chronological order.
  */
 function aiInstallBackupPruneOld(string $targetRoot, int $keep): void
@@ -87,7 +89,7 @@ function aiInstallBackupPruneOld(string $targetRoot, int $keep): void
         return;
     }
 
-    $base = $targetRoot . DIRECTORY_SEPARATOR . '.ai-backups';
+    $base = $targetRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'backups';
     if (!is_dir($base)) {
         return;
     }
@@ -135,7 +137,7 @@ function aiInstallBackupDeleteTree(string $path): void
 
 function aiInstallBackupRecordAfter(string $targetRoot, string $backupId, array $plan = [], string $sourceRoot = '', string $state = 'applied'): array
 {
-    $backupDir = $targetRoot . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+    $backupDir = aiInstallBackupDir($targetRoot, $backupId);
     $manifest = aiInstallBackupLoadManifest($targetRoot, $backupId);
     if (($manifest['schema'] ?? '') !== 'ai-install-backup/v1') {
         return $manifest;
@@ -194,14 +196,53 @@ function aiInstallBackupUpdateState(string $targetRoot, string $backupId, string
     if ($failure !== null) {
         $manifest['failure'] = $failure;
     }
-    $backupDir = $targetRoot . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+    $backupDir = aiInstallBackupDir($targetRoot, $backupId);
     aiInstallBackupWriteManifest($backupDir, $manifest);
+}
+
+/**
+ * Append one transaction/audit event under `.ai/logs/` without rewriting prior events.
+ *
+ * @param array<string,mixed> $event
+ */
+function aiInstallBackupAppendAudit(string $root, string $event, array $data = []): void
+{
+    $dir = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'logs';
+    aiInstallBackupMkdir($dir, 0700);
+    $payload = array_merge([
+        'schema' => 'ai-install-audit/v1',
+        'ts' => gmdate('c'),
+        'event' => $event,
+    ], $data);
+    file_put_contents(
+        $dir . DIRECTORY_SEPARATOR . 'install-transactions-' . gmdate('Ymd') . '.jsonl',
+        json_encode($payload, JSON_UNESCAPED_SLASHES) . PHP_EOL,
+        FILE_APPEND
+    );
+}
+
+/** Mark an interrupted/failed write window when no backup exists yet, so verify can detect it. */
+function aiInstallBackupMarkRecoverableNoBackup(string $root, string $reason): void
+{
+    $dir = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'logs';
+    aiInstallBackupMkdir($dir, 0700);
+    $marker = [
+        'schema' => 'ai-install-recoverable/v1',
+        'ts' => gmdate('c'),
+        'state' => 'failed_recoverable_no_backup',
+        'reason' => $reason,
+    ];
+    file_put_contents(
+        $dir . DIRECTORY_SEPARATOR . 'install-recoverable.json',
+        json_encode($marker, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL
+    );
+    aiInstallBackupAppendAudit($root, 'install_failed_recoverable_no_backup', ['reason' => $reason]);
 }
 
 function aiInstallBackupLoadManifest(string $root, string $backupId): array
 {
     aiInstallBackupNormalizeRelativePath($backupId);
-    $path = $root . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId . DIRECTORY_SEPARATOR . 'manifest.json';
+    $path = aiInstallBackupDir($root, $backupId) . DIRECTORY_SEPARATOR . 'manifest.json';
     if (!is_file($path)) {
         throw new RuntimeException('backup manifest not found for backup id: ' . $backupId);
     }
@@ -220,7 +261,7 @@ function aiInstallBackupRollback(string $root, string $backupId, bool $apply, bo
         return aiInstallBackupRollbackLegacy($root, $backupId, $manifest, $apply);
     }
 
-    $base = $root . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+    $base = aiInstallBackupDir($root, $backupId);
     $only = array_map('aiInstallBackupNormalizeRelativePath', $only);
     $restore = [];
     $delete = [];
@@ -304,11 +345,11 @@ function aiInstallBackupRollback(string $root, string $backupId, bool $apply, bo
             }
             $deleted[] = $rel;
         }
-        aiInstallBackupUpdateState($root, $backupId, 'rolled_back');
+        aiInstallBackupUpdateState($root, $backupId, $conflicts === [] ? 'rolled_back' : 'failed_recoverable');
     }
 
     return [
-        'status' => $conflicts === [] || $force ? 'ok' : 'conflicts',
+        'status' => $conflicts === [] ? 'ok' : 'conflicts',
         'backup' => $backupId,
         'dry_run' => !$apply,
         'restore' => $restore,
@@ -457,11 +498,37 @@ function aiInstallBackupHashFile(string $path): string
     return 'sha256:' . hash_file('sha256', $path);
 }
 
-function aiInstallBackupMkdir(string $path): void
+function aiInstallBackupMkdir(string $path, int $mode = 0777): void
 {
-    if (!is_dir($path) && !mkdir($path, 0777, true) && !is_dir($path)) {
+    if (is_dir($path)) {
+        if ($mode !== 0777) {
+            @chmod($path, $mode);
+        }
+        return;
+    }
+    if (!mkdir($path, $mode, true) && !is_dir($path)) {
         throw new RuntimeException('failed to create directory: ' . $path);
     }
+    @chmod($path, $mode);
+}
+
+function aiInstallBackupOperationFromPrefix(string $prefix): string
+{
+    $op = $prefix === 'install-ai-kit' ? 'install' : $prefix;
+    $op = preg_replace('/[^A-Za-z0-9_-]+/', '-', $op) ?? 'install';
+    $op = trim($op, '-_');
+    return $op === '' ? 'install' : $op;
+}
+
+function aiInstallBackupDir(string $root, string $backupId): string
+{
+    aiInstallBackupNormalizeRelativePath($backupId);
+    $new = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'backups' . DIRECTORY_SEPARATOR . $backupId;
+    $legacy = $root . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+    if (is_dir($legacy) && !is_dir($new)) {
+        return $legacy;
+    }
+    return $new;
 }
 
 function aiInstallBackupWriteManifest(string $backupDir, array $manifest): void
@@ -518,7 +585,7 @@ function aiInstallBackupMatchesOnly(string $path, array $only): bool
 function aiInstallBackupRollbackLegacy(string $root, string $backupId, array $manifest, bool $apply): array
 {
     $targets = $manifest['targets'] ?? [];
-    $base = $root . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+    $base = aiInstallBackupDir($root, $backupId);
     $filesDir = $base . DIRECTORY_SEPARATOR . 'files';
     $restored = [];
     if ($apply && is_dir($filesDir)) {
