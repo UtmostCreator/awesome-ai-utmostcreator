@@ -115,6 +115,8 @@ permission:
     'shellcheck *': allow
     'php -l *': allow
     'php tools/ai/validate-*.php *': allow
+    # --- shipped CLI tool access (shared snippet: agent-tools-execute) ---
+    # --- read-only ai.php subcommands (advisory; write only to docs/ai/generated) ---
     'php tools/ai/ai.php placeholders*': allow
     'php tools/ai/ai.php verify*': allow
     'php tools/ai/ai.php preflight*': allow
@@ -124,7 +126,6 @@ permission:
     'php tools/ai/ai.php packs*': allow
     'php tools/ai/ai.php env-check*': allow
     'php tools/ai/ai.php install-docs --check': allow
-    # --- shipped CLI tool access (shared snippet: agent-tools-execute) ---
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow
