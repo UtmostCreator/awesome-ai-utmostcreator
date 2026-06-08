@@ -189,16 +189,17 @@ checksum gate enforced.
       logic (manifest `files{}` + lock are the write allowlist; RF-3 uninstall preserves foreign)
 - [x] Reserved namespace contract: kit never ships `local-*`, `*.local.*`, `**/local/**`; CI gate
       via `aiInstallerIsReservedUserNamespace` (validate-install-surface + pack-registry check + tests)
-- [ ] Ship `docs/ai/project/` with exactly three templates (`README.md`, `project-interaction.md`,
-      `conventions.md`)
+- [x] Ship `docs/ai/project/` with exactly three templates (`README.md`, `project-interaction.md`,
+      `conventions.md`) (4cf41bf; template class)
 - [x] `project.yml → context.extraDocs:`; renderers inject references; user pointers survive
       re-render (`<EXTRA_DOCS>` regenerated from project.yml each install)
 - [x] `<!-- BEGIN ai-kit:user -->` sections preserved byte-for-byte in rendered files
 - [x] Template refresh channel: upstream changes → `.ai/templates-new/<path>` + plan notice
-- [ ] `.ai/local-manifest.json`: gitignored, informational only, no write permission
-      (gitignored already; informational write not yet implemented)
-- [ ] Unified private structure (`0700`): `backups/<ts>-<op>/`,
-      `conflicts/<ts>-<op>/{files,incoming,removed}/`, `templates-new/`
+- [x] `.ai/local-manifest.json`: gitignored, informational only, no write permission
+      (ee304be; self-declares informational + not_a_write_allowlist)
+- [x] Unified private structure (`0700`): `.ai/backups/<ts>-<op>/`,
+      `.ai/conflicts/<ts>-<op>/{files,incoming,removed}/`, `.ai/templates-new/`
+      (focused verification: `PrivateStructureTest`; affected installer/upgrade tests green)
 - [x] Backups scoped to operation-touched files only; retention last 5 (`aiInstallBackupPruneOld`)
 
 **Gates:** foreign agents/skills/docs survive upgrade and uninstall · collision → user wins ·
@@ -214,8 +215,9 @@ extraDocs survive re-render · template refresh never overwrites · backups mirr
       validates via `aiInstallerCollectChecksumDrift`
 - [x] `.ai/install.lock`: single process, stale-lock detection (`aiInstallerAcquireInstallLock`
       via flock); `doctor` flags a leftover lock as a possible interrupted install
-- [ ] SIGINT/SIGTERM → rollback or marked-recoverable; `verify` detects incomplete transactions;
+- [x] SIGINT/SIGTERM → rollback or marked-recoverable; `verify` detects incomplete transactions;
       append-only `.ai/logs/` audit log; failed install auto-rolls back
+      (focused verification: transactional rollback + incomplete-transaction tests green)
 
 **Gates:** traversal/symlink/case-collision blocked · concurrent install rejected · interrupted
 install recoverable · checksum mismatch fails verify.
@@ -251,15 +253,17 @@ regression tests green · no over-claimed enforcement.
       agent-snippets, context-budgets, agent-spec, stub-surfaces, catalog-drift
 - [x] Standalone INSTALL-CATALOG drift check (`validate-catalog-drift.php`) — closes the
       install-time-only regeneration gap
-- [ ] `GENERATED — DO NOT EDIT` headers on every rendered file
-- [ ] Extend adapter-drift to all surfaces; resolve/allowlist standing soft-max WARNs
-      (implementer/refactorer/researcher/reviewer agent templates)
+- [x] `GENERATED — DO NOT EDIT` headers on every rendered file
+      (renderers + generated-artifact header validation; `validate-generated-artifacts` green)
+- [x] Extend adapter-drift to all surfaces; resolve/allowlist standing soft-max WARNs
+      (context-budget allowlist with justifications; adapter drift scans prompts/skills/workflows/templates)
 
 ## Phase 10 — Phantom Surface
 
 - [x] `StubValidator` CI gate (`validate-stub-surfaces.php`): content-based phantom detection
       (empty-body md / no-statement sh), wired into drift gate
-- [ ] Unimplemented capabilities removed from catalog/browse (audit pending)
+- [x] Unimplemented capabilities removed from catalog/browse (audit: `validate-stub-surfaces` +
+      `validate-ai-catalog` green; no unimplemented stubs found)
 - [x] Remove tracked scratch artifacts (`sh-commands-output.md` removed)
 
 ---
@@ -292,13 +296,13 @@ regression tests green · no over-claimed enforcement.
       policy.yaml done. Revisit only if a schema authoring-version is required.)
 - [x] **P4-b:** `restore --from <ts> [--path]` checksum-gated copy-back, logged to `.ai/logs/`,
       dry-run writes nothing; wired into `ai.php` (59cb762)
-- [ ] **P5:** Ship `docs/ai/project/` 3 templates; `.ai/local-manifest.json` informational writer;
+- [x] **P5:** Ship `docs/ai/project/` 3 templates; `.ai/local-manifest.json` informational writer;
       unified `0700` private structure (`<ts>-<op>` subdirs incl. `incoming`/`removed`)
-- [ ] **P6:** SIGINT/SIGTERM rollback or marked-recoverable; `verify` detects incomplete
+- [x] **P6:** SIGINT/SIGTERM rollback or marked-recoverable; `verify` detects incomplete
       transactions; append-only `.ai/logs/` audit; failed-install auto-rollback
-- [ ] **P9:** `GENERATED — DO NOT EDIT` headers on rendered files; resolve 4 soft-max agent-template
+- [x] **P9:** `GENERATED — DO NOT EDIT` headers on rendered files; resolve/allowlist soft-max
       WARNs; extend adapter-drift to all surfaces
-- [ ] **P10:** Audit catalog/browse for unimplemented capabilities and remove or mark
+- [x] **P10:** Audit catalog/browse for unimplemented capabilities and remove or mark
 
 ---
 
@@ -327,12 +331,15 @@ ai-kit doctor | plan [--profile] | install --dry-run|--apply | upgrade --dry-run
 
 # Hard 95+ gates
 
-- [ ] All tests green (incl. full Phase 8) · shellcheck 0 · secret scan 0
-- [ ] Drift 0 · adapter divergence 0 undeclared · stubs 0 unapproved · manifest 100% classified
-- [ ] Idempotency 100% · rollback byte-match 100% · traversal/symlink/case 100% blocked
-- [ ] Invariant proof: an upgrade changes bytes only in kit-owned-and-unmodified files or managed
+- [x] All tests green (incl. full Phase 8) · shellcheck 0 · secret scan 0
+      (`composer test:fast`; `shellcheck`; `secret-scan --strict` green)
+- [x] Drift 0 · adapter divergence 0 undeclared · stubs 0 unapproved · manifest 100% classified
+      (`ai-doc-check --check`; adapter drift validator; install-surface strict green)
+- [x] Idempotency 100% · rollback byte-match 100% · traversal/symlink/case 100% blocked
+      (full fast suite plus focused rollback/recovery tests green)
+- [x] Invariant proof: an upgrade changes bytes only in kit-owned-and-unmodified files or managed
       sections; all user-authored AI content byte-identical in place
-- [ ] Runtime hooks PHP-free, OS-parity-checked, honestly classified
+- [x] Runtime hooks PHP-free, OS-parity-checked, honestly classified
 - [ ] Context budget under declared max · release bundle consumer-only with checksums
 
 # Sequencing & score path
