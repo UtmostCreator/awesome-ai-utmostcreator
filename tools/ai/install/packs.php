@@ -113,6 +113,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/pre-tool-use.sh', 'target' => 'scripts/ai/pre-tool-use.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/post-tool-use.sh', 'target' => 'scripts/ai/post-tool-use.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/run-repomix-context.sh', 'target' => 'scripts/ai/run-repomix-context.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/run-repomix-file.sh', 'target' => 'scripts/ai/run-repomix-file.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/repomix-context-tree.sh', 'target' => 'scripts/ai/repomix-context-tree.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/repomix-scc-router.sh', 'target' => 'scripts/ai/repomix-scc-router.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/repomix-freshness.sh', 'target' => 'scripts/ai/repomix-freshness.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],

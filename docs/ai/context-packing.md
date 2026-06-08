@@ -28,7 +28,7 @@ Prefer `run-repomix-context.sh` over calling `repomix` directly so compression a
 For an exact single-file bundle, use the dedicated wrapper instead of the tree planner:
 
 ```bash
-SECRETS_SCAN=0 bash scripts/ai/run-repomix-file.sh . docs/ai/shared/nuxt/nuxt-cache.json
+SECRETS_SCAN=0 bash scripts/ai/run-repomix-file.sh . docs/ai/context-packing.md
 ```
 
 This keeps the file list exact by piping one repository-relative path into `repomix --stdin` and writes the bundle to the generated single-file context output area by default.
