@@ -144,4 +144,27 @@ final class InstallManifestReconciliationTest extends TestCase
         $this->assertStringContainsString('--allow-non-git', $cmd, 'install --apply must forward --allow-non-git to the installer subprocess');
         $this->assertStringContainsString('--no-base', $cmd, 'sidecar-only mode must still suppress base pack');
     }
+
+    public function testReinstallForcesSubprocessSoManagedFilesAreRewritten(): void
+    {
+        // A reinstall over an existing manifest must overwrite managed files. Without
+        // forcing, install-ai-kit.php skips existing managed dirs (skip_existing_unmanaged)
+        // and the reinstall is a silent no-op for e.g. .opencode/agents.
+        $reinstallCmd = aiInstallerBuildSubprocessInstallCommand('opencode', 'full-governance', 'merge', [
+            'reinstall' => true,
+        ]);
+        $this->assertStringContainsString(
+            '--force',
+            $reinstallCmd,
+            'install --reinstall --apply must force the subprocess installer so managed files are rewritten'
+        );
+
+        // Without reinstall or force, the subprocess must not force (no silent clobber).
+        $plainCmd = aiInstallerBuildSubprocessInstallCommand('opencode', 'full-governance', 'merge', []);
+        $this->assertStringNotContainsString(
+            '--force',
+            $plainCmd,
+            'a non-reinstall, non-force install must not force the subprocess installer'
+        );
+    }
 }

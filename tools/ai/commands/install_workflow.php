@@ -229,6 +229,12 @@ function aiRunInstallWorkflow(string $root, array $args): int
     aiCliWriteArtifact($root, 'install-transaction', 'php tools/ai/ai.php install --apply', $tx, 'ok', null, 'Transaction prepared; apply command execution follows.');
 
     $runtime = (string) $installConfig['runtime'];
+    // A reinstall over an existing manifest must actually overwrite managed files.
+    // Without forcing, the subprocess installer skips existing files
+    // (skip_existing_unmanaged) and the reinstall is a silent no-op for managed dirs
+    // such as .opencode/agents. The upgrade path already pairs --reinstall with --force;
+    // the builder mirrors that by forcing whenever reinstall is requested.
+    $installConfig['reinstall'] = $reinstall;
     $cmd = aiInstallerBuildSubprocessInstallCommand($runtime, (string) $installConfig['profile'], $mode, $installConfig);
 
     $run = aiRunCommand($root, $cmd);
@@ -368,7 +374,9 @@ function aiInstallerBuildSubprocessInstallCommand(string $runtime, string $profi
     if ($mode === 'sidecar-only') {
         $cmd .= ' --no-base';
     }
-    if (!empty($installConfig['force'])) {
+    // A reinstall implies overwriting existing managed files, so force the subprocess
+    // installer; otherwise it skips them and the reinstall is a no-op for managed dirs.
+    if (!empty($installConfig['force']) || !empty($installConfig['reinstall'])) {
         $cmd .= ' --force';
     }
     if (!empty($installConfig['allowCoreOverwrite'])) {
