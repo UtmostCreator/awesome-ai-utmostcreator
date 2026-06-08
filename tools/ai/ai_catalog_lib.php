@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-const AI_DIR_MODE = 0755;
+defined('AI_DIR_MODE') || define('AI_DIR_MODE', 0755);
 
 function aiRepoRoot(): string
 {

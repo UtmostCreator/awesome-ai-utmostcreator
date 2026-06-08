@@ -66,6 +66,15 @@ permission:
     'bash scripts/doctor.sh': allow
     'bash scripts/doctor.sh *': allow
     'php tools/ai/validate-*.php *': allow
+    'php tools/ai/ai.php placeholders*': allow
+    'php tools/ai/ai.php verify*': allow
+    'php tools/ai/ai.php preflight*': allow
+    'php tools/ai/ai.php list': allow
+    'php tools/ai/ai.php next*': allow
+    'php tools/ai/ai.php freshness*': allow
+    'php tools/ai/ai.php packs*': allow
+    'php tools/ai/ai.php env-check*': allow
+    'php tools/ai/ai.php install-docs --check': allow
     'php tools/ai/generate-*.php --check*': allow
     'git show*': allow
     'git blame*': allow

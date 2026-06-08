@@ -25,7 +25,7 @@ require_once __DIR__ . '/commands/install_commands.php';
 require_once __DIR__ . '/commands/advisor_command.php';
 require_once __DIR__ . '/commands/descriptors_command.php';
 
-const AI_DIR_MODE = 0755;
+defined('AI_DIR_MODE') || define('AI_DIR_MODE', 0755);
 
 function aiUsage(): void
 {

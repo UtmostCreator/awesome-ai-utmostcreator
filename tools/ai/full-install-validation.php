@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 $root = realpath(__DIR__ . '/..' . '/..');
 
-const AI_DIR_MODE = 0755;
+defined('AI_DIR_MODE') || define('AI_DIR_MODE', 0755);
 
 if ($root === false) {
     fwrite(STDERR, "ERROR: unable to resolve repository root\n");
