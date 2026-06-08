@@ -84,7 +84,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-diff-context.sh` / `ai-doc-check.sh` / `check-file-refs.sh` — to assess current change and doc drift; expect a diff bundle and lint results.
 - repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
 
-Denied: all write/test/hook/host scripts (`ai-verify`, `ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). This role plans; it does not run or mutate. See `docs/ai/agent-script-access.md`.
+Denied: all write/test/hook/host scripts (`ai-verify`, `ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). This role plans; it does not run or mutate. See `docs/ai/agent-script-access.md`.
 
 Goals:
 

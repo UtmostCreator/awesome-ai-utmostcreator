@@ -86,7 +86,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-diff-context.sh` / `ai-doc-check.sh` / `ai-install-coverage.sh` — to assess current change, doc drift, and install coverage; expect a diff bundle, lint, and coverage findings.
 - `ai-verify.sh` (`ask`) / repomix / `pack-context.sh` (`ask`) — only when an audit needs a verification probe or large context pack.
 
-Denied: all write/test/hook/host scripts (`ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). This role audits; it does not mutate. See `docs/ai/agent-script-access.md`.
+Denied: all write/test/hook/host scripts (`ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). This role audits; it does not mutate. See `docs/ai/agent-script-access.md`.
 
 Use this role for:
 

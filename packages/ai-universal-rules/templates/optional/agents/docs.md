@@ -93,7 +93,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-diff-context.sh` — to align docs with the implementation change; expect a diff bundle.
 - `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when a native path-scoped `edit:` is insufficient; `session-checkpoint.sh` (`ask`) for continuity.
 
-This role does not run tests (`ai-test-select`, `run-repo-tests` denied). Edits normally use the native path-scoped `edit:` permission. Denied also: `ai-task`, `gh-pr-context`, `pre/post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
+This role does not run tests (`ai-test-select`, `run-repo-tests` denied). Edits normally use the native path-scoped `edit:` permission. Denied also: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
 
 Rules:
 

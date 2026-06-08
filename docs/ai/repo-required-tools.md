@@ -125,6 +125,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `tests/scripts/ai/test-repomix-scc-router.sh`
 - `tests/scripts/ai/test-rg-code.sh`
 - `tests/scripts/ai/test-run-repomix-context.sh`
+- `tests/scripts/ai/test-run-repomix-file.sh`
 - `tests/scripts/ai/test-session-checkpoint.sh`
 - `tests/scripts/ai/test-validate-agent-spec.sh`
 - `tests/scripts/ai/test-validate-context-budgets.sh`
