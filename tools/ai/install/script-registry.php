@@ -224,6 +224,16 @@ function aiInstallerScriptRegistry(): array
             'supports_dry_run' => true,
             'default_args' => [],
         ],
+        'repomix-file' => [
+            'label' => 'Generate Repomix bundle for a single file',
+            'source_path' => 'scripts/ai/run-repomix-file.sh',
+            'installed_path' => 'scripts/ai/run-repomix-file.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'jq', 'repomix'],
+            'risk' => 'read-only',
+            'supports_dry_run' => true,
+            'default_args' => [],
+        ],
         'repomix-tree' => [
             'label' => 'Generate Repomix context tree',
             'source_path' => 'scripts/ai/repomix-context-tree.sh',

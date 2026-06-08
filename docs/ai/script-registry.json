@@ -17,6 +17,7 @@
     "pre-tool-use": {"source_path":"scripts/ai/pre-tool-use.sh","installed_path":"scripts/ai/pre-tool-use.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "post-tool-use": {"source_path":"scripts/ai/post-tool-use.sh","installed_path":"scripts/ai/post-tool-use.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "repomix-context": {"source_path":"scripts/ai/run-repomix-context.sh","installed_path":"scripts/ai/run-repomix-context.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
+    "repomix-file": {"source_path":"scripts/ai/run-repomix-file.sh","installed_path":"scripts/ai/run-repomix-file.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "repomix-tree": {"source_path":"scripts/ai/repomix-context-tree.sh","installed_path":"scripts/ai/repomix-context-tree.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "repomix-scc-router": {"source_path":"scripts/ai/repomix-scc-router.sh","installed_path":"scripts/ai/repomix-scc-router.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "repomix-freshness": {"source_path":"scripts/ai/repomix-freshness.sh","installed_path":"scripts/ai/repomix-freshness.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},

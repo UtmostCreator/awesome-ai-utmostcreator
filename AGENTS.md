@@ -1,3 +1,5 @@
+<!-- GENERATED — DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/AGENTS.template.md. Edit the template or .ai/project.yml, not this file. -->
+
 # awesome-ai-utmostcreator - Repository Instructions
 
 ## Project Summary
@@ -7,7 +9,7 @@
 - Summary: `AI workflow starter for awesome-ai-utmostcreator`
 - Primary language: `unknown`
 - Primary runtime: `unknown`
-- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools`
+- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,improvement-plan.md,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools`
 - Inactive or legacy paths: `unknown`
 - Primary entrypoints: `README.md, docs/ai/project-context.md`
 

@@ -1,18 +1,43 @@
-# awesome-ai-utmostcreator — Project Interaction Guide
+# awesome-ai-utmostcreator — AI Interaction Guide
 
-This source repository packages and installs AI workflow files into other projects.
+User-owned. Describe how you want AI agents to collaborate on this repository. The kit
+installs this once and never overwrites it.
+
+## Collaboration defaults
+
+- Preferred change size: <e.g. smallest safe slice; pause beyond ~6 files>
+- When to ask vs. proceed: <e.g. ask before schema, auth, billing, or dependency changes>
+- Verification expectation: <e.g. run the focused test that proves the behavior>
 
 ## External project interaction map
 
+List external repositories, sibling directories, generated-artifact sources, shared scripts,
+upstream/downstream packages, or tool configuration layers that agents may need to inspect.
+
 | External project/system | Direction | Local entrypoint | External path/reference | Contract |
 |---|---:|---|---|---|
-| Install target repository | outbound | `php tools/ai/install-ai-kit.php --target <path>` | user-provided target path | Installer writes selected AI kit files into the target when `--apply` is approved. |
-| Fresh verification target | outbound | install and verification commands | `/home/utmostcreator/Projects/Test` when explicitly requested | Test target may be reset/reinstalled only when the user asks for that path. |
+| <example: shared-configs> | inbound/outbound | <local file or command> | <../shared-configs> | <read-only contract summary> |
 
-## Rules
+Read-only inspection of projects named here is allowed when relevant to the current task, subject to
+the OpenCode `external_directory: ask` prompt and secret/sensitive-file rules. External edits require
+separate explicit user approval naming the external path and intended change.
 
-- Read-only inspection of external projects named here or in `docs/ai/project-context.md` is allowed
-  when relevant, subject to OpenCode `external_directory: ask` and sensitive-file rules.
-- Do not edit external projects unless the user explicitly approves the exact external path and
-  intended change.
-- If code or docs reveal a new cross-project dependency, propose updating this file.
+## Communication
+
+- Explanation depth: <terse diffs / step-by-step rationale>
+- What to always report: <failed commands, skipped checks, assumptions>
+
+## Escalation
+
+Escalate (stop and ask) when a change would affect:
+
+- public interfaces or persistence shape
+- security posture, secrets, or permissions
+- rollout/rollback risk
+- files outside this project unless the user explicitly authorized that external edit
+
+## Out of scope
+
+List anything the AI should not touch without explicit approval:
+
+- <paths, systems, or workflows>

@@ -16,6 +16,7 @@ Mutating entries must not be lower than `act_with_approval`. See `docs/ai/capabi
 ## Notable Read-Only Scripts
 
 - `run-repo-tests` (`scripts/ai/run-repo-tests.sh`) — single parallel-first repository test runner. It runs root PHP tests with ParaTest, shell suites through `tests/scripts/ai/run-all-tests.sh`, optional Bats tests, optional package ParaTest, and validators. Use `PARATEST_PROCS=12`; the script caps ParaTest workers at 20.
+- `run-repomix-file` (`scripts/ai/run-repomix-file.sh`) — exact single-file Repomix wrapper. Runs from a repository root, passes one relative file through `repomix --stdin`, defaults to `--compress --style xml`, and writes to the generated single-file context output area unless `--output` is provided.
 
 ## Notable Mutating Scripts
 

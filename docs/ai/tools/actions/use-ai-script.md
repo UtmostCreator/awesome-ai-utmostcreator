@@ -33,7 +33,7 @@ If the script emits `status: unsafe_blocked` or a `dry_run` preview that would o
 
 ## Evidence
 
-Approved scripts write evidence under `.ai-logs/` per `.ai-logs/README.md`. Reference the produced trace in the final task report.
+Approved scripts write evidence under the local `.ai-logs/` evidence root (created at runtime). Reference the produced trace in the final task report.
 
 ## Related
 

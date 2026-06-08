@@ -98,6 +98,7 @@ SUITES=(
     "repomix-scc-router.sh|tests/scripts/ai/test-repomix-scc-router.sh"
     "repomix-context-tree.sh|tests/scripts/ai/test-repomix-context-tree.sh"
     "run-repomix-context.sh|tests/scripts/ai/test-run-repomix-context.sh"
+    "run-repomix-file.sh|tests/scripts/ai/test-run-repomix-file.sh"
     "repo-tool-inventory.sh|tests/scripts/ai/test-repo-tool-inventory.sh"
     "watch-loop.sh|tests/scripts/ai/test-watch-loop.sh"
     "ai-edit.sh|tests/scripts/ai/test-ai-edit.sh"

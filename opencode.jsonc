@@ -1,3 +1,5 @@
+// Managed by ai-kit. Source: packages/ai-universal-rules/templates/core/opencode.json
+// This file may be adopted or replaced by project policy; do not auto-merge — use ai-kit plan/adopt.
 {
   "$schema": "https://opencode.ai/config.json",
   "instructions": [

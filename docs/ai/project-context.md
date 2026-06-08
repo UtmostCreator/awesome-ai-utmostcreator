@@ -14,7 +14,7 @@ Use this file as durable, canonical project context for instructions, agents, pr
 
 ## 2) Scope and Ownership
 
-- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools`
+- Active paths: `.ai-install-manifest.json,.ai-logs,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,improvement-plan.md,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools`
 - Inactive/legacy paths: `unknown`
 - Primary entrypoints: `README.md, docs/ai/project-context.md`
 - Architecture notes: `Keep policy and capability docs canonical; keep runtime adapters thin.`
@@ -126,3 +126,10 @@ Fill and maintain these for each installed project:
 - Allowed scripts list: `unknown`
 - Forbidden script patterns: `unknown`
 - Additional security rules: `unknown`
+
+## 13) Additional Project Docs
+
+Extra project docs the AI should reference. Manage these under `context.extraDocs`
+in `.ai/project.yml`; the list is re-rendered here on every install/upgrade.
+
+_No additional project docs configured. Add paths under `context.extraDocs` in `.ai/project.yml`._
