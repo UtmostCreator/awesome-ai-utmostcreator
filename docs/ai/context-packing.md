@@ -25,6 +25,14 @@ SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh .
 
 Prefer `run-repomix-context.sh` over calling `repomix` directly so compression and bounded styling are applied consistently.
 
+For an exact single-file bundle, use the dedicated wrapper instead of the tree planner:
+
+```bash
+SECRETS_SCAN=0 bash scripts/ai/run-repomix-file.sh . docs/ai/shared/nuxt/nuxt-cache.json
+```
+
+This keeps the file list exact by piping one repository-relative path into `repomix --stdin` and writes the bundle to the generated single-file context output area by default.
+
 ## One-Step Freshness Gate (Preferred For Agents)
 
 Instead of checking freshness and regenerating as separate steps, call the single ask-gated wrapper:

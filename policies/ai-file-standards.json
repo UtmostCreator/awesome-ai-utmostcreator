@@ -1,0 +1,296 @@
+{
+  "$schema": "../../schemas/ai/ai-file-standards.schema.json",
+  "version": "1.0.0",
+  "execution_protocol": {
+    "canonical_doc": "docs/ai/execution-protocol.md",
+    "capability": "docs/ai/capabilities/evidence-first-execution/CAPABILITY.md",
+    "task_modes": [
+      "research",
+      "plan",
+      "test-only",
+      "source-fix",
+      "refactor",
+      "docs-only",
+      "config-infra",
+      "migration-data"
+    ],
+    "minimum_understanding_for_edits": 70,
+    "default_diff_budget": {
+      "files": 6,
+      "changed_loc": 300
+    },
+    "verification_statuses": [
+      "verified",
+      "partially-verified",
+      "not-verified",
+      "failed-verification"
+    ],
+    "protected_actions": [
+      "destructive-command",
+      "dependency-change",
+      "lockfile-change",
+      "migration",
+      "data-rewrite",
+      "auth-security-change",
+      "ci-deploy-change",
+      "network-access",
+      "generated-artifact-rewrite",
+      "public-contract-change",
+      "protected-path-edit"
+    ]
+  },
+  "line_limits": [
+    {
+      "id": "root-instructions",
+      "label": "root instructions",
+      "patterns": [
+        "AGENTS.md"
+      ],
+      "target_min": 60,
+      "target_max": 120,
+      "warn_above": 180,
+      "fail_above": 250
+    },
+    {
+      "id": "copilot-instructions",
+      "label": "Copilot instructions",
+      "patterns": [
+        ".github/copilot-instructions.md"
+      ],
+      "target_min": 40,
+      "target_max": 100,
+      "warn_above": 150,
+      "fail_above": 220
+    },
+    {
+      "id": "copilot-path-instructions",
+      "label": "Copilot path instructions",
+      "patterns": [
+        ".github/instructions/*.instructions.md"
+      ],
+      "target_min": 40,
+      "target_max": 90,
+      "warn_above": 140,
+      "fail_above": 180
+    },
+    {
+      "id": "copilot-agents",
+      "label": "Copilot agents",
+      "patterns": [
+        ".github/agents/*.agent.md"
+      ],
+      "target_min": 80,
+      "target_max": 160,
+      "warn_above": 220,
+      "fail_above": 300
+    },
+    {
+      "id": "copilot-prompts",
+      "label": "Copilot prompts",
+      "patterns": [
+        ".github/prompts/*.prompt.md"
+      ],
+      "target_min": 30,
+      "target_max": 80,
+      "warn_above": 120,
+      "fail_above": 160
+    },
+    {
+      "id": "copilot-skills",
+      "label": "Copilot skills",
+      "patterns": [
+        ".github/skills/*/SKILL.md"
+      ],
+      "target_min": 80,
+      "target_max": 180,
+      "warn_above": 250,
+      "fail_above": 350
+    },
+    {
+      "id": "opencode-agents",
+      "label": "OpenCode agents",
+      "patterns": [
+        ".opencode/agents/*.md"
+      ],
+      "target_min": 80,
+      "target_max": 170,
+      "warn_above": 240,
+      "fail_above": 320,
+      "warn_allowlist": [
+        {
+          "path": ".opencode/agents/implementer.md",
+          "reason": "Temporary parity with package implementer template while P9 tracks extraction of shared role guidance."
+        },
+        {
+          "path": ".opencode/agents/researcher.md",
+          "reason": "Temporary parity with package researcher template while P9 tracks extraction of shared role guidance."
+        }
+      ]
+    },
+    {
+      "id": "opencode-commands",
+      "label": "OpenCode commands",
+      "patterns": [
+        ".opencode/commands/*.md"
+      ],
+      "target_min": 15,
+      "target_max": 50,
+      "warn_above": 80,
+      "fail_above": 120
+    },
+    {
+      "id": "opencode-skills",
+      "label": "OpenCode skills",
+      "patterns": [
+        ".opencode/skills/*/SKILL.md"
+      ],
+      "target_min": 80,
+      "target_max": 180,
+      "warn_above": 250,
+      "fail_above": 350
+    },
+    {
+      "id": "package-root-instructions-template",
+      "label": "package root instructions template",
+      "patterns": [
+        "packages/ai-universal-rules/templates/core/AGENTS.template.md"
+      ],
+      "target_min": 60,
+      "target_max": 120,
+      "warn_above": 180,
+      "fail_above": 250
+    },
+    {
+      "id": "package-copilot-instructions-template",
+      "label": "package Copilot instructions template",
+      "patterns": [
+        "packages/ai-universal-rules/templates/core/copilot-instructions.template.md"
+      ],
+      "target_min": 40,
+      "target_max": 100,
+      "warn_above": 150,
+      "fail_above": 220
+    },
+    {
+      "id": "package-instruction-templates",
+      "label": "package instruction templates",
+      "patterns": [
+        "packages/ai-universal-rules/templates/instructions/*.instructions.md"
+      ],
+      "target_min": 40,
+      "target_max": 90,
+      "warn_above": 140,
+      "fail_above": 180
+    },
+    {
+      "id": "package-agent-templates",
+      "label": "package agent templates",
+      "patterns": [
+        "packages/ai-universal-rules/templates/core/agents/*.md"
+      ],
+      "target_min": 80,
+      "target_max": 170,
+      "warn_above": 240,
+      "fail_above": 320,
+      "warn_allowlist": [
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/bootstrapper.md",
+          "reason": "Internal install agent is intentionally verbose until bootstrap procedure is split into support docs."
+        },
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/implementer.md",
+          "reason": "Temporary parity with installed implementer agent while P9 tracks extraction of shared role guidance."
+        },
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/refactorer.md",
+          "reason": "Temporary parity with installed refactorer agent while P9 tracks extraction of shared role guidance."
+        },
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/researcher.md",
+          "reason": "Temporary parity with installed researcher agent while P9 tracks extraction of shared role guidance."
+        },
+        {
+          "path": "packages/ai-universal-rules/templates/core/agents/reviewer.md",
+          "reason": "Temporary parity with installed reviewer agent while P9 tracks extraction of shared role guidance."
+        }
+      ]
+    },
+    {
+      "id": "package-workflow-templates",
+      "label": "package workflow templates",
+      "patterns": [
+        "packages/ai-universal-rules/templates/workflows/*.md"
+      ],
+      "target_min": 30,
+      "target_max": 80,
+      "warn_above": 120,
+      "fail_above": 160
+    },
+    {
+      "id": "package-command-templates",
+      "label": "package command templates",
+      "patterns": [
+        "packages/ai-universal-rules/templates/commands/*.md"
+      ],
+      "target_min": 15,
+      "target_max": 50,
+      "warn_above": 80,
+      "fail_above": 120
+    },
+    {
+      "id": "package-capability-docs",
+      "label": "package capability docs",
+      "patterns": [
+        "packages/ai-universal-rules/templates/capabilities/*/CAPABILITY.md"
+      ],
+      "target_min": 120,
+      "target_max": 220,
+      "warn_above": 300,
+      "fail_above": 400
+    },
+    {
+      "id": "package-capability-checklists",
+      "label": "package capability checklists",
+      "patterns": [
+        "packages/ai-universal-rules/templates/capabilities/*/checklist.md"
+      ],
+      "target_min": 40,
+      "target_max": 100,
+      "warn_above": 140,
+      "fail_above": 180
+    },
+    {
+      "id": "package-capability-gotchas",
+      "label": "package capability gotchas",
+      "patterns": [
+        "packages/ai-universal-rules/templates/capabilities/*/gotchas.md"
+      ],
+      "target_min": 30,
+      "target_max": 80,
+      "warn_above": 120,
+      "fail_above": 160
+    },
+    {
+      "id": "package-capability-references",
+      "label": "package capability references",
+      "patterns": [
+        "packages/ai-universal-rules/templates/capabilities/*/reference.md"
+      ],
+      "target_min": 20,
+      "target_max": 70,
+      "warn_above": 100,
+      "fail_above": 140
+    },
+    {
+      "id": "package-capability-examples",
+      "label": "package capability examples",
+      "patterns": [
+        "packages/ai-universal-rules/templates/capabilities/*/examples.md"
+      ],
+      "target_min": 60,
+      "target_max": 160,
+      "warn_above": 220,
+      "fail_above": 300
+    }
+  ]
+}

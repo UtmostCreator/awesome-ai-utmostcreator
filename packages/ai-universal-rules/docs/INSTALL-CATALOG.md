@@ -63,6 +63,7 @@ Deterministic catalog generated from installer registries.
 - `pre-tool-use` -> `scripts/ai/pre-tool-use.sh`
 - `post-tool-use` -> `scripts/ai/post-tool-use.sh`
 - `repomix-context` -> `scripts/ai/run-repomix-context.sh`
+- `repomix-file` -> `scripts/ai/run-repomix-file.sh`
 - `repomix-tree` -> `scripts/ai/repomix-context-tree.sh`
 - `repomix-scc-router` -> `scripts/ai/repomix-scc-router.sh`
 - `repomix-freshness` -> `scripts/ai/repomix-freshness.sh`

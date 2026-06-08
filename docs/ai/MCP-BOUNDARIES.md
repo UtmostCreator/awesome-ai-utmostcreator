@@ -23,17 +23,17 @@ For each MCP integration, record:
 
 ## How To Wire An MCP Server
 
-No MCP server is configured by default in this repository. The runtime config is
-`opencode.jsonc` (OpenCode) and the equivalent Copilot/Claude runtime config; MCP
-servers are declared there under a top-level `mcp` block, then governed by the
-existing `permission` rules in the same file.
+No MCP server is configured by default. The runtime config is `opencode.jsonc`
+(OpenCode) and the equivalent Copilot/Claude runtime config; MCP servers are declared
+there under a top-level `mcp` block, then governed by the existing `permission` rules
+in the same file.
 
 Wiring checklist:
 
 1. Add the server under the `mcp` key in `opencode.jsonc` (or your runtime's MCP config).
 2. Declare its posture (read-only vs mutating) and the systems it can reach.
 3. Add it to the approved allowlist and record it in the "Recommended Documentation" table above.
-4. Gate mutating or production-facing servers behind explicit approval (see `docs/ai/approval-boundaries.md`).
+4. Gate mutating or production-facing servers behind explicit approval.
 5. Keep secrets out of the config; reference environment variables, never inline credentials.
 
 ### Example: read-only SQL database replica
@@ -66,3 +66,10 @@ Posture to record for this example: read-only; reaches the analytics read replic
 only; requires approval before any query that could be expensive or expose PII;
 falls back to "MCP unavailable" (the agent must not fabricate query results) if the
 server is down.
+
+## See Also
+
+- `../foundations/CONTROL-MODEL.md` — advisory vs deterministic controls and MCP boundary model
+- `../foundations/COMPATIBILITY.md` — surface-dependent MCP availability
+- `GOVERNANCE.md` — approval requirements for external system access
+- `HOOKS-AND-ENFORCEMENT.md` — deterministic enforcement alongside MCP boundaries

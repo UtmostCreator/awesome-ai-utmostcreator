@@ -1,0 +1,38 @@
+# AI kit project values. Template/user-owned: edit values here, then rerun install/upgrade to re-render managed files.
+schemaVersion: "1"
+projectName: "awesome-ai-utmostcreator"
+projectType: "php project"
+projectSummary: "AI workflow starter for awesome-ai-utmostcreator"
+primaryLanguage: "unknown"
+primaryRuntime: "unknown"
+primaryEntrypoints: "README.md, docs/ai/project-context.md"
+primaryVerifyCommand: "unknown"
+primaryBuildCommand: "unknown"
+primaryTestCommand: "unknown"
+# Optional project-fact values (uncomment to override kit defaults):
+# targetPlatforms: unknown
+# sourceDirs: unknown
+# testDirs: unknown
+# testCommand: unknown
+# buildCommand: unknown
+# lintCommand: unknown
+# formatCommand: unknown
+# installCommand: unknown
+# packageManager: unknown
+# ciCommands: unknown
+# protectedPaths: unknown
+# generatedFiles: unknown
+# protectedFiles: unknown
+# reviewPriorities: unknown
+# riskAreas: unknown
+# approvalRequiredChanges: unknown
+# inactivePaths: unknown
+# availableCapabilities: unknown
+# primaryStack: unknown
+# filePlacementRules: unknown
+# namingRules: unknown
+# goldenExamples: unknown
+# formatterConfigFiles: unknown
+# linterConfigFiles: unknown
+# editorconfigPath: unknown
+# ignoreFiles: unknown

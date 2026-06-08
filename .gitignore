@@ -23,3 +23,18 @@ docs/ai/generated/
 # (its frontmatter id currently duplicates implementer.md). Ignored so it is
 # not committed or surfaced as untracked until that is resolved.
 .opencode/agents/super-implementer.md
+
+# BEGIN ai-kit
+.ai/backups/
+.ai/logs/
+.ai-backups/
+.ai-logs/
+.ai/conflicts/
+.ai/templates-new/
+.ai/local-manifest.json
+.ai/install.lock
+.repomix-context/
+*.tmp
+*.bak
+docs/ai/generated/
+# END ai-kit

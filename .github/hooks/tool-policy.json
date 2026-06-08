@@ -1,4 +1,10 @@
 {
+  "_generated": {
+    "tool": "ai-kit",
+    "editable": false,
+    "source": "docs/ai/command-policy.tiers.yaml",
+    "note": "Regenerate via ai-kit install/upgrade."
+  },
   "version": 1,
   "hooks": {
     "preToolUse": [
