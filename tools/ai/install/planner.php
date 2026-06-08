@@ -11,6 +11,25 @@ function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs):
         ? $config['knownKitChecksums']
         : aiInstallerLoadKnownKitChecksums((string) ($config['sourceRoot'] ?? ''));
 
+    // Files recorded as kit-managed by a previous install. Under --force we may only overwrite
+    // a differing on-disk file when we can prove the kit owns it (identical to source, a known
+    // prior-kit checksum, or recorded in this manifest). Anything else is foreign and must not be
+    // silently clobbered, even with --force. See improvement-plan invariants 1 and 2.
+    //
+    // The ownership gate only engages once the kit already manages this target (a manifest exists):
+    // on a re-install/upgrade an unrecorded, differing file is genuinely foreign and must be
+    // protected. On a true first install (no manifest) there is no ownership context, so --force
+    // keeps its explicit overwrite semantics. First-install collision with a consumer's own generic
+    // root file (e.g. manifest.json) is independently prevented by namespacing kit descriptors
+    // under .ai/ (Part 1), so this gate need not second-guess a clean first install.
+    // A full backup (--backup snapshots every displaced file to .ai/backups/) makes a force
+    // overwrite recoverable, so it is an explicit, safe acknowledgment that satisfies the gate.
+    $backupRequested = ($config['backup'] ?? false) === true;
+    $targetRootForGate = (string) ($config['targetRoot'] ?? '');
+    $kitAlreadyManagesTarget = $targetRootForGate !== ''
+        && is_file($targetRootForGate . DIRECTORY_SEPARATOR . '.ai-install-manifest.json');
+    $recordedKitFiles = aiInstallerLoadRecordedManifestFiles($targetRootForGate);
+
     $plan = [];
     foreach ($packs as $packId) {
         foreach ($packRegistry[$packId] ?? [] as $item) {
@@ -64,8 +83,29 @@ function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs):
                         $action = 'SKIP_EXISTING_UNMANAGED';
                         $reason = 'template (skip-if-exists) preserved under force';
                     }
-                } else {
+                } elseif ($adopt) {
+                    // Explicit adoption: the user accepts overwriting whatever is on disk
+                    // (a backup/conflict snapshot is recorded by the apply path).
                     $action = 'OVERWRITE_MANAGED';
+                    $reason = 'foreign or owned target overwritten via --force --adopt';
+                } elseif (
+                    !$kitAlreadyManagesTarget
+                    || $backupRequested
+                    || aiInstallerPathsAreIdentical($absSource, $absTarget)
+                    || aiInstallerMatchesKnownKitChecksum($target, $absTarget, $knownKitChecksums)
+                    || isset($recordedKitFiles[$target])
+                ) {
+                    // Safe to overwrite: a true first install (no ownership context, --force is
+                    // explicit), an explicit --backup (displaced bytes are snapshotted), or
+                    // ownership proven (identical to source, known prior-kit checksum, or recorded
+                    // as kit-managed in this target's manifest).
+                    $action = 'OVERWRITE_MANAGED';
+                } else {
+                    // Re-install/upgrade --force must NOT clobber a file the kit manages a project
+                    // but never recorded — that is a genuinely foreign file. Surface a conflict so
+                    // the user decides (rerun with --adopt to overwrite, with a backup recorded).
+                    $action = 'CONFLICT_FOREIGN';
+                    $reason = 'target exists, differs from the kit version, and is not kit-owned; rerun with --adopt to overwrite (a backup is recorded) or resolve manually';
                 }
             }
             if ($exists && $config['force'] && (($item['core'] ?? false) === true) && !$config['allowCoreOverwrite']) {
@@ -153,6 +193,37 @@ function aiInstallerMatchesKnownKitChecksum(string $target, string $absTarget, a
     }
 
     return false;
+}
+
+/**
+ * Load the set of target-relative paths recorded as kit-managed by a previous install.
+ *
+ * Reads `.ai-install-manifest.json`'s `files{}` map. Returns a path => true set used by the
+ * --force ownership gate so we only refresh files the kit already owns and never clobber an
+ * unrelated foreign file that happens to sit at a kit-claimed path.
+ *
+ * @return array<string,true>
+ */
+function aiInstallerLoadRecordedManifestFiles(string $targetRoot): array
+{
+    if ($targetRoot === '') {
+        return [];
+    }
+    $path = $targetRoot . DIRECTORY_SEPARATOR . '.ai-install-manifest.json';
+    if (!is_file($path)) {
+        return [];
+    }
+    $decoded = json_decode((string) file_get_contents($path), true);
+    if (!is_array($decoded) || !is_array($decoded['files'] ?? null)) {
+        return [];
+    }
+
+    $set = [];
+    foreach (array_keys($decoded['files']) as $relative) {
+        $set[str_replace('\\', '/', (string) $relative)] = true;
+    }
+
+    return $set;
 }
 
 function aiInstallerPathsAreIdentical(string $source, string $target): bool

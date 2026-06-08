@@ -119,6 +119,18 @@ class AgentPermissionPolicyTest extends TestCase
     ];
 
     /** @var list<string> */
+    private const EXTERNAL_BOUNDARY_AGENT_FILES = [
+        '.opencode/agents/architect.md',
+        '.opencode/agents/implementer.md',
+        '.opencode/agents/researcher.md',
+        '.opencode/agents/reviewer.md',
+        'packages/ai-universal-rules/templates/core/agents/architect.md',
+        'packages/ai-universal-rules/templates/core/agents/implementer.md',
+        'packages/ai-universal-rules/templates/core/agents/researcher.md',
+        'packages/ai-universal-rules/templates/core/agents/reviewer.md',
+    ];
+
+    /** @var list<string> */
     private const REVIEWER_GIT_REVIEW_ALLOW_PATTERNS = [
         'git merge-base',
         'git range-diff',
@@ -189,6 +201,12 @@ class AgentPermissionPolicyTest extends TestCase
     public static function reviewerAgentProvider(): array
     {
         return array_map(static fn (string $path): array => [$path], self::REVIEWER_AGENT_FILES);
+    }
+
+    /** @return list<array{0:string}> */
+    public static function externalBoundaryAgentProvider(): array
+    {
+        return array_map(static fn (string $path): array => [$path], self::EXTERNAL_BOUNDARY_AGENT_FILES);
     }
 
     #[DataProvider('gitMutatingAgentProvider')]
@@ -336,12 +354,29 @@ class AgentPermissionPolicyTest extends TestCase
         self::assertSame([], $violations, sprintf('%s contains forbidden allow patterns: %s', $relativePath, implode('; ', $violations)));
     }
 
+    #[DataProvider('projectConfigProvider')]
+    public function testProjectConfigAsksForExternalDirectoryAndLoadsBoundaryDocs(string $relativePath): void
+    {
+        $config = $this->loadProjectConfig($relativePath);
+
+        self::assertSame('ask', $config['permission']['external_directory'] ?? null, sprintf('%s must ask before external-directory access.', $relativePath));
+        self::assertContains('docs/ai/project-context.md', $config['instructions'] ?? [], sprintf('%s must load project context.', $relativePath));
+        self::assertContains('docs/ai/project/project-interaction.md', $config['instructions'] ?? [], sprintf('%s must load project interaction rules.', $relativePath));
+    }
+
+    #[DataProvider('externalBoundaryAgentProvider')]
+    public function testKeyAgentsDocumentExternalBoundaryPolicy(string $relativePath): void
+    {
+        $raw = $this->loadFile($relativePath);
+
+        self::assertStringContainsString('docs/ai/project-context.md', $raw, sprintf('%s must reference project context.', $relativePath));
+        self::assertStringContainsString('docs/ai/project/project-interaction.md', $raw, sprintf('%s must reference project interaction.', $relativePath));
+        self::assertStringContainsString('external_directory: ask', $raw, sprintf('%s must mention OpenCode external directory prompt.', $relativePath));
+    }
+
     private function loadFrontmatter(string $relativePath): string
     {
-        $raw = file_get_contents(self::$repoRoot . '/' . $relativePath);
-        if ($raw === false) {
-            throw new \RuntimeException("Could not read $relativePath");
-        }
+        $raw = $this->loadFile($relativePath);
 
         if (!str_starts_with($raw, '---')) {
             return $raw;
@@ -354,6 +389,17 @@ class AgentPermissionPolicyTest extends TestCase
     /** @return array<string,string> */
     private function loadProjectBashPermissions(string $relativePath): array
     {
+        $data = $this->loadProjectConfig($relativePath);
+        self::assertIsArray($data['permission']['bash'] ?? null, sprintf('%s must declare permission.bash', $relativePath));
+
+        /** @var array<string,string> $bash */
+        $bash = $data['permission']['bash'];
+        return $bash;
+    }
+
+    /** @return array<string,mixed> */
+    private function loadProjectConfig(string $relativePath): array
+    {
         $raw = file_get_contents(self::$repoRoot . '/' . $relativePath);
         self::assertNotFalse($raw);
 
@@ -365,11 +411,18 @@ class AgentPermissionPolicyTest extends TestCase
 
         $data = json_decode($raw, true);
         self::assertIsArray($data, sprintf('%s must be valid JSON', $relativePath));
-        self::assertIsArray($data['permission']['bash'] ?? null, sprintf('%s must declare permission.bash', $relativePath));
 
-        /** @var array<string,string> $bash */
-        $bash = $data['permission']['bash'];
-        return $bash;
+        return $data;
+    }
+
+    private function loadFile(string $relativePath): string
+    {
+        $raw = file_get_contents(self::$repoRoot . '/' . $relativePath);
+        if ($raw === false) {
+            throw new \RuntimeException("Could not read $relativePath");
+        }
+
+        return $raw;
     }
 
     private function stripJsonCommentsForTest(string $input): string

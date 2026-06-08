@@ -400,6 +400,14 @@ function aiInstallerWriteSetupDocs(string $targetRoot, array $manifest): void
     $postInstall .= "- Upgrade preview: `php tools/ai/ai.php upgrade --dry-run`\n";
     $postInstall .= "- Rollback: `php tools/ai/ai.php rollback --backup <backup-id> --apply`\n";
     $postInstall .= "- Specific-file rollback: `php tools/ai/ai.php rollback --backup <backup-id> --only path/to/file --apply`\n";
+    $postInstall .= "\n## Kit Descriptors Under `.ai/`\n\n";
+    $postInstall .= "- Kit descriptors install under `.ai/` (`.ai/kit-manifest.json`, `.ai/kit-manifest.yml`, "
+        . "`.ai/catalog.json`, `.ai/package-lock.ai.json`) so they never collide with your project's own root files.\n";
+    $postInstall .= "- Inspect them: `php tools/ai/ai.php descriptors --list`\n";
+    $postInstall .= "- Copy one out to root (dry-run default; add `--apply` to write): "
+        . "`php tools/ai/ai.php descriptors --copy-out --name manifest.json`\n";
+    $postInstall .= "- Copy-out never overwrites a differing root file: yours is preserved and the kit copy is "
+        . "snapshotted under `.ai/conflicts/`. Only `manifest.json`/`manifest.yml` are copy-out safe.\n";
     $postInstall .= "\n## Hook Wiring\n\n";
     $postInstall .= "- Hook scripts are installed when `hooks-pack` is selected; wiring remains explicit.\n";
     $postInstall .= "- Wire hooks with: `php tools/ai/ai.php hooks install --driver husky|lefthook|native`.\n";

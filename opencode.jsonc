@@ -2,6 +2,8 @@
   "$schema": "https://opencode.ai/config.json",
   "instructions": [
     "AGENTS.md",
+    "docs/ai/project-context.md",
+    "docs/ai/project/project-interaction.md",
     "docs/ai/tools/ai-search.md",
     "docs/ai/tools/tool-map.md",
     "docs/ai/tools/actions/search-evidence.md",

@@ -23,6 +23,7 @@ require_once __DIR__ . '/commands/workspace.php';
 require_once __DIR__ . '/commands/decisions.php';
 require_once __DIR__ . '/commands/install_commands.php';
 require_once __DIR__ . '/commands/advisor_command.php';
+require_once __DIR__ . '/commands/descriptors_command.php';
 
 const AI_DIR_MODE = 0755;
 
@@ -80,6 +81,8 @@ Commands:
   run-script     Run approved scripts-pack helper scripts by registry id
   install-docs   Generate or check install instructions and catalog docs
   advisor        Project intelligence advisor pipeline commands
+  descriptors    List relocated .ai/ kit descriptors or copy a safe one out to root
+                 Use --list (default) or --copy-out --name <file> (--dry-run default)
   version        Show installer/package identity from canonical manifest
   freshness      Evaluate generated artifact freshness
   budget         Estimate context token budget from generated artifacts
@@ -124,6 +127,8 @@ Examples:
   php tools/ai/ai.php run-script --list
   php tools/ai/ai.php install-docs --check
   php tools/ai/ai.php advisor --all
+  php tools/ai/ai.php descriptors --list
+  php tools/ai/ai.php descriptors --copy-out --name manifest.json --apply
   php tools/ai/ai.php placeholders --fail
   php tools/ai/ai.php version
 TXT;
@@ -237,6 +242,8 @@ try {
             exit(aiRunInstallDocs($root, $args));
         case 'advisor':
             exit(aiRunAdvisor($root, $args));
+        case 'descriptors':
+            exit(aiRunDescriptors($root, $args));
         case 'version':
             exit(aiRunVersion($root));
         default:

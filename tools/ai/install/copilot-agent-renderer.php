@@ -139,6 +139,11 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
 /**
  * Copies the source agents directory to dest, rendering each .md file as a Copilot .agent.md.
  *
+ * This is the clobber variant used by the base adapter-copilot pack: the destination tree is
+ * removed first so a re-install/upgrade is deterministic. Optional Copilot agents that share the
+ * same .github/agents target must instead use aiInstallerMergeDirAsCopilotAgents, which renders
+ * into the existing directory without deleting sibling base agents.
+ *
  * @param string $src         Absolute path to source agents dir (OpenCode templates)
  * @param string $dest        Absolute path to destination dir (.github/agents)
  * @param string $scriptsRoot Absolute path to scripts/ai/ in the target repo
@@ -158,14 +163,58 @@ function aiInstallerCopyDirAsCopilotAgents(string $src, string $dest, string $sc
     }
     aiInstallerMkdir($dest);
 
+    aiInstallerRenderCopilotAgentsInto($src, $dest, $scriptsRoot, false);
+}
+
+/**
+ * Merge variant: renders each source agent into an existing .github/agents directory WITHOUT
+ * deleting the tree, so optional Copilot agents coexist with the base adapter-copilot agents
+ * (no filename overlap between core/agents and optional/agents). Honors skip-if-exists semantics:
+ * a destination agent the user already authored is preserved, never overwritten.
+ *
+ * @param string $src         Absolute path to source agents dir (OpenCode templates)
+ * @param string $dest        Absolute path to destination dir (.github/agents)
+ * @param string $scriptsRoot Absolute path to scripts/ai/ in the target repo
+ * @param bool   $skipExisting When true, a pre-existing destination agent file is preserved.
+ */
+function aiInstallerMergeDirAsCopilotAgents(string $src, string $dest, string $scriptsRoot, bool $skipExisting = true): void
+{
+    if (!is_dir($src)) {
+        throw new RuntimeException('missing source directory: ' . $src);
+    }
+    $srcReal  = realpath($src);
+    $destReal = file_exists($dest) ? realpath($dest) : false;
+    if ($srcReal !== false && $destReal !== false && $srcReal === $destReal) {
+        return;
+    }
+    aiInstallerMkdir($dest);
+
+    aiInstallerRenderCopilotAgentsInto($src, $dest, $scriptsRoot, $skipExisting);
+}
+
+/**
+ * Shared render loop for both copilot-agents copy variants. Renders every non-hidden source
+ * agent template into $dest as <id>.agent.md via the Copilot renderer. The caller decides whether
+ * the destination tree was cleared first (clobber) or kept (merge).
+ *
+ * @param string $src          Absolute path to source agents dir (OpenCode templates)
+ * @param string $dest         Absolute path to destination dir (.github/agents); must already exist
+ * @param string $scriptsRoot  Absolute path to scripts/ai/ in the target repo
+ * @param bool   $skipExisting When true, an existing destination .agent.md is preserved.
+ */
+function aiInstallerRenderCopilotAgentsInto(string $src, string $dest, string $scriptsRoot, bool $skipExisting): void
+{
     foreach (glob($src . DIRECTORY_SEPARATOR . '*.md') ?: [] as $srcFile) {
         $agentId  = pathinfo($srcFile, PATHINFO_FILENAME);
         $content  = (string) file_get_contents($srcFile);
         if (aiAgentIsHiddenInternalOnly($content)) {
             continue;
         }
-        $rendered = aiInstallerRenderCopilotAgent($content, $agentId, $scriptsRoot);
         $destFile = $dest . DIRECTORY_SEPARATOR . $agentId . '.agent.md';
+        if ($skipExisting && is_file($destFile)) {
+            continue;
+        }
+        $rendered = aiInstallerRenderCopilotAgent($content, $agentId, $scriptsRoot);
         if (file_put_contents($destFile, $rendered) === false) {
             throw new RuntimeException('failed to write rendered agent: ' . $destFile);
         }

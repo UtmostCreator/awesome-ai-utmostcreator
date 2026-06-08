@@ -126,8 +126,38 @@ function aiInstallerRun(array $argv): int
     $applied = [];
     $seenDirTargets = [];
     $templateRefreshes = [];
+    // Targets written by more than one copilot-agents pack (base adapter-copilot + the optional
+    // pack both target .github/agents). For these, the first writer must NOT clobber the dir, so
+    // the two agent sets coexist regardless of pack order. Filenames never overlap between
+    // core/agents and optional/agents, so a pure merge is deterministic.
+    $copilotAgentsWritersByTarget = [];
+    foreach ($plan as $planItem) {
+        if (($planItem['install_type'] ?? '') === 'copilot-agents') {
+            $t = (string) ($planItem['target'] ?? '');
+            $copilotAgentsWritersByTarget[$t] = ($copilotAgentsWritersByTarget[$t] ?? 0) + 1;
+        }
+    }
     foreach ($plan as $item) {
         if ($item['action'] === 'SKIP_EXISTING_UNMANAGED' || $item['action'] === 'SKIP_PROTECTED_CORE' || $item['action'] === 'SKIP_IDENTICAL_EXISTING') {
+            // Force-render the optional Copilot agents even when the planner marked the shared
+            // .github/agents dir SKIP (it pre-existed at plan time, e.g. on every re-install). The
+            // base adapter-copilot pack re-renders that dir this run, so without this the optional
+            // agents would be lost on re-install. The merge variant only writes agents that are not
+            // already present, so user-authored .agent.md files are still preserved.
+            if (
+                !$config['dryRun']
+                && ($item['install_type'] ?? '') === 'copilot-agents'
+                && ($item['merge_into_existing'] ?? false) === true
+            ) {
+                $src = $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['source']);
+                $dest = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['target']);
+                $scriptsRoot = $config['targetRoot'] . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai';
+                // Mark the target seen so the base writer (whichever order it runs) merges too.
+                $seenDirTargets[$item['target']] = true;
+                aiInstallerMergeDirAsCopilotAgents($src, $dest, $scriptsRoot, true);
+                aiInstallerLog('merged optional copilot agents into ' . $item['target'] . ' (preserved alongside base agents)');
+                continue;
+            }
             // Template refresh channel: when a skip-if-exists template is preserved but the shipped
             // upstream version has changed, surface the new version under .ai/templates-new/<path>
             // so the user can diff/merge — the user's file is never overwritten.
@@ -163,13 +193,43 @@ function aiInstallerRun(array $argv): int
             continue;
         }
 
+        // Before overwriting a displaced foreign file via adoption, snapshot it so user bytes are
+        // always recoverable from .ai/conflicts/ even without an explicit --backup. Only adopted
+        // overwrites carry this reason; ownership-proven refreshes (identical/known-kit/recorded)
+        // do not displace user data and are skipped here.
+        if (
+            ($item['action'] ?? '') === 'OVERWRITE_MANAGED'
+            && ($item['type'] ?? '') === 'file'
+            && str_contains((string) ($item['reason'] ?? ''), 'adopt')
+        ) {
+            $snapshot = aiInstallerSnapshotAdoptedForeign($config, $item, gmdate('Ymd\THis\Z'));
+            if ($snapshot !== null) {
+                aiInstallerLog('snapshot ' . $item['target'] . ' (adopted foreign overwrite; see ' . $snapshot . ')');
+            }
+        }
+
         $src = $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['source']);
         $dest = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['target']);
         if ($item['type'] === 'file') {
             aiInstallerCopyFile($src, $dest);
         } elseif (($item['install_type'] ?? '') === 'copilot-agents') {
             $scriptsRoot = $config['targetRoot'] . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai';
-            aiInstallerCopyDirAsCopilotAgents($src, $dest, $scriptsRoot);
+            // Two packs target .github/agents: the base adapter-copilot pack and the
+            // optional-agents-copilot-pack. Whichever runs is allowed to clobber-render ONLY when it
+            // is the sole writer for this target AND nothing has written it yet this run. As soon as
+            // a second writer exists (or the dir was already written this run), every writer merges,
+            // so neither pack wipes the other's agents via delete-tree — independent of pack order.
+            $hasCoWriter = (int) ($copilotAgentsWritersByTarget[$item['target']] ?? 1) > 1;
+            $mergeIntoExisting = ($item['merge_into_existing'] ?? false) === true
+                || $hasCoWriter
+                || isset($seenDirTargets[$item['target']]);
+            $seenDirTargets[$item['target']] = true;
+            if ($mergeIntoExisting) {
+                $skipExisting = ($item['merge_strategy'] ?? '') === 'skip-if-exists';
+                aiInstallerMergeDirAsCopilotAgents($src, $dest, $scriptsRoot, $skipExisting);
+            } else {
+                aiInstallerCopyDirAsCopilotAgents($src, $dest, $scriptsRoot);
+            }
         } elseif (($item['install_type'] ?? '') === 'opencode-agents') {
             aiInstallerCopyDirAsOpenCodeAgents($src, $dest);
         } elseif (($item['install_type'] ?? '') === 'skill-dirs') {
@@ -753,10 +813,10 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
         // descriptor or its docs/policies would corrupt JSON/lock/policy data).
         if (
             $target === 'PLACEHOLDERS.md'
-            || $target === 'manifest.json'
-            || $target === 'manifest.yml'
-            || $target === 'catalog.json'
-            || $target === 'package-lock.ai.json'
+            || $target === '.ai/kit-manifest.json'
+            || $target === '.ai/kit-manifest.yml'
+            || $target === '.ai/catalog.json'
+            || $target === '.ai/package-lock.ai.json'
             || str_starts_with($target, 'packages/ai-universal-rules/')
             || str_starts_with($target, 'docs/ai/package/')
             || str_starts_with($target, 'policies/')
@@ -836,6 +896,29 @@ function aiInstallerPrivateTemplatesNewRel(): string
 }
 
 /**
+ * Map a relocated kit descriptor target path to its canonical root filename and copy-out
+ * safety. Returns null for any path that is not a relocated descriptor.
+ *
+ * copyOutSafe is true only for manifest.json/manifest.yml: catalog.json and
+ * package-lock.ai.json are resolved by the kit's descriptor resolver (.ai/ first) and copying
+ * them to root can confuse the legacy root fallback in ai_catalog_lib.php, so they are marked
+ * informational-only (copyOutSafe=false).
+ *
+ * @return array{canonicalRootName:string,copyOutSafe:bool}|null
+ */
+function aiInstallerDescriptorProvenance(string $target): ?array
+{
+    static $map = [
+        '.ai/kit-manifest.json' => ['canonicalRootName' => 'manifest.json', 'copyOutSafe' => true],
+        '.ai/kit-manifest.yml' => ['canonicalRootName' => 'manifest.yml', 'copyOutSafe' => true],
+        '.ai/catalog.json' => ['canonicalRootName' => 'catalog.json', 'copyOutSafe' => false],
+        '.ai/package-lock.ai.json' => ['canonicalRootName' => 'package-lock.ai.json', 'copyOutSafe' => false],
+    ];
+
+    return $map[$target] ?? null;
+}
+
+/**
  * P5-b: write the informational-only `.ai/local-manifest.json`.
  *
  * This is a gitignored, human-facing summary of what the kit installed. It is NEVER read
@@ -851,10 +934,19 @@ function aiInstallerWriteLocalManifest(string $targetRoot, array $manifest): voi
         if (!is_string($path) || !is_array($meta)) {
             continue;
         }
-        $files[$path] = [
+        $entry = [
             'ownership' => (string) ($meta['ownership'] ?? 'owned'),
             'installed_hash' => (string) ($meta['installed_hash'] ?? ''),
         ];
+        $prov = aiInstallerDescriptorProvenance($path);
+        if ($prov !== null) {
+            $entry['descriptor'] = [
+                'canonicalRootName' => $prov['canonicalRootName'],
+                'namespacedToAvoidCollision' => true,
+                'copyOutSafe' => $prov['copyOutSafe'],
+            ];
+        }
+        $files[$path] = $entry;
     }
     ksort($files);
 
@@ -1111,6 +1203,39 @@ function aiInstallerOfferIncomingConflict(array $config, array $item): ?string
     $out = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
     aiInstallerMkdir(dirname($out), aiInstallerPrivateDirMode());
     if (!@copy($src, $out)) {
+        return null;
+    }
+
+    return $rel;
+}
+
+/**
+ * Snapshot a foreign file that is about to be overwritten by an adopted --force/--adopt overwrite.
+ *
+ * Copies the existing on-disk file to `.ai/conflicts/<ts>-install/files/<path>` so user bytes are
+ * never destroyed without a recoverable copy, even when the caller did not pass --backup. Returns
+ * the relative snapshot path, or null when there is nothing to snapshot (no existing file, or the
+ * existing file already matches the incoming source).
+ */
+function aiInstallerSnapshotAdoptedForeign(array $config, array $item, string $stamp): ?string
+{
+    $source = (string) ($item['source'] ?? '');
+    $target = (string) ($item['target'] ?? '');
+    if ($source === '' || $target === '') {
+        return null;
+    }
+
+    $src = $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $source);
+    $dest = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $target);
+    // Only snapshot a genuine, differing existing file.
+    if (!is_file($dest) || (is_file($src) && aiInstallerPathsAreIdentical($src, $dest))) {
+        return null;
+    }
+
+    $rel = aiInstallerPrivateConflictRel('install', 'files', $stamp) . '/' . $target;
+    $out = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+    aiInstallerMkdir(dirname($out), aiInstallerPrivateDirMode());
+    if (!@copy($dest, $out)) {
         return null;
     }
 

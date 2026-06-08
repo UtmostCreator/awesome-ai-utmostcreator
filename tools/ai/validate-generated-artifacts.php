@@ -20,7 +20,7 @@ $write = in_array('--write', $argv, true) || in_array('--fix', $argv, true);
 
 $required = [
     'docs/ai/catalog.md' => 'php tools/ai/generate-ai-catalog.php --check',
-    $packageBase . 'catalog.json' => 'php tools/ai/generate-ai-catalog.php --check',
+    aiResolveKitDescriptorPath($root, 'catalog.json') => 'php tools/ai/generate-ai-catalog.php --check',
     $packageDocsBase . 'BROWSE.md' => 'php tools/ai/generate-ai-catalog.php --check',
     'llms.txt' => 'php tools/ai/generate-ai-catalog.php --check',
     'docs/ai/repo-required-tools.md' => 'php tools/ai/repo-tool-inventory.php --check',

@@ -38,6 +38,11 @@ function aiResolvePackageBase(string $root): string
     if (is_dir($root . '/packages/ai-universal-rules/templates')) {
         return 'packages/ai-universal-rules/';
     }
+    // Consumer install: kit descriptors live under the byte-protected .ai/ dir.
+    // (Legacy installs placed manifest.json at the consumer root; still honored.)
+    if (is_file($root . '/.ai/kit-manifest.json') && is_file($root . '/.ai-install-manifest.json')) {
+        return '';
+    }
     if (is_file($root . '/manifest.json') && is_file($root . '/.ai-install-manifest.json')) {
         return '';
     }
@@ -45,6 +50,40 @@ function aiResolvePackageBase(string $root): string
         return 'packages/ai-universal-rules/';
     }
     return 'packages/ai-universal-rules/';
+}
+
+/**
+ * Resolve the relative path to a kit package descriptor for the given root, in any layout.
+ *
+ * Supported $descriptor values: 'manifest.json', 'manifest.yml', 'catalog.json',
+ * 'package-lock.ai.json'. In source/package mode the descriptor lives under
+ * packages/ai-universal-rules/. In a consumer install it lives under .ai/ (manifest*.{json,yml}
+ * are renamed to kit-manifest.*). Legacy consumer installs that still keep the bare descriptor at
+ * the root are honored for backward compatibility.
+ */
+function aiResolveKitDescriptorPath(string $root, string $descriptor): string
+{
+    $base = aiResolvePackageBase($root);
+    if ($base !== '') {
+        // Source/package layout: descriptors keep their original names under the package dir.
+        return $base . $descriptor;
+    }
+
+    // Consumer layout. Map renamed descriptors to their .ai/ targets.
+    $consumerMap = [
+        'manifest.json' => '.ai/kit-manifest.json',
+        'manifest.yml' => '.ai/kit-manifest.yml',
+        'catalog.json' => '.ai/catalog.json',
+        'package-lock.ai.json' => '.ai/package-lock.ai.json',
+    ];
+    $relocated = $consumerMap[$descriptor] ?? $descriptor;
+
+    // Backward compatibility: a legacy install may still hold the bare root descriptor.
+    if (!is_file($root . '/' . $relocated) && is_file($root . '/' . $descriptor)) {
+        return $descriptor;
+    }
+
+    return $relocated;
 }
 
 /**
@@ -191,7 +230,7 @@ function aiResource(
 
 function aiCollectCatalog(string $root): array
 {
-    $manifest = aiLoadJson($root, aiResolvePackageBase($root) . 'manifest.json');
+    $manifest = aiLoadJson($root, aiResolveKitDescriptorPath($root, 'manifest.json'));
     $resources = [];
 
     foreach (aiCollectRootResources($root) as $resource) {
@@ -874,7 +913,7 @@ function aiValidateManifest(array $manifest, string $root): array
 
 function aiReadManifestYamlSummary(string $root): array
 {
-    $content = aiReadFile($root, aiResolvePackageBase($root) . 'manifest.yml');
+    $content = aiReadFile($root, aiResolveKitDescriptorPath($root, 'manifest.yml'));
     $summary = [];
 
     foreach (preg_split('/\r?\n/', $content) ?: [] as $line) {

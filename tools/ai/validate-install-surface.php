@@ -127,6 +127,11 @@ foreach ($packs as $packId => $items) {
         if ($target !== '' && aiInstallerIsReservedUserNamespace($target)) {
             $errors[] = "pack {$packId} item {$index} ships into the reserved user namespace: {$target}";
         }
+        // Generic, collision-prone root filenames must be namespaced (e.g. under .ai/) so the kit
+        // never competes for, or overwrites, a consumer project's own root file of the same name.
+        if ($target !== '' && aiInstallerIsCollisionProneRootTarget($target)) {
+            $errors[] = "pack {$packId} item {$index} ships a collision-prone generic root filename '{$target}'; namespace it (e.g. .ai/) to avoid clobbering a consumer project file";
+        }
     }
 }
 
@@ -158,10 +163,14 @@ foreach ($scriptEnforcedProfiles as $profileId) {
 
 $packSources = [];
 $packTargets = [];
+$packDirTargets = [];
 foreach ($packs as $items) {
     foreach ($items as $item) {
         $packSources[] = (string) ($item['source'] ?? '');
         $packTargets[] = (string) ($item['target'] ?? '');
+        if ((string) ($item['type'] ?? '') === 'dir') {
+            $packDirTargets[] = (string) ($item['target'] ?? '');
+        }
     }
 }
 
@@ -198,6 +207,7 @@ foreach ($scripts as $id => $script) {
 validateScriptRegistryJsonParity($root, $scripts, $errors);
 validateAdapterScriptReferences($root, $scripts, $errors);
 validateScriptsPackCoverage($packs, $scripts, $errors);
+validateShippedDocReferenceIntegrity($root, $packTargets, $packDirTargets, $errors);
 
 $opencodeAgentNames = collectAgentNames($root . '/packages/ai-universal-rules/templates/core/agents', '.md');
 $githubAgentNames = $opencodeAgentNames;
@@ -685,6 +695,131 @@ function validateScriptsPackCoverage(array $packs, array $scripts, array &$error
     foreach (array_keys($packScriptPaths) as $path) {
         if (!isset($registryScriptPaths[$path])) {
             $errors[] = "scripts-pack path {$path} is not registered in tools/ai/install/script-registry.php";
+        }
+    }
+}
+
+/**
+ * True when a pack target is a generic root-level filename likely to collide with a consumer
+ * project's own file. Such names must be namespaced (e.g. under .ai/) before shipping.
+ *
+ * Only flags bare root targets (no directory separator). Files the kit legitimately owns at the
+ * project root (AGENTS.md, opencode.jsonc, llms.txt, PLACEHOLDERS.md, etc.) are allowlisted.
+ */
+function aiInstallerIsCollisionProneRootTarget(string $target): bool
+{
+    $normalized = str_replace('\\', '/', $target);
+    if (str_contains($normalized, '/')) {
+        return false; // namespaced — not a bare root file
+    }
+
+    $collisionProne = [
+        'manifest.json',
+        'manifest.yml',
+        'manifest.yaml',
+        'catalog.json',
+        'package-lock.ai.json',
+        'config.json',
+        'config.yml',
+        'config.yaml',
+        'settings.json',
+    ];
+
+    return in_array(strtolower($normalized), $collisionProne, true);
+}
+
+/**
+ * Bidirectional ship-reference integrity for the shipped doc surface.
+ *
+ * Direction A — referenced-but-not-shipped: every repo-relative doc path listed in the shipped
+ *   opencode.json instructions[] must be a planned install target (or an installer-generated path).
+ * Direction B — dangling shipped link: every relative docs/ai/** link inside a shipped docs/ai/**
+ *   markdown must itself resolve to a planned install target.
+ *
+ * This catches the class of bug where opencode.jsonc points at an instruction file the installer
+ * never ships, and where a shipped doc's See-Also/Related links point at unshipped docs.
+ */
+function validateShippedDocReferenceIntegrity(string $root, array $packTargets, array $packDirTargets, array &$errors): void
+{
+    $plannedTargets = array_fill_keys(array_filter(array_map('strval', $packTargets)), true);
+    $dirTargets = array_values(array_filter(array_map('strval', $packDirTargets)));
+
+    // Installer-generated targets that exist post-install but are not pack-registry entries.
+    $installerGenerated = [
+        'docs/ai/POST-INSTALL.md',
+        'docs/ai/available-packs.md',
+        'docs/ai/SETUP.md',
+        'docs/ai/installed-files.md',
+        'docs/ai/project-configuration.md',
+        'docs/ai/project-context.md',
+        'docs/ai/project/README.md',
+        'docs/ai/project/conventions.md',
+        'docs/ai/project/project-interaction.md',
+    ];
+    foreach ($installerGenerated as $generated) {
+        $plannedTargets[$generated] = true;
+    }
+
+    $isShippedDoc = static function (string $relPath) use ($plannedTargets, $dirTargets): bool {
+        if (isset($plannedTargets[$relPath])) {
+            return true;
+        }
+        // Runtime-generated artifacts live under docs/ai/generated/ and are produced on demand.
+        if (str_starts_with($relPath, 'docs/ai/generated/')) {
+            return true;
+        }
+        // A file shipped as part of a dir-type pack target counts as shipped.
+        foreach ($dirTargets as $dir) {
+            if ($dir !== '' && str_starts_with($relPath, rtrim($dir, '/') . '/')) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    // Direction A: opencode.json instruction list.
+    $opencodeTemplate = $root . '/packages/ai-universal-rules/templates/core/opencode.json';
+    if (is_file($opencodeTemplate)) {
+        $raw = (string) file_get_contents($opencodeTemplate);
+        // Strip // line comments so json_decode accepts the JSONC template header.
+        $stripped = preg_replace('~^\s*//.*$~m', '', $raw) ?? $raw;
+        $decoded = json_decode($stripped, true);
+        $instructions = is_array($decoded) && isset($decoded['instructions']) && is_array($decoded['instructions'])
+            ? $decoded['instructions']
+            : [];
+        foreach ($instructions as $instruction) {
+            $path = (string) $instruction;
+            // Only validate repo-relative doc/file paths (skip URLs and bare root files like AGENTS.md
+            // that are shipped via other packs and verified elsewhere).
+            if ($path === '' || str_contains($path, '://')) {
+                continue;
+            }
+            if (!$isShippedDoc($path) && $path !== 'AGENTS.md') {
+                $errors[] = "opencode.json instruction references a path not shipped by any pack: {$path}";
+            }
+        }
+    }
+
+    // Direction B: dangling docs/ai/** links inside shipped docs/ai/** markdown.
+    foreach (array_keys($plannedTargets) as $target) {
+        if (!str_starts_with($target, 'docs/ai/') || !str_ends_with($target, '.md')) {
+            continue;
+        }
+        // The shipped body lives either under the template package mirror or directly in the repo.
+        $templateMirror = $root . '/packages/ai-universal-rules/templates/' . $target;
+        $repoDirect = $root . '/' . $target;
+        $sourceFile = is_file($templateMirror) ? $templateMirror : (is_file($repoDirect) ? $repoDirect : null);
+        if ($sourceFile === null) {
+            continue;
+        }
+        $body = (string) file_get_contents($sourceFile);
+        // Match backtick-wrapped or inline docs/ai/... references ending in a file extension.
+        if (preg_match_all('~docs/ai/[A-Za-z0-9._/-]+\.(?:md|json|ya?ml)~', $body, $matches) > 0) {
+            foreach (array_unique($matches[0]) as $ref) {
+                if (!$isShippedDoc($ref)) {
+                    $errors[] = "shipped doc {$target} references an unshipped path: {$ref}";
+                }
+            }
         }
     }
 }

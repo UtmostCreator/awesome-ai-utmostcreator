@@ -231,6 +231,14 @@ Implement the agreed change, prove it with focused verification, and hand off a 
 - Separate completed verification from recommended verification.
 - Use `unknown` when evidence does not prove a claim.
 
+## External Boundary Rule
+
+Read-only inspection of external projects named in `docs/ai/project-context.md` or
+`docs/ai/project/project-interaction.md` may be requested when needed for this slice, subject to the
+OpenCode `external_directory: ask` prompt and sensitive-file rules. Implement changes only inside
+the current project unless the user separately approves the exact external path and intended edit.
+If approval is missing, stop before external mutation and report the limitation.
+
 ## Script Access
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write/build tier. Use:

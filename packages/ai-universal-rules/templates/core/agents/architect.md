@@ -122,6 +122,14 @@ Define exact scope, non-goals, affected paths, source-of-truth files, contracts 
 - Do not create parallel implementations unless the repository explicitly requires them.
 - Use `unknown` when evidence does not prove a claim.
 
+## External Context Boundary
+
+Read-only inspection of external projects named in `docs/ai/project-context.md` or
+`docs/ai/project/project-interaction.md` is allowed when needed for the design, subject to the
+OpenCode `external_directory: ask` prompt and sensitive-file rules. If the external project is not
+named there, ask before reading it. Never propose external edits unless the user explicitly approves
+the named external path and intended change.
+
 ## Script Access
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Design tier = read-only. Use:
