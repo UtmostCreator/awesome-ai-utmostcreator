@@ -156,6 +156,22 @@ Any remaining matches should be reviewed and resolved before write-capable AI ru
 
 ---
 
+## Kit Descriptors Under `.ai/`
+
+The kit's own package descriptors are installed under `.ai/` (as `.ai/kit-manifest.json`, `.ai/kit-manifest.yml`, `.ai/catalog.json`, `.ai/package-lock.ai.json`) so they never collide with your project's own root files of the same name.
+
+To inspect them, or copy one back out to its canonical root name when you want it there:
+
+```bash
+php tools/ai/ai.php descriptors --list
+php tools/ai/ai.php descriptors --copy-out --name manifest.json            # dry-run preview (default)
+php tools/ai/ai.php descriptors --copy-out --name manifest.json --apply    # write it to root
+```
+
+Copy-out never overwrites an existing, differing root file: it preserves yours and snapshots the kit copy under `.ai/conflicts/` so you can merge as you see fit. Only `manifest.json` and `manifest.yml` are copy-out safe; `catalog.json` and `package-lock.ai.json` stay informational-only under `.ai/`.
+
+---
+
 ## Reference
 
 | File                                      | Purpose                                                 |
@@ -167,3 +183,4 @@ Any remaining matches should be reviewed and resolved before write-capable AI ru
 | `docs/ai/scripts-reference.md`            | All installed scripts explained                         |
 | `docs/ai/validation.md`                   | Validation and verification procedures                  |
 | `.ai-install-manifest.json`               | Records what was installed, versions, and managed files |
+| `.ai/local-manifest.json`                 | Informational install summary + relocated-descriptor provenance |

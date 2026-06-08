@@ -122,6 +122,11 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/preview-file.sh', 'target' => 'scripts/ai/preview-file.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             // tests/scripts/ai/test-preview-file.sh is source-repo-only — not installed to target projects
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/docs/ai/tools/actions/preview-file.md', 'target' => 'docs/ai/tools/actions/preview-file.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            // tool docs referenced by the shipped opencode.json instructions[] and tool-map See-Also closure
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/docs/ai/tools/ai-search.md', 'target' => 'docs/ai/tools/ai-search.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/docs/ai/tools/tool-map.md', 'target' => 'docs/ai/tools/tool-map.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/docs/ai/tools/actions/search-evidence.md', 'target' => 'docs/ai/tools/actions/search-evidence.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/docs/ai/tools/actions/use-ai-script.md', 'target' => 'docs/ai/tools/actions/use-ai-script.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/query-usage.sh', 'target' => 'scripts/ai/query-usage.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/fd-files.sh', 'target' => 'scripts/ai/fd-files.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/rg-code.sh', 'target' => 'scripts/ai/rg-code.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -144,6 +149,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/mandatory-tools-install.md', 'target' => 'docs/ai/mandatory-tools-install.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/script-registry.md', 'target' => 'docs/ai/script-registry.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/script-registry.json', 'target' => 'docs/ai/script-registry.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'docs/ai/script-registry.schema.json', 'target' => 'docs/ai/script-registry.schema.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
         'hooks-pack' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/github/hooks/tool-policy.json', 'target' => '.github/hooks/tool-policy.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -181,7 +187,11 @@ function aiInstallerPackRegistry(): array
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.opencode/agents-optional', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'optional-agents-copilot-pack' => [
-            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.github/agents', 'rename_ext' => '.agent.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            // Render optional agents through the Copilot renderer (VS Code-native frontmatter) and
+            // MERGE into .github/agents so they coexist with the base adapter-copilot agents. A raw
+            // rename copy would (a) ship invalid OpenCode frontmatter and (b) clobber the base
+            // agents via delete-tree. merge_into_existing selects the non-clobbering copy path.
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.github/agents', 'install_type' => 'copilot-agents', 'merge_into_existing' => true, 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'preview-environments-pack' => [
             ['type' => 'dir', 'source' => 'docs/ai/capabilities/preview-environments', 'target' => 'docs/ai/capabilities/preview-environments', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
@@ -203,10 +213,12 @@ function aiInstallerPackRegistry(): array
         ],
         'target-tools-pack' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            // Kit package descriptors are namespaced under the byte-protected .ai/ dir so they never
+            // collide with a consumer project's own root manifest.json/catalog.json/package-lock.
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => '.ai/kit-manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => '.ai/kit-manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => '.ai/package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => '.ai/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'docs/ai/package', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'tools/ai/install', 'target' => 'tools/ai/install', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -258,10 +270,10 @@ function aiInstallerPackRegistry(): array
         // targets can run generate-ai-catalog/validate-generated-artifacts and
         // package-verify without re-downloading the source repo.
         'package-source-pack' => [
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => 'manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => 'catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => 'manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => 'package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => '.ai/kit-manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => '.ai/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => '.ai/kit-manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => '.ai/package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'docs/ai/package', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],

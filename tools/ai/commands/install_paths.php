@@ -6,7 +6,7 @@ require_once __DIR__ . '/../ai_catalog_lib.php';
 
 function aiPackageLockPath(string $root): string
 {
-    return aiAbsolutePath($root, aiResolvePackageBase($root) . 'package-lock.ai.json');
+    return aiAbsolutePath($root, aiResolveKitDescriptorPath($root, 'package-lock.ai.json'));
 }
 
 function aiInstallManifestPath(string $root): string

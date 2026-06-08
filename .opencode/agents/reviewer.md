@@ -117,6 +117,13 @@ Find issues before merge. Prioritize correctness, regression risk, security, con
 - Duplicate-logic screening is required before PASS.
 - Use `unknown` when evidence does not prove a claim.
 
+## External Context Boundary
+
+Read-only inspection of external projects named in `docs/ai/project-context.md` or
+`docs/ai/project/project-interaction.md` is allowed when needed to verify contracts or regressions,
+subject to the OpenCode `external_directory: ask` prompt and sensitive-file rules. If the external
+project is not named there, ask before reading it. Reviewer never edits external projects.
+
 ## Git Review Flow
 
 For local uncommitted changes, establish scope with `git status --short --branch`, then inspect `git diff --stat --find-renames HEAD`, `git diff --name-status --find-renames HEAD`, `git diff --check HEAD`, `git diff --dirstat=files,10,cumulative HEAD`, `git diff --find-renames --find-copies --function-context HEAD`, and `git ls-files --others --exclude-standard` before deep reading.

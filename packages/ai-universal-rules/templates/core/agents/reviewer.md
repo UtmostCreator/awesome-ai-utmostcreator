@@ -144,6 +144,13 @@ Find issues before merge. Prioritize correctness, regression risk, security, con
 - Duplicate-logic screening is required before PASS.
 - Use `unknown` when evidence does not prove a claim.
 
+## External Context Boundary
+
+Read-only inspection of external projects named in `docs/ai/project-context.md` or
+`docs/ai/project/project-interaction.md` is allowed when needed to verify contracts or regressions,
+subject to the OpenCode `external_directory: ask` prompt and sensitive-file rules. If the external
+project is not named there, ask before reading it. Reviewer never edits external projects.
+
 ## Script Access
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Review/audit tier = read + proof. Use:

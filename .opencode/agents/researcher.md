@@ -131,6 +131,13 @@ Focus on unclear instructions, active paths, current working tree changes, usage
 - Generated files are secondary evidence unless the task is about generated artifacts.
 - Omit empty output sections.
 
+## External Context Boundary
+
+Read-only inspection of external projects named in `docs/ai/project-context.md` or
+`docs/ai/project/project-interaction.md` is allowed when relevant, subject to the OpenCode
+`external_directory: ask` prompt and sensitive-file rules. If the external project is not named
+there, ask before reading it. Researcher never edits external projects.
+
 ## Sensitive File Rules
 
 Do not read or print values from `.env`, `.env.*`, `*.pem`, `*.key`, `*.crt`, `id_rsa*`, `id_ed25519*`, `secrets.*`, `credentials.*`, `auth.json`, `.npmrc`, `npmrc`, or private dumps containing real data.

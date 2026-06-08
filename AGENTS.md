@@ -52,6 +52,24 @@ Ask for approval before making:
 - `secrets, destructive changes, auth or billing changes`
 - A human approver must be able to explain each changed section well enough to own the merge.
 
+## External Project Context Policy
+
+OpenCode is configured with `external_directory: ask` so external paths are not hard-blocked,
+but the runtime must ask before tools touch paths outside the directory where OpenCode started.
+
+Read-only inspection of another project is allowed when that project or path is explicitly
+mentioned in `docs/ai/project-context.md` or `docs/ai/project/project-interaction.md`, subject to
+the runtime permission prompt and normal secret/sensitive-file rules. Use it only to answer the
+current task, and report which external path was inspected.
+
+When an external project is relevant but not named in those files, ask before reading. The question
+must include the exact path or project name, why it matters, and whether access is read-only.
+
+Agents with edit permission may modify only the current project by default. If a task appears to
+require editing an external project, stop and ask for separate explicit approval that names the
+external path and intended change. If approval is denied, continue with current-repo evidence only
+and mark the missing external context or edit as a limitation.
+
 ## Core Engineering Rules
 
 - Keep behavior explicit.

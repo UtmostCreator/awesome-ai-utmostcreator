@@ -2295,4 +2295,104 @@ class InstallerSafetyTest extends TestCase
             $this->removeTree($target);
         }
     }
+
+    /**
+     * Regression: the optional-agents-copilot-pack and the base adapter-copilot pack both target
+     * .github/agents. The base pack clobber-renders that directory; the optional pack must MERGE
+     * its agents in without being wiped. Previously the optional Copilot agents never shipped
+     * because both copiers deleted the destination tree, so the last writer won.
+     */
+    public function testFullGovernanceShipsBothBaseAndOptionalCopilotAgents(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_optional_copilot_agents_' . uniqid('', true);
+
+        $this->makeTargetRepo($target);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# Existing Project\n\nThis fixture repository has enough content for installed documentation checks.\n");
+
+        $install = function () use ($target): array {
+            return $this->runTool(implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--project-name',
+                'optional-agents-fixture',
+                '--backup',
+                '--verify-after',
+                '--non-interactive',
+            ]));
+        };
+
+        try {
+            $result = $install();
+            $this->assertSame(0, $result['exit'], $result['stdout'] . $result['stderr']);
+
+            $manifest = json_decode((string) file_get_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+            $this->assertIsArray($manifest);
+            $this->assertContains('adapter-copilot', $manifest['packs'] ?? []);
+            $this->assertContains('optional-agents-copilot-pack', $manifest['packs'] ?? []);
+
+            $agents = $this->targetGlob($target, '.github/agents/*.agent.md');
+
+            // Base adapter-copilot agents must be present.
+            $this->assertContains('.github/agents/architect.agent.md', $agents, 'base Copilot agents must survive the merge');
+            $this->assertContains('.github/agents/reviewer.agent.md', $agents);
+
+            // Optional Copilot agents must coexist (the actual regression). Use non-hidden
+            // optional agents; hidden internal-only templates (e.g. ui-builder) are intentionally
+            // not rendered for Copilot.
+            $this->assertContains('.github/agents/bugfix.agent.md', $agents, 'optional Copilot agents must be merged into .github/agents');
+            $this->assertContains('.github/agents/architecture-plan.agent.md', $agents);
+            $this->assertContains('.github/agents/upgrade.agent.md', $agents);
+
+            // Hidden internal-only optional agents must NOT be rendered into the Copilot surface.
+            $this->assertNotContains('.github/agents/ui-builder.agent.md', $agents, 'hidden optional agents must stay internal-only');
+
+            // Optional OpenCode agents land in their own namespace, never clobbered.
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents-optional' . DIRECTORY_SEPARATOR . 'bugfix.md');
+
+            // Optional Copilot agents must be VS Code-native rendered, not raw OpenCode frontmatter.
+            $optional = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents' . DIRECTORY_SEPARATOR . 'bugfix.agent.md');
+            $this->assertMatchesRegularExpression('/^---\R[\s\S]*?^name:\s+\S/m', $optional, 'optional Copilot agent must have VS Code-native name: frontmatter');
+            $this->assertMatchesRegularExpression('/^tools:\s*\[/m', $optional, 'optional Copilot agent must have a Copilot tools list');
+            $this->assertDoesNotMatchRegularExpression('/^id:\s+\S/m', $optional, 'optional Copilot agent must not ship OpenCode id: frontmatter');
+            $this->assertStringNotContainsString('<SCRIPTS_ROOT>', $optional, 'optional Copilot agent must have placeholders resolved');
+
+            // The shipped surface validator must accept the merged optional agents.
+            $validate = $this->runTool('cd ' . escapeshellarg($target) . ' && php tools/ai/validate-install-surface.php --strict');
+            $this->assertSame(0, $validate['exit'], $validate['stdout'] . $validate['stderr']);
+
+            // Re-install with --force: base pack clobber-renders the shared dir, optional agents
+            // must be re-merged (not lost) and the agent set must be stable (idempotent).
+            $forceResult = $this->runTool(implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--profile',
+                'full-governance',
+                '--runtime',
+                'both',
+                '--project-name',
+                'optional-agents-fixture',
+                '--backup',
+                '--non-interactive',
+                '--force',
+            ]));
+            $this->assertSame(0, $forceResult['exit'], $forceResult['stdout'] . $forceResult['stderr']);
+
+            $agentsAfterForce = $this->targetGlob($target, '.github/agents/*.agent.md');
+            $this->assertContains('.github/agents/bugfix.agent.md', $agentsAfterForce, 'optional Copilot agents must survive a --force reinstall');
+            $this->assertContains('.github/agents/architect.agent.md', $agentsAfterForce);
+            $this->assertSame($agents, $agentsAfterForce, '--force reinstall must keep the Copilot agent set stable');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
 }
