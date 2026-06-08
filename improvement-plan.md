@@ -292,8 +292,9 @@ regression tests green · no over-claimed enforcement.
 
 ## Still genuinely incomplete
 
-- [ ] **P0:** `schemaVersion` on remaining JSON schemas (decision: schemas use `$schema`; tiers.yaml +
-      policy.yaml done. Revisit only if a schema authoring-version is required.)
+- [x] **P0 (closed):** DECIDED — no JSON schema change needed. All 15 JSON schemas anchor their
+      identity via `$schema`; `tiers.yaml` + `policy.yaml` carry the integer `schemaVersion` they
+      require. A separate authoring-version key on JSON schemas is not warranted and is not planned.
 - [x] **P4-b:** `restore --from <ts> [--path]` checksum-gated copy-back, logged to `.ai/logs/`,
       dry-run writes nothing; wired into `ai.php` (59cb762)
 - [x] **P5:** Ship `docs/ai/project/` 3 templates; `.ai/local-manifest.json` informational writer;
@@ -312,8 +313,9 @@ regression tests green · no over-claimed enforcement.
       add `DOGFOODING.md`
 - [ ] **Phase 12 — Context economy:** budget validator on rendered install; catalog/browse
       on-demand; trim root instructions
-- [ ] **Phase 13 — Release trust:** versioned `dist/` + `SHA256SUMS` + SBOM/provenance;
-      `composer audit` in CI; optional `ai-kit-verify.yml`; PHAR path
+- [~] **Phase 13 — Release trust (partial):** DONE — versioned `dist/` consumer-only export +
+      `SHA256SUMS` + read-only `--verify` + aggregate context budget, wired into CI. REMAINING:
+      SBOM/provenance, `composer audit` in CI, optional `ai-kit-verify.yml`, PHAR path.
 - [ ] **Phase 14 — Compatibility:** `compatibility.md` + CI matrix (PHP 8.3/8.4, macOS/Linux/WSL);
       old-schema migrate-or-fail; monorepo/subdir; configurable `context.yml`
 - [ ] **Phase 15 — Doc hygiene:** markdownlint, link check, Status/Source/Last-verified headers;
@@ -340,7 +342,8 @@ ai-kit doctor | plan [--profile] | install --dry-run|--apply | upgrade --dry-run
 - [x] Invariant proof: an upgrade changes bytes only in kit-owned-and-unmodified files or managed
       sections; all user-authored AI content byte-identical in place
 - [x] Runtime hooks PHP-free, OS-parity-checked, honestly classified
-- [ ] Context budget under declared max · release bundle consumer-only with checksums
+- [x] Context budget under declared max · release bundle consumer-only with checksums
+      (aggregate per-bundle budget `release.max_bundle_lines: 13500` enforced; `export-ai-universal-rules.php` writes `SHA256SUMS` + read-only `--verify`; `ReleaseBundleTest` + CI `--check`/`--verify` green)
 
 # Sequencing & score path
 
