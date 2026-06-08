@@ -254,8 +254,21 @@ class CliToolsTest extends TestCase
     private function mirrorRepo(string $source, string $dest): void
     {
         mkdir($dest, 0777, true);
+        // Prune volatile/large top-level trees BEFORE the iterator descends into them.
+        // `dist/` is gitignored build output that other parallel test workers create and
+        // delete mid-run; descending into it races with those workers and makes
+        // RecursiveDirectoryIterator throw "Failed to open directory". `.git` and `vendor`
+        // are excluded for the same prune-before-descent reason (and were already skipped
+        // in the loop body, which is too late to prevent descent).
+        $prune = ['dist', '.git', 'vendor'];
         $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
+            new \RecursiveCallbackFilterIterator(
+                new \RecursiveDirectoryIterator($source, \FilesystemIterator::SKIP_DOTS),
+                static function (\SplFileInfo $current, string $key, \RecursiveDirectoryIterator $inner) use ($source, $prune): bool {
+                    $relative = substr($current->getPathname(), strlen($source) + 1);
+                    return !in_array($relative, $prune, true);
+                }
+            ),
             \RecursiveIteratorIterator::SELF_FIRST
         );
         foreach ($iterator as $item) {

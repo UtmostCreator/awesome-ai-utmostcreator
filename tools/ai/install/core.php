@@ -174,6 +174,10 @@ function aiInstallerRun(array $argv): int
             aiInstallerCopyDirAsOpenCodeAgents($src, $dest);
         } elseif (($item['install_type'] ?? '') === 'skill-dirs') {
             aiInstallerCopyDirAsSkillDirs($src, $dest);
+        } elseif (($item['install_type'] ?? '') === 'opencode-commands') {
+            $cleanFirst = !isset($seenDirTargets[$item['target']]);
+            $seenDirTargets[$item['target']] = true;
+            aiInstallerCopyDirAsOpenCodeCommands($src, $dest, $cleanFirst);
         } elseif (isset($item['rename_ext'])) {
             aiInstallerCopyDirWithRename($src, $dest, $item['rename_ext']);
         } else {
@@ -906,6 +910,8 @@ function aiInstallerEnsureProjectValuesFile(string $targetRoot, string $projectN
         'lintCommand', 'formatCommand', 'installCommand', 'packageManager', 'ciCommands',
         'protectedPaths', 'generatedFiles', 'protectedFiles', 'reviewPriorities',
         'riskAreas', 'approvalRequiredChanges', 'inactivePaths', 'availableCapabilities',
+        'primaryStack', 'filePlacementRules', 'namingRules', 'goldenExamples',
+        'formatterConfigFiles', 'linterConfigFiles', 'editorconfigPath', 'ignoreFiles',
     ];
     $lines[] = '# Optional project-fact values (uncomment to override kit defaults):';
     foreach ($optionalKeys as $key) {
@@ -948,6 +954,14 @@ function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): 
         'approvalRequiredChanges' => 'unknown',
         'inactivePaths' => 'unknown',
         'availableCapabilities' => 'unknown',
+        'primaryStack' => 'unknown',
+        'filePlacementRules' => 'unknown',
+        'namingRules' => 'unknown',
+        'goldenExamples' => 'unknown',
+        'formatterConfigFiles' => 'unknown',
+        'linterConfigFiles' => 'unknown',
+        'editorconfigPath' => 'unknown',
+        'ignoreFiles' => 'unknown',
     ];
 
     $path = aiInstallerProjectValuesPath($targetRoot);
@@ -1011,6 +1025,14 @@ function aiInstallerProjectValuesPlaceholderMap(array $values): array
         'approvalRequiredChanges' => '<APPROVAL_REQUIRED_CHANGES>',
         'inactivePaths' => '<INACTIVE_PATHS>',
         'availableCapabilities' => '<AVAILABLE_CAPABILITIES>',
+        'primaryStack' => '<PRIMARY_STACK>',
+        'filePlacementRules' => '<FILE_PLACEMENT_RULES>',
+        'namingRules' => '<NAMING_RULES>',
+        'goldenExamples' => '<GOLDEN_EXAMPLES>',
+        'formatterConfigFiles' => '<FORMATTER_CONFIG_FILES>',
+        'linterConfigFiles' => '<LINTER_CONFIG_FILES>',
+        'editorconfigPath' => '<EDITORCONFIG_PATH>',
+        'ignoreFiles' => '<IGNORE_FILES>',
     ];
     foreach ($projectFactTokens as $key => $token) {
         $value = (string) ($values[$key] ?? '');
@@ -1426,7 +1448,13 @@ function aiInstallerCopyDirAsSkillDirs(string $src, string $dest): void
         $skillName = pathinfo($file, PATHINFO_FILENAME);
         $skillDir = $dest . DIRECTORY_SEPARATOR . $skillName;
         aiInstallerMkdir($skillDir);
-        if (!copy($file, $skillDir . DIRECTORY_SEPARATOR . 'SKILL.md')) {
+        // P3: hard GENERATED marker after the YAML frontmatter so the shipped
+        // SKILL.md stays parseable. Idempotent.
+        $content = aiInstallerInsertGeneratedHeaderAfterFrontmatter(
+            (string) file_get_contents($file),
+            'ai-kit installer from packages/ai-universal-rules/templates'
+        );
+        if (file_put_contents($skillDir . DIRECTORY_SEPARATOR . 'SKILL.md', $content) === false) {
             throw new RuntimeException('failed to copy skill file: ' . $file);
         }
     }
@@ -1458,6 +1486,50 @@ function aiInstallerCopyDirWithRename(string $src, string $dest, string $newExt)
         $renamedName = $baseName . $newExt;
         $target = $dest . DIRECTORY_SEPARATOR . ($dirPart !== '.' ? $dirPart . DIRECTORY_SEPARATOR . $renamedName : $renamedName);
         aiInstallerMkdir(dirname($target));
+        if (!copy($item->getPathname(), $target)) {
+            throw new RuntimeException('failed to copy file: ' . $item->getPathname());
+        }
+    }
+}
+
+/**
+ * Copy a commands directory (e.g. .opencode/commands) like aiInstallerCopyDir, but inject the
+ * hard GENERATED marker after each markdown file's YAML frontmatter so the shipped command files
+ * carry the marker while staying frontmatter-parseable. Non-markdown files are copied verbatim.
+ * Idempotent: never double-inserts the marker.
+ */
+function aiInstallerCopyDirAsOpenCodeCommands(string $src, string $dest, bool $cleanFirst = false): void
+{
+    if (!is_dir($src)) {
+        throw new RuntimeException('missing source directory: ' . $src);
+    }
+    $srcReal = realpath($src);
+    $destReal = file_exists($dest) ? realpath($dest) : false;
+    if ($srcReal !== false && $destReal !== false && $srcReal === $destReal) {
+        return;
+    }
+    if ($cleanFirst && file_exists($dest)) {
+        aiInstallerDeleteTree($dest);
+    }
+    aiInstallerMkdir($dest);
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+    foreach ($it as $item) {
+        $target = $dest . DIRECTORY_SEPARATOR . $it->getSubPathName();
+        if ($item->isDir()) {
+            aiInstallerMkdir($target);
+            continue;
+        }
+        aiInstallerMkdir(dirname($target));
+        if (strtolower($item->getExtension()) === 'md') {
+            $content = aiInstallerInsertGeneratedHeaderAfterFrontmatter(
+                (string) file_get_contents($item->getPathname()),
+                'ai-kit installer from packages/ai-universal-rules/templates'
+            );
+            if (file_put_contents($target, $content) === false) {
+                throw new RuntimeException('failed to copy command file: ' . $item->getPathname());
+            }
+            continue;
+        }
         if (!copy($item->getPathname(), $target)) {
             throw new RuntimeException('failed to copy file: ' . $item->getPathname());
         }

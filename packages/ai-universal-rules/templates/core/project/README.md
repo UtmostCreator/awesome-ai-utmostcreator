@@ -16,6 +16,13 @@ Reference these files from `.ai/project.yml` under `context.extraDocs:` so every
 instruction surface points back to them. They survive re-render because they are listed in
 `project.yml`, not embedded in generated files.
 
+## What you can edit
+
+These three files (and `.ai/project.yml`, `docs/ai/project-stack.md`) are **user-owned**: edit
+them freely. Kit-managed files — anything with a `GENERATED — DO NOT EDIT` or `Managed by ai-kit`
+header — are re-rendered on upgrade, so edit the template or `.ai/project.yml` instead. For the full
+editable-vs-generated breakdown see `docs/ai/source-of-truth.md`.
+
 ## Keeping this current
 
 Update these when your stack, workflow, or conventions change. Prefer concrete, verifiable

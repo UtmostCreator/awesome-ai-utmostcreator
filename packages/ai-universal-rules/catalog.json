@@ -76,7 +76,7 @@
             "name": "<PROJECT_NAME> - Repository Instructions",
             "path": "packages/ai-universal-rules/templates/core/AGENTS.template.md",
             "runtime": "canonical",
-            "description": "- Project: `<PROJECT_NAME>`"
+            "description": "<!-- GENERATED \u2014 DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/AGENTS.template.md. Edit the template or .ai/project.yml, not this file. -->"
         },
         {
             "scope": "package",
@@ -228,7 +228,7 @@
             "name": "opencode",
             "path": "packages/ai-universal-rules/templates/core/opencode.json",
             "runtime": "canonical",
-            "description": "{"
+            "description": "// Managed by ai-kit. Source: packages/ai-universal-rules/templates/core/opencode.json"
         },
         {
             "scope": "package",

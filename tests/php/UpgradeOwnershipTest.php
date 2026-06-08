@@ -26,6 +26,7 @@ final class UpgradeOwnershipTest extends TestCase
             throw new \RuntimeException('Could not resolve repo root');
         }
         self::$repoRoot = $root;
+        require_once $root . '/tools/ai/install/core.php';
         require_once $root . '/tools/ai/install/planner.php';
         require_once $root . '/tools/ai/commands/install_paths.php';
         require_once $root . '/tools/ai/commands/install_workflow.php';

@@ -305,6 +305,21 @@ regression tests green · no over-claimed enforcement.
       WARNs; extend adapter-drift to all surfaces
 - [x] **P10:** Audit catalog/browse for unimplemented capabilities and remove or mark
 
+## Quality hardening (landed, verified)
+
+- [x] **P3:** `GENERATED — DO NOT EDIT` headers on `AGENTS.template.md` +
+      `.opencode`/`.github` agents/commands/skills + `installed-files.md`; soft
+      `Managed by ai-kit` notice on `opencode.jsonc`; `_generated` metadata on hook JSON;
+      enforcement in `validate-generated-artifacts.php` (shared `generated-header.php` helper)
+- [x] **P4:** `## Editable vs Generated Files` section in `docs/ai/source-of-truth.md` +
+      pointers in `project/README.md` and `POST-INSTALL.template.md`
+- [x] **P5:** `ai-kit status` command (`php tools/ai/ai.php status`) reusing doctor/checksum
+      helpers; honest policy-enforcement classification
+- [x] **N1:** 8 stranded required tokens (`PRIMARY_STACK`, `FILE_PLACEMENT_RULES`,
+      `NAMING_RULES`, `GOLDEN_EXAMPLES`, `FORMATTER_CONFIG_FILES`, `LINTER_CONFIG_FILES`,
+      `EDITORCONFIG_PATH`, `IGNORE_FILES`) wired into `.ai/project.yml`
+- [x] **N2:** Removed orphan `<BACKEND_PATH_GLOB>`
+
 ---
 
 # NICE-TO-HAVE (95 → 97)
