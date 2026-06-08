@@ -149,6 +149,7 @@
       "Exports are directory bundles by default so they stay portable across machines without extra dependencies.",
       "Run generation before export so catalogs and machine-readable outputs stay in sync.",
       "Starter profiles are curated bundles, not independent package managers."
-    ]
+    ],
+    "max_bundle_lines": 13500
   }
 }
