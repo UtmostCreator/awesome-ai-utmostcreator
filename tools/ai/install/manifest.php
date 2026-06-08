@@ -426,6 +426,9 @@ function aiInstallerWriteSetupDocs(string $targetRoot, array $manifest): void
     if (function_exists('aiInstallerWriteInstallDocs')) {
         aiInstallerWriteInstallDocs($targetRoot, $manifest);
     }
+    if (function_exists('aiInstallerWriteCatalogDocs')) {
+        aiInstallerWriteCatalogDocs($targetRoot);
+    }
 }
 
 function aiInstallerRefreshGeneratedManifestEntries(string $targetRoot, array $manifest): array

@@ -209,7 +209,6 @@ function aiInstallerWriteCatalogDocs(string $root): array
 {
     $generated = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated';
     aiInstallerMkdir($generated);
-    aiInstallerMkdir($root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'docs');
 
     $data = aiInstallerBuildCatalogData($root);
     $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
@@ -217,7 +216,8 @@ function aiInstallerWriteCatalogDocs(string $root): array
 
     $jsonPath = $generated . DIRECTORY_SEPARATOR . 'install-catalog.json';
     $mdPath = $generated . DIRECTORY_SEPARATOR . 'install-catalog.md';
-    $pkgMdPath = $root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'INSTALL-CATALOG.md';
+    $pkgMdPath = aiInstallerCatalogMarkdownPath($root);
+    aiInstallerMkdir(dirname($pkgMdPath));
     file_put_contents($jsonPath, $json);
     file_put_contents($mdPath, $md);
     file_put_contents($pkgMdPath, $md);
@@ -230,7 +230,7 @@ function aiInstallerCheckCatalogDocs(string $root): array
     $generated = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated';
     $jsonPath = $generated . DIRECTORY_SEPARATOR . 'install-catalog.json';
     $mdPath = $generated . DIRECTORY_SEPARATOR . 'install-catalog.md';
-    $pkgMdPath = $root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'INSTALL-CATALOG.md';
+    $pkgMdPath = aiInstallerCatalogMarkdownPath($root);
 
     $data = aiInstallerBuildCatalogData($root);
     $jsonExpected = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
@@ -244,8 +244,30 @@ function aiInstallerCheckCatalogDocs(string $root): array
         $drift[] = 'docs/ai/generated/install-catalog.md';
     }
     if (!is_file($pkgMdPath) || (string) file_get_contents($pkgMdPath) !== $mdExpected) {
-        $drift[] = 'packages/ai-universal-rules/docs/INSTALL-CATALOG.md';
+        $drift[] = aiInstallerCatalogMarkdownRelativePath($root);
     }
 
     return ['drift' => $drift, 'data' => $data];
+}
+
+function aiInstallerCatalogMarkdownPath(string $root): string
+{
+    $sourcePath = $root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'INSTALL-CATALOG.md';
+    $installedPath = $root . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'package' . DIRECTORY_SEPARATOR . 'INSTALL-CATALOG.md';
+
+    if (is_dir(dirname($sourcePath))) {
+        return $sourcePath;
+    }
+    if (is_dir(dirname($installedPath))) {
+        return $installedPath;
+    }
+
+    return $sourcePath;
+}
+
+function aiInstallerCatalogMarkdownRelativePath(string $root): string
+{
+    $path = aiInstallerCatalogMarkdownPath($root);
+    $relative = ltrim(str_replace('\\', '/', substr($path, strlen(rtrim($root, DIRECTORY_SEPARATOR)))), '/');
+    return $relative === '' ? 'packages/ai-universal-rules/docs/INSTALL-CATALOG.md' : $relative;
 }

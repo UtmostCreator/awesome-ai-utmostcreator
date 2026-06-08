@@ -653,6 +653,50 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testDirectInstallerOpenCodeWithoutTargetToolsShipsPlaceholderRegistryAndVerifier(): void
+    {
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_opencode_placeholders_' . uniqid('', true);
+        $this->makeTargetRepo($target);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'opencode',
+                '--profile',
+                'opencode',
+                '--without',
+                'scripts-pack',
+                '--force',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+
+            $placeholdersPath = $target . DIRECTORY_SEPARATOR . 'PLACEHOLDERS.md';
+            $verifierPath = $target . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'verify-install-placeholders.php';
+            $this->assertFileExists($placeholdersPath);
+            $this->assertFileExists($verifierPath);
+
+            $placeholders = (string) file_get_contents($placeholdersPath);
+            foreach (['<PROJECT_NAME>', '<PRIMARY_STACK>', '<PROJECT_ALLOWED_SCRIPTS>'] as $token) {
+                $this->assertStringContainsString('`' . $token . '`', $placeholders, 'installed placeholder registry should include full token row for ' . $token);
+            }
+            $this->assertStringNotContainsString('packages/ai-universal-rules/PLACEHOLDERS.md', $placeholders, 'installed placeholder registry should not point users back to source-only package paths');
+
+            $verify = $this->runTool('cd ' . escapeshellarg($target) . ' && ' . escapeshellarg((string) PHP_BINARY) . ' tools/ai/verify-install-placeholders.php');
+            $this->assertSame(0, $verify['exit'], $verify['stdout'] . $verify['stderr']);
+            $this->assertStringContainsString('OK: no required placeholders remain', $verify['stdout']);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testAiCliInstallApplyForwardsAdoptAndAllowNonGitToSubprocess(): void
     {
         $this->skipIfToolchainMissing(['git']);
@@ -1316,7 +1360,7 @@ class InstallerSafetyTest extends TestCase
 
         mkdir($docsDir, 0700, true);
         mkdir($target . DIRECTORY_SEPARATOR . '.git', 0700, true);
-        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# Existing Project\n\nThis fixture repository has enough content for installed documentation checks.\n");
         // Template (skip-if-exists) file: must be PRESERVED under --force, not overwritten.
         file_put_contents($docsDir . DIRECTORY_SEPARATOR . 'failure-handling.md', "# existing local copy\n");
         // Owned (replace) file: will be overwritten under --force, so it must be backed up.
@@ -1519,7 +1563,7 @@ class InstallerSafetyTest extends TestCase
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_full_governance_opencode_' . uniqid('', true);
 
         $this->makeTargetRepo($target);
-        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# existing\n");
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'README.md', "# Existing Project\n\nThis fixture repository has enough content for installed documentation checks.\n");
 
         $git = $this->runTool('git init ' . escapeshellarg($target));
         $this->assertSame(0, $git['exit'], $git['stderr']);
@@ -1565,6 +1609,7 @@ class InstallerSafetyTest extends TestCase
                 'php tools/ai/validate-ai-config.php',
                 'php tools/ai/validate-install-surface.php --strict',
                 'php tools/ai/validate-ai-catalog.php',
+                'bash scripts/ai/ai-doc-check.sh --check',
             ] as $targetCommand) {
                 $validate = $this->runTool('cd ' . escapeshellarg($target) . ' && ' . $targetCommand);
                 $this->assertSame(0, $validate['exit'], $targetCommand . "\n" . $validate['stdout'] . $validate['stderr']);
