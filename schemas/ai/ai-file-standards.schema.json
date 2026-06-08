@@ -132,6 +132,27 @@
           "fail_above": {
             "type": "integer",
             "minimum": 0
+          },
+          "warn_allowlist": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "path",
+                "reason"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 10
+                }
+              },
+              "additionalProperties": false
+            }
           }
         },
         "additionalProperties": false

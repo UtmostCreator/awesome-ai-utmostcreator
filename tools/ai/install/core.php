@@ -81,8 +81,11 @@ function aiInstallerRun(array $argv): int
 
     // Single-process guard: only one writing install may run per target at a time.
     $installLock = null;
+    $signalState = null;
+    $backupInfo = null;
     if (!$config['dryRun']) {
         $installLock = aiInstallerAcquireInstallLock((string) $config['targetRoot']);
+        $signalState = aiInstallerInstallSignalHandlers();
     }
     try {
 
@@ -105,13 +108,12 @@ function aiInstallerRun(array $argv): int
             'docs/ai/generated/',
         ]);
         aiInstallerAssertGitignoreEffective($config['targetRoot'], [
-            '.ai-backups/install-ai-kit-probe',
+            '.ai/backups/install-ai-kit-probe',
             '.ai/conflicts/probe',
             'docs/ai/generated/probe.json',
         ]);
     }
 
-    $backupInfo = null;
     if (!$config['dryRun'] && ($config['backup'] ?? false)) {
         $backupInfo = aiInstallBackupCreate($config['targetRoot'], $plan, $config['sourceRoot'], 'install-ai-kit');
         aiInstallerLog('backup created: ' . $backupInfo['backup_dir']);
@@ -139,7 +141,7 @@ function aiInstallerRun(array $argv): int
                     }
                 } else {
                     // P3-c: a non-template kit file blocked by a foreign file is surfaced under
-                    // .ai/conflicts/<ts>/incoming/<path> so the user can diff; never overwritten.
+                    // .ai/conflicts/<ts>-install/incoming/<path> so the user can diff; never overwritten.
                     $incoming = aiInstallerOfferIncomingConflict($config, $item);
                     if ($incoming !== null) {
                         $templateRefreshes[] = $incoming;
@@ -342,10 +344,70 @@ function aiInstallerRun(array $argv): int
     }
 
         return 0;
+    } catch (Throwable $e) {
+        if (!$config['dryRun'] && is_array($backupInfo) && is_string($backupInfo['backup_id'] ?? null)) {
+            $backupId = (string) $backupInfo['backup_id'];
+            aiInstallBackupUpdateState((string) $config['targetRoot'], $backupId, 'failed', $e->getMessage());
+            try {
+                $rollback = aiInstallBackupRollback((string) $config['targetRoot'], $backupId, true, true);
+                $rolledBack = (($rollback['status'] ?? null) === 'ok') && (($rollback['conflicts'] ?? []) === []);
+                aiInstallBackupUpdateState((string) $config['targetRoot'], $backupId, $rolledBack ? 'failed_rolled_back' : 'failed_recoverable', $e->getMessage());
+                aiInstallBackupAppendAudit((string) $config['targetRoot'], $rolledBack ? 'install_failed_auto_rollback' : 'install_failed_recoverable', [
+                    'backup_id' => $backupId,
+                    'reason' => $e->getMessage(),
+                    'rollback_status' => $rollback['status'] ?? 'unknown',
+                    'rollback_conflicts' => $rollback['conflicts'] ?? [],
+                ]);
+            } catch (Throwable $rollbackError) {
+                aiInstallBackupUpdateState((string) $config['targetRoot'], $backupId, 'failed_recoverable', $rollbackError->getMessage());
+                aiInstallBackupAppendAudit((string) $config['targetRoot'], 'install_failed_recoverable', [
+                    'backup_id' => $backupId,
+                    'reason' => $e->getMessage(),
+                    'rollback_error' => $rollbackError->getMessage(),
+                ]);
+            }
+        } elseif (!$config['dryRun']) {
+            aiInstallBackupMarkRecoverableNoBackup((string) $config['targetRoot'], $e->getMessage());
+        }
+        throw $e;
     } finally {
+        if (is_array($signalState)) {
+            aiInstallerRestoreSignalHandlers($signalState);
+        }
         if ($installLock !== null) {
             aiInstallerReleaseInstallLock($installLock);
         }
+    }
+}
+
+/** @return array<int,mixed>|null */
+function aiInstallerInstallSignalHandlers(): ?array
+{
+    if (!function_exists('pcntl_signal')) {
+        return null;
+    }
+    if (function_exists('pcntl_async_signals')) {
+        pcntl_async_signals(true);
+    }
+    $signals = [];
+    foreach ([SIGINT, SIGTERM] as $signal) {
+        $signals[$signal] = pcntl_signal_get_handler($signal);
+        pcntl_signal($signal, static function (int $caught): void {
+            $name = $caught === SIGINT ? 'SIGINT' : 'SIGTERM';
+            throw new RuntimeException('install interrupted by ' . $name);
+        });
+    }
+    return $signals;
+}
+
+/** @param array<int,mixed> $signals */
+function aiInstallerRestoreSignalHandlers(array $signals): void
+{
+    if (!function_exists('pcntl_signal')) {
+        return;
+    }
+    foreach ($signals as $signal => $handler) {
+        pcntl_signal((int) $signal, $handler);
     }
 }
 
@@ -723,6 +785,53 @@ function aiInstallerProjectValuesPath(string $targetRoot): string
 }
 
 /**
+ * P5-c: mode for kit-private directories (backups/conflicts/logs/templates-new). 0700 keeps
+ * snapshotted user bytes out of world-readable space.
+ */
+function aiInstallerPrivateDirMode(): int
+{
+    return 0700;
+}
+
+/**
+ * P5-c: resolve a conflict subtree path under a single operation-tagged timestamped root:
+ * `.ai/conflicts/<ts>-<op>/<kind>`. `$kind` is one of files|incoming|removed.
+ *
+ * Callers within one operation should pass the same `$stamp` so all subtrees share one root;
+ * when `$stamp` is null a fresh UTC stamp is generated.
+ */
+function aiInstallerPrivateConflictDir(string $targetRoot, string $op, string $kind, ?string $stamp = null): string
+{
+    $stamp ??= gmdate('Ymd\THis\Z');
+    return $targetRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'conflicts'
+        . DIRECTORY_SEPARATOR . $stamp . '-' . $op . DIRECTORY_SEPARATOR . $kind;
+}
+
+/** P5-c: repo-relative form of aiInstallerPrivateConflictDir for reporting. */
+function aiInstallerPrivateConflictRel(string $op, string $kind, string $stamp): string
+{
+    return '.ai/conflicts/' . $stamp . '-' . $op . '/' . $kind;
+}
+
+/** P5-c: repo-relative root for operation-tagged backups. */
+function aiInstallerPrivateBackupRel(string $op, string $stamp): string
+{
+    return '.ai/backups/' . $stamp . '-' . $op;
+}
+
+/** P5-c: target-absolute root for operation-tagged backups. */
+function aiInstallerPrivateBackupDir(string $targetRoot, string $op, string $stamp): string
+{
+    return $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, aiInstallerPrivateBackupRel($op, $stamp));
+}
+
+/** P5-c: repo-relative root for template refreshes. */
+function aiInstallerPrivateTemplatesNewRel(): string
+{
+    return '.ai/templates-new';
+}
+
+/**
  * P5-b: write the informational-only `.ai/local-manifest.json`.
  *
  * This is a gitignored, human-facing summary of what the kit installed. It is NEVER read
@@ -941,9 +1050,9 @@ function aiInstallerOfferTemplateRefresh(array $config, array $item): ?string
         return null;
     }
 
-    $rel = '.ai/templates-new/' . $target;
+    $rel = aiInstallerPrivateTemplatesNewRel() . '/' . $target;
     $out = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-    aiInstallerMkdir(dirname($out));
+    aiInstallerMkdir(dirname($out), aiInstallerPrivateDirMode());
     if (!@copy($src, $out)) {
         return null;
     }
@@ -956,7 +1065,7 @@ function aiInstallerOfferTemplateRefresh(array $config, array $item): ?string
  *
  * When a non-template kit file is skipped because a differing foreign (user-authored)
  * file already occupies its target path, write the kit version to
- * .ai/conflicts/<ts>/incoming/<path> so the user can diff/merge. The foreign file on
+ * .ai/conflicts/<ts>-install/incoming/<path> so the user can diff/merge. The foreign file on
  * disk is never overwritten. Returns the relative path of the incoming copy, or null
  * when there is no collision (target missing) or the existing file already matches.
  */
@@ -976,9 +1085,9 @@ function aiInstallerOfferIncomingConflict(array $config, array $item): ?string
     }
 
     $stamp = gmdate('Ymd\THis\Z');
-    $rel = '.ai/conflicts/' . $stamp . '/incoming/' . $target;
+    $rel = aiInstallerPrivateConflictRel('install', 'incoming', $stamp) . '/' . $target;
     $out = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-    aiInstallerMkdir(dirname($out));
+    aiInstallerMkdir(dirname($out), aiInstallerPrivateDirMode());
     if (!@copy($src, $out)) {
         return null;
     }
@@ -1518,10 +1627,11 @@ function aiInstallerCreateBackup(string $targetRoot, array $plan): array
         $targets[$target] = true;
     }
 
-    $backupId = 'install-ai-kit-' . gmdate('Ymd-His');
-    $backupDir = $targetRoot . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+    $stamp = gmdate('Ymd\THis\Z');
+    $backupId = $stamp . '-install';
+    $backupDir = aiInstallerPrivateBackupDir($targetRoot, 'install', $stamp);
     $filesDir = $backupDir . DIRECTORY_SEPARATOR . 'files';
-    aiInstallerMkdir($filesDir);
+    aiInstallerMkdir($filesDir, aiInstallerPrivateDirMode());
 
     $entries = [];
     foreach (array_keys($targets) as $target) {
@@ -1548,7 +1658,7 @@ function aiInstallerCreateBackup(string $targetRoot, array $plan): array
 
     return [
         'backup_id' => $backupId,
-        'backup_dir' => '.ai-backups/' . $backupId,
+        'backup_dir' => aiInstallerPrivateBackupRel('install', $stamp),
         'entry_count' => count($entries),
     ];
 }
@@ -1602,14 +1712,18 @@ function aiInstallerDeleteTree(string $path): void
     @rmdir($path);
 }
 
-function aiInstallerMkdir(string $path): void
+function aiInstallerMkdir(string $path, int $mode = 0777): void
 {
     if (is_dir($path)) {
+        if ($mode !== 0777) {
+            @chmod($path, $mode);
+        }
         return;
     }
-    if (!mkdir($path, 0777, true) && !is_dir($path)) {
+    if (!mkdir($path, $mode, true) && !is_dir($path)) {
         throw new RuntimeException('failed to create directory: ' . $path);
     }
+    @chmod($path, $mode);
 }
 
 function aiInstallerLog(string $message): void

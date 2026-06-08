@@ -107,7 +107,7 @@ function aiRunVerify(string $root, array $args): int
         ? 'Run next to choose commit or PR closeout action.'
         : 'Open verify logs and fix the first failing check before proceeding.';
 
-    $findings = [];
+    $findings = aiVerifyCollectIncompleteTransactions($root);
     foreach ($failed as $name) {
         $findings[] = [
             'severity' => 'ERROR',
@@ -364,4 +364,68 @@ function aiRunVerify(string $root, array $args): int
         return 2;
     }
     return 0;
+}
+
+/** @return list<array{severity:string,code:string,file:?string,message:string,suggested_fix:string}> */
+function aiVerifyCollectIncompleteTransactions(string $root): array
+{
+    $findings = [];
+    $lock = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'install.lock';
+    if (is_file($lock)) {
+        $findings[] = [
+            'severity' => 'ERROR',
+            'code' => 'INCOMPLETE_INSTALL_TRANSACTION',
+            'file' => '.ai/install.lock',
+            'message' => 'Install lock is present; a prior install may have been interrupted or is still running.',
+            'suggested_fix' => 'Confirm no installer is running, then inspect .ai/logs/ and rerun install/rollback as appropriate.',
+        ];
+    }
+
+    $recoverableMarker = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'install-recoverable.json';
+    if (is_file($recoverableMarker)) {
+        $findings[] = [
+            'severity' => 'ERROR',
+            'code' => 'INCOMPLETE_INSTALL_TRANSACTION',
+            'file' => '.ai/logs/install-recoverable.json',
+            'message' => 'Recoverable install marker is present; a write failed before a backup was available.',
+            'suggested_fix' => 'Inspect .ai/logs/install-recoverable.json and rerun install/rollback as appropriate, then remove the marker after recovery.',
+        ];
+    }
+
+    $incompleteStates = ['backed_up', 'applying', 'failed', 'failed_recoverable'];
+    $backupRoots = [
+        '.ai/backups' => $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'backups',
+        '.ai-backups' => $root . DIRECTORY_SEPARATOR . '.ai-backups',
+    ];
+    foreach ($backupRoots as $label => $backupRoot) {
+        if (!is_dir($backupRoot)) {
+            continue;
+        }
+        foreach (scandir($backupRoot) ?: [] as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $manifest = $backupRoot . DIRECTORY_SEPARATOR . $entry . DIRECTORY_SEPARATOR . 'manifest.json';
+            if (!is_file($manifest)) {
+                continue;
+            }
+            $decoded = json_decode((string) file_get_contents($manifest), true);
+            if (!is_array($decoded)) {
+                continue;
+            }
+            $state = (string) ($decoded['state'] ?? 'unknown');
+            if (!in_array($state, $incompleteStates, true)) {
+                continue;
+            }
+            $findings[] = [
+                'severity' => 'ERROR',
+                'code' => 'INCOMPLETE_INSTALL_TRANSACTION',
+                'file' => $label . '/' . $entry . '/manifest.json',
+                'message' => 'Backup transaction is incomplete or recoverable: state=' . $state,
+                'suggested_fix' => 'Inspect .ai/logs/, rerun verify after rollback/restore, or remove only after manual recovery is complete.',
+            ];
+        }
+    }
+
+    return $findings;
 }

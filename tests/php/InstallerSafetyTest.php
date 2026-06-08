@@ -512,6 +512,35 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testRollbackStructuralConflictIsRecoverableEvenWithForce(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/backup.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_structural_rollback_' . uniqid('', true);
+        mkdir($target . DIRECTORY_SEPARATOR . 'docs', 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . 'docs/existing.md', "before\n");
+        $plan = [['target' => 'docs/existing.md', 'action' => 'UPDATE']];
+
+        try {
+            $backup = aiInstallBackupCreate($target, $plan, $target, 'test');
+            $backupId = (string) $backup['backup_id'];
+            file_put_contents($target . DIRECTORY_SEPARATOR . 'docs/existing.md', "after\n");
+            aiInstallBackupRecordAfter($target, $backupId, $plan, $target, 'applied');
+
+            $backupDir = $target . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, (string) $backup['backup_dir']);
+            unlink($backupDir . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR . 'before' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'existing.md');
+
+            $result = aiInstallBackupRollback($target, $backupId, true, true);
+
+            $this->assertSame('conflicts', $result['status']);
+            $this->assertSame('snapshot_not_found', $result['conflicts'][0]['reason'] ?? null);
+            $manifest = json_decode((string) file_get_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json'), true);
+            $this->assertSame('failed_recoverable', $manifest['state'] ?? null);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testDirectInstallerCopilotInstallMakesInstalledSurfaceVisible(): void
     {
         $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
@@ -810,6 +839,95 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testFailedApplyAutoRollsBackAndWritesAudit(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_install_auto_rollback_' . uniqid('', true);
+        mkdir($target . '/.ai', 0700, true);
+        file_put_contents($target . '/.ai/project.yml', "projectName: \"x\"\npolicy:\n  allow:\n    - \"rm file\"\n");
+
+        try {
+            try {
+                aiInstallerRun([
+                    'install-ai-kit.php',
+                    '--target',
+                    $target,
+                    '--profile',
+                    'opencode',
+                    '--runtime',
+                    'opencode',
+                    '--mode',
+                    'sidecar-only',
+                    '--allow-non-git',
+                    '--apply',
+                    '--backup',
+                    '--force',
+                ]);
+                $this->fail('install must fail on malicious local policy override');
+            } catch (\RuntimeException $e) {
+                $this->assertStringContainsString('command policy compilation failed', $e->getMessage());
+            }
+
+            $backupRoot = $target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'backups';
+            $entries = array_values(array_diff((array) scandir($backupRoot), ['.', '..']));
+            $this->assertCount(1, $entries, 'failed install must keep its recovery backup manifest');
+            $manifest = json_decode((string) file_get_contents($backupRoot . DIRECTORY_SEPARATOR . $entries[0] . DIRECTORY_SEPARATOR . 'manifest.json'), true);
+            $this->assertSame('failed_rolled_back', $manifest['state'] ?? null, 'failed apply must auto-rollback and mark backup state');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'logs' . DIRECTORY_SEPARATOR . 'install-transactions-' . gmdate('Ymd') . '.jsonl');
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'opencode.jsonc', 'created files must be removed by rollback');
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testVerifyDetectsIncompleteTransactions(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/commands/verify.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_verify_incomplete_tx_' . uniqid('', true);
+        mkdir($target . '/.ai/backups/20260101T000000Z-install', 0700, true);
+        file_put_contents($target . '/.ai/install.lock', "pid=999999\n");
+        file_put_contents($target . '/.ai/backups/20260101T000000Z-install/manifest.json', json_encode([
+            'schema' => 'ai-install-backup/v1',
+            'backup_id' => '20260101T000000Z-install',
+            'state' => 'applying',
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+
+        try {
+            $findings = aiVerifyCollectIncompleteTransactions($target);
+            $files = array_column($findings, 'file');
+            $this->assertContains('.ai/install.lock', $files);
+            $this->assertContains('.ai/backups/20260101T000000Z-install/manifest.json', $files);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    public function testVerifyDetectsLegacyAndNoBackupRecoverableTransactions(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/commands/verify.php';
+        require_once self::$repoRoot . '/tools/ai/install/backup.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_verify_legacy_incomplete_tx_' . uniqid('', true);
+        mkdir($target . '/.ai-backups/legacy-backup', 0700, true);
+        file_put_contents($target . '/.ai-backups/legacy-backup/manifest.json', json_encode([
+            'schema' => 'ai-install-backup/v1',
+            'backup_id' => 'legacy-backup',
+            'state' => 'failed_recoverable',
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+
+        try {
+            aiInstallBackupMarkRecoverableNoBackup($target, 'pre-backup failure');
+            $findings = aiVerifyCollectIncompleteTransactions($target);
+            $files = array_column($findings, 'file');
+            $this->assertContains('.ai-backups/legacy-backup/manifest.json', $files);
+            $this->assertContains('.ai/logs/install-recoverable.json', $files);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testCompileCommandPolicyNoOpsWithoutHooksSurface(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/core.php';
@@ -1011,13 +1129,13 @@ class InstallerSafetyTest extends TestCase
         require_once self::$repoRoot . '/tools/ai/install/backup.php';
 
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_backup_retention_' . uniqid('', true);
-        $base = $target . DIRECTORY_SEPARATOR . '.ai-backups';
+        $base = $target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'backups';
         mkdir($base, 0700, true);
 
         // Seed 8 timestamp-ordered backup dirs.
         $ids = [];
         for ($i = 1; $i <= 8; $i++) {
-            $id = sprintf('install-ai-kit-20260101-0000%02d', $i);
+            $id = sprintf('20260101T0000%02dZ-install', $i);
             mkdir($base . DIRECTORY_SEPARATOR . $id, 0700, true);
             file_put_contents($base . DIRECTORY_SEPARATOR . $id . DIRECTORY_SEPARATOR . 'manifest.json', '{}');
             $ids[] = $id;
@@ -1092,7 +1210,7 @@ class InstallerSafetyTest extends TestCase
             file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
 
             $backupId = 'upgrade-test-backup';
-            $backupDir = $target . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+            $backupDir = $target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'backups' . DIRECTORY_SEPARATOR . $backupId;
             mkdir($backupDir, 0700, true);
             file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json', json_encode([
                 'schema' => 'ai-install-backup/v1',
@@ -1160,7 +1278,7 @@ class InstallerSafetyTest extends TestCase
             file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
 
             $backupId = 'deprecated-test-backup';
-            $backupDir = $target . DIRECTORY_SEPARATOR . '.ai-backups' . DIRECTORY_SEPARATOR . $backupId;
+            $backupDir = $target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'backups' . DIRECTORY_SEPARATOR . $backupId;
             mkdir($backupDir, 0700, true);
             file_put_contents($backupDir . DIRECTORY_SEPARATOR . 'manifest.json', json_encode([
                 'schema' => 'ai-install-backup/v1',
@@ -1799,15 +1917,15 @@ class InstallerSafetyTest extends TestCase
         $this->makeTargetRepo($target);
 
         try {
-            aiInstallerEnsureGitignoreEntries($target, ['.ai-backups/', '.ai-logs/', '.repomix-context/']);
+            aiInstallerEnsureGitignoreEntries($target, ['.ai/backups/', '.ai/logs/', '.repomix-context/']);
 
             $gitignore = $target . DIRECTORY_SEPARATOR . '.gitignore';
             $this->assertFileExists($gitignore);
             $content = (string) file_get_contents($gitignore);
             $this->assertStringContainsString('# BEGIN ai-kit', $content);
             $this->assertStringContainsString('# END ai-kit', $content);
-            $this->assertStringContainsString('.ai-backups/', $content);
-            $this->assertStringContainsString('.ai-logs/', $content);
+            $this->assertStringContainsString('.ai/backups/', $content);
+            $this->assertStringContainsString('.ai/logs/', $content);
             $this->assertStringContainsString('.repomix-context/', $content);
             $this->assertStringEndsWith("\n", $content);
         } finally {
@@ -1823,14 +1941,14 @@ class InstallerSafetyTest extends TestCase
         $this->makeTargetRepo($target);
 
         try {
-            $entries = ['.ai-backups/', '.ai-logs/', '.repomix-context/'];
+            $entries = ['.ai/backups/', '.ai/logs/', '.repomix-context/'];
             aiInstallerEnsureGitignoreEntries($target, $entries);
             $first = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.gitignore');
             aiInstallerEnsureGitignoreEntries($target, $entries);
             $second = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.gitignore');
 
             $this->assertSame($first, $second, 'second run must not change .gitignore');
-            $this->assertSame(1, substr_count($second, '.ai-logs/'), 'no duplicate .ai-logs entry');
+            $this->assertSame(1, substr_count($second, '.ai/logs/'), 'no duplicate .ai/logs entry');
         } finally {
             $this->removeTree($target);
         }
@@ -1848,7 +1966,7 @@ class InstallerSafetyTest extends TestCase
             $original = "node_modules/\n.ai-logs\n.repomix-context/**\n";
             file_put_contents($target . DIRECTORY_SEPARATOR . '.gitignore', $original);
 
-            aiInstallerEnsureGitignoreEntries($target, ['.ai-backups/', '.ai-logs/', '.repomix-context/']);
+            aiInstallerEnsureGitignoreEntries($target, ['.ai/backups/', '.ai/logs/', '.repomix-context/']);
             $content = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.gitignore');
 
             // Existing content preserved verbatim at the top.
@@ -1858,8 +1976,8 @@ class InstallerSafetyTest extends TestCase
             // Managed rules live in a replaceable ai-kit block; user rules remain outside it.
             $this->assertStringContainsString('# BEGIN ai-kit', $content);
             $this->assertStringContainsString('# END ai-kit', $content);
-            $this->assertStringContainsString('.ai-backups/', $content);
-            $this->assertStringContainsString('.ai-logs/', $content);
+            $this->assertStringContainsString('.ai/backups/', $content);
+            $this->assertStringContainsString('.ai/logs/', $content);
             $this->assertStringContainsString('.repomix-context/', $content);
         } finally {
             $this->removeTree($target);
@@ -1878,10 +1996,10 @@ class InstallerSafetyTest extends TestCase
             $init = $this->runTool('git init ' . escapeshellarg($target));
             $this->assertSame(0, $init['exit'], $init['stderr']);
 
-            aiInstallerEnsureGitignoreEntries($target, ['.ai-backups/', '.ai/conflicts/', 'docs/ai/generated/', '.ai/install.lock', '*.tmp']);
-            aiInstallerAssertGitignoreEffective($target, ['.ai-backups/probe', '.ai/conflicts/probe', 'docs/ai/generated/probe.json', '.ai/install.lock', 'scratch.tmp']);
+            aiInstallerEnsureGitignoreEntries($target, ['.ai/backups/', '.ai/conflicts/', 'docs/ai/generated/', '.ai/install.lock', '*.tmp']);
+            aiInstallerAssertGitignoreEffective($target, ['.ai/backups/probe', '.ai/conflicts/probe', 'docs/ai/generated/probe.json', '.ai/install.lock', 'scratch.tmp']);
 
-            $check = $this->runTool('git -C ' . escapeshellarg($target) . ' check-ignore -- .ai-backups/probe .ai/conflicts/probe docs/ai/generated/probe.json .ai/install.lock scratch.tmp');
+            $check = $this->runTool('git -C ' . escapeshellarg($target) . ' check-ignore -- .ai/backups/probe .ai/conflicts/probe docs/ai/generated/probe.json .ai/install.lock scratch.tmp');
             $this->assertSame(0, $check['exit'], $check['stderr']);
 
             // File-style and glob entries must NOT be rewritten with a trailing slash,

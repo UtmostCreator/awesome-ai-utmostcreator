@@ -26,11 +26,28 @@ $required = [
     'docs/ai/repo-required-tools.md' => 'php tools/ai/repo-tool-inventory.php --check',
 ];
 
+$requiredGeneratedHeaders = [
+    'docs/ai/catalog.md',
+    $packageDocsBase . 'BROWSE.md',
+    'llms.txt',
+];
+
 $errors = [];
 
 foreach ($required as $path => $generator) {
     if (!is_file($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path))) {
         $errors[] = "missing generated artifact {$path} (generator: {$generator})";
+    }
+}
+
+foreach ($requiredGeneratedHeaders as $path) {
+    $absolutePath = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+    if (!is_file($absolutePath)) {
+        continue;
+    }
+    $content = (string) file_get_contents($absolutePath);
+    if (!str_starts_with($content, '<!-- GENERATED — DO NOT EDIT:')) {
+        $errors[] = "generated artifact {$path} is missing GENERATED — DO NOT EDIT header";
     }
 }
 
