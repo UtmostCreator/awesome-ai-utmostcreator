@@ -26,7 +26,7 @@ Deterministic catalog generated from installer registries.
 - `capabilities-extended` (2 items)
 - `capabilities-governance` (2 items)
 - `policy-pack` (3 items)
-- `scripts-pack` (44 items)
+- `scripts-pack` (45 items)
 - `hooks-pack` (8 items)
 - `ci-pack` (2 items)
 - `evidence-pack` (2 items)
