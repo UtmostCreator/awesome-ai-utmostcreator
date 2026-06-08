@@ -57,6 +57,7 @@ Commands:
   symbols        Extract top-level code symbols from tracked source files
   preflight      Check installer prerequisites and environment readiness
   doctor         Read-only health check: environment, tools, and install state
+  status         Read-only install status: kit state, drift, conflicts, policy
   package-lock   Check or update source template checksum lock
   package-verify Verify source templates against checksum lock
   audit-instructions Audit local instruction surfaces and ownership hints
@@ -198,6 +199,8 @@ try {
             exit(aiRunPreflight($root));
         case 'doctor':
             exit(aiRunDoctor($root));
+        case 'status':
+            exit(aiRunStatus($root));
         case 'package-lock':
             exit(aiRunPackageLock($root, $args));
         case 'package-verify':

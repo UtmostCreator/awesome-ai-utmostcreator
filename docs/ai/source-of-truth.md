@@ -30,3 +30,24 @@ Trust active repository evidence over recall. Report conflicts instead of silent
 - Generated context, compacted summaries, and adapter files are lower authority than live repository files. When a summary and the current code disagree, the code wins.
 - Preserve exact paths, version numbers, error messages, and unresolved decisions across any compaction or handoff; do not let summarization generalize them away.
 - See `docs/ai/context-economy.md` for the bounded-context and verification-cost rules that keep this evidence cheap to gather.
+
+## Editable vs Generated Files
+
+Kit-managed files are re-rendered on every upgrade; user-owned files are installed once and preserved. When unsure, check the `GENERATED — DO NOT EDIT` or `Managed by ai-kit` header at the top of the file (see the headers added across rendered files).
+
+| Safe to edit | Do not edit directly |
+| --- | --- |
+| `.ai/project.yml` | generated `AGENTS.md` body (edit the template or `.ai/project.yml`) |
+| `docs/ai/project/**` | kit-managed `.opencode/agents/*`, `.github/agents/*` |
+| `docs/ai/project-stack.md`, `docs/ai/project/conventions.md` | `.github/hooks/scripts/command-policy.compiled.sh` |
+| pre-existing non-kit files | `docs/ai/catalog.md`, `llms.txt`, `BROWSE.md` (generated) |
+| marked user sections in rendered files | `.ai/*.lock`, install manifest |
+
+| Classification (`merge_strategy`) | User can edit? | Upgrade behaviour |
+| --- | --- | --- |
+| kit-managed (`replace`) | No, except marked user sections | Re-rendered/replaced from templates + `.ai/project.yml` |
+| user-owned (`skip-if-exists`) | Yes | Installed once; preserved (never overwritten) |
+| adoptable (`opencode.jsonc`, `never_auto_merge`) | Via ai-kit plan/adopt | Not auto-merged |
+| foreign (pre-existing at kit path) | Yes | Untouched unless `--adopt` |
+
+Files that say `GENERATED — DO NOT EDIT` or `Managed by ai-kit` are kit-managed.

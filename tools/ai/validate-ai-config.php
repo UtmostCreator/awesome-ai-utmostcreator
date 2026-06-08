@@ -625,6 +625,12 @@ function loadJsonFile(string $root, string $relativePath, array &$errors): ?arra
         return null;
     }
 
+    // opencode.jsonc (and any .jsonc) is JSON-with-comments. The kit ships it with a
+    // managed soft-notice comment header, so strip comments/trailing commas before decoding.
+    if (str_ends_with(strtolower($relativePath), '.jsonc')) {
+        $content = stripJsonCommentsAndTrailingCommas($content);
+    }
+
     $decoded = json_decode($content, true);
 
     if (!is_array($decoded)) {
@@ -633,6 +639,76 @@ function loadJsonFile(string $root, string $relativePath, array &$errors): ?arra
     }
 
     return $decoded;
+}
+
+/**
+ * Strip // line comments, block comments, and trailing commas from a JSONC string.
+ * String-literal aware so comment markers inside JSON strings are preserved.
+ */
+function stripJsonCommentsAndTrailingCommas(string $input): string
+{
+    $out = '';
+    $inString = false;
+    $escaped = false;
+    $inLineComment = false;
+    $inBlockComment = false;
+    $length = strlen($input);
+
+    for ($i = 0; $i < $length; $i++) {
+        $char = $input[$i];
+        $next = $i + 1 < $length ? $input[$i + 1] : '';
+
+        if ($inLineComment) {
+            if ($char === "\n") {
+                $inLineComment = false;
+                $out .= $char;
+            }
+            continue;
+        }
+
+        if ($inBlockComment) {
+            if ($char === '*' && $next === '/') {
+                $inBlockComment = false;
+                $i++;
+            }
+            continue;
+        }
+
+        if ($inString) {
+            $out .= $char;
+            if ($escaped) {
+                $escaped = false;
+            } elseif ($char === '\\') {
+                $escaped = true;
+            } elseif ($char === '"') {
+                $inString = false;
+            }
+            continue;
+        }
+
+        if ($char === '"') {
+            $inString = true;
+            $out .= $char;
+            continue;
+        }
+
+        if ($char === '/' && $next === '/') {
+            $inLineComment = true;
+            $i++;
+            continue;
+        }
+
+        if ($char === '/' && $next === '*') {
+            $inBlockComment = true;
+            $i++;
+            continue;
+        }
+
+        $out .= $char;
+    }
+
+    // Remove trailing commas before } or ].
+    return (string) preg_replace('/,(\s*[}\]])/', '$1', $out);
 }
 
 function validateOpenCodePermissions(array $config, array &$errors): void

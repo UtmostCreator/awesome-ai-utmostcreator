@@ -1,3 +1,5 @@
+<!-- GENERATED — DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/AGENTS.template.md. Edit the template or .ai/project.yml, not this file. -->
+
 # <PROJECT_NAME> - Repository Instructions
 
 ## Project Summary

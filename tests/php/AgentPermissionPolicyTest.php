@@ -357,6 +357,12 @@ class AgentPermissionPolicyTest extends TestCase
         $raw = file_get_contents(self::$repoRoot . '/' . $relativePath);
         self::assertNotFalse($raw);
 
+        // opencode.json ships as JSONC (managed soft-notice comment header), so strip
+        // comments before decoding. Plain .json files are unaffected.
+        if (str_ends_with(strtolower($relativePath), '.json') || str_ends_with(strtolower($relativePath), '.jsonc')) {
+            $raw = $this->stripJsonCommentsForTest($raw);
+        }
+
         $data = json_decode($raw, true);
         self::assertIsArray($data, sprintf('%s must be valid JSON', $relativePath));
         self::assertIsArray($data['permission']['bash'] ?? null, sprintf('%s must declare permission.bash', $relativePath));
@@ -364,6 +370,65 @@ class AgentPermissionPolicyTest extends TestCase
         /** @var array<string,string> $bash */
         $bash = $data['permission']['bash'];
         return $bash;
+    }
+
+    private function stripJsonCommentsForTest(string $input): string
+    {
+        $out = '';
+        $inString = false;
+        $escaped = false;
+        $inLine = false;
+        $inBlock = false;
+        $length = strlen($input);
+
+        for ($i = 0; $i < $length; $i++) {
+            $char = $input[$i];
+            $next = $i + 1 < $length ? $input[$i + 1] : '';
+
+            if ($inLine) {
+                if ($char === "\n") {
+                    $inLine = false;
+                    $out .= $char;
+                }
+                continue;
+            }
+            if ($inBlock) {
+                if ($char === '*' && $next === '/') {
+                    $inBlock = false;
+                    $i++;
+                }
+                continue;
+            }
+            if ($inString) {
+                $out .= $char;
+                if ($escaped) {
+                    $escaped = false;
+                } elseif ($char === '\\') {
+                    $escaped = true;
+                } elseif ($char === '"') {
+                    $inString = false;
+                }
+                continue;
+            }
+            if ($char === '"') {
+                $inString = true;
+                $out .= $char;
+                continue;
+            }
+            if ($char === '/' && $next === '/') {
+                $inLine = true;
+                $i++;
+                continue;
+            }
+            if ($char === '/' && $next === '*') {
+                $inBlock = true;
+                $i++;
+                continue;
+            }
+            $out .= $char;
+        }
+
+        return (string) preg_replace('/,(\s*[}\]])/', '$1', $out);
     }
 
     private function usesStrictDeny(string $haystack): bool

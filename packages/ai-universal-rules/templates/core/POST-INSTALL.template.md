@@ -10,6 +10,8 @@ Open `docs/ai/project-context.md` and replace every `<PLACEHOLDER>` with real pr
 
 This file is the single source of truth that all agents, prompts, and instructions read. Leaving placeholders here means agents will invent values or produce incorrect output.
 
+> Which files are safe to edit vs re-rendered on upgrade? See `docs/ai/source-of-truth.md` → "Editable vs Generated Files".
+
 ### Required placeholders — fill before any write-capable AI run
 
 | Placeholder                | Where it appears                         | What to put there                                                      |

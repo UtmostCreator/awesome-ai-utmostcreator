@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/copilot-agent-tool-registry.php';
+require_once __DIR__ . '/generated-header.php';
 
 /**
  * Renders a canonical OpenCode agent template as a Copilot VS Code-native .agent.md file.
@@ -125,7 +126,14 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
 
     // --- Combine: Copilot frontmatter + enforcement + original body + shell boundary ---
     $body = ltrim($body);
-    return $copilotFm . $enforcement . $shellBoundary . "\n" . $body;
+    $rendered = $copilotFm . $enforcement . $shellBoundary . "\n" . $body;
+
+    // P3: hard GENERATED marker placed AFTER the closing frontmatter `---` so the
+    // YAML frontmatter stays parseable. Idempotent (will not double-insert).
+    return aiInstallerInsertGeneratedHeaderAfterFrontmatter(
+        $rendered,
+        'ai-kit installer (Copilot agent renderer) from packages/ai-universal-rules/templates/core/agents'
+    );
 }
 
 /**
@@ -219,6 +227,12 @@ function aiInstallerCopyDirAsOpenCodeAgents(string $src, string $dest): void
         if (aiAgentIsHiddenInternalOnly($content)) {
             continue;
         }
+        // P3: hard GENERATED marker after the YAML frontmatter so the shipped
+        // OpenCode agent stays parseable. Idempotent.
+        $content = aiInstallerInsertGeneratedHeaderAfterFrontmatter(
+            $content,
+            'ai-kit installer from packages/ai-universal-rules/templates/core/agents'
+        );
         $destFile = $dest . DIRECTORY_SEPARATOR . basename($srcFile);
         if (file_put_contents($destFile, $content) === false) {
             throw new RuntimeException('failed to copy agent: ' . $destFile);

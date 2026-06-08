@@ -116,6 +116,299 @@ function aiRunDoctor(string $root): int
 }
 
 /**
+ * Read-only install status (Phase C / P5). Reports kit install state, kit-owned file integrity,
+ * pending template updates, preserved user-owned files, conflict subtrees, and an HONESTLY
+ * classified policy-enforcement picture. Reuses aiInstallerCollectChecksumDrift and the manifest
+ * read used by doctor; it never reimplements drift logic and writes nothing except the standard
+ * CLI artifact (docs/ai/generated/status.json), exactly like doctor.
+ *
+ * Invariant: no false enforcement claims. Policy sections are derived only from real filesystem
+ * evidence (hook config presence + runtime reference). When evidence is incomplete the section
+ * is classified `partial`/`unknown`/`advisory`/`absent`, never `enforced`.
+ */
+function aiRunStatus(string $root): int
+{
+    $sep = DIRECTORY_SEPARATOR;
+    $abs = static fn(string $rel): string => $root . $sep . str_replace('/', $sep, $rel);
+
+    // --- Section 1: install state (manifest presence is the source of truth) ---
+    $manifestPath = $abs('.ai-install-manifest.json');
+    $installed = is_file($manifestPath);
+    $manifestRaw = $installed ? file_get_contents($manifestPath) : false;
+    $manifest = ($manifestRaw !== false) ? json_decode((string) $manifestRaw, true) : null;
+
+    // Hard error only when the manifest exists but cannot be parsed; otherwise read-only/exit 0.
+    if ($installed && !is_array($manifest)) {
+        $data = [
+            'installed' => true,
+            'error' => 'install manifest present but unreadable or invalid JSON: .ai-install-manifest.json',
+        ];
+        $written = aiCliWriteArtifact($root, 'status', 'php tools/ai/ai.php status', $data, 'failed', null, 'Repair or regenerate .ai-install-manifest.json (reinstall).');
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return 1;
+    }
+
+    $files = (is_array($manifest) && is_array($manifest['files'] ?? null)) ? $manifest['files'] : [];
+    $managedFileCount = count($files);
+    $profile = is_array($manifest) ? ($manifest['profile'] ?? null) : null;
+
+    // Optional, cheap worktree cleanliness via porcelain. Guarded for non-git targets; if git is
+    // unavailable or this is not a repo, report 'unknown' rather than overclaiming.
+    $worktree = 'unknown';
+    $isGitRepo = is_dir($abs('.git')) || is_file($abs('.git'));
+    if ($isGitRepo) {
+        $porcelain = [];
+        $gitExit = 0;
+        $prev = aiInstallerSafeCwdEnter();
+        exec('git -C ' . escapeshellarg($root) . ' status --porcelain 2>/dev/null', $porcelain, $gitExit);
+        aiInstallerSafeCwdLeave($prev);
+        if ($gitExit === 0) {
+            $worktree = ($porcelain === []) ? 'clean' : 'dirty';
+        }
+    }
+
+    // Install lock: a left-behind .ai/install.lock means a prior writing install was interrupted.
+    $lockPath = $abs('.ai/install.lock');
+    $lockPresent = is_file($lockPath);
+
+    $installState = [
+        'installed' => $installed,
+        'profile' => $profile,
+        'managed_file_count' => $managedFileCount,
+        'install_lock_present' => $lockPresent,
+        'worktree' => $worktree,
+    ];
+
+    // --- Section 2: kit-owned files (REUSE drift helper; same data doctor surfaces) ---
+    if ($installed && is_array($manifest)) {
+        $drift = aiInstallerCollectChecksumDrift($root, $manifest);
+    } else {
+        $drift = ['checked' => 0, 'drifted' => [], 'missing' => []];
+    }
+    $kitOwned = [
+        'clean' => max(0, $drift['checked'] - count($drift['drifted'])),
+        'checked' => $drift['checked'],
+        'modified' => $drift['drifted'],
+        'missing' => $drift['missing'],
+        'checksum_drift' => ($drift['drifted'] !== [] || $drift['missing'] !== []),
+    ];
+
+    // --- Section 3 & 6: rendered/stale == pending template updates under .ai/templates-new/* ---
+    // This repo's only cheap "template update available" signal is the templates-new refresh
+    // channel populated by the installer; there is no separate re-render diff to invent.
+    // Canonical refresh-channel root (mirrors aiInstallerPrivateTemplatesNewRel() in install/core.php;
+    // inlined here to keep status self-contained and free of cross-file load-order coupling).
+    $templatesNewRel = '.ai/templates-new';
+    $templatesNewDir = $abs($templatesNewRel);
+    $templateUpdatePaths = aiStatusRelFiles($templatesNewDir, $templatesNewRel);
+    $renderedStale = [
+        'signal' => 'templates-new presence',
+        'template_updates_available' => $templateUpdatePaths !== [],
+        'pending_paths' => $templateUpdatePaths,
+        'note' => 'No separate re-render diff exists in this repo; .ai/templates-new/* presence is the template-update signal.',
+    ];
+
+    // --- Section 4: preserved user files (ownership == template) that exist on disk ---
+    $preserved = [];
+    foreach ($files as $rel => $meta) {
+        if (!is_string($rel) || !is_array($meta)) {
+            continue;
+        }
+        if ((string) ($meta['ownership'] ?? 'owned') === 'template' && is_file($abs($rel))) {
+            $preserved[] = $rel;
+        }
+    }
+    sort($preserved, SORT_STRING);
+    $projectFiles = aiStatusRelFiles($abs('docs/ai/project'), 'docs/ai/project');
+    $preservedUserFiles = [
+        'template_owned' => $preserved,
+        'project_files_present' => $projectFiles !== [],
+        'project_files' => $projectFiles,
+    ];
+
+    // --- Section 5: conflicts (.ai/conflicts/<ts>-<op> subtrees) ---
+    $conflictsDir = $abs('.ai/conflicts');
+    $conflictDirs = [];
+    if (is_dir($conflictsDir)) {
+        foreach (scandir($conflictsDir) ?: [] as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            if (is_dir($conflictsDir . $sep . $entry)) {
+                $conflictDirs[] = $entry;
+            }
+        }
+    }
+    sort($conflictDirs, SORT_STRING);
+    $conflicts = [
+        'count' => count($conflictDirs),
+        'subtrees' => $conflictDirs,
+    ];
+
+    // --- Section 7: policy enforcement (HONEST classification) ---
+    $policy = aiStatusPolicyEnforcement($root);
+
+    // Status rollup: warnings (drift/conflicts/stale/lock) are exit 0. Read-only diagnostic.
+    $warnings = [];
+    if ($kitOwned['checksum_drift']) {
+        $warnings[] = 'kit-owned file drift: ' . count($drift['drifted']) . ' modified, ' . count($drift['missing']) . ' missing';
+    }
+    if ($conflicts['count'] > 0) {
+        $warnings[] = $conflicts['count'] . ' conflict subtree(s) under .ai/conflicts/';
+    }
+    if ($renderedStale['template_updates_available']) {
+        $warnings[] = count($templateUpdatePaths) . ' pending template update(s) under .ai/templates-new/';
+    }
+    if ($lockPresent) {
+        $warnings[] = 'stale .ai/install.lock present (prior install may have been interrupted)';
+    }
+    if (!$installed) {
+        $warnings[] = 'kit not installed in this repo (no .ai-install-manifest.json)';
+    }
+
+    $status = $warnings === [] ? 'ok' : 'warning';
+    $next = !$installed
+        ? 'Kit not installed here; run install to set up the kit.'
+        : ($warnings === [] ? 'Install healthy; no drift, conflicts, or pending template updates.' : 'Review reported warnings (drift/conflicts/template updates) and act as needed.');
+
+    $data = [
+        'status' => $status,
+        'install_state' => $installState,
+        'kit_owned_files' => $kitOwned,
+        'rendered_stale' => $renderedStale,
+        'preserved_user_files' => $preservedUserFiles,
+        'conflicts' => $conflicts,
+        'template_updates' => [
+            'available' => $renderedStale['template_updates_available'],
+            'pending_paths' => $templateUpdatePaths,
+        ],
+        'policy_enforcement' => $policy,
+        'warnings' => $warnings,
+        'recommended_next_action' => $next,
+    ];
+
+    $written = aiCliWriteArtifact($root, 'status', 'php tools/ai/ai.php status', $data, $status, null, $next);
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+
+    // Read-only diagnostic: warnings are exit 0; only a hard manifest error (handled above) is non-zero.
+    return 0;
+}
+
+/**
+ * List repo-relative file paths under a directory (recursive), sorted. Returns [] when the
+ * directory is absent. Used for templates-new and project-file presence reporting.
+ *
+ * @return list<string>
+ */
+function aiStatusRelFiles(string $absDir, string $relPrefix): array
+{
+    if (!is_dir($absDir)) {
+        return [];
+    }
+    $out = [];
+    $it = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($absDir, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::LEAVES_ONLY
+    );
+    $prefixLen = strlen($absDir);
+    foreach ($it as $info) {
+        /** @var SplFileInfo $info */
+        if (!$info->isFile()) {
+            continue;
+        }
+        $tail = str_replace(DIRECTORY_SEPARATOR, '/', substr($info->getPathname(), $prefixLen + 1));
+        $out[] = rtrim($relPrefix, '/') . '/' . $tail;
+    }
+    sort($out, SORT_STRING);
+    return $out;
+}
+
+/**
+ * HONEST policy-enforcement classification from filesystem evidence only.
+ *
+ * OpenCode: `enforced` requires BOTH the runtime hook wiring (.github/hooks/tool-policy.json or
+ * tool-guardian.json) AND a compiled policy present AND a runtime reference to that wiring from a
+ * loaded config (opencode.jsonc or .vscode/settings.json). With policy files but no runtime
+ * reference -> `advisory`. With neither -> `absent`. Anything ambiguous -> `partial`.
+ *
+ * Copilot: Copilot has no enforced hook runtime, so instructions are advisory by nature; classify
+ * `advisory` when present, `absent` otherwise. Never `enforced`.
+ *
+ * Runtime hooks: factual presence checks only (no behavioral claim).
+ *
+ * @return array<string,mixed>
+ */
+function aiStatusPolicyEnforcement(string $root): array
+{
+    $sep = DIRECTORY_SEPARATOR;
+    $abs = static fn(string $rel): string => $root . $sep . str_replace('/', $sep, $rel);
+    $has = static fn(string $rel): bool => is_file($abs($rel));
+
+    // Factual runtime-hook presence.
+    $guardianSh = $has('.github/hooks/scripts/tool-guardian.sh');
+    $guardianPs1 = $has('.github/hooks/scripts/tool-guardian.ps1');
+    $compiledPolicy = $has('.github/hooks/scripts/command-policy.compiled.sh');
+    $runtimeHooks = [
+        'tool_guardian_sh' => $guardianSh,
+        'tool_guardian_ps1' => $guardianPs1,
+        'command_policy_compiled_sh' => $compiledPolicy,
+    ];
+
+    // Hook config files (the wiring that maps a tool event to a guard command).
+    $toolPolicyCfg = $has('.github/hooks/tool-policy.json');
+    $toolGuardianCfg = $has('.github/hooks/tool-guardian.json');
+    $hookConfigPresent = $toolPolicyCfg || $toolGuardianCfg;
+
+    // Runtime reference: is the hook wiring actually referenced by a loaded config? We look for a
+    // literal reference to the hook config or guard scripts in opencode.jsonc / .vscode/settings.json.
+    $referenced = false;
+    foreach (['opencode.jsonc', '.vscode/settings.json'] as $cfgRel) {
+        $cfgAbs = $abs($cfgRel);
+        if (!is_file($cfgAbs)) {
+            continue;
+        }
+        $body = (string) file_get_contents($cfgAbs);
+        if (
+            str_contains($body, 'tool-policy.json')
+            || str_contains($body, 'tool-guardian')
+            || str_contains($body, '.github/hooks')
+        ) {
+            $referenced = true;
+            break;
+        }
+    }
+
+    // OpenCode classification.
+    if ($hookConfigPresent && $compiledPolicy && $referenced) {
+        $opencode = 'enforced';
+    } elseif ($hookConfigPresent || $compiledPolicy) {
+        // Policy files exist but no runtime reference wires them into an enforced runtime.
+        $opencode = $referenced ? 'partial' : 'advisory';
+    } else {
+        $opencode = 'absent';
+    }
+
+    // Copilot: advisory-by-nature; presence only flips advisory vs absent.
+    $copilotPresent = $has('.github/copilot-instructions.md');
+    $copilot = $copilotPresent ? 'advisory' : 'absent';
+
+    return [
+        'opencode' => [
+            'classification' => $opencode,
+            'hook_config_present' => $hookConfigPresent,
+            'compiled_policy_present' => $compiledPolicy,
+            'runtime_reference_present' => $referenced,
+        ],
+        'copilot' => [
+            'classification' => $copilot,
+            'instructions_present' => $copilotPresent,
+            'note' => 'Copilot has no enforced hook runtime; instructions are advisory by nature.',
+        ],
+        'runtime_hooks' => $runtimeHooks,
+    ];
+}
+
+/**
  * Compare managed files against their recorded installed_hash. Returns counts and the lists of
  * drifted (content changed) and missing files. Installer-generated/volatile artifacts and
  * user-owned template files are excluded so the check reflects real integrity drift only.

@@ -128,4 +128,92 @@ final class ProjectValuesPlaceholderTest extends TestCase
         $this->assertArrayNotHasKey('<LINT_COMMAND>', $map, 'unset project-fact tokens are omitted so base defaults survive');
         $this->assertArrayNotHasKey('<REVIEW_PRIORITIES>', $map, 'unset review priorities must not clobber the base default');
     }
+
+    /**
+     * N1: 8 previously-stranded REQUIRED project-context tokens (primaryStack,
+     * filePlacementRules, namingRules, goldenExamples, formatterConfigFiles,
+     * linterConfigFiles, editorconfigPath, ignoreFiles) are now driveable from
+     * .ai/project.yml, following the exact P4-a override-when-set pattern.
+     */
+    public function testStrandedProjectContextTokensComeFromProjectYml(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'n1_set_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        $this->writeProjectYml($root, [
+            'primaryStack' => 'Laravel 11',
+            'filePlacementRules' => 'app/ for code, tests/ for tests',
+            'namingRules' => 'PascalCase classes, snake_case columns',
+            'goldenExamples' => 'app/Services/Billing.php',
+            'formatterConfigFiles' => '.php-cs-fixer.php',
+            'linterConfigFiles' => 'phpstan.neon',
+            'editorconfigPath' => '.editorconfig',
+            'ignoreFiles' => '.gitignore, .dockerignore',
+        ]);
+
+        $values = aiInstallerLoadProjectValues($root, 'demo');
+        $map = aiInstallerProjectValuesPlaceholderMap($values);
+
+        $this->assertSame('Laravel 11', $map['<PRIMARY_STACK>'] ?? null);
+        $this->assertSame('app/ for code, tests/ for tests', $map['<FILE_PLACEMENT_RULES>'] ?? null);
+        $this->assertSame('PascalCase classes, snake_case columns', $map['<NAMING_RULES>'] ?? null);
+        $this->assertSame('app/Services/Billing.php', $map['<GOLDEN_EXAMPLES>'] ?? null);
+        $this->assertSame('.php-cs-fixer.php', $map['<FORMATTER_CONFIG_FILES>'] ?? null);
+        $this->assertSame('phpstan.neon', $map['<LINTER_CONFIG_FILES>'] ?? null);
+        $this->assertSame('.editorconfig', $map['<EDITORCONFIG_PATH>'] ?? null);
+        $this->assertSame('.gitignore, .dockerignore', $map['<IGNORE_FILES>'] ?? null);
+    }
+
+    /**
+     * N1: unset or 'unknown' stranded tokens must NOT be force-emitted, so the
+     * base substitution-map 'unknown' default survives (back-compat) — mirrors the
+     * existing P4-a reviewPriorities/lintCommand assertions.
+     */
+    public function testUnsetStrandedProjectContextTokensDoNotClobberBaseDefaults(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'n1_unset_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        // primaryStack set; the rest left unset (and editorconfigPath explicitly 'unknown').
+        $this->writeProjectYml($root, [
+            'primaryStack' => 'Laravel 11',
+            'editorconfigPath' => 'unknown',
+        ]);
+
+        $values = aiInstallerLoadProjectValues($root, 'demo');
+        $map = aiInstallerProjectValuesPlaceholderMap($values);
+
+        $this->assertSame('Laravel 11', $map['<PRIMARY_STACK>'] ?? null);
+        $this->assertArrayNotHasKey('<FILE_PLACEMENT_RULES>', $map, 'unset stranded token must not clobber base default');
+        $this->assertArrayNotHasKey('<NAMING_RULES>', $map, 'unset stranded token must not clobber base default');
+        $this->assertArrayNotHasKey('<GOLDEN_EXAMPLES>', $map, 'unset stranded token must not clobber base default');
+        $this->assertArrayNotHasKey('<FORMATTER_CONFIG_FILES>', $map, 'unset stranded token must not clobber base default');
+        $this->assertArrayNotHasKey('<LINTER_CONFIG_FILES>', $map, 'unset stranded token must not clobber base default');
+        $this->assertArrayNotHasKey('<EDITORCONFIG_PATH>', $map, "'unknown' stranded token must not clobber base default");
+        $this->assertArrayNotHasKey('<IGNORE_FILES>', $map, 'unset stranded token must not clobber base default');
+    }
+
+    /**
+     * N1: aiInstallerLoadProjectValues recognizes all 8 new keys from .ai/project.yml.
+     */
+    public function testLoadProjectValuesRecognizesStrandedKeys(): void
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'n1_load_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        $kv = [
+            'primaryStack' => 'Laravel 11',
+            'filePlacementRules' => 'app/ for code',
+            'namingRules' => 'PascalCase',
+            'goldenExamples' => 'app/Services/Billing.php',
+            'formatterConfigFiles' => '.php-cs-fixer.php',
+            'linterConfigFiles' => 'phpstan.neon',
+            'editorconfigPath' => '.editorconfig',
+            'ignoreFiles' => '.gitignore',
+        ];
+        $this->writeProjectYml($root, $kv);
+
+        $values = aiInstallerLoadProjectValues($root, 'demo');
+
+        foreach ($kv as $key => $expected) {
+            $this->assertSame($expected, $values[$key] ?? null, "loadProjectValues must recognize key: {$key}");
+        }
+    }
 }

@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+// install_workflow.php calls private-conflict helpers (aiInstallerPrivateConflictDir,
+// aiInstallerPrivateConflictRel, ...) defined in tools/ai/install/core.php. Load that
+// dependency explicitly so this file is self-contained regardless of test/worker load
+// order. core.php is idempotent (require_once + top-level functions), so this is safe.
+require_once __DIR__ . '/../install/core.php';
+
 /**
  * Merge workflow-level install metadata onto the canonical manifest written by the
  * subprocess installer (install-ai-kit.php -> manifest.php).

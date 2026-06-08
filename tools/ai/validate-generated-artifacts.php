@@ -51,6 +51,51 @@ foreach ($requiredGeneratedHeaders as $path) {
     }
 }
 
+// P3: enforce the hard generated-file markers on the SOURCE surfaces that the installer
+// renders from. These are deterministic to check (no install run required) and keep the
+// "generated, do not edit" contract honest at its source.
+//
+// 1) AGENTS.md is rendered from this template; the GENERATED header must be the first line
+//    of the template so it survives placeholder substitution into the installed AGENTS.md.
+$agentsTemplate = 'packages/ai-universal-rules/templates/core/AGENTS.template.md';
+$agentsTemplateAbs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $agentsTemplate);
+if (is_file($agentsTemplateAbs)) {
+    if (!str_starts_with((string) file_get_contents($agentsTemplateAbs), '<!-- GENERATED — DO NOT EDIT:')) {
+        $errors[] = "source template {$agentsTemplate} must start with the GENERATED — DO NOT EDIT header (it renders the installed AGENTS.md)";
+    }
+}
+
+// 2) Hook JSON has no comments, so the generated marker lives in a `_generated` metadata
+//    object. Enforce `_generated.tool == "ai-kit"` on the shipped hook templates.
+$hookJsonTemplates = [
+    'packages/ai-universal-rules/templates/github/hooks/tool-policy.json',
+    'packages/ai-universal-rules/templates/github/hooks/tool-guardian.json',
+];
+foreach ($hookJsonTemplates as $hookPath) {
+    $hookAbs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $hookPath);
+    if (!is_file($hookAbs)) {
+        continue;
+    }
+    $decoded = json_decode((string) file_get_contents($hookAbs), true);
+    if (!is_array($decoded)) {
+        $errors[] = "hook config {$hookPath} is not valid JSON";
+        continue;
+    }
+    if (($decoded['_generated']['tool'] ?? null) !== 'ai-kit') {
+        $errors[] = "hook config {$hookPath} is missing the generated marker (_generated.tool == \"ai-kit\")";
+    }
+}
+
+// 3) opencode.json installs to opencode.jsonc and carries a SOFT managed notice (not a hard
+//    "DO NOT EDIT") because it has adopt/conflict semantics. Enforce the soft notice marker.
+$opencodeTemplate = 'packages/ai-universal-rules/templates/core/opencode.json';
+$opencodeTemplateAbs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $opencodeTemplate);
+if (is_file($opencodeTemplateAbs)) {
+    if (!str_contains((string) file_get_contents($opencodeTemplateAbs), '// Managed by ai-kit.')) {
+        $errors[] = "source template {$opencodeTemplate} must contain the soft '// Managed by ai-kit.' notice";
+    }
+}
+
 if (!$existenceOnly) {
     $phpBin = defined('PHP_BINARY') ? (string) PHP_BINARY : 'php';
 
