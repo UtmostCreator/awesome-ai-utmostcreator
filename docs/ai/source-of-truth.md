@@ -18,6 +18,9 @@ When sources disagree, resolve in this order and state which level a claim rests
 
 Trust active repository evidence over recall. Report conflicts instead of silently picking one side.
 
+For the shipped JSON Schema contracts and their producers, consumers, and validators, see
+`docs/ai/schema-ownership.md`.
+
 ## Correctness Rules
 
 - Label any claim not grounded in levels 1-6 above with `[unverified]`. Never present an unverified claim as a fact.

@@ -1,5 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://app-configs.local/schemas/project-placeholders.schema.json",
   "title": "Project Placeholder Registry",
   "type": "object",
   "properties": {

@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-configs.local/schemas/project-signals.schema.json",
   "title": "project-signals",
   "type": "object",
   "required": ["schema_version", "project", "tracked_files_count", "counts", "ai_surface", "toolchain"],

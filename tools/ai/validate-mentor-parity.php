@@ -104,14 +104,17 @@ function mentor_scan(string $root): int
 {
     $violations = 0;
     $configs = [];
+    $present = 0;
 
     foreach (MENTOR_CAP_DIRS as $rel) {
         $dir = $root . '/' . $rel;
         if (!is_dir($dir)) {
-            mentor_fail("missing capability directory: {$rel}");
-            $violations++;
+            // Not all surfaces carry every copy: an installed target has the
+            // canonical docs/ai capability but not the package template mirror.
+            // Skip absent copies; only the cross-copy drift check below needs both.
             continue;
         }
+        $present++;
         $cfg = mentor_load_config("{$dir}/config.example.json");
         if ($cfg === null) {
             mentor_fail("missing or invalid config.example.json in {$rel}");
@@ -136,6 +139,13 @@ function mentor_scan(string $root): int
                 $violations++;
             }
         }
+    }
+
+    if ($present === 0) {
+        // No mentor-mode capability is installed on this surface; nothing to check.
+        fwrite(STDOUT, "SKIP: no mentor-mode capability directory present\n");
+
+        return 0;
     }
 
     if (count($configs) > 1) {
