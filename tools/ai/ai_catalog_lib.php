@@ -228,6 +228,79 @@ function aiResource(
     ], $extra);
 }
 
+/**
+ * Filter globbed absolute paths down to git-tracked files.
+ *
+ * Adapter agent renders (e.g. optional Copilot agents) can be written into the
+ * working tree by a self-install without being committed. Cataloguing those
+ * untracked local renders causes false drift against the committed catalog.
+ * Restricting enumeration to tracked files keeps the catalog deterministic and
+ * identical on a clean checkout (where every catalogued file is tracked).
+ *
+ * Falls back to the unfiltered paths when git is unavailable or the tree is not
+ * a git repository (e.g. an extracted release tarball), preserving behavior.
+ *
+ * @param list<string> $absPaths
+ * @return list<string>
+ */
+function aiFilterTrackedPaths(string $root, array $absPaths): array
+{
+    if ($absPaths === []) {
+        return $absPaths;
+    }
+
+    $tracked = aiLoadTrackedFileSet($root);
+    if ($tracked === null) {
+        return array_values($absPaths);
+    }
+
+    $rootPrefixLen = strlen(aiNormalizePath($root)) + 1;
+
+    return array_values(array_filter($absPaths, static function (string $abs) use ($tracked, $rootPrefixLen): bool {
+        $rel = substr(aiNormalizePath($abs), $rootPrefixLen);
+
+        return isset($tracked[$rel]);
+    }));
+}
+
+/**
+ * Load the set of git-tracked relative paths for the repository, cached per root.
+ *
+ * @return array<string,true>|null map of tracked relative paths, or null when git
+ *                                 is unavailable / the tree is not a git repository
+ */
+function aiLoadTrackedFileSet(string $root): ?array
+{
+    static $cache = [];
+
+    $rootKey = aiNormalizePath($root);
+    if (array_key_exists($rootKey, $cache)) {
+        return $cache[$rootKey];
+    }
+
+    $gitMarker = $root . DIRECTORY_SEPARATOR . '.git';
+    if (!is_dir($gitMarker) && !is_file($gitMarker)) {
+        return $cache[$rootKey] = null;
+    }
+    if (!function_exists('shell_exec')) {
+        return $cache[$rootKey] = null;
+    }
+
+    $output = shell_exec('git -C ' . escapeshellarg($root) . ' ls-files -z 2>/dev/null');
+    if (!is_string($output) || $output === '') {
+        return $cache[$rootKey] = null;
+    }
+
+    $set = [];
+    foreach (explode("\0", $output) as $entry) {
+        if ($entry !== '') {
+            $set[aiNormalizePath($entry)] = true;
+        }
+    }
+
+    return $cache[$rootKey] = ($set === [] ? null : $set);
+}
+
 function aiCollectCatalog(string $root): array
 {
     $manifest = aiLoadJson($root, aiResolveKitDescriptorPath($root, 'manifest.json'));
@@ -407,7 +480,7 @@ function aiCollectRootResources(string $root): array
         $resources[] = aiResource('root', 'capability', $name, $relativePath, aiSummarizeMarkdown($content), 'canonical');
     }
 
-    $agentPaths = glob(aiAbsolutePath($root, '.github/agents/*.agent.md')) ?: [];
+    $agentPaths = aiFilterTrackedPaths($root, glob(aiAbsolutePath($root, '.github/agents/*.agent.md')) ?: []);
     sort($agentPaths);
 
     foreach ($agentPaths as $path) {
@@ -487,7 +560,7 @@ function aiCollectRootResources(string $root): array
     ];
 
     foreach ($opencodeResourcePatterns as $pattern => [$type, $runtime]) {
-        $paths = glob(aiAbsolutePath($root, $pattern)) ?: [];
+        $paths = aiFilterTrackedPaths($root, glob(aiAbsolutePath($root, $pattern)) ?: []);
         sort($paths);
 
         foreach ($paths as $path) {

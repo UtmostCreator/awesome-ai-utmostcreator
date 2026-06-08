@@ -19,6 +19,11 @@ docs/ai/generated/
 # and uploaded as a CI artifact (see export-ai-universal-rules-preview.yml). Not tracked.
 /dist/
 /composer.phar
+# Self-install renders in the kit repo only: docs/ai/package/ duplicates
+# packages/ai-universal-rules/docs (the real source), and .ai-tmp/ is the install
+# transaction staging dir. Produced by self-install; not source, not committed.
+docs/ai/package/
+.ai-tmp/
 # Draft agent: super-implementer.md is held back pending an id-collision fix
 # (its frontmatter id currently duplicates implementer.md). Ignored so it is
 # not committed or surfaced as untracked until that is resolved.

@@ -288,6 +288,11 @@ php tools/ai/ai.php install --profile full-governance --reinstall --dry-run
 php tools/ai/ai.php install --profile full-governance --reinstall --apply
 ```
 
+`--reinstall --apply` rewrites managed files in place (it forces the subprocess
+installer so existing managed dirs such as `.opencode/agents/` are actually
+refreshed, not skipped). A mandatory backup is created first under
+`.ai/backups/`. Run the `--dry-run` first to preview the plan.
+
 ---
 
 ### Quick Start — Workstation Configs

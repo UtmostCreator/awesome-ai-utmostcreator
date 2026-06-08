@@ -42,3 +42,14 @@ PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh
 | `php tools/ai/ai.php verify --json` / `--changed`                                                         | AI CLI verification: config, catalog, generated checks, advisor/install docs checks                                               |                                           writes generated artifacts/logs | `tools/ai/commands/verify.php`, `tools/ai/ai.php`                   |
 | `php tools/ai/verify-full-install.php`                                                                    | Full install verification sequence: preflight, package verify, adapter plan, install dry-run, validators, advisor, changed verify |                                                        broad; can be slow | `tools/ai/verify-full-install.php`                                  |
 | `php tools/ai/full-install-validation.php [flags]`                                                        | Broad validation with optional full verifier/PHPUnit                                                                              |        default `timeout-sec=600`, idle `180`; PHPUnit stage can be longer | `tools/ai/full-install-validation.php`                              |
+
+## Expected Test Skips
+
+A green run reports a small number of **intentional** skips. These are environment guards, not failures. Do not try to force them to run.
+
+| Skipped test | Reason | Fires when |
+| --- | --- | --- |
+| `AgentPermissionPolicyTest::testStrictDenyAgentsAllowBasicReadOnlyGitInspection` (×4) | `repository-researcher` and `repository-reviewer` are **ask-default** agents (not strict `'*': deny`), so the strict-deny read-only assertion does not apply. Counted once per file: `.opencode/agents/` and `packages/.../core/agents/` for each. | always (by design) |
+| `InstallerSafetyTest::testCopyFileFailsClearlyOnReadOnlyTarget` (×1) | chmod read-only enforcement cannot be tested as **root**, because root bypasses file permissions. | test process runs as root |
+
+Other skip guards exist for Windows-only/POSIX-only paths, missing optional tools, and missing adapter directories; on a fully provisioned POSIX checkout they do not fire. If the skip count changes, confirm it matches one of the guards above before treating it as a regression.
