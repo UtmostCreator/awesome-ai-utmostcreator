@@ -192,9 +192,24 @@ if ((${#ENTRIES[@]} == 0)); then
 fi
 
 # ---- --list mode --------------------------------------------------------
+# Defense-in-depth: candidate paths (AGENTS.md, opencode.jsonc) are an
+# --apply --include-candidates concept only. They must never appear in --list,
+# even if a generator places them in the manifest with source != key.
+path_is_candidate() {
+    local rel="${1:?rel path required}"
+    local cand
+    for cand in "${CANDIDATE_PATHS[@]}"; do
+        [[ "$rel" == "$cand" ]] && return 0
+    done
+    return 1
+}
+
 if [[ "$mode" == "list" ]]; then
     for line in "${ENTRIES[@]+${ENTRIES[@]}}"; do
         path="${line%%$'\t'*}"
+        if path_is_candidate "$path"; then
+            continue
+        fi
         printf '%s\n' "$path"
     done
     exit 0
