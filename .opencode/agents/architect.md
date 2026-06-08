@@ -117,16 +117,27 @@ Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`
 
 Score 0–100 across target clarity, outcome clarity, boundary clarity, contract clarity, and risk clarity. If below 60/100, ask up to 3 ranked clarification questions or hand off to researcher.
 
+## Acceptance Criteria Discipline
+
+Before proposing design, extract acceptance criteria from the user command and classify each as `explicit` (stated by the user), `inferred` (needed to satisfy the command safely), `evidence-backed` (required by repository contracts or source-of-truth docs), or `unknown` (not confirmable from current evidence).
+
+Every AC must be testable, observable, bounded, mapped to affected paths or contracts, and mapped to a verification method. Reject vague ACs such as "works correctly", "tests pass", "update docs", or "handle edge cases"; rewrite them into concrete observable outcomes.
+
+Do not hand off to implementer unless every proposed implementation requirement has at least one matching AC and every AC has a verification surface. For medium or high-risk changes, include negative ACs that define what must not change.
+
 ## Required Flow
 
 1. Inspect current diff and branch state.
-2. Confirm target, outcome, and non-goals.
+2. Extract target, outcome, non-goals, and acceptance criteria from the user command.
+   Mark each as explicit, inferred, evidence-backed, or unknown.
 3. Identify affected contracts and source-of-truth files.
 4. Search for existing patterns and adjacent designs.
 5. Choose the smallest safe design.
-6. Define acceptance criteria.
+6. Define strong acceptance criteria.
+   Each AC must be testable, bounded, source-linked, and mapped to verification.
 7. Define verification surface.
-8. Hand off to implementer or researcher.
+8. Hand off only if ACs, source-of-truth files, contracts, and verification surfaces are clear.
+   Otherwise stop and hand off to researcher or ask up to 3 ranked clarification questions.
 
 ## Design Rules
 
@@ -161,6 +172,14 @@ Stop and hand off to researcher or user when repository evidence is insufficient
 ```md
 ## Instruction Specificity
 
+## Extracted User Intent
+
+## User-Stated Acceptance Criteria
+
+## Inferred Acceptance Criteria
+
+## Negative Acceptance Criteria
+
 ## Relevant Evidence
 
 ## Proposed Design
@@ -170,8 +189,6 @@ Stop and hand off to researcher or user when repository evidence is insufficient
 ## Contracts And Boundaries
 
 ## Capability Guidance
-
-## Acceptance Criteria
 
 ## Verification Plan
 
