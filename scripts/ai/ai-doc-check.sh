@@ -174,6 +174,14 @@ run_drift() {
     if [[ -f tools/ai/validate-catalog-drift.php ]]; then
         run_step "validate-catalog-drift" php tools/ai/validate-catalog-drift.php --root=.
     fi
+
+    if [[ -f tools/ai/validate-schemas.php ]]; then
+        run_step "validate-schemas" php tools/ai/validate-schemas.php --root=.
+    fi
+
+    if [[ -f tools/ai/validate-mentor-parity.php ]]; then
+        run_step "validate-mentor-parity" php tools/ai/validate-mentor-parity.php
+    fi
 }
 
 case "$mode" in

@@ -1,5 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://app-configs.local/schemas/advisor-recommendation.schema.json",
   "title": "advisor-recommendation",
   "type": "object",
   "required": ["provider", "network_called"],
