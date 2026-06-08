@@ -140,7 +140,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
 - `ai-structured.sh` — to emit a structured design/handoff; expect structured JSON.
 
-Denied: all verify/test/write/hook/host scripts (`ai-verify`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Architect designs; it does not run or mutate.
+Denied: all verify/test/write/hook/host scripts (`ai-verify`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Architect designs; it does not run or mutate.
 
 ## Canonical References
 

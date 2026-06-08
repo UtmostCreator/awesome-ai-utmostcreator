@@ -38,13 +38,13 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / cli` - 1
 - `root / exporter` - 1
 - `root / generator` - 1
-- `root / github-copilot-agent` - 23
+- `root / github-copilot-agent` - 11
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 18
-- `root / github-copilot-skill` - 18
+- `root / github-copilot-prompt` - 17
+- `root / github-copilot-skill` - 17
 - `root / opencode-agent` - 12
-- `root / opencode-command` - 20
-- `root / opencode-skill` - 20
+- `root / opencode-command` - 19
+- `root / opencode-skill` - 19
 - `root / php-reference` - 3
 - `root / root-doc` - 19
 - `root / schema` - 1
@@ -106,20 +106,9 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`cli`|ai|`tools/ai/ai.php`|Main AI workflow CLI dispatcher.|
 |`exporter`|export-ai-universal-rules|`tools/ai/export-ai-universal-rules.php`|Builds starter-profile release bundles under dist/.|
 |`generator`|generate-ai-catalog|`tools/ai/generate-ai-catalog.php`|Generates catalog docs, catalog JSON, and llms.txt.|
-|`github-copilot-agent`|Agent Creator Runtime Guardian|`.github/agents/agent-creator-runtime-guardian.agent.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator|
-|`github-copilot-agent`|Agent Creator Semantic Verifier|`.github/agents/agent-creator-semantic-verifier.agent.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator|
-|`github-copilot-agent`|Agent Creator Static Validator|`.github/agents/agent-creator-static-validator.agent.md`|Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors|
-|`github-copilot-agent`|Agent Creator Supervisor|`.github/agents/agent-creator-supervisor.agent.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
-|`github-copilot-agent`|Agent Creator|`.github/agents/agent-creator.agent.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
 |`github-copilot-agent`|Architect|`.github/agents/architect.agent.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
-|`github-copilot-agent`|Architecture Plan|`.github/agents/architecture-plan.agent.md`|Produce a focused implementation plan for a medium or large change in awesome-ai-utmostcreator|
-|`github-copilot-agent`|Bootstrapper|`.github/agents/bootstrapper.agent.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|
-|`github-copilot-agent`|Bugfix|`.github/agents/bugfix.agent.md`|Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal|
-|`github-copilot-agent`|Build Config|`.github/agents/build-config.agent.md`|Update build, packaging, or verification configuration in awesome-ai-utmostcreator|
 |`github-copilot-agent`|Config Maintainer|`.github/agents/config-maintainer.agent.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
-|`github-copilot-agent`|Docs|`.github/agents/docs.agent.md`|Update or align documentation after implementation changes in awesome-ai-utmostcreator|
 |`github-copilot-agent`|Implementer|`.github/agents/implementer.agent.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
-|`github-copilot-agent`|Infra Auditor|`.github/agents/infra-auditor.agent.md`|Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator|
 |`github-copilot-agent`|Post Install|`.github/agents/post-install.agent.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
 |`github-copilot-agent`|Refactorer|`.github/agents/refactorer.agent.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
 |`github-copilot-agent`|Release Auditor|`.github/agents/release-auditor.agent.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
@@ -127,7 +116,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-agent`|Repository Reviewer|`.github/agents/repository-reviewer.agent.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`github-copilot-agent`|Researcher|`.github/agents/researcher.agent.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`github-copilot-agent`|Reviewer|`.github/agents/reviewer.agent.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
-|`github-copilot-agent`|Upgrade|`.github/agents/upgrade.agent.md`|Plan or apply dependency and platform upgrades carefully in awesome-ai-utmostcreator|
 |`github-copilot-agent`|Workflow Auditor|`.github/agents/workflow-auditor.agent.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`github-copilot-instruction`|ai-file-standards|`.github/instructions/ai-file-standards.instructions.md`|AI workflow file roles, line budgets, duplication rules, and adapter boundaries|
 |`github-copilot-instruction`|ai-scripts|`.github/instructions/ai-scripts.instructions.md`|AI script registry consistency and risk-based execution rules|
@@ -159,7 +147,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|mentor-mode|`.github/prompts/mentor-mode.prompt.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-prompt`|new-feature|`.github/prompts/new-feature.prompt.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-prompt`|plan-slice|`.github/prompts/plan-slice.prompt.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
-|`github-copilot-prompt`|post-install-setup|`.github/prompts/post-install-setup.prompt.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
 |`github-copilot-prompt`|project-context|`.github/prompts/project-context.prompt.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`github-copilot-prompt`|regression-test|`.github/prompts/regression-test.prompt.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`github-copilot-prompt`|release-safety|`.github/prompts/release-safety.prompt.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
@@ -177,7 +164,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|mentor-mode|`.github/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-skill`|new-feature|`.github/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-skill`|plan-slice|`.github/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
-|`github-copilot-skill`|post-install-setup|`.github/skills/post-install-setup/SKILL.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
 |`github-copilot-skill`|project-context|`.github/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`github-copilot-skill`|regression-test|`.github/skills/regression-test/SKILL.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`github-copilot-skill`|release-safety|`.github/skills/release-safety/SKILL.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
@@ -207,7 +193,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|mentor-mode|`.opencode/commands/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-command`|new-feature|`.opencode/commands/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-command`|plan-slice|`.opencode/commands/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
-|`opencode-command`|post-install-setup|`.opencode/commands/post-install-setup.md`|Guided post-install setup for installed projects|
 |`opencode-command`|project-context|`.opencode/commands/project-context.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`opencode-command`|regression-test|`.opencode/commands/regression-test.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`opencode-command`|release-safety|`.opencode/commands/release-safety.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
@@ -229,7 +214,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|mentor-mode|`.opencode/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-skill`|new-feature|`.opencode/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-skill`|plan-slice|`.opencode/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
-|`opencode-skill`|post-install-setup|`.opencode/skills/post-install-setup/SKILL.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
 |`opencode-skill`|project-context|`.opencode/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`opencode-skill`|regression-test|`.opencode/skills/regression-test/SKILL.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`opencode-skill`|release-safety|`.opencode/skills/release-safety/SKILL.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|

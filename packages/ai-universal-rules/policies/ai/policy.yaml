@@ -1,0 +1,111 @@
+schemaVersion: 1
+version: 1
+
+deny:
+  - id: system-damage
+    reason: Dangerous system command blocked
+    pattern: '(^|[\s])(sudo|su -|mkfs|dd\s|shutdown|reboot|halt|poweroff|mount|umount)([\s]|$)'
+  - id: permission-mutation
+    reason: Filesystem permission mutation blocked
+    pattern: '(^|[\s])(chmod|chown|chgrp)([\s]|$)'
+  - id: rm-direct
+    reason: Direct rm blocked
+    pattern: '(^|[\s])rm([\s]|$)'
+  - id: destructive-git
+    reason: Destructive git command blocked
+    pattern: '^git\s+(push|reset\s+--hard|clean\s+-|checkout\s+--|restore\s+--|rebase\s|filter-branch|reflog\s+delete)'
+  - id: remote-pipe-shell
+    reason: Remote pipe-to-shell execution blocked
+    pattern: '(curl|wget).*\|\s*(sh|bash|zsh|python|python3|php|node|ruby)'
+  - id: exfiltration-attempt
+    reason: Possible data exfiltration blocked
+    pattern: '(curl|wget|nc|ncat|netcat)\s+.*(-d|--data|--upload-file|--data-binary)'
+  - id: env-secret-read
+    reason: Direct .env secret extraction blocked
+    pattern: '(^|[[:space:]])(cat|bat|less|head|tail)([[:space:]]|$).*\.env([^[:space:]]*)?([[:space:]]|$)'
+
+allow:
+  - id: read-only-tools
+    reason: Safe read-only CLI tools
+    pattern: '^(rg|fd|fzf|bat|jq|yq|mlr|fx|delta|eza|ls|pwd|cat|head|tail|wc|sort|uniq|cut|date|env|which|type|file|stat|du|df)\b'
+  - id: git-read
+    reason: Safe git read operations
+    pattern: '^git\s+(log|show|diff|status|grep|blame|ls-files|branch|tag|describe|shortlog|rev-parse|cat-file|check-ignore|stash list)\b'
+  - id: gh-read
+    reason: Safe GitHub CLI read operations
+    pattern: '^gh\s+(pr\s+(view|list|checks|diff)|issue\s+(view|list)|repo\s+view|run\s+(list|view))\b'
+  - id: ast-grep-search
+    reason: ast-grep search-only
+    pattern: '^ast-grep\s+run\b(?!.*--(rewrite|update-all|u)\b)'
+  - id: semgrep-scan
+    reason: Semgrep scan
+    pattern: '^semgrep\s+scan\b'
+  - id: gitleaks-detect
+    reason: Gitleaks scan
+    pattern: '^gitleaks\s+detect\b'
+  - id: trivy-scan
+    reason: Trivy scan
+    pattern: '^trivy\s+fs\b'
+  - id: shellcheck
+    reason: Shellcheck lint
+    pattern: '^shellcheck\b'
+  - id: shfmt-diff
+    reason: shfmt dry-run
+    pattern: '^shfmt\s+-d\b'
+  - id: actionlint
+    reason: actionlint workflow lint
+    pattern: '^actionlint\b'
+  - id: lychee
+    reason: lychee offline link check
+    pattern: '^lychee\b'
+  # Tier 1 — read-only wrapper scripts (auto-approve)
+  # See docs/ai/command-risk-taxonomy.md for the full invocation matrix.
+  - id: tier1-read-only-scripts
+    reason: "Tier 1: read-only AI wrapper scripts (no source mutation)"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/(ai-search|ai-verify|preview-file|fd-files|rg-code|git-forensics|repo-stats|query-usage)\.sh\b'
+  # Tier 1† — read-only-adjacent scripts (write only to generated directories)
+  - id: tier1-generated-output-scripts
+    reason: "Tier 1\u2020: generated-output writes to .ai-logs/ or .repomix-context/ only"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/(ai-diff-context|pack-context|gh-pr-context|repomix-context-tree)\.sh\b'
+  # Tier 1 — ai-edit dry-run only (no APPLY or VERIFY flag)
+  - id: tier1-ai-edit-dryrun
+    reason: "Tier 1: ai-edit dry-run (no APPLY=1 or VERIFY=1)"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/ai-edit\.sh\b(?!.*\b(APPLY|VERIFY)=1)'
+  # Tier 1 — ai-rollback read-only subcommands
+  - id: tier1-ai-rollback-read
+    reason: "Tier 1: ai-rollback list or show \u2014 read-only inspection"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/ai-rollback\.sh\s+(list|show)\b'
+  # Tier 1 — repomix-scc-router read-only subcommands
+  - id: tier1-repomix-read
+    reason: "Tier 1: repomix-scc-router stats, plan, run, or bundle \u2014 read-only or generated-output"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/repomix-scc-router\.sh\s+(stats|plan|run|bundle)\b'
+
+confirm:
+  # Tier 2 — modification (confirm before execution)
+  # See docs/ai/command-risk-taxonomy.md for the full invocation matrix.
+  - id: git-commit
+    reason: "Tier 2: git commit modifies history \u2014 confirm required"
+    pattern: '^git\s+commit\b'
+  - id: git-stash-push
+    reason: "Tier 2: git stash push modifies working state \u2014 confirm required"
+    pattern: '^git\s+stash\s+(push|drop|pop)\b'
+  - id: ai-edit-apply
+    reason: "Tier 2: ai-edit apply mode mutates source files \u2014 confirm required"
+    pattern: '^(APPLY=1|VERIFY=1).*scripts/ai/ai-edit\.sh\b'
+  - id: ai-edit-apply-env-prefix
+    reason: "Tier 2: ai-edit with APPLY or VERIFY env vars \u2014 confirm required"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/ai-edit\.sh\b.*\b(APPLY|VERIFY)=1'
+  # Tier 3 — deletion/recovery (deny by default; listed here as confirm so the hook can
+  # surface an explicit approval prompt rather than a silent deny)
+  - id: ai-rollback-apply
+    reason: "Tier 3: ai-rollback apply is a recovery mutation \u2014 explicit approval required"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/ai-rollback\.sh\s+apply\b'
+  - id: repomix-clean-purge
+    reason: "Tier 3: repomix-scc-router clean or purge deletes generated artifacts \u2014 explicit approval required"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/repomix-scc-router\.sh\s+(clean|purge)\b'
+  - id: repomix-tree-clean-purge
+    reason: "Tier 3: repomix-context-tree clean or purge deletes generated artifacts \u2014 explicit approval required"
+    pattern: '^(bash\s+)?(\./)?scripts/ai/repomix-context-tree\.sh\s+(clean|purge)\b'
+  - id: just-context-clean-purge
+    reason: "Tier 3: just context-clean or context-purge deletes generated artifacts \u2014 explicit approval required"
+    pattern: '^just\s+context-(clean|purge)\b'

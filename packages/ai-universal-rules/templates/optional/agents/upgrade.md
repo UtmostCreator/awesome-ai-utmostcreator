@@ -119,7 +119,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to prove compatibility; expect pass/fail evidence.
 - `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when a native path-scoped `edit:` is insufficient; `session-checkpoint.sh` (`ask`) for continuity.
 
-Edits normally use the native path-scoped `edit:` permission. Denied: `ai-task`, `gh-pr-context`, `pre/post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
+Edits normally use the native path-scoped `edit:` permission. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
 
 Rules:
 

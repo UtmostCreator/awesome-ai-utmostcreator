@@ -56,13 +56,13 @@
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 23,
+        "root:github-copilot-agent": 11,
         "root:github-copilot-instruction": 22,
-        "root:github-copilot-prompt": 18,
-        "root:github-copilot-skill": 18,
+        "root:github-copilot-prompt": 17,
+        "root:github-copilot-skill": 17,
         "root:opencode-agent": 12,
-        "root:opencode-command": 20,
-        "root:opencode-skill": 20,
+        "root:opencode-command": 19,
+        "root:opencode-skill": 19,
         "root:php-reference": 3,
         "root:root-doc": 19,
         "root:schema": 1,
@@ -1673,82 +1673,10 @@
         {
             "scope": "root",
             "type": "github-copilot-agent",
-            "name": "Agent Creator Runtime Guardian",
-            "path": ".github/agents/agent-creator-runtime-guardian.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Creator Semantic Verifier",
-            "path": ".github/agents/agent-creator-semantic-verifier.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Creator Static Validator",
-            "path": ".github/agents/agent-creator-static-validator.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Creator Supervisor",
-            "path": ".github/agents/agent-creator-supervisor.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Creator",
-            "path": ".github/agents/agent-creator.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
             "name": "Architect",
             "path": ".github/agents/architect.agent.md",
             "runtime": "github-copilot",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Architecture Plan",
-            "path": ".github/agents/architecture-plan.agent.md",
-            "runtime": "github-copilot",
-            "description": "Produce a focused implementation plan for a medium or large change in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Bootstrapper",
-            "path": ".github/agents/bootstrapper.agent.md",
-            "runtime": "github-copilot",
-            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Bugfix",
-            "path": ".github/agents/bugfix.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Build Config",
-            "path": ".github/agents/build-config.agent.md",
-            "runtime": "github-copilot",
-            "description": "Update build, packaging, or verification configuration in awesome-ai-utmostcreator"
         },
         {
             "scope": "root",
@@ -1761,26 +1689,10 @@
         {
             "scope": "root",
             "type": "github-copilot-agent",
-            "name": "Docs",
-            "path": ".github/agents/docs.agent.md",
-            "runtime": "github-copilot",
-            "description": "Update or align documentation after implementation changes in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
             "name": "Implementer",
             "path": ".github/agents/implementer.agent.md",
             "runtime": "github-copilot",
             "description": "Use when a bounded implementation slice is clear and focused verification should happen in this repository"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Infra Auditor",
-            "path": ".github/agents/infra-auditor.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator"
         },
         {
             "scope": "root",
@@ -1837,14 +1749,6 @@
             "path": ".github/agents/reviewer.agent.md",
             "runtime": "github-copilot",
             "description": "Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Upgrade",
-            "path": ".github/agents/upgrade.agent.md",
-            "runtime": "github-copilot",
-            "description": "Plan or apply dependency and platform upgrades carefully in awesome-ai-utmostcreator"
         },
         {
             "scope": "root",
@@ -2097,14 +2001,6 @@
         {
             "scope": "root",
             "type": "github-copilot-prompt",
-            "name": "post-install-setup",
-            "path": ".github/prompts/post-install-setup.prompt.md",
-            "runtime": "github-copilot",
-            "description": "Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-prompt",
             "name": "project-context",
             "path": ".github/prompts/project-context.prompt.md",
             "runtime": "github-copilot",
@@ -2237,14 +2133,6 @@
             "path": ".github/skills/plan-slice/SKILL.md",
             "runtime": "github-copilot",
             "description": "Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-skill",
-            "name": "post-install-setup",
-            "path": ".github/skills/post-install-setup/SKILL.md",
-            "runtime": "github-copilot",
-            "description": "Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first"
         },
         {
             "scope": "root",
@@ -2481,14 +2369,6 @@
         {
             "scope": "root",
             "type": "opencode-command",
-            "name": "post-install-setup",
-            "path": ".opencode/commands/post-install-setup.md",
-            "runtime": "opencode",
-            "description": "Guided post-install setup for installed projects"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-command",
             "name": "project-context",
             "path": ".opencode/commands/project-context.md",
             "runtime": "opencode",
@@ -2653,14 +2533,6 @@
             "path": ".opencode/skills/plan-slice/SKILL.md",
             "runtime": "opencode",
             "description": "Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-skill",
-            "name": "post-install-setup",
-            "path": ".opencode/skills/post-install-setup/SKILL.md",
-            "runtime": "opencode",
-            "description": "Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first"
         },
         {
             "scope": "root",

@@ -121,7 +121,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-install-coverage.sh` / `repo-tool-inventory.sh` / `repo-stats.sh` — to audit install coverage and adapter parity.
 - `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — history and current change; `ai-verify.sh` (`ask`) for spot verification.
 
-Denied: `gh-pr-context`, `ai-test-select`, `run-repo-tests`, and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Auditor flags drift; it does not mutate.
+Denied: `gh-pr-context`, `ai-test-select`, `run-repo-tests`, and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Auditor flags drift; it does not mutate.
 
 ## Canonical References
 

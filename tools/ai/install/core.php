@@ -1565,13 +1565,19 @@ function aiInstallerCopyDirAsSkillDirs(string $src, string $dest): void
     if ($srcReal !== false && $destReal !== false && $srcReal === $destReal) {
         return;
     }
-    if (file_exists($dest)) {
-        aiInstallerDeleteTree($dest);
-    }
+    // Do NOT delete-tree the whole destination. Sibling skill dirs in this same target
+    // (e.g. ai-search / ai-scripts shipped as standalone file items, or user-authored
+    // skills) must survive. A blind wipe here races those siblings — on --reinstall the
+    // sibling file items are SKIP_IDENTICAL_EXISTING and never re-written, so a wipe
+    // would permanently delete them. Replace only the skill dirs this source owns.
     aiInstallerMkdir($dest);
     foreach (glob($src . DIRECTORY_SEPARATOR . '*.md') ?: [] as $file) {
         $skillName = pathinfo($file, PATHINFO_FILENAME);
         $skillDir = $dest . DIRECTORY_SEPARATOR . $skillName;
+        if (is_dir($skillDir)) {
+            // Prune stale content inside this kit-owned skill before rewriting it.
+            aiInstallerDeleteTree($skillDir);
+        }
         aiInstallerMkdir($skillDir);
         // P3: hard GENERATED marker after the YAML frontmatter so the shipped
         // SKILL.md stays parseable. Idempotent.
