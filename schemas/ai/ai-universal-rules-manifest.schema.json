@@ -151,6 +151,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "max_bundle_lines": {
+          "type": "integer",
+          "minimum": 1
         }
       },
       "additionalProperties": false
