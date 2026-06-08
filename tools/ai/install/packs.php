@@ -185,7 +185,11 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md', 'target' => 'docs/ai/delivery/slice-card.template.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'optional-agents-opencode-pack' => [
-            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.opencode/agents-optional', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            // Render through the OpenCode agents renderer (not a raw dir copy) so it honors
+            // `hidden: true` and skips internal-only agents (e.g. ui-builder), matching the
+            // Copilot optional pack. A raw copy would ship hidden agents that must not leave
+            // the kit repo. Pre-existing hidden agents in the target are preserved.
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.opencode/agents-optional', 'install_type' => 'opencode-agents', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'optional-agents-copilot-pack' => [
             // Render optional agents through the Copilot renderer (VS Code-native frontmatter) and
