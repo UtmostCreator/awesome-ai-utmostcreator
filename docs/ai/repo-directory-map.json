@@ -2,6 +2,15 @@
   "schema_version": 1,
   "directories": [
     {
+      "path": ".ai",
+      "purpose": "Namespaced AI kit descriptors: project values, kit manifest, catalog, and install lockfiles.",
+      "designed_for": "Installer and upgrade flows that render managed files from kit state.",
+      "install_guide": "README.md",
+      "install_script": "none",
+      "ai_entrypoint": ".ai/project.yml",
+      "notes": "User-owned project.yml drives re-render; manifest and lock files track installed kit state."
+    },
+    {
       "path": ".",
       "purpose": "Repository root configuration and entrypoint files.",
       "designed_for": "Project-wide metadata and installer/runtime entry files.",
