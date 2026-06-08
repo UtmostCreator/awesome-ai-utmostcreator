@@ -36,9 +36,21 @@ if (!$check && !$write) {
     $check = true;
 }
 
-$snippetDir = $root . '/packages/ai-universal-rules/templates/snippets';
-$readonly = @file_get_contents($snippetDir . '/agent-tools-readonly.snippet.md');
-$execute = @file_get_contents($snippetDir . '/agent-tools-execute.snippet.md');
+$snippetDirs = [
+    $root . '/packages/ai-universal-rules/templates/snippets',
+    $root . '/docs/ai/snippets',
+];
+$readonly = false;
+$execute = false;
+foreach ($snippetDirs as $snippetDir) {
+    $readonlyCandidate = @file_get_contents($snippetDir . '/agent-tools-readonly.snippet.md');
+    $executeCandidate = @file_get_contents($snippetDir . '/agent-tools-execute.snippet.md');
+    if ($readonlyCandidate !== false && $executeCandidate !== false) {
+        $readonly = $readonlyCandidate;
+        $execute = $executeCandidate;
+        break;
+    }
+}
 if ($readonly === false || $execute === false) {
     fwrite(STDERR, "ERROR: missing agent tool snippet source\n");
     exit(1);

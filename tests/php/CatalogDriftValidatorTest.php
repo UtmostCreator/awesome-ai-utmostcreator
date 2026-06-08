@@ -69,4 +69,52 @@ final class CatalogDriftValidatorTest extends TestCase
         // Confirm restoration leaves the catalog clean again.
         $this->assertSame(0, $this->runValidator()['exit']);
     }
+
+    public function testValidatorUsesInstalledPackageCatalogWhenSourcePackageIsAbsent(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'catalog_drift_installed_' . uniqid('', true);
+        mkdir($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'package', 0700, true);
+
+        try {
+            \aiInstallerWriteCatalogDocs($target);
+
+            $this->assertFileDoesNotExist($target . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'INSTALL-CATALOG.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'package' . DIRECTORY_SEPARATOR . 'INSTALL-CATALOG.md');
+
+            $cmd = escapeshellarg((string) PHP_BINARY) . ' ' . escapeshellarg(self::$validator) . ' --root=' . escapeshellarg($target);
+            $descriptors = [1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
+            $process = proc_open($cmd, $descriptors, $pipes, self::$repoRoot);
+            $this->assertIsResource($process);
+            $stdout = (string) stream_get_contents($pipes[1]);
+            $stderr = (string) stream_get_contents($pipes[2]);
+            fclose($pipes[1]);
+            fclose($pipes[2]);
+            $exit = proc_close($process);
+
+            $this->assertSame(0, $exit, $stdout . $stderr);
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
+    private function removeTree(string $path): void
+    {
+        if (!is_dir($path)) {
+            return;
+        }
+        $it = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        foreach ($it as $file) {
+            if ($file->isDir()) {
+                rmdir($file->getPathname());
+            } else {
+                unlink($file->getPathname());
+            }
+        }
+        rmdir($path);
+    }
 }

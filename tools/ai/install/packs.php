@@ -8,7 +8,7 @@ function aiInstallerPackRegistry(): array
 {
     return [
         'setup-docs' => [
-            ['type' => 'file', 'source' => 'PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/agents.md', 'target' => 'docs/ai/agents.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/agent-script-access.md', 'target' => 'docs/ai/agent-script-access.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/adapter-contract.md', 'target' => 'docs/ai/adapter-contract.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -35,6 +35,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/security.md', 'target' => 'docs/ai/security.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/catalog.md', 'target' => 'docs/ai/catalog.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'llms.txt', 'target' => 'llms.txt', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'tools/ai/verify-install-placeholders.php', 'target' => 'tools/ai/verify-install-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             // SETUP.md and package-boundaries.md intentionally excluded: source-repo-specific generated/meta files
             ['type' => 'file', 'source' => 'docs/ai/repo-documentation-generation.md', 'target' => 'docs/ai/repo-documentation-generation.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/capabilities/README.md', 'target' => 'docs/ai/capabilities/README.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],

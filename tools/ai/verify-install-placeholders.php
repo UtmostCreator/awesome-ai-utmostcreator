@@ -53,7 +53,7 @@ if ($target === false) {
 
 $dictionary = loadDictionary($kitRoot);
 if ($dictionary === null) {
-    emitError($emitJson, 'dictionary_missing', 'packages/ai-universal-rules/PLACEHOLDERS.md not found in kit root');
+    emitError($emitJson, 'dictionary_missing', 'PLACEHOLDERS.md not found in kit root');
     exit(2);
 }
 
@@ -135,18 +135,30 @@ foreach ($unresolvedRequired as $finding) {
     fwrite(STDERR, "  - {$finding['token']} in {$finding['file']}:{$finding['line']}\n");
 }
 fwrite(STDERR, "Install is not complete. Resolve every required placeholder before trusting AI write-capable flows.\n");
-fwrite(STDERR, "See packages/ai-universal-rules/PLACEHOLDERS.md for substitution guidance.\n");
+fwrite(STDERR, "See PLACEHOLDERS.md for substitution guidance.\n");
 exit(1);
 
 /**
- * Load the placeholder dictionary from packages/ai-universal-rules/PLACEHOLDERS.md.
+ * Load the placeholder dictionary from the source package, or from root PLACEHOLDERS.md in installed projects.
  *
  * @return array<int, string>|null Sorted token list, or null if not found.
  */
 function loadDictionary(string $kitRoot): ?array
 {
-    $path = $kitRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'PLACEHOLDERS.md';
-    if (!is_file($path)) {
+    $paths = [
+        $kitRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'PLACEHOLDERS.md',
+        $kitRoot . DIRECTORY_SEPARATOR . 'PLACEHOLDERS.md',
+    ];
+
+    $path = null;
+    foreach ($paths as $candidate) {
+        if (is_file($candidate)) {
+            $path = $candidate;
+            break;
+        }
+    }
+
+    if ($path === null) {
         return null;
     }
     $content = (string) file_get_contents($path);
