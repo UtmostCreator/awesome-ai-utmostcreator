@@ -207,6 +207,7 @@ foreach ($scripts as $id => $script) {
 validateScriptRegistryJsonParity($root, $scripts, $errors);
 validateAdapterScriptReferences($root, $scripts, $errors);
 validateScriptsPackCoverage($packs, $scripts, $errors);
+validateScriptsReferenceCoverage($root, $scripts, $errors);
 validateShippedDocReferenceIntegrity($root, $packTargets, $packDirTargets, $errors);
 
 $opencodeAgentNames = collectAgentNames($root . '/packages/ai-universal-rules/templates/core/agents', '.md');
@@ -589,6 +590,37 @@ function validateScriptRegistryJsonParity(string $root, array $scripts, array &$
     foreach (array_keys($jsonScripts) as $id) {
         if (!array_key_exists((string) $id, $scripts)) {
             $errors[] = "script registry JSON has unknown script id {$id}";
+        }
+    }
+}
+
+/**
+ * Every registered script must be documented in docs/ai/scripts-reference.md so Copilot and
+ * OpenCode agents always have a when/why/how surface for each script. This prose surface is the
+ * only one not already covered by JSON/pack parity checks, so without this guard it can silently
+ * drift to a partial list. All registry ids are required, including source_repo_only scripts,
+ * because the reference doc documents the full installed + source surface.
+ */
+function validateScriptsReferenceCoverage(string $root, array $scripts, array &$errors): void
+{
+    $referencePath = $root . '/docs/ai/scripts-reference.md';
+    if (!is_file($referencePath)) {
+        $errors[] = 'missing scripts reference doc: docs/ai/scripts-reference.md';
+        return;
+    }
+
+    $content = (string) file_get_contents($referencePath);
+
+    foreach ($scripts as $id => $entry) {
+        $basename = basename((string) ($entry['installed_path'] ?? ''));
+        if ($basename === '' || !str_ends_with($basename, '.sh')) {
+            continue;
+        }
+        // Match the exact basename token so e.g. repomix-context.sh cannot satisfy
+        // a requirement for run-repomix-context.sh.
+        $pattern = '/(^|[^A-Za-z0-9._\/-])' . preg_quote($basename, '/') . '($|[^A-Za-z0-9._-])/m';
+        if (preg_match($pattern, $content) !== 1) {
+            $errors[] = "scripts reference doc docs/ai/scripts-reference.md is missing script {$basename} (id {$id}) — add a row to docs/ai/scripts-reference.md";
         }
     }
 }
