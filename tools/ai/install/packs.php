@@ -189,7 +189,7 @@ function aiInstallerPackRegistry(): array
             // `hidden: true` and skips internal-only agents (e.g. ui-builder), matching the
             // Copilot optional pack. A raw copy would ship hidden agents that must not leave
             // the kit repo. Pre-existing hidden agents in the target are preserved.
-            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.opencode/agents-optional', 'install_type' => 'opencode-agents', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.opencode/agents-optional', 'install_type' => 'opencode-agents', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
         ],
         'optional-agents-copilot-pack' => [
             // Render optional agents through the Copilot renderer (VS Code-native frontmatter) and
