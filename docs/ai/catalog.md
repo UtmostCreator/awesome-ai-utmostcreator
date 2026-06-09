@@ -24,7 +24,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / github-copilot-instruction-template` - 22
 - `package / opencode-command-template` - 4
 - `package / operations-doc` - 6
-- `package / optional-template` - 16
+- `package / optional-template` - 15
 - `package / package-capability` - 42
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
@@ -333,7 +333,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in <PROJECT_NAME>|
 |`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in <PROJECT_NAME>|
 |`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>|
-|`optional-template`|Mentor|`packages/ai-universal-rules/templates/optional/agents/mentor.md`|Use to coach the human through a task in <PROJECT_NAME> by applying Mentor Mode instead of handing over a full solution by default|
 |`optional-template`|ui-builder|`packages/ai-universal-rules/templates/optional/agents/ui-builder.md`|UI builder for <PROJECT_NAME>. Builds UI changes that follow existing product patterns and accessibility expectations.|
 |`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades carefully in <PROJECT_NAME>|
 |`optional-template`|Optional Delivery Pack|`packages/ai-universal-rules/templates/optional/delivery/README.md`|Use this pack when you want a lightweight slice card for non-trivial work.|
