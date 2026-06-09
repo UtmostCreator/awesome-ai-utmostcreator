@@ -223,6 +223,51 @@ final class OwnershipClassesTest extends TestCase
         }
     }
 
+    public function testBuildManifestBackfillsOwnershipForLegacySkippedEntries(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_manifest_backfill_' . uniqid('', true);
+        mkdir($target, 0700, true);
+        file_put_contents($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json', json_encode([
+            'schema_version' => 1,
+            'installer_version' => '0.2.0',
+            'profile' => 'dual',
+            'packs' => ['scripts-pack'],
+            'files' => [
+                'docs/ai/validation.md' => [
+                    'managed' => true,
+                    'merge_strategy' => 'skip-if-exists',
+                    'installed_hash' => 'sha256:legacy',
+                    'source_hash' => 'sha256:legacy-source',
+                ],
+            ],
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+
+        try {
+            $manifest = aiInstallerBuildManifest([
+                'sourceRoot' => self::$repoRoot,
+                'targetRoot' => $target,
+                'profile' => 'dual',
+            ], ['scripts-pack'], [[
+                'type' => 'file',
+                'target' => 'docs/ai/validation.md',
+                'source' => 'packages/ai-universal-rules/templates/docs/ai/validation.md',
+                'pack' => 'scripts-pack',
+                'merge_strategy' => 'skip-if-exists',
+                'action' => 'SKIP_EXISTING_UNMANAGED',
+            ]]);
+
+            $this->assertArrayHasKey('docs/ai/validation.md', $manifest['files']);
+            $meta = $manifest['files']['docs/ai/validation.md'];
+            $this->assertSame('template', $meta['ownership'] ?? null, 'legacy skipped entries should be normalized to a valid ownership class');
+            $this->assertSame('scripts-pack', $meta['pack'] ?? null);
+            $this->assertArrayHasKey('runtimes', $meta);
+            $this->assertIsArray($meta['runtimes']);
+        } finally {
+            @unlink($target . DIRECTORY_SEPARATOR . '.ai-install-manifest.json');
+            @rmdir($target);
+        }
+    }
+
     public function testMigrationsAreDiscoveredInNaturalOrder(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/migrations.php';
