@@ -112,7 +112,6 @@
         "templates/instructions/testing.instructions.md": "sha256:6d5cb599860955840bdc9f02db957834395089326dac6347d82f508f716628f9",
         "templates/instructions/tools.instructions.md": "sha256:116ad252ed2ea51e8e0ad3dd53a5a66a9327f4a5eb4be9e654474f67279b287c",
         "templates/internal/agents/ai-maintenance.md": "sha256:f703fb1f8e6b9f897d3fc978e52e1c60ce299276244788f3d1729cac1ff8f9ee",
-        "templates/optional/agents/agent-builder.md": "sha256:bcc1f15d676c087a818a87d92190cf546482b797bac51c6c9795fabeb06d487c",
         "templates/optional/agents/agent-creator-runtime-guardian.md": "sha256:b85e11e259169d1f2f8897876c87695741664913a49cdca19b45975659162d26",
         "templates/optional/agents/agent-creator-semantic-verifier.md": "sha256:fae05116eaaa74500c07745eedd3edc8735bf585b3501bffe30aeaa84d350b20",
         "templates/optional/agents/agent-creator-static-validator.md": "sha256:0701b8466b69988abb41b82a926e216c15d8ddd4e60872fc4dbf5dc99b73363c",
