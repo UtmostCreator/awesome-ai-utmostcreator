@@ -204,7 +204,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-verify.sh` (`ask`; scoped `AI_VERIFY_SCOPE=changed` variant `allow`), `ai-test-select.sh`, `run-repo-tests.sh` — to validate the install.
 - repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
 
-Denied: `gh-pr-context` and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Use the kit's own install tooling, not raw mutators.
+Denied: `gh-pr-context` and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Use the kit's own install tooling, not raw mutators.
 
 ## Read First
 

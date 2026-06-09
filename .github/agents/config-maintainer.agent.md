@@ -88,6 +88,15 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `shellcheck *`
 - `php -l *`
 - `php tools/ai/validate-*.php *`
+- `php tools/ai/ai.php placeholders*`
+- `php tools/ai/ai.php verify*`
+- `php tools/ai/ai.php preflight*`
+- `php tools/ai/ai.php list`
+- `php tools/ai/ai.php next*`
+- `php tools/ai/ai.php freshness*`
+- `php tools/ai/ai.php packs*`
+- `php tools/ai/ai.php env-check*`
+- `php tools/ai/ai.php install-docs --check`
 - `scc *`
 - `tokei *`
 - `ast-grep *`
@@ -101,6 +110,9 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `shfmt -d *`
 - `semgrep *`
 - `bash scripts/ai/repomix-freshness.sh *`
+- `ls -1 scripts/ai/*.sh | sort`
+- `git status --short; echo "---BRANCH---"; git branch --show-current`
+- `git status --short && git branch --show-current`
 
 Do not run arbitrary shell commands. Do not run commands not in this list.
 Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
@@ -138,7 +150,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the path-scoped `edit:` permission is insufficient; expect a tracked, reversible edit.
 - `session-checkpoint.sh` (`ask`) — for continuity across a multi-file config pass.
 
-Edits normally go through the native path-scoped `edit:` permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `scripts/ai/pre-tool-use.sh`, `scripts/ai/post-tool-use.sh`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
+Edits normally go through the native path-scoped `edit:` permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
 
 ## Canonical References
 

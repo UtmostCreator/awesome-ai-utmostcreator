@@ -85,6 +85,15 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `git stash show*`
 - `git branch*`
 - `git rev-parse*`
+- `php tools/ai/ai.php placeholders*`
+- `php tools/ai/ai.php verify*`
+- `php tools/ai/ai.php preflight*`
+- `php tools/ai/ai.php list`
+- `php tools/ai/ai.php next*`
+- `php tools/ai/ai.php freshness*`
+- `php tools/ai/ai.php packs*`
+- `php tools/ai/ai.php env-check*`
+- `php tools/ai/ai.php install-docs --check`
 - `scc *`
 - `tokei *`
 - `ast-grep *`
@@ -98,6 +107,9 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `shfmt -d *`
 - `shellcheck *`
 - `bash scripts/ai/repomix-freshness.sh *`
+- `ls -1 scripts/ai/*.sh | sort`
+- `git status --short; echo "---BRANCH---"; git branch --show-current`
+- `git status --short && git branch --show-current`
 
 Do not run arbitrary shell commands. Do not run commands not in this list.
 Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
@@ -115,7 +127,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-verify.sh` (`ask`; scoped `AI_VERIFY_SCOPE=changed` variant `allow`), `ai-test-select.sh`, `run-repo-tests.sh` — to validate the install.
 - repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
 
-Denied: `gh-pr-context` and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Use the kit's own install tooling, not raw mutators.
+Denied: `gh-pr-context` and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Use the kit's own install tooling, not raw mutators.
 
 ## Read First
 
@@ -145,7 +157,7 @@ Complete target-repository post-install setup by scanning the existing repo, res
 
 - Do not bulk-fill, auto-default, or leave any placeholder at a generic example value. Each token must hold a real, project-specific value.
 - Resolve each placeholder from real repository evidence, then review and approve ("tick") every placeholder line individually against the actual project — line by line, not in bulk.
-- Gather project facts by delegation, not guessing. Pick the most suitable subagent for the need and launch it via the Copilot agent/handoff mechanism with explicit, bounded instructions:
+- Gather project facts by delegation, not guessing. Pick the most suitable subagent for the need and launch it via the Task tool with explicit, bounded instructions:
   - read-only discovery (stack, runtime, active paths, entrypoints, test/build/lint commands): a research/explore agent.
   - applying resolved values across templates and docs: the `implementer` agent, one bounded instruction per placeholder group.
 - Keep a per-token approval ledger keyed to `PLACEHOLDERS.md`. As each token is resolved and approved, update `PLACEHOLDERS.md` and every occurrence in the installed files, and mark that line approved.
@@ -170,8 +182,8 @@ Gate proof (both must pass before the gate is cleared): `php tools/ai/ai.php pla
 
 1. Inspect `git status --short`, `.ai-install-manifest.json`, `docs/ai/POST-INSTALL.md`, `README.md`, `AGENTS.md`, and read `PLACEHOLDERS.md` in full.
 2. Run the placeholder scan (`php tools/ai/ai.php placeholders --fail`) and build a per-token approval ledger from `PLACEHOLDERS.md` covering every token still present in the installed files.
-3. Gather project evidence by delegation: launch the most suitable read-only subagent (research/explore) to map stack, runtime, active paths, entrypoints, and verify/build/test/lint commands. Do not guess values.
-4. Resolve placeholders one line at a time. For applying values across many files, delegate bounded edits to the `implementer` agent with explicit per-group instructions. Update `PLACEHOLDERS.md` and every occurrence, and mark each line approved only after confirming the value against the repo.
+3. Gather project evidence by delegation: launch the most suitable read-only subagent (research/explore) via the Task tool to map stack, runtime, active paths, entrypoints, and verify/build/test/lint commands. Do not guess values.
+4. Resolve placeholders one line at a time. For applying values across many files, delegate bounded edits to the `implementer` subagent with explicit per-group instructions. Update `PLACEHOLDERS.md` and every occurrence, and mark each line approved only after confirming the value against the repo.
 5. Also update `docs/ai/project-context.md`, `docs/ai/source-of-truth.md`, `docs/ai/workflow.md`, `docs/ai/shared/**`, `README.md`, `AGENTS.md`, and adapter instructions/prompts/agents where the install docs require target-specific ownership or interaction details.
 6. Clear the Placeholder Resolution Gate: confirm `php tools/ai/ai.php placeholders --fail` and `php tools/ai/verify-install-placeholders.php` both report zero unresolved required placeholders. Stay blocked while any line is unresolved or unapproved.
 7. Only after the gate is cleared, run the documented post-install verification, then report results and whether it is safe to retire this agent.

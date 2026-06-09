@@ -58,9 +58,9 @@
         "root:generator": 1,
         "root:github-copilot-agent": 11,
         "root:github-copilot-instruction": 22,
-        "root:github-copilot-prompt": 17,
-        "root:github-copilot-skill": 17,
-        "root:opencode-agent": 13,
+        "root:github-copilot-prompt": 18,
+        "root:github-copilot-skill": 18,
+        "root:opencode-agent": 12,
         "root:opencode-command": 19,
         "root:opencode-skill": 19,
         "root:php-reference": 3,
@@ -2001,6 +2001,14 @@
         {
             "scope": "root",
             "type": "github-copilot-prompt",
+            "name": "post-install-setup",
+            "path": ".github/prompts/post-install-setup.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
             "name": "project-context",
             "path": ".github/prompts/project-context.prompt.md",
             "runtime": "github-copilot",
@@ -2133,6 +2141,14 @@
             "path": ".github/skills/plan-slice/SKILL.md",
             "runtime": "github-copilot",
             "description": "Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "post-install-setup",
+            "path": ".github/skills/post-install-setup/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first"
         },
         {
             "scope": "root",
@@ -2293,14 +2309,6 @@
             "path": ".opencode/agents/reviewer.md",
             "runtime": "opencode",
             "description": "Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "super-implementer",
-            "path": ".opencode/agents/super-implementer.md",
-            "runtime": "opencode",
-            "description": "Use when a bounded implementation slice is clear and focused verification should happen in this repository"
         },
         {
             "scope": "root",

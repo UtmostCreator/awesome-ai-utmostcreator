@@ -771,6 +771,27 @@ When you change templates, config, or cataloged assets, regenerate in this order
 | 4   | `bash scripts/ai/repomix-context-tree.sh all .`       | `.repomix-context/tree-context/*`                |
 | 5   | `bash scripts/ai/repo-tool-inventory.sh`              | `docs/ai/repo-required-tools.md`                 |
 
+For this source repository, also run the package lock refresh whenever a
+change intentionally edits shipped AI-kit templates, source package docs,
+agent/skill/command templates, or snippets under `packages/ai-universal-rules/`:
+
+```bash
+php tools/ai/ai.php package-lock --update
+php tools/ai/ai.php package-verify
+```
+
+Run the full install governance apply flow when a change intentionally modifies
+installed surfaces, pack membership, adapter templates, install manifests, or
+when verification reports a missing managed install path such as
+`docs/ai/package/`:
+
+```bash
+php tools/ai/full-install-validation.php --profile=full-governance --apply --include-deep-verify --include-phpunit --timeout-sec=600 --idle-timeout-sec=180 --heartbeat-sec=30 --clear-cancel
+```
+
+That command creates a backup before applying managed-file refreshes and writes
+the evidence report to `docs/ai/generated/full-install-validation.md`.
+
 If `--check` shows drift:
 
 ```bash
@@ -793,6 +814,19 @@ Both call the same underlying scripts:
 
 - `scripts/hooks/pre-commit.sh` — checks for merge conflict markers, runs `php -l` on staged PHP files
 - `scripts/hooks/commit-msg.sh` — validates commit message format
+
+In this source repository only, `scripts/hooks/pre-commit.sh` also auto-refreshes
+AI-kit authoring artifacts when relevant source-repo files are staged:
+
+- `php tools/ai/ai.php package-lock --update`
+- `php tools/ai/generate-ai-catalog.php`
+- `php tools/ai/ai.php package-verify`
+- `php tools/ai/generate-ai-catalog.php --check`
+
+The hook stages the refreshed package lock and catalog outputs so the commit can
+include the generated artifacts. Installed target repositories do not have the
+`packages/ai-universal-rules/` source tree, so this auto-generation path is
+skipped there.
 
 **Recommendation**: Use Lefthook (`brew install lefthook && lefthook install`).
 

@@ -2,7 +2,7 @@
     "schema_version": 1,
     "installer_version": "0.2.0",
     "installed_at": "2026-06-01T01:23:06+00:00",
-    "updated_at": "2026-06-08T18:36:36+00:00",
+    "updated_at": "2026-06-09T18:22:40+00:00",
     "profile": "full-governance",
     "package": {
         "name": "ai-universal-rules",
@@ -140,8 +140,8 @@
         "scripts/hooks/pre-commit.sh": {
             "pack": "hooks-pack",
             "source": "scripts/hooks/pre-commit.sh",
-            "source_hash": "sha256:6703186265aa6d12caa02ddab572dc087fe42e4c0d54d4bdd7d9bb2ce4eb57eb",
-            "installed_hash": "sha256:6703186265aa6d12caa02ddab572dc087fe42e4c0d54d4bdd7d9bb2ce4eb57eb",
+            "source_hash": "sha256:28f41429f8eaa58986f29cf45753ea4618bfe332efde4250247044c4d4b7154d",
+            "installed_hash": "sha256:28f41429f8eaa58986f29cf45753ea4618bfe332efde4250247044c4d4b7154d",
             "managed": true,
             "merge_strategy": "skip-if-exists",
             "required": true,
@@ -196,8 +196,8 @@
         "docs/ai/validation.md": {
             "pack": "docs-reference-pack",
             "source": "docs/ai/validation.md",
-            "source_hash": "sha256:5d1ddbe83043e2added5a9ebb08d6ded688c44237ed779be2403e21c747fe8c4",
-            "installed_hash": "sha256:5d1ddbe83043e2added5a9ebb08d6ded688c44237ed779be2403e21c747fe8c4",
+            "source_hash": "sha256:be81f9c7a114386f1e4775a5de0789559c0a5192f3643abeea96a1272aa81262",
+            "installed_hash": "sha256:be81f9c7a114386f1e4775a5de0789559c0a5192f3643abeea96a1272aa81262",
             "managed": true,
             "merge_strategy": "skip-if-exists",
             "required": true,
@@ -252,8 +252,8 @@
         "docs/ai/context-packing.md": {
             "pack": "docs-reference-pack",
             "source": "docs/ai/context-packing.md",
-            "source_hash": "sha256:e0ee4da0c7615ba321dc05595a05f57da36ac827507c2fd3d00707bc5c69f905",
-            "installed_hash": "sha256:e0ee4da0c7615ba321dc05595a05f57da36ac827507c2fd3d00707bc5c69f905",
+            "source_hash": "sha256:7dccbe9145ab2b2f8dc4f1ed75713f2d12f577f19395a1d62777ee7e4218bf5b",
+            "installed_hash": "sha256:7dccbe9145ab2b2f8dc4f1ed75713f2d12f577f19395a1d62777ee7e4218bf5b",
             "managed": true,
             "merge_strategy": "skip-if-exists",
             "required": true,
@@ -266,8 +266,8 @@
         "docs/ai/scripts-reference.md": {
             "pack": "docs-reference-pack",
             "source": "docs/ai/scripts-reference.md",
-            "source_hash": "sha256:3108405d2885c25ee1afbc2b7e4beb685d299fb3f3cfea4c61d6c4856e2ca53d",
-            "installed_hash": "sha256:3108405d2885c25ee1afbc2b7e4beb685d299fb3f3cfea4c61d6c4856e2ca53d",
+            "source_hash": "sha256:0f5244c7bf7db5a9be3f7ff019cd07c6c1d0416a519efa768bf852360dfe5f35",
+            "installed_hash": "sha256:0f5244c7bf7db5a9be3f7ff019cd07c6c1d0416a519efa768bf852360dfe5f35",
             "managed": true,
             "merge_strategy": "skip-if-exists",
             "required": true,
@@ -322,12 +322,12 @@
         ".opencode/agents-optional": {
             "pack": "optional-agents-opencode-pack",
             "source": "packages/ai-universal-rules/templates/optional/agents",
-            "source_hash": "sha256:3f77267c2cd982d588007956d87dc86fd08f43718676b240ab042b43c0a2e699",
-            "installed_hash": "sha256:38601dfaa5551d42267affcdb655605d6aedb216a19f0511af50a7e2c08adc4f",
+            "source_hash": "sha256:cf4aad335fb9914b0dd47e5d1ee6919947045a28d5d165122002b0bcb7e4a927",
+            "installed_hash": "sha256:086b294490d899ba34baf8ea7b742ac6a7e53d5c4fc3c0407531e6fa083e755b",
             "managed": true,
-            "merge_strategy": "skip-if-exists",
+            "merge_strategy": "replace",
             "required": true,
-            "ownership": "template",
+            "ownership": "owned",
             "component": "optional-agents-opencode-pack",
             "runtimes": [
                 "opencode"
@@ -336,8 +336,8 @@
         ".github/agents": {
             "pack": "adapter-copilot",
             "source": "packages/ai-universal-rules/templates/core/agents",
-            "source_hash": "sha256:d433940812c2cfbb37a4d5d19132c363e23d0f68209a65aec2d8accc525374d9",
-            "installed_hash": "sha256:ace43f5908f83b3110ed098378c56085d762a682f8f21c3fc97498ceab216816",
+            "source_hash": "sha256:b227e1b60aebf563623737d65d55a247c87fcf471da9bbb8b9e66cf275c9ce50",
+            "installed_hash": "sha256:435b35dd510a21729b8afaf28fa42e689b4b740cef55101777c100bbecd81248",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -378,8 +378,8 @@
         "docs/ai/capabilities/service-boundary-patterns": {
             "pack": "service-boundary-pack",
             "source": "docs/ai/capabilities/service-boundary-patterns",
-            "source_hash": "sha256:184b26b34365a4288889381db79b6e6dcdf349ba2f1965e4d385256887b87268",
-            "installed_hash": "sha256:184b26b34365a4288889381db79b6e6dcdf349ba2f1965e4d385256887b87268",
+            "source_hash": "sha256:1111bdbc06c4fc11dd8a4455f6740cbc05fa2c26bf1fb071525854283483f7d6",
+            "installed_hash": "sha256:1111bdbc06c4fc11dd8a4455f6740cbc05fa2c26bf1fb071525854283483f7d6",
             "managed": true,
             "merge_strategy": "skip-if-exists",
             "required": true,
@@ -504,8 +504,8 @@
         ".ai/package-lock.ai.json": {
             "pack": "target-tools-pack",
             "source": "packages/ai-universal-rules/package-lock.ai.json",
-            "source_hash": "sha256:834c0d4bce6f3d5638fa4aab10b1cc6cbef00fdecee0b4f508105130047dda0c",
-            "installed_hash": "sha256:834c0d4bce6f3d5638fa4aab10b1cc6cbef00fdecee0b4f508105130047dda0c",
+            "source_hash": "sha256:0c5e3340835ee6156d4a2d52fcd57f60768f4e0eb66858766cca1e9f75cc5599",
+            "installed_hash": "sha256:0c5e3340835ee6156d4a2d52fcd57f60768f4e0eb66858766cca1e9f75cc5599",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -518,8 +518,8 @@
         ".ai/catalog.json": {
             "pack": "target-tools-pack",
             "source": "packages/ai-universal-rules/catalog.json",
-            "source_hash": "sha256:0968d16bdf11c628eef20a4e8a53f85b1facff9f5d4999e7d6fc69828d8ace2c",
-            "installed_hash": "sha256:0968d16bdf11c628eef20a4e8a53f85b1facff9f5d4999e7d6fc69828d8ace2c",
+            "source_hash": "sha256:e93b5948d71dbfa6669302a9087ed1dac749cc150653bcd4c26eabe7136d600f",
+            "installed_hash": "sha256:e93b5948d71dbfa6669302a9087ed1dac749cc150653bcd4c26eabe7136d600f",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -532,8 +532,8 @@
         "docs/ai/package": {
             "pack": "target-tools-pack",
             "source": "packages/ai-universal-rules/docs",
-            "source_hash": "sha256:9af6e0ecd0947dc175e3adc99e00fdf3b46182deeb086a99203f37c4f64f525a",
-            "installed_hash": "sha256:dee8922a2ef923099ce18b26c7806950d94d9576b3d751c8dade094af52c8d97",
+            "source_hash": "sha256:cb60a3c7980e2f7070a5880d9da6e75120c03ce9f6869c96892cc810b9792e0f",
+            "installed_hash": "sha256:afd9c80013046f903ca5139a7a8d7f899e3784770a4df9b1e37ca1be50c305aa",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -546,8 +546,8 @@
         "policies": {
             "pack": "target-tools-pack",
             "source": "packages/ai-universal-rules/policies",
-            "source_hash": "sha256:4d08b7044240ef98f53d49437ba4fce79a9f28280824950280e24da1e61db49a",
-            "installed_hash": "sha256:4d08b7044240ef98f53d49437ba4fce79a9f28280824950280e24da1e61db49a",
+            "source_hash": "sha256:4d68f4232e5dec12d1ebe4ae3e6ba6b5486fd67b3d0fce886128a0893e5ff02f",
+            "installed_hash": "sha256:4d68f4232e5dec12d1ebe4ae3e6ba6b5486fd67b3d0fce886128a0893e5ff02f",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -557,11 +557,347 @@
                 "both"
             ]
         },
-        "tools/ai/install": {
+        "tools/ai/install/backup.php": {
             "pack": "target-tools-pack",
-            "source": "tools/ai/install",
-            "source_hash": "sha256:49843c54e3aa3ed78c62be29be5a8dc230c79c3bbed097d11846d89c3cea07ec",
-            "installed_hash": "sha256:49843c54e3aa3ed78c62be29be5a8dc230c79c3bbed097d11846d89c3cea07ec",
+            "source": "tools/ai/install/backup.php",
+            "source_hash": "sha256:87539092d2626824f85d1e7d77650c1bd422466c3d384847979eba3615680760",
+            "installed_hash": "sha256:87539092d2626824f85d1e7d77650c1bd422466c3d384847979eba3615680760",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/base.sh": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/base.sh",
+            "source_hash": "sha256:c8097282be6ed1573cc6e8d48f00c79c04b26fa9806ebc9b7253677b38420f3b",
+            "installed_hash": "sha256:c8097282be6ed1573cc6e8d48f00c79c04b26fa9806ebc9b7253677b38420f3b",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/config.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/config.php",
+            "source_hash": "sha256:37ec30e6a12a42c8024267d3c453459cf93b20d9131f230dc92b0aa35a3199d2",
+            "installed_hash": "sha256:37ec30e6a12a42c8024267d3c453459cf93b20d9131f230dc92b0aa35a3199d2",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/copilot-agent-renderer.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/copilot-agent-renderer.php",
+            "source_hash": "sha256:75815d33a81daf7a4a85bb4744254291503f6a82d9c5209ad3fba2501262264e",
+            "installed_hash": "sha256:75815d33a81daf7a4a85bb4744254291503f6a82d9c5209ad3fba2501262264e",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/copilot-agent-tool-registry.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/copilot-agent-tool-registry.php",
+            "source_hash": "sha256:63cf4de0876f876f93715e86e91c04802851b9a03a29d92371566f324cd40e9d",
+            "installed_hash": "sha256:63cf4de0876f876f93715e86e91c04802851b9a03a29d92371566f324cd40e9d",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/core.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/core.php",
+            "source_hash": "sha256:ed9a0c8487e5632a192f5df91e82c8dc65af0807ac1a85ebe4514bbcf672306d",
+            "installed_hash": "sha256:ed9a0c8487e5632a192f5df91e82c8dc65af0807ac1a85ebe4514bbcf672306d",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/docs.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/docs.php",
+            "source_hash": "sha256:c9b72c9b3125d459fdad6ae94e3213eefb776c3b8bde4da38d1e2533931ea642",
+            "installed_hash": "sha256:c9b72c9b3125d459fdad6ae94e3213eefb776c3b8bde4da38d1e2533931ea642",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/generated-header.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/generated-header.php",
+            "source_hash": "sha256:d2934a2eeafa3b1c2876ffb63d96b556730fe38c93835aaec3e34a8a3c6e6a0a",
+            "installed_hash": "sha256:d2934a2eeafa3b1c2876ffb63d96b556730fe38c93835aaec3e34a8a3c6e6a0a",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/lib.sh": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/lib.sh",
+            "source_hash": "sha256:1ba165d151ffcca3957fd9187eb7e9fda4a2af73e0f150c603687e5064f430be",
+            "installed_hash": "sha256:1ba165d151ffcca3957fd9187eb7e9fda4a2af73e0f150c603687e5064f430be",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/manifest.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/manifest.php",
+            "source_hash": "sha256:a3851ce67a57c4b7ee931d3950c21101b108515c0a04d260482ede5f496e3616",
+            "installed_hash": "sha256:a3851ce67a57c4b7ee931d3950c21101b108515c0a04d260482ede5f496e3616",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/markers.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/markers.php",
+            "source_hash": "sha256:5b350f5bfc91a42e4317826a28a6d73f646fc896ad80a3f9627592275ab10062",
+            "installed_hash": "sha256:5b350f5bfc91a42e4317826a28a6d73f646fc896ad80a3f9627592275ab10062",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/migrations.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/migrations.php",
+            "source_hash": "sha256:1762aa49fe9501f5c429540212dbbdcaf95e2ea911516c34c4a9b1ce262496c5",
+            "installed_hash": "sha256:1762aa49fe9501f5c429540212dbbdcaf95e2ea911516c34c4a9b1ce262496c5",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/packs.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/packs.php",
+            "source_hash": "sha256:ce8be253f9cf41177e19ae231ede4a6f5d2238251982041e65cbbbc37e8a6e21",
+            "installed_hash": "sha256:ce8be253f9cf41177e19ae231ede4a6f5d2238251982041e65cbbbc37e8a6e21",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/planner.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/planner.php",
+            "source_hash": "sha256:068659925c9612127c379159d7d941010c387121a4b315f114b9336a9f9228b2",
+            "installed_hash": "sha256:068659925c9612127c379159d7d941010c387121a4b315f114b9336a9f9228b2",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/profiles.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/profiles.php",
+            "source_hash": "sha256:75cd4f7066613d87087514dab2a31529b75860326b3785ace22e1938840e5088",
+            "installed_hash": "sha256:75cd4f7066613d87087514dab2a31529b75860326b3785ace22e1938840e5088",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/project-yaml.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/project-yaml.php",
+            "source_hash": "sha256:3fab8b2d1f20f7d3e23529ce2917ff1ee286755f184a7b705f1a5b7fab24b090",
+            "installed_hash": "sha256:3fab8b2d1f20f7d3e23529ce2917ff1ee286755f184a7b705f1a5b7fab24b090",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/runtime-copilot.sh": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/runtime-copilot.sh",
+            "source_hash": "sha256:9d110ed7db8ac42d663b85471aef4b05bd5553bd6f9cdf946d0546acf632795d",
+            "installed_hash": "sha256:9d110ed7db8ac42d663b85471aef4b05bd5553bd6f9cdf946d0546acf632795d",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/runtime-opencode.sh": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/runtime-opencode.sh",
+            "source_hash": "sha256:e33510c6ad708b0c88a0bb1385c3b1a8cf3a11c3935a3f50582c0c41bfa21a26",
+            "installed_hash": "sha256:e33510c6ad708b0c88a0bb1385c3b1a8cf3a11c3935a3f50582c0c41bfa21a26",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/script-registry.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/script-registry.php",
+            "source_hash": "sha256:7588aebc24bf79088181406b107b6434c12302f5a120a91c7c3abf854af9f74c",
+            "installed_hash": "sha256:7588aebc24bf79088181406b107b6434c12302f5a120a91c7c3abf854af9f74c",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/script-runner.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/script-runner.php",
+            "source_hash": "sha256:e2ae2919dfeba494e8030e5eb9740fe2c85e45a885fb5c1b332b07d075c7304f",
+            "installed_hash": "sha256:e2ae2919dfeba494e8030e5eb9740fe2c85e45a885fb5c1b332b07d075c7304f",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/toolchain.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/toolchain.php",
+            "source_hash": "sha256:c7e7714b90858188d47e6a7601d4812875a97e4d9acf08f82fb4bcff75956a83",
+            "installed_hash": "sha256:c7e7714b90858188d47e6a7601d4812875a97e4d9acf08f82fb4bcff75956a83",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/toolchain-registry.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/toolchain-registry.php",
+            "source_hash": "sha256:63ec8433dd4ab2134b419018e6fa0e53d963f32571188f8d6da5940681533d8b",
+            "installed_hash": "sha256:63ec8433dd4ab2134b419018e6fa0e53d963f32571188f8d6da5940681533d8b",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/verify-install-result.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/verify-install-result.php",
+            "source_hash": "sha256:c459b277b5ac1a5886d8724960d3406f92f6e2403e7070d2b65a7365c126b680",
+            "installed_hash": "sha256:c459b277b5ac1a5886d8724960d3406f92f6e2403e7070d2b65a7365c126b680",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/verify-manifest.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/verify-manifest.php",
+            "source_hash": "sha256:e28420de8fb2ad576a06fd598a2c1c7c08001dd665d2c71588df15ed001b407f",
+            "installed_hash": "sha256:e28420de8fb2ad576a06fd598a2c1c7c08001dd665d2c71588df15ed001b407f",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/install/verify-no-overwrite.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/install/verify-no-overwrite.php",
+            "source_hash": "sha256:9057e936a47968f3fffcda7882c1d1e6da71be44ee2a918ca828d2d1bdcb2bf5",
+            "installed_hash": "sha256:9057e936a47968f3fffcda7882c1d1e6da71be44ee2a918ca828d2d1bdcb2bf5",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -574,8 +910,8 @@
         "tools/ai/commands": {
             "pack": "target-tools-pack",
             "source": "tools/ai/commands",
-            "source_hash": "sha256:5fcbc61c65ea441f01f967d8afcf7309c64b155c0239e5f8943f251d19549872",
-            "installed_hash": "sha256:5fcbc61c65ea441f01f967d8afcf7309c64b155c0239e5f8943f251d19549872",
+            "source_hash": "sha256:a1f4c53d4910698c62935ff75600e5c0f8bf5ceaf34074b68158b0e95dcbb02d",
+            "installed_hash": "sha256:a1f4c53d4910698c62935ff75600e5c0f8bf5ceaf34074b68158b0e95dcbb02d",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -588,8 +924,8 @@
         "tools/ai/ai.php": {
             "pack": "target-tools-pack",
             "source": "tools/ai/ai.php",
-            "source_hash": "sha256:02b51bff032b509d4144493a6c8ca85aa22c4cbceb1723bc119f8737455ba2fe",
-            "installed_hash": "sha256:02b51bff032b509d4144493a6c8ca85aa22c4cbceb1723bc119f8737455ba2fe",
+            "source_hash": "sha256:1fa0af88c0a65b5574124dfab1164840409de0ccb4180699dba402f76647296a",
+            "installed_hash": "sha256:1fa0af88c0a65b5574124dfab1164840409de0ccb4180699dba402f76647296a",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -602,8 +938,8 @@
         "tools/ai/ai_catalog_lib.php": {
             "pack": "target-tools-pack",
             "source": "tools/ai/ai_catalog_lib.php",
-            "source_hash": "sha256:56673f14e6efadb8125029e50284784ee9fdbbe11eed8cf6c46a1466dcc180ae",
-            "installed_hash": "sha256:56673f14e6efadb8125029e50284784ee9fdbbe11eed8cf6c46a1466dcc180ae",
+            "source_hash": "sha256:8243417c4f63f0edd1f054c9be70bdcd4907a02a80b0ab0e3011b2d52e5b2a6d",
+            "installed_hash": "sha256:8243417c4f63f0edd1f054c9be70bdcd4907a02a80b0ab0e3011b2d52e5b2a6d",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -644,8 +980,8 @@
         "tools/ai/full-install-validation.php": {
             "pack": "target-tools-pack",
             "source": "tools/ai/full-install-validation.php",
-            "source_hash": "sha256:d2b28882bd9796978af649fbedc8ddef33cdf05499f87a09831ec28408512ec7",
-            "installed_hash": "sha256:d2b28882bd9796978af649fbedc8ddef33cdf05499f87a09831ec28408512ec7",
+            "source_hash": "sha256:a0a40f1cfc8ca31e48e5825ed31e10688414b8d0c0b2a094c285d9a69396b106",
+            "installed_hash": "sha256:a0a40f1cfc8ca31e48e5825ed31e10688414b8d0c0b2a094c285d9a69396b106",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -686,8 +1022,8 @@
         "tools/ai/generate-agent-snippets.php": {
             "pack": "target-tools-pack",
             "source": "tools/ai/generate-agent-snippets.php",
-            "source_hash": "sha256:4c0b97e9bfa42596d19d1b1c3b3c91d39eab14239fbde4b171e72f33b3804f94",
-            "installed_hash": "sha256:4c0b97e9bfa42596d19d1b1c3b3c91d39eab14239fbde4b171e72f33b3804f94",
+            "source_hash": "sha256:84dd9371a8040bb63a64ab738611708d64b456ca44780a256e77d8eccdaef499",
+            "installed_hash": "sha256:84dd9371a8040bb63a64ab738611708d64b456ca44780a256e77d8eccdaef499",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -868,8 +1204,8 @@
         "tools/ai/validate-install-surface.php": {
             "pack": "target-tools-pack",
             "source": "tools/ai/validate-install-surface.php",
-            "source_hash": "sha256:f6d3bee085ae57b14e41d46953e3f38bb96edd5721d5c1162fa423b966cefed4",
-            "installed_hash": "sha256:f6d3bee085ae57b14e41d46953e3f38bb96edd5721d5c1162fa423b966cefed4",
+            "source_hash": "sha256:f89237a72e85e03b1263a1bcc79cd4f2944a32e286df9ebe5ec59035a6556491",
+            "installed_hash": "sha256:f89237a72e85e03b1263a1bcc79cd4f2944a32e286df9ebe5ec59035a6556491",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -898,6 +1234,20 @@
             "source": "tools/ai/validate-catalog-drift.php",
             "source_hash": "sha256:ba91c7cdec927dedf1e5aca135e5614f1e95ae6d3f885db5c660bd8da8a45f8f",
             "installed_hash": "sha256:ba91c7cdec927dedf1e5aca135e5614f1e95ae6d3f885db5c660bd8da8a45f8f",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "tools/ai/validate-agent-spec.php": {
+            "pack": "target-tools-pack",
+            "source": "tools/ai/validate-agent-spec.php",
+            "source_hash": "sha256:451573e5450480faee2aa39969dd797c7655b9f423afa0de530c1b7426cb1480",
+            "installed_hash": "sha256:451573e5450480faee2aa39969dd797c7655b9f423afa0de530c1b7426cb1480",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1010,6 +1360,20 @@
             "source": "schemas/ai/ai-file-standards.schema.json",
             "source_hash": "sha256:84ca0a78e2d8941c187b63a03b6e67acdb0ab1d63a6801560d9b28aa37aa7acc",
             "installed_hash": "sha256:84ca0a78e2d8941c187b63a03b6e67acdb0ab1d63a6801560d9b28aa37aa7acc",
+            "managed": true,
+            "merge_strategy": "skip-if-exists",
+            "required": true,
+            "ownership": "template",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "schemas/ai/agent-spec.schema.json": {
+            "pack": "target-tools-pack",
+            "source": "schemas/ai/agent-spec.schema.json",
+            "source_hash": "sha256:78fb63fee985f153527df1918c097c482d16d15eb97a9b8ec70516cb36e219cb",
+            "installed_hash": "sha256:78fb63fee985f153527df1918c097c482d16d15eb97a9b8ec70516cb36e219cb",
             "managed": true,
             "merge_strategy": "skip-if-exists",
             "required": true,
@@ -1134,8 +1498,8 @@
         "docs/ai/snippets": {
             "pack": "shared-templates-pack",
             "source": "packages/ai-universal-rules/templates/snippets",
-            "source_hash": "sha256:58a47af285776cd41f37786f81ad7ea7835ac59697463879644334b4d3bf3691",
-            "installed_hash": "sha256:258747825a1d5848b9cd260f6a4921d97f3bec65ee627cd1ffc4a93357a90f90",
+            "source_hash": "sha256:1496a4a5548d79b96892d1b99bcfecff5c5eafa184a80ef75b0acf09718d3dc1",
+            "installed_hash": "sha256:fc8366dbfb0546053dc1117c87268856b86f23e1ac6f1ec57ee1a80751e46027",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1299,11 +1663,25 @@
                 "both"
             ]
         },
+        "scripts/ai/run-repomix-file.sh": {
+            "pack": "scripts-pack",
+            "source": "scripts/ai/run-repomix-file.sh",
+            "source_hash": "sha256:79f21a3afc9e238353f96c5638e8b1e12b24df6fc23b626850b4ae542f1a2c3e",
+            "installed_hash": "sha256:79f21a3afc9e238353f96c5638e8b1e12b24df6fc23b626850b4ae542f1a2c3e",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "scripts-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
         "scripts/ai/repomix-context-tree.sh": {
             "pack": "scripts-pack",
             "source": "scripts/ai/repomix-context-tree.sh",
-            "source_hash": "sha256:f901a29668bc9cbfa5f05cdb00fdb79740dbcf1ca472e77cdd1cbc3e480acbe7",
-            "installed_hash": "sha256:f901a29668bc9cbfa5f05cdb00fdb79740dbcf1ca472e77cdd1cbc3e480acbe7",
+            "source_hash": "sha256:fa1d9459d0989f91842adca81ba10e49b01f606bca9150d5c6678f053cdbf5ea",
+            "installed_hash": "sha256:fa1d9459d0989f91842adca81ba10e49b01f606bca9150d5c6678f053cdbf5ea",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1360,6 +1738,20 @@
             "source": "scripts/ai/git-forensics.sh",
             "source_hash": "sha256:44af52fb6e5032f935b90f80d2bd324a4837803a73fc75ee753e1bb5f934837e",
             "installed_hash": "sha256:44af52fb6e5032f935b90f80d2bd324a4837803a73fc75ee753e1bb5f934837e",
+            "managed": true,
+            "merge_strategy": "replace",
+            "required": true,
+            "ownership": "owned",
+            "component": "scripts-pack",
+            "runtimes": [
+                "both"
+            ]
+        },
+        "scripts/ai/git-branch-origin.sh": {
+            "pack": "scripts-pack",
+            "source": "scripts/ai/git-branch-origin.sh",
+            "source_hash": "sha256:b450cff4da329b122e55601254f50145cf7115e8eb2df4d187b80e59107fc4ed",
+            "installed_hash": "sha256:b450cff4da329b122e55601254f50145cf7115e8eb2df4d187b80e59107fc4ed",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1554,8 +1946,8 @@
         "scripts/ai/run-repo-tests.sh": {
             "pack": "scripts-pack",
             "source": "scripts/ai/run-repo-tests.sh",
-            "source_hash": "sha256:6a03cd37b65f54dd70bc1371b5c11069b490dd6ea998ada25dad146b26a1f8da",
-            "installed_hash": "sha256:6a03cd37b65f54dd70bc1371b5c11069b490dd6ea998ada25dad146b26a1f8da",
+            "source_hash": "sha256:267a7822cc50fc014afcef5054fc08416e20b87e64646058e30c8017d61c001b",
+            "installed_hash": "sha256:267a7822cc50fc014afcef5054fc08416e20b87e64646058e30c8017d61c001b",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1694,8 +2086,8 @@
         "docs/ai/repo-required-tools.md": {
             "pack": "scripts-pack",
             "source": "docs/ai/repo-required-tools.md",
-            "source_hash": "sha256:d4ecac532a868c18f9edb1f5756f39158377c79e61992eb4e38b17818d92aea4",
-            "installed_hash": "sha256:d4ecac532a868c18f9edb1f5756f39158377c79e61992eb4e38b17818d92aea4",
+            "source_hash": "sha256:12be3fa7698531229af673e860e4e64df52fb8dbf7a016d2735f25dda65399af",
+            "installed_hash": "sha256:12be3fa7698531229af673e860e4e64df52fb8dbf7a016d2735f25dda65399af",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1736,8 +2128,8 @@
         "docs/ai/script-registry.json": {
             "pack": "scripts-pack",
             "source": "docs/ai/script-registry.json",
-            "source_hash": "sha256:ab9700ebf65f219b28b3a4d7b23bc5d421335cf721be10a2e77093016b0c5ba4",
-            "installed_hash": "sha256:ab9700ebf65f219b28b3a4d7b23bc5d421335cf721be10a2e77093016b0c5ba4",
+            "source_hash": "sha256:a55663d8e8b118b73b1955fed75842cbad78cd396d73f58798dbc13e38db8b7d",
+            "installed_hash": "sha256:a55663d8e8b118b73b1955fed75842cbad78cd396d73f58798dbc13e38db8b7d",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1820,8 +2212,8 @@
         ".github/copilot-instructions.md": {
             "pack": "adapter-copilot",
             "source": "packages/ai-universal-rules/templates/core/copilot-instructions.template.md",
-            "source_hash": "sha256:58f0303b8fd64bdc93ac6417805044b4003d40718d2c56383f4dbe8c47e77359",
-            "installed_hash": "sha256:51bdad0299fcced41524976fcbc6d115117f2d1f853877be8c5567aa0189d2b3",
+            "source_hash": "sha256:4d327970b9778d1850968c3596dbec0a02764052a6dfe29ae70f07f7bdcc2ad6",
+            "installed_hash": "sha256:1423221d11e525dda97df2c213fbbfec484cf4269c3e9bfb09d6c93cad8719a2",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1848,8 +2240,8 @@
         ".vscode/settings.json": {
             "pack": "adapter-copilot",
             "source": "packages/ai-universal-rules/templates/core/copilot-vscode-settings.template.json",
-            "source_hash": "sha256:68878782b090891a71581d1546350d1b0e2092e1930ce26234ed6d60f0faef22",
-            "installed_hash": "sha256:68878782b090891a71581d1546350d1b0e2092e1930ce26234ed6d60f0faef22",
+            "source_hash": "sha256:d76afe3da75f17f1b53a3a9f95bf8abb4623d703525dc24d096ba3333e914916",
+            "installed_hash": "sha256:d76afe3da75f17f1b53a3a9f95bf8abb4623d703525dc24d096ba3333e914916",
             "managed": true,
             "merge_strategy": "skip-if-exists",
             "required": true,
@@ -1862,8 +2254,8 @@
         ".github/instructions": {
             "pack": "adapter-copilot",
             "source": "packages/ai-universal-rules/templates/instructions",
-            "source_hash": "sha256:4b5bf505b37e7fa9542785d151114cea83bbc57b7a6028cac630ab6d3d1170f6",
-            "installed_hash": "sha256:6b35ceaa6fdea4d8377e3558e930217c287628f0346b6b36a54bf147be0031a6",
+            "source_hash": "sha256:91c38159bc5e5a974d82aa4fa24edd4bd398412ebda334635ed7b91fc61621ad",
+            "installed_hash": "sha256:4899b3b20b856c711cc0ada50d263b6c11ff646fb7426627bf95c1689c532ca7",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1877,7 +2269,7 @@
             "pack": "adapter-copilot",
             "source": "packages/ai-universal-rules/templates/workflows",
             "source_hash": "sha256:90328e6024c2964f17d740411b8329a8003244a74c87825b522319014591c652",
-            "installed_hash": "sha256:58d06b181e9abe4093daa138b866c268d15f32e3de0919965c4e3c6877f8a5db",
+            "installed_hash": "sha256:46c9f9da60a2a3f35ea8b91d12a9c84e52470ca45cbd22049d12b6adeca243fe",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1891,7 +2283,7 @@
             "pack": "adapter-copilot",
             "source": "packages/ai-universal-rules/templates/workflows",
             "source_hash": "sha256:90328e6024c2964f17d740411b8329a8003244a74c87825b522319014591c652",
-            "installed_hash": "sha256:11ed6a81c94cb752cef82cb208ecae8cc7d1f8fb799babe196c03a5f9b885555",
+            "installed_hash": "sha256:288e2ba0ce7516f9c1fdec5fe829e2a45578785d39aaaa2e78122a2dc0e3edca",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1904,8 +2296,8 @@
         ".github/instructions/tools.instructions.md": {
             "pack": "adapter-copilot",
             "source": "packages/ai-universal-rules/templates/instructions/tools.instructions.md",
-            "source_hash": "sha256:116ad252ed2ea51e8e0ad3dd53a5a66a9327f4a5eb4be9e654474f67279b287c",
-            "installed_hash": "sha256:ff00eb69a12ab975a350191d62833560ac158d4de8d471424556552a71d1672f",
+            "source_hash": "sha256:73def59a59c7c29e83bb925315e0d8cef3d3514cc5a8b60bca35412c6b6a1e55",
+            "installed_hash": "sha256:9db644cd1fb8f3ebade32197b5c94a4c43f6c7dfa0291a05c6cf35ecf5ac014c",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1946,8 +2338,8 @@
         ".opencode/agents": {
             "pack": "adapter-opencode",
             "source": "packages/ai-universal-rules/templates/core/agents",
-            "source_hash": "sha256:d433940812c2cfbb37a4d5d19132c363e23d0f68209a65aec2d8accc525374d9",
-            "installed_hash": "sha256:d25f17bd52ff5e42d9fbd470f0d9fc62eadb7b71f62ef0d2d116acb8a4e90268",
+            "source_hash": "sha256:b227e1b60aebf563623737d65d55a247c87fcf471da9bbb8b9e66cf275c9ce50",
+            "installed_hash": "sha256:544b03a00a238d426fe2e5fa6387eb15f5916f2e2a0172910e43d11c3e1f846d",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1961,7 +2353,7 @@
             "pack": "adapter-opencode",
             "source": "packages/ai-universal-rules/templates/workflows",
             "source_hash": "sha256:90328e6024c2964f17d740411b8329a8003244a74c87825b522319014591c652",
-            "installed_hash": "sha256:3ecd96496acdc41de18a416a4a4c404d213b2124668a6e3420a096ceffe7d05d",
+            "installed_hash": "sha256:dd3ad58b86fafc18daf4caf993399c2baf08c023ee80903caaf776d8f70cd6cc",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -1975,7 +2367,7 @@
             "pack": "adapter-opencode",
             "source": "packages/ai-universal-rules/templates/commands",
             "source_hash": "sha256:db01af38b7fd8be67d094965f23a3137078e5291bc0e9eebb5d0c99051e7b5da",
-            "installed_hash": "sha256:9bd70919ea0651ea6407ed870d0a58df7d059cc5831eec49b7a25b2f8b3ec2d1",
+            "installed_hash": "sha256:1ef794037f432cb7d72a907bb2bf8d714238aebeae259f5c8e6e35583bc46afb",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2045,7 +2437,7 @@
             "pack": "base",
             "source": "packages/ai-universal-rules/templates/core/AGENTS.template.md",
             "source_hash": "sha256:3074cb77d5bb4552c95019cf3cf2978bbb96362077c2813f363c9a5b2c1a14cf",
-            "installed_hash": "sha256:b046c106c1ea7e0c9fd47e7c921af3964a63e0aba9515bf658a66ac3f9480422",
+            "installed_hash": "sha256:72649562df5d4c577b13d3e747f8e7fc18d591d4a63e813f9fbbdbea1ddb9c24",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2059,7 +2451,7 @@
             "pack": "base",
             "source": "packages/ai-universal-rules/templates/core/project-context.template.md",
             "source_hash": "sha256:7c5bff882f79c87b572477f2225905e88c39cb2cc28b014dffade15be7278b61",
-            "installed_hash": "sha256:98793c50c6469740614e0fb54a7705e584a1eab74bbb298a4a52f1b9b60b74ee",
+            "installed_hash": "sha256:68ba88d7eae730ef4fb5aca5b2d3ea9641541e78ca59f9b65df58c51d4cd768c",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2100,8 +2492,8 @@
         "docs/ai/execution-protocol.md": {
             "pack": "base",
             "source": "packages/ai-universal-rules/templates/core/execution-protocol.template.md",
-            "source_hash": "sha256:f4ed95b2b98d00c16a5610fe1a2ab3ba1629c8807a8af44563997895ca9428aa",
-            "installed_hash": "sha256:f4ed95b2b98d00c16a5610fe1a2ab3ba1629c8807a8af44563997895ca9428aa",
+            "source_hash": "sha256:0535feec3805474a08762723dae90ec8d022302d432917c50f8a32303eaaffd2",
+            "installed_hash": "sha256:0535feec3805474a08762723dae90ec8d022302d432917c50f8a32303eaaffd2",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2142,8 +2534,8 @@
         "docs/ai/generated-artifacts.md": {
             "pack": "base",
             "source": "packages/ai-universal-rules/templates/core/generated-artifacts.template.md",
-            "source_hash": "sha256:bb2156e17edf50dd0f3502c0edd99d3239c599e6bb6ca1a9ecb6025cdce30779",
-            "installed_hash": "sha256:bb2156e17edf50dd0f3502c0edd99d3239c599e6bb6ca1a9ecb6025cdce30779",
+            "source_hash": "sha256:53ebbd76d3b049b6a4975c8504c436e7efc033d53fc2ec2ba22679876bd6cbde",
+            "installed_hash": "sha256:53ebbd76d3b049b6a4975c8504c436e7efc033d53fc2ec2ba22679876bd6cbde",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2282,8 +2674,8 @@
         "docs/ai/agents.md": {
             "pack": "setup-docs",
             "source": "docs/ai/agents.md",
-            "source_hash": "sha256:28da64bfa30f28d2f0913d604a51bba6909ca15dda34e32eb9b0acb67f6b8ad2",
-            "installed_hash": "sha256:28da64bfa30f28d2f0913d604a51bba6909ca15dda34e32eb9b0acb67f6b8ad2",
+            "source_hash": "sha256:a84ec07ad28100b9dc4c2a06db4a09e1efc35df25285818a3d3fdb8c8f45853a",
+            "installed_hash": "sha256:a84ec07ad28100b9dc4c2a06db4a09e1efc35df25285818a3d3fdb8c8f45853a",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2310,8 +2702,8 @@
         "docs/ai/adapter-contract.md": {
             "pack": "setup-docs",
             "source": "docs/ai/adapter-contract.md",
-            "source_hash": "sha256:cd2884aa07fb0a4fc6e17c4bd70a121e7f3df02622317048d268e3982c54b1fd",
-            "installed_hash": "sha256:cd2884aa07fb0a4fc6e17c4bd70a121e7f3df02622317048d268e3982c54b1fd",
+            "source_hash": "sha256:3c285d11060fb0b9ee83be6fd2acbeebb155535bd502e0d4948c91d115a38ca4",
+            "installed_hash": "sha256:3c285d11060fb0b9ee83be6fd2acbeebb155535bd502e0d4948c91d115a38ca4",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2464,8 +2856,8 @@
         "docs/ai/verification-matrix.md": {
             "pack": "setup-docs",
             "source": "docs/ai/verification-matrix.md",
-            "source_hash": "sha256:131915840a3403ca5ea00553744c7f8b949288d15b07d3810f152f7e8f4a01f5",
-            "installed_hash": "sha256:131915840a3403ca5ea00553744c7f8b949288d15b07d3810f152f7e8f4a01f5",
+            "source_hash": "sha256:04fc892f67ab33ef4df3a70e3da2b3d8f08ef0475947a405fb04c10f658e8b96",
+            "installed_hash": "sha256:04fc892f67ab33ef4df3a70e3da2b3d8f08ef0475947a405fb04c10f658e8b96",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2562,7 +2954,7 @@
         "docs/ai/available-packs.md": {
             "pack": "setup-docs",
             "source": "docs/ai/available-packs.md",
-            "source_hash": "sha256:bf746f221ea13f05a9e7a43311676f48fee1c20542c19de1cf530a8199c7e472",
+            "source_hash": "sha256:8abc7cb30832dca7915e1a3c089735dad3acb06f786548a10ff0f71a675e7707",
             "installed_hash": "sha256:8abc7cb30832dca7915e1a3c089735dad3acb06f786548a10ff0f71a675e7707",
             "managed": true,
             "merge_strategy": "replace",
@@ -2618,8 +3010,8 @@
         "docs/ai/catalog.md": {
             "pack": "setup-docs",
             "source": "docs/ai/catalog.md",
-            "source_hash": "sha256:dee3b2cfb435cc3ad7eeeed61a94ecd10dfe133a79c69c1a44dad5a06d28098f",
-            "installed_hash": "sha256:dee3b2cfb435cc3ad7eeeed61a94ecd10dfe133a79c69c1a44dad5a06d28098f",
+            "source_hash": "sha256:01246bc7ef53bd7bf072e9e9dc76feb63d3193dc13a13c7d0976ee14f4d19cdb",
+            "installed_hash": "sha256:01246bc7ef53bd7bf072e9e9dc76feb63d3193dc13a13c7d0976ee14f4d19cdb",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2730,8 +3122,8 @@
         "docs/ai/capabilities/adapter-drift": {
             "pack": "capabilities-core",
             "source": "docs/ai/capabilities/adapter-drift",
-            "source_hash": "sha256:fdca2024e91b25773debea93636e1675dfbdef7b3ee327782b86ce364c2f7a75",
-            "installed_hash": "sha256:fdca2024e91b25773debea93636e1675dfbdef7b3ee327782b86ce364c2f7a75",
+            "source_hash": "sha256:d891cf741b518e1a7e8ae69e6dfca2110c3085a612ca5bff254cb361ecae2f44",
+            "installed_hash": "sha256:d891cf741b518e1a7e8ae69e6dfca2110c3085a612ca5bff254cb361ecae2f44",
             "managed": true,
             "merge_strategy": "replace",
             "required": true,
@@ -2760,19 +3152,18 @@
         "docs/ai/capabilities/dependency-upgrade",
         "docs/ai/capabilities/mentor-mode",
         ".opencode/agents-optional",
-        ".github/agents",
         "docs/ai/capabilities/preview-environments",
         "docs/ai/capabilities/evaluation-and-regression",
         "docs/ai/capabilities/service-boundary-patterns",
         "tools/ai/advisor",
         "docs/ai/package",
         "policies",
-        "tools/ai/install",
         "tools/ai/commands",
         "docs/ai/shared/approvals",
         "docs/ai/shared/verification",
         "docs/ai/snippets",
         ".github/instructions",
+        ".github/agents",
         ".github/prompts",
         ".github/skills",
         ".opencode/agents",
@@ -2804,20 +3195,9 @@
     "placeholders": {
         "unresolved_required": [],
         "unresolved_optional": [
-            "<UNKNOWN>",
-            "<FILES_OR_COMMANDS_CHECKED>",
-            "<NEXT_STEP>",
-            "<PLACEHOLDER>",
-            "<FRONTEND_PATH_GLOB>",
-            "<TEST_PATH_GLOB>",
-            "<CLAIM_BEING_PROVED>",
-            "<FOCUSED_PROOF_COMMAND>",
-            "<PASS_FAIL_OR_OUTPUT>",
-            "<FOCUSED_PROOF_EXPLANATION>",
-            "<OPTIONAL_VERIFY_EXPLANATION>",
-            "<UNRUN_CHECKS_AND_REASON>",
-            "<RESIDUAL_RISK_NOTES>",
             "<CHANGE_REQUEST>",
+            "<CLAIM_BEING_PROVED>",
+            "<PLACEHOLDER_NAME>",
             "<RISK_LEVEL>",
             "<AFFECTED_PATHS>",
             "<APPROVAL_REASON>",
@@ -2827,9 +3207,20 @@
             "<SUCCESS_SIGNAL>",
             "<VERIFICATION_PLAN>",
             "<OPEN_QUESTIONS>",
-            "<PLACEHOLDER_NAME>"
+            "<FOCUSED_PROOF_COMMAND>",
+            "<PASS_FAIL_OR_OUTPUT>",
+            "<FOCUSED_PROOF_EXPLANATION>",
+            "<OPTIONAL_VERIFY_EXPLANATION>",
+            "<UNRUN_CHECKS_AND_REASON>",
+            "<RESIDUAL_RISK_NOTES>",
+            "<UNKNOWN>",
+            "<FILES_OR_COMMANDS_CHECKED>",
+            "<NEXT_STEP>",
+            "<PLACEHOLDER>",
+            "<FRONTEND_PATH_GLOB>",
+            "<TEST_PATH_GLOB>"
         ],
-        "resolved_values_hash": "sha256:4b22b5d0a10cb8b4361d1ec5d11c4b1ad0adf9f149edd6acf6bf08340ce7ab48"
+        "resolved_values_hash": "sha256:99439b050b556a81a8b0c6b8bf5244ee7b43f3f26ed02e5abe4720704db63b47"
     },
     "mode": "safe-merge",
     "runtime": "both",
@@ -2841,15 +3232,9 @@
     "post_install_script": {
         "requested": null,
         "executed": false,
-        "reason": "skipped_verify_failed",
+        "reason": null,
         "exit": null
     },
-    "package_lock_sha256": "sha256:834c0d4bce6f3d5638fa4aab10b1cc6cbef00fdecee0b4f508105130047dda0c",
-    "managed_paths": [
-        ".ai/kit-manifest.json",
-        ".ai/kit-manifest.yml",
-        ".ai/package-lock.ai.json",
-        ".ai/catalog.json",
-        "docs/ai/package"
-    ]
+    "package_lock_sha256": "sha256:0c5e3340835ee6156d4a2d52fcd57f60768f4e0eb66858766cca1e9f75cc5599",
+    "managed_paths": []
 }

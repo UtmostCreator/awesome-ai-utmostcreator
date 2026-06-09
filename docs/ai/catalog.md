@@ -40,8 +40,8 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / generator` - 1
 - `root / github-copilot-agent` - 11
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 17
-- `root / github-copilot-skill` - 17
+- `root / github-copilot-prompt` - 18
+- `root / github-copilot-skill` - 18
 - `root / opencode-agent` - 12
 - `root / opencode-command` - 19
 - `root / opencode-skill` - 19
@@ -147,6 +147,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|mentor-mode|`.github/prompts/mentor-mode.prompt.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-prompt`|new-feature|`.github/prompts/new-feature.prompt.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-prompt`|plan-slice|`.github/prompts/plan-slice.prompt.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
+|`github-copilot-prompt`|post-install-setup|`.github/prompts/post-install-setup.prompt.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
 |`github-copilot-prompt`|project-context|`.github/prompts/project-context.prompt.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`github-copilot-prompt`|regression-test|`.github/prompts/regression-test.prompt.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`github-copilot-prompt`|release-safety|`.github/prompts/release-safety.prompt.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
@@ -164,6 +165,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|mentor-mode|`.github/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-skill`|new-feature|`.github/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-skill`|plan-slice|`.github/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
+|`github-copilot-skill`|post-install-setup|`.github/skills/post-install-setup/SKILL.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
 |`github-copilot-skill`|project-context|`.github/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`github-copilot-skill`|regression-test|`.github/skills/regression-test/SKILL.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`github-copilot-skill`|release-safety|`.github/skills/release-safety/SKILL.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
