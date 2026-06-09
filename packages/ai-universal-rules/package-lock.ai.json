@@ -123,7 +123,6 @@
         "templates/optional/agents/build-config.md": "sha256:0547fd63b70d2a17d999a007e005b5e8f02d21dfb6cc86db04ce10dfa3d4aab1",
         "templates/optional/agents/docs.md": "sha256:6c7c5cc942f3924f16de644ab8512b9ae413729186400c14e02c40089ee2190b",
         "templates/optional/agents/infra-auditor.md": "sha256:a40a3ec88cf2e608c8206172aa396dd91331a9dbcc93a62de7e6cc5620e60e5e",
-        "templates/optional/agents/mentor.md": "sha256:fa2cc84532af2c918b22e5b1bafd64a4c40de3149a28a5d65cfed5b37eafd917",
         "templates/optional/agents/ui-builder.md": "sha256:c46c0909bc7eb895b17c864c67fb729e5712cbfb19adfe74286dc4583d34d7f1",
         "templates/optional/agents/upgrade.md": "sha256:98410b0dfdda4a4049dd4549f85755f72185ff37f4b99cee4ce00855444d71fc",
         "templates/optional/delivery/README.md": "sha256:1c167735dd80af27b7961ae6ed46ae9f8f45d8ef64238423fab6b979a3c6b48a",

@@ -42,7 +42,7 @@
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 4,
         "package:operations-doc": 6,
-        "package:optional-template": 16,
+        "package:optional-template": 15,
         "package:package-capability": 42,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
@@ -677,14 +677,6 @@
             "path": "packages/ai-universal-rules/templates/optional/agents/infra-auditor.md",
             "runtime": "optional",
             "description": "Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "Mentor",
-            "path": "packages/ai-universal-rules/templates/optional/agents/mentor.md",
-            "runtime": "optional",
-            "description": "Use to coach the human through a task in <PROJECT_NAME> by applying Mentor Mode instead of handing over a full solution by default"
         },
         {
             "scope": "package",
