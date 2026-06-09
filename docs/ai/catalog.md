@@ -24,7 +24,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / github-copilot-instruction-template` - 22
 - `package / opencode-command-template` - 4
 - `package / operations-doc` - 6
-- `package / optional-template` - 14
+- `package / optional-template` - 16
 - `package / package-capability` - 42
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
@@ -322,6 +322,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`operations-doc`|Maintenance|`packages/ai-universal-rules/docs/operations/MAINTENANCE.md`|Treat this package like workflow infrastructure, not throwaway prompts.|
 |`operations-doc`|MCP Boundaries|`packages/ai-universal-rules/docs/operations/MCP-BOUNDARIES.md`|MCP extends capability, but also risk.|
 |`operations-doc`|Troubleshooting|`packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md`|- unresolved placeholders|
+|`optional-template`|Agent Builder|`packages/ai-universal-rules/templates/optional/agents/agent-builder.md`|Use to request a new AI agent in <PROJECT_NAME>; alias for the governed agent-creator supervisor pipeline, not a free-form agent writer|
 |`optional-template`|Agent Creator Runtime Guardian|`packages/ai-universal-rules/templates/optional/agents/agent-creator-runtime-guardian.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in <PROJECT_NAME>|
 |`optional-template`|Agent Creator Semantic Verifier|`packages/ai-universal-rules/templates/optional/agents/agent-creator-semantic-verifier.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in <PROJECT_NAME>|
 |`optional-template`|Agent Creator Static Validator|`packages/ai-universal-rules/templates/optional/agents/agent-creator-static-validator.md`|Use under the supervisor to run the deterministic AgentSpec static validator for <PROJECT_NAME> and report pass/fail with exact errors|
@@ -332,6 +333,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in <PROJECT_NAME>|
 |`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in <PROJECT_NAME>|
 |`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>|
+|`optional-template`|Mentor|`packages/ai-universal-rules/templates/optional/agents/mentor.md`|Use to coach the human through a task in <PROJECT_NAME> by applying Mentor Mode instead of handing over a full solution by default|
 |`optional-template`|ui-builder|`packages/ai-universal-rules/templates/optional/agents/ui-builder.md`|UI builder for <PROJECT_NAME>. Builds UI changes that follow existing product patterns and accessibility expectations.|
 |`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades carefully in <PROJECT_NAME>|
 |`optional-template`|Optional Delivery Pack|`packages/ai-universal-rules/templates/optional/delivery/README.md`|Use this pack when you want a lightweight slice card for non-trivial work.|
