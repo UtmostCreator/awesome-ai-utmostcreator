@@ -15,38 +15,9 @@ Usage:
 
 Environment:
   DOC_PATHS="README.md docs/**/*.md"
+    VERIFY_LINKS_NETWORK=1   # opt in to network link checks
 EOF
 }
-
-mode="all"
-DOC_PATHS="${DOC_PATHS:-README.md docs/**/*.md}"
-failures=0
-
-if (($# > 0)); then
-    case "$1" in
-    all | markdownlint | links | drift)
-        mode="$1"
-        shift
-        ;;
-    --check)
-        shift
-        ;;
-    --help | -h)
-        usage
-        exit 0
-        ;;
-    *)
-        # A first argument that is neither a known mode/flag nor an existing
-        # path is an unknown mode. Existing paths fall through as [paths...].
-        if [[ ! -e "$1" ]]; then
-            usage >&2
-            die "unknown mode: $1"
-        fi
-        ;;
-    esac
-fi
-
-shopt -s nullglob globstar
 
 # Generated/aggregated docs are gitignored build artifacts, not authored documentation.
 # Their concatenated relative links resolve against the wrong base and produce false
@@ -106,10 +77,6 @@ resolve_doc_paths() {
     printf '%s\n' "${resolved[@]}"
 }
 
-mapfile -t DOC_PATH_LIST < <(resolve_doc_paths "$@")
-
-agent_session_init "ai-doc-check"
-
 run_step() {
     local label="$1"
     shift
@@ -140,7 +107,11 @@ run_links() {
     if command -v lychee >/dev/null 2>&1; then
         # Accept 403/429: these mean the resource exists but blocks automated checks
         # (anti-bot / rate limiting), which must not be treated as a broken link.
-        run_step "lychee" lychee --accept "200..=299,403,429" "${DOC_PATH_LIST[@]}"
+        if [[ "$VERIFY_LINKS_NETWORK" == "1" ]]; then
+            run_step "lychee" lychee --accept "200..=299,403,429" "${DOC_PATH_LIST[@]}"
+        else
+            run_step "lychee --offline" lychee --offline --accept "200..=299,403,429" "${DOC_PATH_LIST[@]}"
+        fi
     else
         log_warn "lychee not installed; skipping"
     fi
@@ -184,34 +155,75 @@ run_drift() {
     fi
 }
 
-case "$mode" in
-all)
-    run_markdownlint
-    run_links
-    run_drift
-    ;;
-markdownlint)
-    run_markdownlint
-    ;;
-links)
-    run_links
-    ;;
-drift)
-    run_drift
-    ;;
---help | -h)
-    usage
-    ;;
-*)
-    usage
-    die "unknown mode: $mode"
-    ;;
-esac
+main() {
+    local mode="all"
+    local DOC_PATHS="${DOC_PATHS:-README.md docs/**/*.md}"
+    local VERIFY_LINKS_NETWORK="${VERIFY_LINKS_NETWORK:-0}"
+    local failures=0
 
-if ((failures > 0)); then
-    log_json "doc-check.failed" "$(jq -cn --argjson failures "$failures" '{failures:$failures}')"
-    exit 1
+    if (($# > 0)); then
+        case "$1" in
+        all | markdownlint | links | drift)
+            mode="$1"
+            shift
+            ;;
+        --check)
+            shift
+            ;;
+        --help | -h)
+            usage
+            exit 0
+            ;;
+        *)
+            # A first argument that is neither a known mode/flag nor an existing
+            # path is an unknown mode. Existing paths fall through as [paths...].
+            if [[ ! -e "$1" ]]; then
+                usage >&2
+                die "unknown mode: $1"
+            fi
+            ;;
+        esac
+    fi
+
+    shopt -s nullglob globstar
+
+    mapfile -t DOC_PATH_LIST < <(resolve_doc_paths "$@")
+
+    agent_session_init "ai-doc-check"
+
+    case "$mode" in
+    all)
+        run_markdownlint
+        run_links
+        run_drift
+        ;;
+    markdownlint)
+        run_markdownlint
+        ;;
+    links)
+        run_links
+        ;;
+    drift)
+        run_drift
+        ;;
+    --help | -h)
+        usage
+        ;;
+    *)
+        usage
+        die "unknown mode: $mode"
+        ;;
+    esac
+
+    if ((failures > 0)); then
+        log_json "doc-check.failed" "$(jq -cn --argjson failures "$failures" '{failures:$failures}')"
+        exit 1
+    fi
+
+    log_json "doc-check.passed" "$(jq -cn --arg mode "$mode" '{mode:$mode}')"
+    echo "==> docs ok"
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+    main "$@"
 fi
-
-log_json "doc-check.passed" "$(jq -cn --arg mode "$mode" '{mode:$mode}')"
-echo "==> docs ok"
