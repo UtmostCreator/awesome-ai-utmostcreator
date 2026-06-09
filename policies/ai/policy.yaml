@@ -73,39 +73,39 @@ allow:
     pattern: '^(bash\s+)?(\./)?scripts/ai/ai-edit\.sh\b(?!.*\b(APPLY|VERIFY)=1)'
   # Tier 1 — ai-rollback read-only subcommands
   - id: tier1-ai-rollback-read
-    reason: "Tier 1: ai-rollback list or show — read-only inspection"
+    reason: "Tier 1: ai-rollback list or show \u2014 read-only inspection"
     pattern: '^(bash\s+)?(\./)?scripts/ai/ai-rollback\.sh\s+(list|show)\b'
   # Tier 1 — repomix-scc-router read-only subcommands
   - id: tier1-repomix-read
-    reason: "Tier 1: repomix-scc-router stats, plan, run, or bundle — read-only or generated-output"
+    reason: "Tier 1: repomix-scc-router stats, plan, run, or bundle \u2014 read-only or generated-output"
     pattern: '^(bash\s+)?(\./)?scripts/ai/repomix-scc-router\.sh\s+(stats|plan|run|bundle)\b'
 
 confirm:
   # Tier 2 — modification (confirm before execution)
   # See docs/ai/command-risk-taxonomy.md for the full invocation matrix.
   - id: git-commit
-    reason: "Tier 2: git commit modifies history — confirm required"
+    reason: "Tier 2: git commit modifies history \u2014 confirm required"
     pattern: '^git\s+commit\b'
   - id: git-stash-push
-    reason: "Tier 2: git stash push modifies working state — confirm required"
+    reason: "Tier 2: git stash push modifies working state \u2014 confirm required"
     pattern: '^git\s+stash\s+(push|drop|pop)\b'
   - id: ai-edit-apply
-    reason: "Tier 2: ai-edit apply mode mutates source files — confirm required"
+    reason: "Tier 2: ai-edit apply mode mutates source files \u2014 confirm required"
     pattern: '^(APPLY=1|VERIFY=1).*scripts/ai/ai-edit\.sh\b'
   - id: ai-edit-apply-env-prefix
-    reason: "Tier 2: ai-edit with APPLY or VERIFY env vars — confirm required"
+    reason: "Tier 2: ai-edit with APPLY or VERIFY env vars \u2014 confirm required"
     pattern: '^(bash\s+)?(\./)?scripts/ai/ai-edit\.sh\b.*\b(APPLY|VERIFY)=1'
   # Tier 3 — deletion/recovery (deny by default; listed here as confirm so the hook can
   # surface an explicit approval prompt rather than a silent deny)
   - id: ai-rollback-apply
-    reason: "Tier 3: ai-rollback apply is a recovery mutation — explicit approval required"
+    reason: "Tier 3: ai-rollback apply is a recovery mutation \u2014 explicit approval required"
     pattern: '^(bash\s+)?(\./)?scripts/ai/ai-rollback\.sh\s+apply\b'
   - id: repomix-clean-purge
-    reason: "Tier 3: repomix-scc-router clean or purge deletes generated artifacts — explicit approval required"
+    reason: "Tier 3: repomix-scc-router clean or purge deletes generated artifacts \u2014 explicit approval required"
     pattern: '^(bash\s+)?(\./)?scripts/ai/repomix-scc-router\.sh\s+(clean|purge)\b'
   - id: repomix-tree-clean-purge
-    reason: "Tier 3: repomix-context-tree clean or purge deletes generated artifacts — explicit approval required"
+    reason: "Tier 3: repomix-context-tree clean or purge deletes generated artifacts \u2014 explicit approval required"
     pattern: '^(bash\s+)?(\./)?scripts/ai/repomix-context-tree\.sh\s+(clean|purge)\b'
   - id: just-context-clean-purge
-    reason: "Tier 3: just context-clean or context-purge deletes generated artifacts — explicit approval required"
+    reason: "Tier 3: just context-clean or context-purge deletes generated artifacts \u2014 explicit approval required"
     pattern: '^just\s+context-(clean|purge)\b'

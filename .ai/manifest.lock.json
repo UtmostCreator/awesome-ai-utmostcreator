@@ -1,23 +1,22 @@
 {
     "schemaVersion": 1,
-    "generatedAt": "2026-06-08T18:36:36+00:00",
+    "generatedAt": "2026-06-09T18:22:40+00:00",
     "createdDirs": [
         "docs/ai/capabilities/dependency-upgrade",
         "docs/ai/capabilities/mentor-mode",
         ".opencode/agents-optional",
-        ".github/agents",
         "docs/ai/capabilities/preview-environments",
         "docs/ai/capabilities/evaluation-and-regression",
         "docs/ai/capabilities/service-boundary-patterns",
         "tools/ai/advisor",
         "docs/ai/package",
         "policies",
-        "tools/ai/install",
         "tools/ai/commands",
         "docs/ai/shared/approvals",
         "docs/ai/shared/verification",
         "docs/ai/snippets",
         ".github/instructions",
+        ".github/agents",
         ".github/prompts",
         ".github/skills",
         ".opencode/agents",
@@ -45,7 +44,7 @@
             ],
             "source": "packages/ai-universal-rules/catalog.json",
             "generator": "installer",
-            "sha256": "sha256:0968d16bdf11c628eef20a4e8a53f85b1facff9f5d4999e7d6fc69828d8ace2c",
+            "sha256": "sha256:e93b5948d71dbfa6669302a9087ed1dac749cc150653bcd4c26eabe7136d600f",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -90,7 +89,7 @@
             ],
             "source": "packages/ai-universal-rules/package-lock.ai.json",
             "generator": "installer",
-            "sha256": "sha256:834c0d4bce6f3d5638fa4aab10b1cc6cbef00fdecee0b4f508105130047dda0c",
+            "sha256": "sha256:0c5e3340835ee6156d4a2d52fcd57f60768f4e0eb66858766cca1e9f75cc5599",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -120,7 +119,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/core/agents",
             "generator": "installer",
-            "sha256": "sha256:ace43f5908f83b3110ed098378c56085d762a682f8f21c3fc97498ceab216816",
+            "sha256": "sha256:435b35dd510a21729b8afaf28fa42e689b4b740cef55101777c100bbecd81248",
             "mode": "0755",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -135,7 +134,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/core/copilot-instructions.template.md",
             "generator": "installer",
-            "sha256": "sha256:51bdad0299fcced41524976fcbc6d115117f2d1f853877be8c5567aa0189d2b3",
+            "sha256": "sha256:1423221d11e525dda97df2c213fbbfec484cf4269c3e9bfb09d6c93cad8719a2",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -181,7 +180,7 @@
             "source": "packages/ai-universal-rules/templates/github/hooks/scripts/tool-guardian.sh",
             "generator": "installer",
             "sha256": "sha256:f45d13e63415ec5bdea267bd7d4c1144e8261f3b9c7476b796cb911a0d9adb4f",
-            "mode": "0755",
+            "mode": "0700",
             "lineEnding": "lf",
             "kitVersion": "unknown",
             "schemaVersion": 1
@@ -225,7 +224,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/instructions",
             "generator": "installer",
-            "sha256": "sha256:6b35ceaa6fdea4d8377e3558e930217c287628f0346b6b36a54bf147be0031a6",
+            "sha256": "sha256:4899b3b20b856c711cc0ada50d263b6c11ff646fb7426627bf95c1689c532ca7",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -255,7 +254,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/instructions/tools.instructions.md",
             "generator": "installer",
-            "sha256": "sha256:ff00eb69a12ab975a350191d62833560ac158d4de8d471424556552a71d1672f",
+            "sha256": "sha256:9db644cd1fb8f3ebade32197b5c94a4c43f6c7dfa0291a05c6cf35ecf5ac014c",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -270,7 +269,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/workflows",
             "generator": "installer",
-            "sha256": "sha256:58d06b181e9abe4093daa138b866c268d15f32e3de0919965c4e3c6877f8a5db",
+            "sha256": "sha256:46c9f9da60a2a3f35ea8b91d12a9c84e52470ca45cbd22049d12b6adeca243fe",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -300,7 +299,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/workflows",
             "generator": "installer",
-            "sha256": "sha256:11ed6a81c94cb752cef82cb208ecae8cc7d1f8fb799babe196c03a5f9b885555",
+            "sha256": "sha256:288e2ba0ce7516f9c1fdec5fe829e2a45578785d39aaaa2e78122a2dc0e3edca",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -330,7 +329,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/core/agents",
             "generator": "installer",
-            "sha256": "sha256:d25f17bd52ff5e42d9fbd470f0d9fc62eadb7b71f62ef0d2d116acb8a4e90268",
+            "sha256": "sha256:544b03a00a238d426fe2e5fa6387eb15f5916f2e2a0172910e43d11c3e1f846d",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -338,14 +337,14 @@
         },
         {
             "path": ".opencode/agents-optional",
-            "ownership": "template",
+            "ownership": "owned",
             "component": "optional-agents-opencode-pack",
             "runtimes": [
                 "opencode"
             ],
             "source": "packages/ai-universal-rules/templates/optional/agents",
             "generator": "installer",
-            "sha256": "sha256:38601dfaa5551d42267affcdb655605d6aedb216a19f0511af50a7e2c08adc4f",
+            "sha256": "sha256:086b294490d899ba34baf8ea7b742ac6a7e53d5c4fc3c0407531e6fa083e755b",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -360,7 +359,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/commands",
             "generator": "installer",
-            "sha256": "sha256:9bd70919ea0651ea6407ed870d0a58df7d059cc5831eec49b7a25b2f8b3ec2d1",
+            "sha256": "sha256:1ef794037f432cb7d72a907bb2bf8d714238aebeae259f5c8e6e35583bc46afb",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -375,7 +374,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/workflows",
             "generator": "installer",
-            "sha256": "sha256:3ecd96496acdc41de18a416a4a4c404d213b2124668a6e3420a096ceffe7d05d",
+            "sha256": "sha256:dd3ad58b86fafc18daf4caf993399c2baf08c023ee80903caaf776d8f70cd6cc",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -435,7 +434,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/core/copilot-vscode-settings.template.json",
             "generator": "installer",
-            "sha256": "sha256:68878782b090891a71581d1546350d1b0e2092e1930ce26234ed6d60f0faef22",
+            "sha256": "sha256:d76afe3da75f17f1b53a3a9f95bf8abb4623d703525dc24d096ba3333e914916",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -450,7 +449,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/core/AGENTS.template.md",
             "generator": "installer",
-            "sha256": "sha256:b046c106c1ea7e0c9fd47e7c921af3964a63e0aba9515bf658a66ac3f9480422",
+            "sha256": "sha256:72649562df5d4c577b13d3e747f8e7fc18d591d4a63e813f9fbbdbea1ddb9c24",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -525,7 +524,7 @@
             ],
             "source": "docs/ai/adapter-contract.md",
             "generator": "installer",
-            "sha256": "sha256:cd2884aa07fb0a4fc6e17c4bd70a121e7f3df02622317048d268e3982c54b1fd",
+            "sha256": "sha256:3c285d11060fb0b9ee83be6fd2acbeebb155535bd502e0d4948c91d115a38ca4",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -585,7 +584,7 @@
             ],
             "source": "docs/ai/agents.md",
             "generator": "installer",
-            "sha256": "sha256:28da64bfa30f28d2f0913d604a51bba6909ca15dda34e32eb9b0acb67f6b8ad2",
+            "sha256": "sha256:a84ec07ad28100b9dc4c2a06db4a09e1efc35df25285818a3d3fdb8c8f45853a",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -675,7 +674,7 @@
             ],
             "source": "docs/ai/capabilities/adapter-drift",
             "generator": "installer",
-            "sha256": "sha256:fdca2024e91b25773debea93636e1675dfbdef7b3ee327782b86ce364c2f7a75",
+            "sha256": "sha256:d891cf741b518e1a7e8ae69e6dfca2110c3085a612ca5bff254cb361ecae2f44",
             "mode": "0755",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -915,7 +914,7 @@
             ],
             "source": "docs/ai/capabilities/service-boundary-patterns",
             "generator": "installer",
-            "sha256": "sha256:184b26b34365a4288889381db79b6e6dcdf349ba2f1965e4d385256887b87268",
+            "sha256": "sha256:1111bdbc06c4fc11dd8a4455f6740cbc05fa2c26bf1fb071525854283483f7d6",
             "mode": "0755",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -945,7 +944,7 @@
             ],
             "source": "docs/ai/catalog.md",
             "generator": "installer",
-            "sha256": "sha256:dee3b2cfb435cc3ad7eeeed61a94ecd10dfe133a79c69c1a44dad5a06d28098f",
+            "sha256": "sha256:01246bc7ef53bd7bf072e9e9dc76feb63d3193dc13a13c7d0976ee14f4d19cdb",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1020,7 +1019,7 @@
             ],
             "source": "docs/ai/context-packing.md",
             "generator": "installer",
-            "sha256": "sha256:e0ee4da0c7615ba321dc05595a05f57da36ac827507c2fd3d00707bc5c69f905",
+            "sha256": "sha256:7dccbe9145ab2b2f8dc4f1ed75713f2d12f577f19395a1d62777ee7e4218bf5b",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1110,7 +1109,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/core/execution-protocol.template.md",
             "generator": "installer",
-            "sha256": "sha256:f4ed95b2b98d00c16a5610fe1a2ab3ba1629c8807a8af44563997895ca9428aa",
+            "sha256": "sha256:0535feec3805474a08762723dae90ec8d022302d432917c50f8a32303eaaffd2",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1155,7 +1154,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/core/generated-artifacts.template.md",
             "generator": "installer",
-            "sha256": "sha256:bb2156e17edf50dd0f3502c0edd99d3239c599e6bb6ca1a9ecb6025cdce30779",
+            "sha256": "sha256:53ebbd76d3b049b6a4975c8504c436e7efc033d53fc2ec2ba22679876bd6cbde",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1275,7 +1274,7 @@
             ],
             "source": "packages/ai-universal-rules/docs",
             "generator": "installer",
-            "sha256": "sha256:dee8922a2ef923099ce18b26c7806950d94d9576b3d751c8dade094af52c8d97",
+            "sha256": "sha256:afd9c80013046f903ca5139a7a8d7f899e3784770a4df9b1e37ca1be50c305aa",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -1305,7 +1304,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/core/project-context.template.md",
             "generator": "installer",
-            "sha256": "sha256:98793c50c6469740614e0fb54a7705e584a1eab74bbb298a4a52f1b9b60b74ee",
+            "sha256": "sha256:68ba88d7eae730ef4fb5aca5b2d3ea9641541e78ca59f9b65df58c51d4cd768c",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1336,7 +1335,7 @@
             "source": "packages/ai-universal-rules/templates/core/project/README.md",
             "generator": "installer",
             "sha256": "sha256:cafd6e1e870b49289107ceec3ad436d0572d72498ba2e09d85eaac97ab6e6d50",
-            "mode": "0644",
+            "mode": "0600",
             "lineEnding": "lf",
             "kitVersion": "unknown",
             "schemaVersion": 1
@@ -1395,7 +1394,7 @@
             ],
             "source": "docs/ai/repo-required-tools.md",
             "generator": "installer",
-            "sha256": "sha256:d4ecac532a868c18f9edb1f5756f39158377c79e61992eb4e38b17818d92aea4",
+            "sha256": "sha256:12be3fa7698531229af673e860e4e64df52fb8dbf7a016d2735f25dda65399af",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1425,7 +1424,7 @@
             ],
             "source": "docs/ai/script-registry.json",
             "generator": "installer",
-            "sha256": "sha256:ab9700ebf65f219b28b3a4d7b23bc5d421335cf721be10a2e77093016b0c5ba4",
+            "sha256": "sha256:a55663d8e8b118b73b1955fed75842cbad78cd396d73f58798dbc13e38db8b7d",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1470,7 +1469,7 @@
             ],
             "source": "docs/ai/scripts-reference.md",
             "generator": "installer",
-            "sha256": "sha256:3108405d2885c25ee1afbc2b7e4beb685d299fb3f3cfea4c61d6c4856e2ca53d",
+            "sha256": "sha256:0f5244c7bf7db5a9be3f7ff019cd07c6c1d0416a519efa768bf852360dfe5f35",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1486,7 +1485,7 @@
             "source": "docs/ai/security.md",
             "generator": "installer",
             "sha256": "sha256:b4644442f3df3fe0d61e3fcee069b9fac3d5edf224dfca59884a7cf1598a3b0e",
-            "mode": "0644",
+            "mode": "0600",
             "lineEnding": "lf",
             "kitVersion": "unknown",
             "schemaVersion": 1
@@ -1560,7 +1559,7 @@
             ],
             "source": "packages/ai-universal-rules/templates/snippets",
             "generator": "installer",
-            "sha256": "sha256:258747825a1d5848b9cd260f6a4921d97f3bec65ee627cd1ffc4a93357a90f90",
+            "sha256": "sha256:fc8366dbfb0546053dc1117c87268856b86f23e1ac6f1ec57ee1a80751e46027",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -1695,7 +1694,7 @@
             ],
             "source": "docs/ai/validation.md",
             "generator": "installer",
-            "sha256": "sha256:5d1ddbe83043e2added5a9ebb08d6ded688c44237ed779be2403e21c747fe8c4",
+            "sha256": "sha256:be81f9c7a114386f1e4775a5de0789559c0a5192f3643abeea96a1272aa81262",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1710,7 +1709,7 @@
             ],
             "source": "docs/ai/verification-matrix.md",
             "generator": "installer",
-            "sha256": "sha256:131915840a3403ca5ea00553744c7f8b949288d15b07d3810f152f7e8f4a01f5",
+            "sha256": "sha256:04fc892f67ab33ef4df3a70e3da2b3d8f08ef0475947a405fb04c10f658e8b96",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -1770,7 +1769,7 @@
             ],
             "source": "packages/ai-universal-rules/policies",
             "generator": "installer",
-            "sha256": "sha256:4d08b7044240ef98f53d49437ba4fce79a9f28280824950280e24da1e61db49a",
+            "sha256": "sha256:4d68f4232e5dec12d1ebe4ae3e6ba6b5486fd67b3d0fce886128a0893e5ff02f",
             "mode": "0777",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -1786,6 +1785,21 @@
             "source": "schemas/ai/advisor-recommendation.schema.json",
             "generator": "installer",
             "sha256": "sha256:8e2f5dcf80356bb53a5435f62403e1f73d21b8f618887096af9ac67cd648b205",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "schemas/ai/agent-spec.schema.json",
+            "ownership": "template",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "schemas/ai/agent-spec.schema.json",
+            "generator": "installer",
+            "sha256": "sha256:78fb63fee985f153527df1918c097c482d16d15eb97a9b8ec70516cb36e219cb",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2182,6 +2196,21 @@
             "schemaVersion": 1
         },
         {
+            "path": "scripts/ai/git-branch-origin.sh",
+            "ownership": "owned",
+            "component": "scripts-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "scripts/ai/git-branch-origin.sh",
+            "generator": "installer",
+            "sha256": "sha256:b450cff4da329b122e55601254f50145cf7115e8eb2df4d187b80e59107fc4ed",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
             "path": "scripts/ai/git-forensics.sh",
             "ownership": "owned",
             "component": "scripts-pack",
@@ -2310,7 +2339,7 @@
             ],
             "source": "scripts/ai/repomix-context-tree.sh",
             "generator": "installer",
-            "sha256": "sha256:f901a29668bc9cbfa5f05cdb00fdb79740dbcf1ca472e77cdd1cbc3e480acbe7",
+            "sha256": "sha256:fa1d9459d0989f91842adca81ba10e49b01f606bca9150d5c6678f053cdbf5ea",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2385,7 +2414,7 @@
             ],
             "source": "scripts/ai/run-repo-tests.sh",
             "generator": "installer",
-            "sha256": "sha256:6a03cd37b65f54dd70bc1371b5c11069b490dd6ea998ada25dad146b26a1f8da",
+            "sha256": "sha256:267a7822cc50fc014afcef5054fc08416e20b87e64646058e30c8017d61c001b",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2402,6 +2431,21 @@
             "generator": "installer",
             "sha256": "sha256:bfbb43683092c5111ecb6dcc7dd4aa021ec1bc870a3053d4a55eb6c93a7954bf",
             "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "scripts/ai/run-repomix-file.sh",
+            "ownership": "owned",
+            "component": "scripts-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "scripts/ai/run-repomix-file.sh",
+            "generator": "installer",
+            "sha256": "sha256:79f21a3afc9e238353f96c5638e8b1e12b24df6fc23b626850b4ae542f1a2c3e",
+            "mode": "0755",
             "lineEnding": "lf",
             "kitVersion": "unknown",
             "schemaVersion": 1
@@ -2460,7 +2504,7 @@
             ],
             "source": "scripts/hooks/pre-commit.sh",
             "generator": "installer",
-            "sha256": "sha256:6703186265aa6d12caa02ddab572dc087fe42e4c0d54d4bdd7d9bb2ce4eb57eb",
+            "sha256": "sha256:28f41429f8eaa58986f29cf45753ea4618bfe332efde4250247044c4d4b7154d",
             "mode": "0755",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2490,7 +2534,7 @@
             ],
             "source": "tools/ai/ai.php",
             "generator": "installer",
-            "sha256": "sha256:02b51bff032b509d4144493a6c8ca85aa22c4cbceb1723bc119f8737455ba2fe",
+            "sha256": "sha256:1fa0af88c0a65b5574124dfab1164840409de0ccb4180699dba402f76647296a",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2505,7 +2549,7 @@
             ],
             "source": "tools/ai/ai_catalog_lib.php",
             "generator": "installer",
-            "sha256": "sha256:56673f14e6efadb8125029e50284784ee9fdbbe11eed8cf6c46a1466dcc180ae",
+            "sha256": "sha256:8243417c4f63f0edd1f054c9be70bdcd4907a02a80b0ab0e3011b2d52e5b2a6d",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2550,7 +2594,7 @@
             ],
             "source": "tools/ai/commands",
             "generator": "installer",
-            "sha256": "sha256:5fcbc61c65ea441f01f967d8afcf7309c64b155c0239e5f8943f251d19549872",
+            "sha256": "sha256:a1f4c53d4910698c62935ff75600e5c0f8bf5ceaf34074b68158b0e95dcbb02d",
             "mode": "0755",
             "lineEnding": "none",
             "kitVersion": "unknown",
@@ -2565,7 +2609,7 @@
             ],
             "source": "tools/ai/full-install-validation.php",
             "generator": "installer",
-            "sha256": "sha256:d2b28882bd9796978af649fbedc8ddef33cdf05499f87a09831ec28408512ec7",
+            "sha256": "sha256:a0a40f1cfc8ca31e48e5825ed31e10688414b8d0c0b2a094c285d9a69396b106",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2580,7 +2624,7 @@
             ],
             "source": "tools/ai/generate-agent-snippets.php",
             "generator": "installer",
-            "sha256": "sha256:4c0b97e9bfa42596d19d1b1c3b3c91d39eab14239fbde4b171e72f33b3804f94",
+            "sha256": "sha256:84dd9371a8040bb63a64ab738611708d64b456ca44780a256e77d8eccdaef499",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2632,21 +2676,6 @@
             "schemaVersion": 1
         },
         {
-            "path": "tools/ai/install",
-            "ownership": "owned",
-            "component": "target-tools-pack",
-            "runtimes": [
-                "both"
-            ],
-            "source": "tools/ai/install",
-            "generator": "installer",
-            "sha256": "sha256:49843c54e3aa3ed78c62be29be5a8dc230c79c3bbed097d11846d89c3cea07ec",
-            "mode": "0755",
-            "lineEnding": "none",
-            "kitVersion": "unknown",
-            "schemaVersion": 1
-        },
-        {
             "path": "tools/ai/install-ai-kit.php",
             "ownership": "owned",
             "component": "target-tools-pack",
@@ -2656,6 +2685,381 @@
             "source": "tools/ai/install-ai-kit.php",
             "generator": "installer",
             "sha256": "sha256:3b0487c4a4b2c6916b6ff365b1524ed5429f10e394aaa4b3653d8e96a87368cb",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/backup.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/backup.php",
+            "generator": "installer",
+            "sha256": "sha256:87539092d2626824f85d1e7d77650c1bd422466c3d384847979eba3615680760",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/base.sh",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/base.sh",
+            "generator": "installer",
+            "sha256": "sha256:c8097282be6ed1573cc6e8d48f00c79c04b26fa9806ebc9b7253677b38420f3b",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/config.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/config.php",
+            "generator": "installer",
+            "sha256": "sha256:37ec30e6a12a42c8024267d3c453459cf93b20d9131f230dc92b0aa35a3199d2",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/copilot-agent-renderer.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/copilot-agent-renderer.php",
+            "generator": "installer",
+            "sha256": "sha256:75815d33a81daf7a4a85bb4744254291503f6a82d9c5209ad3fba2501262264e",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/copilot-agent-tool-registry.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/copilot-agent-tool-registry.php",
+            "generator": "installer",
+            "sha256": "sha256:63cf4de0876f876f93715e86e91c04802851b9a03a29d92371566f324cd40e9d",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/core.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/core.php",
+            "generator": "installer",
+            "sha256": "sha256:ed9a0c8487e5632a192f5df91e82c8dc65af0807ac1a85ebe4514bbcf672306d",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/docs.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/docs.php",
+            "generator": "installer",
+            "sha256": "sha256:c9b72c9b3125d459fdad6ae94e3213eefb776c3b8bde4da38d1e2533931ea642",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/generated-header.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/generated-header.php",
+            "generator": "installer",
+            "sha256": "sha256:d2934a2eeafa3b1c2876ffb63d96b556730fe38c93835aaec3e34a8a3c6e6a0a",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/lib.sh",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/lib.sh",
+            "generator": "installer",
+            "sha256": "sha256:1ba165d151ffcca3957fd9187eb7e9fda4a2af73e0f150c603687e5064f430be",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/manifest.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/manifest.php",
+            "generator": "installer",
+            "sha256": "sha256:a3851ce67a57c4b7ee931d3950c21101b108515c0a04d260482ede5f496e3616",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/markers.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/markers.php",
+            "generator": "installer",
+            "sha256": "sha256:5b350f5bfc91a42e4317826a28a6d73f646fc896ad80a3f9627592275ab10062",
+            "mode": "0600",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/migrations.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/migrations.php",
+            "generator": "installer",
+            "sha256": "sha256:1762aa49fe9501f5c429540212dbbdcaf95e2ea911516c34c4a9b1ce262496c5",
+            "mode": "0600",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/packs.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/packs.php",
+            "generator": "installer",
+            "sha256": "sha256:ce8be253f9cf41177e19ae231ede4a6f5d2238251982041e65cbbbc37e8a6e21",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/planner.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/planner.php",
+            "generator": "installer",
+            "sha256": "sha256:068659925c9612127c379159d7d941010c387121a4b315f114b9336a9f9228b2",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/profiles.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/profiles.php",
+            "generator": "installer",
+            "sha256": "sha256:75cd4f7066613d87087514dab2a31529b75860326b3785ace22e1938840e5088",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/project-yaml.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/project-yaml.php",
+            "generator": "installer",
+            "sha256": "sha256:3fab8b2d1f20f7d3e23529ce2917ff1ee286755f184a7b705f1a5b7fab24b090",
+            "mode": "0600",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/runtime-copilot.sh",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/runtime-copilot.sh",
+            "generator": "installer",
+            "sha256": "sha256:9d110ed7db8ac42d663b85471aef4b05bd5553bd6f9cdf946d0546acf632795d",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/runtime-opencode.sh",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/runtime-opencode.sh",
+            "generator": "installer",
+            "sha256": "sha256:e33510c6ad708b0c88a0bb1385c3b1a8cf3a11c3935a3f50582c0c41bfa21a26",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/script-registry.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/script-registry.php",
+            "generator": "installer",
+            "sha256": "sha256:7588aebc24bf79088181406b107b6434c12302f5a120a91c7c3abf854af9f74c",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/script-runner.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/script-runner.php",
+            "generator": "installer",
+            "sha256": "sha256:e2ae2919dfeba494e8030e5eb9740fe2c85e45a885fb5c1b332b07d075c7304f",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/toolchain-registry.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/toolchain-registry.php",
+            "generator": "installer",
+            "sha256": "sha256:63ec8433dd4ab2134b419018e6fa0e53d963f32571188f8d6da5940681533d8b",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/toolchain.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/toolchain.php",
+            "generator": "installer",
+            "sha256": "sha256:c7e7714b90858188d47e6a7601d4812875a97e4d9acf08f82fb4bcff75956a83",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/verify-install-result.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/verify-install-result.php",
+            "generator": "installer",
+            "sha256": "sha256:c459b277b5ac1a5886d8724960d3406f92f6e2403e7070d2b65a7365c126b680",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/verify-manifest.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/verify-manifest.php",
+            "generator": "installer",
+            "sha256": "sha256:e28420de8fb2ad576a06fd598a2c1c7c08001dd665d2c71588df15ed001b407f",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
+            "path": "tools/ai/install/verify-no-overwrite.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/install/verify-no-overwrite.php",
+            "generator": "installer",
+            "sha256": "sha256:9057e936a47968f3fffcda7882c1d1e6da71be44ee2a918ca828d2d1bdcb2bf5",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2752,6 +3156,21 @@
             "schemaVersion": 1
         },
         {
+            "path": "tools/ai/validate-agent-spec.php",
+            "ownership": "owned",
+            "component": "target-tools-pack",
+            "runtimes": [
+                "both"
+            ],
+            "source": "tools/ai/validate-agent-spec.php",
+            "generator": "installer",
+            "sha256": "sha256:451573e5450480faee2aa39969dd797c7655b9f423afa0de530c1b7426cb1480",
+            "mode": "0644",
+            "lineEnding": "lf",
+            "kitVersion": "unknown",
+            "schemaVersion": 1
+        },
+        {
             "path": "tools/ai/validate-ai-catalog.php",
             "ownership": "owned",
             "component": "target-tools-pack",
@@ -2791,7 +3210,7 @@
             "source": "tools/ai/validate-catalog-drift.php",
             "generator": "installer",
             "sha256": "sha256:ba91c7cdec927dedf1e5aca135e5614f1e95ae6d3f885db5c660bd8da8a45f8f",
-            "mode": "0644",
+            "mode": "0600",
             "lineEnding": "lf",
             "kitVersion": "unknown",
             "schemaVersion": 1
@@ -2850,7 +3269,7 @@
             ],
             "source": "tools/ai/validate-install-surface.php",
             "generator": "installer",
-            "sha256": "sha256:f6d3bee085ae57b14e41d46953e3f38bb96edd5721d5c1162fa423b966cefed4",
+            "sha256": "sha256:f89237a72e85e03b1263a1bcc79cd4f2944a32e286df9ebe5ec59035a6556491",
             "mode": "0644",
             "lineEnding": "lf",
             "kitVersion": "unknown",
@@ -2911,7 +3330,7 @@
             "source": "tools/ai/validate-stub-surfaces.php",
             "generator": "installer",
             "sha256": "sha256:2bd141fa8eef4b296616834764f4034a7223be0827d33197f539e2e3572dedab",
-            "mode": "0644",
+            "mode": "0600",
             "lineEnding": "lf",
             "kitVersion": "unknown",
             "schemaVersion": 1

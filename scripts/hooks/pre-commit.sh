@@ -8,6 +8,46 @@ echo "[hook] pre-commit checks"
 
 staged_files="$(git diff --cached --name-only --diff-filter=ACM || true)"
 
+is_ai_kit_source_repo() {
+    [[ -d packages/ai-universal-rules/templates \
+        && -f packages/ai-universal-rules/package-lock.ai.json \
+        && -f tools/ai/ai.php \
+        && -f tools/ai/generate-ai-catalog.php ]]
+}
+
+needs_ai_kit_generation() {
+    [[ -n "$staged_files" ]] || return 1
+
+    while IFS= read -r file; do
+        [[ -n "$file" ]] || continue
+        case "$file" in
+            packages/ai-universal-rules/templates/*|\
+            packages/ai-universal-rules/docs/*|\
+            packages/ai-universal-rules/catalog.json|\
+            packages/ai-universal-rules/manifest.json|\
+            packages/ai-universal-rules/manifest.yml|\
+            docs/ai/capabilities/*|\
+            docs/ai/snippets/*|\
+            tools/ai/ai_catalog_lib.php|\
+            tools/ai/install/packs.php|\
+            tools/ai/install/profiles.php)
+                return 0
+                ;;
+        esac
+    done <<<"$staged_files"
+
+    return 1
+}
+
+stage_if_present() {
+    local path
+    for path in "$@"; do
+        if [[ -e "$path" ]]; then
+            git add "$path"
+        fi
+    done
+}
+
 if [[ -n "$staged_files" ]]; then
     while IFS= read -r file; do
         [[ -n "$file" ]] || continue
@@ -19,6 +59,21 @@ if [[ -n "$staged_files" ]]; then
 fi
 
 if command -v php >/dev/null 2>&1; then
+    if is_ai_kit_source_repo && needs_ai_kit_generation; then
+        echo "[hook] refreshing AI-kit source generated artifacts"
+        php tools/ai/ai.php package-lock --update
+        php tools/ai/generate-ai-catalog.php
+        stage_if_present \
+            packages/ai-universal-rules/package-lock.ai.json \
+            .ai/package-lock.ai.json \
+            docs/ai/catalog.md \
+            .ai/catalog.json \
+            packages/ai-universal-rules/catalog.json \
+            llms.txt
+        php tools/ai/ai.php package-verify
+        php tools/ai/generate-ai-catalog.php --check
+    fi
+
     changed_php="$(git diff --cached --name-only --diff-filter=ACM | rg '\.php$' || true)"
     if [[ -n "$changed_php" ]]; then
         while IFS= read -r file; do

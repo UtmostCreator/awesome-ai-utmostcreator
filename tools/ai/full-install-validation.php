@@ -460,6 +460,9 @@ function isJsoncLikePath(string $file): bool
     return str_starts_with($path, 'configs/vscode/')
         || $path === 'configs/karabiner/karabiner.json'
         || $path === '.vscode/settings.json'
+        || $path === 'opencode.jsonc'
+        || str_ends_with($path, '/opencode.json')
+        || str_ends_with($path, '/opencode.jsonc')
         || str_ends_with($path, 'copilot-vscode-settings.template.json');
 }
 

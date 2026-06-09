@@ -33,7 +33,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` — repo shape and doc drift.
 - `ai-verify.sh` (`ask`; scoped `AI_VERIFY_SCOPE=changed` variant `allow`) — to confirm changed-scope verification; expect a verify report.
 
-Denied: `ai-install-coverage`, `ai-test-select`, `run-repo-tests`, and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Reviewer evaluates; it does not mutate.
+Denied: `ai-install-coverage`, `ai-test-select`, `run-repo-tests`, and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Reviewer evaluates; it does not mutate.
 
 ## Mandatory sequence
 

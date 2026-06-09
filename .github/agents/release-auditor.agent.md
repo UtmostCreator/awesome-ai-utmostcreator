@@ -48,7 +48,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-diff-context.sh` / `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to confirm verification depth; expect diff bundle and test results.
 - `ai-doc-check.sh` / `check-file-refs.sh` / `ai-install-coverage.sh` — to catch drift and install gaps; expect lint and coverage results.
 
-Denied: write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Auditor inspects and verifies; it does not mutate or deploy.
+Denied: write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Auditor inspects and verifies; it does not mutate or deploy.
 
 ## Canonical References
 

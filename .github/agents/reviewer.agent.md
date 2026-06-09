@@ -58,7 +58,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-diff-context.sh` / `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to confirm proof; expect diff bundle and test results.
 - `ai-doc-check.sh` / `check-file-refs.sh` / `ai-file-freshness.sh` — to catch drift; expect lint and freshness results.
 
-Denied: write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre/post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Reviewer inspects and verifies; it does not mutate.
+Denied: write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Reviewer inspects and verifies; it does not mutate.
 
 ## Git Review Flow
 
