@@ -2351,6 +2351,11 @@ class InstallerSafetyTest extends TestCase
             $this->assertContains('.github/agents/architecture-plan.agent.md', $agents);
             $this->assertContains('.github/agents/upgrade.agent.md', $agents);
 
+            // Agent-creator optional agents reference the deterministic static validator;
+            // full-governance installs must ship it with its public schema contract.
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'tools' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'validate-agent-spec.php');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'schemas' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'agent-spec.schema.json');
+
             // Hidden internal-only optional agents must NOT be rendered into the Copilot surface.
             $this->assertNotContains('.github/agents/ui-builder.agent.md', $agents, 'hidden optional agents must stay internal-only');
 
