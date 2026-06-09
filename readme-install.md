@@ -437,6 +437,12 @@ When you install `full-governance` into a target repo, these files are created:
 | `CLAUDE.md`             | (generated)                                            | Claude-specific thin adapter             |
 | `.vscode/settings.json` | `templates/core/copilot-vscode-settings.template.json` | VS Code sandbox + auto-approve rules     |
 
+> **Existing `.vscode/settings.json` is never overwritten.** If the target repo already has a
+> `.vscode/settings.json`, the installer preserves it byte-for-byte. When the kit's recommended
+> settings differ from your file, the recommended version is written to
+> `.ai/templates-new/.vscode/settings.json` instead. Open that file after install and borrow the
+> rules you want into your own `.vscode/settings.json`. The post-install output points you to it.
+
 ### `.github/` — Copilot Adapter
 
 | Installed File                           | Purpose                                        |

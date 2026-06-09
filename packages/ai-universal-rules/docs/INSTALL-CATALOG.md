@@ -26,7 +26,7 @@ Deterministic catalog generated from installer registries.
 - `capabilities-extended` (2 items)
 - `capabilities-governance` (2 items)
 - `policy-pack` (3 items)
-- `scripts-pack` (45 items)
+- `scripts-pack` (46 items)
 - `hooks-pack` (8 items)
 - `ci-pack` (2 items)
 - `evidence-pack` (2 items)
@@ -39,7 +39,7 @@ Deterministic catalog generated from installer registries.
 - `service-boundary-pack` (1 items)
 - `mcp-boundaries-pack` (1 items)
 - `advisor-pack` (4 items)
-- `target-tools-pack` (45 items)
+- `target-tools-pack` (71 items)
 - `shared-templates-pack` (4 items)
 - `package-source-pack` (7 items)
 - `kit-authoring-pack` (4 items)
@@ -54,6 +54,7 @@ Deterministic catalog generated from installer registries.
 - `preview-file` -> `scripts/ai/preview-file.sh`
 - `query-usage` -> `scripts/ai/query-usage.sh`
 - `git-forensics` -> `scripts/ai/git-forensics.sh`
+- `git-branch-origin` -> `scripts/ai/git-branch-origin.sh`
 - `gh-pr-context` -> `scripts/ai/gh-pr-context.sh`
 - `ai-doc-check` -> `scripts/ai/ai-doc-check.sh`
 - `ai-diff-context` -> `scripts/ai/ai-diff-context.sh`

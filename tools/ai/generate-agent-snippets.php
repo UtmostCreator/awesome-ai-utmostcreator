@@ -121,7 +121,10 @@ foreach ($dirs as $dir) {
             $lineEnd = $nl === false ? $len : $nl;
             $line = substr($raw, $cursor, $lineEnd - $cursor);
             $isMarker = (bool) preg_match('/^\s*#\s*---/', $line);
-            $isEntry = (bool) preg_match('/^\s+[\'"][^\'"]+[\'"]\s*:\s*(?:allow|ask|deny)\s*$/', $line);
+            // Key may be single- or double-quoted and may contain the opposite quote
+            // character inside it (e.g. 'git status; echo "x"': allow), so match a
+            // complete quoted token rather than a quote-free run.
+            $isEntry = (bool) preg_match('/^\s+(?:\'[^\']+\'|"[^"]+")\s*:\s*(?:allow|ask|deny)\s*$/', $line);
             if ($firstLine) {
                 // first line is the start marker itself
                 $firstLine = false;

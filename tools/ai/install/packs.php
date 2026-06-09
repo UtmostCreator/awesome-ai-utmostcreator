@@ -6,6 +6,44 @@ require_once __DIR__ . '/profiles.php';
 
 function aiInstallerPackRegistry(): array
 {
+    $targetToolInstallerFiles = array_map(
+        static fn(string $path): array => [
+            'type' => 'file',
+            'source' => $path,
+            'target' => $path,
+            'core' => false,
+            'merge_strategy' => 'replace',
+            'required' => true,
+        ],
+        [
+            'tools/ai/install/backup.php',
+            'tools/ai/install/base.sh',
+            'tools/ai/install/config.php',
+            'tools/ai/install/copilot-agent-renderer.php',
+            'tools/ai/install/copilot-agent-tool-registry.php',
+            'tools/ai/install/core.php',
+            'tools/ai/install/docs.php',
+            'tools/ai/install/generated-header.php',
+            'tools/ai/install/lib.sh',
+            'tools/ai/install/manifest.php',
+            'tools/ai/install/markers.php',
+            'tools/ai/install/migrations.php',
+            'tools/ai/install/packs.php',
+            'tools/ai/install/planner.php',
+            'tools/ai/install/profiles.php',
+            'tools/ai/install/project-yaml.php',
+            'tools/ai/install/runtime-copilot.sh',
+            'tools/ai/install/runtime-opencode.sh',
+            'tools/ai/install/script-registry.php',
+            'tools/ai/install/script-runner.php',
+            'tools/ai/install/toolchain.php',
+            'tools/ai/install/toolchain-registry.php',
+            'tools/ai/install/verify-install-result.php',
+            'tools/ai/install/verify-manifest.php',
+            'tools/ai/install/verify-no-overwrite.php',
+        ]
+    );
+
     return [
         'setup-docs' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -227,7 +265,10 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/catalog.json', 'target' => '.ai/catalog.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'docs/ai/package', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
-            ['type' => 'dir', 'source' => 'tools/ai/install', 'target' => 'tools/ai/install', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            // Source-repo-only interactive shellcheck batches are intentionally
+            // excluded from installed targets; target verification uses
+            // scripts/ai/ai-verify.sh instead.
+            ...$targetToolInstallerFiles,
             ['type' => 'dir', 'source' => 'tools/ai/commands', 'target' => 'tools/ai/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai.php', 'target' => 'tools/ai/ai.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai_catalog_lib.php', 'target' => 'tools/ai/ai_catalog_lib.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
