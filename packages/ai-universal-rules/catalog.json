@@ -42,7 +42,7 @@
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 4,
         "package:operations-doc": 6,
-        "package:optional-template": 14,
+        "package:optional-template": 16,
         "package:package-capability": 42,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
@@ -593,6 +593,14 @@
         {
             "scope": "package",
             "type": "optional-template",
+            "name": "Agent Builder",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-builder.md",
+            "runtime": "optional",
+            "description": "Use to request a new AI agent in <PROJECT_NAME>; alias for the governed agent-creator supervisor pipeline, not a free-form agent writer"
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
             "name": "Agent Creator Runtime Guardian",
             "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-runtime-guardian.md",
             "runtime": "optional",
@@ -669,6 +677,14 @@
             "path": "packages/ai-universal-rules/templates/optional/agents/infra-auditor.md",
             "runtime": "optional",
             "description": "Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>"
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
+            "name": "Mentor",
+            "path": "packages/ai-universal-rules/templates/optional/agents/mentor.md",
+            "runtime": "optional",
+            "description": "Use to coach the human through a task in <PROJECT_NAME> by applying Mentor Mode instead of handing over a full solution by default"
         },
         {
             "scope": "package",

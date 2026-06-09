@@ -2349,6 +2349,8 @@ class InstallerSafetyTest extends TestCase
             // not rendered for Copilot.
             $this->assertContains('.github/agents/bugfix.agent.md', $agents, 'optional Copilot agents must be merged into .github/agents');
             $this->assertContains('.github/agents/architecture-plan.agent.md', $agents);
+            $this->assertContains('.github/agents/agent-builder.agent.md', $agents);
+            $this->assertContains('.github/agents/mentor.agent.md', $agents);
             $this->assertContains('.github/agents/upgrade.agent.md', $agents);
 
             // Hidden internal-only optional agents must NOT be rendered into the Copilot surface.
@@ -2356,6 +2358,8 @@ class InstallerSafetyTest extends TestCase
 
             // Optional OpenCode agents land in their own namespace, never clobbered.
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents-optional' . DIRECTORY_SEPARATOR . 'bugfix.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents-optional' . DIRECTORY_SEPARATOR . 'agent-builder.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents-optional' . DIRECTORY_SEPARATOR . 'mentor.md');
 
             // Optional Copilot agents must be VS Code-native rendered, not raw OpenCode frontmatter.
             $optional = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents' . DIRECTORY_SEPARATOR . 'bugfix.agent.md');
