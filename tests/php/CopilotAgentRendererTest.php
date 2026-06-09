@@ -7,6 +7,7 @@ namespace Tests;
 use PHPUnit\Framework\TestCase;
 
 require_once dirname(__DIR__, 2) . '/tools/ai/install/copilot-agent-renderer.php';
+require_once dirname(__DIR__, 2) . '/tools/ai/install/core.php';
 
 class CopilotAgentRendererTest extends TestCase
 {
@@ -40,6 +41,27 @@ class CopilotAgentRendererTest extends TestCase
         $path = $this->repoRoot . '/packages/ai-universal-rules/templates/core/agents/researcher.md';
         $this->assertFileExists($path, 'researcher template must exist');
         return (string) file_get_contents($path);
+    }
+
+    private function removeTree(string $path): void
+    {
+        if (!file_exists($path)) {
+            return;
+        }
+
+        if (is_file($path) || is_link($path)) {
+            unlink($path);
+            return;
+        }
+
+        foreach (scandir($path) ?: [] as $entry) {
+            if ($entry === '.' || $entry === '..') {
+                continue;
+            }
+            $this->removeTree($path . DIRECTORY_SEPARATOR . $entry);
+        }
+
+        rmdir($path);
     }
 
     // ----- Architect (read-only) -----
@@ -118,6 +140,7 @@ class CopilotAgentRendererTest extends TestCase
             $this->assertStringContainsString('edit/editFiles', $m[1]);
             $this->assertStringContainsString('edit/createFile', $m[1]);
             $this->assertStringContainsString('edit/createDirectory', $m[1]);
+            $this->assertStringNotContainsString('delete', strtolower($m[1]));
             $this->assertStringContainsString('execute/runInTerminal', $m[1]);
             $this->assertStringContainsString('execute/testFailure', $m[1]);
         } else {
@@ -125,10 +148,40 @@ class CopilotAgentRendererTest extends TestCase
         }
     }
 
+    public function testImplementerOutputPrefersInPlaceEdits(): void
+    {
+        $out = aiInstallerRenderCopilotAgent($this->implementerTemplate(), 'implementer', '/project/scripts/ai');
+        $this->assertStringContainsString('Prefer in-place file edits over deleting and recreating files', $out);
+    }
+
     public function testImplementerOutputHasShellBoundarySection(): void
     {
         $out = aiInstallerRenderCopilotAgent($this->implementerTemplate(), 'implementer', '/project/scripts/ai');
         $this->assertStringContainsString('## Shell Boundary', $out);
+    }
+
+    public function testCopilotAgentCopyRefreshesWithoutDeletingDestinationTree(): void
+    {
+        $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'copilot_agent_copy_' . uniqid('', true);
+        $src = $tmp . DIRECTORY_SEPARATOR . 'src';
+        $dest = $tmp . DIRECTORY_SEPARATOR . 'dest';
+
+        mkdir($src, 0777, true);
+        mkdir($dest, 0777, true);
+        file_put_contents($src . DIRECTORY_SEPARATOR . 'implementer.md', $this->implementerTemplate());
+        file_put_contents($dest . DIRECTORY_SEPARATOR . 'user-authored.agent.md', "---\nname: User Authored\n---\n");
+
+        try {
+            aiInstallerCopyDirAsCopilotAgents($src, $dest, '/project/scripts/ai');
+
+            $this->assertFileExists($dest . DIRECTORY_SEPARATOR . 'implementer.agent.md');
+            $this->assertFileExists(
+                $dest . DIRECTORY_SEPARATOR . 'user-authored.agent.md',
+                'Copilot agent refresh must not delete sibling/user-authored files'
+            );
+        } finally {
+            $this->removeTree($tmp);
+        }
     }
 
     // ----- Researcher (execute, no edit) -----

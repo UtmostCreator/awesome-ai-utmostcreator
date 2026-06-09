@@ -2298,9 +2298,9 @@ class InstallerSafetyTest extends TestCase
 
     /**
      * Regression: the optional-agents-copilot-pack and the base adapter-copilot pack both target
-     * .github/agents. The base pack clobber-renders that directory; the optional pack must MERGE
-     * its agents in without being wiped. Previously the optional Copilot agents never shipped
-     * because both copiers deleted the destination tree, so the last writer won.
+     * .github/agents. Both packs must refresh files in place or merge agents without wiping the
+     * directory. Previously the optional Copilot agents never shipped because both copiers deleted
+     * the destination tree, so the last writer won.
      */
     public function testFullGovernanceShipsBothBaseAndOptionalCopilotAgents(): void
     {
@@ -2373,8 +2373,8 @@ class InstallerSafetyTest extends TestCase
             $validate = $this->runTool('cd ' . escapeshellarg($target) . ' && php tools/ai/validate-install-surface.php --strict');
             $this->assertSame(0, $validate['exit'], $validate['stdout'] . $validate['stderr']);
 
-            // Re-install with --force: base pack clobber-renders the shared dir, optional agents
-            // must be re-merged (not lost) and the agent set must be stable (idempotent).
+            // Re-install with --force: base pack refreshes files in place, optional agents must be
+            // re-merged (not lost), and the agent set must be stable (idempotent).
             $forceResult = $this->runTool(implode(' ', [
                 escapeshellarg((string) PHP_BINARY),
                 'tools/ai/install-ai-kit.php',

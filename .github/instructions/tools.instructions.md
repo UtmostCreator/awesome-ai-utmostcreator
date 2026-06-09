@@ -56,6 +56,8 @@ Do not run scripts outside `scripts/ai/` unless explicitly required by the task.
 
 Do not run destructive commands: `rm -rf`, `git push --force`, `git reset --hard`, deploy commands.
 
+For Copilot terminal/sandbox use, simple read-only git commands and exact inventory commands may be auto-approved. Do not rely on auto-approval for compound shell beyond explicitly allowlisted read-only forms. Heredocs, inline interpreters (`python3`, `php -r`), write redirects, destructive git, and network installer pipes must stay blocked or require explicit approval.
+
 ## Path Note
 
 Scripts should be run from the repository root. When the script location is unclear, use the repository-root script path:

@@ -215,10 +215,9 @@ function aiInstallerRun(array $argv): int
         } elseif (($item['install_type'] ?? '') === 'copilot-agents') {
             $scriptsRoot = $config['targetRoot'] . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai';
             // Two packs target .github/agents: the base adapter-copilot pack and the
-            // optional-agents-copilot-pack. Whichever runs is allowed to clobber-render ONLY when it
-            // is the sole writer for this target AND nothing has written it yet this run. As soon as
-            // a second writer exists (or the dir was already written this run), every writer merges,
-            // so neither pack wipes the other's agents via delete-tree — independent of pack order.
+            // optional-agents-copilot-pack. Writers refresh rendered files in place. As soon as a
+            // second writer exists (or the dir was already written this run), every writer uses the
+            // merge path so neither pack skips or replaces the other's agents.
             $hasCoWriter = (int) ($copilotAgentsWritersByTarget[$item['target']] ?? 1) > 1;
             $mergeIntoExisting = ($item['merge_into_existing'] ?? false) === true
                 || $hasCoWriter

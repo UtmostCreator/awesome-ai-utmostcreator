@@ -139,10 +139,10 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
 /**
  * Copies the source agents directory to dest, rendering each .md file as a Copilot .agent.md.
  *
- * This is the clobber variant used by the base adapter-copilot pack: the destination tree is
- * removed first so a re-install/upgrade is deterministic. Optional Copilot agents that share the
- * same .github/agents target must instead use aiInstallerMergeDirAsCopilotAgents, which renders
- * into the existing directory without deleting sibling base agents.
+ * This is the refresh variant used by the base adapter-copilot pack: each rendered agent file is
+ * overwritten in place so diffs remain reviewable and sibling/user files are not deleted.
+ * Optional Copilot agents that share the same .github/agents target may also use
+ * aiInstallerMergeDirAsCopilotAgents when they need skip-if-exists semantics.
  *
  * @param string $src         Absolute path to source agents dir (OpenCode templates)
  * @param string $dest        Absolute path to destination dir (.github/agents)
@@ -157,9 +157,6 @@ function aiInstallerCopyDirAsCopilotAgents(string $src, string $dest, string $sc
     $destReal = file_exists($dest) ? realpath($dest) : false;
     if ($srcReal !== false && $destReal !== false && $srcReal === $destReal) {
         return;
-    }
-    if (file_exists($dest)) {
-        aiInstallerDeleteTree($dest);
     }
     aiInstallerMkdir($dest);
 
@@ -194,8 +191,8 @@ function aiInstallerMergeDirAsCopilotAgents(string $src, string $dest, string $s
 
 /**
  * Shared render loop for both copilot-agents copy variants. Renders every non-hidden source
- * agent template into $dest as <id>.agent.md via the Copilot renderer. The caller decides whether
- * the destination tree was cleared first (clobber) or kept (merge).
+ * agent template into $dest as <id>.agent.md via the Copilot renderer. Existing files are
+ * overwritten in place unless $skipExisting is true.
  *
  * @param string $src          Absolute path to source agents dir (OpenCode templates)
  * @param string $dest         Absolute path to destination dir (.github/agents); must already exist

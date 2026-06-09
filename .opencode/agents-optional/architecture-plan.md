@@ -7,6 +7,7 @@ temperature: 0.1
 argument-hint: 'Describe the goal, scope, and affected behavior'
 permission:
   edit: deny
+  task: ask
   bash:
     '*': deny
     'pwd': allow
@@ -69,6 +70,14 @@ permission:
     'bash scripts/ai/common.sh*': deny
     'php tools/ai/validate-*.php *': allow
     'grep *': ask
+    # --- safe compound read-only helpers; last-match wins ---
+    'ls -1 scripts/ai/*.sh | sort': allow
+    'git status --short; echo "---BRANCH---"; git branch --show-current': allow
+    'git status --short && git branch --show-current': allow
+    # --- hard stop for ad hoc mutation scripts; last-match wins ---
+    'python3 *': deny
+    'php -r *': deny
+    '* <<*': deny
 ---
 
 You are the architecture-plan agent for `awesome-ai-utmostcreator`.
