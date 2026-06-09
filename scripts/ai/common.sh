@@ -15,6 +15,11 @@ AI_EVENT_LOG="${AI_EVENT_LOG:-${COPILOT_EVENT_LOG:-${AI_LOG_DIR}/tool-usage.json
 COPILOT_EVENT_LOG="${COPILOT_EVENT_LOG:-$AI_EVENT_LOG}"
 AI_SESSION_GENERATED_DIR="${AI_SESSION_GENERATED_DIR:-docs/ai/generated/sessions}"
 
+
+# Keep repo-local git reads working inside IDE sandboxes that cannot access the
+# user's global include chain (for example ~/.gitconfig-work on macOS).
+export GIT_CONFIG_GLOBAL="${GIT_CONFIG_GLOBAL:-/dev/null}"
+
 if [[ -z "${NO_COLOR:-}" ]] && [[ -t 2 ]]; then
     _C_RESET=$'\033[0m'
     _C_RED=$'\033[0;31m'

@@ -56,6 +56,44 @@ test_excludes_generated() {
 }
 run_test "excludes docs/ai/generated from doc checks" test_excludes_generated
 
+run_with_fake_lychee() {
+    local tmpbin record
+    tmpbin="$(mktemp -d)"
+    record="$tmpbin/lychee.calls"
+    cat >"$tmpbin/lychee" <<EOF
+#!/usr/bin/env bash
+printf '%s\n' "\$*" >>"$record"
+exit 0
+EOF
+    chmod +x "$tmpbin/lychee"
+
+    local work="$tmpbin/work"
+    mkdir -p "$work/docs"
+    printf '# t\n' >"$work/README.md"
+    printf '# t\n' >"$work/docs/test.md"
+    (
+        cd "$work"
+        PATH="$tmpbin:$PATH" AI_LOG_DIR="$TMP/logs-links" AI_EVENT_LOG="$TMP/logs-links/ev.jsonl" \
+            "$@" "$BASH_BIN" "$SCRIPT" links >/dev/null 2>&1 || true
+    )
+    cat "$record" 2>/dev/null || true
+    rm -rf "$tmpbin"
+}
+
+test_links_offline_by_default() {
+    local calls
+    calls="$(run_with_fake_lychee env)"
+    [[ "$calls" == *"--offline"* ]]
+}
+run_test "links mode runs lychee offline by default" test_links_offline_by_default
+
+test_links_network_opt_in() {
+    local calls
+    calls="$(run_with_fake_lychee env VERIFY_LINKS_NETWORK=1)"
+    [[ -n "$calls" && "$calls" != *"--offline"* ]]
+}
+run_test "VERIFY_LINKS_NETWORK=1 runs lychee without offline" test_links_network_opt_in
+
 # markdownlint mode
 if command -v markdownlint >/dev/null 2>&1; then
     test_markdownlint() {
