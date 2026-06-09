@@ -42,7 +42,7 @@
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 4,
         "package:operations-doc": 6,
-        "package:optional-template": 15,
+        "package:optional-template": 14,
         "package:package-capability": 42,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
@@ -589,14 +589,6 @@
             "path": "packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md",
             "runtime": "canonical",
             "description": "- unresolved placeholders"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "Agent Builder",
-            "path": "packages/ai-universal-rules/templates/optional/agents/agent-builder.md",
-            "runtime": "optional",
-            "description": "Use to request a new AI agent in <PROJECT_NAME>; alias for the governed agent-creator supervisor pipeline, not a free-form agent writer"
         },
         {
             "scope": "package",
