@@ -41,13 +41,28 @@ JOBS=()
 NAMES=()
 LOGS=()
 
+# Resolve a hard-timeout launcher once. Each job is bounded by SUITE_TIMEOUT so a
+# hung suite is killed and reported as failed instead of blocking the run forever.
+# Falls back to running unbounded only when no timeout binary is available.
+TIMEOUT_BIN=""
+if command -v timeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="timeout"
+elif command -v gtimeout >/dev/null 2>&1; then
+    TIMEOUT_BIN="gtimeout"
+fi
+
 run_job() {
     local name="$1"
     shift
     local log="$TMP_DIR/${name//[^A-Za-z0-9_.-]/_}.log"
 
     echo "==> start: $name"
-    ("$@") >"$log" 2>&1 &
+    if [[ -n "$TIMEOUT_BIN" ]]; then
+        ("$TIMEOUT_BIN" --kill-after=10s "$SUITE_TIMEOUT" "$@") >"$log" 2>&1 &
+    else
+        echo "==> warn: no timeout/gtimeout binary; running '$name' WITHOUT a time limit" >&2
+        ("$@") >"$log" 2>&1 &
+    fi
     JOBS+=("$!")
     NAMES+=("$name")
     LOGS+=("$log")

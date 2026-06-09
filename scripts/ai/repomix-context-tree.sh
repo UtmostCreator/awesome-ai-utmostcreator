@@ -116,7 +116,6 @@ abs_path() {
 
 safe_name() {
     local name="$1"
-    name="${name//\//}"
     name="${name//\//__}"
     name="${name// /_}"
     printf '%s\n' "$name"
@@ -673,8 +672,12 @@ run_pack() {
         packed=$((packed + 1))
     done
 
-    # while loop runs in subshell in some shells; verify bundles instead of relying on counter
-    ls "$BUNDLES_DIR" >/dev/null 2>&1 || die "no bundles generated"
+    # The while loop runs in a subshell in some shells, so $packed is unreliable
+    # here. Verify that at least one bundle file was actually produced rather than
+    # that the (always-present) bundles directory merely exists.
+    if ! find "$BUNDLES_DIR" -type f -print -quit 2>/dev/null | grep -q .; then
+        die "no bundles generated"
+    fi
 }
 
 run_all() {

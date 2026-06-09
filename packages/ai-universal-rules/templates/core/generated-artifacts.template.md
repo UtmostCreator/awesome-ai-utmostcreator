@@ -11,7 +11,7 @@ Files here are **not** tracked in git and are safe to delete and regenerate.
 | Review what was installed        | `install.json`                            |
 | See package verification results | `package-verify.json`                     |
 | Run the advisor pipeline         | `advisor-context.md`, `advisor-prompt.md` |
-| Check adapter drift              | `advisor-drift.md`                        |
+| Check advisor scorecard drift    | `advisor-drift.md`                        |
 | Verify the full install          | `verify.json`                             |
 | See repository structure data    | `repo-structure.json`                     |
 | Browse all artifacts at a glance | `artifacts.json`                          |
@@ -30,7 +30,7 @@ These are consumed by the verification or advisor pipeline. Do not delete them b
 - `advisor-context.md` — packed context for advisor LLM prompt
 - `advisor-context.index.md` — index of packed context files
 - `advisor-prompt.md` — assembled advisor prompt
-- `advisor-drift.md` — adapter drift report
+- `advisor-drift.md` — advisor scorecard drift report (per-area score deltas vs. the saved baseline; not adapter/template parity — see `docs/ai/validation.md`)
 - `install-manifest.json` — detailed install manifest
 - `install-instructions.json` — generated instruction file list
 - `repo-structure.json` — repository structure snapshot

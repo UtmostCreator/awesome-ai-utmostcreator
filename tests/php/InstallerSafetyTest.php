@@ -765,6 +765,50 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testExistingVscodeSettingsPreservedAndRecommendedSurfacedForBorrowing(): void
+    {
+        require_once self::$repoRoot . '/tools/ai/install/core.php';
+
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_vscode_refresh_' . uniqid('', true);
+        mkdir($root . '/src/.vscode', 0700, true);
+        mkdir($root . '/tgt/.vscode', 0700, true);
+        // Kit's recommended settings vs the user's own pre-existing settings.
+        file_put_contents($root . '/src/.vscode/settings.json', "{\"kit\":\"recommended\"}\n");
+        file_put_contents($root . '/tgt/.vscode/settings.json', "{\"user\":\"keepme\"}\n");
+
+        $config = ['sourceRoot' => $root . '/src', 'targetRoot' => $root . '/tgt'];
+        $item = [
+            'type' => 'file',
+            'source' => '.vscode/settings.json',
+            'target' => '.vscode/settings.json',
+            'action' => 'SKIP_EXISTING_UNMANAGED',
+            'merge_strategy' => 'skip-if-exists',
+        ];
+
+        try {
+            // Existing user .vscode/settings.json must be preserved; recommended version is surfaced
+            // under .ai/templates-new/.vscode/settings.json for the user to open and borrow from.
+            $rel = aiInstallerOfferTemplateRefresh($config, $item);
+            $this->assertSame('.ai/templates-new/.vscode/settings.json', $rel, 'recommended settings must be surfaced at the path the post-install pointer reports');
+            $this->assertSame(
+                "{\"kit\":\"recommended\"}\n",
+                (string) file_get_contents($root . '/tgt/.ai/templates-new/.vscode/settings.json'),
+                'sidecar must contain the kit recommended settings'
+            );
+            $this->assertSame(
+                "{\"user\":\"keepme\"}\n",
+                (string) file_get_contents($root . '/tgt/.vscode/settings.json'),
+                'user .vscode/settings.json must never be overwritten'
+            );
+
+            // Fresh install (no existing user file) -> no sidecar; the normal copy writes settings directly.
+            unlink($root . '/tgt/.vscode/settings.json');
+            $this->assertNull(aiInstallerOfferTemplateRefresh($config, $item));
+        } finally {
+            $this->removeTree($root);
+        }
+    }
+
     public function testExtraDocsFromProjectYmlRenderAndSurviveReRender(): void
     {
         require_once self::$repoRoot . '/tools/ai/install/core.php';

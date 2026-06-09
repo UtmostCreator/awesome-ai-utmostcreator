@@ -374,6 +374,34 @@ function aiInstallerRun(array $argv): int
         }
     }
 
+    // Preserved-template pointer: when a skip-if-exists template (notably .vscode/settings.json)
+    // was kept because the user already had the file, the kit's recommended version is surfaced
+    // under .ai/templates-new/<path>. Point the user to it so they can open it and borrow rules;
+    // the user's own file is never overwritten.
+    if ($templateRefreshes !== []) {
+        $vscodeRefresh = null;
+        foreach ($templateRefreshes as $refreshRel) {
+            if (str_contains((string) $refreshRel, '.vscode/settings.json')) {
+                $vscodeRefresh = (string) $refreshRel;
+                break;
+            }
+        }
+        aiInstallerLog('');
+        aiInstallerLog('ℹ  PRESERVED YOUR EXISTING FILES — recommended versions saved for review:');
+        if ($vscodeRefresh !== null) {
+            aiInstallerLog('   Your .vscode/settings.json was kept as-is (not overwritten).');
+            aiInstallerLog('   The kit\'s recommended VS Code settings are here — open it and borrow what you want:');
+            aiInstallerLog('     ' . $vscodeRefresh);
+        }
+        foreach ($templateRefreshes as $refreshRel) {
+            if ((string) $refreshRel === $vscodeRefresh) {
+                continue;
+            }
+            aiInstallerLog('     ' . $refreshRel);
+        }
+        aiInstallerLog('');
+    }
+
     aiInstallerLog('next steps:');
     aiInstallerLog('1) ✏  Edit docs/ai/project-context.md — replace every <PLACEHOLDER> with real project facts');
     aiInstallerLog('2) ✏  Edit .github/instructions/frontend.instructions.md — replace <FRONTEND_PATH_GLOB>');
@@ -401,6 +429,7 @@ function aiInstallerRun(array $argv): int
             'missing_optional_tools' => $missingOptional,
             'backup' => $backupInfo,
             'placeholders' => $placeholderStatus,
+            'template_updates' => $templateRefreshes,
         ];
         $json = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
         file_put_contents((string) $config['outputJson'], $json);

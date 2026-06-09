@@ -192,7 +192,7 @@ if [[ "$OUTPUT_JSON" == "1" ]]; then
         candidates_json="$(printf '%s\n' "${scored[@]}" |
             sort -t' ' -k1,1n -k2,2n |
             jq -R -s 'split("\n") | map(select(length>0)) | map(
-                (./ " ") as $p | {priority: ($p[0]|tonumber), distance: ($p[1]|tonumber), name: $p[2], merge_base: $p[3]}
+                (. / " ") as $p | {priority: ($p[0]|tonumber), distance: ($p[1]|tonumber), name: $p[2], merge_base: $p[3]}
             )')"
     fi
     jq -cn \

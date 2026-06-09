@@ -131,7 +131,7 @@
 - `docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md`
 - `.github/copilot-instructions.md`
 - `.github/pull_request_template.md`
-- `.vscode/settings.json`
+- `.vscode/settings.json` (preserved if it already exists; the recommended version is then surfaced under `.ai/templates-new/.vscode/settings.json` for manual review)
 - `.github/instructions`
 - `.github/prompts`
 - `.github/skills`
