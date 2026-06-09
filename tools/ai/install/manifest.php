@@ -48,7 +48,7 @@ function aiInstallerBuildManifest(array $config, array $packs, array $plan): arr
         if (in_array($action, ['SKIP_EXISTING_UNMANAGED', 'SKIP_PROTECTED_CORE', 'CONFLICT_FOREIGN'], true)) {
             $rel = (string) ($item['target'] ?? '');
             if ($rel !== '' && is_array($existingManifest['files'][$rel] ?? null) && $action !== 'CONFLICT_FOREIGN') {
-                $files[$rel] = $existingManifest['files'][$rel];
+                $files[$rel] = aiInstallerNormalizeManifestFileMeta($existingManifest['files'][$rel], $item);
             }
             continue;
         }
@@ -269,6 +269,45 @@ function aiInstallerResolveOwnership(array $item, string $mergeStrategy): string
     }
 
     return $mergeStrategy === 'skip-if-exists' ? 'template' : 'owned';
+}
+
+/**
+ * Backfill required manifest metadata for preserved legacy file entries.
+ *
+ * Older target manifests may lack ownership metadata on files kept during reinstall
+ * (for example SKIP_EXISTING_UNMANAGED paths). Normalize the entry so strict
+ * validation can succeed without requiring --adopt.
+ *
+ * @param array<string,mixed> $meta Existing manifest metadata for one file.
+ * @param array<string,mixed> $item Current plan item for the same file.
+ * @return array<string,mixed>
+ */
+function aiInstallerNormalizeManifestFileMeta(array $meta, array $item): array
+{
+    $validOwnership = ['owned', 'template', 'rendered', 'patch-managed'];
+    $mergeStrategy = (string) ($meta['merge_strategy'] ?? ($item['merge_strategy'] ?? 'replace'));
+    $ownership = (string) ($meta['ownership'] ?? '');
+    if (!in_array($ownership, $validOwnership, true)) {
+        $ownership = aiInstallerResolveOwnership($item, $mergeStrategy);
+    }
+
+    $pack = (string) ($meta['pack'] ?? ($item['pack'] ?? 'unknown'));
+
+    $meta['managed'] = (bool) ($meta['managed'] ?? true);
+    $meta['merge_strategy'] = $mergeStrategy;
+    $meta['required'] = (bool) ($meta['required'] ?? true);
+    $meta['ownership'] = $ownership;
+    $meta['component'] = (string) ($meta['component'] ?? $pack);
+    $meta['runtimes'] = is_array($meta['runtimes'] ?? null)
+        ? array_values(array_map('strval', $meta['runtimes']))
+        : aiInstallerResolveRuntimes($pack);
+    $meta['pack'] = $pack;
+
+    if (!isset($meta['source']) && isset($item['source'])) {
+        $meta['source'] = (string) $item['source'];
+    }
+
+    return $meta;
 }
 
 /**
