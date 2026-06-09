@@ -4,9 +4,13 @@
   "chat.tools.terminal.ignoreDefaultAutoApproveRules": true,
   "chat.tools.terminal.blockDetectedFileWrites": true,
   "chat.tools.terminal.autoApprove": {
+    "/^ls\\s+-1\\s+scripts\\/ai\\/\\*\\.sh\\s+\\|\\s+sort$/": true,
+    "/^git\\s+status\\s+--short;\\s+echo\\s+\"---BRANCH---\";\\s+git\\s+branch\\s+--show-current$/": true,
+    "/^git\\s+status\\s+--short;\\s+git\\s+branch\\s+--show-current$/": true,
+    "/^git\\s+status\\s+--short\\s+&&\\s+git\\s+branch\\s+--show-current$/": true,
     "/^bash scripts\\/ai\\/(ai-search|ai-verify|ai-doc-check|ai-file-freshness|ai-install-coverage|preview-file|fd-files|rg-code|git-forensics|query-usage|ai-diff-context|pack-context|gh-pr-context|repomix-context-tree|repomix-scc-router|check-file-refs|repo-stats)\\.sh(\\s|$)/": true,
-    "/^git\\s+(status|diff|log|show|rev-parse|ls-files|blame|branch|tag|remote|describe|shortlog|merge-base|rev-list|config\\s+--get|cat-file|symbolic-ref|for-each-ref)\\b/": true,
-    "/\\brm\\b|\\bdel\\b|\\brmdir\\b|\\bgit\\s+push\\b|\\bgit\\s+reset\\b|\\bsudo\\b|curl\\s+.*\\|\\s*(sh|bash|zsh|python|python3|php|node|ruby)|wget\\s+.*\\|\\s*(sh|bash|zsh|python|python3|php|node|ruby)/": false
+    "/^git\\s+(status|diff|log|show|rev-parse|ls-files|blame|branch|tag|remote|describe|shortlog|merge-base|rev-list|config\\s+--get|cat-file|symbolic-ref|for-each-ref)\\b[^;&|<>`$()]*$/": true,
+    "/<<|>\\s*[^&]|\\$\\(|`|\\bpython3\\b|\\bpython\\b|\\bphp\\s+-r\\b|\\brm\\b|\\bdel\\b|\\brmdir\\b|\\bgit\\s+push\\b|\\bgit\\s+reset\\b|\\bsudo\\b|curl\\s+.*\\|\\s*(sh|bash|zsh|python|python3|php|node|ruby)|wget\\s+.*\\|\\s*(sh|bash|zsh|python|python3|php|node|ruby)/": false
   },
   "chat.agent.sandbox.enabled": "on",
   "chat.agent.networkFilter": true,

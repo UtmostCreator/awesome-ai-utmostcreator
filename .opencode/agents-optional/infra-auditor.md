@@ -10,6 +10,7 @@ capabilities:
   - dependency-upgrade
 permission:
   edit: deny
+  task: ask
   bash:
     '*': deny
     'pwd': allow
@@ -73,6 +74,14 @@ permission:
     'php tools/ai/validate-*.php *': allow
     'composer validate*': allow
     'grep *': ask
+    # --- safe compound read-only helpers; last-match wins ---
+    'ls -1 scripts/ai/*.sh | sort': allow
+    'git status --short; echo "---BRANCH---"; git branch --show-current': allow
+    'git status --short && git branch --show-current': allow
+    # --- hard stop for ad hoc mutation scripts; last-match wins ---
+    'python3 *': deny
+    'php -r *': deny
+    '* <<*': deny
 ---
 
 You are the infra auditor for `awesome-ai-utmostcreator`.

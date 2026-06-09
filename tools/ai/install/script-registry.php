@@ -99,6 +99,16 @@ function aiInstallerScriptRegistry(): array
             'supports_dry_run' => false,
             'default_args' => [],
         ],
+        'git-branch-origin' => [
+            'label' => 'Resolve branch origin, merge base, and branch distance',
+            'source_path' => 'scripts/ai/git-branch-origin.sh',
+            'installed_path' => 'scripts/ai/git-branch-origin.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'git'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => ['--json'],
+        ],
         'gh-pr-context' => [
             'label' => 'GitHub PR context wrapper',
             'source_path' => 'scripts/ai/gh-pr-context.sh',

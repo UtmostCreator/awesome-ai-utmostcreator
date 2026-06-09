@@ -132,6 +132,7 @@ Stop and ask or report a blocker when:
 - Conflict avoidance notes: `Keep repo-wide and path-specific guidance complementary.`
 - Global or shared rule sources: `organization instructions, user-level instructions`
 - Stronger VS Code posture: combine fine-grained custom-agent tools, terminal auto-approval allowlists, repo hook policy, and sandbox/network restrictions instead of relying on prompts alone.
+- Copilot terminal posture: allow simple read-only git and inventory commands, but do not auto-approve heredocs, inline interpreters (`python3`, `php -r`), write redirects, destructive git, or piped network installers; keep sandbox and network filters enabled.
 - Local evidence artifacts default to `.ai-logs/` as documented in `.ai-logs/README.md`.
 - Do not assume prompt file support on every Copilot surface.
 - Do not assume custom-agent properties, handoffs, or advanced workflows behave the same on every Copilot surface.

@@ -119,6 +119,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/repomix-freshness.sh', 'target' => 'scripts/ai/repomix-freshness.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/repomix-ensure-fresh.sh', 'target' => 'scripts/ai/repomix-ensure-fresh.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/git-forensics.sh', 'target' => 'scripts/ai/git-forensics.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/git-branch-origin.sh', 'target' => 'scripts/ai/git-branch-origin.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/gh-pr-context.sh', 'target' => 'scripts/ai/gh-pr-context.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/preview-file.sh', 'target' => 'scripts/ai/preview-file.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             // tests/scripts/ai/test-preview-file.sh is source-repo-only — not installed to target projects

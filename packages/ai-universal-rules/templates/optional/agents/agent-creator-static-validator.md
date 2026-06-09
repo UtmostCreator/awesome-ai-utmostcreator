@@ -11,6 +11,7 @@ capabilities:
 permission:
   todowrite: allow
   edit: deny
+  task: ask
   bash:
     '*': deny
     'pwd': allow
@@ -62,6 +63,14 @@ permission:
     'bash scripts/ai/prune-shipped-targets.sh *': deny
     'bash scripts/ai/watch-loop.sh *': deny
     'bash scripts/ai/common.sh*': deny
+    # --- safe compound read-only helpers; last-match wins ---
+    'ls -1 scripts/ai/*.sh | sort': allow
+    'git status --short; echo "---BRANCH---"; git branch --show-current': allow
+    'git status --short && git branch --show-current': allow
+    # --- hard stop for ad hoc mutation scripts; last-match wins ---
+    'python3 *': deny
+    'php -r *': deny
+    '* <<*': deny
     'php tools/ai/validate-agent-spec.php *': allow
 ---
 

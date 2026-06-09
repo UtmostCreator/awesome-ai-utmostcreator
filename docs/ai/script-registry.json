@@ -8,6 +8,7 @@
     "preview-file": {"source_path":"scripts/ai/preview-file.sh","installed_path":"scripts/ai/preview-file.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "query-usage": {"source_path":"scripts/ai/query-usage.sh","installed_path":"scripts/ai/query-usage.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "git-forensics": {"source_path":"scripts/ai/git-forensics.sh","installed_path":"scripts/ai/git-forensics.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
+    "git-branch-origin": {"source_path":"scripts/ai/git-branch-origin.sh","installed_path":"scripts/ai/git-branch-origin.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "gh-pr-context": {"source_path":"scripts/ai/gh-pr-context.sh","installed_path":"scripts/ai/gh-pr-context.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "ai-doc-check": {"source_path":"scripts/ai/ai-doc-check.sh","installed_path":"scripts/ai/ai-doc-check.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "ai-diff-context": {"source_path":"scripts/ai/ai-diff-context.sh","installed_path":"scripts/ai/ai-diff-context.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},

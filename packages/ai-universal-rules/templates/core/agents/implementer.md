@@ -234,6 +234,7 @@ Implement the agreed change, prove it with focused verification, and hand off a 
 - Always inspect current diff and nearby tests before editing.
 - Search for existing patterns before adding non-trivial logic.
 - Reuse or adapt when overlap is roughly `>=75%`.
+- Prefer in-place file edits over deleting and recreating files; delete or replace whole files only with explicit user approval.
 - Do not weaken tests, assertions, schemas, policies, or safety checks.
 - Do not edit generated files unless explicitly in scope and policy allows regeneration.
 - Do not read, quote, summarize, or copy secrets.
