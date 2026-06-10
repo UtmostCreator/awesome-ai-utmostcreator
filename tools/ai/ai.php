@@ -76,6 +76,8 @@ Commands:
                  files and .ai/ state unless --purge. Default is --dry-run.
   packs          List installer profiles and packs
   placeholders   Scan and manage unresolved placeholders
+                 Use --apply to substitute registry-mapped tokens from .ai/project.yml
+                 (optionally scoped with --files=a,b,c); --fail for strict gate
   hooks          Hook wiring and status helpers (compatibility surface)
   toolchain      Check/install-plan/apply safe AI toolchain dependencies
   run-script     Run approved scripts-pack helper scripts by registry id
@@ -130,6 +132,8 @@ Examples:
   php tools/ai/ai.php descriptors --list
   php tools/ai/ai.php descriptors --copy-out --name manifest.json --apply
   php tools/ai/ai.php placeholders --fail
+  php tools/ai/ai.php placeholders --apply
+  php tools/ai/ai.php placeholders --apply --files=AGENTS.md,docs/ai/project-context.md
   php tools/ai/ai.php version
 TXT;
 

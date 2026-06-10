@@ -47,6 +47,7 @@ function aiInstallerPackRegistry(): array
     return [
         'setup-docs' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/placeholders.json', 'target' => '.ai/placeholders.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/agents.md', 'target' => 'docs/ai/agents.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/agent-script-access.md', 'target' => 'docs/ai/agent-script-access.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/adapter-contract.md', 'target' => 'docs/ai/adapter-contract.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -257,6 +258,7 @@ function aiInstallerPackRegistry(): array
         ],
         'target-tools-pack' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/placeholders.json', 'target' => '.ai/placeholders.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             // Kit package descriptors are namespaced under the byte-protected .ai/ dir so they never
             // collide with a consumer project's own root manifest.json/catalog.json/package-lock.
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.json', 'target' => '.ai/kit-manifest.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -324,6 +326,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/manifest.yml', 'target' => '.ai/kit-manifest.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/package-lock.ai.json', 'target' => '.ai/package-lock.ai.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/PLACEHOLDERS.md', 'target' => 'PLACEHOLDERS.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/placeholders.json', 'target' => '.ai/placeholders.json', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/docs', 'target' => 'docs/ai/package', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/policies', 'target' => 'policies', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
         ],

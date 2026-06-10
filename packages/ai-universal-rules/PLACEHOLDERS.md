@@ -105,7 +105,17 @@ These placeholders appear in `docs/ai/project-context.md` (and related canonical
 
 ## Meta Placeholder
 
-`<PLACEHOLDER>` appears in installer log messages and docs as a generic stand-in for "any uppercase token". It is a documentation device, not a project value, so the installer does not substitute it.
+`<PLACEHOLDER>` appears in installer log messages and docs as a generic stand-in for "any uppercase token". `<PLACEHOLDER_NAME>` is the same device used in the format example at the top of this file. Both are documentation devices, not project values, so the installer does not substitute them.
+
+## Machine-Readable Registry
+
+This document has a machine-readable companion: `placeholders.json` (shipped from `packages/ai-universal-rules/placeholders.json`, installed as `.ai/placeholders.json`). It maps every token to its `required` flag, category, and `.ai/project.yml` key (`projectYmlKey`). Tooling reads the JSON registry:
+
+- the installer and `php tools/ai/verify-install-placeholders.php` derive the required-token gate from it,
+- `php tools/ai/ai.php placeholders --apply` substitutes mapped tokens from `.ai/project.yml` values,
+- `php tools/ai/validate-placeholders.php` fails when this file and the registry drift apart.
+
+When adding or removing a token, update both this file and `placeholders.json` in the same change.
 
 ## Notes
 
@@ -114,5 +124,6 @@ These placeholders appear in `docs/ai/project-context.md` (and related canonical
 - Delete sections that do not fit instead of leaving vague guidance behind.
 - Do not invent tool features that your target environment does not support.
 - Only fill capability placeholders with features you have verified for the target runtime.
-- Run `php tools/ai/validate-placeholders.php` to confirm every token used in templates is documented here.
+- Run `php tools/ai/validate-placeholders.php` to confirm every token used in templates is documented here and stays in sync with `placeholders.json`.
 - After install, run `php tools/ai/verify-install-placeholders.php` against the installed project to confirm no required placeholder remains unresolved.
+- Prefer filling `.ai/project.yml` and running `php tools/ai/ai.php placeholders --apply` over hand-editing each file.

@@ -43,6 +43,14 @@ function aiRunPlaceholders(string $root, array $args): int
 {
     $fail = in_array('--fail', $args, true);
     $interactive = in_array('--interactive', $args, true);
+    $apply = in_array('--apply', $args, true);
+    $applyResult = null;
+    if ($apply) {
+        // Registry-driven substitution: replace mapped tokens with concrete
+        // .ai/project.yml values before scanning, so the scan reports the
+        // post-apply state. Limited to --files=<a,b,c> when provided.
+        $applyResult = aiPlaceholderApplyFromProjectValues($root, aiParseArg($args, 'files'));
+    }
     $setValues = [];
     foreach ($args as $arg) {
         if (str_starts_with($arg, '--set')) {
@@ -105,11 +113,118 @@ function aiRunPlaceholders(string $root, array $args): int
         }
     }
 
-    $data = ['count' => count($hits), 'items' => $hits, 'mode' => $fail ? 'fail' : 'scan'];
+    $data = ['count' => count($hits), 'items' => $hits, 'mode' => $apply ? 'apply' : ($fail ? 'fail' : 'scan')];
+    if ($applyResult !== null) {
+        $data['apply'] = $applyResult;
+    }
     $status = $hits === [] ? 'ok' : ($fail ? 'failed' : 'warning');
     $written = aiCliWriteArtifact($root, 'placeholders', 'php tools/ai/ai.php placeholders', $data, $status, null, $hits === [] ? 'No unresolved placeholders found.' : 'Resolve placeholders before strict verification.');
     fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $status === 'failed' ? 1 : 0;
+}
+
+/**
+ * Substitute placeholder tokens from `.ai/project.yml` values, guided by the
+ * placeholders.json registry (only tokens marked substitute=true are touched;
+ * values that are empty or 'unknown' are skipped).
+ *
+ * @param string|null $filesArg comma-separated relative paths; null applies to default scan roots
+ * @return array<string,mixed> apply evidence for the artifact envelope
+ */
+function aiPlaceholderApplyFromProjectValues(string $root, ?string $filesArg): array
+{
+    $registry = aiPlaceholderRegistryLoad($root);
+    $values = aiInstallerLoadProjectValues($root, basename($root));
+    $map = aiInstallerProjectValuesPlaceholderMap($values);
+
+    $substitutable = null;
+    if ($registry !== null) {
+        $substitutable = [];
+        foreach ($registry['tokens'] as $entry) {
+            if (is_array($entry) && is_string($entry['token'] ?? null) && ($entry['substitute'] ?? false) === true) {
+                $substitutable[$entry['token']] = true;
+            }
+        }
+    }
+
+    $replacements = [];
+    foreach ($map as $token => $value) {
+        if ($value === '' || $value === 'unknown') {
+            continue;
+        }
+        if ($substitutable !== null && !isset($substitutable[$token])) {
+            continue;
+        }
+        $replacements[$token] = $value;
+    }
+
+    $targets = [];
+    if ($filesArg !== null && trim($filesArg) !== '') {
+        foreach (explode(',', $filesArg) as $rel) {
+            $rel = trim($rel);
+            if ($rel !== '') {
+                $targets[] = $rel;
+            }
+        }
+        aiInstallerAssertSafePlanTargets($root, array_map(
+            static fn(string $target): array => ['target' => $target],
+            $targets
+        ));
+    } else {
+        $targets = ['AGENTS.md', 'docs/ai', '.github', '.opencode'];
+    }
+
+    $applied = [];
+    foreach ($targets as $rel) {
+        $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+        if (is_file($abs)) {
+            $count = aiPlaceholderApplyToFile($abs, $replacements);
+            if ($count > 0) {
+                $applied[] = ['path' => $rel, 'replacements' => $count];
+            }
+            continue;
+        }
+        if (!is_dir($abs)) {
+            continue;
+        }
+        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($abs, FilesystemIterator::SKIP_DOTS));
+        foreach ($it as $file) {
+            if (!$file->isFile() || strtolower($file->getExtension()) !== 'md') {
+                continue;
+            }
+            $fileRel = str_replace('\\', '/', substr($file->getPathname(), strlen($root) + 1));
+            if (aiInstallerShouldSkipPlaceholderScanPath($fileRel)) {
+                continue;
+            }
+            $count = aiPlaceholderApplyToFile($file->getPathname(), $replacements);
+            if ($count > 0) {
+                $applied[] = ['path' => $fileRel, 'replacements' => $count];
+            }
+        }
+    }
+
+    return [
+        'registry_found' => $registry !== null,
+        'tokens_with_values' => array_keys($replacements),
+        'files_changed' => $applied,
+        'files_changed_count' => count($applied),
+    ];
+}
+
+/** @param array<string,string> $replacements @return int replacement count actually written */
+function aiPlaceholderApplyToFile(string $filePath, array $replacements): int
+{
+    if ($replacements === [] || !is_file($filePath)) {
+        return 0;
+    }
+    $content = (string) file_get_contents($filePath);
+    $count = 0;
+    $updated = str_replace(array_keys($replacements), array_values($replacements), $content, $count);
+    if ($updated === $content) {
+        return 0;
+    }
+    file_put_contents($filePath, $updated);
+    return $count;
 }
 
 function aiApplyPlaceholderSetsToFile(string $filePath, array $setValues): void
