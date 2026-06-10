@@ -18,7 +18,7 @@ Deterministic catalog generated from installer registries.
 
 ## Packs
 
-- `setup-docs` (30 items)
+- `setup-docs` (31 items)
 - `capabilities-core` (5 items)
 - `base` (17 items)
 - `adapter-copilot` (9 items)
@@ -39,9 +39,9 @@ Deterministic catalog generated from installer registries.
 - `service-boundary-pack` (1 items)
 - `mcp-boundaries-pack` (1 items)
 - `advisor-pack` (4 items)
-- `target-tools-pack` (71 items)
+- `target-tools-pack` (72 items)
 - `shared-templates-pack` (4 items)
-- `package-source-pack` (7 items)
+- `package-source-pack` (8 items)
 - `kit-authoring-pack` (4 items)
 
 ## Script IDs

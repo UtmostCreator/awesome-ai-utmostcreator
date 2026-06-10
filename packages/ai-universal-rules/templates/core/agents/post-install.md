@@ -233,9 +233,10 @@ Complete target-repository post-install setup by scanning the existing repo, res
 
 - Do not bulk-fill, auto-default, or leave any placeholder at a generic example value. Each token must hold a real, project-specific value.
 - Resolve each placeholder from real repository evidence, then review and approve ("tick") every placeholder line individually against the actual project — line by line, not in bulk.
-- Gather project facts by delegation, not guessing. Pick the most suitable subagent for the need and launch it via the Task tool with explicit, bounded instructions:
-  - read-only discovery (stack, runtime, active paths, entrypoints, test/build/lint commands): a research/explore agent.
+- Gather project facts by delegation, not guessing. Research delegation is mandatory before resolving any token group: launch a research subagent (`researcher` or `repository-researcher`; fall back to any read-only explore agent) via the Task tool. Every delegation brief must name the exact tokens under investigation, the candidate evidence surfaces (package manifests, lockfiles, CI workflows, build scripts, test configs, directory layout), and must require a file path or command output as proof for each proposed value. Reject and re-delegate any value returned without evidence.
+  - read-only discovery (stack, runtime, active paths, entrypoints, test/build/lint commands): `researcher` / `repository-researcher`.
   - applying resolved values across templates and docs: the `implementer` agent, one bounded instruction per placeholder group.
+- Resolve value-store-first: the machine-readable registry `.ai/placeholders.json` (shipped from `packages/ai-universal-rules/placeholders.json`) maps each token to its required flag and `projectYmlKey`. For every token with a `projectYmlKey`, write the approved value into `.ai/project.yml`, then substitute all occurrences with `php tools/ai/ai.php placeholders --apply` (or an install re-render) so each value flows from one source. Hand-edit individual files only for tokens with no registry mapping.
 - Keep a per-token approval ledger keyed to `PLACEHOLDERS.md`. As each token is resolved and approved, update `PLACEHOLDERS.md` and every occurrence in the installed files, and mark that line approved.
 
 STRICTLY DENY each of the following while ANY required placeholder line is unresolved, unverified, or not yet line-approved:
@@ -257,9 +258,9 @@ Gate proof (both must pass before the gate is cleared): `php tools/ai/ai.php pla
 ## Workflow
 
 1. Inspect `git status --short`, `.ai-install-manifest.json`, `docs/ai/POST-INSTALL.md`, `README.md`, `AGENTS.md`, and read `PLACEHOLDERS.md` in full.
-2. Run the placeholder scan (`php tools/ai/ai.php placeholders --fail`) and build a per-token approval ledger from `PLACEHOLDERS.md` covering every token still present in the installed files.
-3. Gather project evidence by delegation: launch the most suitable read-only subagent (research/explore) via the Task tool to map stack, runtime, active paths, entrypoints, and verify/build/test/lint commands. Do not guess values.
-4. Resolve placeholders one line at a time. For applying values across many files, delegate bounded edits to the `implementer` subagent with explicit per-group instructions. Update `PLACEHOLDERS.md` and every occurrence, and mark each line approved only after confirming the value against the repo.
+2. Run the placeholder scan (`php tools/ai/ai.php placeholders --fail`) and build a per-token approval ledger from `PLACEHOLDERS.md` and `.ai/placeholders.json` covering every token still present in the installed files.
+3. Gather project evidence by delegation: launch a research subagent (`researcher` / `repository-researcher`) via the Task tool with per-token-group briefs to map stack, runtime, active paths, entrypoints, and verify/build/test/lint commands. Require evidence (file path or command output) for every value. Do not guess values; do not resolve any token group without a completed research delegation.
+4. Resolve placeholders one line at a time, value-store-first: write each approved value into `.ai/project.yml` when the registry maps it, then run `php tools/ai/ai.php placeholders --apply` to substitute every occurrence. For remaining unmapped tokens, delegate bounded edits to the `implementer` subagent with explicit per-group instructions. Update `PLACEHOLDERS.md` and every occurrence, and mark each line approved only after confirming the value against the repo.
 5. Also update `docs/ai/project-context.md`, `docs/ai/source-of-truth.md`, `docs/ai/workflow.md`, `docs/ai/shared/**`, `README.md`, `AGENTS.md`, and adapter instructions/prompts/agents where the install docs require target-specific ownership or interaction details.
 6. Clear the Placeholder Resolution Gate: confirm `php tools/ai/ai.php placeholders --fail` and `php tools/ai/verify-install-placeholders.php` both report zero unresolved required placeholders. Stay blocked while any line is unresolved or unapproved.
 7. Only after the gate is cleared, run the documented post-install verification, then report results and whether it is safe to retire this agent.

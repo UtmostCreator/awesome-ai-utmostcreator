@@ -2,16 +2,44 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://app-configs.local/schemas/project-placeholders.schema.json",
   "title": "Project Placeholder Registry",
+  "description": "Machine-readable companion to PLACEHOLDERS.md (packages/ai-universal-rules/placeholders.json, installed as .ai/placeholders.json). Tokens with required=true gate strict installs; projectYmlKey maps a token to its .ai/project.yml value for `php tools/ai/ai.php placeholders --apply`.",
   "type": "object",
   "properties": {
-    "required": {
-      "type": "array",
-      "items": { "type": "string", "pattern": "^<[A-Z0-9_]+>$" }
+    "schema": {
+      "type": "string",
+      "const": "ai.placeholders-registry.v1"
     },
-    "optional": {
+    "schema_version": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "package": {
+      "type": "string"
+    },
+    "notes": {
       "type": "array",
-      "items": { "type": "string", "pattern": "^<[A-Z0-9_]+>$" }
+      "items": { "type": "string" }
+    },
+    "tokens": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "token": { "type": "string", "pattern": "^<[A-Z0-9_]+>$" },
+          "required": { "type": "boolean" },
+          "category": {
+            "type": "string",
+            "enum": ["core", "optional", "project-context", "prompt-slot", "capability-slot", "format-slot", "meta"]
+          },
+          "projectYmlKey": {
+            "type": ["string", "null"]
+          },
+          "substitute": { "type": "boolean" }
+        },
+        "required": ["token", "required", "category", "projectYmlKey", "substitute"],
+        "additionalProperties": false
+      }
     }
   },
-  "required": ["required", "optional"]
+  "required": ["schema", "schema_version", "tokens"]
 }

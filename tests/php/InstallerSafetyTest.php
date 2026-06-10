@@ -2392,8 +2392,11 @@ class InstallerSafetyTest extends TestCase
             // optional agents; hidden internal-only templates (e.g. ui-builder) are intentionally
             // not rendered for Copilot.
             $this->assertContains('.github/agents/bugfix.agent.md', $agents, 'optional Copilot agents must be merged into .github/agents');
-            $this->assertContains('.github/agents/architecture-plan.agent.md', $agents);
             $this->assertContains('.github/agents/upgrade.agent.md', $agents);
+
+            // The architecture-plan optional agent was removed in favor of the core
+            // architect agent; it must no longer render into the Copilot surface.
+            $this->assertNotContains('.github/agents/architecture-plan.agent.md', $agents, 'removed optional agents must not resurface');
 
             // Agent-creator optional agents reference the deterministic static validator;
             // full-governance installs must ship it with its public schema contract.

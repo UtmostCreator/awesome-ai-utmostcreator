@@ -51,13 +51,17 @@ if ($target === false) {
     exit(2);
 }
 
-$dictionary = loadDictionary($kitRoot);
+$registry = loadPlaceholderRegistry($kitRoot, $target);
+$dictionary = $registry !== null ? registryTokenList($registry) : loadDictionary($kitRoot);
 if ($dictionary === null) {
-    emitError($emitJson, 'dictionary_missing', 'PLACEHOLDERS.md not found in kit root');
+    emitError($emitJson, 'dictionary_missing', 'placeholders.json and PLACEHOLDERS.md not found in kit root');
     exit(2);
 }
 
-$requiredTokens = requiredTokensList();
+$requiredTokens = $registry !== null ? registryRequiredTokenList($registry) : requiredTokensList();
+if ($requiredTokens === []) {
+    $requiredTokens = requiredTokensList();
+}
 
 $scanRoots = [
     'AGENTS.md',
@@ -139,7 +143,61 @@ fwrite(STDERR, "See PLACEHOLDERS.md for substitution guidance.\n");
 exit(1);
 
 /**
+ * Load the machine-readable placeholder registry (placeholders.json).
+ * Lookup order: kit package source, target `.ai/` descriptor, target root.
+ * Kept dependency-free because this script ships standalone into installed projects.
+ *
+ * @return array<string,mixed>|null decoded registry or null when absent/invalid
+ */
+function loadPlaceholderRegistry(string $kitRoot, string $target): ?array
+{
+    $candidates = [
+        $kitRoot . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'placeholders.json',
+        $target . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'placeholders.json',
+        $target . DIRECTORY_SEPARATOR . 'placeholders.json',
+        $kitRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'placeholders.json',
+    ];
+    foreach ($candidates as $path) {
+        if (!is_file($path)) {
+            continue;
+        }
+        $decoded = json_decode((string) file_get_contents($path), true);
+        if (is_array($decoded) && is_array($decoded['tokens'] ?? null)) {
+            return $decoded;
+        }
+    }
+    return null;
+}
+
+/** @return array<int, string> sorted unique token list from the registry */
+function registryTokenList(array $registry): array
+{
+    $tokens = [];
+    foreach ($registry['tokens'] as $entry) {
+        if (is_array($entry) && is_string($entry['token'] ?? null)) {
+            $tokens[] = $entry['token'];
+        }
+    }
+    $tokens = array_values(array_unique($tokens));
+    sort($tokens);
+    return $tokens;
+}
+
+/** @return array<int, string> required tokens from the registry */
+function registryRequiredTokenList(array $registry): array
+{
+    $tokens = [];
+    foreach ($registry['tokens'] as $entry) {
+        if (is_array($entry) && ($entry['required'] ?? false) === true && is_string($entry['token'] ?? null)) {
+            $tokens[] = $entry['token'];
+        }
+    }
+    return array_values(array_unique($tokens));
+}
+
+/**
  * Load the placeholder dictionary from the source package, or from root PLACEHOLDERS.md in installed projects.
+ * Fallback when placeholders.json is unavailable (pre-registry installs).
  *
  * @return array<int, string>|null Sorted token list, or null if not found.
  */
@@ -171,8 +229,9 @@ function loadDictionary(string $kitRoot): ?array
 }
 
 /**
- * Required token list mirrored from tools/ai/install/core.php::aiInstallerCollectPlaceholderStatus.
- * Keep this in sync with the installer's $required array.
+ * Fallback required token list for installs that predate placeholders.json.
+ * The canonical source is packages/ai-universal-rules/placeholders.json
+ * (tokens with required=true); keep this mirror in sync when the registry changes.
  *
  * @return array<int, string>
  */

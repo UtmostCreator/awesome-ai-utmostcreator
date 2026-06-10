@@ -686,9 +686,53 @@ function aiInstallerRunPostInstallVerification(string $targetRoot): void
     }
 }
 
-function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
+/**
+ * Resolve the machine-readable placeholder registry (placeholders.json).
+ * Lookup order: kit package source, installed `.ai/` descriptor, project root.
+ *
+ * @return array<string,mixed>|null decoded registry or null when absent/invalid
+ */
+function aiPlaceholderRegistryLoad(string $root): ?array
 {
-    $required = [
+    $candidates = [
+        $root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'placeholders.json',
+        $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'placeholders.json',
+        $root . DIRECTORY_SEPARATOR . 'placeholders.json',
+    ];
+    foreach ($candidates as $path) {
+        if (!is_file($path)) {
+            continue;
+        }
+        $decoded = json_decode((string) file_get_contents($path), true);
+        if (is_array($decoded) && is_array($decoded['tokens'] ?? null)) {
+            return $decoded;
+        }
+    }
+    return null;
+}
+
+/**
+ * Required placeholder tokens. Sourced from placeholders.json; the hardcoded
+ * list is a fallback for targets installed before the registry shipped.
+ *
+ * @return array<int,string>
+ */
+function aiInstallerRequiredPlaceholderTokens(string $root): array
+{
+    $registry = aiPlaceholderRegistryLoad($root);
+    if ($registry !== null) {
+        $required = [];
+        foreach ($registry['tokens'] as $entry) {
+            if (is_array($entry) && ($entry['required'] ?? false) === true && is_string($entry['token'] ?? null)) {
+                $required[] = $entry['token'];
+            }
+        }
+        if ($required !== []) {
+            return $required;
+        }
+    }
+
+    return [
         '<PROJECT_NAME>', '<PROJECT_TYPE>', '<PRIMARY_LANGUAGE>', '<PRIMARY_RUNTIME>',
         '<SOURCE_DIRS>', '<TEST_DIRS>', '<TEST_COMMAND>', '<BUILD_COMMAND>',
         '<LINT_COMMAND>', '<PACKAGE_MANAGER>', '<CI_COMMANDS>', '<PROTECTED_PATHS>',
@@ -699,6 +743,11 @@ function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
         '<EDITORCONFIG_PATH>', '<IGNORE_FILES>', '<GENERATED_FILES>',
         '<PROTECTED_FILES>', '<INSTALL_COMMAND>', '<FORMAT_COMMAND>',
     ];
+}
+
+function aiInstallerCollectPlaceholderStatus(string $targetRoot): array
+{
+    $required = aiInstallerRequiredPlaceholderTokens($targetRoot);
     // Note: <SCRIPTS_ROOT> is resolved at install time and is intentionally not in the required list.
     // Note: <UNKNOWN>, <FILES_OR_COMMANDS_CHECKED>, <NEXT_STEP> are format slots in blocked-response examples
     //       and are not project values. They stay as placeholders in canonical docs.

@@ -48,12 +48,54 @@ $used = array_values(array_unique($used));
 
 $missing = array_values(array_diff($used, $documented));
 
+$failed = false;
 if ($missing !== []) {
     foreach ($missing as $token) {
         fwrite(STDERR, "ERROR: undocumented placeholder token {$token}\n");
     }
+    $failed = true;
+}
+
+// Machine-readable registry (placeholders.json) must stay token-synced with PLACEHOLDERS.md.
+$registryPath = $root . '/' . aiResolvePackageBase($root) . 'placeholders.json';
+if (!is_file($registryPath)) {
+    $registryPath = $root . '/.ai/placeholders.json';
+}
+if (!is_file($registryPath)) {
+    $registryPath = $root . '/placeholders.json';
+}
+
+if (is_file($registryPath)) {
+    $registry = json_decode((string) file_get_contents($registryPath), true);
+    if (!is_array($registry) || !is_array($registry['tokens'] ?? null)) {
+        fwrite(STDERR, "ERROR: invalid placeholder registry JSON: {$registryPath}\n");
+        $failed = true;
+    } else {
+        $registryTokens = [];
+        foreach ($registry['tokens'] as $entry) {
+            if (is_array($entry) && is_string($entry['token'] ?? null)) {
+                $registryTokens[] = $entry['token'];
+            }
+        }
+        $registryTokens = array_values(array_unique($registryTokens));
+
+        foreach (array_diff($documented, $registryTokens) as $token) {
+            fwrite(STDERR, "ERROR: token documented in PLACEHOLDERS.md but missing from placeholders.json: {$token}\n");
+            $failed = true;
+        }
+        foreach (array_diff($registryTokens, $documented) as $token) {
+            fwrite(STDERR, "ERROR: token in placeholders.json but undocumented in PLACEHOLDERS.md: {$token}\n");
+            $failed = true;
+        }
+    }
+} else {
+    fwrite(STDERR, "ERROR: missing placeholders.json registry next to PLACEHOLDERS.md\n");
+    $failed = true;
+}
+
+if ($failed) {
     exit(1);
 }
 
-fwrite(STDOUT, "OK: placeholder registry covers template tokens\n");
+fwrite(STDOUT, "OK: placeholder registry covers template tokens and matches placeholders.json\n");
 exit(0);
