@@ -101,7 +101,7 @@ load_scoping_functions() {
     # Pull only the function bodies (between the marked helpers) by sourcing the
     # whole script in a guarded way: define a fake "cd"/main no-op is fragile, so
     # instead we re-declare the functions verbatim via sed extraction.
-    eval "$(sed -n '/^resolve_branch_base() {/,/^}/p;/^branch_scoped_files() {/,/^}/p;/^scoped_php_files() {/,/^}/p' "$SCRIPT")"
+    eval "$(sed -n '/^resolve_branch_base() {/,/^}/p;/^branch_scoped_files() {/,/^}/p;/^scoped_php_files() {/,/^}/p;/^is_shipped_ai_kit_shell_file() {/,/^}/p;/^is_changed_or_branch_scope() {/,/^}/p;/^tracked_existing_shell_files() {/,/^}/p' "$SCRIPT")"
 }
 
 # resolve_branch_base prints a commit sha or fails cleanly
@@ -189,13 +189,48 @@ test_links_offline_when_enabled() {
 }
 run_test "VERIFY_LINKS=1 runs lychee with --offline" test_links_offline_when_enabled
 
-# VERIFY_LINKS=1 + VERIFY_LINKS_NETWORK=1: lychee runs WITHOUT --offline.
-test_links_network_when_opted_in() {
+# VERIFY_LINKS_NETWORK=1 is ignored by this wrapper: lychee still runs offline.
+test_links_network_still_offline() {
     local calls
     calls="$(run_with_fake_lychee env VERIFY_LINKS=1 VERIFY_LINKS_NETWORK=1)"
-    [[ -n "$calls" && "$calls" != *"--offline"* ]]
+    [[ "$calls" == *"--offline"* ]]
 }
-run_test "VERIFY_LINKS_NETWORK=1 runs lychee without --offline" test_links_network_when_opted_in
+run_test "VERIFY_LINKS_NETWORK=1 still runs lychee offline" test_links_network_still_offline
+
+test_changed_scope_excludes_shipped_ai_scripts() {
+    local tmp rc=0
+    tmp="$(mktemp -d)"
+    (
+        cd "$tmp"
+        git init -q
+        git config user.email test@example.test
+        git config user.name Test
+        mkdir -p .github/hooks/scripts scripts/ai scripts/hooks tools/ai/install bin
+        printf '#!/usr/bin/env bash\nprintf hook\\n' >.github/hooks/scripts/tool-guardian.sh
+        printf '#!/usr/bin/env bash\nprintf shipped\\n' >scripts/ai/shipped.sh
+        printf '#!/usr/bin/env bash\nprintf hook\\n' >scripts/hooks/pre-commit.sh
+        printf '#!/usr/bin/env bash\nprintf install\\n' >tools/ai/install/base.sh
+        printf '#!/usr/bin/env bash\nprintf local\\n' >bin/local.sh
+        git add -A
+        git commit -q -m init
+        printf '\n# changed\n' >>.github/hooks/scripts/tool-guardian.sh
+        printf '\n# changed\n' >>scripts/ai/shipped.sh
+        printf '\n# changed\n' >>scripts/hooks/pre-commit.sh
+        printf '\n# changed\n' >>tools/ai/install/base.sh
+        printf '\n# changed\n' >>bin/local.sh
+        load_scoping_functions
+        AI_VERIFY_SCOPE=changed
+        out="$(tracked_existing_shell_files)"
+        [[ "$out" == *"bin/local.sh"* ]]
+        [[ "$out" != *".github/hooks/scripts/tool-guardian.sh"* ]]
+        [[ "$out" != *"scripts/ai/shipped.sh"* ]]
+        [[ "$out" != *"scripts/hooks/pre-commit.sh"* ]]
+        [[ "$out" != *"tools/ai/install/base.sh"* ]]
+    ) || rc=$?
+    rm -rf "$tmp"
+    return "$rc"
+}
+run_test "changed scope excludes shipped scripts/ai wrappers" test_changed_scope_excludes_shipped_ai_scripts
 
 # Default (ai) scope must resolve PHP linting to branch scoping, not project-wide.
 # Verify by exercising the same case logic the script uses.
@@ -204,7 +239,10 @@ test_default_scope_is_php_scoped() {
     case "$AI_VERIFY_SCOPE" in
     all) ;;
     changed) php_scoped=1 ;;
-    *) php_scoped=1; php_scope_source="branch" ;;
+    *)
+        php_scoped=1
+        php_scope_source="branch"
+        ;;
     esac
     ((php_scoped == 1)) && [[ "$php_scope_source" == "branch" ]]
 }

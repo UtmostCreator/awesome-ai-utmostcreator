@@ -37,10 +37,10 @@ ALLOW_PLACEHOLDERS_FLAG="--allow-placeholders"
 # Parse optional arguments after the target path
 for arg in "${@:2}"; do
     case "$arg" in
-        --force) FORCE_FLAG="--force" ;;
-        --strict-placeholders) ALLOW_PLACEHOLDERS_FLAG="" ;;
-        --*)     ;; # ignore unknown flags for forward-compatibility
-        *)       PROJECT_NAME="$arg" ;;
+    --force) FORCE_FLAG="--force" ;;
+    --strict-placeholders) ALLOW_PLACEHOLDERS_FLAG="" ;;
+    --*) ;; # ignore unknown flags for forward-compatibility
+    *) PROJECT_NAME="$arg" ;;
     esac
 done
 
@@ -165,8 +165,7 @@ for relative_path in \
     .github/copilot-instructions.md \
     .github/instructions/frontend.instructions.md \
     .github/instructions/testing.instructions.md \
-    opencode.jsonc
-do
+    opencode.jsonc; do
     check_target_path "$relative_path" || target_failures=$((target_failures + 1))
 done
 if [[ $target_failures -gt 0 ]]; then
@@ -178,8 +177,8 @@ echo "==> Running target-local documentation checks..."
 if [[ -f "$TARGET/scripts/ai/ai-doc-check.sh" ]]; then
     (
         cd "$TARGET" &&
-        bash scripts/ai/ai-doc-check.sh markdownlint docs/ai .github AGENTS.md .github/copilot-instructions.md &&
-        bash scripts/ai/ai-doc-check.sh links docs/ai .github AGENTS.md .github/copilot-instructions.md
+            bash scripts/ai/ai-doc-check.sh markdownlint docs/ai .github AGENTS.md .github/copilot-instructions.md &&
+            bash scripts/ai/ai-doc-check.sh links docs/ai .github AGENTS.md .github/copilot-instructions.md
     ) || true
 else
     echo "    Skipped: scripts/ai/ai-doc-check.sh not installed in target"
@@ -194,11 +193,12 @@ echo "      cd $TARGET && AI_ALLOW_NO_TIMEOUT=1 VERIFY_SECRETS=0 bash scripts/ai
 # ── Repomix context bundle ────────────────────────────────────────────────────
 echo ""
 if command -v repomix >/dev/null 2>&1 && command -v rg >/dev/null 2>&1 && command -v scc >/dev/null 2>&1; then
-    echo "==> Generating repomix context bundle (depth=3, top=120, min-code=800, min-files=3, max-bundle-tokens=100000)..."
+    echo "==> Generating repomix context bundle (depth=2, top=0, min-code=25, min-files=1, context-window=1000000)..."
     (
         cd "$TARGET" &&
-        SECRETS_SCAN=0 MAX_BUNDLE_TOKENS=100000 bash scripts/ai/run-repomix-context.sh . \
-            --depth 3 --top 120 --min-code 800 --min-files 3
+            SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh . \
+                --depth 2 --top 0 --min-code 25 --min-files 1 \
+                --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8
     ) 2>/dev/null || true
 else
     echo "==> Skipping repomix bundle — missing: $(command -v repomix >/dev/null 2>&1 || echo 'repomix ')$(command -v rg >/dev/null 2>&1 || echo 'rg ')$(command -v scc >/dev/null 2>&1 || echo 'scc')"
@@ -209,8 +209,8 @@ fi
 echo ""
 if [[ -f "$TARGET/tools/ai/advisor/scorer.php" ]]; then
     echo "==> Running AI workflow advisor..."
-    (cd "$TARGET" && php tools/ai/ai.php advisor --all 2>/dev/null) || \
-    echo "    Advisor skipped (run manually: cd $TARGET && php tools/ai/ai.php advisor --all)"
+    (cd "$TARGET" && php tools/ai/ai.php advisor --all 2>/dev/null) ||
+        echo "    Advisor skipped (run manually: cd $TARGET && php tools/ai/ai.php advisor --all)"
 else
     echo "==> Advisor not installed in target (advisor-pack not in profile or tools/ai/ not shipped)"
 fi
@@ -258,6 +258,6 @@ echo "  and you want to push updated templates, rerun with --force:"
 echo "       bash install-ai-kit.sh $TARGET $PROJECT_NAME --force"
 echo ""
 echo "  Manual repomix + advisor run (already run above when tools are present):"
-echo "       cd $TARGET && SECRETS_SCAN=0 MAX_BUNDLE_TOKENS=100000 bash scripts/ai/run-repomix-context.sh . --depth 3 --top 120 --min-code 800 --min-files 3"
+echo "       cd $TARGET && SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh . --depth 2 --top 0 --min-code 25 --min-files 1 --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8"
 echo "       cd $TARGET && php tools/ai/ai.php advisor --all"
 echo ""

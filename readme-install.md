@@ -225,8 +225,9 @@ php tools/ai/install-ai-kit.php \
 #    These run automatically when using the bash wrapper (install-ai-kit.sh).
 #    When using the PHP installer directly, run them manually:
 cd /path/to/your-project
-SECRETS_SCAN=0 MAX_BUNDLE_TOKENS=100000 bash scripts/ai/run-repomix-context.sh . \
-  --depth 3 --top 120 --min-code 800 --min-files 3
+SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh . \
+  --depth 2 --top 0 --min-code 25 --min-files 1 \
+  --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8
 php tools/ai/ai.php advisor --all
 cd -
 
@@ -661,7 +662,8 @@ Repomix creates AI-ready context bundles from repository source code. This is us
 
 ```bash
 SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh /Users/example-user/Workspaces/example-app \
-  --depth 3 --top 0 --min-code 0 --min-files 0 --context-window 128000
+  --depth 2 --top 0 --min-code 25 --min-files 1 \
+  --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8
 ```
 
 > **Note**: The target directory must be a git repository. If you see `Error: no files available after applying ignore rules`, the directory is not a git repo — see [Non-git directory workaround](#error-no-files-available-after-applying-ignore-rules) below.
@@ -685,7 +687,8 @@ git init
 git add -A
 git commit -m "init for repomix"
 SECRETS_SCAN=0 bash /path/to/awesome-ai-utmostcreator/scripts/ai/run-repomix-context.sh . \
-  --depth 3 --top 0 --min-code 0 --min-files 0
+  --depth 2 --top 0 --min-code 25 --min-files 1 \
+  --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8
 ```
 
 **Workaround B — Run repomix directly from inside the directory (no git required):**
@@ -728,18 +731,19 @@ just context-tree-run           # Guided build with dependency checks
 
 | Parameter             | Default | Recommended | Why                                                                   |
 | --------------------- | ------- | ----------- | --------------------------------------------------------------------- |
-| `--depth`             | 1       | 3           | Captures nested folders; use 4–5 for very large projects              |
-| `--top`               | 25      | 0           | `0` means all routes — ensures nothing is skipped                     |
-| `--min-code`          | 300     | 0           | `0` captures small files/configs that matter                          |
-| `--min-files`         | 2       | 0           | `0` captures single-file routes                                       |
+| `--depth`             | 2       | 2           | Captures high-value folder groupings without over-fragmenting routes  |
+| `--top`               | 0       | 0           | `0` means all routes — ensures nothing is skipped                     |
+| `--min-code`          | 25      | 25          | Keeps tiny low-signal fragments out while retaining small code routes |
+| `--min-files`         | 1       | 1           | Captures single-file routes                                           |
 | `--min-score`         | 0       | 0           | No score filtering                                                    |
 | `--min-complexity`    | 0       | 0           | No complexity filtering                                               |
-| `--max-bundle-tokens` | 100000  | 100000      | Max tokens per bundle; oversized routes are force-split               |
 | `--compress`          | off     | on          | Reduces token usage (added automatically by `run-repomix-context.sh`) |
 | `--style`             | xml     | xml         | XML style is default and most compatible                              |
-| `--context-window`    | 128000  | 128000      | Match your model's context window                                     |
+| `--context-window`    | 1000000 | 1000000     | Default 1M-token budget profile                                       |
+| `--reserved-output`   | 25000   | 25000       | Reserve output tokens inside the budget                               |
+| `--instruction-overhead` | 30000 | 30000       | Reserve prompt/instruction tokens inside the budget                   |
+| `--safety-factor`     | 0.8     | 0.8         | Leave conservative headroom                                           |
 | `SECRETS_SCAN`        | 1       | 0           | Disable if gitleaks is not installed or project is local-only         |
-| `MAX_BUNDLE_TOKENS`   | 100000  | 100000      | Env var override for `--max-bundle-tokens`                            |
 
 ### Output structure
 

@@ -15,21 +15,28 @@ Usage:
 Defaults:
   --compress
   --style xml
+  --depth 2 --top 0 --min-code 25 --min-files 1
+  --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8
 
 Examples:
   scripts/ai/run-repomix-context.sh .
-  scripts/ai/run-repomix-context.sh . --depth 2 --top 20
+  scripts/ai/run-repomix-context.sh . --depth 2 --top 0 --min-code 25 --min-files 1
   SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh /Users/example-user/Workspaces/example-app \
-    --depth 3 --top 0 --min-code 0 --min-files 0 --context-window 128000
+    --depth 2 --top 0 --min-code 25 --min-files 1 \
+    --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8
+
+  # Focused 273K budget profile:
+  SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh . \
+    --context-window 273000 --reserved-output 12000 --instruction-overhead 18000 --safety-factor 0.8
 
   # Bundle a git-ignored folder (for example a JSON cache under storage/tmp):
   SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh storage/tmp \
-    --include-ignored --min-code 0 --min-files 1
+    --include-ignored --min-code 25 --min-files 1
 
   # Force-pack ANY selected folder even when blocked by .gitignore AND
   # .repomixignore (full bypass; .git and the output dir stay excluded):
   SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh docs/ai/generated \
-    --no-ignore --min-code 0 --min-files 1
+    --no-ignore --min-code 25 --min-files 1
 EOF
 }
 
@@ -56,7 +63,18 @@ require_clean_secret_scan "$root_abs"
 
 section "Generate context tree"
 
-if ! bash "$TREE_SCRIPT" all "$root_abs" --compress --style xml "$@"; then
+if ! bash "$TREE_SCRIPT" all "$root_abs" \
+    --compress \
+    --style xml \
+    --depth 2 \
+    --top 0 \
+    --min-code 25 \
+    --min-files 1 \
+    --context-window 1000000 \
+    --reserved-output 25000 \
+    --instruction-overhead 30000 \
+    --safety-factor 0.8 \
+    "$@"; then
     die "context tree generation failed"
 fi
 

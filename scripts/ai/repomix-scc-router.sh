@@ -25,10 +25,10 @@ Commands:
 
 Options:
   --output-dir <dir>          Output directory (default: .repomix-context)
-  --depth <n>                 Folder grouping depth (default: 1)
-  --top <n>                   Max folders to pack, 0 means all (default: 25)
-  --min-code <n>              Minimum code lines per folder (default: 300)
-  --min-files <n>             Minimum files per folder (default: 2)
+  --depth <n>                 Folder grouping depth (default: 2)
+  --top <n>                   Max folders to pack, 0 means all (default: 0)
+  --min-code <n>              Minimum code lines per folder (default: 25)
+  --min-files <n>             Minimum files per folder (default: 1)
   --min-score <n>             Minimum ranking score (default: 0)
   --min-complexity <n>        Minimum cyclomatic complexity per folder (default: 0)
   --changed-since <ref>       Limit planning and stats weighting to files changed since ref
@@ -51,9 +51,9 @@ Options:
   --help                      Show this help
 
 Examples:
-  scripts/ai/repomix-scc-router.sh stats . --depth 1
-  scripts/ai/repomix-scc-router.sh plan . --depth 2 --top 20
-  scripts/ai/repomix-scc-router.sh all . --depth 1 --compress --split-size 10mb
+  scripts/ai/repomix-scc-router.sh stats . --depth 2
+  scripts/ai/repomix-scc-router.sh plan . --depth 2 --top 0 --min-code 25 --min-files 1
+  scripts/ai/repomix-scc-router.sh all . --depth 2 --compress --split-size 10mb
   scripts/ai/repomix-scc-router.sh clean .
   scripts/ai/repomix-scc-router.sh purge .
 EOF
@@ -207,12 +207,26 @@ AI_CONTEXT_HARD_EXCLUDES=(
     ".git"
     ".ai-backups"
     ".ai-logs"
+    ".cache"
+    ".next"
+    ".nuxt"
     ".repomix-context"
+    ".turbo"
+    "docs/ai/generated"
     "node_modules"
     "vendor"
     "dist"
     "build"
     "coverage"
+    "logs"
+    "tmp"
+    "temp"
+    "cache"
+    "storage/logs"
+    "storage/framework/cache"
+    "storage/framework/sessions"
+    "storage/framework/views"
+    "target"
 )
 
 load_ignore_patterns() {
@@ -733,10 +747,10 @@ if (($# > 0)) && [[ "${1:-}" != --* ]]; then
 fi
 
 OUTPUT_DIR='.repomix-context'
-DEPTH=1
-TOP=25
-MIN_CODE=300
-MIN_FILES=2
+DEPTH=2
+TOP=0
+MIN_CODE=25
+MIN_FILES=1
 MIN_SCORE=0
 MIN_COMPLEXITY=0
 CHANGED_SINCE=''

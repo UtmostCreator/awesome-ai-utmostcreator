@@ -80,8 +80,9 @@ php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-go
 #    These run automatically when using the bash wrapper above.
 #    When calling the PHP installer directly, run them manually:
 cd /path/to/your-project
-SECRETS_SCAN=0 MAX_BUNDLE_TOKENS=100000 bash scripts/ai/run-repomix-context.sh . \
-  --depth 3 --top 120 --min-code 800 --min-files 3
+SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh . \
+  --depth 2 --top 0 --min-code 25 --min-files 1 \
+  --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8
 php tools/ai/ai.php advisor --all
 cd -
 
