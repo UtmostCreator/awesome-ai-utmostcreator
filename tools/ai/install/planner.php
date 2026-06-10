@@ -83,6 +83,13 @@ function aiInstallerBuildPlan(array $config, array $packRegistry, array $packs):
                         $action = 'SKIP_EXISTING_UNMANAGED';
                         $reason = 'template (skip-if-exists) preserved under force';
                     }
+                } elseif (aiInstallerPathsAreIdentical($absSource, $absTarget)) {
+                    // A byte-identical target under --force is an idempotent no-op: rewriting it
+                    // would change no content yet still snapshot it into a near-empty backup and
+                    // report it as an overwrite. Classify it as a true no-op so a clean reinstall
+                    // is zero-diff and the backup only captures files that actually change.
+                    $action = 'SKIP_IDENTICAL_EXISTING';
+                    $reason = 'target matches source';
                 } elseif ($adopt) {
                     // Explicit adoption: the user accepts overwriting whatever is on disk
                     // (a backup/conflict snapshot is recorded by the apply path).

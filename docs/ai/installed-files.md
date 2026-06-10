@@ -33,6 +33,7 @@
 - `schemas/ai/project-scorecard.schema.json`
 - `schemas/ai/advisor-recommendation.schema.json`
 - `PLACEHOLDERS.md`
+- `.ai/placeholders.json`
 - `.ai/kit-manifest.json`
 - `.ai/kit-manifest.yml`
 - `.ai/package-lock.ai.json`

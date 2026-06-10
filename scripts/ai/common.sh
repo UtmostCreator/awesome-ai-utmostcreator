@@ -505,9 +505,33 @@ run_guarded() {
     local poll="${AI_GUARD_POLL:-2}"
     local kill_after="${AI_KILL_AFTER:-5}"
 
-    local out_file err_file
-    out_file="$(mktemp 2>/dev/null || echo "/tmp/ai-guard-out.$$")"
-    err_file="$(mktemp 2>/dev/null || echo "/tmp/ai-guard-err.$$")"
+    # The guard needs two writable scratch files to sample the child's output.
+    # Honor TMPDIR (sandboxes such as VS Code set a restricted TMPDIR and make
+    # the system /tmp non-writable). Try mktemp in each candidate dir; if none
+    # is writable, degrade gracefully to the plain wall-clock wrapper rather
+    # than failing every step by writing to a hardcoded unwritable /tmp path.
+    local out_file="" err_file="" guard_tmp_dir=""
+    local candidate
+    for candidate in "${TMPDIR:-}" "$PWD/.ai-logs/tmp" /tmp; do
+        [[ -n "$candidate" ]] || continue
+        mkdir -p "$candidate" 2>/dev/null || continue
+        [[ -w "$candidate" ]] || continue
+        out_file="$(mktemp "$candidate/ai-guard-out.XXXXXX" 2>/dev/null)" || { out_file=""; continue; }
+        err_file="$(mktemp "$candidate/ai-guard-err.XXXXXX" 2>/dev/null)" || {
+            rm -f "$out_file" 2>/dev/null || true
+            out_file=""
+            continue
+        }
+        guard_tmp_dir="$candidate"
+        break
+    done
+
+    if [[ -z "$out_file" || -z "$err_file" ]]; then
+        log_warn "run_guarded: no writable temp dir (checked TMPDIR, ./.ai-logs/tmp, /tmp); falling back to plain timeout wrapper for '$label'."
+        run_with_timeout "$wall" "$@"
+        return $?
+    fi
+    : "$guard_tmp_dir"
 
     # Start the command in its own process group so we can kill the whole tree
     # without touching the parent shell. `setsid` is preferred; fall back to a

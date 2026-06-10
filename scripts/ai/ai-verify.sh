@@ -146,6 +146,20 @@ is_changed_or_branch_scope() {
     [[ "$AI_VERIFY_SCOPE" == "changed" || "$AI_VERIFY_SCOPE" == "branch" ]]
 }
 
+# True only when running inside the AI-kit's own authoring repository, where the
+# shipped scripts/ai/*.sh wrappers ARE the product under test and should be
+# linted/formatted. Installed target repositories receive scripts/ai/* but never
+# the kit package source (packages/ai-universal-rules/), so in a target the
+# shipped wrappers must not become part of that project's verification burden.
+# Override with AI_KIT_SELF_VERIFY=1 (force self-verify) or 0 (force target mode).
+is_ai_kit_source_repo() {
+    case "${AI_KIT_SELF_VERIFY:-auto}" in
+    1) return 0 ;;
+    0) return 1 ;;
+    esac
+    [[ -f packages/ai-universal-rules/catalog.json ]]
+}
+
 if [[ "${AI_VERIFY_TEST_MODE:-0}" == "1" ]]; then
     echo "==> repository"
     git status --short || true
@@ -174,9 +188,61 @@ run_step() {
         run_with_timeout "$VERIFY_TIMEOUT" "$@" || rc=$?
     fi
 
+    # Expose the last step's exit code without changing this function's own
+    # return semantics: run_step has always effectively returned success so that
+    # bare callers under `set -e` keep running every step and tally failures.
+    last_step_rc="$rc"
+
     if ((rc != 0)); then
         echo "FAIL: $label failed (exit $rc)" >&2
         failures=$((failures + 1))
+    fi
+}
+
+last_step_rc=0
+
+# Wrapper for pnpm/JS verification steps. Behaves exactly like run_step (same
+# streaming, watchdog, and failure counting) but, on failure, runs a focused
+# private-registry auth diagnostic so a missing token does not masquerade as a
+# typecheck/lint failure. Does not alter exit-code or failure-count behavior.
+run_step_js() {
+    local label="$1"
+    run_step "$@"
+    if ((last_step_rc != 0)); then
+        diagnose_pnpm_auth "$label"
+    fi
+}
+
+# Detect the common "implicit pnpm install hit a private registry without a
+# token" failure mode. pnpm runs a deps-status check before `pnpm exec`, so an
+# unset ${NPM_TOKEN} referenced by .npmrc surfaces as ERR_PNPM_FETCH_401 on a
+# step that looks like a typecheck. This check is deterministic (it inspects
+# .npmrc + env, not captured output) and only prints an advisory hint.
+diagnose_pnpm_auth() {
+    local label="${1:-pnpm step}"
+    local npmrc found_ref="" referenced_var=""
+
+    for npmrc in .npmrc "$HOME/.npmrc"; do
+        [[ -f "$npmrc" ]] || continue
+        # Find an auth line that interpolates an env var, e.g.
+        #   //npm.pkg.github.com/:_authToken=${NPM_TOKEN}
+        referenced_var="$(
+            sed -n 's/.*_authToken=\${\([A-Za-z_][A-Za-z0-9_]*\)}.*/\1/p' "$npmrc" 2>/dev/null | head -n1
+        )"
+        if [[ -n "$referenced_var" ]]; then
+            found_ref="$npmrc"
+            break
+        fi
+    done
+
+    [[ -n "$found_ref" ]] || return 0
+
+    # If the referenced token variable is unset/empty, the implicit install will
+    # fail with a 401 before the actual check runs.
+    if [[ -z "${!referenced_var:-}" ]]; then
+        log_warn "$label: '$found_ref' uses \${$referenced_var} for private-registry auth, but \$$referenced_var is unset."
+        log_warn "$label: a 401/ERR_PNPM_FETCH_401 here is almost certainly missing registry auth, not a real type/lint error."
+        log_warn "$label: set $referenced_var (token with read:packages) and re-run, e.g.: export $referenced_var=<token>; pnpm install"
     fi
 }
 
@@ -197,6 +263,10 @@ has_package_dependency() {
 tracked_existing_shell_files() {
     case "$AI_VERIFY_SCOPE" in
     ai)
+        # In an installed target repo the shipped scripts/ai/*.sh wrappers are
+        # not the user's code to verify; only self-verify them inside the kit's
+        # own authoring repository.
+        is_ai_kit_source_repo || return 0
         git ls-files -co --exclude-standard 'scripts/ai/*.sh' |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
@@ -366,44 +436,44 @@ fi
 if [[ -f package.json ]]; then
     if command -v pnpm >/dev/null 2>&1; then
         if has_package_script lint; then
-            run_step 'pnpm run lint' pnpm run lint
+            run_step_js 'pnpm run lint' pnpm run lint
         elif has_package_dependency eslint; then
-            run_step 'pnpm exec eslint .' pnpm exec eslint .
+            run_step_js 'pnpm exec eslint .' pnpm exec eslint .
         fi
 
         if has_package_script typecheck; then
-            run_step 'pnpm run typecheck' pnpm run typecheck
+            run_step_js 'pnpm run typecheck' pnpm run typecheck
         elif [[ -f tsconfig.json ]] && has_package_dependency typescript; then
-            run_step 'pnpm exec tsc --noEmit' pnpm exec tsc --noEmit
+            run_step_js 'pnpm exec tsc --noEmit' pnpm exec tsc --noEmit
         fi
 
         if has_package_dependency vue-tsc; then
-            run_step 'pnpm exec vue-tsc --noEmit' pnpm exec vue-tsc --noEmit
+            run_step_js 'pnpm exec vue-tsc --noEmit' pnpm exec vue-tsc --noEmit
         fi
 
         if has_package_dependency nuxt || has_package_dependency nuxi; then
-            run_step 'pnpm exec nuxi typecheck' pnpm exec nuxi typecheck
+            run_step_js 'pnpm exec nuxi typecheck' pnpm exec nuxi typecheck
         fi
 
         if has_package_dependency @graphql-codegen/cli && [[ -f codegen.yml || -f codegen.yaml || -f codegen.ts ]]; then
-            run_step 'pnpm exec graphql-codegen' pnpm exec graphql-codegen
+            run_step_js 'pnpm exec graphql-codegen' pnpm exec graphql-codegen
         fi
 
         if has_package_dependency @graphql-eslint/eslint-plugin; then
-            run_step 'pnpm exec graphql-eslint .' pnpm exec graphql-eslint .
+            run_step_js 'pnpm exec graphql-eslint .' pnpm exec graphql-eslint .
         fi
 
         if has_package_dependency biome; then
-            run_step 'pnpm exec biome check .' pnpm exec biome check .
+            run_step_js 'pnpm exec biome check .' pnpm exec biome check .
         fi
 
         if has_package_dependency knip; then
-            run_step 'pnpm exec knip' pnpm exec knip
+            run_step_js 'pnpm exec knip' pnpm exec knip
         fi
 
         if has_package_script test; then
             if [[ "$VERIFY_FULL" == "1" ]]; then
-                run_step 'pnpm test' pnpm test
+                run_step_js 'pnpm test' pnpm test
             else
                 log_warn "Skipping full JS test suite. Use VERIFY_FULL=1 to run pnpm test."
             fi
