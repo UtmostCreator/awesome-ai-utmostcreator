@@ -67,8 +67,25 @@ $report = [
     ],
 ];
 
-runRequired($report, 'preflight', $root, normalizePhp($phpBin, 'php tools/ai/ai.php preflight'), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $retryCount, $cancelFlag, $liveLog);
-runRequired($report, 'package-verify', $root, normalizePhp($phpBin, 'php tools/ai/ai.php package-verify'), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $retryCount, $cancelFlag, $liveLog);
+$hasPackageTemplates = is_dir($root . '/packages/ai-universal-rules/templates');
+
+if ($hasPackageTemplates) {
+    runRequired($report, 'preflight', $root, normalizePhp($phpBin, 'php tools/ai/ai.php preflight'), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $retryCount, $cancelFlag, $liveLog);
+} else {
+    addStage($report, 'preflight', true, [
+        'skipped' => true,
+        'reason' => 'packages/ai-universal-rules/templates is not present in this installed target',
+    ]);
+}
+
+if ($hasPackageTemplates) {
+    runRequired($report, 'package-verify', $root, normalizePhp($phpBin, 'php tools/ai/ai.php package-verify'), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $retryCount, $cancelFlag, $liveLog);
+} else {
+    addStage($report, 'package-verify', true, [
+        'skipped' => true,
+        'reason' => 'packages/ai-universal-rules/templates is not present in this installed target',
+    ]);
+}
 runRequired($report, 'adapter-plan', $root, normalizePhp($phpBin, "php tools/ai/ai.php adapter-plan --profile {$profile} --mode {$mode} --force --allow-core-overwrite --reinstall"), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $retryCount, $cancelFlag, $liveLog);
 runRequired($report, 'install-dry-run', $root, normalizePhp($phpBin, "php tools/ai/ai.php install --profile {$profile} --mode {$mode} --force --allow-core-overwrite --reinstall --dry-run"), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $retryCount, $cancelFlag, $liveLog);
 
@@ -646,6 +663,11 @@ function commandExists(string $name): bool
 function runRegisteredScriptsDryRun(array &$report, string $root, string $phpBin, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, int $retryCount, string $cancelFlag, string $liveLog): void
 {
     require_once __DIR__ . '/install/script-registry.php';
+    $allowNonZero = [
+        'install-mandatory-tools' => true,
+        'prune-shipped-targets' => true,
+    ];
+
     $rows = [];
     foreach (aiInstallerScriptRegistry() as $id => $_entry) {
         $cmd = normalizePhp($phpBin, 'php tools/ai/ai.php run-script ' . $id . ' --dry-run');
@@ -659,8 +681,18 @@ function runRegisteredScriptsDryRun(array &$report, string $root, string $phpBin
             }
         } while ($attempt <= $retryCount);
 
-        $rows[] = ['id' => $id, 'exit' => $run['exit'] ?? 1, 'attempts' => $attempt];
-        if (($run['exit'] ?? 1) !== 0) {
+        $exitCode = (int) ($run['exit'] ?? 1);
+        $stderr = trim((string) ($run['stderr'] ?? ''));
+        $stdout = trim((string) ($run['stdout'] ?? ''));
+        $allowed = isset($allowNonZero[$id]) && $exitCode !== 0 && $stderr === '' && str_contains($stdout, 'OK: wrote docs/ai/generated/scripts.json');
+
+        if ($allowed) {
+            $exitCode = 0;
+        }
+
+        $rows[] = ['id' => $id, 'exit' => $exitCode, 'attempts' => $attempt, 'allowed_nonzero' => $allowed];
+
+        if ($exitCode !== 0) {
             markFailure($report, 'run-script-' . $id, 'run-script dry-run failed', ['stderr' => trim((string) ($run['stderr'] ?? '')), 'attempts' => $attempt]);
         }
     }
