@@ -1,6 +1,8 @@
 vendor/
 node_modules/
 .git/
+.github/
+.ai/
 .ai-logs/
 .ai-backups/
 .cache/
@@ -9,6 +11,7 @@ node_modules/
 .repomix-context/
 .turbo/
 docs/ai/generated/
+scripts/
 dist/
 build/
 coverage/
@@ -16,8 +19,13 @@ logs/
 tmp/
 temp/
 cache/
+storage/
 storage/logs/
 storage/framework/cache/
 storage/framework/sessions/
 storage/framework/views/
 target/
+bruno.xml
+.copilot-logs/
+.opencode
+.schemas
