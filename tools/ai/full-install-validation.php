@@ -179,7 +179,14 @@ function runRequired(array &$report, string $id, string $root, string $command, 
         if (($run['exit'] ?? 1) !== 0 && $id === 'package-verify' && $attempt <= $retries) {
             runCommandWatchdog($root, normalizePhp((string) (defined('PHP_BINARY') ? PHP_BINARY : 'php'), 'php tools/ai/ai.php package-lock'), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, 'package-lock-refresh');
         }
+        if (($run['exit'] ?? 1) !== 0 && $id === 'generate-ai-catalog-check' && $attempt <= $retries) {
+            runCommandWatchdog($root, normalizePhp((string) (defined('PHP_BINARY') ? PHP_BINARY : 'php'), 'php tools/ai/generate-ai-catalog.php --write'), max($timeoutSec, 900), max($idleTimeoutSec, 300), $heartbeatSec, $cancelFlag, $liveLog, 'catalog-refresh');
+        }
         if (($run['exit'] ?? 1) !== 0 && $id === 'generate-repo-structure-check' && $attempt <= $retries) {
+            $stderrText = (string) ($run['stderr'] ?? '');
+            if (str_contains($stderrText, 'metadata file not found:')) {
+                bootstrapRepoDirectoryMapIfMissing($root, $liveLog);
+            }
             runCommandWatchdog($root, normalizePhp((string) (defined('PHP_BINARY') ? PHP_BINARY : 'php'), 'php tools/ai/generate-repo-structure.php --with-scc'), max($timeoutSec, 900), max($idleTimeoutSec, 300), $heartbeatSec, $cancelFlag, $liveLog, 'repo-structure-refresh');
         }
         if (($run['exit'] ?? 1) === 0) {
@@ -217,6 +224,68 @@ function runRequired(array &$report, string $id, string $root, string $command, 
             'next_action' => $resolution,
         ]);
     }
+}
+
+function bootstrapRepoDirectoryMapIfMissing(string $root, string $liveLog): void
+{
+    $metadataPath = $root . '/docs/ai/repo-directory-map.json';
+    if (is_file($metadataPath)) {
+        return;
+    }
+
+    $run = runCommandWatchdog($root, 'git ls-files', 120, 60, 5, $root . '/docs/ai/generated/full-install-validation.cancel', $liveLog, 'repo-map-bootstrap-scan');
+    if (($run['exit'] ?? 1) !== 0) {
+        logLine($liveLog, 'repo-map-bootstrap skipped: git ls-files failed');
+        return;
+    }
+
+    $topLevel = [];
+    foreach (preg_split('/\R/', (string) ($run['stdout'] ?? '')) ?: [] as $line) {
+        $line = trim(str_replace('\\', '/', $line));
+        if ($line === '') {
+            continue;
+        }
+        $firstSlash = strpos($line, '/');
+        $path = $firstSlash === false ? '.' : substr($line, 0, $firstSlash);
+        $topLevel[$path] = true;
+    }
+
+    if ($topLevel === []) {
+        logLine($liveLog, 'repo-map-bootstrap skipped: no tracked files');
+        return;
+    }
+
+    ksort($topLevel, SORT_STRING);
+    $directories = [];
+    foreach (array_keys($topLevel) as $path) {
+        $directories[] = [
+            'path' => $path,
+            'purpose' => 'unknown',
+            'designed_for' => 'unknown',
+            'install_guide' => 'none',
+            'install_script' => 'none',
+            'ai_entrypoint' => 'none',
+            'notes' => 'auto-generated bootstrap metadata; replace with project-specific values',
+        ];
+    }
+
+    $payload = [
+        'schema_version' => 1,
+        'directories' => $directories,
+        'metadata_exemptions' => [
+            [
+                'path' => '.repomix-context',
+                'reason' => 'Generated during context packing and not tracked',
+            ],
+        ],
+    ];
+
+    $dir = dirname($metadataPath);
+    if (!is_dir($dir)) {
+        mkdir($dir, AI_DIR_MODE, true);
+    }
+    file_put_contents($metadataPath, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
+    logLine($liveLog, 'repo-map-bootstrap wrote docs/ai/repo-directory-map.json');
 }
 
 function runCommandWatchdog(string $root, string $command, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog, string $stageId): array
