@@ -58,7 +58,8 @@ php tools/ai/install-ai-kit.php \
   --project-name "your-project-name" \
   --backup \
   --verify-after \
-  --non-interactive
+  --non-interactive \
+  --allow-placeholders
 
 # Reinstall / push updated templates — add --force to overwrite existing managed files
 php tools/ai/install-ai-kit.php \
@@ -69,10 +70,11 @@ php tools/ai/install-ai-kit.php \
   --backup \
   --verify-after \
   --non-interactive \
+  --allow-placeholders \
   --force
 
 # OpenCode-only full install, excluding GitHub Copilot adapter surfaces
-php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime opencode --without optional-agents-copilot-pack --project-name "your-project-name" --backup --verify-after --non-interactive
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime opencode --without optional-agents-copilot-pack --project-name "your-project-name" --backup --verify-after --non-interactive --allow-placeholders
 
 # 5. Generate repomix context bundle + run advisor (run inside the target repo)
 #    These run automatically when using the bash wrapper above.
