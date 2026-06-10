@@ -63,6 +63,7 @@ graceful_fallbacks:
     fallback: Use explicit verification commands and approval packets when hooks are unavailable.
 examples: []
 placeholder_reference: PLACEHOLDERS.md
+placeholder_registry: placeholders.json
 generated_outputs:
   - packages/ai-universal-rules/catalog.json
   - packages/ai-universal-rules/docs/BROWSE.md
@@ -77,6 +78,7 @@ starter_profiles:
       - README.md
       - QUICKSTART.md
       - PLACEHOLDERS.md
+      - placeholders.json
       - docs
       - templates/core
       - templates/shared
@@ -90,6 +92,7 @@ starter_profiles:
       - README.md
       - QUICKSTART.md
       - PLACEHOLDERS.md
+      - placeholders.json
       - docs
       - templates/core
       - templates/shared

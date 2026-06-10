@@ -201,6 +201,52 @@ final class UpgradeOwnershipTest extends TestCase
         $this->assertSame('SKIP_PROTECTED_CORE', $plan[0]['action'] ?? null, 'differing core file remains protected');
     }
 
+    private function buildManagedFilePlan(string $sourceBytes, string $targetBytes): array
+    {
+        $root = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'identical_noop_' . uniqid('', true);
+        $this->tmpDirs[] = $root;
+        mkdir($root . DIRECTORY_SEPARATOR . 'source', 0700, true);
+        mkdir($root . DIRECTORY_SEPARATOR . 'target', 0700, true);
+        file_put_contents($root . DIRECTORY_SEPARATOR . 'source' . DIRECTORY_SEPARATOR . 'managed.sh', $sourceBytes);
+        file_put_contents($root . DIRECTORY_SEPARATOR . 'target' . DIRECTORY_SEPARATOR . 'managed.sh', $targetBytes);
+
+        return aiInstallerBuildPlan([
+            'sourceRoot' => $root . DIRECTORY_SEPARATOR . 'source',
+            'targetRoot' => $root . DIRECTORY_SEPARATOR . 'target',
+            'force' => true,
+            'adopt' => false,
+            'allowCoreOverwrite' => false,
+            'upgradeSuffix' => '',
+            // --backup makes a displaced kit-managed file safe to overwrite, so a
+            // genuinely-different file reaches OVERWRITE_MANAGED rather than CONFLICT_FOREIGN.
+            'backup' => true,
+        ], [
+            'pack' => [[
+                'type' => 'file',
+                'source' => 'managed.sh',
+                'target' => 'managed.sh',
+                'merge_strategy' => 'replace',
+                'core' => false,
+            ]],
+        ], ['pack']);
+    }
+
+    public function testForceReinstallOfIdenticalManagedFileIsNoOp(): void
+    {
+        // A byte-identical non-core managed file under --force must be a true no-op so a
+        // clean reinstall is zero-diff and the backup does not snapshot unchanged files.
+        $plan = $this->buildManagedFilePlan("#!/usr/bin/env bash\necho hi\n", "#!/usr/bin/env bash\necho hi\n");
+        $this->assertSame('SKIP_IDENTICAL_EXISTING', $plan[0]['action'] ?? null, 'identical managed file under force is an idempotent no-op');
+        $this->assertSame('target matches source', $plan[0]['reason'] ?? null);
+    }
+
+    public function testForceReinstallOfModifiedManagedFileStillOverwrites(): void
+    {
+        // A genuinely-changed managed file must still be rewritten under --force --backup.
+        $plan = $this->buildManagedFilePlan("#!/usr/bin/env bash\necho new\n", "#!/usr/bin/env bash\necho old\n");
+        $this->assertSame('OVERWRITE_MANAGED', $plan[0]['action'] ?? null, 'changed managed file under force is overwritten');
+    }
+
     // ---- P0-b Slice 2: computed `deprecated` class (never stored) ----
 
     public function testComputeDeprecatedFlagsManifestFilesAbsentFromRegistry(): void
