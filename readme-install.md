@@ -193,7 +193,8 @@ php tools/ai/install-ai-kit.php \
   --project-name "your-project-name" \
   --backup \
   --verify-after \
-  --non-interactive
+  --non-interactive \
+  --allow-placeholders
 
 # Reinstall / push updated templates — add --force to overwrite existing managed files
 # (safe: core base policy files are still protected without --allow-core-overwrite)
@@ -205,6 +206,7 @@ php tools/ai/install-ai-kit.php \
   --backup \
   --verify-after \
   --non-interactive \
+  --allow-placeholders \
   --force
 
 # OpenCode-only full install — excludes GitHub Copilot adapter files
@@ -216,7 +218,8 @@ php tools/ai/install-ai-kit.php \
   --project-name "your-project-name" \
   --backup \
   --verify-after \
-  --non-interactive
+  --non-interactive \
+  --allow-placeholders
 
 # 4. Generate repomix context bundle + run advisor (run from inside the target repo)
 #    These run automatically when using the bash wrapper (install-ai-kit.sh).
@@ -244,6 +247,7 @@ cat /path/to/your-project/docs/ai/POST-INSTALL.md
 | `--profile <name>`     | Yes                                  | `dual`            | Which packs to install. Use `full-governance` for complete setup                                           |
 | `--runtime <name>`     | Yes                                  | `both`            | `github-copilot`, `opencode`, or `both`                                                                    |
 | `--without <packs>`    | Optional                             | off               | Remove packs from the profile; use `optional-agents-copilot-pack` when doing an OpenCode-only full install |
+| `--allow-placeholders` | Recommended for first full install   | off               | Allows strict profiles to complete before placeholder files are manually filled                            |
 | `--project-name <n>`   | Recommended                          | inferred from dir | Sets `<PROJECT_NAME>` placeholder in installed files                                                       |
 | `--backup`             | **Yes** if target has existing files | off               | Archives managed files before overwriting                                                                  |
 | `--non-interactive`    | Yes in CI                            | off               | Disables interactive prompts                                                                               |
@@ -456,28 +460,28 @@ When you install `full-governance` into a target repo, these files are created:
 
 ### `docs/ai/` — Canonical Documentation
 
-| Installed File                 | Purpose                                  |
-| ------------------------------ | ---------------------------------------- |
-| `docs/ai/project-context.md`   | Durable project context for all AI tools |
-| `docs/ai/workflow.md`          | Default task workflow                    |
-| `docs/ai/AI-GUARDRAILS.md`     | Safety rules                             |
-| `docs/ai/capabilities/*/`      | Reusable procedure packages              |
-| `docs/ai/script-registry.md`   | Approved script allowlist                |
-| `docs/ai/script-registry.json` | Machine-readable script registry         |
+| Installed File                 | Purpose                                                     |
+| ------------------------------ | ----------------------------------------------------------- |
+| `docs/ai/project-context.md`   | Durable project context for all AI tools                    |
+| `docs/ai/workflow.md`          | Default task workflow                                       |
+| `docs/ai/AI-GUARDRAILS.md`     | Safety rules                                                |
+| `docs/ai/capabilities/*/`      | Reusable procedure packages                                 |
+| `docs/ai/script-registry.md`   | Approved script allowlist                                   |
+| `docs/ai/script-registry.json` | Machine-readable script registry                            |
 | `docs/ai/package/`             | Package reference docs (foundations, operations, workflows) |
 
 ### Package Descriptors — Target Root
 
 Named-profile installs place the package descriptors at the **target repository root** (via `target-tools-pack`), not under a `packages/` folder. A consumer install never receives a `packages/` directory.
 
-| Installed File          | Purpose                                       |
-| ----------------------- | --------------------------------------------- |
-| `manifest.json`         | Installed-file manifest (machine-readable)    |
-| `manifest.yml`          | Installed-file manifest (YAML mirror)         |
-| `catalog.json`          | Cataloged asset metadata                      |
-| `package-lock.ai.json`  | Pinned package content hashes                 |
-| `PLACEHOLDERS.md`       | Placeholder reference                         |
-| `policies/`             | Governance command policies                   |
+| Installed File         | Purpose                                    |
+| ---------------------- | ------------------------------------------ |
+| `manifest.json`        | Installed-file manifest (machine-readable) |
+| `manifest.yml`         | Installed-file manifest (YAML mirror)      |
+| `catalog.json`         | Cataloged asset metadata                   |
+| `package-lock.ai.json` | Pinned package content hashes              |
+| `PLACEHOLDERS.md`      | Placeholder reference                      |
+| `policies/`            | Governance command policies                |
 
 > Package reference docs land under `docs/ai/package/` (not `packages/ai-universal-rules/docs/`). The source-repo-only `README.md` and `QUICKSTART.md` are **not** shipped to consumers. The `packages/ai-universal-rules/templates/` tree is only installed by the opt-in `kit-authoring-pack`.
 
@@ -886,18 +890,18 @@ php tools/ai/maintenance-mode.php disable
 
 ## Known Issues and Gotchas
 
-| Issue                                                                                      | Status            | Workaround                                                                                                                                                                         |
-| ------------------------------------------------------------------------------------------ | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| macOS Bash is 3.2; scripts need 4+                                                         | Known             | `brew install bash` + add to PATH via `~/.zprofile`                                                                                                                                |
-| `.husky/` exists but no `package.json`                                                     | Orphaned          | Use Lefthook instead                                                                                                                                                               |
-| `.eslintrc.json`, `.prettierrc.json`, `.stylelintrc.json` reference frameworks not present | Reference configs | Not a bug — they serve as starter configs for target projects                                                                                                                      |
-| `docs/ai/project-context.md` has `unknown` values                                          | Intentional       | Template defaults — filled in per-project during install                                                                                                                           |
-| VS Code sandbox `deniedDomains` warning                                                    | Fixed             | Disappears after VS Code restart                                                                                                                                                   |
+| Issue                                                                                             | Status            | Workaround                                                                                                                                                                                                   |
+| ------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| macOS Bash is 3.2; scripts need 4+                                                                | Known             | `brew install bash` + add to PATH via `~/.zprofile`                                                                                                                                                          |
+| `.husky/` exists but no `package.json`                                                            | Orphaned          | Use Lefthook instead                                                                                                                                                                                         |
+| `.eslintrc.json`, `.prettierrc.json`, `.stylelintrc.json` reference frameworks not present        | Reference configs | Not a bug — they serve as starter configs for target projects                                                                                                                                                |
+| `docs/ai/project-context.md` has `unknown` values                                                 | Intentional       | Template defaults — filled in per-project during install                                                                                                                                                     |
+| VS Code sandbox `deniedDomains` warning                                                           | Fixed             | Disappears after VS Code restart                                                                                                                                                                             |
 | Copilot `git` commands fail in the sandbox, then re-prompt to run without sandbox (wastes tokens) | Fixed             | `.vscode/settings.json` no longer denies writes to `./.git/`, so `git` can refresh its index/locks inside the sandbox; read-only `git` verbs are also terminal auto-approved. Restart VS Code after install. |
-| `~/.gitignore_global` may block `git add`                                                  | Per-user          | Use `git add -f <file>` for files in `.vscode/`, `scripts/`, `.github/`, `docs/`                                                                                                   |
-| Windows Git not in PATH                                                                    | Known             | `$env:Path = "C:\Program Files\Git\cmd;$env:Path"`                                                                                                                                 |
-| `repomix` not found                                                                        | Missing tool      | `npm i -g repomix`                                                                                                                                                                 |
-| `Error: no files available after applying ignore rules` when running repomix               | Not a git repo    | `git init && git add -A && git commit -m "init"` in the target dir, or `cd /path/to/dir && repomix --include "**/*" --no-gitignore --no-git-sort-by-changes --output /tmp/out.xml` |
+| `~/.gitignore_global` may block `git add`                                                         | Per-user          | Use `git add -f <file>` for files in `.vscode/`, `scripts/`, `.github/`, `docs/`                                                                                                                             |
+| Windows Git not in PATH                                                                           | Known             | `$env:Path = "C:\Program Files\Git\cmd;$env:Path"`                                                                                                                                                           |
+| `repomix` not found                                                                               | Missing tool      | `npm i -g repomix`                                                                                                                                                                                           |
+| `Error: no files available after applying ignore rules` when running repomix                      | Not a git repo    | `git init && git add -A && git commit -m "init"` in the target dir, or `cd /path/to/dir && repomix --include "**/*" --no-gitignore --no-git-sort-by-changes --output /tmp/out.xml`                           |
 
 ---
 

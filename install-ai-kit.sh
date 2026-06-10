@@ -8,6 +8,7 @@
 #   bash install-ai-kit.sh /path/to/your-project "my-project-name"
 #   bash install-ai-kit.sh /path/to/your-project "my-project-name" --force
 #   bash install-ai-kit.sh /path/to/your-project --force
+#   bash install-ai-kit.sh /path/to/your-project --strict-placeholders
 #
 # Options:
 #   --force   Overwrite existing files. Use on reinstalls to push updated
@@ -15,12 +16,15 @@
 #             Core base policy files are protected and will NOT be overwritten
 #             unless you also pass --allow-core-overwrite to the PHP installer
 #             directly.
+#   --strict-placeholders  Fail install when required placeholders remain
+#             unresolved (disables default --allow-placeholders passthrough).
 #
 # Examples:
 #   bash install-ai-kit.sh /Users/you/Herd/project-name
 #   bash install-ai-kit.sh /Users/you/Herd/project-name project-name
 #   bash install-ai-kit.sh /Users/you/Herd/project-name --force
 #   bash install-ai-kit.sh /Users/you/Herd/project-name project-name --force
+#   bash install-ai-kit.sh /Users/you/Herd/project-name --strict-placeholders
 # =============================================================================
 set -euo pipefail
 
@@ -28,28 +32,34 @@ set -euo pipefail
 TARGET="${1:-}"
 PROJECT_NAME=""
 FORCE_FLAG=""
+ALLOW_PLACEHOLDERS_FLAG="--allow-placeholders"
 
 # Parse optional arguments after the target path
 for arg in "${@:2}"; do
     case "$arg" in
         --force) FORCE_FLAG="--force" ;;
+        --strict-placeholders) ALLOW_PLACEHOLDERS_FLAG="" ;;
         --*)     ;; # ignore unknown flags for forward-compatibility
         *)       PROJECT_NAME="$arg" ;;
     esac
 done
 
 if [[ -z "$TARGET" ]]; then
-    echo "Usage: bash install-ai-kit.sh /path/to/project [project-name] [--force]"
+    echo "Usage: bash install-ai-kit.sh /path/to/project [project-name] [--force] [--strict-placeholders]"
     echo ""
     echo "Options:"
     echo "  --force   Overwrite existing managed files in the target."
     echo "            Use on reinstalls to pick up updated templates."
+    echo "  --strict-placeholders"
+    echo "            Fail if required placeholders remain unresolved."
+    echo "            Default behavior allows placeholder-first bootstrap installs."
     echo ""
     echo "Examples:"
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name"
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name project-name"
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name --force"
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name project-name --force"
+    echo "  bash install-ai-kit.sh /Users/you/Herd/project-name --strict-placeholders"
     exit 1
 fi
 
@@ -128,6 +138,7 @@ php tools/ai/install-ai-kit.php \
     --backup \
     --verify-after \
     --non-interactive \
+    ${ALLOW_PLACEHOLDERS_FLAG} \
     ${FORCE_FLAG}
 
 # ── Validate install surface ──────────────────────────────────────────────────
