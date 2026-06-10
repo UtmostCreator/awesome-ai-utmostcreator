@@ -15,7 +15,7 @@ Usage:
 
 Environment:
   DOC_PATHS="README.md docs/**/*.md"
-    VERIFY_LINKS_NETWORK=1   # opt in to network link checks
+  Link checks always run lychee with --offline.
 EOF
 }
 
@@ -107,11 +107,7 @@ run_links() {
     if command -v lychee >/dev/null 2>&1; then
         # Accept 403/429: these mean the resource exists but blocks automated checks
         # (anti-bot / rate limiting), which must not be treated as a broken link.
-        if [[ "$VERIFY_LINKS_NETWORK" == "1" ]]; then
-            run_step "lychee" lychee --accept "200..=299,403,429" "${DOC_PATH_LIST[@]}"
-        else
-            run_step "lychee --offline" lychee --offline --accept "200..=299,403,429" "${DOC_PATH_LIST[@]}"
-        fi
+        run_step "lychee --offline" lychee --offline --accept "200..=299,403,429" "${DOC_PATH_LIST[@]}"
     else
         log_warn "lychee not installed; skipping"
     fi
@@ -158,7 +154,6 @@ run_drift() {
 main() {
     local mode="all"
     local DOC_PATHS="${DOC_PATHS:-README.md docs/**/*.md}"
-    local VERIFY_LINKS_NETWORK="${VERIFY_LINKS_NETWORK:-0}"
     local failures=0
 
     if (($# > 0)); then

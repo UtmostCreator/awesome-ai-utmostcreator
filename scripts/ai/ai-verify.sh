@@ -19,12 +19,10 @@ VERIFY_BASE_REF="${VERIFY_BASE_REF:-}"
 # Optional author filter for the "branch" scope. When set (e.g. your git email),
 # only files from commits authored by you (plus uncommitted work) are scoped.
 VERIFY_AUTHOR="${VERIFY_AUTHOR:-}"
-# Link checking is OFF by default because it can reach the network and hit
-# production URLs embedded in docs. Set VERIFY_LINKS=1 to enable it. Even then,
-# lychee runs with --offline (local file links only) unless VERIFY_LINKS_NETWORK=1
-# is also set, so a verify run never dials production endpoints by accident.
+# Link checking is OFF by default. Set VERIFY_LINKS=1 to enable local-only link
+# validation. Lychee always runs with --offline from this wrapper; shipped verify
+# commands must never dial production URLs embedded in target-project docs.
 VERIFY_LINKS="${VERIFY_LINKS:-0}"
-VERIFY_LINKS_NETWORK="${VERIFY_LINKS_NETWORK:-0}"
 
 failures=0
 
@@ -131,6 +129,23 @@ scoped_php_files() {
         done
 }
 
+is_shipped_ai_kit_shell_file() {
+    case "$1" in
+    .github/hooks/scripts/*.sh | \
+        scripts/ai/*.sh | \
+        scripts/hooks/*.sh | \
+        tools/ai/install/*.sh)
+        return 0
+        ;;
+    esac
+
+    return 1
+}
+
+is_changed_or_branch_scope() {
+    [[ "$AI_VERIFY_SCOPE" == "changed" || "$AI_VERIFY_SCOPE" == "branch" ]]
+}
+
 if [[ "${AI_VERIFY_TEST_MODE:-0}" == "1" ]]; then
     echo "==> repository"
     git status --short || true
@@ -198,6 +213,10 @@ tracked_existing_shell_files() {
             sort -u |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
+                # In installed target repositories, AI-kit shell files are
+                # shipped support files. Changed-scope verification is for the
+                # user's slice, not re-linting shipped wrappers after install.
+                is_shipped_ai_kit_shell_file "$script" && continue
                 [[ "$script" == scripts/ai/check-batch*.sh ]] && continue
                 printf '%s\n' "$script"
             done
@@ -206,6 +225,10 @@ tracked_existing_shell_files() {
         branch_scoped_files '*.sh' |
             while IFS= read -r script; do
                 [[ -f "$script" ]] || continue
+                # Branch scope can include freshly installed kit shell files in
+                # a target repository; do not make shipped wrappers part of the
+                # target project's verification burden.
+                is_shipped_ai_kit_shell_file "$script" && continue
                 [[ "$script" == scripts/ai/check-batch*.sh ]] && continue
                 printf '%s\n' "$script"
             done
@@ -246,19 +269,12 @@ if command -v actionlint >/dev/null 2>&1 && [[ -d .github/workflows ]]; then
 fi
 
 if [[ "$VERIFY_LINKS" == "1" ]] && command -v lychee >/dev/null 2>&1; then
-    if [[ -f scripts/run-link-check.sh ]]; then
-        run_step 'bash scripts/run-link-check.sh' bash scripts/run-link-check.sh
-    elif [[ "$VERIFY_LINKS_NETWORK" == "1" ]]; then
-        # Explicit network link check requested. This CAN reach production URLs
-        # embedded in docs; only enable when that is intended.
-        run_step 'lychee README.md docs/**/*.md' lychee README.md docs/**/*.md
-    else
-        # Offline by default: validate local file links only, never dial the
-        # network (so production URLs in docs are not contacted).
-        run_step 'lychee --offline README.md docs/**/*.md' lychee --offline README.md docs/**/*.md
-    fi
+    # Always offline: validate local file links only, never dial the network
+    # (so production URLs in docs are not contacted). Do not delegate to a
+    # target project's link-check wrapper because it may perform network checks.
+    run_step 'lychee --offline README.md docs/**/*.md' lychee --offline README.md docs/**/*.md
 else
-    log_warn "Skipping link check. Use VERIFY_LINKS=1 (offline) or VERIFY_LINKS=1 VERIFY_LINKS_NETWORK=1 (network)."
+    log_warn "Skipping link check. Use VERIFY_LINKS=1 to run lychee in offline mode."
 fi
 
 if [[ -f composer.json ]]; then
@@ -419,16 +435,23 @@ else
     log_warn "Skipping secret scan. Use VERIFY_SECRETS=1 to enable gitleaks."
 fi
 
-if command -v trivy >/dev/null 2>&1; then
+if is_changed_or_branch_scope; then
+    log_warn "Skipping broad security scanners in $AI_VERIFY_SCOPE scope. Use AI_VERIFY_SCOPE=all to run trivy/semgrep/osv-scanner."
+elif command -v trivy >/dev/null 2>&1; then
     run_step 'trivy fs --scanners vuln,misconfig,secret .' trivy fs --scanners vuln,misconfig,secret .
-fi
-
-if command -v semgrep >/dev/null 2>&1; then
-    run_step 'semgrep scan --config auto .' semgrep scan --config auto .
-fi
-
-if command -v osv-scanner >/dev/null 2>&1; then
-    run_step 'osv-scanner scan --lockfile=.' osv-scanner scan --lockfile=.
+    if command -v semgrep >/dev/null 2>&1; then
+        run_step 'semgrep scan --config auto .' semgrep scan --config auto .
+    fi
+    if command -v osv-scanner >/dev/null 2>&1; then
+        run_step 'osv-scanner scan --lockfile=.' osv-scanner scan --lockfile=.
+    fi
+else
+    if command -v semgrep >/dev/null 2>&1; then
+        run_step 'semgrep scan --config auto .' semgrep scan --config auto .
+    fi
+    if command -v osv-scanner >/dev/null 2>&1; then
+        run_step 'osv-scanner scan --lockfile=.' osv-scanner scan --lockfile=.
+    fi
 fi
 
 if ((failures > 0)); then

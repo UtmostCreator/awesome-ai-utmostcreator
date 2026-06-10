@@ -21,10 +21,10 @@ Commands:
 
 Options:
   --output-dir <dir>          Base output directory (default: .repomix-context)
-  --depth <n>                 Folder grouping depth for stats (default: 1)
-  --top <n>                   Max routes to consider, 0 means all (default: 25)
-  --min-code <n>              Minimum code lines per route (default: 300)
-  --min-files <n>             Minimum files per route (default: 2)
+  --depth <n>                 Folder grouping depth for stats (default: 2)
+  --top <n>                   Max routes to consider, 0 means all (default: 0)
+  --min-code <n>              Minimum code lines per route (default: 25)
+  --min-files <n>             Minimum files per route (default: 1)
   --min-score <n>             Minimum ranking score (default: 0)
   --min-complexity <n>        Minimum complexity (default: 0)
   --changed-since <ref>       Scope stats input to files changed since ref
@@ -41,10 +41,10 @@ Options:
   --no-ignore                 repomix default patterns so an explicitly chosen
                               folder is always packable (implies
                               --include-ignored). Env: INCLUDE_REPOMIXIGNORED=1
-  --context-window <n>        Context window estimate (default: 128000)
-  --reserved-output <n>       Reserved output tokens (default: 4000)
-  --instruction-overhead <n>  Instruction overhead tokens (default: 8000)
-  --safety-factor <float>     Safety multiplier (default: 0.85)
+  --context-window <n>        Context window estimate (default: 1000000)
+  --reserved-output <n>       Reserved output tokens (default: 25000)
+  --instruction-overhead <n>  Instruction overhead tokens (default: 30000)
+  --safety-factor <float>     Safety multiplier (default: 0.8)
   --help
 EOF
 }
@@ -154,10 +154,10 @@ if (($# > 0)) && [[ "${1:-}" != --* ]]; then
 fi
 
 OUTPUT_DIR='.repomix-context'
-DEPTH=1
-TOP=25
-MIN_CODE=300
-MIN_FILES=2
+DEPTH=2
+TOP=0
+MIN_CODE=25
+MIN_FILES=1
 MIN_SCORE=0
 MIN_COMPLEXITY=0
 CHANGED_SINCE=''
@@ -172,10 +172,10 @@ INCLUDE_IGNORED="${INCLUDE_IGNORED:-0}"
 # Full bypass of .repomixignore (and repomix default ignore layers). Off by
 # default; opt in via env key or --no-ignore / --include-repomixignored.
 INCLUDE_REPOMIXIGNORED="${INCLUDE_REPOMIXIGNORED:-0}"
-CONTEXT_WINDOW=128000
-RESERVED_OUTPUT=4000
-INSTRUCTION_OVERHEAD=8000
-SAFETY_FACTOR=0.85
+CONTEXT_WINDOW=1000000
+RESERVED_OUTPUT=25000
+INSTRUCTION_OVERHEAD=30000
+SAFETY_FACTOR=0.8
 
 while (($# > 0)); do
     case "$1" in

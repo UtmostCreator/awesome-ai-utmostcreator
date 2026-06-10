@@ -17,13 +17,22 @@ Policy (read from `.repomix-context/tree-context/run-manifest.json`):
 - `> 7 days`: expired — exits non-zero; regenerate before use.
 - missing manifest: exits non-zero; generate context first.
 
-Regenerate (applies `--compress --style xml` for lower token usage):
+Regenerate (applies `--compress --style xml --depth 2 --top 0 --min-code 25 --min-files 1` and the default 1M-token budget profile):
 
 ```bash
 SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh .
 ```
 
 Prefer `run-repomix-context.sh` over calling `repomix` directly so compression and bounded styling are applied consistently.
+
+Use the focused 273K profile when the consumer has a smaller context window:
+
+```bash
+SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh . \
+  --context-window 273000 --reserved-output 12000 --instruction-overhead 18000 --safety-factor 0.8
+```
+
+Installed scripts also append common low-value generated/runtime paths to their hard excludes, so `.git/`, `.repomix-context/`, `.ai-logs/`, `.ai-backups/`, dependency directories, build outputs, caches, logs, and framework runtime cache/session/view folders stay out of context plans even when the target `.repomixignore` is missing or stale. The shipped `.repomixignore` is only a default template; installers should not replace a user's existing file just to enforce these script-level excludes.
 
 For an exact single-file bundle, use the dedicated wrapper instead of the tree planner:
 

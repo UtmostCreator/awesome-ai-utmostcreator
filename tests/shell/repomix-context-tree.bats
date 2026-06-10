@@ -43,7 +43,7 @@ teardown() {
 }
 
 @test "plan generates contracted files and human sections" {
-    run bash "$TREE_SCRIPT" plan "$TMP_REPO" --style xml --context-window 128000
+    run bash "$TREE_SCRIPT" plan "$TMP_REPO" --style xml --context-window 1000000
     [ "$status" -eq 0 ]
 
     [ -f "$TMP_REPO/.repomix-context/tree-context/index.md" ]
@@ -126,10 +126,11 @@ EOF
 
 @test "hardcoded excludes apply with missing .repomixignore (P1)" {
     rm -f "$TMP_REPO/.repomixignore"
-    mkdir -p "$TMP_REPO/.ai-backups/install-x/files" "$TMP_REPO/.ai-logs" "$TMP_REPO/.repomix-context/leftover"
+    mkdir -p "$TMP_REPO/.ai-backups/install-x/files" "$TMP_REPO/.ai-logs" "$TMP_REPO/.repomix-context/leftover" "$TMP_REPO/docs/ai/generated"
     printf '%s\n' '# snapshot' >"$TMP_REPO/.ai-backups/install-x/files/y.md"
     printf '%s\n' '{"run":1}' >"$TMP_REPO/.ai-logs/run.jsonl"
     printf '%s\n' '{"old":1}' >"$TMP_REPO/.repomix-context/leftover/old.json"
+    printf '%s\n' '{"generated":1}' >"$TMP_REPO/docs/ai/generated/context.json"
 
     git -C "$TMP_REPO" add -A
     git -C "$TMP_REPO" commit --quiet -m "add ephemeral state without repomixignore"
@@ -140,5 +141,7 @@ EOF
     run grep -F ".ai-backups" "$TMP_REPO/.repomix-context/tree-context/tree-plan.tsv"
     [ "$status" -ne 0 ]
     run grep -F ".ai-logs" "$TMP_REPO/.repomix-context/tree-context/tree-plan.tsv"
+    [ "$status" -ne 0 ]
+    run grep -F "docs/ai/generated" "$TMP_REPO/.repomix-context/tree-context/tree-plan.tsv"
     [ "$status" -ne 0 ]
 }
