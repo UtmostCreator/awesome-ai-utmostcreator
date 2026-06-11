@@ -502,7 +502,7 @@ Installed via `scripts-pack`. See the [Scripts](#scripts--what-each-one-does) se
 | `rg-code.sh`      | Ripgrep wrapper with mode presets (php, js, config, json)                      | `bash scripts/ai/rg-code.sh "pattern" . --mode php`         |
 | `fd-files.sh`     | File discovery wrapper using fd                                                | `bash scripts/ai/fd-files.sh "*.php" .`                     |
 | `preview-file.sh` | Safe file preview with line-range support                                      | `bash scripts/ai/preview-file.sh path/file.php --around 50` |
-| `query-usage.sh`  | Find all usages of a symbol across the repo                                    | `bash scripts/ai/query-usage.sh "myFunction"`               |
+| `query-usage.sh`  | Estimate token/byte context cost of a PATH (file or dir); NOT a symbol search  | `bash scripts/ai/query-usage.sh src/`                       |
 | `repo-stats.sh`   | Per-file and per-directory line/size metrics                                   | `bash scripts/ai/repo-stats.sh . --json`                    |
 
 ### Git and History (read-only)

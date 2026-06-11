@@ -125,7 +125,7 @@ Denied: `ai-install-coverage`, `ai-test-select`, `run-repo-tests`, and all write
 2. For branch or PR review, resolve the common ancestor with `git merge-base BASE_REF HEAD` and prefer `BASE...HEAD` diff views.
 3. Search changed evidence first, then staged, then tracked with `AI_OUTPUT=json bash scripts/ai/ai-search.sh <mode> <query> . --fixed`.
 4. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
-5. Use `bash scripts/ai/query-usage.sh <symbol-or-path>`, `git grep`, and when useful `git log -S` / `git log -G` before flagging duplication or usage risk.
+5. Use `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed`, `git grep`, and when useful `git log -S` / `git log -G` before flagging duplication or usage risk (`query-usage.sh <path>` only estimates a path's token/byte cost; it is not a symbol search).
 6. For AI wiring, run `AI_OUTPUT=json bash scripts/ai/ai-search.sh doctor` and the PHP validators when available.
 
 ## Output expectations

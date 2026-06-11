@@ -7,7 +7,13 @@ usage() {
 Usage:
   scripts/ai/query-usage.sh [path] [--multiplier <n>] [--multiplier-label <label>] [--reserved-output <n>]
 
-Print a read-only usage closeout summary for inspected content.
+Estimate the context/token cost of a PATH (file or directory). Prints bytes and
+estimated token counts for budgeting context packs. Read-only.
+
+[path] MUST be a real file or directory that exists on disk (defaults to ".").
+This is NOT a symbol/usage/call-site search: a bare identifier like "MyClass"
+will fail with "Path not found". To find where a symbol is used, run:
+  bash scripts/ai/ai-search.sh text "MyClass" . --fixed
 EOF
 }
 
@@ -61,6 +67,8 @@ done
 
 [[ -e "$TARGET" ]] || {
     echo "Path not found: $TARGET" >&2
+    echo "query-usage.sh estimates the token cost of a PATH (file or directory), not a symbol." >&2
+    echo "To search where a symbol is used, run: bash scripts/ai/ai-search.sh text \"$TARGET\" . --fixed" >&2
     exit 1
 }
 

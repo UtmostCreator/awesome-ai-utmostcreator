@@ -13,7 +13,7 @@ Format: `script — when to use — why — expect after`.
 - `preview-file.sh` — read a file or range after a search hit — safe bounded reader (blocks binaries/secrets) — expect `path`, `range`, `content`, `truncated`.
 - `rg-code.sh` — fast text/code regex search — ripgrep wrapper with repo defaults — expect matching file paths and line numbers.
 - `fd-files.sh` — find files by name/pattern — fd wrapper — expect matching file paths.
-- `query-usage.sh` — trace where a symbol/path is used — usage map before changing shared code — expect call-site list.
+- `query-usage.sh` — estimate the token/byte context cost of a PATH (file or directory) before a broad read — NOT a symbol search; the argument must be a real path, not an identifier (use `ai-search.sh` for symbol usage) — expect a byte/token estimate.
 
 ## Repo-aware read (low/medium risk)
 
