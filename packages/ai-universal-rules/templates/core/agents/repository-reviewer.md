@@ -23,6 +23,9 @@ permission:
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/ai-search-multi.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow

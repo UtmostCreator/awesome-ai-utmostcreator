@@ -18,6 +18,7 @@ All scripts ship from and install to the listed path in `scripts-pack` unless no
 | --- | --- | --- | --- | --- |
 | `common.sh` | Source from other AI scripts only. | Centralizes shared guards, logging, JSON, git, and rollback helpers. | Library functions; not a runnable task. | No CLI help; inspect callers. |
 | `ai-search.sh` | Search changed, staged, tracked, text, files, or structural evidence. | Gives agents a bounded repository search entrypoint before broad reads. | Text or JSON hit envelopes; read-only. | `--help`/`-h`; supports `AI_OUTPUT=json`. |
+| `ai-search-multi.sh` | Run one safe `ai-search` mode over several queries in a single invocation. | Lets agents batch related searches without an ad-hoc shell-chained command. | `---`-separated results or a JSON array of envelopes; read-only. | `--help`/`-h`; supports `AI_OUTPUT=json`; caps at `AI_SEARCH_MULTI_MAX` queries. |
 | `rg-code.sh` | Run code-focused ripgrep with common language filters. | Keeps search patterns consistent and excludes noisy surfaces. | Search results; read-only. | `--help`/`-h`. |
 | `fd-files.sh` | Find files by query, extension, or hidden-file mode. | Provides portable file discovery with optional JSON. | File lists or JSON; read-only. | `--help`/`-h`; supports `--json`. |
 | `preview-file.sh` | Preview a safe file range after search finds a path/line. | Avoids unbounded dumps, binary files, and unsafe paths. | Bounded text or JSON preview; read-only. | `--help`/`-h`; supports `AI_OUTPUT=json`. |

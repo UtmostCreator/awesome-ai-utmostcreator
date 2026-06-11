@@ -3,6 +3,7 @@
   "scripts": {
     "common": {"source_path":"scripts/ai/common.sh","installed_path":"scripts/ai/common.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "ai-search": {"source_path":"scripts/ai/ai-search.sh","installed_path":"scripts/ai/ai-search.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
+    "ai-search-multi": {"source_path":"scripts/ai/ai-search-multi.sh","installed_path":"scripts/ai/ai-search-multi.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "rg-code": {"source_path":"scripts/ai/rg-code.sh","installed_path":"scripts/ai/rg-code.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "fd-files": {"source_path":"scripts/ai/fd-files.sh","installed_path":"scripts/ai/fd-files.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "preview-file": {"source_path":"scripts/ai/preview-file.sh","installed_path":"scripts/ai/preview-file.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
