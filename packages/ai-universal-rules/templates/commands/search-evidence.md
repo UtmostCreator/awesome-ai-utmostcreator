@@ -28,7 +28,7 @@ Preview any cited file or line with:
 AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30
 ```
 
-Use `bash scripts/ai/query-usage.sh <symbol-or-path>` when the request asks for usage, impact, or duplication.
+For usage, impact, or duplication questions, search with `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed` (and `git grep`). Use `bash scripts/ai/query-usage.sh <path>` only to estimate the token/byte cost of a file or directory; it is not a symbol search.
 
 ## Return fields
 

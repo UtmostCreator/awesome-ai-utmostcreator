@@ -27,7 +27,7 @@ When the repository provides wrapper scripts, use those in preference to direct 
 - `bash scripts/ai/rg-code.sh "<pattern>" .` — code-specific rg wrapper
 - `bash scripts/ai/fd-files.sh "<pattern>" .` — file discovery wrapper
 - `AI_OUTPUT=json bash scripts/ai/preview-file.sh "<path>" --around <line> --context 30` — safe file preview
-- `bash scripts/ai/query-usage.sh "<symbol>"` — symbol usage search
+- `bash scripts/ai/query-usage.sh <path>` — estimate token/byte context cost of a PATH (file or dir); NOT a symbol search (use `ai-search.sh` for symbol usage)
 - `bash scripts/ai/git-forensics.sh "<symbol-or-path>"` — git history tracing
 
 Only use scripts that are listed in both `docs/ai/script-registry.md` and `docs/ai/script-registry.json`.

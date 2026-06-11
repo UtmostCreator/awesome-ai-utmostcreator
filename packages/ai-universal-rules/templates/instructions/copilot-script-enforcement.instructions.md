@@ -54,13 +54,13 @@ php tools/ai/ai.php freshness                            # check artifact freshn
 
 ```bash
 bash scripts/ai/git-forensics.sh "<symbol-or-path>"     # git history tracing
-bash scripts/ai/query-usage.sh "<symbol>"                # symbol usage across repo
 bash scripts/ai/gh-pr-context.sh                         # PR context
 ```
 
 ### Context and Packaging
 
 ```bash
+bash scripts/ai/query-usage.sh <path>                    # estimate token/byte cost of a PATH (NOT a symbol search)
 bash scripts/ai/pack-context.sh                          # pack AI context
 bash scripts/ai/repomix-scc-router.sh                    # SCC-ranked context
 bash scripts/ai/ai-diff-context.sh                       # diff-aware context
@@ -92,7 +92,7 @@ bash scripts/ai/ai-install-coverage.sh                   # check install complet
 ## Do Not
 
 - Do not skip verification scripts because built-in tools found no errors.
-- Do not substitute `grep_search` for `query-usage.sh` when checking symbol usage across the full repo.
+- Do not substitute `grep_search` for `ai-search.sh` when checking symbol usage across the full repo (`query-usage.sh` estimates the cost of a PATH; it does not search for symbols).
 - Do not substitute `read_file` for `preview-file.sh` when the script provides structured JSON output needed by other tools.
 - Do not claim verification was done if you only used built-in search tools.
 - Do not use `cat`, `grep`, `find`, `xargs`, or broad `ls` pipelines for normal exploration in Copilot VS Code.

@@ -101,7 +101,7 @@ load_scoping_functions() {
     # Pull only the function bodies (between the marked helpers) by sourcing the
     # whole script in a guarded way: define a fake "cd"/main no-op is fragile, so
     # instead we re-declare the functions verbatim via sed extraction.
-    eval "$(sed -n '/^resolve_branch_base() {/,/^}/p;/^branch_scoped_files() {/,/^}/p;/^scoped_php_files() {/,/^}/p;/^is_shipped_ai_kit_shell_file() {/,/^}/p;/^is_changed_or_branch_scope() {/,/^}/p;/^tracked_existing_shell_files() {/,/^}/p' "$SCRIPT")"
+    eval "$(sed -n '/^resolve_branch_base() {/,/^}/p;/^branch_scoped_files() {/,/^}/p;/^scoped_php_files() {/,/^}/p;/^all_php_files_excluding_shipped() {/,/^}/p;/^is_shipped_ai_kit_shell_file() {/,/^}/p;/^is_shipped_ai_kit_php_file() {/,/^}/p;/^is_ai_kit_source_repo() {/,/^}/p;/^should_skip_shipped_ai_kit_shell_file() {/,/^}/p;/^should_skip_shipped_ai_kit_php_file() {/,/^}/p;/^is_changed_or_branch_scope() {/,/^}/p;/^tracked_existing_shell_files() {/,/^}/p' "$SCRIPT")"
 }
 
 # resolve_branch_base prints a commit sha or fails cleanly
@@ -205,11 +205,14 @@ test_changed_scope_excludes_shipped_ai_scripts() {
         git init -q
         git config user.email test@example.test
         git config user.name Test
-        mkdir -p .github/hooks/scripts scripts/ai scripts/hooks tools/ai/install bin
+        mkdir -p .github/hooks/scripts scripts/ai scripts/hooks tools/ai/install tools/ai/install/checks bin
         printf '#!/usr/bin/env bash\nprintf hook\\n' >.github/hooks/scripts/tool-guardian.sh
         printf '#!/usr/bin/env bash\nprintf shipped\\n' >scripts/ai/shipped.sh
         printf '#!/usr/bin/env bash\nprintf hook\\n' >scripts/hooks/pre-commit.sh
         printf '#!/usr/bin/env bash\nprintf install\\n' >tools/ai/install/base.sh
+        printf '#!/usr/bin/env bash\nprintf check\\n' >tools/ai/install/checks/check-batch3.sh
+        printf '#!/usr/bin/env bash\nprintf install\\n' >tools/ai/install-ai-kit.sh
+        printf '#!/usr/bin/env bash\nprintf install\\n' >install-ai-kit.sh
         printf '#!/usr/bin/env bash\nprintf local\\n' >bin/local.sh
         git add -A
         git commit -q -m init
@@ -217,20 +220,191 @@ test_changed_scope_excludes_shipped_ai_scripts() {
         printf '\n# changed\n' >>scripts/ai/shipped.sh
         printf '\n# changed\n' >>scripts/hooks/pre-commit.sh
         printf '\n# changed\n' >>tools/ai/install/base.sh
+        printf '\n# changed\n' >>tools/ai/install/checks/check-batch3.sh
+        printf '\n# changed\n' >>tools/ai/install-ai-kit.sh
+        printf '\n# changed\n' >>install-ai-kit.sh
         printf '\n# changed\n' >>bin/local.sh
         load_scoping_functions
         AI_VERIFY_SCOPE=changed
+        # This temp repo lacks the kit authoring artifacts, so it is treated as
+        # an installed target repo (is_ai_kit_source_repo is false here).
         out="$(tracked_existing_shell_files)"
         [[ "$out" == *"bin/local.sh"* ]]
         [[ "$out" != *".github/hooks/scripts/tool-guardian.sh"* ]]
         [[ "$out" != *"scripts/ai/shipped.sh"* ]]
         [[ "$out" != *"scripts/hooks/pre-commit.sh"* ]]
         [[ "$out" != *"tools/ai/install/base.sh"* ]]
+        [[ "$out" != *"tools/ai/install/checks/check-batch3.sh"* ]]
+        [[ "$out" != *"tools/ai/install-ai-kit.sh"* ]]
+        [[ "$out" != *"install-ai-kit.sh"* ]]
     ) || rc=$?
     rm -rf "$tmp"
     return "$rc"
 }
 run_test "changed scope excludes shipped scripts/ai wrappers" test_changed_scope_excludes_shipped_ai_scripts
+
+# Inside the kit's own source repo, the shipped install scripts ARE the product
+# and must stay in changed-scope verification. Forced via AI_KIT_SELF_VERIFY=1.
+test_changed_scope_keeps_install_scripts_in_source_repo() {
+    local tmp rc=0
+    tmp="$(mktemp -d)"
+    (
+        cd "$tmp"
+        git init -q
+        git config user.email test@example.test
+        git config user.name Test
+        mkdir -p scripts/ai tools/ai/install/checks
+        printf '#!/usr/bin/env bash\nprintf install\\n' >tools/ai/install/base.sh
+        printf '#!/usr/bin/env bash\nprintf check\\n' >tools/ai/install/checks/check-batch3.sh
+        printf '#!/usr/bin/env bash\nprintf install\\n' >install-ai-kit.sh
+        git add -A
+        git commit -q -m init
+        printf '\n# changed\n' >>tools/ai/install/base.sh
+        printf '\n# changed\n' >>tools/ai/install/checks/check-batch3.sh
+        printf '\n# changed\n' >>install-ai-kit.sh
+        load_scoping_functions
+        AI_VERIFY_SCOPE=changed
+        # Consumed dynamically by the eval'd is_ai_kit_source_repo helper.
+        # shellcheck disable=SC2034
+        AI_KIT_SELF_VERIFY=1
+        out="$(tracked_existing_shell_files)"
+        [[ "$out" == *"tools/ai/install/base.sh"* ]]
+        [[ "$out" == *"tools/ai/install/checks/check-batch3.sh"* ]]
+        [[ "$out" == *"install-ai-kit.sh"* ]]
+    ) || rc=$?
+    rm -rf "$tmp"
+    return "$rc"
+}
+run_test "changed scope keeps install scripts inside kit source repo" test_changed_scope_keeps_install_scripts_in_source_repo
+
+# Unit-level: the widened glob matches every shipped install path that used to
+# leak (root install, tools/ai/install-*.sh, and install/checks/*.sh).
+test_shipped_glob_covers_install_scripts() {
+    (
+        set -euo pipefail
+        load_scoping_functions
+        is_shipped_ai_kit_shell_file "install-ai-kit.sh"
+        is_shipped_ai_kit_shell_file "tools/ai/install-ai-kit.sh"
+        is_shipped_ai_kit_shell_file "tools/ai/install-copilot-kit.sh"
+        is_shipped_ai_kit_shell_file "tools/ai/install/base.sh"
+        is_shipped_ai_kit_shell_file "tools/ai/install/checks/check-batch3.sh"
+        # A user's own shell file must NOT be treated as shipped.
+        ! is_shipped_ai_kit_shell_file "bin/local.sh"
+    )
+}
+run_test "shipped glob covers all install script paths" test_shipped_glob_covers_install_scripts
+
+# Unit-level: the shipped-PHP glob covers tools/ai/** at every depth, and never
+# flags the user's own PHP files.
+test_shipped_php_glob_covers_tools_ai() {
+    (
+        set -euo pipefail
+        load_scoping_functions
+        is_shipped_ai_kit_php_file "tools/ai/ai.php"
+        is_shipped_ai_kit_php_file "tools/ai/install/packs.php"
+        is_shipped_ai_kit_php_file "tools/ai/advisor/scorer.php"
+        is_shipped_ai_kit_php_file "tools/ai/commands/install_extras.php"
+        # The user's own project PHP must NOT be treated as shipped.
+        ! is_shipped_ai_kit_php_file "src/App.php"
+        ! is_shipped_ai_kit_php_file "app/Models/User.php"
+    )
+}
+run_test "shipped php glob covers tools/ai at all depths" test_shipped_php_glob_covers_tools_ai
+
+# changed scope must exclude shipped tools/ai/**/*.php in a target repo, but keep
+# the user's own PHP, so pint/phpstan/psalm never lint shipped support code.
+test_changed_scope_excludes_shipped_php_in_target() {
+    local tmp rc=0
+    tmp="$(mktemp -d)"
+    (
+        cd "$tmp"
+        git init -q
+        git config user.email test@example.test
+        git config user.name Test
+        mkdir -p tools/ai/install tools/ai/advisor src
+        printf '<?php\n' >tools/ai/ai.php
+        printf '<?php\n' >tools/ai/install/packs.php
+        printf '<?php\n' >tools/ai/advisor/scorer.php
+        printf '<?php\n' >src/App.php
+        git add -A
+        git commit -q -m init
+        printf '// changed\n' >>tools/ai/ai.php
+        printf '// changed\n' >>tools/ai/install/packs.php
+        printf '// changed\n' >>tools/ai/advisor/scorer.php
+        printf '// changed\n' >>src/App.php
+        load_scoping_functions
+        # Target repo: no kit authoring artifacts -> is_ai_kit_source_repo false.
+        AI_VERIFY_SCOPE=changed
+        out="$(scoped_php_files)"
+        [[ "$out" == *"src/App.php"* ]]
+        [[ "$out" != *"tools/ai/ai.php"* ]]
+        [[ "$out" != *"tools/ai/install/packs.php"* ]]
+        [[ "$out" != *"tools/ai/advisor/scorer.php"* ]]
+    ) || rc=$?
+    rm -rf "$tmp"
+    return "$rc"
+}
+run_test "changed scope excludes shipped tools/ai php in target repo" test_changed_scope_excludes_shipped_php_in_target
+
+# Inside the kit source repo, shipped tools/ai/**/*.php must STAY in scope so the
+# kit can lint its own product code.
+test_changed_scope_keeps_shipped_php_in_source_repo() {
+    local tmp rc=0
+    tmp="$(mktemp -d)"
+    (
+        cd "$tmp"
+        git init -q
+        git config user.email test@example.test
+        git config user.name Test
+        mkdir -p tools/ai/install
+        printf '<?php\n' >tools/ai/ai.php
+        printf '<?php\n' >tools/ai/install/packs.php
+        git add -A
+        git commit -q -m init
+        printf '// changed\n' >>tools/ai/ai.php
+        printf '// changed\n' >>tools/ai/install/packs.php
+        load_scoping_functions
+        AI_VERIFY_SCOPE=changed
+        # Consumed dynamically by the eval'd is_ai_kit_source_repo helper.
+        # shellcheck disable=SC2034
+        AI_KIT_SELF_VERIFY=1
+        out="$(scoped_php_files)"
+        [[ "$out" == *"tools/ai/ai.php"* ]]
+        [[ "$out" == *"tools/ai/install/packs.php"* ]]
+    ) || rc=$?
+    rm -rf "$tmp"
+    return "$rc"
+}
+run_test "changed scope keeps shipped tools/ai php inside source repo" test_changed_scope_keeps_shipped_php_in_source_repo
+
+# all scope in a target repo must produce an explicit non-shipped file list (so a
+# project-wide pint --test never lints shipped tools/ai/**), and must NOT fall
+# back to a bare project-wide run.
+test_all_scope_excludes_shipped_php_in_target() {
+    local tmp rc=0
+    tmp="$(mktemp -d)"
+    (
+        cd "$tmp"
+        git init -q
+        git config user.email test@example.test
+        git config user.name Test
+        mkdir -p tools/ai/install src
+        printf '<?php\n' >tools/ai/ai.php
+        printf '<?php\n' >tools/ai/install/packs.php
+        printf '<?php\n' >src/App.php
+        git add -A
+        git commit -q -m init
+        load_scoping_functions
+        # Target repo (no authoring artifacts).
+        out="$(all_php_files_excluding_shipped)"
+        [[ "$out" == *"src/App.php"* ]]
+        [[ "$out" != *"tools/ai/ai.php"* ]]
+        [[ "$out" != *"tools/ai/install/packs.php"* ]]
+    ) || rc=$?
+    rm -rf "$tmp"
+    return "$rc"
+}
+run_test "all scope excludes shipped tools/ai php in target repo" test_all_scope_excludes_shipped_php_in_target
 
 # Default (ai) scope must resolve PHP linting to branch scoping, not project-wide.
 # Verify by exercising the same case logic the script uses.

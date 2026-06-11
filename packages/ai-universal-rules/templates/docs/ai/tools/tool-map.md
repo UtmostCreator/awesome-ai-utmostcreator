@@ -9,7 +9,8 @@ This document routes common agent and human tasks to the approved repository too
 | Search text in repo | `scripts/ai/ai-search.sh` (see `docs/ai/tools/ai-search.md`) |
 | Find files by name | `scripts/ai/ai-search.sh` in `files` mode |
 | Structural pattern search | `scripts/ai/ai-search.sh` in `struct` mode |
-| Trace symbol usage | `scripts/ai/query-usage.sh` |
+| Trace symbol usage | `scripts/ai/ai-search.sh` (bare symbols are not paths) |
+| Estimate token/usage cost of a path | `scripts/ai/query-usage.sh` (takes a file or directory path) |
 | Read a single file | `scripts/ai/preview-file.sh` (see `docs/ai/tools/actions/preview-file.md`) |
 
 ## Diff And History
