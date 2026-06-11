@@ -101,15 +101,17 @@ if ($runApply && !$smokeMode) {
     }
 }
 
-$shellInventory = buildInventory($root, '*.sh', $withScc, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
+$trackedFiles = listTrackedFiles($root, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
+
+$shellInventory = buildInventory($root, '*.sh', $withScc, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, $trackedFiles);
 $report['shell_inventory'] = $shellInventory;
-$phpInventory = buildInventory($root, '*.php', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
+$phpInventory = buildInventory($root, '*.php', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, $trackedFiles);
 $report['php_inventory'] = $phpInventory;
-$jsonInventory = buildInventory($root, '*.json', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
+$jsonInventory = buildInventory($root, '*.json', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, $trackedFiles);
 $report['json_inventory'] = $jsonInventory;
-$yamlInventory = buildYamlInventory($root, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
+$yamlInventory = buildYamlInventory($root, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, $trackedFiles);
 $report['yaml_inventory'] = $yamlInventory;
-$mdInventory = buildInventory($root, '*.md', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
+$mdInventory = buildInventory($root, '*.md', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, $trackedFiles);
 $report['markdown_inventory'] = $mdInventory;
 
 lintShellScripts($report, $root, $shellInventory['files'], $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
@@ -426,9 +428,9 @@ function readBackupId(string $root): ?string
     return is_string($id) && $id !== '' ? $id : null;
 }
 
-function buildInventory(string $root, string $glob, bool $withScc, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog): array
+function listTrackedFiles(string $root, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog): array
 {
-    $filesOut = runCommandWatchdog($root, 'git ls-files ' . escapeshellarg($glob), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, 'inventory-' . $glob);
+    $filesOut = runCommandWatchdog($root, 'git ls-files', $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, 'inventory-tracked-all');
     $files = [];
     foreach (preg_split('/\R/', (string) ($filesOut['stdout'] ?? '')) ?: [] as $line) {
         $line = trim($line);
@@ -439,6 +441,42 @@ function buildInventory(string $root, string $glob, bool $withScc, int $timeoutS
             continue;
         }
         $files[] = $line;
+    }
+    sort($files);
+
+    return $files;
+}
+
+function trackedPathMatchesGlob(string $path, string $glob): bool
+{
+    if (str_starts_with($glob, '*.')) {
+        $suffix = substr($glob, 1);
+
+        return $suffix !== false && str_ends_with($path, $suffix);
+    }
+
+    if (function_exists('fnmatch')) {
+        return fnmatch($glob, $path);
+    }
+
+    return $path === $glob;
+}
+
+function buildInventory(string $root, string $glob, bool $withScc, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog, ?array $trackedFiles = null): array
+{
+    if ($trackedFiles === null) {
+        $trackedFiles = listTrackedFiles($root, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
+    }
+
+    $files = [];
+    foreach ($trackedFiles as $trackedPath) {
+        if (!is_string($trackedPath) || $trackedPath === '') {
+            continue;
+        }
+        if (!trackedPathMatchesGlob($trackedPath, $glob)) {
+            continue;
+        }
+        $files[] = $trackedPath;
     }
     sort($files);
 
@@ -708,10 +746,10 @@ function lintYamlFiles(array &$report, string $root, array $files, int $timeoutS
     addStage($report, 'yaml-parse-all', true, ['checked_files' => count($files)]);
 }
 
-function buildYamlInventory(string $root, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog): array
+function buildYamlInventory(string $root, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog, ?array $trackedFiles = null): array
 {
-    $yml = buildInventory($root, '*.yml', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
-    $yaml = buildInventory($root, '*.yaml', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog);
+    $yml = buildInventory($root, '*.yml', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, $trackedFiles);
+    $yaml = buildInventory($root, '*.yaml', false, $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, $trackedFiles);
     $files = array_values(array_unique(array_merge($yml['files'], $yaml['files'])));
     sort($files);
     return ['files' => $files, 'total' => count($files), 'scc_enabled' => false, 'items' => array_map(static fn(string $p): array => ['path' => $p, 'scc' => null], $files)];
