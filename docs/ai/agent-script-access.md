@@ -10,6 +10,7 @@ Format: `script — when to use — why — expect after`.
 ## Read / research (low risk)
 
 - `ai-search.sh` — find code, symbols, or evidence — unified safe search over raw grep/find — expect JSON envelope with `path`, `line`, `context` hits.
+- `ai-search-multi.sh` — run one `ai-search` mode over several queries at once — batch related searches without an ad-hoc shell-chained command — expect `---`-separated results or a JSON array of `ai-search` envelopes.
 - `preview-file.sh` — read a file or range after a search hit — safe bounded reader (blocks binaries/secrets) — expect `path`, `range`, `content`, `truncated`.
 - `rg-code.sh` — fast text/code regex search — ripgrep wrapper with repo defaults — expect matching file paths and line numbers.
 - `fd-files.sh` — find files by name/pattern — fd wrapper — expect matching file paths.
