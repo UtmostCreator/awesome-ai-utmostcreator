@@ -1,8 +1,37 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Early --help|-h delegate: render the JSON-driven help BEFORE sourcing any
+# runtime dependencies or dispatching search logic. This mirrors the
+# --introspect guard below but emits the human-readable --format=help view.
+# It never executes search, never sources common.sh, and does not require a git
+# repo or rg/fd/ast-grep. If PHP or the introspector is unavailable it prints a
+# minimal fallback rather than crashing.
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    _here="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+    _introspector="$_here/../../tools/ai/sh-introspect.php"
+    _php_bin="${PHP_BIN:-php}"
+    if command -v "$_php_bin" >/dev/null 2>&1 && [[ -f "$_introspector" ]]; then
+        exec "$_php_bin" "$_introspector" --format=help "$_here/ai-search.sh"
+    fi
+    # Minimal fallback (no PHP / no introspector available).
+    echo "ai-search.sh — unified repository search entrypoint"
+    echo "Usage: ai-search.sh MODE [QUERY] [root] [flags]"
+    echo "Run with --introspect for the machine-readable JSON contract."
+    exit 0
+fi
+
 # shellcheck disable=SC1091
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+
+# Self-introspection: machine-readable contract for this script.
+# Never executes search logic; delegates to the static introspector and
+# replaces this process so no normal mode dispatch runs.
+if [[ "${1:-}" == "--introspect" ]]; then
+    _here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    exec env AI_OUTPUT=json "${PHP_BIN:-php}" \
+        "$_here/../../tools/ai/sh-introspect.php" "$_here/ai-search.sh"
+fi
 
 # ai-search.sh — unified repository search entrypoint.
 #
@@ -23,31 +52,123 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
 usage() {
     cat <<'EOF'
+ai-search.sh — unified repository search entrypoint.
+
 Usage:
     ai-search.sh MODE [QUERY] [root] [flags]
 
-File-list modes:
-    changed-files | staged-files
-    changed | staged        deprecated aliases; allowed unless AI_SEARCH_STRICT=1
+JSON output is activated by the AI_OUTPUT=json environment variable (no --json
+flag). The envelope is: {schema,status,tool,query,mode,matches[],results[],
+warnings[],errors[],limits,meta[,summary,symbols]}. Status is one of:
+ok | no_matches | error | unavailable | dry_run | blocked.
 
-Content-search modes:
-    text | tracked | files | struct | docs
-    changed-text | staged-text
+Content-search modes (QUERY required; structured results[] via rg):
+    text                    search a root (rg)
+    tracked                 git-grep over tracked files (requires git root)
+    changed-text            search only unstaged-changed files
+    staged-text             search only staged files
+    files                   filename search (fd; unavailable if fd absent)
+
+Surface-scoped content modes (QUERY required; restricted file family):
+    docs                    README*/CHANGELOG*/docs/**/*.md/*.rst/*.adoc
+    tests                   tests/**/__tests__/**/*.test.*/*.spec.*/*Test.php
+    config                  .env*/config/**/*.yaml|yml|json|toml|ini|nix/docker-compose*
+    deps                    composer/package/lock files, flake.nix, go.mod, Cargo.toml, pyproject.toml
+
+File-list modes (no QUERY; optional root):
+    changed-files           list unstaged-changed files
+    staged-files            list staged files
+    changed | staged        deprecated aliases (warn; AI_SEARCH_STRICT=1 -> error)
+
+Git-aware modes:
+    diff QUERY              unstaged hunks; --staged or --base REF; results carry
+                            path/marker/new_line/text/scope
+    history QUERY           git log pickaxe (-S; --regex -> -G); --messages,
+                            --patch; results carry commit/author/date/message/path
+
+Curated no-query modes (optional root):
+    todo                    TODO|FIXME|HACK|XXX|deprecated|temporary|workaround|legacy,
+                            grouped by file with tag/line/text
+    unsafe-patterns         curated risky patterns with rule + severity
+
+Structural modes (ast-grep; unavailable if ast-grep absent):
+    struct PATTERN          ast-grep pattern; --lang LANG (or AI_LANG, default php)
+    symbols NAME            resolve a symbol; emits symbols[] (kind/name/path/start/end/language)
+    class NAME              class definitions only (symbols[] with kind=class)
 
 Other modes:
-    doctor | unsafe-all
+    doctor                  diagnostics{} of available/missing/warnings/root/git_available
+    unsafe-all              approval-gated; always returns status=blocked
 
 Flags:
+  Pattern / case:
     --fixed                 literal fixed-string match
+    --regex                 regex match (default)
+    --pcre2                 PCRE2 regex
+    --ignore-case | -i      case-insensitive
+    --case-sensitive        force case-sensitive
+    --smart-case            case-insensitive unless query has uppercase (default)
+  Scope:
+    --glob PATTERN          include glob (repeatable)
+    --type NAME             rg type filter (repeatable)
+    --exclude PATH          exclude path (repeatable; on top of default excludes
+                            vendor,node_modules,dist,build,coverage,.git)
+    --max-depth N           bound traversal depth
     --absolute              add absolute_path to structured results
-    --ignore-case | -i      case-insensitive match
-    --max-results N         cap returned matches; default 100
-    --files-with-matches    results[] of {path} only + summary{}; -l alias
+  Ignore files (gitignore honored BY DEFAULT: local + parent + global gitignore,
+  .git/info/exclude, and .ignore/.rgignore; the global gitignore is resolved from
+  git core.excludesfile / $XDG_CONFIG_HOME/git/ignore and applied explicitly):
+    --no-ignore             disable ALL ignore sources (local+parent+global+.ignore)
+    --no-ignore-vcs         disable local + parent .gitignore (keep global)
+    --no-ignore-global      disable only the global gitignore
+    --no-ignore-parent      disable parent-directory ignore files
+    --no-ignore-dot         disable .ignore / .rgignore files
+    (applied to all rg-backed modes; files mode maps the supported subset to fd;
+     tracked/changed-text/staged-text search an explicit file set so ignores
+     do not apply.)
+  Context (text/docs):
+    --context N | -C N      N lines before+after
+    --before-context N | -B N   N lines before match
+    --after-context N | -A N    N lines after match
+  Output shape:
+    --files-with-matches | -l   results[] of {path} only + summary{}
     --count                 results[] of {path,count} + summary{}
     --count-matches         summary{} match totals only
+  Bounds:
+    --max-results N         cap returned matches; default 100; sets meta.truncated
+    --max-bytes N           drop context payload past N bytes; sets meta.truncated
+  Git-aware:
+    --staged                diff: staged hunks
+    --base REF              diff: against REF
+    --messages              history: search commit messages
+    --patch                 history: attach commit patch text
+  Structural:
+    --lang LANG             struct/symbols/class language
+  Misc:
     --dry-run               report dry_run without searching
+    --introspect            print full machine-readable JSON contract (sh-introspect)
     --help | -h             show this help
+
+Examples:
+    AI_OUTPUT=json bash scripts/ai/ai-search.sh text TenantResolver . --fixed
+    AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed
+    AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged
+    AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php
 EOF
+}
+
+# Print the auto-derived compact contract summary (modes + param:type) beneath
+# the hand-written usage() text. Falls back silently when the introspector or
+# php is unavailable, so --help never breaks; it only ADDS a summary on success.
+introspect_help_summary() {
+    local here tool
+    here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    tool="$here/../../tools/ai/sh-introspect.php"
+    [[ -f "$tool" ]] || return 0
+    command -v "${PHP_BIN:-php}" >/dev/null 2>&1 || return 0
+    printf '\n---\nQuick contract (auto-generated by sh-introspect):\n\n'
+    "${PHP_BIN:-php}" "$tool" --format=help "$here/ai-search.sh" 2>/dev/null || true
+    printf '\nMachine contract: bash scripts/ai/ai-search.sh --introspect\n'
 }
 
 DEFAULT_MAX_RESULTS=100
@@ -82,7 +203,58 @@ is_file_list_mode() {
 is_content_mode() {
     case "$1" in
     text | tracked | files | struct | docs | changed-text | staged-text) return 0 ;;
+    # Phase 4 query-required repo-aware modes.
+    diff | history | tests | config | deps) return 0 ;;
+    # Phase 5 structural modes take a pattern/name as the query.
+    symbols | class) return 0 ;;
     *) return 1 ;;
+    esac
+}
+
+# Phase 5 structural (ast-grep) modes.
+is_ast_mode() {
+    case "$1" in
+    struct | symbols | class) return 0 ;;
+    *) return 1 ;;
+    esac
+}
+
+# Phase 4 modes that take no query and an optional root only.
+is_no_query_mode() {
+    case "$1" in
+    todo | unsafe-patterns) return 0 ;;
+    *) return 1 ;;
+    esac
+}
+
+# Phase 4 surface-scoped text modes: search like `text` but restricted to a
+# fixed glob set. `docs` is split out from `text` so it is truly scoped.
+is_surface_mode() {
+    case "$1" in
+    docs | tests | config | deps) return 0 ;;
+    *) return 1 ;;
+    esac
+}
+
+# surface_globs MODE — print the rg --glob include patterns for a surface mode,
+# one per line. Used to restrict docs/tests/config/deps to their file families.
+surface_globs() {
+    case "$1" in
+    docs)
+        printf '%s\n' 'README*' 'CHANGELOG*' '*.md' '*.rst' '*.adoc' 'docs/**'
+        ;;
+    tests)
+        printf '%s\n' 'tests/**' '__tests__/**' '*.test.*' '*.spec.*' '*Test.php'
+        ;;
+    config)
+        printf '%s\n' '.env*' 'config/**' '*.yaml' '*.yml' '*.json' '*.toml' \
+            '*.ini' '*.nix' 'docker-compose*'
+        ;;
+    deps)
+        printf '%s\n' 'composer.json' 'composer.lock' 'package.json' \
+            'package-lock.json' 'pnpm-lock.yaml' 'yarn.lock' 'flake.nix' \
+            'go.mod' 'Cargo.toml' 'pyproject.toml'
+        ;;
     esac
 }
 
@@ -437,6 +609,13 @@ max_bytes=0
 # Phase 3D count / file-only output. One of: none | files | count | count-matches.
 count_mode="none"
 g_summary_json=""
+# Phase 4 diff/history controls.
+diff_staged=0
+diff_base=""
+history_messages=0
+history_patch=0
+# Phase 5 structural search language (falls back to AI_LANG, then php).
+lang_flag=""
 # Phase 3C scope control.
 case_mode="smart"      # smart | ignore | sensitive
 pattern_mode="default" # default | fixed | regex | pcre2
@@ -444,9 +623,15 @@ max_depth=""
 glob_args=()
 type_args=()
 exclude_args=()
+# Ignore-file control (rg-backed modes). By DEFAULT all gitignore sources are
+# honored: local .gitignore, parent .gitignore, .git/info/exclude, the global
+# gitignore (git core.excludesfile), and .ignore/.rgignore files. These flags
+# selectively disable those sources to surface otherwise-ignored files.
+ignore_args=()
 
 if [[ "$mode" == "--help" || "$mode" == "-h" || -z "$mode" ]]; then
     usage
+    introspect_help_summary
     exit 0
 fi
 
@@ -559,6 +744,29 @@ while [[ $# -gt 0 ]]; do
         validate_non_negative_int "--max-depth" "${1:-}"
         max_depth="$1"
         ;;
+    --no-ignore)
+        # Disable ALL ignore sources (local + parent + global gitignore,
+        # .git/info/exclude, and .ignore/.rgignore files).
+        ignore_args+=(--no-ignore)
+        ;;
+    --no-ignore-vcs)
+        # Disable local + parent .gitignore and .git/info/exclude only;
+        # the global gitignore is still honored.
+        ignore_args+=(--no-ignore-vcs)
+        ;;
+    --no-ignore-global)
+        # Disable only the global gitignore (git core.excludesfile);
+        # local/parent .gitignore are still honored.
+        ignore_args+=(--no-ignore-global)
+        ;;
+    --no-ignore-parent)
+        # Disable .gitignore/.ignore files in parent directories only.
+        ignore_args+=(--no-ignore-parent)
+        ;;
+    --no-ignore-dot)
+        # Disable .ignore and .rgignore files (keep gitignore behavior).
+        ignore_args+=(--no-ignore-dot)
+        ;;
     --dry-run)
         dry_run=1
         ;;
@@ -597,8 +805,28 @@ while [[ $# -gt 0 ]]; do
     --count-matches)
         count_mode="count-matches"
         ;;
+    --staged)
+        diff_staged=1
+        ;;
+    --base)
+        shift
+        [[ -n "${1:-}" ]] || fail "error" "--base requires a ref"
+        diff_base="$1"
+        ;;
+    --messages)
+        history_messages=1
+        ;;
+    --patch)
+        history_patch=1
+        ;;
+    --lang)
+        shift
+        [[ -n "${1:-}" ]] || fail "error" "--lang requires a language"
+        lang_flag="$1"
+        ;;
     --help | -h)
         usage
+        introspect_help_summary
         exit 0
         ;;
     --*)
@@ -696,6 +924,16 @@ elif is_content_mode "$mode"; then
         root="${positionals[1]}"
     fi
 
+elif is_no_query_mode "$mode"; then
+    # todo / unsafe-patterns: optional root, never a query.
+    if [[ ${#positionals[@]} -gt 1 ]]; then
+        fail "error" "mode '$mode' does not accept a query; usage: ai-search.sh $mode [root] [flags]"
+    fi
+
+    if [[ ${#positionals[@]} -eq 1 ]]; then
+        root="${positionals[0]}"
+    fi
+
 else
     fail "error" "unknown mode: $mode"
 fi
@@ -728,6 +966,44 @@ pcre2) rg_fixed_args=(--pcre2) ;;
 *) : ;;
 esac
 
+# Global gitignore robustness. rg only auto-reads the global gitignore from
+# git's GLOBAL/system config (or $XDG_CONFIG_HOME/git/ignore), not a repo-local
+# core.excludesfile. To honor the global gitignore deterministically, resolve it
+# and pass it via --ignore-file. Skipped when the user disabled global or all
+# ignore sources.
+resolve_global_gitignore() {
+    local f
+    f="$(git config --get core.excludesfile 2>/dev/null || true)"
+    if [[ -z "$f" ]]; then
+        f="${XDG_CONFIG_HOME:-$HOME/.config}/git/ignore"
+    fi
+    # Expand a leading literal ~ to $HOME. git stores core.excludesfile verbatim,
+    # so a configured "~/path" arrives as a literal tilde that we must expand
+    # ourselves. SC2088 warns about tilde-in-quotes, but matching the literal
+    # prefix is exactly the intent here.
+    # shellcheck disable=SC2088
+    case "$f" in
+    "~/"*) f="$HOME/${f#"~/"}" ;;
+    esac
+    if [[ -f "$f" ]]; then
+        printf '%s' "$f"
+    fi
+    # Always succeed: an absent global gitignore is normal, not an error. The
+    # trailing `[[ ]] && cmd` footgun under `set -e` would otherwise abort.
+    return 0
+}
+
+ignore_disables_global=0
+for _ia in "${ignore_args[@]+"${ignore_args[@]}"}"; do
+    [[ "$_ia" == "--no-ignore" || "$_ia" == "--no-ignore-global" ]] && ignore_disables_global=1
+done
+if [[ "$ignore_disables_global" -eq 0 ]]; then
+    global_gitignore="$(resolve_global_gitignore)"
+    if [[ -n "$global_gitignore" ]]; then
+        ignore_args+=(--ignore-file "$global_gitignore")
+    fi
+fi
+
 # Directories excluded by default; callers can extend via --exclude.
 DEFAULT_EXCLUDES=(vendor node_modules dist build coverage)
 
@@ -755,6 +1031,35 @@ build_rg_scope_args() {
     return 0
 }
 build_rg_scope_args
+
+# ---------------------------------------------------------------------------
+# Core-tool guards. A missing core backend must be a hard `error`, not a silent
+# `no_matches` (the backend commands suppress stderr, so a missing tool would
+# otherwise collapse to rc!=2 and look like an empty result set).
+# ---------------------------------------------------------------------------
+mode_needs_rg() {
+    case "$1" in
+    text | docs | tests | config | deps | changed-text | staged-text | \
+        todo | unsafe-patterns) return 0 ;;
+    *) return 1 ;;
+    esac
+}
+
+mode_needs_git() {
+    case "$1" in
+    changed-files | staged-files | changed-text | staged-text | tracked | \
+        diff | history) return 0 ;;
+    *) return 1 ;;
+    esac
+}
+
+if mode_needs_rg "$mode" && ! command_exists rg; then
+    fail "error" "required tool 'rg' (ripgrep) not found on PATH; mode '$mode' unavailable"
+fi
+
+if mode_needs_git "$mode" && ! command_exists git; then
+    fail "error" "required tool 'git' not found on PATH; mode '$mode' unavailable"
+fi
 
 # ---------------------------------------------------------------------------
 # Backends.
@@ -808,6 +1113,410 @@ search_git_scoped_files() {
     return 0
 }
 
+# ---------------------------------------------------------------------------
+# Phase 4 bespoke modes. These build their own results[] shapes and emit
+# directly, because their output does not fit the path:line:text pipeline.
+# ---------------------------------------------------------------------------
+
+# query_matches_line LINE — return 0 when the parsed query matches the given
+# text under the active pattern/case mode. Used by diff/history line filters.
+query_matches_line() {
+    local line="$1" grep_args=()
+    case "$pattern_mode" in
+    fixed) grep_args+=(-F) ;;
+    pcre2) grep_args+=(-P) ;;
+    *) grep_args+=(-E) ;;
+    esac
+    case "$case_mode" in
+    ignore) grep_args+=(-i) ;;
+    sensitive) : ;;
+    smart | *) [[ "$query" =~ [[:upper:]] ]] || grep_args+=(-i) ;;
+    esac
+    printf '%s' "$line" | grep -q "${grep_args[@]}" -- "$query"
+}
+
+run_diff_mode() {
+    require_git_root
+    local repo_root diff_out git_args=()
+    repo_root="$(git -C "$root" rev-parse --show-toplevel 2>/dev/null)" ||
+        fail "error" "not a git repository: $root"
+
+    if [[ -n "$diff_base" ]]; then
+        git_args=(diff "$diff_base")
+    elif [[ "$diff_staged" -eq 1 ]]; then
+        git_args=(diff --cached)
+    else
+        git_args=(diff)
+    fi
+
+    diff_out="$(cd "$repo_root" && git "${git_args[@]}" -U0 2>/dev/null || true)"
+
+    # Walk the unified diff: track current file from +++ headers and the new
+    # line number from @@ hunk headers; collect added lines matching the query.
+    local results
+    results="$(
+        printf '%s\n' "$diff_out" | awk '
+            /^\+\+\+ / {
+                p = $2; sub(/^b\//, "", p); cur = p; next
+            }
+            /^@@ / {
+                # @@ -a,b +c,d @@  -> new-file start = c
+                match($0, /\+[0-9]+/); ns = substr($0, RSTART+1, RLENGTH-1);
+                new_line = ns + 0; next
+            }
+            /^\+/ && !/^\+\+\+/ {
+                text = substr($0, 2);
+                printf "%s\t%d\t%s\n", cur, new_line, text;
+                new_line++; next
+            }
+            /^ / { new_line++; next }
+        '
+    )"
+
+    local result_objs=() path line text
+    while IFS=$'\t' read -r path line text; do
+        [[ -n "$path" ]] || continue
+        query_matches_line "$text" || continue
+        result_objs+=("$(jq -cn \
+            --arg path "$path" --argjson new_line "$line" --arg text "$text" \
+            '{path: $path, marker: "+", new_line: $new_line, text: $text}')")
+    done <<<"$results"
+
+    local scope="unstaged"
+    [[ "$diff_staged" -eq 1 ]] && scope="staged"
+    [[ -n "$diff_base" ]] && scope="base:$diff_base"
+
+    g_results_json="$(printf '%s\n' "${result_objs[@]:-}" |
+        jq -s 'map(select(. != null))')"
+    g_results_json="$(printf '%s' "$g_results_json" |
+        jq --arg scope "$scope" 'map(.scope = $scope)')"
+
+    local matches_json status
+    matches_json="$(printf '%s' "$g_results_json" |
+        jq '[.[] | (.path + ":" + (.new_line|tostring) + ":" + .text)]')"
+    status="ok"
+    [[ "$(printf '%s' "$matches_json" | jq 'length')" -eq 0 ]] && status="no_matches"
+
+    if [[ "$json_mode" == "json" ]]; then
+        g_summary_json="$(printf '%s' "$g_results_json" |
+            jq -c '{scope: (.[0].scope // null)}')"
+        emit_json "$status" "$matches_json"
+    else
+        printf '%s' "$g_results_json" | jq -r '.[] | "\(.path):\(.new_line):\(.text)"'
+    fi
+    exit 0
+}
+
+run_history_mode() {
+    require_git_root
+    local repo_root log_args=() raw
+    repo_root="$(git -C "$root" rev-parse --show-toplevel 2>/dev/null)" ||
+        fail "error" "not a git repository: $root"
+
+    # Field-separated commit metadata; %x1f unit separator, %x1e record sep.
+    local fmt='%H%x1f%an%x1f%aI%x1f%s'
+
+    if [[ "$history_messages" -eq 1 ]]; then
+        log_args=(log "--grep=$query" "--format=$fmt")
+        [[ "$pattern_mode" == "fixed" ]] && log_args+=(--fixed-strings)
+        [[ "$case_mode" == "ignore" ]] && log_args+=(-i)
+    elif [[ "$pattern_mode" == "regex" || "$pattern_mode" == "pcre2" ]]; then
+        log_args=(log "-G$query" "--format=$fmt" --name-only)
+    else
+        # Default/fixed: -S pickaxe is literal by default.
+        log_args=(log "-S$query" "--format=$fmt" --name-only)
+    fi
+
+    raw="$(cd "$repo_root" && git "${log_args[@]}" 2>/dev/null || true)"
+
+    # Parse: a metadata line (contains \x1f) starts a commit; subsequent plain
+    # lines are file paths (present when --name-only is used).
+    local commits_json
+    commits_json="$(
+        printf '%s\n' "$raw" | jq -R -s --arg us $'\x1f' '
+            split("\n")
+            | reduce .[] as $line ({commits: [], cur: null};
+                if ($line | contains($us)) then
+                    (if .cur != null then .commits += [.cur] else . end)
+                    | ($line | split($us)) as $f
+                    | .cur = {
+                        commit: $f[0], author: $f[1], date: $f[2],
+                        message: $f[3], files: []
+                      }
+                elif ($line | length) > 0 and (.cur != null) then
+                    .cur.files += [$line]
+                else . end
+              )
+            | (if .cur != null then .commits += [.cur] else . end)
+            | .commits
+        '
+    )"
+
+    # Expand to one result per (commit, file). When no files (message search),
+    # keep a single row with the commit-level path null.
+    local results_json
+    results_json="$(printf '%s' "$commits_json" | jq -c '
+        map(
+            . as $c
+            | if (($c.files // []) | length) > 0 then
+                ($c.files[] | { commit: $c.commit, author: $c.author,
+                  date: $c.date, message: $c.message, path: . })
+              else
+                { commit: $c.commit, author: $c.author, date: $c.date,
+                  message: $c.message, path: null }
+              end
+        )
+    ')"
+
+    if [[ "$history_patch" -eq 1 ]]; then
+        # Attach the commit patch text on request only.
+        local enriched=() row commit_hash patch
+        while IFS= read -r row; do
+            [[ -n "$row" ]] || continue
+            commit_hash="$(printf '%s' "$row" | jq -r '.commit')"
+            patch="$(cd "$repo_root" && git show --format= --patch "$commit_hash" 2>/dev/null || true)"
+            enriched+=("$(printf '%s' "$row" | jq -c --arg p "$patch" '.patch = $p')")
+        done < <(printf '%s' "$results_json" | jq -c '.[]')
+        results_json="$(printf '%s\n' "${enriched[@]:-}" | jq -s 'map(select(. != null))')"
+    fi
+
+    g_results_json="$results_json"
+    local matches_json status
+    matches_json="$(printf '%s' "$g_results_json" |
+        jq '[.[] | (.commit + " " + (.message // ""))]')"
+    status="ok"
+    [[ "$(printf '%s' "$g_results_json" | jq 'length')" -eq 0 ]] && status="no_matches"
+
+    if [[ "$json_mode" == "json" ]]; then
+        emit_json "$status" "$matches_json"
+    else
+        printf '%s' "$g_results_json" | jq -r '.[] | "\(.commit) \(.message)"'
+    fi
+    exit 0
+}
+
+run_todo_mode() {
+    local tag_re='TODO|FIXME|HACK|XXX|deprecated|temporary|workaround|legacy'
+    local out rc=0
+    out="$(rg --json --ignore-case "${ignore_args[@]+"${ignore_args[@]}"}" "${rg_scope_args[@]}" -e "$tag_re" "$root" 2>/dev/null)" || rc=$?
+    [[ "$rc" -eq 2 ]] && fail "error" "todo scan backend error"
+    local root_abs
+    root_abs="$(canonical_root "$root")"
+
+    g_results_json="$(printf '%s' "$out" | jq -s -R \
+        --arg root "$root_abs" '
+        def relpath($p): ($p|if type=="string" then . else "" end) as $s
+          | if ($root != "" and ($s | startswith($root + "/"))) then $s[($root|length+1):] else $s end;
+        [ splits("\n") | select(length>0) | (fromjson? // empty) ]
+        | map(select(.type == "match"))
+        | map({
+            path: relpath(.data.path.text),
+            line: .data.line_number,
+            text: (.data.lines.text | if type=="string" then . else "" end | rtrimstr("\n"))
+          })
+        | group_by(.path)
+        | map({
+            path: .[0].path,
+            matches: map({
+              tag: (
+                (.text | ascii_downcase) as $lt
+                | if ($lt|contains("todo")) then "TODO"
+                  elif ($lt|contains("fixme")) then "FIXME"
+                  elif ($lt|contains("hack")) then "HACK"
+                  elif ($lt|contains("xxx")) then "XXX"
+                  elif ($lt|contains("deprecated")) then "deprecated"
+                  elif ($lt|contains("temporary")) then "temporary"
+                  elif ($lt|contains("workaround")) then "workaround"
+                  elif ($lt|contains("legacy")) then "legacy"
+                  else null end
+              ),
+              line: .line,
+              text: .text
+            })
+          })
+    ')"
+
+    local matches_json status
+    matches_json="$(printf '%s' "$g_results_json" | jq '[.[].path]')"
+    status="ok"
+    [[ "$(printf '%s' "$g_results_json" | jq 'length')" -eq 0 ]] && status="no_matches"
+
+    if [[ "$json_mode" == "json" ]]; then
+        emit_json "$status" "$matches_json"
+    else
+        printf '%s' "$g_results_json" | jq -r '.[].path'
+    fi
+    exit 0
+}
+
+run_unsafe_patterns_mode() {
+    # Curated risky patterns with a rule label and severity. Not a free scan.
+    local rules=(
+        'eval\(|rule=eval|high'
+        'unserialize\(|rule=unserialize|high'
+        'system\(|rule=system|high'
+        'exec\(|rule=exec|high'
+        'shell_exec\(|rule=shell_exec|high'
+        'md5\(|rule=weak-hash|medium'
+        'mt_rand\(|rule=weak-random|low'
+    )
+    local pattern_args=() spec re
+    for spec in "${rules[@]}"; do
+        re="${spec%%|rule=*}"
+        pattern_args+=(-e "$re")
+    done
+
+    local out rc=0
+    out="$(rg --json "${ignore_args[@]+"${ignore_args[@]}"}" "${rg_scope_args[@]}" "${pattern_args[@]}" "$root" 2>/dev/null)" || rc=$?
+    [[ "$rc" -eq 2 ]] && fail "error" "unsafe-patterns scan backend error"
+    local root_abs
+    root_abs="$(canonical_root "$root")"
+
+    g_results_json="$(printf '%s' "$out" | jq -s -R \
+        --arg root "$root_abs" '
+        def relpath($p): ($p|if type=="string" then . else "" end) as $s
+          | if ($root != "" and ($s | startswith($root + "/"))) then $s[($root|length+1):] else $s end;
+        def classify($t):
+          if ($t|contains("eval(")) then {rule:"eval", severity:"high"}
+          elif ($t|contains("unserialize(")) then {rule:"unserialize", severity:"high"}
+          elif ($t|contains("system(")) then {rule:"system", severity:"high"}
+          elif ($t|contains("shell_exec(")) then {rule:"shell_exec", severity:"high"}
+          elif ($t|contains("exec(")) then {rule:"exec", severity:"high"}
+          elif ($t|contains("md5(")) then {rule:"weak-hash", severity:"medium"}
+          elif ($t|contains("mt_rand(")) then {rule:"weak-random", severity:"low"}
+          else {rule:"unsafe", severity:"medium"} end;
+        [ splits("\n") | select(length>0) | (fromjson? // empty) ]
+        | map(select(.type == "match"))
+        | map(
+            (.data.lines.text | if type=="string" then . else "" end | rtrimstr("\n")) as $t
+            | (classify($t)) as $c
+            | {
+                path: relpath(.data.path.text),
+                line: .data.line_number,
+                text: $t,
+                rule: $c.rule,
+                severity: $c.severity
+              }
+          )
+    ')"
+
+    local matches_json status
+    matches_json="$(printf '%s' "$g_results_json" |
+        jq '[.[] | (.path + ":" + (.line|tostring) + ":" + .rule)]')"
+    status="ok"
+    [[ "$(printf '%s' "$g_results_json" | jq 'length')" -eq 0 ]] && status="no_matches"
+
+    if [[ "$json_mode" == "json" ]]; then
+        emit_json "$status" "$matches_json"
+    else
+        printf '%s' "$g_results_json" | jq -r '.[] | "\(.path):\(.line):\(.rule)"'
+    fi
+    exit 0
+}
+
+# run_ast_mode — Phase 5 structural search via ast-grep, emitting structured
+# results[] with name/kind/path/start/end/language.
+run_ast_mode() {
+    command_exists ast-grep ||
+        fail "unavailable" "ast-grep not installed; $mode mode unavailable"
+
+    local lang="${lang_flag:-${AI_LANG:-php}}"
+    local pattern kind=""
+
+    case "$mode" in
+    struct)
+        pattern="$query"
+        ;;
+    class)
+        kind="class"
+        pattern="class $query"
+        ;;
+    symbols)
+        # Resolve a bare name to its definition. Default to class def; callers
+        # use the dedicated shortcuts for other kinds.
+        kind="class"
+        pattern="class $query"
+        ;;
+    esac
+
+    local out rc=0 root_abs
+    out="$(ast-grep run --lang "$lang" --pattern "$pattern" --json "$root" 2>/dev/null)" || rc=$?
+    root_abs="$(canonical_root "$root")"
+
+    g_results_json="$(printf '%s' "$out" | jq -c \
+        --argjson n "$g_max_results" \
+        --arg mode "$g_mode" \
+        --arg lang "$lang" \
+        --arg kind "$kind" \
+        --arg query "$query" \
+        --arg root "$root_abs" '
+        def relpath($p): ($p|if type=="string" then . else "" end) as $s
+          | if ($root != "" and ($s | startswith($root + "/"))) then $s[($root|length+1):] else $s end;
+        (if type == "array" then . else [] end)
+        | .[:$n]
+        | map({
+            path: relpath(.file),
+            text: .text,
+            start: ((.range.start.line // 0) + 1),
+            end: ((.range.end.line // 0) + 1),
+            language: $lang,
+            mode: $mode,
+            source_tool: "ast-grep"
+          }
+          + (if $kind != "" then {
+                kind: $kind,
+                name: ((.metaVariables.single.NAME.text) // $query)
+             } else {} end))
+    ')"
+
+    local matches_json status
+    matches_json="$(printf '%s' "$g_results_json" |
+        jq '[.[] | (.path + ":" + (.start|tostring) + ":" + (.name // .text))]')"
+    status="ok"
+    [[ "$(printf '%s' "$g_results_json" | jq 'length')" -eq 0 ]] && status="no_matches"
+
+    if [[ "$mode" == "symbols" || "$mode" == "class" ]]; then
+        # Symbol modes publish symbols[] in addition to results[].
+        if [[ "$json_mode" == "json" ]]; then
+            local symbols_json
+            symbols_json="$g_results_json"
+            jq -cn \
+                --arg schema "1" --arg status "$status" --arg tool "ai-search" \
+                --arg query "$g_query" --arg mode "$g_mode" \
+                --argjson results "$g_results_json" \
+                --argjson symbols "$symbols_json" \
+                --argjson matches "$matches_json" \
+                --argjson warnings "$(to_json_array "${g_warnings[@]+"${g_warnings[@]}"}")" \
+                --argjson max_results "$g_max_results" '
+                {
+                    schema: $schema, status: $status, tool: $tool,
+                    query: $query, mode: $mode,
+                    matches: $matches, results: $results, symbols: $symbols,
+                    warnings: $warnings, errors: [],
+                    limits: { max_results: $max_results },
+                    meta: { returned: ($results|length), truncated: false }
+                }'
+            exit 0
+        fi
+    fi
+
+    if [[ "$json_mode" == "json" ]]; then
+        emit_json "$status" "$matches_json"
+    else
+        printf '%s' "$g_results_json" | jq -r '.[] | "\(.path):\(.start):\(.text)"'
+    fi
+    exit 0
+}
+
+# Early dispatch for bespoke result shapes.
+case "$mode" in
+diff) run_diff_mode ;;
+history) run_history_mode ;;
+todo) run_todo_mode ;;
+unsafe-patterns) run_unsafe_patterns_mode ;;
+struct | symbols | class) run_ast_mode ;;
+esac
+
 case "$mode" in
 changed-files)
     require_git_root
@@ -845,20 +1554,37 @@ tracked)
     # git grep: 0 = match, 1 = no match, >=2 = error.
     [[ "$rc" -ge 2 ]] && fail "error" "git grep error for query: $query"
     ;;
-text | docs)
+text)
     rc=0
-    out="$(rg --json "${case_args[@]}" "${rg_fixed_args[@]}" "${rg_scope_args[@]}" -- "$query" "$root" 2>/dev/null)" || rc=$?
+    out="$(rg --json "${case_args[@]}" "${rg_fixed_args[@]}" "${ignore_args[@]+"${ignore_args[@]}"}" "${rg_scope_args[@]}" -- "$query" "$root" 2>/dev/null)" || rc=$?
     # rg: 0 = match, 1 = no match, 2 = error.
+    [[ "$rc" -eq 2 ]] && fail "error" "search backend error (invalid regex or unreadable path): $query"
+    ;;
+docs | tests | config | deps)
+    # Surface-scoped text search: same engine as `text` but restricted to the
+    # mode's file family via include globs (default excludes still apply).
+    surface_glob_args=()
+    while IFS= read -r _sg; do
+        [[ -n "$_sg" ]] && surface_glob_args+=(--glob "$_sg")
+    done < <(surface_globs "$mode")
+    rc=0
+    out="$(rg --json "${case_args[@]}" "${rg_fixed_args[@]}" "${ignore_args[@]+"${ignore_args[@]}"}" "${rg_scope_args[@]}" "${surface_glob_args[@]}" -- "$query" "$root" 2>/dev/null)" || rc=$?
     [[ "$rc" -eq 2 ]] && fail "error" "search backend error (invalid regex or unreadable path): $query"
     ;;
 files)
     fd_bin="$(find_fd_bin)"
     [[ -n "$fd_bin" ]] || fail "unavailable" "fd/fdfind not installed; files mode unavailable"
-    out="$("$fd_bin" --hidden --exclude .git -- "$query" "$root" 2>/dev/null || true)"
-    ;;
-struct)
-    command_exists ast-grep || fail "unavailable" "ast-grep not installed; struct mode unavailable"
-    out="$(ast-grep run --lang "${AI_LANG:-php}" --pattern "$query" "$root" 2>/dev/null || true)"
+    # Translate the rg-style ignore flags to fd-compatible ones. fd shares
+    # --no-ignore/--no-ignore-vcs/--no-ignore-parent; it has no separate
+    # --no-ignore-global/--no-ignore-dot, so those map up to --no-ignore.
+    fd_ignore_args=()
+    for _ia in "${ignore_args[@]+"${ignore_args[@]}"}"; do
+        case "$_ia" in
+        --no-ignore | --no-ignore-vcs | --no-ignore-parent) fd_ignore_args+=("$_ia") ;;
+        --no-ignore-global | --no-ignore-dot) fd_ignore_args+=(--no-ignore) ;;
+        esac
+    done
+    out="$("$fd_bin" --hidden "${fd_ignore_args[@]+"${fd_ignore_args[@]}"}" --exclude .git -- "$query" "$root" 2>/dev/null || true)"
     ;;
 *)
     fail "error" "unknown mode: $mode"
@@ -870,7 +1596,7 @@ if [[ "$json_mode" == "json" ]]; then
     # text/docs come from an rg --json stream (accurate column, colon-safe
     # paths); tracked/changed-text/staged-text are line-oriented.
     case "$mode" in
-    text | docs)
+    text | docs | tests | config | deps)
         root_abs="$(canonical_root "$root")"
         matches_json="$(printf '%s' "$out" | rg_json_to_matches)"
         g_results_json="$(printf '%s' "$out" | rg_json_to_results "rg" "$root_abs")"

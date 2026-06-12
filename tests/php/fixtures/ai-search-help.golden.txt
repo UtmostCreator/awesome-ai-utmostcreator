@@ -1,0 +1,102 @@
+ai-search.sh — unified repository search entrypoint
+
+Usage: ai-search.sh MODE [QUERY] [root] [flags]
+JSON output: AI_OUTPUT=json
+
+Positionals: MODE [QUERY] [root]
+
+Status values: ok no_matches error unavailable dry_run blocked
+
+Modes:
+  content (query required):
+    changed-text     search only unstaged-changed files
+    files            filename search (fd; unavailable if fd absent)
+    staged-text      search only staged files
+    text             search a root (rg)
+    tracked          git-grep over tracked files (requires git root)
+  surface (query required):
+    config           .env*/config/**/*.yaml|yml|json|toml|ini|nix/docker-compose*
+    deps             composer/package/lock files, flake.nix, go.mod, Cargo.toml, pyproject.toml
+    docs             README*/CHANGELOG*/docs/**/*.md/*.rst/*.adoc
+    tests            tests/**/__tests__/**/*.test.*/*.spec.*/*Test.php
+  file-list:
+    changed-files    list unstaged-changed files
+    staged-files     list staged files
+  git-aware (query required):
+    diff             unstaged hunks; --staged or --base REF; results carry path/marker/new_line/text/scope
+    history          git log pickaxe (-S; --regex -> -G); --messages, --patch; results carry commit/author/date/message/path
+  curated (no query):
+    todo             TODO|FIXME|HACK|XXX|deprecated|temporary|workaround|legacy, grouped by file with tag/line/text
+    unsafe-patterns  curated risky patterns with rule + severity
+  structural (query required):
+    class            class definitions only (symbols[] with kind=class)
+    struct           ast-grep pattern; --lang LANG (or AI_LANG, default php)
+    symbols          resolve a symbol; emits symbols[] (kind/name/path/start/end/language)
+  other:
+    doctor           diagnostics{} of available/missing/warnings/root/git_available
+    unsafe-all       approval-gated; always returns status=blocked
+  deprecated:
+    changed staged  (see Deprecated modes below)
+
+Deprecated modes:
+  changed -> changed-files, changed-text
+  staged  -> staged-files, staged-text
+
+Params:
+  pattern:
+    --case-sensitive           flag    force case-sensitive
+    --fixed                    flag    literal fixed-string match
+    --ignore-case | -i         flag    case-insensitive
+    --pcre2                    flag    PCRE2 regex
+    --regex                    flag    regex match (default)
+    --smart-case               flag    case-insensitive unless query has uppercase (default)
+  scope:
+    --absolute                 flag    add absolute_path to structured results
+    --exclude                  value+  exclude path (repeatable; on top of default excludes vendor,node_modules,dist,build,coverage,.git)
+    --glob                     value+  include glob (repeatable)
+    --max-depth                value   bound traversal depth
+    --type                     value+  rg type filter (repeatable)
+  ignore:
+    --no-ignore                flag    disable ALL ignore sources (local+parent+global+.ignore)
+    --no-ignore-dot            flag    disable .ignore / .rgignore files
+    --no-ignore-global         flag    disable only the global gitignore
+    --no-ignore-parent         flag    disable parent-directory ignore files
+    --no-ignore-vcs            flag    disable local + parent .gitignore (keep global)
+  context:
+    --after-context | -A       value   N lines after match
+    --before-context | -B      value   N lines before match
+    --context | -C             value   N lines before+after
+  output:
+    --count                    flag    results[] of {path,count} + summary{}
+    --count-matches            flag    summary{} match totals only
+    --files-with-matches | -l  flag    results[] of {path} only + summary{}
+  bounds:
+    --max-bytes                value   drop context payload past N bytes; sets meta.truncated
+    --max-results              value   cap returned matches; default 100; sets meta.truncated
+  git:
+    --base                     value   diff: against REF
+    --messages                 flag    history: search commit messages
+    --patch                    flag    history: attach commit patch text
+    --staged                   flag    diff: staged hunks
+  structural:
+    --lang                     value   struct/symbols/class language
+  misc:
+    --dry-run                  flag    report dry_run without searching
+    --help | -h                flag    show this help
+    --introspect               flag    print full machine-readable JSON contract (sh-introspect)
+
+Env: AI_LANG AI_OUTPUT AI_SEARCH_STRICT PHP_BIN XDG_CONFIG_HOME
+
+Tools:
+  primary: ast-grep fd git jq rg
+  base utilities: awk cat grep
+  mode-specific tools: see mode contract via --introspect
+
+Examples:
+  AI_OUTPUT=json bash scripts/ai/ai-search.sh text TenantResolver . --fixed
+  AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed
+  AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged
+  AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php
+
+Machine contract: bash scripts/ai/ai-search.sh --introspect
+Full contract: AI_OUTPUT=json php tools/ai/sh-introspect.php scripts/ai/ai-search.sh

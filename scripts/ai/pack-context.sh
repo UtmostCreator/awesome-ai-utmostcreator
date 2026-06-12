@@ -53,7 +53,7 @@ agent_session_init "pack-context"
 require_bins jq
 
 root="$(git_root)"
-OUTPUT_DIR="${OUTPUT_DIR:-${COPILOT_CONTEXT_DIR}/manual}"
+OUTPUT_DIR="${OUTPUT_DIR:-${AI_CONTEXT_DIR}/manual}"
 OUTPUT_STYLE="${OUTPUT_STYLE:-xml}"
 TOKEN_BUDGET="${TOKEN_BUDGET:-80000}"
 timestamp="$(date +%Y%m%d-%H%M%S)"

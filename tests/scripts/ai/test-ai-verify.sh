@@ -422,6 +422,86 @@ test_default_scope_is_php_scoped() {
 }
 run_test "default (ai) scope narrows PHP linting to branch, not project-wide" test_default_scope_is_php_scoped
 
+# ── Line-count guardrail ──────────────────────────────────────────────────────
+# Build an isolated git repo with files of known sizes so the tiered thresholds
+# are exercised deterministically, independent of this repo's own files.
+_linecount_fixture() {
+    local tmp
+    tmp="$(mktemp -d)"
+    (
+        cd "$tmp"
+        git init -q
+        git config user.email t@t.t
+        git config user.name t
+        printf 'x\n%.0s' $(seq 1 360) >big-info.txt    # 360 lines -> info
+        printf 'x\n%.0s' $(seq 1 560) >big-warn.txt    # 560 lines -> warn
+        printf 'x\n%.0s' $(seq 1 810) >big-error.txt   # 810 lines -> error
+        printf 'x\n%.0s' $(seq 1 10) >small.txt        # under all tiers
+    )
+    printf '%s\n' "$tmp"
+}
+
+# info/warn/error tiers each fire at the right file (changed scope = untracked work).
+test_linecount_tiers() {
+    local tmp rc=0
+    tmp="$(_linecount_fixture)"
+    local out
+    out="$(AI_VERIFY_TEST_MODE=1 AI_VERIFY_SCOPE=changed "$BASH_BIN" "$SCRIPT" "$tmp" 2>&1 || true)"
+    (
+        [[ "$out" == *"big-info.txt = 360 lines >= 350"* ]]
+        [[ "$out" == *"big-warn.txt = 560 lines >= 550"* ]]
+        [[ "$out" == *"big-error.txt = 810 lines >= 800 (URGENT"* ]]
+        # small.txt is under every tier, so it must not appear in a line-count line.
+        [[ "$out" != *"line-count small.txt"* ]]
+    ) || rc=$?
+    rm -rf "$tmp"
+    return "$rc"
+}
+run_test "line-count tiers info/warn/error fire per file size" test_linecount_tiers
+
+# A file >= error threshold makes ai-verify exit non-zero.
+test_linecount_error_fails() {
+    local tmp rc=0
+    tmp="$(_linecount_fixture)"
+    AI_VERIFY_TEST_MODE=1 AI_VERIFY_SCOPE=changed "$BASH_BIN" "$SCRIPT" "$tmp" >/dev/null 2>&1 || rc=$?
+    rm -rf "$tmp"
+    # exit 1 expected because big-error.txt (810 lines) exceeds LINECOUNT_ERROR.
+    [[ "$rc" -eq 1 ]]
+}
+run_test "line-count error tier fails verification (exit 1)" test_linecount_error_fails
+
+# VERIFY_LINECOUNT=0 disables the check entirely.
+test_linecount_disabled() {
+    local tmp rc=0
+    tmp="$(_linecount_fixture)"
+    local out
+    out="$(AI_VERIFY_TEST_MODE=1 AI_VERIFY_SCOPE=changed VERIFY_LINECOUNT=0 "$BASH_BIN" "$SCRIPT" "$tmp" 2>&1 || true)"
+    (
+        [[ "$out" == *"Skipping line-count"* ]]
+        # No line-count tier lines should be emitted when disabled.
+        [[ "$out" != *"line-count big-error.txt"* ]]
+    ) || rc=$?
+    rm -rf "$tmp"
+    return "$rc"
+}
+run_test "VERIFY_LINECOUNT=0 disables the line-count check" test_linecount_disabled
+
+# Custom thresholds are honored.
+test_linecount_custom_thresholds() {
+    local tmp rc=0
+    tmp="$(_linecount_fixture)"
+    local out
+    # Lower the error threshold so the 360-line file trips it.
+    out="$(AI_VERIFY_TEST_MODE=1 AI_VERIFY_SCOPE=changed LINECOUNT_ERROR=300 \
+        "$BASH_BIN" "$SCRIPT" "$tmp" 2>&1 || true)"
+    if [[ "$out" != *"big-info.txt = 360 lines >= 300 (URGENT"* ]]; then
+        rc=1
+    fi
+    rm -rf "$tmp"
+    return "$rc"
+}
+run_test "line-count honors custom LINECOUNT_ERROR threshold" test_linecount_custom_thresholds
+
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
 if ((FAIL == 0)); then

@@ -78,6 +78,7 @@ printf '\033[1m=== AI Script Test Runner ===\033[0m\n'
 
 SUITES=(
     "common.sh|tests/scripts/ai/test-common.sh"
+    "common.sh-source|tests/scripts/ai/test-common-source.sh"
     "ai-search.sh|tests/scripts/ai/test-ai-search.sh"
     "rg-code.sh|tests/scripts/ai/test-rg-code.sh"
     "fd-files.sh|tests/scripts/ai/test-fd-files.sh"
@@ -100,6 +101,7 @@ SUITES=(
     "run-repomix-context.sh|tests/scripts/ai/test-run-repomix-context.sh"
     "run-repomix-file.sh|tests/scripts/ai/test-run-repomix-file.sh"
     "repo-tool-inventory.sh|tests/scripts/ai/test-repo-tool-inventory.sh"
+    "sh-introspect.sh|tests/scripts/ai/test-sh-introspect.sh"
     "watch-loop.sh|tests/scripts/ai/test-watch-loop.sh"
     "ai-edit.sh|tests/scripts/ai/test-ai-edit.sh"
     "ai-rollback.sh|tests/scripts/ai/test-ai-rollback.sh"
@@ -165,15 +167,10 @@ run_parallel_suites() {
         printf '\n\033[1m━━━ %s (queued) ━━━\033[0m\n' "$name"
         (
             export AI_LOG_DIR="$suite_tmp/ai-logs"
-            export COPILOT_LOG_DIR="$suite_tmp/copilot-logs"
             export AI_EVENT_LOG="$suite_tmp/ai-logs/events.jsonl"
-            export COPILOT_EVENT_LOG="$suite_tmp/copilot-logs/events.jsonl"
             export AI_SESSION_DIR="$suite_tmp/ai-sessions"
-            export COPILOT_SESSION_DIR="$suite_tmp/copilot-sessions"
             export AI_SNAPSHOT_DIR="$suite_tmp/ai-snapshots"
-            export COPILOT_SNAPSHOT_DIR="$suite_tmp/copilot-snapshots"
             export AI_CONTEXT_DIR="$suite_tmp/ai-context"
-            export COPILOT_CONTEXT_DIR="$suite_tmp/copilot-context"
             run_suite_with_timeout "$file"
         ) >"$log" 2>&1 &
         pids[idx]=$!

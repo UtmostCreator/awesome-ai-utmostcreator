@@ -10,8 +10,8 @@ Use this command to answer the user's evidence request without broad raw search.
 
 ```bash
 git status --short
-AI_OUTPUT=json bash scripts/ai/ai-search.sh changed "$ARGUMENTS" . --fixed
-AI_OUTPUT=json bash scripts/ai/ai-search.sh staged "$ARGUMENTS" . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text "$ARGUMENTS" . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh staged-text "$ARGUMENTS" . --fixed
 AI_OUTPUT=json bash scripts/ai/ai-search.sh tracked "$ARGUMENTS" . --fixed
 ```
 

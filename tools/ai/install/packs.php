@@ -142,7 +142,9 @@ function aiInstallerPackRegistry(): array
         ],
         'scripts-pack' => [
             ['type' => 'file', 'source' => 'scripts/ai/common.sh', 'target' => 'scripts/ai/common.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'scripts/ai/lib', 'target' => 'scripts/ai/lib', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-search.sh', 'target' => 'scripts/ai/ai-search.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/ai-search-multi.sh', 'target' => 'scripts/ai/ai-search-multi.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-diff-context.sh', 'target' => 'scripts/ai/ai-diff-context.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-verify.sh', 'target' => 'scripts/ai/ai-verify.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-rollback.sh', 'target' => 'scripts/ai/ai-rollback.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -184,6 +186,8 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/watch-loop.sh', 'target' => 'scripts/ai/watch-loop.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/repo-tool-inventory.sh', 'target' => 'scripts/ai/repo-tool-inventory.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'tools/ai/repo-tool-inventory.php', 'target' => 'tools/ai/repo-tool-inventory.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'scripts/ai/sh-introspect.sh', 'target' => 'scripts/ai/sh-introspect.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'tools/ai/sh-introspect.php', 'target' => 'tools/ai/sh-introspect.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             // install-mandatory-tools.sh is intentionally excluded:
             // it installs workstation-level tooling and is meant to be run from this source repo only.
             ['type' => 'file', 'source' => 'docs/ai/repo-required-tools.md', 'target' => 'docs/ai/repo-required-tools.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],

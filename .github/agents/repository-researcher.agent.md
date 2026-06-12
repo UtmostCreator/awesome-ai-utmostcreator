@@ -90,7 +90,7 @@ Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host 
 ## Mandatory sequence
 
 1. Run `git status --short`.
-2. Search changed evidence first: `AI_OUTPUT=json bash scripts/ai/ai-search.sh changed <query> . --fixed`.
+2. Search changed evidence first: `AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text <query> . --fixed`.
 3. Search staged evidence next, then tracked evidence.
 4. Fall back to docs/tests/schema/text only when narrow evidence is insufficient.
 5. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
