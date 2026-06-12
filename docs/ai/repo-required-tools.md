@@ -34,7 +34,6 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `node`
 - `npm`
 - `pnpm`
-- `realpath`
 - `sed`
 - `semgrep`
 - `shellcheck`
@@ -59,11 +58,13 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/ai-file-freshness.sh`
 - `scripts/ai/ai-install-coverage.sh`
 - `scripts/ai/ai-rollback.sh`
+- `scripts/ai/ai-search-multi.sh`
 - `scripts/ai/ai-search.sh`
 - `scripts/ai/ai-structured.sh`
 - `scripts/ai/ai-task.sh`
 - `scripts/ai/ai-test-select.sh`
 - `scripts/ai/ai-verify.sh`
+- `scripts/ai/all_in_one.sh`
 - `scripts/ai/check-file-refs.sh`
 - `scripts/ai/common.sh`
 - `scripts/ai/fd-files.sh`

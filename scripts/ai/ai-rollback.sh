@@ -5,7 +5,7 @@ set -euo pipefail
 # shellcheck source=scripts/ai/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
-SNAPSHOT_DIR="${COPILOT_SNAPSHOT_DIR:-.ai-logs/snapshots}"
+SNAPSHOT_DIR="${AI_SNAPSHOT_DIR:-.ai-logs/snapshots}"
 
 usage() {
     cat <<'EOF'

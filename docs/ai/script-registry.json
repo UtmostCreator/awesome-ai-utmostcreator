@@ -2,7 +2,7 @@
   "schema_version": "1.1.0",
   "scripts": {
     "common": {"source_path":"scripts/ai/common.sh","installed_path":"scripts/ai/common.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "ai-search": {"source_path":"scripts/ai/ai-search.sh","installed_path":"scripts/ai/ai-search.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
+    "ai-search": {"source_path":"scripts/ai/ai-search.sh","installed_path":"scripts/ai/ai-search.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe","introspection":{"introspect_flag":"--introspect","help_summary":true,"tool":"sh-introspect"}},
     "ai-search-multi": {"source_path":"scripts/ai/ai-search-multi.sh","installed_path":"scripts/ai/ai-search-multi.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "rg-code": {"source_path":"scripts/ai/rg-code.sh","installed_path":"scripts/ai/rg-code.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "fd-files": {"source_path":"scripts/ai/fd-files.sh","installed_path":"scripts/ai/fd-files.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
@@ -35,6 +35,7 @@
     "check-file-refs": {"source_path":"scripts/ai/check-file-refs.sh","installed_path":"scripts/ai/check-file-refs.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "repo-stats": {"source_path":"scripts/ai/repo-stats.sh","installed_path":"scripts/ai/repo-stats.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "repo-tool-inventory": {"source_path":"scripts/ai/repo-tool-inventory.sh","installed_path":"scripts/ai/repo-tool-inventory.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
+    "sh-introspect": {"source_path":"scripts/ai/sh-introspect.sh","installed_path":"scripts/ai/sh-introspect.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe","description":"Static introspection of shell scripts: functions, modes, params, internal case keys, env inputs, and sourced files. Never executes the target."},
     "install-mandatory-tools": {"source_path":"scripts/ai/install-mandatory-tools.sh","installed_path":"scripts/ai/install-mandatory-tools.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"},
     "watch-loop": {"source_path":"scripts/ai/watch-loop.sh","installed_path":"scripts/ai/watch-loop.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"act_with_approval"},
     "prune-shipped-targets": {"source_path":"scripts/ai/prune-shipped-targets.sh","installed_path":"scripts/ai/prune-shipped-targets.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"}

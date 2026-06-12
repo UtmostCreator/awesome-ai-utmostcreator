@@ -95,7 +95,7 @@ bash scripts/ai/ai-verify.sh .
 Find usages of a symbol restricted to the current diff:
 
 ```bash
-AI_OUTPUT=json bash scripts/ai/ai-search.sh changed "MySymbol" . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text "MySymbol" . --fixed
 ```
 
 Search tracked files for a config key:

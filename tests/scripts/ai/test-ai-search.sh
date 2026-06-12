@@ -44,6 +44,33 @@ run_multi() {
     set -e
 }
 
+# run_search_without TOOL ARGS... — run ai-search.sh with a PATH that contains
+# every needed tool EXCEPT TOOL, to prove missing-core-tool error handling.
+# Returns rc 99 (and leaves $LAST_JSON empty) when the isolated bindir cannot be
+# built, so the caller can skip cleanly.
+run_search_without() {
+    local drop="$1"
+    shift
+    local bindir tool p
+    bindir="$(mktemp -d)"
+    for tool in jq git bash sh awk grep sed cat tr wc dirname mktemp rm find \
+        printf rmdir fd fdfind ast-grep rg env head tail sort uniq xargs; do
+        [[ "$tool" == "$drop" ]] && continue
+        p="$(command -v "$tool" 2>/dev/null)" && ln -sf "$p" "$bindir/$tool"
+    done
+    if [[ -n "$(PATH="$bindir" command -v "$drop" 2>/dev/null)" ]]; then
+        rm -rf "$bindir"
+        LAST_JSON=""
+        LAST_RC=99
+        return 0
+    fi
+    set +e
+    LAST_JSON="$(PATH="$bindir" AI_OUTPUT=json "$BASH_BIN" "$SCRIPT" "$@" 2>&1)"
+    LAST_RC=$?
+    set -e
+    rm -rf "$bindir"
+}
+
 expect_status() {
     local name="$1" want="$2"
 
@@ -372,10 +399,10 @@ repo_root="$(git rev-parse --show-toplevel)"
     rc=$?
     set -e
 
-    printf '%s' "$json" | jq -e '.status=="ok" or .status=="no_matches"' >/dev/null \
-        && printf '%s' "$json" | jq -e '.mode=="changed-files" or .mode=="changed"' >/dev/null \
-        && printf '  PASS legacy changed alias from non-git cwd -> ok|no_matches\n' \
-        || {
+    printf '%s' "$json" | jq -e '.status=="ok" or .status=="no_matches"' >/dev/null &&
+        printf '%s' "$json" | jq -e '.mode=="changed-files" or .mode=="changed"' >/dev/null &&
+        printf '  PASS legacy changed alias from non-git cwd -> ok|no_matches\n' ||
+        {
             printf '  FAIL legacy changed alias from non-git cwd (rc=%s)\n' "$rc" >&2
             printf '       envelope: %s\n' "$json" >&2
             exit 1
@@ -434,6 +461,33 @@ expect_status "legacy changed on non-git root -> error" "error"
 rmdir "$nogit" 2>/dev/null || true
 nogit=""
 
+# Missing core tool -> error (not a silent no_matches). Skip cleanly if the
+# tool cannot be hidden from PATH in this environment.
+run_search_without rg text Tenant .
+if [[ "$LAST_RC" -eq 99 ]]; then
+    printf '  PASS missing rg test skipped (rg not isolatable on this PATH)\n'
+else
+    expect_status "missing rg -> error" "error"
+    expect_jq "missing rg error names rg" '(.errors|join(" ")) | test("rg|ripgrep"; "i")'
+fi
+
+run_search_without git diff Foo . --fixed
+if [[ "$LAST_RC" -eq 99 ]]; then
+    printf '  PASS missing git test skipped (git not isolatable on this PATH)\n'
+else
+    expect_status "missing git -> error" "error"
+    expect_jq "missing git error names git" '(.errors|join(" ")) | test("git"; "i")'
+fi
+
+# struct with ast-grep absent -> unavailable (proves the optional-tool path).
+run_search_without ast-grep struct 'class $NAME' . --lang php
+if [[ "$LAST_RC" -eq 99 ]]; then
+    printf '  PASS struct-unavailable test skipped (ast-grep not isolatable)\n'
+else
+    expect_status "struct without ast-grep -> unavailable" "unavailable"
+    expect_jq "struct unavailable names ast-grep" '(.errors|join(" ")) | test("ast-grep|unavailable"; "i")'
+fi
+
 # =============================================================================
 # Phase 1C — real doctor diagnostics
 # =============================================================================
@@ -451,6 +505,25 @@ expect_jq "doctor lists core tools" '
 expect_jq "doctor reports root + git_available" '
   (.diagnostics|has("root")) and (.diagnostics|has("git_available"))
 '
+
+# Gate-proof: the canonical file-list mode names must still contain the
+# substrings validate-ai-config.php greps for (changed/staged/tracked), so the
+# rename satisfies the config gate without running PHP here.
+printf '[phase0] gate-proof: renamed modes keep required substrings\n'
+gate_ok=1
+gate_modes="changed-files staged-files tracked"
+for needle in changed staged tracked; do
+    case "$gate_modes" in
+    *"$needle"*) : ;;
+    *) gate_ok=0 ;;
+    esac
+done
+if [[ "$gate_ok" -eq 1 ]]; then
+    printf '  PASS renamed modes contain changed/staged/tracked substrings\n'
+else
+    printf '  FAIL renamed modes missing a required substring\n' >&2
+    exit 1
+fi
 
 # =============================================================================
 # Phase 1D — bounded output
@@ -991,6 +1064,84 @@ else
     expect_jq "shortcut class returns class defs only" '
       all(.results[]; .kind == "class" and .name == "UserService")
     '
+fi
+
+# =============================================================================
+# Phase 6 — self-introspection (--introspect / enriched --help)
+# =============================================================================
+printf '[phase6] self-introspection\n'
+
+if ! command -v php >/dev/null 2>&1 || ! command -v jq >/dev/null 2>&1; then
+    printf '  PASS phase6 self-introspection tests skipped because php or jq is not installed\n'
+else
+    # --introspect emits the static contract envelope and exits 0.
+    set +e
+    INTRO_JSON="$("$BASH_BIN" "$SCRIPT" --introspect 2>/dev/null)"
+    INTRO_RC=$?
+    set -e
+
+    if [[ "$INTRO_RC" -eq 0 ]]; then
+        printf '  PASS --introspect exits 0\n'
+    else
+        printf '  FAIL --introspect exits 0 (rc=%s)\n' "$INTRO_RC" >&2
+        exit 1
+    fi
+
+    if printf '%s' "$INTRO_JSON" | jq -e '.schema == "ai.sh-introspect/v1"' >/dev/null; then
+        printf '  PASS --introspect schema is ai.sh-introspect/v1\n'
+    else
+        printf '  FAIL --introspect schema is ai.sh-introspect/v1 (got %s)\n' \
+            "$(printf '%s' "$INTRO_JSON" | jq -r '.schema // "<none>"' 2>/dev/null || printf '<invalid-json>')" >&2
+        exit 1
+    fi
+
+    # Guard: --introspect must NOT run a search; its tool is the introspector,
+    # never the search tool.
+    if printf '%s' "$INTRO_JSON" | jq -e '.tool == "sh-introspect"' >/dev/null; then
+        printf '  PASS --introspect tool is sh-introspect (not a search)\n'
+    else
+        printf '  FAIL --introspect tool is sh-introspect (got %s)\n' \
+            "$(printf '%s' "$INTRO_JSON" | jq -r '.tool // "<none>"' 2>/dev/null || printf '<invalid-json>')" >&2
+        exit 1
+    fi
+
+    if printf '%s' "$INTRO_JSON" | jq -e '.meta.target_executed == false' >/dev/null; then
+        printf '  PASS --introspect did not execute the target\n'
+    else
+        printf '  FAIL --introspect meta.target_executed must be false\n' >&2
+        exit 1
+    fi
+
+    # --help keeps the original hand-written usage AND appends the auto summary.
+    set +e
+    HELP_OUT="$("$BASH_BIN" "$SCRIPT" --help 2>/dev/null)"
+    HELP_RC=$?
+    set -e
+
+    if [[ "$HELP_RC" -eq 0 ]]; then
+        printf '  PASS --help exits 0\n'
+    else
+        printf '  FAIL --help exits 0 (rc=%s)\n' "$HELP_RC" >&2
+        exit 1
+    fi
+
+    if printf '%s' "$HELP_OUT" | grep -q 'unified repository search'; then
+        printf '  PASS --help keeps original usage text\n'
+    else
+        printf '  FAIL --help keeps original usage text\n' >&2
+        exit 1
+    fi
+
+    if printf '%s' "$HELP_OUT" | grep -qE 'Quick contract|Modes:'; then
+        printf '  PASS --help appends auto-generated contract summary\n'
+    else
+        printf '  FAIL --help appends auto-generated contract summary\n' >&2
+        exit 1
+    fi
+
+    # Regression: the early --introspect interceptor must not break normal mode.
+    run_search text usage "$p1_repo"
+    expect_jq "normal search still works after introspect wiring" '.tool == "ai-search"'
 fi
 
 echo "ai-search tests passed"

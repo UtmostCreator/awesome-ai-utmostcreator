@@ -8,8 +8,8 @@ command_to_run="${1:?command required}"
 extensions="${2:-md,json,sh,lua,php,yml,yaml}"
 debounce_ms="${WATCH_DEBOUNCE_MS:-500}"
 
-mkdir -p "$COPILOT_LOG_DIR"
-watch_log="$COPILOT_LOG_DIR/watch-loop.jsonl"
+mkdir -p "$AI_LOG_DIR"
+watch_log="$AI_LOG_DIR/watch-loop.jsonl"
 
 log_watch_event() {
     local event="$1"

@@ -13,7 +13,7 @@ bash scripts/ai/rg-code.sh "TODO|FIXME" .
 AI_OUTPUT=json bash scripts/ai/ai-search.sh tracked "Context Gate" . --fixed
 
 # Search only changed files
-AI_OUTPUT=json bash scripts/ai/ai-search.sh changed "refactor" . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text "refactor" . --fixed
 ```
 
 ## Good

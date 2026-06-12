@@ -19,7 +19,7 @@ case "${1:-}" in
     ;;
 esac
 
-mkdir -p "$COPILOT_LOG_DIR"
+mkdir -p "$AI_LOG_DIR"
 input="$(cat)"
 [[ -n "$input" ]] || die "JSON tool event required on stdin"
 jq -e . >/dev/null 2>&1 <<<"$input" || die "invalid JSON tool event on stdin"

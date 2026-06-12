@@ -4,10 +4,10 @@
 
 ```bash
 # Start with changed files
-AI_OUTPUT=json bash scripts/ai/ai-search.sh changed "KEYWORD" . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text "KEYWORD" . --fixed
 
 # Then staged files
-AI_OUTPUT=json bash scripts/ai/ai-search.sh staged "KEYWORD" . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh staged-text "KEYWORD" . --fixed
 
 # Then tracked files
 AI_OUTPUT=json bash scripts/ai/ai-search.sh tracked "KEYWORD" . --fixed

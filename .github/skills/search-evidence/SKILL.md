@@ -12,7 +12,7 @@ Collect repository evidence for `$ARGUMENTS`.
 Default commands:
 
 ```bash
-AI_OUTPUT=json bash scripts/ai/ai-search.sh changed "$ARGUMENTS" . --fixed
-AI_OUTPUT=json bash scripts/ai/ai-search.sh staged "$ARGUMENTS" . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text "$ARGUMENTS" . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh staged-text "$ARGUMENTS" . --fixed
 AI_OUTPUT=json bash scripts/ai/ai-search.sh tracked "$ARGUMENTS" . --fixed
 ```

@@ -6,8 +6,8 @@ Use this action to collect script-first repository evidence before raw search or
 
 ```bash
 git status --short
-AI_OUTPUT=json bash scripts/ai/ai-search.sh changed QUERY . --fixed
-AI_OUTPUT=json bash scripts/ai/ai-search.sh staged QUERY . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text QUERY . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh staged-text QUERY . --fixed
 AI_OUTPUT=json bash scripts/ai/ai-search.sh tracked QUERY . --fixed
 ```
 

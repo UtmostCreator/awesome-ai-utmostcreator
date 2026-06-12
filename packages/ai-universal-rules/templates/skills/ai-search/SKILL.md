@@ -20,8 +20,8 @@ git status --short
 Search the smallest relevant surface before broad text search:
 
 ```bash
-AI_OUTPUT=json bash scripts/ai/ai-search.sh changed <query> . --fixed
-AI_OUTPUT=json bash scripts/ai/ai-search.sh staged <query> . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text <query> . --fixed
+AI_OUTPUT=json bash scripts/ai/ai-search.sh staged-text <query> . --fixed
 AI_OUTPUT=json bash scripts/ai/ai-search.sh tracked <query> . --fixed
 ```
 
