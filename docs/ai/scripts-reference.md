@@ -5,10 +5,11 @@ AI-facing reference for the installed `scripts/ai/*.sh` helper surface. The sour
 ## Best Practices For AI Help
 
 - Look up the script in `docs/ai/script-registry.json` before running it, then prefer the narrowest script that matches the task.
-- Prefer `--help` or `-h` before first use where the table says help is supported.
+- Prefer `--help` or `-h` before first use. Every `scripts/ai/*.sh` script accepts `--help`/`-h` as its first argument and prints a human-readable contract (the `sh-introspect --format=help` view) without running its own logic; scripts with a curated help block (e.g. `ai-search.sh`, `ai-edit.sh`) show that instead.
+- Use `--introspect` as the first argument for the machine-readable JSON contract (`sh-introspect` envelope); this never executes the target script.
 - Prefer `AI_OUTPUT=json` where supported by the script or its docs; JSON output is easier to cite as bounded evidence.
 - Do not run mutating, installer, rollback, watch, or approval-gated scripts without explicit approval. Use dry-run/list/check modes first when available.
-- No-argument scripts with no help are documented below. `common.sh` is a sourced helper library, not a runnable task.
+- `common.sh` is a sourced helper library, not a runnable task; running it directly only yields its `--help`/`--introspect` contract.
 
 ## Registry Scripts
 
@@ -43,14 +44,14 @@ All scripts ship from and install to the listed path in `scripts-pack` unless no
 | `ai-structured.sh` | Emit structured output from supported inputs such as CSV. | Normalizes machine-readable snippets for AI consumption. | Structured text/JSON-like output; read-only. | `--help`/`-h`. |
 | `ai-task.sh` | Generate or inspect task-context evidence. | Establishes task scope before non-trivial edits. | Task-context output/artifacts; read-only registry risk. | `--help`/`-h`. |
 | `ai-test-select.sh` | Select focused tests for a diff or touched path. | Helps choose smallest useful verification. | Test recommendation output; read-only. | `--help`/`-h`. |
-| `run-repo-tests.sh` | Run repository test suites with parallel-first defaults. | Standardizes broad verification when focused checks are insufficient. | Test output; read-only; uses temp logs. | No dedicated help; run only when broad tests are warranted. |
+| `run-repo-tests.sh` | Run repository test suites with parallel-first defaults. | Standardizes broad verification when focused checks are insufficient. | Test output; read-only; uses temp logs. | `--help`/`-h` (introspect help view); run only when broad tests are warranted. |
 | `session-checkpoint.sh` | Save checkpoint notes for a long AI session. | Preserves continuity across handoffs or context resets. | Writes checkpoint artifacts/logs; dry-run default in registry. | `--help`/`-h`; approval recommended for writes. |
-| `ai-file-freshness.sh` | Show dirty AI/docs/runtime files. | Quick stale-surface check before edits or handoff. | `git status --short docs .github .opencode AGENTS.md`; read-only. | No dedicated help; no arguments. |
-| `ai-install-coverage.sh` | Run strict install-surface validation. | Confirms installed script/docs/config surfaces remain registered. | Validation output; read-only. | No dedicated help; no arguments. |
+| `ai-file-freshness.sh` | Show dirty AI/docs/runtime files. | Quick stale-surface check before edits or handoff. | `git status --short docs .github .opencode AGENTS.md`; read-only. | `--help`/`-h` (introspect help view); otherwise no arguments. |
+| `ai-install-coverage.sh` | Run strict install-surface validation. | Confirms installed script/docs/config surfaces remain registered. | Validation output; read-only. | `--help`/`-h` (introspect help view); otherwise no arguments. |
 | `check-file-refs.sh` | Validate documentation file references. | Finds broken paths in AI docs before handoff. | Reference check report; read-only. | `--help`/`-h`. |
-| `repo-stats.sh` | Count tracked repository files. | Quick repository-size signal for context planning. | `git ls-files` count; read-only. | No dedicated help; no arguments. |
-| `repo-tool-inventory.sh` | Generate or check required tool inventory docs. | Keeps tool requirements discoverable after install. | Delegates to `tools/ai/repo-tool-inventory.php`; may check or write depending on args. | No shell help; pass PHP tool args such as `--check`. |
-| `sh-introspect.sh` | Statically inspect a shell script's callable surface (functions, modes, params, internal case keys, env inputs, sources, examples). | Lets agents understand a script's interface without executing it. | Delegates to `tools/ai/sh-introspect.php`; never executes the target; read-only text or JSON envelope. | `--help`/`-h`; supports `AI_OUTPUT=json` and `--format=json`. |
-| `install-mandatory-tools.sh` | Install mandatory CLI tools for this AI kit. | Bootstraps required commands across OSes. | Mutates host tools unless `--dry-run`; source-repo-only. | No dedicated help; use `--dry-run` first and require approval. |
-| `watch-loop.sh` | Re-run a command under `watchexec` or `entr`. | Supports human-supervised iterative checks. | Long-running watcher; writes evidence under `.ai-logs/`. | No dedicated help; approval recommended. |
+| `repo-stats.sh` | Count tracked repository files. | Quick repository-size signal for context planning. | `git ls-files` count; read-only. | `--help`/`-h` (introspect help view); otherwise no arguments. |
+| `repo-tool-inventory.sh` | Generate or check required tool inventory docs. | Keeps tool requirements discoverable after install. | Delegates to `tools/ai/repo-tool-inventory.php`; may check or write depending on args. | `--help`/`-h` (introspect help view); otherwise pass PHP tool args such as `--check`. |
+| `sh-introspect.sh` | Statically inspect a shell script's callable surface (functions, modes, params, internal case keys, env inputs, sources, examples), or `--all` to bundle every `scripts/ai` script into one index report. | Lets agents understand a script's interface without executing it. | Delegates to `tools/ai/sh-introspect.php`; never executes the target; read-only text or JSON envelope, optionally written to a file via `--output`. | `--help`/`-h`; supports `AI_OUTPUT=json`, `--format=json\|help`, `--all`, and `--output PATH` (`-o`/`--output=PATH`) to write the report to a file. |
+| `install-mandatory-tools.sh` | Install mandatory CLI tools for this AI kit. | Bootstraps required commands across OSes. | Mutates host tools unless `--dry-run`; source-repo-only. | `--help`/`-h` (introspect help view); use `--dry-run` first and require approval. |
+| `watch-loop.sh` | Re-run a command under `watchexec` or `entr`. | Supports human-supervised iterative checks. | Long-running watcher; writes evidence under `.ai-logs/`. | `--help`/`-h` (introspect help view); approval recommended. |
 | `prune-shipped-targets.sh` | List or prune files duplicated from shipped templates. | Source-repo maintenance cleanup for generated/template drift. | `--list`/`--dry-run` read-only; `--apply` mutates files, writes backup snapshots, and logs to `.ai-logs/`. | `--help`/`-h`; approval required for `--apply`. |

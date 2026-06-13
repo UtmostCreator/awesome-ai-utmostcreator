@@ -15,6 +15,8 @@ permission:
   bash:
     '*': deny
     'pwd': allow
+    'git diff*': allow
+    'git log*': allow
     'ls *': allow
     'fd *': allow
     'rg *': allow

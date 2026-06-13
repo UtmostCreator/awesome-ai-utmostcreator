@@ -451,6 +451,176 @@ function aiRunScriptCommand(string $root, array $args): int
     return $status === 'ok' ? 0 : 1;
 }
 
+/**
+ * Build a single tool descriptor for the gateway from a registry entry.
+ *
+ * @param array<string,mixed> $entry
+ * @return array<string,mixed>
+ */
+function aiToolGatewayDescriptor(string $id, array $entry): array
+{
+    return [
+        'id' => $id,
+        'label' => $entry['label'] ?? $id,
+        'pack' => $entry['pack'] ?? 'unknown',
+        'risk' => $entry['risk'] ?? 'read-only',
+        'profiles' => aiInstallerScriptProfiles($entry),
+        'requires_approval' => aiInstallerScriptRequiresApproval($entry),
+        'required_tools' => is_array($entry['required_tools'] ?? null) ? array_values($entry['required_tools']) : [],
+        'supports_dry_run' => ($entry['supports_dry_run'] ?? false) === true,
+    ];
+}
+
+/**
+ * Resolve the requested --profile value, or null when not provided.
+ *
+ * Accepts either a profile id (readonly/verify/impl) or an agent name, which is
+ * mapped to its profile via aiInstallerAgentProfiles(). Returns the raw value
+ * unchanged when it matches neither, so callers can fail closed on it.
+ */
+function aiToolGatewayRequestedProfile(array $args): ?string
+{
+    $profile = aiParseArg($args, 'profile');
+    if ($profile === null || $profile === '') {
+        return null;
+    }
+
+    if (in_array($profile, aiInstallerScriptProfileNames(), true)) {
+        return $profile;
+    }
+
+    $agents = aiInstallerAgentProfiles();
+    if (isset($agents[$profile])) {
+        return $agents[$profile];
+    }
+
+    return $profile;
+}
+
+/** tool:list — thin view over the script registry, filtered by profile. */
+function aiRunToolListCommand(string $root, array $args): int
+{
+    $profile = aiToolGatewayRequestedProfile($args);
+    $validProfiles = aiInstallerScriptProfileNames();
+    if ($profile !== null && !in_array($profile, $validProfiles, true)) {
+        $data = ['error' => 'unknown profile: ' . $profile, 'valid_profiles' => $validProfiles];
+        $written = aiCliWriteArtifact($root, 'tool-list', 'php tools/ai/ai.php tool:list', $data, 'failed', null, 'Use one of the valid profiles.');
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return 1;
+    }
+
+    $registry = aiInstallerScriptRegistry();
+    $tools = [];
+    foreach ($registry as $id => $entry) {
+        $descriptor = aiToolGatewayDescriptor($id, $entry);
+        if ($profile !== null && !in_array($profile, $descriptor['profiles'], true)) {
+            continue;
+        }
+        $tools[] = $descriptor;
+    }
+
+    $data = ['profile' => $profile, 'valid_profiles' => $validProfiles, 'tools' => $tools, 'count' => count($tools)];
+    $written = aiCliWriteArtifact($root, 'tool-list', 'php tools/ai/ai.php tool:list', $data, 'ok', null, 'Inspect one with: php tools/ai/ai.php tool:describe <id>');
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+    return 0;
+}
+
+/** tool:describe — single-entry projection. Fails closed on unknown id. */
+function aiRunToolDescribeCommand(string $root, array $args): int
+{
+    $toolId = '';
+    foreach ($args as $arg) {
+        if ($arg !== '' && $arg[0] !== '-') {
+            $toolId = $arg;
+            break;
+        }
+    }
+    if ($toolId === '') {
+        throw new RuntimeException('tool:describe requires a tool id');
+    }
+
+    $registry = aiInstallerScriptRegistry();
+    if (!isset($registry[$toolId])) {
+        $data = ['error' => 'unknown tool id: ' . $toolId];
+        $written = aiCliWriteArtifact($root, 'tool-describe', 'php tools/ai/ai.php tool:describe ' . $toolId, $data, 'failed', null, 'List tools with: php tools/ai/ai.php tool:list');
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return 1;
+    }
+
+    $data = ['tool' => aiToolGatewayDescriptor($toolId, $registry[$toolId])];
+    $written = aiCliWriteArtifact($root, 'tool-describe', 'php tools/ai/ai.php tool:describe ' . $toolId, $data, 'ok', null, 'Run it with: php tools/ai/ai.php tool:run ' . $toolId . ' --dry-run');
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+    return 0;
+}
+
+/**
+ * tool:run — profile- and approval-aware wrapper over aiRunScriptById.
+ *
+ * Fails closed when: id is unknown, id is not visible to the requested profile,
+ * or an approval-required tool is invoked without --apply (stays dry-run).
+ */
+function aiRunToolRunCommand(string $root, array $args): int
+{
+    $toolId = '';
+    foreach ($args as $arg) {
+        if ($arg !== '' && $arg[0] !== '-') {
+            $toolId = $arg;
+            break;
+        }
+    }
+    if ($toolId === '') {
+        throw new RuntimeException('tool:run requires a tool id');
+    }
+
+    $registry = aiInstallerScriptRegistry();
+    if (!isset($registry[$toolId])) {
+        $data = ['error' => 'unknown tool id: ' . $toolId];
+        $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, 'List tools with: php tools/ai/ai.php tool:list');
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return 1;
+    }
+
+    $entry = $registry[$toolId];
+    $descriptor = aiToolGatewayDescriptor($toolId, $entry);
+
+    $profile = aiToolGatewayRequestedProfile($args);
+    $validProfiles = aiInstallerScriptProfileNames();
+    if ($profile !== null) {
+        if (!in_array($profile, $validProfiles, true)) {
+            $data = ['error' => 'unknown profile: ' . $profile, 'valid_profiles' => $validProfiles];
+            $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, 'Use one of the valid profiles.');
+            fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+            return 1;
+        }
+        if (!in_array($profile, $descriptor['profiles'], true)) {
+            $data = ['error' => 'tool not available to profile', 'tool' => $toolId, 'profile' => $profile, 'tool_profiles' => $descriptor['profiles']];
+            $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, 'Use a profile that includes this tool, or pick an allowed tool.');
+            fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+            return 1;
+        }
+    }
+
+    // Approval gate: an approval-required tool must not run without explicit --apply.
+    $wantsApply = in_array('--apply', $args, true);
+    if ($descriptor['requires_approval'] && !$wantsApply) {
+        $data = [
+            'status' => 'approval_required',
+            'tool' => $toolId,
+            'requires_approval' => true,
+            'hint' => 'Re-run with --apply after human approval to execute this tool.',
+        ];
+        $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'blocked', null, 'Approval required: re-run with --apply once approved.');
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return 2;
+    }
+
+    $run = aiRunScriptById($root, $toolId, $args, null);
+    $status = ($run['exit'] ?? 1) === 0 ? 'ok' : 'failed';
+    $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $run, $status, null, $status === 'ok' ? 'Tool run completed.' : 'Fix tool errors and retry.');
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+    return $status === 'ok' ? 0 : 1;
+}
+
 function aiRunInstallDocs(string $root, array $args): int
 {
     $check = in_array('--check', $args, true);

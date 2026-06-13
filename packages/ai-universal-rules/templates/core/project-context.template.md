@@ -45,6 +45,9 @@ Establish one before planning/editing:
 
 If missing, perform read-only discovery first and produce a plan before edits.
 
+Durable plans and task context are written to the committed `docs/tickets/` location.
+`docs/ai/generated/task-context/` is ephemeral-only (read if present, never the durable store).
+
 ## 5) Placement, Naming, and Reuse
 
 - File placement rules: `<FILE_PLACEMENT_RULES>`

@@ -7,10 +7,12 @@ description: 'Mandatory task-context loading before planning, editing, or review
 
 Before any agent answers, plans, edits, or reviews, it must establish task context from one of:
 
-- `docs/ai/generated/task-context/latest.md` (if a task-context generator has produced it)
+- `docs/ai/generated/task-context/latest.md` (optional, ephemeral generator output read only if present)
 - read-only discovery via `scripts/ai/ai-search.sh` (`changed`, then `staged`, then `tracked`) plus `git status --short` and `git diff`
 
 If no task context exists, the agent may only perform read-only research.
+
+Write durable plans and task context to the committed `docs/tickets/` location, never under the gitignored `docs/ai/generated/`.
 
 ## Minimum Task Context Must Contain
 

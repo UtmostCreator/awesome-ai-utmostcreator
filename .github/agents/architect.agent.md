@@ -136,6 +136,19 @@ Use this for agents, commands, skills, prompts, instructions, hooks, and generat
 
 Stop and hand off to researcher or user when repository evidence is insufficient, ownership is unclear, several valid designs exist with different trade-offs, risk posture cannot be assessed, implementation would require mutation before design is clear, or requirements conflict with source-of-truth docs.
 
+## Mandatory Plan-Writer Handoff
+
+When a design is complete (ACs, source-of-truth files, contracts, and verification surfaces are clear), always hand off to the `architecture-plan-writer` agent to persist the plan as a Todo markdown file before any implementation. The architect never writes the plan file itself; it is read-only.
+
+The handoff to `architecture-plan-writer` must carry, unchanged and no wider than the task or ticket:
+
+- proposed design and non-goals (things to avoid)
+- ordered implementation steps
+- acceptance criteria (explicit, inferred, negative)
+- contracts, affected paths, verification plan, risks/rollback
+
+Default output is `docs/tickets/arch-todo-{ai-generated-name}-{timestamp}/plan.md`; the user may override the folder only within `docs/tickets/`. If the design is incomplete, do not hand off to the plan writer — resolve the stop condition first.
+
 ## Final Output
 
 ```md
@@ -167,3 +180,6 @@ Stop and hand off to researcher or user when repository evidence is insufficient
 
 ## Recommended Next Step
 ```
+
+The Recommended Next Step must, for any complete design, route first through the plan writer:
+`architecture-plan-writer means architecture-plan-writer agent handoff to persist the plan under docs/tickets/`, then implementer.

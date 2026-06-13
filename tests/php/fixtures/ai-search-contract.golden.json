@@ -70,15 +70,6 @@
       "source": "command-position"
     },
     {
-      "argv_hint": "for tool in jq git rg ast-grep; do",
-      "effect": "filesystem-read",
-      "kind": "dependency-check",
-      "line": 0,
-      "name": "rg",
-      "risk": "low",
-      "source": "tool-loop"
-    },
-    {
       "argv_hint": "f=\"$(git config --get core.excludesfile 2>/dev/null || true)\"",
       "effect": "git-read",
       "kind": "invocation",
@@ -88,7 +79,16 @@
       "source": "command-position"
     },
     {
-      "argv_hint": "mapfile -d '' files < <(git -C \"$repo_root\" diff --name-only -z --)",
+      "argv_hint": "if mode_needs_rg \"$mode\" && ! command_exists rg; then",
+      "effect": "filesystem-read",
+      "kind": "dependency-check",
+      "line": 0,
+      "name": "rg",
+      "risk": "low",
+      "source": "command-check"
+    },
+    {
+      "argv_hint": "out=\"$(git -C \"$root\" diff --name-only 2>/dev/null | tr -d '\\r' || true)\"",
       "effect": "git-read",
       "kind": "invocation",
       "line": 0,
@@ -102,6 +102,15 @@
       "kind": "invocation",
       "line": 0,
       "name": "rg",
+      "risk": "low",
+      "source": "command-position"
+    },
+    {
+      "argv_hint": "out=\"$(git -C \"$root\" grep \"${git_grep_args[@]}\" -n -- \"$query\" 2>/dev/null)\" || rc=$?",
+      "effect": "git-read",
+      "kind": "invocation",
+      "line": 0,
+      "name": "git grep",
       "risk": "low",
       "source": "command-position"
     },
@@ -129,15 +138,6 @@
       "kind": "invocation",
       "line": 0,
       "name": "ast-grep",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "out=\"$(git -C \"$root\" grep \"${git_grep_args[@]}\" -n -- \"$query\" 2>/dev/null)\" || rc=$?",
-      "effect": "git-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "git grep",
       "risk": "low",
       "source": "command-position"
     }
@@ -201,9 +201,23 @@
       "confidence": 90,
       "name": "rg",
       "source": "command-check"
+    },
+    {
+      "category": "base-utility",
+      "classification": "candidate",
+      "confidence": 70,
+      "name": "tail",
+      "source": "invocation"
     }
   ],
   "env_inputs": [
+    {
+      "confidence": 90,
+      "default": "${BASH_SOURCE[0]",
+      "line": 0,
+      "name": "AI_SEARCH_ENTRYPOINT",
+      "source": "param-expansion"
+    },
     {
       "confidence": 90,
       "default": "php",
@@ -213,16 +227,16 @@
     },
     {
       "confidence": 90,
-      "default": "",
+      "default": "0",
       "line": 0,
-      "name": "AI_OUTPUT",
+      "name": "AI_SEARCH_STRICT",
       "source": "param-expansion"
     },
     {
       "confidence": 90,
-      "default": "0",
+      "default": "",
       "line": 0,
-      "name": "AI_SEARCH_STRICT",
+      "name": "AI_OUTPUT",
       "source": "param-expansion"
     },
     {
@@ -298,13 +312,19 @@
     {
       "confidence": 95,
       "line": 0,
+      "name": "normalize_legacy_alias",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
       "name": "add_warning",
       "source": "definition"
     },
     {
       "confidence": 95,
       "line": 0,
-      "name": "to_json_array",
+      "name": "init_run_state",
       "source": "definition"
     },
     {
@@ -346,6 +366,12 @@
     {
       "confidence": 95,
       "line": 0,
+      "name": "to_json_array",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
       "name": "emit_json",
       "source": "definition"
     },
@@ -370,6 +396,12 @@
     {
       "confidence": 95,
       "line": 0,
+      "name": "validate_non_negative_int",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
       "name": "lines_to_structured_results",
       "source": "definition"
     },
@@ -383,12 +415,6 @@
       "confidence": 95,
       "line": 0,
       "name": "rg_json_to_matches",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "validate_non_negative_int",
       "source": "definition"
     },
     {
@@ -412,7 +438,37 @@
     {
       "confidence": 95,
       "line": 0,
+      "name": "parse_flags",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "interpret_positionals",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "handle_dry_run",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "build_case_pattern_args",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
       "name": "resolve_global_gitignore",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "apply_global_gitignore",
       "source": "definition"
     },
     {
@@ -436,13 +492,67 @@
     {
       "confidence": 95,
       "line": 0,
+      "name": "check_tool_guards",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
       "name": "require_git_root",
       "source": "definition"
     },
     {
       "confidence": 95,
       "line": 0,
+      "name": "backend_changed_files",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "backend_staged_files",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "backend_files",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
       "name": "search_git_scoped_files",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "backend_changed_text",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "backend_staged_text",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "backend_tracked",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "backend_text",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "backend_surface",
       "source": "definition"
     },
     {
@@ -479,6 +589,30 @@
       "confidence": 95,
       "line": 0,
       "name": "run_ast_mode",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "run_doctor_mode",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "run_backend",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "emit_results",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "ai_search_main",
       "source": "definition"
     }
   ],
@@ -802,7 +936,8 @@
   "mode_contracts": [
     {
       "dependencies": [
-        "git"
+        "git",
+        "jq"
       ],
       "deprecated": true,
       "examples": [],
@@ -826,7 +961,8 @@
     },
     {
       "dependencies": [
-        "git"
+        "git",
+        "jq"
       ],
       "description": "list unstaged-changed files",
       "examples": [],
@@ -846,6 +982,7 @@
     },
     {
       "dependencies": [
+        "awk",
         "git",
         "jq",
         "rg"
@@ -874,7 +1011,9 @@
     },
     {
       "dependencies": [
-        "ast-grep"
+        "ast-grep",
+        "git",
+        "jq"
       ],
       "description": "class definitions only (symbols[] with kind=class)",
       "examples": [
@@ -901,6 +1040,8 @@
     },
     {
       "dependencies": [
+        "awk",
+        "git",
         "jq",
         "rg"
       ],
@@ -926,6 +1067,8 @@
     },
     {
       "dependencies": [
+        "awk",
+        "git",
         "jq",
         "rg"
       ],
@@ -951,7 +1094,10 @@
     },
     {
       "dependencies": [
-        "git"
+        "awk",
+        "git",
+        "grep",
+        "jq"
       ],
       "description": "unstaged hunks; --staged or --base REF; results carry path/marker/new_line/text/scope",
       "examples": [
@@ -978,6 +1124,8 @@
     },
     {
       "dependencies": [
+        "awk",
+        "git",
         "jq",
         "rg"
       ],
@@ -1046,7 +1194,8 @@
     },
     {
       "dependencies": [
-        "git"
+        "git",
+        "jq"
       ],
       "description": "git log pickaxe (-S; --regex -> -G); --messages, --patch; results carry commit/author/date/message/path",
       "examples": [],
@@ -1071,7 +1220,8 @@
     },
     {
       "dependencies": [
-        "git"
+        "git",
+        "jq"
       ],
       "deprecated": true,
       "examples": [],
@@ -1095,7 +1245,8 @@
     },
     {
       "dependencies": [
-        "git"
+        "git",
+        "jq"
       ],
       "description": "list staged files",
       "examples": [],
@@ -1115,6 +1266,7 @@
     },
     {
       "dependencies": [
+        "awk",
         "git",
         "jq",
         "rg"
@@ -1141,7 +1293,9 @@
     },
     {
       "dependencies": [
-        "ast-grep"
+        "ast-grep",
+        "git",
+        "jq"
       ],
       "description": "ast-grep pattern; --lang LANG (or AI_LANG, default php)",
       "examples": [],
@@ -1165,7 +1319,9 @@
     },
     {
       "dependencies": [
-        "ast-grep"
+        "ast-grep",
+        "git",
+        "jq"
       ],
       "description": "resolve a symbol; emits symbols[] (kind/name/path/start/end/language)",
       "examples": [],
@@ -1189,6 +1345,8 @@
     },
     {
       "dependencies": [
+        "awk",
+        "git",
         "jq",
         "rg"
       ],
@@ -1214,6 +1372,8 @@
     },
     {
       "dependencies": [
+        "awk",
+        "git",
         "jq",
         "rg"
       ],
@@ -1241,6 +1401,8 @@
     },
     {
       "dependencies": [
+        "git",
+        "jq",
         "rg"
       ],
       "description": "TODO|FIXME|HACK|XXX|deprecated|temporary|workaround|legacy, grouped by file with tag/line/text",
@@ -1261,7 +1423,9 @@
     },
     {
       "dependencies": [
+        "awk",
         "git",
+        "grep",
         "jq"
       ],
       "description": "git-grep over tracked files (requires git root)",
@@ -1304,6 +1468,8 @@
     },
     {
       "dependencies": [
+        "git",
+        "jq",
         "rg"
       ],
       "description": "curated risky patterns with rule + severity",
@@ -1324,6 +1490,24 @@
     }
   ],
   "modes": [
+    {
+      "confidence": 80,
+      "deprecated": true,
+      "family": "unknown",
+      "line": 0,
+      "name": "changed",
+      "query_required": false,
+      "source": "subject-case:mode"
+    },
+    {
+      "confidence": 80,
+      "deprecated": true,
+      "family": "unknown",
+      "line": 0,
+      "name": "staged",
+      "query_required": false,
+      "source": "subject-case:mode"
+    },
     {
       "confidence": 95,
       "description": "list unstaged-changed files",
@@ -1503,24 +1687,6 @@
       "name": "unsafe-patterns",
       "query_required": false,
       "source": "mode-family:is_no_query_mode"
-    },
-    {
-      "confidence": 80,
-      "deprecated": true,
-      "family": "unknown",
-      "line": 0,
-      "name": "changed",
-      "query_required": false,
-      "source": "subject-case:mode"
-    },
-    {
-      "confidence": 80,
-      "deprecated": true,
-      "family": "unknown",
-      "line": 0,
-      "name": "staged",
-      "query_required": false,
-      "source": "subject-case:mode"
     },
     {
       "confidence": 90,
@@ -2186,6 +2352,35 @@
       "takes_value": false
     },
     {
+      "aliases": [
+        "--no-ignore-vcs",
+        "--no-ignore-parent"
+      ],
+      "confidence": 95,
+      "description": "disable ALL ignore sources (local+parent+global+.ignore)",
+      "group": "ignore",
+      "line": 0,
+      "name": "--no-ignore",
+      "repeatable": true,
+      "scope": "global",
+      "source": "parser-case",
+      "takes_value": false
+    },
+    {
+      "aliases": [
+        "--no-ignore-dot"
+      ],
+      "confidence": 95,
+      "description": "disable only the global gitignore",
+      "group": "ignore",
+      "line": 0,
+      "name": "--no-ignore-global",
+      "repeatable": true,
+      "scope": "global",
+      "source": "parser-case",
+      "takes_value": false
+    },
+    {
       "aliases": [],
       "confidence": 75,
       "description": "print full machine-readable JSON contract (sh-introspect)",
@@ -2244,9 +2439,9 @@
       "exists": true,
       "inside_repo": true,
       "line": 0,
-      "raw": "source \"$(dirname \"${BASH_SOURCE[0]}\")/common.sh\"",
+      "raw": "source \"$(dirname \"${AI_SEARCH_ENTRYPOINT:-${BASH_SOURCE[0]}}\")/common.sh\"",
       "resolved": "scripts/ai/common.sh",
-      "target": "$(dirname \"${BASH_SOURCE[0]}\")/common.sh"
+      "target": "$(dirname \"${AI_SEARCH_ENTRYPOINT:-${BASH_SOURCE[0]}}\")/common.sh"
     }
   ],
   "status": "ok",
@@ -2271,5 +2466,7 @@
       "pattern": "*"
     }
   ],
-  "warnings": []
+  "warnings": [
+    "contract aggregated from sourced modules (see inlined markers); target not executed"
+  ]
 }

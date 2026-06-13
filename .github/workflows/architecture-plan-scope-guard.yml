@@ -1,0 +1,72 @@
+name: Architecture Plan Scope Guard
+
+# Hard enforcement boundary for the architecture-plan-writer agent.
+#
+# OpenCode enforces the docs/tickets-only write scope at the permission layer.
+# Copilot cannot, so this check is the merge-time boundary for plan PRs.
+#
+# The job ALWAYS runs so it can be a stable, required status check under branch
+# protection. It only enforces the docs/tickets-only restriction when the PR is
+# identified as a plan PR by either:
+#   - the `architecture-plan` label, or
+#   - a branch name starting with `arch-plan/` or `architecture-plan/`.
+# Non-plan PRs report success as a no-op, so requiring this check does not block
+# normal PRs. Make this check required in branch protection so a plan PR cannot
+# merge by simply omitting the label.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+
+jobs:
+  guard-architecture-plan-scope:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Enforce docs/tickets-only scope for plan PRs
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
+          HAS_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'architecture-plan') }}
+        run: |
+          set -euo pipefail
+
+          # Decide whether this PR is an architecture plan PR.
+          is_plan_pr=false
+          if [ "$HAS_LABEL" = "true" ]; then
+            is_plan_pr=true
+          fi
+          case "$HEAD_REF" in
+            arch-plan/*|architecture-plan/*) is_plan_pr=true ;;
+          esac
+
+          if [ "$is_plan_pr" != "true" ]; then
+            echo "Not an architecture plan PR (no 'architecture-plan' label and branch is not arch-plan/*). No-op pass."
+            exit 0
+          fi
+
+          # The architecture-plan-writer agent may only create/modify markdown
+          # under docs/tickets/. Anything else fails this check.
+          allowed_regex='^docs/tickets/.+\.md$'
+
+          git fetch --no-tags --depth=1 origin "$BASE_REF"
+
+          changed_files="$(git diff --name-only "origin/${BASE_REF}...HEAD")"
+
+          bad_files="$(printf '%s\n' "$changed_files" | grep -Ev "$allowed_regex" || true)"
+
+          if [ -n "${bad_files//[[:space:]]/}" ]; then
+            echo "::error::Architecture plan PRs may only change docs/tickets/**/*.md"
+            echo "Out-of-scope files:"
+            printf '%s\n' "$bad_files"
+            exit 1
+          fi
+
+          echo "OK: all changed files are within docs/tickets/**/*.md"

@@ -11,9 +11,10 @@ Apply these rules before proposing or editing architecture-sensitive code.
 
 - Read the current implementation before proposing structural changes.
 - Establish task context first:
-  - `docs/ai/generated/task-context/latest.md` (if a task-context generator has produced it)
+  - `docs/ai/generated/task-context/latest.md` (optional, ephemeral generator output read only if present)
   - otherwise read-only discovery via `scripts/ai/ai-search.sh` plus `git status --short` and `git diff`
 - If task context is missing, perform read-only research before planning implementation.
+- Write durable plans and task context to the committed `docs/tickets/` location, never under the gitignored `docs/ai/generated/`.
 
 ## Source Of Truth
 

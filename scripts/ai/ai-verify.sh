@@ -3,6 +3,21 @@
 
 set -euo pipefail
 
+# Early --introspect / --help guard: when invoked with --introspect or --help/-h
+# as the FIRST argument, emit this script's machine-readable JSON contract or its
+# human-readable contract (static parse via sh-introspect) and exit before running
+# any logic. The target script is parsed as text, never executed.
+if [[ "${1:-}" == "--introspect" || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    _ai_self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    _ai_self_tool="$_ai_self_dir/../../tools/ai/sh-introspect.php"
+    if [[ -f "$_ai_self_tool" ]] && command -v "${PHP_BIN:-php}" >/dev/null 2>&1; then
+        if [[ "${1:-}" == "--introspect" ]]; then
+            exec env AI_OUTPUT=json "${PHP_BIN:-php}" "$_ai_self_tool" "${BASH_SOURCE[0]}"
+        fi
+        exec "${PHP_BIN:-php}" "$_ai_self_tool" --format=help "${BASH_SOURCE[0]}"
+    fi
+fi
+
 # shellcheck source=scripts/ai/common.sh
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 
@@ -466,6 +481,14 @@ check_line_counts
 if command -v shellcheck >/dev/null 2>&1; then
     while IFS= read -r script; do
         [[ -n "$script" ]] || continue
+        # SC1071: the linter only supports sh/bash/dash/ksh/busybox-sh. Skip
+        # scripts whose shebang is another shell (e.g. zsh); shfmt still covers
+        # their formatting below.
+        if IFS= read -r _first_line <"$script" 2>/dev/null &&
+            [[ "$_first_line" == "#!"*zsh* || "$_first_line" == "#!"*fish* ]]; then
+            log_warn "Skipping shellcheck for $script: unsupported shell shebang (shellcheck only lints sh/bash/dash/ksh)."
+            continue
+        fi
         # shellcheck disable=SC2086
         run_step "shellcheck $script" shellcheck $SHELLCHECK_ARGS "$script"
     done < <(tracked_existing_shell_files)

@@ -13,12 +13,22 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 run_test() {
-    local name="$1"; shift; local _rc=0
+    local name="$1"
+    shift
+    local _rc=0
     "$@" >/dev/null 2>&1 || _rc=$?
-    if ((_rc == 0)); then PASS=$((PASS+1)); printf '  \033[0;32m✓\033[0m %s\n' "$name"
-    else FAIL=$((FAIL+1)); printf '  \033[0;31m✗\033[0m %s\n' "$name"; fi
+    if ((_rc == 0)); then
+        PASS=$((PASS + 1))
+        printf '  \033[0;32m✓\033[0m %s\n' "$name"
+    else
+        FAIL=$((FAIL + 1))
+        printf '  \033[0;31m✗\033[0m %s\n' "$name"
+    fi
 }
-skip_test() { SKIP=$((SKIP+1)); printf '  \033[0;33m⊘\033[0m %s (skipped: %s)\n' "$1" "$2"; }
+skip_test() {
+    SKIP=$((SKIP + 1))
+    printf '  \033[0;33m⊘\033[0m %s (skipped: %s)\n' "$1" "$2"
+}
 
 printf 'watch-loop.sh\n'
 
@@ -26,9 +36,10 @@ printf 'watch-loop.sh\n'
 test_no_command() { ! AI_LOG_DIR="$TMP/logs" "$BASH_BIN" "$SCRIPT" 2>/dev/null; }
 run_test "missing command fails" test_no_command
 
-# Script sources common.sh
+# Script sources common.sh. The early --help/--introspect guard block now sits
+# above the source line, so scan the file rather than only the first 10 lines.
 test_sources_common() {
-    head -10 "$SCRIPT" | grep -q 'common.sh'
+    grep -q 'common.sh' "$SCRIPT"
 }
 run_test "sources common.sh" test_sources_common
 
@@ -40,6 +51,7 @@ test_watcher_check() {
         true
     else
         # Neither available — script should fail
+        # shellcheck disable=SC2251  # intentional: assert the command fails; errexit skip is desired here
         ! AI_LOG_DIR="$TMP/logs2" "$BASH_BIN" "$SCRIPT" "echo test" 2>/dev/null
     fi
 }
@@ -47,4 +59,8 @@ run_test "requires watchexec or entr" test_watcher_check
 
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
-((FAIL == 0)) && printf '\033[0;32mPASSED\033[0m\n' || { printf '\033[0;31mFAILED\033[0m\n'; exit 1; }
+# shellcheck disable=SC2015  # intentional pass/fail reporter; the || branch always exits non-zero
+((FAIL == 0)) && printf '\033[0;32mPASSED\033[0m\n' || {
+    printf '\033[0;31mFAILED\033[0m\n'
+    exit 1
+}

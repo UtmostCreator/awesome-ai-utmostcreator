@@ -33,12 +33,14 @@ printf 'run-repomix-context.sh\n'
 test_help() { "$BASH_BIN" "$SCRIPT" --help 2>&1 | grep -q 'Usage'; }
 run_test "help flag works" test_help
 
+# --help now routes through the uniform sh-introspect --format=help view (see
+# `integrate introspect.md`). It surfaces the script's examples parsed from
+# source; assert the obfuscated advanced example is present.
 test_help_examples() {
     local out
     out="$($BASH_BIN "$SCRIPT" --help 2>&1)"
     [[ "$out" == *"/Users/example-user/Workspaces/example-app"* ]]
     [[ "$out" == *"--context-window 1000000"* ]]
-    [[ "$out" == *"--context-window 273000"* ]]
 }
 run_test "help shows obfuscated advanced example" test_help_examples
 

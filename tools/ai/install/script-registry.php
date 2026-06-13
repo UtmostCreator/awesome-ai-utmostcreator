@@ -508,3 +508,91 @@ function aiInstallerCommandPolicyRiskTiers(): array
         'tier4' => 'deny',
     ];
 }
+
+/**
+ * Single source of truth mapping agent names to permission profiles.
+ *
+ * Profiles intentionally reuse the existing risk/autonomy taxonomy rather than
+ * introducing a new scale. See docs/tickets/arch-todo-agent-permission-rethink-*.
+ *
+ * @return array<string,string>
+ */
+function aiInstallerAgentProfiles(): array
+{
+    return [
+        'architect' => 'readonly',
+        'researcher' => 'readonly',
+        'repository-researcher' => 'readonly',
+        'reviewer' => 'readonly',
+        'repository-reviewer' => 'readonly',
+        'release-auditor' => 'readonly',
+        'workflow-auditor' => 'readonly',
+        'config-maintainer' => 'verify',
+        'implementer' => 'impl',
+        'super-implementer' => 'impl',
+        'refactorer' => 'impl',
+    ];
+}
+
+/**
+ * Distinct profile identifiers derived from the agent->profile map.
+ *
+ * @return list<string>
+ */
+function aiInstallerScriptProfileNames(): array
+{
+    $names = array_values(array_unique(array_values(aiInstallerAgentProfiles())));
+    sort($names);
+
+    return $names;
+}
+
+/**
+ * Resolve which permission profiles may see/run a registry entry.
+ *
+ * Derivation rules (no new metadata required on entries):
+ * - read-only, non-approval tools are visible to every profile.
+ * - read-only tools that still require approval are gated to verify/impl.
+ * - mutating tools (or any requires_approval/mutates_state tool) are impl-only.
+ *
+ * @param array<string,mixed> $entry
+ * @return list<string>
+ */
+function aiInstallerScriptProfiles(array $entry): array
+{
+    $all = aiInstallerScriptProfileNames();
+
+    $risk = (string) ($entry['risk'] ?? 'read-only');
+    $mutates = ($entry['mutates_state'] ?? false) === true;
+    $requiresApproval = ($entry['requires_approval'] ?? false) === true;
+    $autonomy = (string) ($entry['autonomy_level'] ?? aiInstallerInferScriptAutonomyLevel($entry));
+
+    $isMutating = $risk === 'mutating' || $mutates || $autonomy === 'act_with_approval';
+
+    if ($isMutating) {
+        // Only write-capable profiles can run mutation-class tools.
+        return array_values(array_filter($all, static fn (string $p): bool => $p === 'impl'));
+    }
+
+    if ($requiresApproval) {
+        // Read-only but approval-gated: keep out of pure read-only profiles.
+        return array_values(array_filter($all, static fn (string $p): bool => $p !== 'readonly'));
+    }
+
+    return $all;
+}
+
+/**
+ * Whether running a registry entry under a profile requires explicit approval.
+ *
+ * @param array<string,mixed> $entry
+ */
+function aiInstallerScriptRequiresApproval(array $entry): bool
+{
+    $risk = (string) ($entry['risk'] ?? 'read-only');
+    $mutates = ($entry['mutates_state'] ?? false) === true;
+    $requiresApproval = ($entry['requires_approval'] ?? false) === true;
+    $autonomy = (string) ($entry['autonomy_level'] ?? aiInstallerInferScriptAutonomyLevel($entry));
+
+    return $risk === 'mutating' || $mutates || $requiresApproval || $autonomy === 'act_with_approval';
+}

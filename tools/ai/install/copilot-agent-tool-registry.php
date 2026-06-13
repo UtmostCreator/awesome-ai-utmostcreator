@@ -38,6 +38,7 @@ function aiCopilotAgentToolRegistry(): array
 
     return [
         'architect'         => $readOnlyToolsWithQuestions,
+        'architecture-plan-writer' => $editExecuteTools,
         'reviewer'          => $readOnlyTools,
         'release-auditor'   => $readOnlyTools,
         'workflow-auditor'  => $readOnlyTools,

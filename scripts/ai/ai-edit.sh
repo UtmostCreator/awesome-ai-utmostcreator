@@ -3,10 +3,20 @@
 
 set -euo pipefail
 
+# Early --introspect guard: emit this script's machine-readable JSON contract
+# (static parse via sh-introspect) and exit before running any logic. --help is
+# handled by this script's own dedicated early guard (curated usage text) below,
+# before common.sh is sourced.
+if [[ "${1:-}" == "--introspect" ]]; then
+    _ai_self_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    _ai_self_tool="$_ai_self_dir/../../tools/ai/sh-introspect.php"
+    if [[ -f "$_ai_self_tool" ]] && command -v "${PHP_BIN:-php}" >/dev/null 2>&1; then
+        exec env AI_OUTPUT=json "${PHP_BIN:-php}" "$_ai_self_tool" "${BASH_SOURCE[0]}"
+    fi
+fi
+
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-# shellcheck source=scripts/ai/common.sh
-source "$SCRIPT_DIR/common.sh"
 
 usage() {
     cat <<'EOF'
@@ -71,6 +81,18 @@ Full contract: AI_OUTPUT=json php tools/ai/sh-introspect.php scripts/ai/ai-edit.
 EOF
 }
 
+# Early --help/-h guard: emit this script's curated usage BEFORE sourcing
+# common.sh, so the universal common.sh --help fallback does not shadow the
+# richer bespoke help. --introspect is still handled by the common.sh guard
+# (and by the parser's --introspect path) after sourcing.
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    usage
+    exit 0
+fi
+
+# shellcheck source=scripts/ai/common.sh
+source "$SCRIPT_DIR/common.sh"
+
 show_diff() {
     git --no-pager diff --stat || true
     git --no-pager diff --color=always | sed -n '1,240p' || true
@@ -120,6 +142,7 @@ write_session_manifest() {
     after_json="$(dirty_files_json)"
     session_changed_json="$(json_array_diff "$baseline_dirty_json" "$after_json")"
 
+    # shellcheck disable=SC2086  # $manifest_path is injected as a JSON string literal into the jq program; path is repo-internal
     jq -n \
         --arg session "${SESSION_ID:-unknown}" \
         --arg mode "${mode:-unknown}" \
@@ -233,17 +256,18 @@ finish() {
         emit_result_json "$status"
     else
         case "$status" in
-            dry_run) printf '\nDry-run only. Re-run with --apply or APPLY=1 to modify files.\n' ;;
-            no_matches) printf 'No matches.\n' ;;
-            applied) printf 'Applied changes. Manifest: %s/edit-session.json\n' "$SESSION_DIR" ;;
-            verified) printf 'Applied and verified. Manifest: %s/edit-session.json\n' "$SESSION_DIR" ;;
-            limit_exceeded|blocked|error|verify_failed) printf '%s\n' "$status" >&2 ;;
+        dry_run) printf '\nDry-run only. Re-run with --apply or APPLY=1 to modify files.\n' ;;
+        no_matches) printf 'No matches.\n' ;;
+        applied) printf 'Applied changes. Manifest: %s/edit-session.json\n' "$SESSION_DIR" ;;
+        verified) printf 'Applied and verified. Manifest: %s/edit-session.json\n' "$SESSION_DIR" ;;
+        limit_exceeded | blocked | error | verify_failed) printf '%s\n' "$status" >&2 ;;
         esac
     fi
 
     exit "$exit_code"
 }
 
+# shellcheck disable=SC2329  # invoked indirectly via `trap on_error ERR`
 on_error() {
     local exit_code=$?
     trap - ERR
@@ -313,36 +337,93 @@ parse_tail() {
 
     while (($# > 0)); do
         case "$1" in
-            --help|-h) usage; exit 0 ;;
-            --format=*) format="${1#*=}"; shift ;;
-            --format) [[ $# -ge 2 ]] || fail_status "error" "--format requires a value" 2; format="$2"; shift 2 ;;
-            --glob) [[ $# -ge 2 ]] || fail_status "error" "--glob requires a value" 2; include_globs+=("$2"); shift 2 ;;
-            --exclude) [[ $# -ge 2 ]] || fail_status "error" "--exclude requires a value" 2; exclude_globs+=("$2"); shift 2 ;;
-            --max-files) [[ $# -ge 2 ]] || fail_status "error" "--max-files requires a value" 2; max_files="$2"; shift 2 ;;
-            --max-files=*) max_files="${1#*=}"; shift ;;
-            --max-replacements) [[ $# -ge 2 ]] || fail_status "error" "--max-replacements requires a value" 2; max_replacements="$2"; shift 2 ;;
-            --max-replacements=*) max_replacements="${1#*=}"; shift ;;
-            --max-bytes) [[ $# -ge 2 ]] || fail_status "error" "--max-bytes requires a value" 2; max_bytes="$2"; shift 2 ;;
-            --max-bytes=*) max_bytes="${1#*=}"; shift ;;
-            --dry-run) apply=0; shift ;;
-            --apply) apply=1; shift ;;
-            --verify) verify=1; shift ;;
-            --no-verify) verify=0; shift ;;
-            --require-clean-tree) require_clean_tree_flag=1; shift ;;
-            --allow-dirty-tree) require_clean_tree_flag=0; shift ;;
-            --*) fail_status "error" "unknown flag: $1" 2 ;;
-            *)
-                ((root_seen == 0)) || fail_status "error" "unexpected extra positional: $1" 2
-                root="$1"
-                root_seen=1
-                shift
-                ;;
+        --help | -h)
+            usage
+            exit 0
+            ;;
+        --format=*)
+            format="${1#*=}"
+            shift
+            ;;
+        --format)
+            [[ $# -ge 2 ]] || fail_status "error" "--format requires a value" 2
+            format="$2"
+            shift 2
+            ;;
+        --glob)
+            [[ $# -ge 2 ]] || fail_status "error" "--glob requires a value" 2
+            include_globs+=("$2")
+            shift 2
+            ;;
+        --exclude)
+            [[ $# -ge 2 ]] || fail_status "error" "--exclude requires a value" 2
+            exclude_globs+=("$2")
+            shift 2
+            ;;
+        --max-files)
+            [[ $# -ge 2 ]] || fail_status "error" "--max-files requires a value" 2
+            max_files="$2"
+            shift 2
+            ;;
+        --max-files=*)
+            max_files="${1#*=}"
+            shift
+            ;;
+        --max-replacements)
+            [[ $# -ge 2 ]] || fail_status "error" "--max-replacements requires a value" 2
+            max_replacements="$2"
+            shift 2
+            ;;
+        --max-replacements=*)
+            max_replacements="${1#*=}"
+            shift
+            ;;
+        --max-bytes)
+            [[ $# -ge 2 ]] || fail_status "error" "--max-bytes requires a value" 2
+            max_bytes="$2"
+            shift 2
+            ;;
+        --max-bytes=*)
+            max_bytes="${1#*=}"
+            shift
+            ;;
+        --dry-run)
+            apply=0
+            shift
+            ;;
+        --apply)
+            apply=1
+            shift
+            ;;
+        --verify)
+            verify=1
+            shift
+            ;;
+        --no-verify)
+            verify=0
+            shift
+            ;;
+        --require-clean-tree)
+            require_clean_tree_flag=1
+            shift
+            ;;
+        --allow-dirty-tree)
+            require_clean_tree_flag=0
+            shift
+            ;;
+        --*) fail_status "error" "unknown flag: $1" 2 ;;
+        *)
+            ((root_seen == 0)) || fail_status "error" "unexpected extra positional: $1" 2
+            root="$1"
+            root_seen=1
+            shift
+            ;;
         esac
     done
 
     case "$format" in
-        text|json|help) ;;
-        *) fail_status "error" "unknown --format value: $format" 2 ;;
+    text | json | help) ;;
+    *) fail_status "error" "unknown --format value: $format" 2 ;;
     esac
 
     validate_uint "--max-files" "$max_files"
@@ -383,7 +464,7 @@ sd_plan() {
         [[ -f "$path" ]] || continue
 
         bytes="$(wc -c <"$path" | tr -d ' ')"
-        if (( bytes > max_bytes )); then
+        if ((bytes > max_bytes)); then
             skipped_for_bytes=1
             add_warning "skipped oversized file: $path"
             continue
@@ -436,15 +517,27 @@ structural_scope_guard() {
 }
 
 case "${1:-}" in
-    --help|-h) usage; exit 0 ;;
-    --format=help) usage; exit 0 ;;
-    --format)
-        [[ "${2:-}" == "help" ]] && { usage; exit 0; }
-        ;;
+--help | -h)
+    usage
+    exit 0
+    ;;
+--format=help)
+    usage
+    exit 0
+    ;;
+--format)
+    [[ "${2:-}" == "help" ]] && {
+        usage
+        exit 0
+    }
+    ;;
 esac
 
 mode="${1:-}"
-[[ -n "$mode" ]] || { usage; exit 2; }
+[[ -n "$mode" ]] || {
+    usage
+    exit 2
+}
 shift || true
 
 agent_session_init "ai-edit"
@@ -470,74 +563,84 @@ baseline_dirty_json="$(dirty_files_json)"
 trap on_error ERR
 
 case "$mode" in
-    ast-grep)
-        [[ $# -ge 3 ]] || fail_status "error" "ast-grep requires LANG PATTERN REWRITE [root]" 2
-        ast_bin="$(resolve_ast_grep)"
-        lang="$1"; pattern="$2"; rewrite="$3"; shift 3
-        parse_tail "$@"
-        structural_scope_guard
+ast-grep)
+    [[ $# -ge 3 ]] || fail_status "error" "ast-grep requires LANG PATTERN REWRITE [root]" 2
+    ast_bin="$(resolve_ast_grep)"
+    lang="$1"
+    pattern="$2"
+    rewrite="$3"
+    shift 3
+    parse_tail "$@"
+    structural_scope_guard
 
+    if [[ "$apply" == "1" ]]; then
+        # shellcheck disable=SC2015  # intentional: warn-and-continue only when clean tree is NOT required
+        [[ "$require_clean_tree_flag" == "1" ]] && require_clean_tree || log_warn "dirty tree allowed"
+        snapshot="$(snapshot_create pre-edit)"
+        "$ast_bin" run --lang "$lang" --pattern "$pattern" --rewrite "$rewrite" "$root" --update-all
+    else
+        if is_json_output; then
+            "$ast_bin" run --lang "$lang" --pattern "$pattern" --rewrite "$rewrite" "$root" >"$SESSION_DIR/dry-run.txt" || true
+        else
+            "$ast_bin" run --lang "$lang" --pattern "$pattern" --rewrite "$rewrite" "$root" || true
+        fi
+        finish "dry_run" 0
+    fi
+    ;;
+
+comby)
+    [[ $# -ge 2 ]] || fail_status "error" "comby requires MATCH REWRITE [root]" 2
+    require_bins comby
+    match="$1"
+    rewrite="$2"
+    shift 2
+    parse_tail "$@"
+    structural_scope_guard
+
+    if [[ "$apply" == "1" ]]; then
+        # shellcheck disable=SC2015  # intentional: warn-and-continue only when clean tree is NOT required
+        [[ "$require_clean_tree_flag" == "1" ]] && require_clean_tree || log_warn "dirty tree allowed"
+        snapshot="$(snapshot_create pre-edit)"
+        comby "$match" "$rewrite" -matcher .generic -in-place "$root"
+    else
+        if is_json_output; then
+            comby "$match" "$rewrite" -matcher .generic "$root" >"$SESSION_DIR/dry-run.txt" || true
+        else
+            comby "$match" "$rewrite" -matcher .generic "$root" || true
+        fi
+        finish "dry_run" 0
+    fi
+    ;;
+
+sd)
+    [[ $# -ge 2 ]] || fail_status "error" "sd requires FROM TO [root]" 2
+    from="$1"
+    to="$2"
+    shift 2
+    parse_tail "$@"
+
+    if sd_plan; then
         if [[ "$apply" == "1" ]]; then
+            # shellcheck disable=SC2015  # intentional: warn-and-continue only when clean tree is NOT required
             [[ "$require_clean_tree_flag" == "1" ]] && require_clean_tree || log_warn "dirty tree allowed"
             snapshot="$(snapshot_create pre-edit)"
-            "$ast_bin" run --lang "$lang" --pattern "$pattern" --rewrite "$rewrite" "$root" --update-all
+            sd_apply
         else
-            if is_json_output; then
-                "$ast_bin" run --lang "$lang" --pattern "$pattern" --rewrite "$rewrite" "$root" >"$SESSION_DIR/dry-run.txt" || true
-            else
-                "$ast_bin" run --lang "$lang" --pattern "$pattern" --rewrite "$rewrite" "$root" || true
-            fi
             finish "dry_run" 0
         fi
-        ;;
+    else
+        case "$?" in
+        1) finish "no_matches" 0 ;;
+        2) finish "limit_exceeded" 3 ;;
+        *) finish "error" 1 ;;
+        esac
+    fi
+    ;;
 
-    comby)
-        [[ $# -ge 2 ]] || fail_status "error" "comby requires MATCH REWRITE [root]" 2
-        require_bins comby
-        match="$1"; rewrite="$2"; shift 2
-        parse_tail "$@"
-        structural_scope_guard
-
-        if [[ "$apply" == "1" ]]; then
-            [[ "$require_clean_tree_flag" == "1" ]] && require_clean_tree || log_warn "dirty tree allowed"
-            snapshot="$(snapshot_create pre-edit)"
-            comby "$match" "$rewrite" -matcher .generic -in-place "$root"
-        else
-            if is_json_output; then
-                comby "$match" "$rewrite" -matcher .generic "$root" >"$SESSION_DIR/dry-run.txt" || true
-            else
-                comby "$match" "$rewrite" -matcher .generic "$root" || true
-            fi
-            finish "dry_run" 0
-        fi
-        ;;
-
-    sd)
-        [[ $# -ge 2 ]] || fail_status "error" "sd requires FROM TO [root]" 2
-        from="$1"; to="$2"; shift 2
-        parse_tail "$@"
-
-        if sd_plan; then
-            if [[ "$apply" == "1" ]]; then
-                [[ "$require_clean_tree_flag" == "1" ]] && require_clean_tree || log_warn "dirty tree allowed"
-                snapshot="$(snapshot_create pre-edit)"
-                sd_apply
-            else
-                finish "dry_run" 0
-            fi
-        else
-            case "$?" in
-                1) finish "no_matches" 0 ;;
-                2) finish "limit_exceeded" 3 ;;
-                *) finish "error" 1 ;;
-            esac
-        fi
-        ;;
-
-    *)
-        usage
-        fail_status "error" "unknown mode: $mode" 2
-        ;;
+*)
+    usage
+    fail_status "error" "unknown mode: $mode" 2
+    ;;
 esac
 
 save_diff_artifacts
