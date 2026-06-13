@@ -120,6 +120,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/run-repo-tests.sh`
 - `scripts/ai/run-repomix-context.sh`
 - `scripts/ai/run-repomix-file.sh`
+- `scripts/ai/run-test-focused.sh`
 - `scripts/ai/session-checkpoint.sh`
 - `scripts/ai/sh-introspect.sh`
 - `scripts/ai/watch-loop.sh`
