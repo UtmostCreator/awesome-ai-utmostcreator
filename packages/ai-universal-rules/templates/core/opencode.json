@@ -147,6 +147,8 @@
         "php tools/ai/verify-full-install.php": "allow",
         "php tools/ai/ai.php advisor --all": "allow",
         "php tools/ai/ai.php advisor --check": "allow",
+        "php tools/ai/ai.php tool:list*": "allow",
+        "php tools/ai/ai.php tool:describe*": "allow",
         "php tools/ai/ai.php verify *": "allow",
         "php tools/ai/ai.php preflight": "allow",
         "php tools/ai/ai.php install-docs --check": "allow",
