@@ -173,6 +173,9 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
   denies preserved; validator enforces `allow` (no silent downgrade); rationale documented.
 
 ### P2b — Wire the gateway execution into permissions  `[PARTLY-DONE / DECISION-GATED]`
+- **Execution runbook:** `./runbook-p2b-gateway-wiring.md` — step-by-step "how to run it
+  correctly without wiring/permission breakage", the OQ-1 live-test gate, and safe
+  permission-change rules. Follow it when this slice is taken up.
 - **What:** Add narrow allow rules — `php tools/ai/ai.php tool:list*`, `tool:describe*`, and a
   **scoped** `tool:run` rule — so the built gateway becomes a reachable safe lane.
 - **Files:** `packages/ai-universal-rules/templates/core/opencode.json` (SOURCE) then re-render
