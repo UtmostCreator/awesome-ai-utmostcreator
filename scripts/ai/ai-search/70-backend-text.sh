@@ -88,11 +88,46 @@ backend_tracked() {
     return 0
 }
 
+# g_text_fallback — set to 1 when backend_text degraded to git grep (line output)
+# so the dispatch parses `out` as path:line:text instead of rg --json.
+g_text_fallback=0
+
 backend_text() {
     local rc=0
+    if ! command_exists rg; then
+        backend_text_fallback
+        return
+    fi
     out="$(rg --json "${case_args[@]}" "${rg_fixed_args[@]}" "${ignore_args[@]+"${ignore_args[@]}"}" "${rg_scope_args[@]}" -- "$query" "$root" 2>/dev/null)" || rc=$?
     # rg: 0 = match, 1 = no match, 2 = error.
     [[ "$rc" -eq 2 ]] && fail "error" "search backend error (invalid regex or unreadable path): $query"
+    return 0
+}
+
+# backend_text_fallback — degrade `text` mode to git grep when rg is absent.
+# Emits line-oriented path:line:text (parsed via the line path in dispatch) and a
+# parity warning: git grep searches TRACKED files only and uses git's regex, not
+# rg's. Requires a git repo (guaranteed by check_tool_guards before we get here).
+backend_text_fallback() {
+    local git_grep_args=() rc=0
+    require_git_root
+    g_text_fallback=1
+    add_warning "rg (ripgrep) not installed; 'text' mode degraded to 'git grep' (tracked files only; git regex, not rg; default ignores/globs not applied)"
+
+    case "$case_mode" in
+    ignore) git_grep_args+=(-i) ;;
+    sensitive) : ;;
+    smart | *) [[ "$query" =~ [[:upper:]] ]] || git_grep_args+=(-i) ;;
+    esac
+    case "$pattern_mode" in
+    fixed) git_grep_args+=(--fixed-strings) ;;
+    pcre2) git_grep_args+=(-P) ;;
+    *) : ;;
+    esac
+
+    out="$(git -C "$root" grep "${git_grep_args[@]}" -n -- "$query" 2>/dev/null)" || rc=$?
+    # git grep: 0 = match, 1 = no match, >=2 = error.
+    [[ "$rc" -ge 2 ]] && fail "error" "git grep error for query: $query"
     return 0
 }
 

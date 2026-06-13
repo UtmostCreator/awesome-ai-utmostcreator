@@ -36,6 +36,13 @@
       "source": "internal-case"
     },
     {
+      "case_subject": "\"$route_mode\"",
+      "confidence": 70,
+      "line": 0,
+      "name": "__text_fallback",
+      "source": "internal-case"
+    },
+    {
       "case_subject": "\"$count_mode\"",
       "confidence": 70,
       "line": 0,
@@ -93,6 +100,24 @@
       "kind": "invocation",
       "line": 0,
       "name": "git diff",
+      "risk": "low",
+      "source": "command-position"
+    },
+    {
+      "argv_hint": "add_warning \"fd/fdfind not installed; files mode degraded to 'git ls-files' (tracked files only; substring match, not...",
+      "effect": "git-read",
+      "kind": "invocation",
+      "line": 0,
+      "name": "git ls-files",
+      "risk": "low",
+      "source": "command-position"
+    },
+    {
+      "argv_hint": "add_warning \"fd/fdfind not installed; files mode degraded to 'git ls-files' (tracked files only; substring match, not...",
+      "effect": "filesystem-read",
+      "kind": "invocation",
+      "line": 0,
+      "name": "fd",
       "risk": "low",
       "source": "command-position"
     },
@@ -172,6 +197,13 @@
       "source": "invocation"
     },
     {
+      "category": "base-utility",
+      "classification": "required",
+      "confidence": 90,
+      "name": "find",
+      "source": "command-check"
+    },
+    {
       "category": "primary-tool",
       "classification": "required",
       "confidence": 90,
@@ -200,7 +232,17 @@
       "classification": "required",
       "confidence": 90,
       "name": "rg",
+      "required_for_modes": [
+        "deps"
+      ],
       "source": "command-check"
+    },
+    {
+      "category": "base-utility",
+      "classification": "candidate",
+      "confidence": 70,
+      "name": "sed",
+      "source": "invocation"
     },
     {
       "category": "base-utility",
@@ -492,6 +534,12 @@
     {
       "confidence": 95,
       "line": 0,
+      "name": "mode_has_rg_fallback",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
       "name": "check_tool_guards",
       "source": "definition"
     },
@@ -522,6 +570,12 @@
     {
       "confidence": 95,
       "line": 0,
+      "name": "backend_files_fallback",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
       "name": "search_git_scoped_files",
       "source": "definition"
     },
@@ -547,6 +601,12 @@
       "confidence": 95,
       "line": 0,
       "name": "backend_text",
+      "source": "definition"
+    },
+    {
+      "confidence": 95,
+      "line": 0,
+      "name": "backend_text_fallback",
       "source": "definition"
     },
     {
@@ -1169,8 +1229,12 @@
     },
     {
       "dependencies": [
+        "awk",
         "fd",
-        "jq"
+        "find",
+        "git",
+        "jq",
+        "sed"
       ],
       "description": "filename search (fd; unavailable if fd absent)",
       "examples": [],
@@ -1374,6 +1438,7 @@
       "dependencies": [
         "awk",
         "git",
+        "grep",
         "jq",
         "rg"
       ],

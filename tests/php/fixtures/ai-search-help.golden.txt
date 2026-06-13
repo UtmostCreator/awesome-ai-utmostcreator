@@ -154,7 +154,7 @@ Env: AI_LANG AI_OUTPUT AI_SEARCH_ENTRYPOINT AI_SEARCH_STRICT PHP_BIN XDG_CONFIG_
 
 Tools:
   primary: ast-grep fd git jq rg
-  base utilities: awk cat grep tail
+  base utilities: awk cat find grep sed tail
   mode-specific tools: see mode contract via --introspect
 
 Examples:
