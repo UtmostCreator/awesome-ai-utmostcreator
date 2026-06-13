@@ -186,7 +186,9 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
 - **Risk:** medium-high. **BLOCKED on OQ-1** (live tokenizer test of `tool:run <id> -- <args>`).
   Phase 1 deliberately deferred broad `tool:*` allow — do not silently override. Route through
   **release-auditor** (touches the permission floor).
-- **Status:** PARTLY-DONE (gateway exists; wiring deferred). **Do not ship until OQ-1 resolved.**
+- **Status:** PARTLY-DONE. Steps 1-2 SHIPPED (commit `5cced30`): `tool:list*`/`tool:describe*`
+  discovery rules + `ai-search-multi.sh` drift fix, additive, no floor change, suite green.
+  Step 3 (`tool:run *` execution rule) **still parked on OQ-1 live test + release-auditor.**
 - **Acceptance:**
   - [ ] OQ-1 resolved with a live OpenCode run showing `tool:run <id> -- <args>` (with quoted
         args) matches a single allow rule — OR the custom-tool route (OQ-6) is chosen instead.
