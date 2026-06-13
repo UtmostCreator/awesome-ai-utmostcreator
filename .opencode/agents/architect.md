@@ -15,7 +15,7 @@ capabilities:
 permission:
   todowrite: allow
   edit: deny
-  task: ask
+  task: allow
   bash:
     '*': deny
     'command -v *': allow

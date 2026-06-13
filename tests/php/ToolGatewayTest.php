@@ -206,6 +206,24 @@ class ToolGatewayTest extends TestCase
         $this->assertSame(0, $this->runTool('php tools/ai/ai.php tool:list --profile=architect')['exit']);
     }
 
+    // --- P3.6: standardized reason codes -----------------------------------
+
+    public function testReasonPayloadUsesKnownReasonCodeAndSafeNextStep(): void
+    {
+        $codes = aiToolGatewayReasonCodes();
+        foreach (['unknown_id', 'unknown_profile', 'profile_mismatch', 'approval_required', 'missing_required_tool'] as $expected) {
+            $this->assertContains($expected, $codes, "reason vocabulary must include '$expected'");
+        }
+
+        $payload = aiToolGatewayReasonPayload('approval_required', 'Stop and do not retry.');
+        $this->assertSame('approval_required', $payload['reason']);
+        $this->assertSame('blocked', $payload['status'], 'approval_required must map to blocked status');
+        $this->assertNotEmpty($payload['safe_next_step']);
+
+        $failed = aiToolGatewayReasonPayload('unknown_id', 'List tools first.');
+        $this->assertSame('failed', $failed['status'], 'non-approval reasons map to failed status');
+    }
+
     private function firstMutatingToolId(): string
     {
         foreach (aiInstallerScriptRegistry() as $id => $entry) {

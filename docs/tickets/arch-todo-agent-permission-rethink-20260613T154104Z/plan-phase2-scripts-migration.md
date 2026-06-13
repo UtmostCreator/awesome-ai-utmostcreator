@@ -186,13 +186,15 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
 - **Risk:** medium-high. **BLOCKED on OQ-1** (live tokenizer test of `tool:run <id> -- <args>`).
   Phase 1 deliberately deferred broad `tool:*` allow — do not silently override. Route through
   **release-auditor** (touches the permission floor).
-- **Status:** SHIPPED pending sign-off. Steps 1-2 (commit `5cced30`) + Step 3 `tool:run *`
-  (commit `f75ffe7`) all ADDED, additive, no floor change, suite 692/692 green. Live probes
-  proved the gateway handles `--`/quoted args and fails closed on mutating ids. **Before merge:**
-  (1) confirm in a live OpenCode session that `tool:run` runs with NO prompt under the new allow
-  rule (the probes used the `ask` fallback, not the `allow` rule); (2) release-auditor sign-off.
+- **Status:** SHIPPED with conditional release-auditor sign-off for scoped P2b only. Steps 1-2 (commit `5cced30`) + Step 3
+  `tool:run *` (commit `f75ffe7`) all ADDED, additive, no floor change, suite 692/692 green.
+  Live probes proved the gateway handles `--`/quoted args and fails closed on mutating ids. A
+  user-provided live OpenCode run after `f75ffe7` confirmed `tool:list`, `tool:describe`, and two
+  `tool:run ai-search` variants wrote expected artifacts with no approval-prompt interruption
+  reported, settling OQ-1 for the broad rule. Release-auditor verdict: conditional yes for scoped
+  P2b only; excludes unrelated current unstaged/untracked worktree changes.
 - **Acceptance:**
-  - [ ] OQ-1 resolved with a live OpenCode run showing `tool:run <id> -- <args>` (with quoted
+  - [x] OQ-1 resolved with a live OpenCode run showing `tool:run <id> -- <args>` (with quoted
         args) matches a single allow rule — OR the custom-tool route (OQ-6) is chosen instead.
   - [ ] gateway returns machine-readable approval reason codes (`reason=approval_required`,
         `safe_alternative`) so agent wording can be "stop, do not retry".

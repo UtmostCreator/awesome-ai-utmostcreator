@@ -84,6 +84,8 @@ Commands:
   tool:list      List gateway tools, optionally filtered by --profile=<role>
   tool:describe  Describe one gateway tool by registry id
   tool:run       Run a gateway tool by id (profile- and approval-aware)
+  registry:export Project the canonical PHP registry into docs/ai/script-registry.json
+                 Use --output PATH to write, or --check [PATH] as a CI drift gate
   install-docs   Generate or check install instructions and catalog docs
   advisor        Project intelligence advisor pipeline commands
   descriptors    List relocated .ai/ kit descriptors or copy a safe one out to root
@@ -133,6 +135,8 @@ Examples:
   php tools/ai/ai.php tool:list --profile=architect
   php tools/ai/ai.php tool:describe ai-search
   php tools/ai/ai.php tool:run ai-search -- --mode text "Needle"
+  php tools/ai/ai.php registry:export --output docs/ai/script-registry.json
+  php tools/ai/ai.php registry:export --check
   php tools/ai/ai.php install-docs --check
   php tools/ai/ai.php advisor --all
   php tools/ai/ai.php descriptors --list
@@ -254,6 +258,8 @@ try {
             exit(aiRunToolDescribeCommand($root, $args));
         case 'tool:run':
             exit(aiRunToolRunCommand($root, $args));
+        case 'registry:export':
+            exit(aiRunRegistryExportCommand($root, $args));
         case 'install-docs':
             exit(aiRunInstallDocs($root, $args));
         case 'advisor':

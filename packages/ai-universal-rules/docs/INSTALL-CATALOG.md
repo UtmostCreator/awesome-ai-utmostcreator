@@ -26,7 +26,7 @@ Deterministic catalog generated from installer registries.
 - `capabilities-extended` (2 items)
 - `capabilities-governance` (2 items)
 - `policy-pack` (3 items)
-- `scripts-pack` (50 items)
+- `scripts-pack` (51 items)
 - `hooks-pack` (8 items)
 - `ci-pack` (2 items)
 - `evidence-pack` (2 items)
@@ -52,6 +52,7 @@ Deterministic catalog generated from installer registries.
 - `rg-code` -> `scripts/ai/rg-code.sh`
 - `fd-files` -> `scripts/ai/fd-files.sh`
 - `run-repo-tests` -> `scripts/ai/run-repo-tests.sh`
+- `run-test-focused` -> `scripts/ai/run-test-focused.sh`
 - `preview-file` -> `scripts/ai/preview-file.sh`
 - `query-usage` -> `scripts/ai/query-usage.sh`
 - `git-forensics` -> `scripts/ai/git-forensics.sh`

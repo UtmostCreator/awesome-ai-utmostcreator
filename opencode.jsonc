@@ -49,6 +49,8 @@
     },
     "edit": {
       "*": "ask",
+      "docs/tickets/**": "allow",
+      "docs/tickets/arch-todo-*/**": "allow",
       ".opencode/**": "deny",
       ".github/agents/**": "deny",
       ".github/instructions/**": "deny",

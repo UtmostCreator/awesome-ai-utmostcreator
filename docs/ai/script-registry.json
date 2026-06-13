@@ -1,44 +1,902 @@
 {
-  "schema_version": "1.1.0",
-  "scripts": {
-    "common": {"source_path":"scripts/ai/common.sh","installed_path":"scripts/ai/common.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "ai-search": {"source_path":"scripts/ai/ai-search.sh","installed_path":"scripts/ai/ai-search.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe","introspection":{"introspect_flag":"--introspect","help_summary":true,"tool":"sh-introspect"}},
-    "ai-search-multi": {"source_path":"scripts/ai/ai-search-multi.sh","installed_path":"scripts/ai/ai-search-multi.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "rg-code": {"source_path":"scripts/ai/rg-code.sh","installed_path":"scripts/ai/rg-code.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "fd-files": {"source_path":"scripts/ai/fd-files.sh","installed_path":"scripts/ai/fd-files.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "preview-file": {"source_path":"scripts/ai/preview-file.sh","installed_path":"scripts/ai/preview-file.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "query-usage": {"source_path":"scripts/ai/query-usage.sh","installed_path":"scripts/ai/query-usage.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "git-forensics": {"source_path":"scripts/ai/git-forensics.sh","installed_path":"scripts/ai/git-forensics.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "git-branch-origin": {"source_path":"scripts/ai/git-branch-origin.sh","installed_path":"scripts/ai/git-branch-origin.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "gh-pr-context": {"source_path":"scripts/ai/gh-pr-context.sh","installed_path":"scripts/ai/gh-pr-context.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "ai-doc-check": {"source_path":"scripts/ai/ai-doc-check.sh","installed_path":"scripts/ai/ai-doc-check.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "ai-diff-context": {"source_path":"scripts/ai/ai-diff-context.sh","installed_path":"scripts/ai/ai-diff-context.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "ai-verify": {"source_path":"scripts/ai/ai-verify.sh","installed_path":"scripts/ai/ai-verify.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "ai-rollback": {"source_path":"scripts/ai/ai-rollback.sh","installed_path":"scripts/ai/ai-rollback.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"},
-    "ai-edit": {"source_path":"scripts/ai/ai-edit.sh","installed_path":"scripts/ai/ai-edit.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"},
-    "pre-tool-use": {"source_path":"scripts/ai/pre-tool-use.sh","installed_path":"scripts/ai/pre-tool-use.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "post-tool-use": {"source_path":"scripts/ai/post-tool-use.sh","installed_path":"scripts/ai/post-tool-use.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "repomix-context": {"source_path":"scripts/ai/run-repomix-context.sh","installed_path":"scripts/ai/run-repomix-context.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "repomix-file": {"source_path":"scripts/ai/run-repomix-file.sh","installed_path":"scripts/ai/run-repomix-file.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "repomix-tree": {"source_path":"scripts/ai/repomix-context-tree.sh","installed_path":"scripts/ai/repomix-context-tree.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "repomix-scc-router": {"source_path":"scripts/ai/repomix-scc-router.sh","installed_path":"scripts/ai/repomix-scc-router.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "repomix-freshness": {"source_path":"scripts/ai/repomix-freshness.sh","installed_path":"scripts/ai/repomix-freshness.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "repomix-ensure-fresh": {"source_path":"scripts/ai/repomix-ensure-fresh.sh","installed_path":"scripts/ai/repomix-ensure-fresh.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"act_with_approval"},
-    "pack-context": {"source_path":"scripts/ai/pack-context.sh","installed_path":"scripts/ai/pack-context.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "ai-structured": {"source_path":"scripts/ai/ai-structured.sh","installed_path":"scripts/ai/ai-structured.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "ai-task": {"source_path":"scripts/ai/ai-task.sh","installed_path":"scripts/ai/ai-task.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "ai-test-select": {"source_path":"scripts/ai/ai-test-select.sh","installed_path":"scripts/ai/ai-test-select.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "run-repo-tests": {"source_path":"scripts/ai/run-repo-tests.sh","installed_path":"scripts/ai/run-repo-tests.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "run-test-focused": {"source_path":"scripts/ai/run-test-focused.sh","installed_path":"scripts/ai/run-test-focused.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "session-checkpoint": {"source_path":"scripts/ai/session-checkpoint.sh","installed_path":"scripts/ai/session-checkpoint.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"},
-    "ai-file-freshness": {"source_path":"scripts/ai/ai-file-freshness.sh","installed_path":"scripts/ai/ai-file-freshness.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "ai-install-coverage": {"source_path":"scripts/ai/ai-install-coverage.sh","installed_path":"scripts/ai/ai-install-coverage.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "check-file-refs": {"source_path":"scripts/ai/check-file-refs.sh","installed_path":"scripts/ai/check-file-refs.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "repo-stats": {"source_path":"scripts/ai/repo-stats.sh","installed_path":"scripts/ai/repo-stats.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
-    "repo-tool-inventory": {"source_path":"scripts/ai/repo-tool-inventory.sh","installed_path":"scripts/ai/repo-tool-inventory.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
-    "sh-introspect": {"source_path":"scripts/ai/sh-introspect.sh","installed_path":"scripts/ai/sh-introspect.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe","description":"Static introspection of shell scripts: functions, modes, params, internal case keys, env inputs, and sourced files. Never executes the target."},
-    "install-mandatory-tools": {"source_path":"scripts/ai/install-mandatory-tools.sh","installed_path":"scripts/ai/install-mandatory-tools.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"},
-    "watch-loop": {"source_path":"scripts/ai/watch-loop.sh","installed_path":"scripts/ai/watch-loop.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"act_with_approval"},
-    "prune-shipped-targets": {"source_path":"scripts/ai/prune-shipped-targets.sh","installed_path":"scripts/ai/prune-shipped-targets.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"}
-  }
+    "schema_version": "1.1.0",
+    "scripts": {
+        "common": {
+            "id": "common",
+            "source_path": "scripts/ai/common.sh",
+            "installed_path": "scripts/ai/common.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-search": {
+            "id": "ai-search",
+            "source_path": "scripts/ai/ai-search.sh",
+            "installed_path": "scripts/ai/ai-search.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git",
+                "jq"
+            ],
+            "optional_tools": [
+                "rg",
+                "fd",
+                "ast-grep"
+            ],
+            "writes_paths": [],
+            "tier": "tier1",
+            "introspection": {
+                "introspect_flag": "--introspect",
+                "help_summary": true,
+                "tool": "sh-introspect"
+            }
+        },
+        "ai-search-multi": {
+            "id": "ai-search-multi",
+            "source_path": "scripts/ai/ai-search-multi.sh",
+            "installed_path": "scripts/ai/ai-search-multi.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git",
+                "jq"
+            ],
+            "optional_tools": [
+                "rg",
+                "fd",
+                "ast-grep"
+            ],
+            "writes_paths": [],
+            "tier": "tier1"
+        },
+        "rg-code": {
+            "id": "rg-code",
+            "source_path": "scripts/ai/rg-code.sh",
+            "installed_path": "scripts/ai/rg-code.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "rg"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "fd-files": {
+            "id": "fd-files",
+            "source_path": "scripts/ai/fd-files.sh",
+            "installed_path": "scripts/ai/fd-files.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "jq",
+                "rg"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "run-repo-tests": {
+            "id": "run-repo-tests",
+            "source_path": "scripts/ai/run-repo-tests.sh",
+            "installed_path": "scripts/ai/run-repo-tests.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "php"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "run-test-focused": {
+            "id": "run-test-focused",
+            "source_path": "scripts/ai/run-test-focused.sh",
+            "installed_path": "scripts/ai/run-test-focused.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "php"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "preview-file": {
+            "id": "preview-file",
+            "source_path": "scripts/ai/preview-file.sh",
+            "installed_path": "scripts/ai/preview-file.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "jq"
+            ],
+            "optional_tools": [],
+            "writes_paths": [],
+            "tier": "tier1"
+        },
+        "query-usage": {
+            "id": "query-usage",
+            "source_path": "scripts/ai/query-usage.sh",
+            "installed_path": "scripts/ai/query-usage.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "rg"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "git-forensics": {
+            "id": "git-forensics",
+            "source_path": "scripts/ai/git-forensics.sh",
+            "installed_path": "scripts/ai/git-forensics.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "git-branch-origin": {
+            "id": "git-branch-origin",
+            "source_path": "scripts/ai/git-branch-origin.sh",
+            "installed_path": "scripts/ai/git-branch-origin.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "gh-pr-context": {
+            "id": "gh-pr-context",
+            "source_path": "scripts/ai/gh-pr-context.sh",
+            "installed_path": "scripts/ai/gh-pr-context.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "gh",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-doc-check": {
+            "id": "ai-doc-check",
+            "source_path": "scripts/ai/ai-doc-check.sh",
+            "installed_path": "scripts/ai/ai-doc-check.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "advise",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "git",
+                "rg"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-diff-context": {
+            "id": "ai-diff-context",
+            "source_path": "scripts/ai/ai-diff-context.sh",
+            "installed_path": "scripts/ai/ai-diff-context.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-verify": {
+            "id": "ai-verify",
+            "source_path": "scripts/ai/ai-verify.sh",
+            "installed_path": "scripts/ai/ai-verify.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": [],
+            "tier": "tier2"
+        },
+        "ai-rollback": {
+            "id": "ai-rollback",
+            "source_path": "scripts/ai/ai-rollback.sh",
+            "installed_path": "scripts/ai/ai-rollback.sh",
+            "pack": "scripts-pack",
+            "risk": "mutating",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": true,
+            "requires_approval": true,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                ".ai-logs/",
+                "docs/ai/generated/"
+            ],
+            "tier": "tier3"
+        },
+        "ai-edit": {
+            "id": "ai-edit",
+            "source_path": "scripts/ai/ai-edit.sh",
+            "installed_path": "scripts/ai/ai-edit.sh",
+            "pack": "scripts-pack",
+            "risk": "mutating",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": true,
+            "requires_approval": true,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "git",
+                "python3"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                "repo-scoped"
+            ],
+            "tier": "tier3"
+        },
+        "pre-tool-use": {
+            "id": "pre-tool-use",
+            "source_path": "scripts/ai/pre-tool-use.sh",
+            "installed_path": "scripts/ai/pre-tool-use.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "jq"
+            ],
+            "optional_tools": [],
+            "writes_paths": [],
+            "tier": "tier1"
+        },
+        "post-tool-use": {
+            "id": "post-tool-use",
+            "source_path": "scripts/ai/post-tool-use.sh",
+            "installed_path": "scripts/ai/post-tool-use.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "advise",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "jq",
+                "date"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                ".ai-logs/"
+            ],
+            "tier": "tier1"
+        },
+        "repomix-context": {
+            "id": "repomix-context",
+            "source_path": "scripts/ai/run-repomix-context.sh",
+            "installed_path": "scripts/ai/run-repomix-context.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "advise",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "git",
+                "repomix",
+                "scc"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "repomix-file": {
+            "id": "repomix-file",
+            "source_path": "scripts/ai/run-repomix-file.sh",
+            "installed_path": "scripts/ai/run-repomix-file.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "advise",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "jq",
+                "repomix"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "repomix-tree": {
+            "id": "repomix-tree",
+            "source_path": "scripts/ai/repomix-context-tree.sh",
+            "installed_path": "scripts/ai/repomix-context-tree.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "advise",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "git",
+                "repomix",
+                "scc"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "repomix-scc-router": {
+            "id": "repomix-scc-router",
+            "source_path": "scripts/ai/repomix-scc-router.sh",
+            "installed_path": "scripts/ai/repomix-scc-router.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "advise",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "git",
+                "jq",
+                "rg",
+                "repomix",
+                "scc"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "repomix-freshness": {
+            "id": "repomix-freshness",
+            "source_path": "scripts/ai/repomix-freshness.sh",
+            "installed_path": "scripts/ai/repomix-freshness.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "jq"
+            ],
+            "optional_tools": [],
+            "writes_paths": [],
+            "tier": "tier1"
+        },
+        "repomix-ensure-fresh": {
+            "id": "repomix-ensure-fresh",
+            "source_path": "scripts/ai/repomix-ensure-fresh.sh",
+            "installed_path": "scripts/ai/repomix-ensure-fresh.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "jq",
+                "git",
+                "repomix",
+                "scc"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                ".repomix-context/"
+            ],
+            "tier": "tier2"
+        },
+        "pack-context": {
+            "id": "pack-context",
+            "source_path": "scripts/ai/pack-context.sh",
+            "installed_path": "scripts/ai/pack-context.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "advise",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-structured": {
+            "id": "ai-structured",
+            "source_path": "scripts/ai/ai-structured.sh",
+            "installed_path": "scripts/ai/ai-structured.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "jq"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-task": {
+            "id": "ai-task",
+            "source_path": "scripts/ai/ai-task.sh",
+            "installed_path": "scripts/ai/ai-task.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git",
+                "jq"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-test-select": {
+            "id": "ai-test-select",
+            "source_path": "scripts/ai/ai-test-select.sh",
+            "installed_path": "scripts/ai/ai-test-select.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "session-checkpoint": {
+            "id": "session-checkpoint",
+            "source_path": "scripts/ai/session-checkpoint.sh",
+            "installed_path": "scripts/ai/session-checkpoint.sh",
+            "pack": "scripts-pack",
+            "risk": "mutating",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-file-freshness": {
+            "id": "ai-file-freshness",
+            "source_path": "scripts/ai/ai-file-freshness.sh",
+            "installed_path": "scripts/ai/ai-file-freshness.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ai-install-coverage": {
+            "id": "ai-install-coverage",
+            "source_path": "scripts/ai/ai-install-coverage.sh",
+            "installed_path": "scripts/ai/ai-install-coverage.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "check-file-refs": {
+            "id": "check-file-refs",
+            "source_path": "scripts/ai/check-file-refs.sh",
+            "installed_path": "scripts/ai/check-file-refs.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "repo-stats": {
+            "id": "repo-stats",
+            "source_path": "scripts/ai/repo-stats.sh",
+            "installed_path": "scripts/ai/repo-stats.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "repo-tool-inventory": {
+            "id": "repo-tool-inventory",
+            "source_path": "scripts/ai/repo-tool-inventory.sh",
+            "installed_path": "scripts/ai/repo-tool-inventory.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "sh-introspect": {
+            "id": "sh-introspect",
+            "source_path": "scripts/ai/sh-introspect.sh",
+            "installed_path": "scripts/ai/sh-introspect.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "php"
+            ],
+            "optional_tools": [],
+            "writes_paths": [],
+            "tier": "tier1"
+        },
+        "install-mandatory-tools": {
+            "id": "install-mandatory-tools",
+            "source_path": "scripts/ai/install-mandatory-tools.sh",
+            "installed_path": "scripts/ai/install-mandatory-tools.sh",
+            "pack": "scripts-pack",
+            "risk": "mutating",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "watch-loop": {
+            "id": "watch-loop",
+            "source_path": "scripts/ai/watch-loop.sh",
+            "installed_path": "scripts/ai/watch-loop.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "prune-shipped-targets": {
+            "id": "prune-shipped-targets",
+            "source_path": "scripts/ai/prune-shipped-targets.sh",
+            "installed_path": "scripts/ai/prune-shipped-targets.sh",
+            "pack": "scripts-pack",
+            "risk": "mutating",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": true,
+            "required_tools": [
+                "bash",
+                "jq",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        }
+    }
 }

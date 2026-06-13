@@ -613,3 +613,88 @@ function aiInstallerScriptRequiresApproval(array $entry): bool
 
     return $risk === 'mutating' || $mutates || $requiresApproval || $autonomy === 'act_with_approval';
 }
+
+/**
+ * P3.0 — Single normalized projection of a registry entry.
+ *
+ * This is the one place that turns the mixed static + derived PHP registry data
+ * into a stable, fully-populated contract. The gateway descriptor and the
+ * `registry:export` generator both build on this so JSON/docs stay in sync with
+ * the canonical PHP source. Derived fields (autonomy_level, profiles,
+ * requires_approval) are computed here, never hand-stored.
+ *
+ * Key order is fixed and deterministic so generated output is byte-stable.
+ *
+ * @param array<string,mixed> $entry
+ * @return array<string,mixed>
+ */
+function aiInstallerNormalizeScriptEntry(string $id, array $entry): array
+{
+    $required = is_array($entry['required_tools'] ?? null) ? array_values($entry['required_tools']) : [];
+    $optional = is_array($entry['optional_tools'] ?? null) ? array_values($entry['optional_tools']) : [];
+    $writes = is_array($entry['writes_paths'] ?? null) ? array_values($entry['writes_paths']) : [];
+
+    $normalized = [
+        'id' => $id,
+        'source_path' => (string) ($entry['source_path'] ?? ''),
+        'installed_path' => (string) ($entry['installed_path'] ?? ($entry['source_path'] ?? '')),
+        'pack' => (string) ($entry['pack'] ?? 'unknown'),
+        'risk' => (string) ($entry['risk'] ?? 'read-only'),
+        'autonomy_level' => (string) ($entry['autonomy_level'] ?? aiInstallerInferScriptAutonomyLevel($entry)),
+        'profiles' => aiInstallerScriptProfiles($entry),
+        'mutates_state' => ($entry['mutates_state'] ?? false) === true,
+        'requires_approval' => aiInstallerScriptRequiresApproval($entry),
+        'supports_dry_run' => ($entry['supports_dry_run'] ?? false) === true,
+        'required_tools' => $required,
+        'optional_tools' => $optional,
+        'writes_paths' => $writes,
+    ];
+
+    if (array_key_exists('tier', $entry)) {
+        $normalized['tier'] = (string) $entry['tier'];
+    }
+    if (isset($entry['introspection']) && is_array($entry['introspection'])) {
+        $normalized['introspection'] = $entry['introspection'];
+    }
+    if (isset($entry['description']) && (string) $entry['description'] !== '') {
+        $normalized['description'] = (string) $entry['description'];
+    }
+
+    return $normalized;
+}
+
+/**
+ * P3.1 — Deterministic normalized projection of the whole registry.
+ *
+ * @return array<string,array<string,mixed>>
+ */
+function aiInstallerNormalizedScriptRegistry(): array
+{
+    $out = [];
+    foreach (aiInstallerScriptRegistry() as $id => $entry) {
+        $out[(string) $id] = aiInstallerNormalizeScriptEntry((string) $id, $entry);
+    }
+
+    return $out;
+}
+
+/**
+ * P3.1 — Render the canonical generated JSON for docs/ai/script-registry.json.
+ *
+ * Output is byte-stable: fixed schema_version, stable key order (registry
+ * insertion order preserved), pretty-printed, trailing newline.
+ */
+function aiInstallerRenderScriptRegistryJson(): string
+{
+    $payload = [
+        'schema_version' => '1.1.0',
+        'scripts' => aiInstallerNormalizedScriptRegistry(),
+    ];
+
+    $json = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    if ($json === false) {
+        throw new RuntimeException('Failed to encode normalized script registry JSON.');
+    }
+
+    return $json . PHP_EOL;
+}
