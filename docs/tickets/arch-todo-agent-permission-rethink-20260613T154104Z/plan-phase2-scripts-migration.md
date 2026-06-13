@@ -140,15 +140,23 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
   (`fd→git ls-files`, `rg→git grep`, with `parity`/`warning`) so fallbacks are declared, not ad hoc.
 - **Breakage surface:** output-format parity (rg regex vs grep substring; fd glob vs find) — see OQ-5.
 - **Risk:** medium. **Rollback:** revert backend fallback branches.
-- **Status:** NEW. P1c is largely a "preserve + improve message" guard, not new degradation.
-- **Acceptance:**
-  - [ ] missing `rg` degrades text search to `git grep`/`grep` with a `warnings[]` entry (P1b).
-  - [ ] missing `fd` degrades `files` mode to `git ls-files`/`find` with a `warnings[]` entry (P1a).
-  - [ ] missing `ast-grep` keeps `status=unavailable` (no silent grep fallback) with a clearer message (P1c).
-  - [ ] JSON envelope still emits `schema`/`status`/`warnings[]` (see OQ-5).
-  - [ ] **behavioral parity** documented: `grep` substring vs `rg` regex, and `find` vs `fd`
-        glob/substring filename match in `backend_files` (`65-backend-files.sh:38`) — differences
-        surfaced in `warnings[]`, not silently divergent.
+- **Status:** ✅ DONE — P1c (`cf8c73d`), P1a (`9c2cd4d`), P1b (`7c9bc94`).
+  - P1a: `65-backend-files.sh` `backend_files_fallback` — fd missing ⇒ `git ls-files`/`find`,
+    case-insensitive substring match, parity warning; only `unavailable` if neither git nor find.
+  - P1b: `70-backend-text.sh` `backend_text_fallback` + `60-guards.sh` `mode_has_rg_fallback`
+    + `95-dispatch.sh` `route_mode` — rg missing ⇒ git grep for `text` only (git present),
+    line output routed through the git-grep parser, reported mode stays `text`, parity warning.
+    Surface modes (docs/tests/config/deps) keep the hard `error` (no safe rg-glob equivalent).
+  - P1c: `85-backend-ast.sh` — ast-grep missing keeps `status=unavailable` (no silent fallback),
+    message now points to the text alternative.
+  - Tests: updated `tests/scripts/ai/test-ai-search.sh` (missing-rg text ⇒ degraded ok + warning;
+    docs ⇒ still error); regenerated sh-introspect help + contract goldens.
+- **Acceptance (met):**
+  - [x] missing `rg` degrades `text` search to `git grep` with a `warnings[]` entry (P1b).
+  - [x] missing `fd` degrades `files` mode to `git ls-files`/`find` with a `warnings[]` entry (P1a).
+  - [x] missing `ast-grep` keeps `status=unavailable` (no silent grep fallback), clearer message (P1c).
+  - [x] JSON envelope still emits `schema`/`status`/`warnings[]`; surface modes still fail closed.
+  - [x] behavioral parity surfaced in `warnings[]`, not silently divergent.
 
 ### P2a — Allow native read tools (`grep`/`glob`/`list`)  `[NEW]`  ★ early, OQ-1-independent
 - **What:** Flip native `grep`/`glob`/`list` from `"ask"`→`"allow"` (confirmed at
@@ -198,7 +206,11 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
   `run-repo-tests` (whole suite) and `ai-test-select` (selects only), with the anti-freeze timeout.
 - **Files:** `tools/ai/install/script-registry.php`; a thin wrapper or new mode.
 - **Risk:** low (raw phpunit/composer-test is already allowed, so friction is moderate).
-- **Status:** NEW. **Acceptance:** [ ] focused single-class/filter run available via `tool:run`.
+- **Status:** ✅ DONE (`154e4ee`). New `scripts/ai/run-test-focused.sh` (phpunit `--filter`/single
+  file, `TEST_TIMEOUT` default 120s, introspect/help guards). Registered across all required
+  surfaces (packs, registry PHP/JSON/MD, scripts-reference, opencode allow). Reachable via
+  `php tools/ai/ai.php tool:run run-test-focused -- --filter <Name>`.
+- **Acceptance (met):** [x] focused single-class/filter run available via gateway + direct script.
 
 ### P4 — First-class external read + small util ids  `[NEW, lower priority]`
 - **What:** Document `preview-file.sh`/ai-search arbitrary-root reads as first-class
@@ -307,6 +319,19 @@ gated behind OQ-1 (or the OQ-6 custom-tool route) and release-auditor review.
 The reassessment lifted the direction from ~88 to ~94 on the dimensions it scored; the lift comes
 from splitting risk classes (P2a vs P2b), adding invariant/drift tests (P0.5/P2c), and shipping
 friction reduction earlier — all confirmed safe and OQ-1-independent.
+
+## Implementation status (2026-06-13)
+
+Shipped this session (commits): **P0** `9e98817` · **P0.5** `9e98817` · **P2a** `8f593ed` ·
+**P5a** `8f593ed` · **P1c** `cf8c73d` · **P1a** `9c2cd4d` · **P1b** `7c9bc94` · **P3** `154e4ee`.
+
+All OQ-1-independent slices are DONE. **Remaining (parked):**
+- **P2b** — gateway `tool:run` permission wiring. Blocked on **OQ-1** (live OpenCode tokenizer
+  test) or **OQ-6** (custom-tool route). Route through **release-auditor** (posture change).
+- **P2c** — registry↔permission drift test (bind to P2b).
+- **P4** — first-class external read + small util ids (lower priority).
+- **P5** / **P5b** — compact agent-file wording rollout + Copilot parity docs (P5a guidance already
+  shipped in `docs/ai/agent-script-access.md`).
 
 ## Handoff
 
