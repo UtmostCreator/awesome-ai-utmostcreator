@@ -115,13 +115,14 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
   but `rg-code` (`:64-73`) omits `tier`/`mutates_state`/`requires_approval`/`supports_json`/
   `bounded_output`. An invariant test catches this immediately and guards every later edit.
 - **Files:** new `tests/php/ScriptRegistryInvariantTest.php` (or extend `ToolGatewayTest`).
-- **Risk:** low. **Rollback:** delete the test file. **Status:** NEW.
-- **Acceptance:**
-  - [ ] every id has `risk`, `source_path`, `installed_path`, a resolvable profile, non-empty
-        `required_tools`; tier-1+ entries declare `tier`.
-  - [ ] every `requires_approval=true` id exits 2 without `--apply` (reuse the existing harness).
-  - [ ] no read-only profile resolves to a mutating id.
-  - [ ] any `optional_tools` are disjoint from `required_tools` for the same entry.
+- **Risk:** low. **Rollback:** delete the test file. **Status:** ✅ DONE (commit `9e98817`).
+  `tests/php/ScriptRegistryInvariantTest.php`, 9 tests / 484 assertions. Confirmed the registry
+  is sound: `rg-code`'s "missing fields" are intentional tier-0 minimalism, not drift.
+- **Acceptance (met):**
+  - [x] every id has `risk`, `source_path`, `installed_path`, a resolvable profile, non-empty
+        `required_tools`; tier-1+ entries with a `tier` use a known tier value.
+  - [x] approval/mutating ids are never visible to the `readonly` profile; mutating ⇒ requires approval.
+  - [x] `optional_tools` are disjoint from `required_tools` for the same entry.
 
 ### P1 — POSIX grep/find fallbacks with `warnings[]`  `[NEW]`  (split into P1a/P1b/P1c)
 - **What:** For search backends that today hard-fail when a tool is missing, add a controlled
@@ -156,8 +157,12 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
 - **Files:** `packages/ai-universal-rules/templates/core/opencode.json` (SOURCE) then re-render
   `opencode.jsonc`. Never edit installed `.opencode/**`.
 - **Breakage surface:** minimal — secret denies live on `read`/`edit` (`:64-68`) and are unaffected.
-- **Risk:** low-medium. **Rollback:** revert the three keys. **Status:** NEW. Schedule right after P0.5.
-- **Acceptance:** [ ] `grep`/`glob`/`list` = `allow` in template + rendered config; secret denies preserved.
+- **Risk:** low-medium. **Rollback:** revert the three keys + validator rule. **Status:** ✅ DONE
+  (commit `8f593ed`). NOTE: not friction-free as assumed — `validate-ai-config.php:801-809` actively
+  forbade `allow` for these keys, so P2a also updated that validator (now requires `allow`) and
+  documented the rationale in `docs/ai/security.md`. Approved by user before changing encoded policy.
+- **Acceptance (met):** [x] `grep`/`glob`/`list` = `allow` in template + rendered config; secret
+  denies preserved; validator enforces `allow` (no silent downgrade); rationale documented.
 
 ### P2b — Wire the gateway execution into permissions  `[PARTLY-DONE / DECISION-GATED]`
 - **What:** Add narrow allow rules — `php tools/ai/ai.php tool:list*`, `tool:describe*`, and a
@@ -204,6 +209,12 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
   line numbers).
 - **Risk:** low-medium. **Status:** NEW.
 - **Acceptance:** [ ] external read documented + gated; [ ] no secret-path bypass.
+
+### P5a — Anti-pipe + native-reads wording  `[NEW, low risk]`  ✅ DONE (commit `8f593ed`)
+- Added a "Native reads first; never pipe" section to the canonical `docs/ai/agent-script-access.md`
+  (referenced by every agent's Script Access block) instead of duplicating wording across 13 agent
+  templates. Covers: use native read/glob/grep/list; never pipe/redirect/`&&`/`$()`; one wrapper per
+  call; stop-don't-retry on `approval_required`.
 
 ### P5 — Compact agent wording + Copilot parity (docs only)  `[NEW, low risk]`
 - **What:** ~6-line agent guidance (native reads; never pipe; one gateway command per call;
