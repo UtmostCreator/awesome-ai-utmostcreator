@@ -395,21 +395,34 @@ function aiRunScriptById(string $root, string $scriptId, array $args, ?array $se
         return ['exit' => 1, 'error' => 'script file not found for id: ' . $scriptId];
     }
 
+    // Hard precheck: only tools the script ALWAYS needs (required_tools). Tools that are
+    // specific to a subset of modes belong in optional_tools and must not block the whole
+    // tool when missing — the script's own per-mode guard fails closed for modes that need
+    // them. This prevents e.g. a missing fd/ast-grep from blocking ai-search 'tracked'
+    // (git grep), which needs neither.
     $requiredTools = is_array($entry['required_tools'] ?? null) ? $entry['required_tools'] : [];
     $missing = aiInstallerMissingTools($requiredTools);
     if ($missing !== []) {
         return ['exit' => 1, 'error' => 'missing required tools: ' . implode(', ', $missing), 'missing_tools' => $missing];
     }
 
+    $optionalTools = is_array($entry['optional_tools'] ?? null) ? $entry['optional_tools'] : [];
+    $missingOptional = $optionalTools === [] ? [] : aiInstallerMissingTools($optionalTools);
+
     $dryRun = in_array('--dry-run', $args, true) || !in_array('--apply', $args, true);
     $scriptArgs = aiArgsAfterDoubleDash($args);
     $argv = array_merge(['bash', $scriptPath], $scriptArgs);
     if ($dryRun) {
-        return ['exit' => 0, 'dry_run' => true, 'argv' => $argv, 'script_id' => $scriptId, 'script_path' => str_replace('\\', '/', substr($scriptPath, strlen($root) + 1))];
+        $result = ['exit' => 0, 'dry_run' => true, 'argv' => $argv, 'script_id' => $scriptId, 'script_path' => str_replace('\\', '/', substr($scriptPath, strlen($root) + 1))];
+        if ($missingOptional !== []) {
+            $result['missing_optional_tools'] = $missingOptional;
+            $result['warnings'] = ['missing optional tools (only some modes need them): ' . implode(', ', $missingOptional)];
+        }
+        return $result;
     }
 
     $run = aiInstallerRunArgv($argv, $root);
-    return [
+    $result = [
         'exit' => $run['exit'],
         'dry_run' => false,
         'argv' => $argv,
@@ -418,6 +431,11 @@ function aiRunScriptById(string $root, string $scriptId, array $args, ?array $se
         'stdout_preview' => substr((string) ($run['stdout'] ?? ''), 0, 3000),
         'stderr_preview' => substr((string) ($run['stderr'] ?? ''), 0, 3000),
     ];
+    if ($missingOptional !== []) {
+        $result['missing_optional_tools'] = $missingOptional;
+        $result['warnings'] = ['missing optional tools (only some modes need them): ' . implode(', ', $missingOptional)];
+    }
+    return $result;
 }
 
 function aiRunScriptCommand(string $root, array $args): int
