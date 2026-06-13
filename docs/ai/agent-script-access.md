@@ -7,6 +7,19 @@ scripts are set to `deny` in the agent.
 
 Format: `script — when to use — why — expect after`.
 
+## Native reads first; never pipe (read this first)
+
+- Use the native tools for inspection: `read` (file contents), `glob` (find files),
+  `grep` (content search), `list` (directories), `lsp` (symbols). They are `allow` and
+  bypass the shell entirely — prefer them over any `bash` read.
+- **Never compose shell pipes, redirects, `&&`, or `$(...)`.** OpenCode matches the *whole*
+  command string, so `grep foo | head` is blocked even when `grep` is allowed. Piping wastes
+  turns and triggers retry loops. If you need less output, ask the tool for less — do not pipe.
+- For repository scripts, call exactly one wrapper per command (no chaining). Each `scripts/ai/*.sh`
+  wrapper already bounds and JSON-envelopes its own output, so you never need `head`/`tail`/`sed`.
+- If a command is denied or returns `approval_required`, **stop — do not retry a variant.** Switch
+  to a native tool, an allowed wrapper, or ask for approval.
+
 ## Read / research (low risk)
 
 - `ai-search.sh` — find code, symbols, or evidence — unified safe search over raw grep/find — expect JSON envelope with `path`, `line`, `context` hits.

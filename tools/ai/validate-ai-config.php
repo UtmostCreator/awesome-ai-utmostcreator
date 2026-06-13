@@ -798,6 +798,10 @@ function validateOpenCodePermissions(array $config, array &$errors): void
         }
     }
 
+    // Native read tools (grep/glob/list) are allowed broadly (P2a): they bypass the
+    // bash matcher entirely and still honor the read secret-denies (.env/*.pem/...),
+    // so allowing them removes approval friction for safe searches without widening
+    // any execution surface. They must not be 'ask'/'deny' downgraded silently here.
     foreach (['grep', 'glob', 'list'] as $tool) {
         $toolPermission = $permission[$tool] ?? null;
         if (!is_array($toolPermission)) {
@@ -805,7 +809,7 @@ function validateOpenCodePermissions(array $config, array &$errors): void
             continue;
         }
 
-        requirePermissionValue($toolPermission, '*', ['ask', 'deny'], "permission.{$tool}.*", $errors);
+        requirePermissionValue($toolPermission, '*', ['allow'], "permission.{$tool}.*", $errors);
     }
 
     $skill = $permission['skill'] ?? null;
