@@ -40,7 +40,15 @@ emit_results() {
         # Phase 3A/3B/3C: additive structured results for content searches.
         # text/docs come from an rg --json stream (accurate column, colon-safe
         # paths); tracked/changed-text/staged-text are line-oriented.
-        case "$mode" in
+        # text mode degraded to git grep (rg absent) is line-oriented, so route
+        # it through the line parser below instead of the rg --json parser. Use a
+        # local routing key so the reported g_mode ("text") is not clobbered.
+        local route_mode="$mode"
+        if [[ "$mode" == "text" && "${g_text_fallback:-0}" == "1" ]]; then
+            route_mode="__text_fallback"
+        fi
+
+        case "$route_mode" in
         text | docs | tests | config | deps)
             root_abs="$(canonical_root "$root")"
             matches_json="$(printf '%s' "$out" | rg_json_to_matches)"
@@ -60,12 +68,12 @@ emit_results() {
                 fi
             fi
             ;;
-        tracked | changed-text | staged-text)
+        tracked | changed-text | staged-text | __text_fallback)
             matches_json="$(printf '%s' "$out" | lines_to_matches)"
             root_abs="$(canonical_root "$root")"
             source_tool="rg"
 
-            if [[ "$mode" == "tracked" ]]; then
+            if [[ "$route_mode" == "tracked" || "$route_mode" == "__text_fallback" ]]; then
                 source_tool="git-grep"
             fi
 

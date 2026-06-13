@@ -461,14 +461,25 @@ expect_status "legacy changed on non-git root -> error" "error"
 rmdir "$nogit" 2>/dev/null || true
 nogit=""
 
-# Missing core tool -> error (not a silent no_matches). Skip cleanly if the
-# tool cannot be hidden from PATH in this environment.
+# Missing rg in `text` mode degrades to git grep (P1b) with a parity warning,
+# instead of erroring — git grep yields the same path:line:text shape. Skip
+# cleanly if rg cannot be hidden from PATH in this environment.
 run_search_without rg text Tenant .
 if [[ "$LAST_RC" -eq 99 ]]; then
-    printf '  PASS missing rg test skipped (rg not isolatable on this PATH)\n'
+    printf '  PASS missing rg (text fallback) test skipped (rg not isolatable on this PATH)\n'
 else
-    expect_status "missing rg -> error" "error"
-    expect_jq "missing rg error names rg" '(.errors|join(" ")) | test("rg|ripgrep"; "i")'
+    expect_status "missing rg text -> degraded ok" "ok"
+    expect_jq "missing rg text warns about git grep fallback" '(.warnings|join(" ")) | test("rg|ripgrep|git grep"; "i")'
+fi
+
+# Missing rg in a SURFACE mode (docs) has no safe fallback (rg glob scoping has
+# no git-grep equivalent), so it must still fail closed with an error.
+run_search_without rg docs Tenant .
+if [[ "$LAST_RC" -eq 99 ]]; then
+    printf '  PASS missing rg (docs no-fallback) test skipped (rg not isolatable on this PATH)\n'
+else
+    expect_status "missing rg docs -> error" "error"
+    expect_jq "missing rg docs error names rg" '(.errors|join(" ")) | test("rg|ripgrep"; "i")'
 fi
 
 run_search_without git diff Foo . --fixed

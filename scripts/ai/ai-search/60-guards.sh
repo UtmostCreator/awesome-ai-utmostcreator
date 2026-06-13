@@ -30,10 +30,25 @@ mode_needs_git() {
     esac
 }
 
+# mode_has_rg_fallback — modes that can degrade to git grep when rg is absent.
+# Only plain `text` qualifies: git grep yields the same path:line:text shape the
+# dispatch already parses. Surface modes (docs/tests/config/deps) rely on rg glob
+# scoping with no safe git-grep equivalent, so they keep the hard guard.
+mode_has_rg_fallback() {
+    [[ "$1" == "text" ]]
+}
+
 # check_tool_guards — fail early when a required core tool is missing.
 check_tool_guards() {
     if mode_needs_rg "$mode" && ! command_exists rg; then
-        fail "error" "required tool 'rg' (ripgrep) not found on PATH; mode '$mode' unavailable"
+        # Allow `text` to degrade to git grep when rg is missing but git is
+        # present (the backend emits a parity warning). Everything else, and the
+        # case where git is also missing, stays a hard error.
+        if mode_has_rg_fallback "$mode" && command_exists git; then
+            :
+        else
+            fail "error" "required tool 'rg' (ripgrep) not found on PATH; mode '$mode' unavailable"
+        fi
     fi
 
     if mode_needs_git "$mode" && ! command_exists git; then
