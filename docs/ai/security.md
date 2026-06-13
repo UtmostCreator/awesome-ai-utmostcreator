@@ -24,6 +24,21 @@ its hooks are provably invoked by that runtime; everything else is documented as
 > Advisory means the policy and guardians exist and document intent, but the kit cannot prove the
 > runtime calls them. Do not claim a surface is "enforced" until its hook invocation is verified.
 
+## Native read tools (grep / glob / list) — allow posture
+
+OpenCode's native `grep`, `glob`, and `list` tools are set to `allow` in `opencode.jsonc`
+(validated by `tools/ai/validate-ai-config.php`). This is intentional and safe:
+
+- They are **read-only** content/file discovery tools that **bypass the `bash` matcher entirely**,
+  so they cannot run pipes, redirects, or chained commands.
+- They still honor the `read` secret-denies (`.env`, `.env.*`, `*.pem`, `*.key`, `*.crt`).
+- Allowing them removes approval friction for safe searches, so agents do not fall back to raw
+  `bash` (`grep file | head`) which breaks on the pipe and wastes turns.
+
+Raw shell equivalents (`grep *`, `rg *`, `cat *`, `sed *`, …) remain `ask` under `permission.bash`,
+and all execution/mutation surfaces are unchanged. The validator enforces `allow` for these three
+native keys so the posture cannot be silently downgraded.
+
 ## Guardian deny coverage
 
 The guardians (`tool-guardian.sh` / `.ps1`, kept at enforced rule parity) block:
