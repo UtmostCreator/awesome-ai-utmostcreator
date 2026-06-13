@@ -89,6 +89,7 @@
         "bash scripts/ai/ai-test-select.sh *": "allow",
         "bash scripts/ai/run-repo-tests.sh": "allow",
         "bash scripts/ai/run-repo-tests.sh *": "allow",
+        "bash scripts/ai/run-test-focused.sh *": "allow",
         "bash scripts/ai/ai-task.sh *": "allow",
         "bash scripts/ai/ai-structured.sh *": "allow",
         "bash scripts/ai/ai-verify.sh *": "ask",

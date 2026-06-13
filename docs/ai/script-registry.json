@@ -29,6 +29,7 @@
     "ai-task": {"source_path":"scripts/ai/ai-task.sh","installed_path":"scripts/ai/ai-task.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "ai-test-select": {"source_path":"scripts/ai/ai-test-select.sh","installed_path":"scripts/ai/ai-test-select.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "run-repo-tests": {"source_path":"scripts/ai/run-repo-tests.sh","installed_path":"scripts/ai/run-repo-tests.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
+    "run-test-focused": {"source_path":"scripts/ai/run-test-focused.sh","installed_path":"scripts/ai/run-test-focused.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"advise"},
     "session-checkpoint": {"source_path":"scripts/ai/session-checkpoint.sh","installed_path":"scripts/ai/session-checkpoint.sh","pack":"scripts-pack","risk":"mutating","autonomy_level":"act_with_approval"},
     "ai-file-freshness": {"source_path":"scripts/ai/ai-file-freshness.sh","installed_path":"scripts/ai/ai-file-freshness.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},
     "ai-install-coverage": {"source_path":"scripts/ai/ai-install-coverage.sh","installed_path":"scripts/ai/ai-install-coverage.sh","pack":"scripts-pack","risk":"read-only","autonomy_level":"observe"},

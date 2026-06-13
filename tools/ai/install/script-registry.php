@@ -91,6 +91,16 @@ function aiInstallerScriptRegistry(): array
             'supports_dry_run' => false,
             'default_args' => [],
         ],
+        'run-test-focused' => [
+            'label' => 'Focused PHPUnit runner (--filter or single file)',
+            'source_path' => 'scripts/ai/run-test-focused.sh',
+            'installed_path' => 'scripts/ai/run-test-focused.sh',
+            'pack' => 'scripts-pack',
+            'required_tools' => ['bash', 'php'],
+            'risk' => 'read-only',
+            'supports_dry_run' => false,
+            'default_args' => [],
+        ],
         'preview-file' => [
             'label' => 'Safe file preview wrapper',
             'source_path' => 'scripts/ai/preview-file.sh',

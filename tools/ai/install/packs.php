@@ -177,6 +177,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/ai-task.sh', 'target' => 'scripts/ai/ai-task.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-test-select.sh', 'target' => 'scripts/ai/ai-test-select.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/run-repo-tests.sh', 'target' => 'scripts/ai/run-repo-tests.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'scripts/ai/run-test-focused.sh', 'target' => 'scripts/ai/run-test-focused.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/session-checkpoint.sh', 'target' => 'scripts/ai/session-checkpoint.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-doc-check.sh', 'target' => 'scripts/ai/ai-doc-check.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/ai-file-freshness.sh', 'target' => 'scripts/ai/ai-file-freshness.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
