@@ -1,6 +1,6 @@
 # Scripts Reference
 
-AI-facing reference for the installed `scripts/ai/*.sh` helper surface. The source of truth is `tools/ai/install/script-registry.php`; `docs/ai/script-registry.json` mirrors installed script paths for validators and adapter allowlists.
+AI-facing reference for the installed `scripts/ai/*.sh` helper surface. The source of truth is `tools/ai/install/script-registry.php`; `docs/ai/script-registry.json` is a generated projection of that registry (run `php tools/ai/ai.php registry:export --check` to verify it is in sync) used by validators and adapter allowlists.
 
 ## Best Practices For AI Help
 

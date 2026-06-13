@@ -157,26 +157,38 @@ migration, no enforcement removed (the floor never changed).
 
 - [x] Discovery rules (`tool:list*`, `tool:describe*`) present in template + rendered. (Step 1, commit `5cced30`)
 - [x] Template/rendered drift resolved (`ai-search-multi.sh` lines). (Step 2, commit `5cced30`)
-- [ ] OQ-1 settled by a LIVE OpenCode run, with evidence in the PR; the shipped
-      run rule (broad or narrowed) matches that evidence. **(Step 3 — still parked)**
+- [x] OQ-1 settled by a LIVE OpenCode run, with evidence in the PR; the shipped
+      run rule (broad or narrowed) matches that evidence. **(Step 3 confirmed 2026-06-13)**
 - [x] No `deny`/`ask` floor weakened; `validate-ai-config.php` green. (Steps 1-2 verified)
-- [ ] Mutating ids still fail closed via the gateway (exit 2 without `--apply`). **(re-confirm at Step 3)**
-- [ ] release-auditor sign-off recorded. **(required before Step 3 merges)**
+- [x] Mutating ids still fail closed via the gateway (exit 2 without `--apply`). **(re-confirmed at Step 3)**
+- [x] release-auditor sign-off recorded. **(conditional yes for scoped P2b only, 2026-06-13)**
 
 ### Progress
 
 - **Steps 1-2 DONE** (commit `5cced30`): discovery rules + drift fix shipped, additive,
   no floor change. Verified: `validate-ai-config` OK, `validate-install-surface --strict`
   0 errors, gateway `tool:list` works, focused + full suite (692) green.
-- **Step 3 `tool:run *` allow ADDED** (commit `f75ffe7`), **OQ-1 live-confirm + release-auditor
-  still pending before merge.** Evidence gathered live this session:
+- **Step 3 `tool:run *` allow ADDED** (commit `f75ffe7`), **OQ-1 live-confirm done;
+  release-auditor conditional sign-off recorded for scoped P2b only.** Evidence gathered live this session:
   - `tool:run ai-search -- --mode tracked "Needle"` → ran, exit 0, argv parsed through `--`.
   - `tool:run ai-search -- --mode text "Needle Two" --fixed` → ran (multi + quoted args).
   - `tool:run ai-edit` (mutating) → `status=blocked`, `reason=approval_required` (fails closed).
-  - **Caveat:** these ran via the `bash "*":"ask"` fallback (auto-approved in this runtime), NOT
-    under an explicit `allow`. So the gateway/shell `--`/quote handling is proven, but the
-    *allow-rule-matches-without-prompt* assertion is NOT yet proven. Confirm in a live OpenCode
-    session that `tool:run` now runs with no prompt, then obtain release-auditor sign-off.
+  - User-provided live OpenCode evidence after commit `f75ffe7`: `tool:list`, `tool:describe`,
+    `tool:run ai-search -- --mode tracked "Needle"`, and `tool:run ai-search -- --mode text
+    "Needle Two" --fixed` wrote their expected generated artifacts with no approval-prompt
+    interruption reported. This settles OQ-1 for the broad `tool:run *` rule in the running
+    OpenCode session.
+  - Local follow-up evidence: `php tools/ai/ai.php tool:run ai-edit` wrote
+    `docs/ai/generated/tool-run.json` with `status=blocked`, `reason=approval_required`,
+    `requires_approval=true`; mutating ids still fail closed without `--apply`.
+  - Release-auditor sign-off (2026-06-13): **conditional yes for scoped P2b only**. The
+    `tool:run *` rule is an additive allow over the existing `bash "*":"ask"` default; no
+    existing `deny` or `ask` rule is weakened. Runtime execution remains bounded by the PHP
+    gateway, which blocks approval-required tools without `--apply` using
+    `reason=approval_required`. OQ-1 is settled by user-provided live OpenCode evidence showing
+    `tool:list`, `tool:describe`, and quoted/`--` `tool:run ai-search` invocations completed
+    without approval-prompt interruption. This sign-off excludes unrelated current
+    unstaged/untracked worktree changes.
 
 ## Follow-up (next slice, not P2b)
 

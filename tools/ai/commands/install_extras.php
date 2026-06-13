@@ -403,7 +403,13 @@ function aiRunScriptById(string $root, string $scriptId, array $args, ?array $se
     $requiredTools = is_array($entry['required_tools'] ?? null) ? $entry['required_tools'] : [];
     $missing = aiInstallerMissingTools($requiredTools);
     if ($missing !== []) {
-        return ['exit' => 1, 'error' => 'missing required tools: ' . implode(', ', $missing), 'missing_tools' => $missing];
+        return [
+            'exit' => 1,
+            'reason' => 'missing_required_tool',
+            'safe_next_step' => 'Install the missing tool(s) (' . implode(', ', $missing) . ') or pick a tool that does not need them.',
+            'error' => 'missing required tools: ' . implode(', ', $missing),
+            'missing_tools' => $missing,
+        ];
     }
 
     $optionalTools = is_array($entry['optional_tools'] ?? null) ? $entry['optional_tools'] : [];
@@ -475,18 +481,57 @@ function aiRunScriptCommand(string $root, array $args): int
  * @param array<string,mixed> $entry
  * @return array<string,mixed>
  */
-function aiToolGatewayDescriptor(string $id, array $entry): array
+/**
+ * P3.6 — Canonical machine-readable gateway reason codes.
+ *
+ * Every non-ok gateway response carries one of these in `reason` plus a
+ * `safe_next_step`, so agents can act deterministically ("stop, do not retry")
+ * instead of parsing free-text error strings.
+ *
+ * @return list<string>
+ */
+function aiToolGatewayReasonCodes(): array
 {
     return [
-        'id' => $id,
-        'label' => $entry['label'] ?? $id,
-        'pack' => $entry['pack'] ?? 'unknown',
-        'risk' => $entry['risk'] ?? 'read-only',
-        'profiles' => aiInstallerScriptProfiles($entry),
-        'requires_approval' => aiInstallerScriptRequiresApproval($entry),
-        'required_tools' => is_array($entry['required_tools'] ?? null) ? array_values($entry['required_tools']) : [],
-        'supports_dry_run' => ($entry['supports_dry_run'] ?? false) === true,
+        'unknown_id',
+        'unknown_profile',
+        'profile_mismatch',
+        'missing_required_tool',
+        'approval_required',
+        'mutating_requires_apply',
+        'unsupported_mode',
+        'external_directory_blocked',
+        'secret_path_blocked',
+        'timeout',
     ];
+}
+
+/**
+ * Build a standardized blocked/failed gateway payload.
+ *
+ * @param array<string,mixed> $extra
+ * @return array<string,mixed>
+ */
+function aiToolGatewayReasonPayload(string $reason, string $safeNextStep, array $extra = []): array
+{
+    return array_merge([
+        'status' => $reason === 'approval_required' ? 'blocked' : 'failed',
+        'reason' => $reason,
+        'safe_next_step' => $safeNextStep,
+    ], $extra);
+}
+
+function aiToolGatewayDescriptor(string $id, array $entry): array
+{
+    // P3.0: build on the single shared normalizer so the gateway view and the
+    // registry:export projection never drift. The gateway adds its own 'label'
+    // and keeps a stable key set for existing consumers/tests.
+    $normalized = aiInstallerNormalizeScriptEntry($id, $entry);
+
+    return array_merge(
+        ['id' => $id, 'label' => $entry['label'] ?? $id],
+        $normalized
+    );
 }
 
 /**
@@ -521,8 +566,12 @@ function aiRunToolListCommand(string $root, array $args): int
     $profile = aiToolGatewayRequestedProfile($args);
     $validProfiles = aiInstallerScriptProfileNames();
     if ($profile !== null && !in_array($profile, $validProfiles, true)) {
-        $data = ['error' => 'unknown profile: ' . $profile, 'valid_profiles' => $validProfiles];
-        $written = aiCliWriteArtifact($root, 'tool-list', 'php tools/ai/ai.php tool:list', $data, 'failed', null, 'Use one of the valid profiles.');
+        $data = aiToolGatewayReasonPayload(
+            'unknown_profile',
+            'Use one of the valid profiles: ' . implode(', ', $validProfiles),
+            ['error' => 'unknown profile: ' . $profile, 'profile' => $profile, 'valid_profiles' => $validProfiles]
+        );
+        $written = aiCliWriteArtifact($root, 'tool-list', 'php tools/ai/ai.php tool:list', $data, 'failed', null, $data['safe_next_step']);
         fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 1;
     }
@@ -559,8 +608,12 @@ function aiRunToolDescribeCommand(string $root, array $args): int
 
     $registry = aiInstallerScriptRegistry();
     if (!isset($registry[$toolId])) {
-        $data = ['error' => 'unknown tool id: ' . $toolId];
-        $written = aiCliWriteArtifact($root, 'tool-describe', 'php tools/ai/ai.php tool:describe ' . $toolId, $data, 'failed', null, 'List tools with: php tools/ai/ai.php tool:list');
+        $data = aiToolGatewayReasonPayload(
+            'unknown_id',
+            'List tools with: php tools/ai/ai.php tool:list',
+            ['error' => 'unknown tool id: ' . $toolId, 'tool' => $toolId]
+        );
+        $written = aiCliWriteArtifact($root, 'tool-describe', 'php tools/ai/ai.php tool:describe ' . $toolId, $data, 'failed', null, $data['safe_next_step']);
         fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 1;
     }
@@ -592,8 +645,12 @@ function aiRunToolRunCommand(string $root, array $args): int
 
     $registry = aiInstallerScriptRegistry();
     if (!isset($registry[$toolId])) {
-        $data = ['error' => 'unknown tool id: ' . $toolId];
-        $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, 'List tools with: php tools/ai/ai.php tool:list');
+        $data = aiToolGatewayReasonPayload(
+            'unknown_id',
+            'List tools with: php tools/ai/ai.php tool:list',
+            ['error' => 'unknown tool id: ' . $toolId, 'tool' => $toolId]
+        );
+        $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, $data['safe_next_step']);
         fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 1;
     }
@@ -605,14 +662,22 @@ function aiRunToolRunCommand(string $root, array $args): int
     $validProfiles = aiInstallerScriptProfileNames();
     if ($profile !== null) {
         if (!in_array($profile, $validProfiles, true)) {
-            $data = ['error' => 'unknown profile: ' . $profile, 'valid_profiles' => $validProfiles];
-            $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, 'Use one of the valid profiles.');
+            $data = aiToolGatewayReasonPayload(
+                'unknown_profile',
+                'Use one of the valid profiles: ' . implode(', ', $validProfiles),
+                ['error' => 'unknown profile: ' . $profile, 'profile' => $profile, 'valid_profiles' => $validProfiles]
+            );
+            $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, $data['safe_next_step']);
             fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
             return 1;
         }
         if (!in_array($profile, $descriptor['profiles'], true)) {
-            $data = ['error' => 'tool not available to profile', 'tool' => $toolId, 'profile' => $profile, 'tool_profiles' => $descriptor['profiles']];
-            $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, 'Use a profile that includes this tool, or pick an allowed tool.');
+            $data = aiToolGatewayReasonPayload(
+                'profile_mismatch',
+                'Use a profile that includes this tool (' . implode(', ', $descriptor['profiles']) . '), or pick an allowed tool.',
+                ['error' => 'tool not available to profile', 'tool' => $toolId, 'profile' => $profile, 'tool_profiles' => $descriptor['profiles']]
+            );
+            $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'failed', null, $data['safe_next_step']);
             fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
             return 1;
         }
@@ -621,13 +686,12 @@ function aiRunToolRunCommand(string $root, array $args): int
     // Approval gate: an approval-required tool must not run without explicit --apply.
     $wantsApply = in_array('--apply', $args, true);
     if ($descriptor['requires_approval'] && !$wantsApply) {
-        $data = [
-            'status' => 'approval_required',
-            'tool' => $toolId,
-            'requires_approval' => true,
-            'hint' => 'Re-run with --apply after human approval to execute this tool.',
-        ];
-        $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'blocked', null, 'Approval required: re-run with --apply once approved.');
+        $data = aiToolGatewayReasonPayload(
+            'approval_required',
+            'Stop and do not retry. Re-run with --apply only after explicit human approval.',
+            ['tool' => $toolId, 'requires_approval' => true]
+        );
+        $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'blocked', null, $data['safe_next_step']);
         fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
         return 2;
     }
@@ -637,6 +701,79 @@ function aiRunToolRunCommand(string $root, array $args): int
     $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $run, $status, null, $status === 'ok' ? 'Tool run completed.' : 'Fix tool errors and retry.');
     fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return $status === 'ok' ? 0 : 1;
+}
+
+/**
+ * P3.1 — registry:export — project the canonical PHP registry into the generated
+ * docs/ai/script-registry.json mirror.
+ *
+ *   registry:export                      print the generated JSON to stdout
+ *   registry:export --output PATH        write the generated JSON to PATH
+ *   registry:export --check [PATH]       exit non-zero if PATH differs from the
+ *                                        freshly generated projection (CI drift gate);
+ *                                        PATH defaults to docs/ai/script-registry.json
+ *
+ * The JSON is byte-stable (fixed schema_version, stable key order, trailing
+ * newline) so --check is deterministic.
+ */
+function aiRegistryExportAbsolutePath(string $root, string $relative): string
+{
+    return $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, ltrim($relative, '/\\'));
+}
+
+function aiRunRegistryExportCommand(string $root, array $args): int
+{
+    $expected = aiInstallerRenderScriptRegistryJson();
+    $defaultRel = 'docs/ai/script-registry.json';
+
+    $check = in_array('--check', $args, true);
+    $outputArg = aiParseArg($args, 'output');
+    $checkArg = aiParseArg($args, 'check');
+
+    if ($check) {
+        // Allow either `--check PATH`, `--check=PATH`, or a bare positional path.
+        $relTarget = $checkArg;
+        if ($relTarget === null) {
+            foreach ($args as $arg) {
+                if ($arg !== '' && $arg[0] !== '-') {
+                    $relTarget = $arg;
+                    break;
+                }
+            }
+        }
+        $relTarget ??= $defaultRel;
+        $absTarget = aiRegistryExportAbsolutePath($root, $relTarget);
+
+        $actual = is_file($absTarget) ? (string) file_get_contents($absTarget) : null;
+        $drift = $actual !== $expected;
+        $status = $drift ? 'failed' : 'ok';
+        $data = [
+            'status' => $status,
+            'mode' => 'check',
+            'target' => $relTarget,
+            'exists' => $actual !== null,
+            'drift' => $drift,
+        ];
+        $next = $drift
+            ? 'Run: php tools/ai/ai.php registry:export --output ' . $relTarget
+            : 'Generated registry projection is up to date.';
+        $written = aiCliWriteArtifact($root, 'registry-export', 'php tools/ai/ai.php registry:export --check ' . $relTarget, $data, $status, null, $next);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return $drift ? 1 : 0;
+    }
+
+    if ($outputArg !== null && $outputArg !== '') {
+        $absTarget = aiRegistryExportAbsolutePath($root, $outputArg);
+        file_put_contents($absTarget, $expected);
+        $data = ['status' => 'ok', 'mode' => 'write', 'target' => $outputArg, 'bytes' => strlen($expected)];
+        $written = aiCliWriteArtifact($root, 'registry-export', 'php tools/ai/ai.php registry:export --output ' . $outputArg, $data, 'ok', null, 'Run registry:export --check in CI to prevent drift.');
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return 0;
+    }
+
+    // Default: print the projection to stdout (safe, read-only).
+    fwrite(STDOUT, $expected);
+    return 0;
 }
 
 function aiRunInstallDocs(string $root, array $args): int

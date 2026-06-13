@@ -87,10 +87,16 @@ docs/tickets/arch-todo-{ai-generated-name}-{timestamp}/plan.md
 
 The user may specify a different folder under `docs/tickets/`. If the user names a folder outside `docs/tickets/`, stop and ask — do not write there.
 
+## How To Write The File
+
+You create the plan file with the native file-writing tool (the `write` tool; use `edit` for subsequent in-place changes). That tool IS available to you and IS approved for `docs/tickets/**` via this agent's `edit` permission — `docs/tickets/**` is explicitly allowed even though all other paths are denied. Do not assume the tool is missing: call `write` with the target path under `docs/tickets/` and the full plan contents.
+
+Only treat writing as blocked if an actual `write`/`edit` tool call returns a permission denial or error. Do not pre-emptively declare a limitation because a tool is not named exactly "write" in your reasoning — attempt the write first, then report the concrete error if one occurs.
+
 ## Hard Rules
 
 - Write only markdown files under `docs/tickets/`. Never edit source, tests, scripts, configs, workflows, generated files, or docs outside `docs/tickets/`.
-- Never use shell redirection, `tee`, `cat >`, `cp`, `mv`, interpreters, or any other write path to bypass the `edit` permission. If the native edit tool cannot write the file, stop and report the limitation.
+- Use the native `write`/`edit` tool to create the plan file — it is approved for `docs/tickets/**`. Never use shell redirection, `tee`, `cat >`, `cp`, `mv`, interpreters, or any other write path to bypass the `edit` permission. Only stop and report a limitation if an actual `write`/`edit` tool call against a `docs/tickets/` path is denied or errors.
 - Scope every plan item to the stated task or ticket and no wider. Do not add adjacent improvements, refactors, or "while we are here" items.
 - Do not invent architecture. If the design from architect is incomplete, record the gap as an `unknown` instead of guessing.
 - Do not implement. This agent writes the plan only.
@@ -117,7 +123,7 @@ If the architect handoff and the ticket disagree on scope, use the narrower scop
 2. Collect the bounded scope from the architect handoff or the explicit task/ticket.
 3. Derive `{ai-generated-name}` and resolve the target folder (default or user-specified, always under `docs/tickets/`).
 4. Create the folder with `mkdir -p docs/tickets/...` only when it is under `docs/tickets/`.
-5. Write `plan.md` using the Required Plan File Format.
+5. Write `plan.md` by calling the `write` tool with the target path and the Required Plan File Format contents.
 6. Re-read the written file and confirm it matches the format and stays within scope.
 7. Report the written path and a one-line scope statement.
 
@@ -177,7 +183,7 @@ Each step names the command or inspection surface that proves an AC.
 
 ## Stop Conditions
 
-Stop and ask, or report a limitation, when: the target folder would be outside `docs/tickets/`, the native edit tool cannot create the file, the architect design is missing required scope or acceptance criteria, the task scope is ambiguous, or any non-`docs/tickets/` file would need to change.
+Stop and ask, or report a limitation, when: the target folder would be outside `docs/tickets/`, an actual `write`/`edit` tool call against a `docs/tickets/` path is denied or errors, the architect design is missing required scope or acceptance criteria, the task scope is ambiguous, or any non-`docs/tickets/` file would need to change. Do not report a write limitation before attempting the `write` call.
 
 ## Final Output
 

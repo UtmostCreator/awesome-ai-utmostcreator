@@ -42,13 +42,50 @@
         },
         "risk": {
           "type": "string",
-          "enum": ["read-only", "mutating", "low", "medium", "high"],
-          "description": "Risk class controlling approval boundary."
+          "enum": ["read-only", "mutating"],
+          "description": "Mutation class controlling the approval boundary. Severity lives in 'tier'."
+        },
+        "tier": {
+          "type": "string",
+          "enum": ["tier0", "tier1", "tier2", "tier3", "tier4"],
+          "description": "Optional risk-severity tier. Absent on simple tier-0 wrappers."
         },
         "autonomy_level": {
           "type": "string",
           "enum": ["observe", "advise", "act_with_approval", "act_autonomously"],
           "description": "Maximum default autonomy level for the script. See docs/ai/capabilities/authorization-and-tool-governance/CAPABILITY.md."
+        },
+        "profiles": {
+          "type": "array",
+          "description": "Derived permission profiles that may see/run the script.",
+          "items": {
+            "type": "string",
+            "enum": ["readonly", "verify", "impl"]
+          }
+        },
+        "required_tools": {
+          "type": "array",
+          "description": "Tools the script always needs to launch safely.",
+          "items": { "type": "string" }
+        },
+        "optional_tools": {
+          "type": "array",
+          "description": "Tools only some modes need; missing ones degrade with warnings, not failure.",
+          "items": { "type": "string" }
+        },
+        "writes_paths": {
+          "type": "array",
+          "description": "Repo-relative or declared evidence/generated paths the script may write.",
+          "items": { "type": "string" }
+        },
+        "introspection": {
+          "type": "object",
+          "description": "Static introspection contract for the script.",
+          "properties": {
+            "introspect_flag": { "type": "string" },
+            "help_summary": { "type": "boolean" },
+            "tool": { "type": "string" }
+          }
         },
         "mutates_state": {
           "type": "boolean"
