@@ -168,8 +168,15 @@ migration, no enforcement removed (the floor never changed).
 - **Steps 1-2 DONE** (commit `5cced30`): discovery rules + drift fix shipped, additive,
   no floor change. Verified: `validate-ai-config` OK, `validate-install-surface --strict`
   0 errors, gateway `tool:list` works, focused + full suite (692) green.
-- **Step 3 (execution rule `tool:run *`) PARKED**: requires the live OQ-1 OpenCode test
-  and release-auditor sign-off (posture change). Do not add it without that evidence.
+- **Step 3 `tool:run *` allow ADDED** (commit `f75ffe7`), **OQ-1 live-confirm + release-auditor
+  still pending before merge.** Evidence gathered live this session:
+  - `tool:run ai-search -- --mode tracked "Needle"` → ran, exit 0, argv parsed through `--`.
+  - `tool:run ai-search -- --mode text "Needle Two" --fixed` → ran (multi + quoted args).
+  - `tool:run ai-edit` (mutating) → `status=blocked`, `reason=approval_required` (fails closed).
+  - **Caveat:** these ran via the `bash "*":"ask"` fallback (auto-approved in this runtime), NOT
+    under an explicit `allow`. So the gateway/shell `--`/quote handling is proven, but the
+    *allow-rule-matches-without-prompt* assertion is NOT yet proven. Confirm in a live OpenCode
+    session that `tool:run` now runs with no prompt, then obtain release-auditor sign-off.
 
 ## Follow-up (next slice, not P2b)
 
