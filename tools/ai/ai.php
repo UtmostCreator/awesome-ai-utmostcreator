@@ -81,6 +81,9 @@ Commands:
   hooks          Hook wiring and status helpers (compatibility surface)
   toolchain      Check/install-plan/apply safe AI toolchain dependencies
   run-script     Run approved scripts-pack helper scripts by registry id
+  tool:list      List gateway tools, optionally filtered by --profile=<role>
+  tool:describe  Describe one gateway tool by registry id
+  tool:run       Run a gateway tool by id (profile- and approval-aware)
   install-docs   Generate or check install instructions and catalog docs
   advisor        Project intelligence advisor pipeline commands
   descriptors    List relocated .ai/ kit descriptors or copy a safe one out to root
@@ -127,6 +130,9 @@ Examples:
   php tools/ai/ai.php packs --validate
   php tools/ai/ai.php toolchain --with repomix,scc --install-plan
   php tools/ai/ai.php run-script --list
+  php tools/ai/ai.php tool:list --profile=architect
+  php tools/ai/ai.php tool:describe ai-search
+  php tools/ai/ai.php tool:run ai-search -- --mode text "Needle"
   php tools/ai/ai.php install-docs --check
   php tools/ai/ai.php advisor --all
   php tools/ai/ai.php descriptors --list
@@ -242,6 +248,12 @@ try {
             exit(aiRunToolchain($root, $args));
         case 'run-script':
             exit(aiRunScriptCommand($root, $args));
+        case 'tool:list':
+            exit(aiRunToolListCommand($root, $args));
+        case 'tool:describe':
+            exit(aiRunToolDescribeCommand($root, $args));
+        case 'tool:run':
+            exit(aiRunToolRunCommand($root, $args));
         case 'install-docs':
             exit(aiRunInstallDocs($root, $args));
         case 'advisor':

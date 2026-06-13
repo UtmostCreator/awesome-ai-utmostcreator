@@ -12,6 +12,16 @@ if [[ "${1:-}" == "--introspect" ]]; then
     fi
 fi
 
+# Early --help/-h guard: emit this script's human-readable contract (the static
+# introspector's compact --format=help view) and exit before installing anything.
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    _ai_help_here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    _ai_help_tool="$_ai_help_here/../../tools/ai/sh-introspect.php"
+    if [[ -f "$_ai_help_tool" ]] && command -v "${PHP_BIN:-php}" >/dev/null 2>&1; then
+        exec "${PHP_BIN:-php}" "$_ai_help_tool" --format=help "${BASH_SOURCE[0]}"
+    fi
+fi
+
 # Installs mandatory CLI tools used by the repository's AI scripts.
 
 DRY_RUN=0

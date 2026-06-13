@@ -29,11 +29,13 @@ skip_test() {
 
 printf 'git-branch-origin.sh\n'
 
-# --help works and documents the tool
+# --help works and documents the tool. --help now routes through the uniform
+# sh-introspect --format=help view (see `integrate introspect.md`), which prints
+# the script name, usage, and its --field/--json params parsed from source.
 test_help() {
     local out
     out="$("$BASH_BIN" "$SCRIPT" --help 2>&1 || true)"
-    [[ "$out" == *"branched off"* || "$out" == *"branch the current branch"* ]]
+    [[ "$out" == *"git-branch-origin.sh"* && "$out" == *"--field"* ]]
 }
 run_test "--help prints usage" test_help
 

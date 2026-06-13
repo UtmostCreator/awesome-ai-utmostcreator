@@ -29,6 +29,7 @@ class ShHelpTest extends TestCase
     private static string $phpBin;
     private static string $tool;
     private static string $target;
+    private static string $script;
 
     public static function setUpBeforeClass(): void
     {
@@ -39,7 +40,13 @@ class ShHelpTest extends TestCase
         self::$repoRoot = $root;
         self::$phpBin = (string) PHP_BINARY;
         self::$tool = 'tools/ai/sh-introspect.php';
+        // ai-search.sh is a thin facade that sources its logic from
+        // scripts/ai/ai-search/NN-*.sh. sh-introspect.php inlines those
+        // statically-resolvable sourced modules, so introspecting the
+        // entrypoint yields the full aggregated contract. $script is the same
+        // entrypoint (the runtime --help / -h wrapper).
         self::$target = 'scripts/ai/ai-search.sh';
+        self::$script = 'scripts/ai/ai-search.sh';
     }
 
     /**
@@ -88,7 +95,7 @@ class ShHelpTest extends TestCase
     /** Run the script wrapper directly (e.g. `--help`/`--introspect`). */
     private function runScript(string $arg, array $envExtra = []): array
     {
-        $cmd = implode(' ', array_map('escapeshellarg', ['bash', self::$target, $arg]));
+        $cmd = implode(' ', array_map('escapeshellarg', ['bash', self::$script, $arg]));
         $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
         $env = [
             'HOME'            => sys_get_temp_dir(),
@@ -216,9 +223,11 @@ class ShHelpTest extends TestCase
             if (!$inModes) {
                 continue;
             }
-            // A mode row: "    name  description" (skip "  family:" sub-heads and
-            // the deprecated summary line).
-            if (preg_match('/^\s{4,}([a-z][a-z0-9-]*)(\s|$)/', $line, $m)) {
+            // A mode row: "    name  description" — the name sits at exactly the
+            // 4-space mode indent. Wrapped description continuation lines are
+            // indented deeper (aligned under the description column) and are
+            // skipped here, as are "  family:" sub-heads.
+            if (preg_match('/^\s{4}(?! )([a-z][a-z0-9-]*)(\s|$)/', $line, $m)) {
                 $name = $m[1];
                 if ($name === 'changed' || $name === 'staged') {
                     // deprecated summary line lists these space-joined; still valid.
@@ -240,7 +249,7 @@ class ShHelpTest extends TestCase
 
         $inParams = false;
         foreach (preg_split('/\R/', $help) ?: [] as $line) {
-            if (preg_match('/^Params:\s*$/', $line)) {
+            if (preg_match('/^Flags:\s*$/', $line)) {
                 $inParams = true;
                 continue;
             }
@@ -357,7 +366,7 @@ class ShHelpTest extends TestCase
         $seen = [];
         $inParams = false;
         foreach (preg_split('/\R/', $help) ?: [] as $line) {
-            if (preg_match('/^Params:\s*$/', $line)) {
+            if (preg_match('/^Flags:\s*$/', $line)) {
                 $inParams = true;
                 continue;
             }

@@ -19,7 +19,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 
 ## Highlights
 
-- `package / core-template` - 27
+- `package / core-template` - 28
 - `package / foundation-doc` - 6
 - `package / github-copilot-instruction-template` - 22
 - `package / opencode-command-template` - 4
@@ -38,13 +38,13 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / cli` - 1
 - `root / exporter` - 1
 - `root / generator` - 1
-- `root / github-copilot-agent` - 21
+- `root / github-copilot-agent` - 22
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 18
-- `root / github-copilot-skill` - 18
-- `root / opencode-agent` - 12
+- `root / github-copilot-skill` - 19
+- `root / opencode-agent` - 18
 - `root / opencode-command` - 20
-- `root / opencode-skill` - 20
+- `root / opencode-skill` - 21
 - `root / php-reference` - 3
 - `root / root-doc` - 19
 - `root / schema` - 1
@@ -112,6 +112,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-agent`|Agent Creator Supervisor|`.github/agents/agent-creator-supervisor.agent.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
 |`github-copilot-agent`|Agent Creator|`.github/agents/agent-creator.agent.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
 |`github-copilot-agent`|Architect|`.github/agents/architect.agent.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
+|`github-copilot-agent`|Architecture Plan Writer|`.github/agents/architecture-plan-writer.agent.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`github-copilot-agent`|Bugfix|`.github/agents/bugfix.agent.md`|Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal|
 |`github-copilot-agent`|Build Config|`.github/agents/build-config.agent.md`|Update build, packaging, or verification configuration in awesome-ai-utmostcreator|
 |`github-copilot-agent`|Config Maintainer|`.github/agents/config-maintainer.agent.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
@@ -167,6 +168,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|script-inventory|`.github/prompts/script-inventory.prompt.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-prompt`|search-evidence|`.github/prompts/search-evidence.prompt.md`|Collect repository evidence using ai-search|
 |`github-copilot-prompt`|verify-change|`.github/prompts/verify-change.prompt.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
+|`github-copilot-skill`|architecture-plan-writer|`.github/skills/architecture-plan-writer/SKILL.md`|Use when an architect design or a bounded task/ticket must be persisted as a Todo architecture plan markdown file under docs/tickets, strictly scoped to the task with steps, things-to-avoid, and acceptance criteria|
 |`github-copilot-skill`|architecture-plan|`.github/skills/architecture-plan/SKILL.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`github-copilot-skill`|bug-regression|`.github/skills/bug-regression/SKILL.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
 |`github-copilot-skill`|dependency-upgrade|`.github/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
@@ -185,7 +187,13 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|script-inventory|`.github/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-skill`|search-evidence|`.github/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`github-copilot-skill`|verify-change|`.github/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
+|`opencode-agent`|agent-creator-runtime-guardian|`.opencode/agents/agent-creator-runtime-guardian.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator|
+|`opencode-agent`|agent-creator-semantic-verifier|`.opencode/agents/agent-creator-semantic-verifier.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator|
+|`opencode-agent`|agent-creator-static-validator|`.opencode/agents/agent-creator-static-validator.md`|Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors|
+|`opencode-agent`|agent-creator-supervisor|`.opencode/agents/agent-creator-supervisor.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
+|`opencode-agent`|agent-creator|`.opencode/agents/agent-creator.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
 |`opencode-agent`|architect|`.opencode/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
+|`opencode-agent`|architecture-plan-writer|`.opencode/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`opencode-agent`|bootstrapper|`.opencode/agents/bootstrapper.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|
 |`opencode-agent`|config-maintainer|`.opencode/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`opencode-agent`|implementer|`.opencode/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
@@ -219,6 +227,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|verify|`.opencode/commands/verify.md`|Compatibility command that runs the verification workflow; prefer the verify-change skill for reusable guidance|
 |`opencode-skill`|ai-scripts|`.opencode/skills/ai-scripts/SKILL.md`|Use registered scripts with risk-based approvals and evidence.|
 |`opencode-skill`|ai-search|`.opencode/skills/ai-search/SKILL.md`|Use ai-search to collect bounded repository evidence.|
+|`opencode-skill`|architecture-plan-writer|`.opencode/skills/architecture-plan-writer/SKILL.md`|Use when an architect design or a bounded task/ticket must be persisted as a Todo architecture plan markdown file under docs/tickets, strictly scoped to the task with steps, things-to-avoid, and acceptance criteria|
 |`opencode-skill`|architecture-plan|`.opencode/skills/architecture-plan/SKILL.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`opencode-skill`|bug-regression|`.opencode/skills/bug-regression/SKILL.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
 |`opencode-skill`|dependency-upgrade|`.opencode/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
@@ -274,6 +283,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`core-template`|<PROJECT_NAME> - Repository Instructions|`packages/ai-universal-rules/templates/core/AGENTS.template.md`|<!-- GENERATED — DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/AGENTS.template.md. Edit the template or .ai/project.yml, not this file. -->|
 |`core-template`|Post-Install Checklist|`packages/ai-universal-rules/templates/core/POST-INSTALL.template.md`|Your AI workflow kit was installed successfully. **Complete every item below before running write-capable AI agents.**|
 |`core-template`|Architect Agent|`packages/ai-universal-rules/templates/core/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
+|`core-template`|Architecture Plan Writer Agent|`packages/ai-universal-rules/templates/core/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`core-template`|Bootstrapper Agent|`packages/ai-universal-rules/templates/core/agents/bootstrapper.md`|Use when installing, re-installing, or validating the AI kit from dry-run to backup to apply to full verification|
 |`core-template`|Config Maintainer Agent|`packages/ai-universal-rules/templates/core/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`core-template`|Implementer Agent|`packages/ai-universal-rules/templates/core/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|

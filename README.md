@@ -1,271 +1,148 @@
 # awesome-ai-utmostcreator
 
-**A ready-to-use, AI-tool-agnostic workflow kit designed to be installed into other projects.**
+A ready-to-use **AI workflow** starter kit you install into your own project so AI tools work
+consistently and safely from day one.
 
-This repository is not an application — it is a **source kit**. It provides templates, installers, validators, generators, and scripts that you install into your own repositories to get a complete AI-assisted development workflow out of the box. Currently supports **GitHub Copilot** and **OpenCode**; more AI surfaces welcome via pull request.
+Think of it as a starter kit you install into your own project — not an app you run on its own.
+It copies tested templates, helper scripts, and safety rules into your repository so AI tools
+like GitHub Copilot, OpenCode, and Claude have clear, shared rules to follow.
 
-## Why This Exists
+## At a Glance
 
-Setting up AI-assisted workflows (instructions, agents, prompts, skills, scripts, validation, policy hooks) from scratch in every project is tedious and error-prone. This kit solves that by providing:
+| Item                         | Answer                                                        |
+| ---------------------------- | ------------------------------------------------------------- |
+| What is this?                | AI workflow kit for software repositories                     |
+| Where do I run it?           | From this repo, pointed at another repo (the target)          |
+| What does it support?        | GitHub Copilot, OpenCode, Claude (`AGENTS.md` / `CLAUDE.md`)  |
+| Does it edit code by itself? | No — it scaffolds, prepares, and validates; you stay in control |
+| Risk level                   | Low by default (backs up and verifies); no guaranteed safety  |
+| Main command                 | `bash install-ai-kit.sh /path/to/your-project`               |
 
-- **One installer** that copies tested, validated templates into your project
-- **Multi-surface support** — GitHub Copilot (VS Code, CLI, GitHub.com) and OpenCode today, designed for more
-- **Governance and safety** — policy hooks, tool allowlists, approval boundaries, and secret scanning
-- **Verification tooling** — validators that catch configuration drift, stale docs, and missing files
-- **Context packing** — scripts that prepare your codebase for AI consumption within token budgets
+## What It Does
+
+It adds ready-made **configuration** for AI tools (sensible shared rules), safety rules so tools ask
+before risky actions, helper scripts that keep the setup correct, and tooling that prepares your
+files for AI tools — all from one source supporting GitHub Copilot, OpenCode, and Claude.
+
+## How It Works
+
+This repository is the **source kit**. You run its installer and point it at a separate target
+project — the kit is never the project you are building.
+
+```text
+  this source repo            your project
+  (the kit)                   (the target)
+  ┌──────────────┐  install   ┌──────────────┐    configures
+  │ templates    │ ─────────▶ │ AI rules     │ ─────────────▶  your AI tools
+  │ scripts      │            │ scripts      │                 (Copilot /
+  │ safety rules │            │ safety rules │                  OpenCode /
+  └──────────────┘            └──────────────┘                  Claude)
+```
+
+## What This Is Not
+
+- It is **not** an AI model, an IDE, or a chatbot.
+- It does **not** replace GitHub Copilot, OpenCode, or Claude — it configures them.
+- It does **not** make risky, automatic changes to your code on its own.
+- It is **not** a universal tool that builds and ships software for you. It gives ideas, scaffolds,
+  prepares, validates, and does routine work so you can **maintain sanity** — the result is in your
+  hands, and human review stays the final authority.
 
 ## Quick Start
 
-From a local clone of this repository, run the root installer and point it at your target project:
+From a local clone of this repository, run the installer and point it at your target project:
 
 ```bash
 bash install-ai-kit.sh /path/to/your-project
-# or with explicit project name:
-bash install-ai-kit.sh /path/to/your-project "your-project-name"
-# reinstall / push updated templates — add --force to overwrite existing managed files:
-bash install-ai-kit.sh /path/to/your-project "your-project-name" --force
 ```
 
-The script validates this source checkout first, then runs the full install with backup and post-install validation. It then automatically runs repomix context packing and the AI workflow advisor. It does not clone or clean up another checkout for you.
+That validates this source checkout, installs into your project with a backup, and runs
+verification. For an explicit project name, reinstalls with `--force`, runtime selection
+(Copilot-only / OpenCode-only / Claude-via-base), backups and rollback, and the advanced cross-repo
+sequence, see the [installation guide](readme-install.md). The installed surfaces are listed in
+[What Gets Added](#what-gets-added-to-your-project) below.
 
-> **When to use `--force`**: By default the installer skips files that already exist in the target. Pass `--force` on reinstalls to push updated templates into the target. Core base policy files are still protected unless you separately pass `--allow-core-overwrite`.
-
-**One-time workstation tools (run once, not per project):**
+## After Installing — Do These (recommended)
 
 ```bash
-# From a clone of this repo:
-bash scripts/ai/install-mandatory-tools.sh   # rg, fd, jq, scc, etc.
-npm install -g repomix                        # context packing
+php tools/ai/ai.php verify                # validate the install
+php tools/ai/ai.php placeholders --fail   # check no placeholders are left
 ```
 
-**Manual step-by-step** (if you prefer calling the PHP installer directly):
+Then, in the installed project: run the `post-install-setup` agent/command to update all required
+files; build `docs/ai/project-context.md` yourself or with the `researcher` agent; and put
+cross-project logic in the shared file `docs/ai/shared/project-interaction.md` (per-project
+collaboration defaults go in `docs/ai/project/project-interaction.md`). Custom agents and rules for
+your setup are only available if you opt in to the optional agent-creator pack.
 
-```bash
-# 1. Install prerequisites
-bash scripts/ai/install-mandatory-tools.sh --dry-run
+## What It Ships With — and Why
 
-# 2. Check prerequisites
-php tools/ai/ai.php preflight
+- **AI agents and recommended order** — research → plan → implement → review → release. See the agent
+  roster and purpose in [docs/ai/agents.md](docs/ai/agents.md) and the chaining order in
+  [docs/ai/workflow.md](docs/ai/workflow.md). Chaining agents this way gives the best results.
+- **Capabilities** — load-on-demand reusable workflows (bug-regression, release-safety,
+  review-diff, and more). See [docs/ai/capabilities/README.md](docs/ai/capabilities/README.md).
+- **Gotchas** — each capability ships a `gotchas.md` capturing recurring traps and the safe
+  response, kept next to the workflow. See [docs/ai/ai-file-standards.md](docs/ai/ai-file-standards.md).
+- **Mentor mode (L0–L5)** — help is given in escalating layers so you learn instead of just
+  receiving answers: **L0** frame, **L1** name the concept, **L2** point to the file/doc, **L3**
+  scaffold, **L4** worked-adjacent example, **L5** direct solution; a struggle gate and teach-it-back
+  step reinforce retention. See
+  [docs/ai/capabilities/mentor-mode/CAPABILITY.md](docs/ai/capabilities/mentor-mode/CAPABILITY.md).
+- **AI builder (agent-creator)** — an opt-in pipeline (supervisor → creator → validators) plus the
+  architecture-plan-writer to scaffold new agents safely. It is **optional**
+  (`optional-agents-opencode-pack` / `optional-agents-copilot-pack`, removable with `--without ...`).
+  See [docs/ai/agents.md](docs/ai/agents.md).
 
-# 3. Preview installation into your project
-php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime both --dry-run
+## Safety and Scope
 
-# 4. Apply installation
-php tools/ai/install-ai-kit.php \
-  --target /path/to/your-project \
-  --profile full-governance \
-  --runtime both \
-  --project-name "your-project-name" \
-  --backup \
-  --verify-after \
-  --non-interactive \
-  --allow-placeholders
+The kit ships rules, checks, and safer defaults — not guaranteed safety. Agents are designed to
+work only within the scope you give them:
 
-# Reinstall / push updated templates — add --force to overwrite existing managed files
-php tools/ai/install-ai-kit.php \
-  --target /path/to/your-project \
-  --profile full-governance \
-  --runtime both \
-  --project-name "your-project-name" \
-  --backup \
-  --verify-after \
-  --non-interactive \
-  --allow-placeholders \
-  --force
+- They stay read-only until scope and ownership are clear, ask one clarifying question when scope is
+  missing, and never implement from memory or proceed past unclear scope.
+- They ask for or build acceptance criteria (ACs); ACs must be observable and testable, and agents
+  proceed only with high confidence — no guessing.
+- Scope is enforced by tested scripts: `scripts/ai/pre-tool-use.sh` (policy gate: allow/ask/deny,
+  blocks destructive commands) and `scripts/ai/post-tool-use.sh` (evidence writer), plus per-agent
+  permission allow/ask/deny lists. See the
+  [context gate](.github/instructions/context-gate.instructions.md),
+  [execution protocol](docs/ai/execution-protocol.md), and [tool map](docs/ai/tools/tool-map.md).
 
-# OpenCode-only full install, excluding GitHub Copilot adapter surfaces
-php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime opencode --without optional-agents-copilot-pack --project-name "your-project-name" --backup --verify-after --non-interactive --allow-placeholders
+## What Gets Added To Your Project
 
-# 5. Generate repomix context bundle + run advisor (run inside the target repo)
-#    These run automatically when using the bash wrapper above.
-#    When calling the PHP installer directly, run them manually:
-cd /path/to/your-project
-SECRETS_SCAN=0 bash scripts/ai/run-repomix-context.sh . \
-  --depth 2 --top 0 --min-code 25 --min-files 1 \
-  --context-window 1000000 --reserved-output 25000 --instruction-overhead 30000 --safety-factor 0.8
-php tools/ai/ai.php advisor --all
-cd -
+| What's added  | What It Provides                                                                 |
+| ------------- | -------------------------------------------------------------------------------- |
+| `AGENTS.md`   | Repository-wide AI agent instructions (consumed by OpenCode, Claude)             |
+| `CLAUDE.md`   | Claude-specific thin adapter pointing to canonical docs                          |
+| `.github/`    | GitHub Copilot adapter — instructions, agents, prompts, skills, hooks, workflows |
+| `.opencode/`  | OpenCode adapter — agents, commands, skills                                      |
+| `docs/ai/`    | Canonical AI workflow documentation, capabilities, and generated artifacts       |
+| `scripts/ai/` | Bash helper scripts — search, verification, context packing, policy hooks        |
+| `schemas/ai/` | JSON schemas for catalog and manifest validation                                 |
+| `policies/`   | Governance policy instances for command-level enforcement                        |
 
-# 6. Audit placeholders
-php tools/ai/ai.php placeholders --fail
-```
+## Supported AI Tools
 
-## Full Documentation
+- **GitHub Copilot** (VS Code, CLI, GitHub.com) — instructions, agents, prompts, skills, hooks.
+- **OpenCode** (CLI) — agents, commands, skills.
+- **Claude** (via `AGENTS.md` / `CLAUDE.md`) — agent instructions and a thin adapter.
+- More AI tools welcome via PR — see `packages/ai-universal-rules/templates/` for the pattern.
 
-See [readme-install.md](readme-install.md) for the complete installation guide covering:
+## Who Should Use This
 
-- Prerequisites and tool installation
-- How the installer works step by step
-- Installation profiles and options
-- Every script and PHP tool documented
-- Validation and verification workflow
-- Context packing with Repomix
+Teams adopting AI coding tools, maintainers who want one consistent and safe AI setup across many
+projects, and anyone who wants AI tools to follow shared rules instead of a blank slate.
 
----
+## Documentation
 
-## What Gets Installed Into Your Project
-
-When you run the installer with `--profile full-governance`, your target project receives:
-
-| Installed Surface | What It Provides                                                                 |
-| ----------------- | -------------------------------------------------------------------------------- |
-| `AGENTS.md`       | Repository-wide AI agent instructions (consumed by OpenCode, Claude)             |
-| `CLAUDE.md`       | Claude-specific thin adapter pointing to canonical docs                          |
-| `.github/`        | GitHub Copilot adapter — instructions, agents, prompts, skills, hooks, workflows |
-| `.opencode/`      | OpenCode adapter — agents, commands, skills                                      |
-| `docs/ai/`        | Canonical AI workflow documentation, capabilities, and generated artifacts       |
-| `scripts/ai/`     | Bash helper scripts — search, verification, context packing, policy hooks        |
-| `schemas/ai/`     | JSON schemas for catalog and manifest validation                                 |
-| `policies/`       | Governance policy instances for command-level enforcement                        |
-
----
-
-## Repository Structure — This Kit's Source Layout
-
-<!-- generated:repo-structure:start -->
-
-_Data generated by `php tools/ai/generate-repo-structure.php --with-scc`. Regenerate with that command if structure changes._
-
-### Tracked Folders (7 top-level entries, 407 tracked files)
-
-| Folder        | Files | Code Lines | Purpose                                                        | Audience                                |
-| ------------- | ----: | ---------: | -------------------------------------------------------------- | --------------------------------------- |
-| `.` (root)    |    17 |        841 | Repository root files and project-level entrypoints            | Humans, CI, package managers, AI agents |
-| `.opencode/`  |    47 |      2,292 | OpenCode runtime adapter — agents, commands, skills            | OpenCode CLI users                      |
-| `schemas/ai/` |    12 |        806 | JSON schemas for catalog and manifest validation               | Validation tooling, maintainers         |
-| `packages/`   |   163 |      9,184 | **Source templates** — master copies of all installable files  | Teams installing into external repos    |
-| `policies/`   |     2 |        101 | Governance policy instances (allow/deny/confirm command rules) | Maintainers                             |
-| `tests/`      |    55 |      4,034 | PHPUnit + Bash test suites and fixtures                        | Maintainers, CI                         |
-| `tools/`      |   111 |     13,153 | **PHP installer, validators, generators**, AI tooling CLI      | Maintainers, AI agents                  |
-
-### Untracked Folders (generated or installed at runtime)
-
-These folders exist on disk after installation or generation but are not committed to this repository:
-
-| Folder              | Purpose                                                               | How It Appears                       |
-| ------------------- | --------------------------------------------------------------------- | ------------------------------------ |
-| `.github/`          | GitHub Copilot adapter (instructions, agents, prompts, skills, hooks) | Created by installer or self-install |
-| `docs/`             | Canonical AI workflow documentation and generated artifacts           | Created by installer or self-install |
-| `scripts/`          | Bash helper scripts (search, verify, context, hooks)                  | Created by installer or self-install |
-| `.ai-logs/`         | Local AI evidence logs (gitignored)                                   | Created at runtime by AI tools       |
-| `.repomix-context/` | Generated context bundles for AI consumption                          | Created by context packing scripts   |
-| `vendor/`           | Composer dependencies                                                 | Created by `composer install`        |
-
-### Root-Level Files Explained
-
-| File                        | Purpose                                                           |
-| --------------------------- | ----------------------------------------------------------------- |
-| `AGENTS.md`                 | AI agent instructions — consumed by OpenCode and Claude           |
-| `CLAUDE.md`                 | Claude-specific adapter pointing to canonical docs                |
-| `README.md`                 | This file — project overview and structure guide                  |
-| `readme-install.md`         | Complete installation guide with every tool and script documented |
-| `llms.txt`                  | Machine-readable project summary for AI tools                     |
-| `opencode.jsonc`            | OpenCode CLI configuration                                        |
-| `composer.json`             | PHP dependencies (PHPUnit for testing)                            |
-| `composer.lock`             | Locked dependency versions                                        |
-| `phpunit.xml.dist`          | PHPUnit test configuration                                        |
-| `.ai-install-manifest.json` | Machine-readable record of what was installed                     |
-| `.editorconfig`             | Editor whitespace and indent rules                                |
-| `.gitattributes`            | Git line-ending and diff rules                                    |
-| `.gitignore`                | Files excluded from git tracking                                  |
-| `.gitleaks.toml`            | Secret scanning rules (used by gitleaks)                          |
-| `.gitleaksignore`           | Gitleaks false-positive suppressions                              |
-| `.markdownlint-cli2.yaml`   | Markdown lint rules                                               |
-| `.shellcheckrc`             | Shell lint rules (used by shellcheck)                             |
-
-### Key Subdirectory Details
-
-#### `packages/ai-universal-rules/` — The Template Source
-
-This is the heart of the kit. It contains the **master copies** of every file that the installer copies into target projects:
-
-| Subfolder                 | Contains                                               |
-| ------------------------- | ------------------------------------------------------ |
-| `templates/core/`         | AGENTS.md, CLAUDE.md, VS Code settings templates       |
-| `templates/instructions/` | Copilot `.instructions.md` files (path-specific rules) |
-| `templates/github/`       | Copilot agents, prompts, skills                        |
-| `templates/commands/`     | OpenCode command definitions                           |
-| `templates/skills/`       | OpenCode and Copilot skill definitions                 |
-| `templates/capabilities/` | Reusable workflow capability packages                  |
-| `templates/docs/`         | Documentation templates                                |
-| `templates/workflows/`    | CI workflow templates                                  |
-| `templates/shared/`       | Shared cross-adapter templates                         |
-| `docs/`                   | Package-level documentation                            |
-| `policies/`               | Policy template files                                  |
-| `manifest.json`           | Package manifest — lists all installable files         |
-| `catalog.json`            | Machine-readable catalog of package contents           |
-
-#### `tools/ai/` — The PHP Toolchain
-
-| Tool Category         | Key Files                                                                                  | What They Do                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------- |
-| **CLI dispatcher**    | `ai.php`                                                                                   | Main entry point — routes `install`, `verify`, `preflight`, etc. |
-| **Installer engine**  | `install/core.php`, `install/packs.php`, `install/profiles.php`                            | Template resolution, conflict detection, file writing            |
-| **Validators**        | `validate-ai-config.php`, `validate-ai-catalog.php`, `validate-install-surface.php`, etc.  | Check configuration integrity without writing files              |
-| **Generators**        | `generate-ai-catalog.php`, `generate-repo-structure.php`, `generate-ai-file-standards.php` | Produce documentation and metadata artifacts                     |
-| **Full verification** | `verify-full-install.php`                                                                  | Runs all validators in sequence                                  |
-
-#### `.opencode/` — OpenCode Adapter
-
-Contains agent definitions (`agents/`), commands (`commands/`), and skills (`skills/`) for the OpenCode CLI tool. These are also installable into target projects via the `opencode` profile.
-
-#### `schemas/ai/` — Validation Schemas
-
-JSON schemas that define the expected shape of catalog files, manifests, command policies, and other structured metadata. Used by the PHP validators.
-
-<!-- generated:repo-structure:end -->
-
----
-
-## Supported AI Surfaces
-
-| Surface                                       | Status                | What Gets Installed                                                        |
-| --------------------------------------------- | --------------------- | -------------------------------------------------------------------------- |
-| **GitHub Copilot** (VS Code, CLI, GitHub.com) | Supported             | Instructions, agents, prompts, skills, hooks                               |
-| **OpenCode** (CLI)                            | Supported             | Agents, commands, skills                                                   |
-| **Claude** (via AGENTS.md/CLAUDE.md)          | Supported             | Agent instructions, thin adapter                                           |
-| _More surfaces_                               | Open for contribution | PRs welcome — see `packages/ai-universal-rules/templates/` for the pattern |
-
-## Requirements
-
-| Tool | Minimum | Install                |
-| ---- | ------- | ---------------------- |
-| PHP  | 8.2+    | `brew install php`     |
-| Bash | 4.0+    | `brew install bash`    |
-| Git  | 2.x     | `brew install git`     |
-| jq   | 1.6+    | `brew install jq`      |
-| rg   | latest  | `brew install ripgrep` |
-
-Optional for context packing: `repomix`, `scc`, `fd`
-
-## Running Tests Locally
-
-From a fresh clone, install PHP dependencies before running any PHPUnit, ParaTest, or repo-wide test command:
-
-```bash
-composer install
-```
-
-Then run the full repository test runner:
-
-```bash
-PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh
-```
-
-The test runner and the direct PHPUnit commands rely on Composer-managed binaries and autoloaded packages under `vendor/`.
-
-## Regenerating Structure Data
-
-```bash
-# Regenerate repo-structure assessment (JSON, CSV, MD, log)
-php tools/ai/generate-repo-structure.php --with-scc
-
-# Check if structure data is current (CI-friendly)
-php tools/ai/generate-repo-structure.php --check --with-scc
-```
-
-The structure data powers the tables above and lives in `docs/ai/generated/repo-structure.*`.
+- [Installation guide](readme-install.md) — full install, options, runtime selection, backup, rollback
+- [Non-technical overview](docs/ai/non-technical-overview.md) — plain-English explanation
+- [Maintainer guide](docs/ai/maintainer-guide.md) — working on the kit itself
+- [AI guardrails](docs/ai/AI-GUARDRAILS.md) — safety rules
+- [Policies](policies/README.md) — command-level governance
 
 ## License
 
-See [docs/ai/AI-GUARDRAILS.md](docs/ai/AI-GUARDRAILS.md) and [policies/README.md](policies/README.md).
+Licensed under the Apache License 2.0 — see [LICENSE](LICENSE). For AI safety rules, see
+[docs/ai/AI-GUARDRAILS.md](docs/ai/AI-GUARDRAILS.md) and [policies/README.md](policies/README.md).

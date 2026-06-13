@@ -15,4 +15,13 @@ if [[ "${1:-}" == "--introspect" ]]; then
     fi
 fi
 
+# `--help`/`-h` reports THIS wrapper's human-readable contract (the static
+# introspector's compact --format=help view) and exits before delegating.
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    _ai_help_tool="$ROOT/tools/ai/sh-introspect.php"
+    if [[ -f "$_ai_help_tool" ]] && command -v "$PHP_BIN" >/dev/null 2>&1; then
+        exec "$PHP_BIN" "$_ai_help_tool" --format=help "${BASH_SOURCE[0]}"
+    fi
+fi
+
 exec "$PHP_BIN" "$ROOT/tools/ai/repo-tool-inventory.php" "$@"

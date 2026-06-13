@@ -36,10 +36,31 @@ if [[ "${1:-}" == "--introspect" ]]; then
     # (no sourcer), introspect common.sh itself.
     _ai_introspect_target="${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}"
     _ai_introspect_tool="$_ai_introspect_here/../../tools/ai/sh-introspect.php"
-    if [[ -n "$_ai_introspect_target" && -f "$_ai_introspect_tool" ]] \
-        && command -v "${PHP_BIN:-php}" >/dev/null 2>&1; then
+    if [[ -n "$_ai_introspect_target" && -f "$_ai_introspect_tool" ]] &&
+        command -v "${PHP_BIN:-php}" >/dev/null 2>&1; then
         exec env AI_OUTPUT=json "${PHP_BIN:-php}" \
             "$_ai_introspect_tool" "$_ai_introspect_target"
+    fi
+fi
+
+# Universal --help/-h guard. Sibling of the --introspect guard above: when a
+# common.sh-sourcing script is invoked with `--help`/`-h` as its FIRST argument,
+# emit that script's human-readable contract (the static introspector's compact
+# `--format=help` view) and exit WITHOUT running the script's own logic. This
+# gives every common.sh-sourcing script a uniform `--help` surface and prevents
+# scripts that otherwise consume positional args from acting on `--help`.
+# Scripts that define their own richer `--help` should handle it BEFORE sourcing
+# common.sh (early guard); this fallback only runs when reached. Scripts already
+# carrying a `--help` flag in their own parser are unaffected because they handle
+# it before this point is reached only when sourced first — so the early-handling
+# scripts (e.g. ai-search.sh) keep their bespoke help.
+if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
+    _ai_help_here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    _ai_help_target="${BASH_SOURCE[1]:-${BASH_SOURCE[0]}}"
+    _ai_help_tool="$_ai_help_here/../../tools/ai/sh-introspect.php"
+    if [[ -n "$_ai_help_target" && -f "$_ai_help_tool" ]] &&
+        command -v "${PHP_BIN:-php}" >/dev/null 2>&1; then
+        exec "${PHP_BIN:-php}" "$_ai_help_tool" --format=help "$_ai_help_target"
     fi
 fi
 

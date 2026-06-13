@@ -11,20 +11,27 @@ This document explains **everything** in this repository — what it does, how t
 3. [Repository Layout](#repository-layout)
 4. [Prerequisites](#prerequisites)
 5. [Quick Start — AI Workflow Kit](#quick-start--ai-workflow-kit)
-6. [Quick Start — Workstation Configs](#quick-start--workstation-configs)
-7. [How The AI Installer Works (Step by Step)](#how-the-ai-installer-works-step-by-step)
-8. [Installation Profiles](#installation-profiles)
-9. [Install Options Reference](#install-options-reference)
-10. [What Gets Installed (File Map)](#what-gets-installed-file-map)
-11. [Scripts — What Each One Does](#scripts--what-each-one-does)
-12. [PHP Tools — What Each One Does](#php-tools--what-each-one-does)
-13. [Validation and Verification](#validation-and-verification)
-14. [Repomix Context Generation](#repomix-context-generation)
-15. [Regenerating Generated Files](#regenerating-generated-files)
-16. [Git Hooks](#git-hooks)
-17. [Style and Linting Config Files](#style-and-linting-config-files)
-18. [Known Issues and Gotchas](#known-issues-and-gotchas)
-19. [Repository Split Consideration](#repository-split-consideration)
+6. [I Want To... (Command Decision Table)](#i-want-to-command-decision-table)
+7. [Choosing Your Runtime (Copilot, OpenCode, Claude)](#choosing-your-runtime-copilot-opencode-claude)
+8. [Beginner Flag Cheatsheet](#beginner-flag-cheatsheet)
+9. [Reinstall, Update, and Backups](#reinstall-update-and-backups)
+10. [Rollback](#rollback)
+11. [Uninstall / Safe Removal](#uninstall--safe-removal)
+12. [Advanced cross-repo install](#advanced-cross-repo-install)
+13. [Quick Start — Workstation Configs](#quick-start--workstation-configs)
+14. [How The AI Installer Works (Step by Step)](#how-the-ai-installer-works-step-by-step)
+15. [Installation Profiles](#installation-profiles)
+16. [Install Options Reference](#install-options-reference)
+17. [What Gets Installed (File Map)](#what-gets-installed-file-map)
+18. [Scripts — What Each One Does](#scripts--what-each-one-does)
+19. [PHP Tools — What Each One Does](#php-tools--what-each-one-does)
+20. [Validation and Verification](#validation-and-verification)
+21. [Repomix Context Generation](#repomix-context-generation)
+22. [Regenerating Generated Files](#regenerating-generated-files)
+23. [Git Hooks](#git-hooks)
+24. [Style and Linting Config Files](#style-and-linting-config-files)
+25. [Known Issues and Gotchas](#known-issues-and-gotchas)
+26. [Repository Split Consideration](#repository-split-consideration)
 
 ---
 
@@ -53,7 +60,7 @@ This kit is **AI-tool-agnostic by design**. Each supported AI surface gets its o
 | --------------------------------------------- | --------------------- | ---------------------------------------- | ------------------------------------------------------- |
 | **GitHub Copilot** (VS Code, CLI, GitHub.com) | Supported             | `.github/`                               | Instructions, agents, prompts, skills, hooks, workflows |
 | **OpenCode** (CLI)                            | Supported             | `.opencode/`                             | Agents, commands, skills                                |
-| **Claude** (via AGENTS.md/CLAUDE.md)          | Supported             | Root files                               | Agent instructions, thin adapter                        |
+| **Claude** (via AGENTS.md)                     | Supported             | Root files                               | Agent instructions (`AGENTS.md`) installed by every profile |
 | _Additional surfaces_                         | Open for contribution | `packages/ai-universal-rules/templates/` | PRs welcome — follow existing template patterns         |
 
 ### How Adapters Work
@@ -81,7 +88,7 @@ These are the source files that make up the kit:
 | `policies/`                    | **Governance policies** — allow/deny/confirm command rules consumed by script-level policy enforcement.                                 | Yes                  |
 | `tests/`                       | **Test suite** — PHPUnit tests for PHP tools, Bash tests for shell scripts.                                                             | No                   |
 | `AGENTS.md`                    | **Agent instructions** — repository-wide rules for AI agents (OpenCode, Claude). Gets installed to target repos.                        | Yes                  |
-| `CLAUDE.md`                    | **Claude-specific** — thin adapter pointing to canonical docs.                                                                          | Yes                  |
+| `CLAUDE.md`                    | **Claude-specific** — thin adapter pointing to canonical docs. Present in this source repo; no install pack ships it to targets (Claude reads `AGENTS.md` in installed projects).                                                                          | No (source only)     |
 
 ### Generated at Runtime (not committed, created by installer or scripts)
 
@@ -167,6 +174,299 @@ bash install-ai-kit.sh /path/to/your-project "your-project-name" --force
 ```
 
 > **When to use `--force`**: By default the installer skips files that already exist in the target (`skip_existing_unmanaged`, `skip_identical_existing`). Pass `--force` on reinstalls to push updated templates into the target. Core base policy files are still protected unless you separately pass `--allow-core-overwrite` to the PHP installer directly.
+
+---
+
+## I Want To... (Command Decision Table)
+
+Pick the row that matches your goal, then jump to the linked section for the full command.
+
+| I want to...                       | Command / Section                                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------- |
+| Install the kit into a project     | `bash install-ai-kit.sh /path/to/your-project` — see [Quick Start](#quick-start--ai-workflow-kit) |
+| Preview an install (no files written) | `php tools/ai/install-ai-kit.php --target /path --profile full-governance --runtime both --dry-run` — see [Step-by-Step Install](#step-by-step-install-manual-with-preview) |
+| Reinstall / push updated templates | `bash install-ai-kit.sh /path/to/your-project "name" --force` — see [Reinstall, Update, and Backups](#reinstall-update-and-backups) |
+| Validate the config                | `php tools/ai/validate-ai-config.php` — see [Validation and Verification](#validation-and-verification) |
+| Verify a completed install         | `php tools/ai/ai.php verify` — see [Validation and Verification](#validation-and-verification)     |
+| Roll back a previous install       | `php tools/ai/ai.php rollback --backup <id> --apply` — see [Rollback](#rollback)                   |
+| Remove the kit safely              | See [Uninstall / Safe Removal](#uninstall--safe-removal)                                           |
+| Run the test suite                 | See [Running Tests](#running-tests) below                                                          |
+| Generate / regenerate docs         | `php tools/ai/generate-ai-catalog.php` — see [Regenerating Generated Files](#regenerating-generated-files) |
+| Pack context for AI tools          | See [Repomix Context Generation](#repomix-context-generation)                                      |
+
+---
+
+## Choosing Your Runtime (Copilot, OpenCode, Claude)
+
+The `--runtime` flag decides **which AI tool adapters** get installed. It accepts **exactly
+three values**:
+
+```text
+--runtime github-copilot | opencode | both
+```
+
+> **A `--runtime` value for Claude does not exist** — `claude` is not a valid `--runtime` choice.
+> Claude support is delivered by the **base layer** (`AGENTS.md`), which *every*
+> runtime installs automatically. If you only want a Claude / base setup, use the `minimal`
+> profile (see case C below). Do not look for a Claude-specific runtime flag — there isn't one.
+
+How the profiles map to runtimes:
+
+| Profile           | Runtime result                                  |
+| ----------------- | ----------------------------------------------- |
+| `copilot`         | GitHub Copilot only (base + `.github/` adapter) |
+| `opencode`        | OpenCode only (base + `.opencode/` adapter)     |
+| `dual`            | Both Copilot and OpenCode                        |
+| `full-governance` | Both + optional governance packs                |
+| `minimal`         | Base only (serves Claude via `AGENTS.md`) |
+
+### Case A — GitHub Copilot only
+
+```bash
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile copilot --project-name "your-project-name" --backup --verify-after --non-interactive --allow-placeholders
+```
+
+Equivalent full-governance variant using the runtime flag:
+
+```bash
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime github-copilot --project-name "your-project-name" --backup --verify-after --non-interactive --allow-placeholders
+```
+
+### Case B — OpenCode only
+
+```bash
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile opencode --project-name "your-project-name" --backup --verify-after --non-interactive --allow-placeholders
+```
+
+Full-governance variant (drop the Copilot agent pack so no `.github/` agents are written):
+
+```bash
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime opencode --without optional-agents-copilot-pack --project-name "your-project-name" --backup --verify-after --non-interactive --allow-placeholders
+```
+
+### Case C — Claude only (base layer)
+
+Claude reads `AGENTS.md`, which the `minimal` profile installs. There is no
+dedicated Claude runtime:
+
+```bash
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile minimal --project-name "your-project-name" --backup --verify-after --non-interactive --allow-placeholders
+```
+
+---
+
+## Beginner Flag Cheatsheet
+
+One row per flag, in plain English. These apply to the PHP installer
+(`php tools/ai/install-ai-kit.php`). The bash wrapper (`install-ai-kit.sh`) forwards `--force`.
+
+| Flag                    | What it does (plain English)                                                                 | Use it when...                                                          |
+| ----------------------- | -------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `--dry-run`             | Shows the full plan but writes **nothing**. Completely safe to run.                          | You want to preview before committing to an install.                   |
+| `--force`               | Overwrites existing **managed** kit files (core base policy stays protected).                | Reinstalling to push updated templates over an earlier install.        |
+| `--backup`              | Snapshots affected files into `.ai/backups/<TIMESTAMP>-install/` before writing.             | Any time the target already has files (recommended on every reinstall).|
+| `--adopt`               | Overwrites pre-existing **foreign** (non-kit) files sitting at kit-claimed paths.            | The target had its own file where the kit needs to write one.          |
+| `--verify-after`        | Runs the validators automatically once the install finishes.                                 | You want install + verification in a single command.                   |
+| `--non-interactive`     | Disables all prompts so the command runs unattended.                                         | Running in CI or any automated script.                                 |
+| `--allow-placeholders`  | Lets strict profiles finish even while `<PLACEHOLDER>` tokens are still unfilled.            | Your first install, before you edit `docs/ai/project-context.md`.      |
+| `--allow-core-overwrite`| Permits `--force` to also overwrite the **core base policy** files (normally protected).     | Rarely — only when you intend to refresh core policy from templates.   |
+
+> **Reading the table:** `--dry-run` is your safety net — run it first. `--backup` + `--force`
+> is the normal reinstall pair. `--allow-core-overwrite` is the only flag here that touches the
+> protected core; leave it off unless you specifically need it.
+
+---
+
+## Reinstall, Update, and Backups
+
+### What `--force` does (and what it does NOT do)
+
+By default the installer is **safe and non-destructive**: if a file already exists in the target,
+it is **skipped** (`skip_existing_unmanaged`, `skip_identical_existing`). Nothing you already have
+is touched.
+
+- **Without `--force`** — existing files are left exactly as they are. A reinstall that finds the
+  same files again is effectively a no-op for those files.
+- **With `--force`** — existing **managed** kit files are **overwritten** with the latest
+  templates. This is how you push updates into a project that already has the kit.
+- **Core base policy files stay protected even with `--force`.** To overwrite those too, you must
+  *also* pass `--allow-core-overwrite` to the PHP installer directly.
+
+Reinstall examples:
+
+```bash
+bash install-ai-kit.sh /path/to/your-project "your-project-name" --force
+```
+
+```bash
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime both --project-name "your-project-name" --backup --verify-after --non-interactive --allow-placeholders --force
+```
+
+Refreshing **this** repository in place uses `--reinstall` (supported by `ai.php`):
+
+```bash
+php tools/ai/ai.php install --profile full-governance --reinstall --dry-run
+```
+
+```bash
+php tools/ai/ai.php install --profile full-governance --reinstall --apply
+```
+
+`--reinstall` rewrites managed files in place; a backup is created first under `.ai/backups/`.
+
+Adopting pre-existing foreign files at kit-claimed paths:
+
+```bash
+php tools/ai/install-ai-kit.php --target /path/to/your-project --profile full-governance --runtime both --project-name "your-project-name" --backup --non-interactive --allow-placeholders --adopt --force
+```
+
+`--adopt` overwrites a target's own (non-kit) file that happens to sit where the kit needs to
+write, recording a backup when paired with `--backup`. Without `--adopt`, such conflicts are
+surfaced instead of overwritten.
+
+### What backup saves (and what it does NOT)
+
+When you pass `--backup`, the installer writes a snapshot **before** overwriting:
+
+```text
+.ai/backups/<TIMESTAMP>-install/
+├── files/before/    ← copies of the affected managed files as they were before the install
+└── manifest.json    ← record of what was backed up
+```
+
+- The installer keeps the **5 most recent** backup folders and prunes older ones automatically.
+- Audit/transaction entries are appended to `.ai/logs/install-transactions-<DATE>.jsonl`.
+
+Backup **does**:
+
+- Snapshot the specific managed files the installer is about to write or overwrite.
+
+Backup **does NOT**:
+
+- Capture unrelated working-tree changes you have not committed.
+- Capture generated or local-only files (for example under `.ai/`, `.ai-logs/`,
+  `docs/ai/generated/`, or `.repomix-context/`).
+
+> Backup is **not** a substitute for git. Commit or stash your own work before a reinstall.
+
+---
+
+## Rollback
+
+If a reinstall or update went wrong, restore from a backup. Rollback is documented in
+`docs/ai/POST-INSTALL.md` (installed in your project root).
+
+### 1. Find a backup id
+
+Backup folders live under `.ai/backups/`. Each folder name (for example
+`20260613T153314Z-install`) is the backup **id**:
+
+```bash
+ls -1 .ai/backups/
+```
+
+### 2. Apply the rollback
+
+```bash
+php tools/ai/ai.php rollback --backup <backup-id> --apply
+```
+
+To restore a single file instead of the whole backup:
+
+```bash
+php tools/ai/ai.php rollback --backup <backup-id> --only path/to/file --apply
+```
+
+### What rollback does NOT restore
+
+Rollback only restores files captured in that backup's snapshot. It does **not** bring back
+unrelated working-tree edits, generated files, or local-only files (`.ai/`, `.ai-logs/`,
+`docs/ai/generated/`, `.repomix-context/`). Use git to recover your own changes.
+
+---
+
+## Uninstall / Safe Removal
+
+There is no automated uninstaller. Removal is manual, but the surfaces are predictable. **Commit
+or back up your own work first**, then remove only what you no longer want.
+
+### Kit-installed surfaces (the kit's own files)
+
+| Path           | What it is                              |
+| -------------- | --------------------------------------- |
+| `AGENTS.md`    | Agent instructions (base layer)         |
+| `.github/`     | GitHub Copilot adapter                   |
+| `.opencode/`   | OpenCode adapter                         |
+| `docs/ai/`     | Canonical AI documentation              |
+| `scripts/ai/`  | Bash helper scripts                     |
+| `schemas/ai/`  | JSON validation schemas                 |
+| `policies/`    | Governance command policies             |
+
+> If your project had its own `.github/` content before installing, edit rather than delete that
+> folder so you keep your own workflows.
+
+### Generated / local-only files (safe to delete separately)
+
+These are not source and regenerate on demand:
+
+| Path                  | What it is                                  |
+| --------------------- | ------------------------------------------- |
+| `.ai/`                | Local kit state — **also holds your backups under `.ai/backups/`** |
+| `.ai-logs/`           | Local AI evidence logs                      |
+| `docs/ai/generated/`  | Machine-generated artifacts                 |
+| `.repomix-context/`   | Packed context bundles                      |
+
+> **Keep `.ai/backups/` until you are sure.** That is where your install snapshots live, so it is
+> your safety net if you remove something by mistake.
+
+---
+
+## Advanced cross-repo install
+
+### Advanced: full cross-repo install from this source clone
+
+This is the end-to-end, non-interactive baseline for installing the kit into **another
+project** directly from a clone of this source repo, then generating artifacts, validating,
+and packing context. Replace `SOURCE` and `TARGET` with your own absolute paths.
+
+> The maintained one-liner [`install-ai-kit.sh`](install-ai-kit.sh) wraps most of this
+> (install + verify + repomix + advisor). Use the explicit sequence below only when you need
+> non-interactive control, `--adopt` to overwrite pre-existing foreign files at kit-claimed
+> paths, or a custom context-window budget. Prefer the wrapper to avoid drift.
+
+```bash
+# 0. Set paths (SOURCE = this repo clone, TARGET = the project you are installing into)
+SOURCE=/path/to/awesome-ai-utmostcreator
+TARGET=/path/to/your-project
+
+# 1. Install the kit into the target (non-interactive, adopt + overwrite managed files)
+cd "$SOURCE"
+php tools/ai/install-ai-kit.php \
+  --target "$TARGET" \
+  --profile full-governance \
+  --runtime both \
+  --project-name "your-project-name" \
+  --backup --verify-after --non-interactive --allow-placeholders --adopt --force
+
+# 2. Generate artifacts + run full install validation (inside the target)
+cd "$TARGET"
+php tools/ai/generate-ai-catalog.php          # writes catalog.json, catalog.md, llms.txt (default writes; use --check to verify only)
+php tools/ai/generate-repo-structure.php --with-scc
+php tools/ai/full-install-validation.php \
+  --profile=full-governance \
+  --timeout-sec=600 --idle-timeout-sec=180 --heartbeat-sec=30 --clear-cancel
+
+# 3. Pack repomix context for the target, run from the SOURCE script with a tuned budget
+SECRETS_SCAN=0 bash "$SOURCE/scripts/ai/run-repomix-context.sh" "$TARGET" \
+  --depth 1 --top 0 --min-code 0 --min-files 1 \
+  --context-window 273000 --reserved-output 12000 --instruction-overhead 18000 --safety-factor 0.8
+```
+
+> `--adopt` overwrites pre-existing non-kit files at kit-claimed paths and records a backup
+> (with `--backup`); rerun without it if you want conflicts surfaced instead of overwritten.
+> The `--context-window 273000` budget targets a ~273k-token model context; adjust it to your
+> model. `generate-ai-catalog.php` writes by default — there is no `--write` flag; pass
+> `--check` to verify freshness without writing.
 
 ---
 
@@ -439,7 +739,6 @@ When you install `full-governance` into a target repo, these files are created:
 | Installed File          | Source Template                                        | Purpose                                  |
 | ----------------------- | ------------------------------------------------------ | ---------------------------------------- |
 | `AGENTS.md`             | `templates/core/AGENTS.template.md`                    | AI agent instructions (OpenCode, Claude) |
-| `CLAUDE.md`             | (generated)                                            | Claude-specific thin adapter             |
 | `.vscode/settings.json` | `templates/core/copilot-vscode-settings.template.json` | VS Code sandbox + auto-approve rules     |
 
 > **Existing `.vscode/settings.json` is never overwritten.** If the target repo already has a
