@@ -155,13 +155,21 @@ migration, no enforcement removed (the floor never changed).
 
 ## Acceptance criteria
 
-- [ ] Discovery rules (`tool:list*`, `tool:describe*`) present in template + rendered.
-- [ ] Template/rendered drift resolved (`ai-search-multi.sh` lines).
+- [x] Discovery rules (`tool:list*`, `tool:describe*`) present in template + rendered. (Step 1, commit `5cced30`)
+- [x] Template/rendered drift resolved (`ai-search-multi.sh` lines). (Step 2, commit `5cced30`)
 - [ ] OQ-1 settled by a LIVE OpenCode run, with evidence in the PR; the shipped
-      run rule (broad or narrowed) matches that evidence.
-- [ ] No `deny`/`ask` floor weakened; `validate-ai-config.php` green.
-- [ ] Mutating ids still fail closed via the gateway (exit 2 without `--apply`).
-- [ ] release-auditor sign-off recorded.
+      run rule (broad or narrowed) matches that evidence. **(Step 3 — still parked)**
+- [x] No `deny`/`ask` floor weakened; `validate-ai-config.php` green. (Steps 1-2 verified)
+- [ ] Mutating ids still fail closed via the gateway (exit 2 without `--apply`). **(re-confirm at Step 3)**
+- [ ] release-auditor sign-off recorded. **(required before Step 3 merges)**
+
+### Progress
+
+- **Steps 1-2 DONE** (commit `5cced30`): discovery rules + drift fix shipped, additive,
+  no floor change. Verified: `validate-ai-config` OK, `validate-install-surface --strict`
+  0 errors, gateway `tool:list` works, focused + full suite (692) green.
+- **Step 3 (execution rule `tool:run *`) PARKED**: requires the live OQ-1 OpenCode test
+  and release-auditor sign-off (posture change). Do not add it without that evidence.
 
 ## Follow-up (next slice, not P2b)
 
