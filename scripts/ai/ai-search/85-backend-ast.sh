@@ -15,8 +15,10 @@
 # run_ast_mode — Phase 5 structural search via ast-grep, emitting structured
 # results[] with name/kind/path/start/end/language.
 run_ast_mode() {
+    # Fail closed: ast-grep has no safe grep/text equivalent (AST semantics differ),
+    # so do NOT silently degrade. Point the caller to the text fallback instead.
     command_exists ast-grep ||
-        fail "unavailable" "ast-grep not installed; $mode mode unavailable"
+        fail "unavailable" "ast-grep not installed; '$mode' mode unavailable (no safe text fallback). Use: ai-search.sh text \"$query\" . --fixed"
 
     local lang="${lang_flag:-${AI_LANG:-php}}"
     local pattern kind=""
