@@ -20,7 +20,12 @@ function aiInstallerScriptRegistry(): array
             'source_path' => 'scripts/ai/ai-search.sh',
             'installed_path' => 'scripts/ai/ai-search.sh',
             'pack' => 'scripts-pack',
-            'required_tools' => ['bash', 'git', 'jq', 'rg', 'fd', 'ast-grep'],
+            // Core tools the wrapper always needs. Mode-specific tools (rg/fd/ast-grep)
+            // live in optional_tools so a missing one does not block every mode: the
+            // backend's own per-mode guard (scripts/ai/ai-search/60-guards.sh,
+            // 85-backend-ast.sh) still fails closed for the modes that truly need them.
+            'required_tools' => ['bash', 'git', 'jq'],
+            'optional_tools' => ['rg', 'fd', 'ast-grep'],
             'risk' => 'read-only',
             'supports_dry_run' => false,
             'default_args' => [],
@@ -42,7 +47,9 @@ function aiInstallerScriptRegistry(): array
             'source_path' => 'scripts/ai/ai-search-multi.sh',
             'installed_path' => 'scripts/ai/ai-search-multi.sh',
             'pack' => 'scripts-pack',
-            'required_tools' => ['bash', 'git', 'jq', 'rg', 'fd', 'ast-grep'],
+            // See ai-search: core tools always required; rg/fd/ast-grep are mode-specific.
+            'required_tools' => ['bash', 'git', 'jq'],
+            'optional_tools' => ['rg', 'fd', 'ast-grep'],
             'risk' => 'read-only',
             'supports_dry_run' => false,
             'default_args' => [],
