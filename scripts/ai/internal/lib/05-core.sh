@@ -66,8 +66,8 @@ ai_load_config_list() {
         local _ai_line
         while IFS= read -r _ai_line || [[ -n "$_ai_line" ]]; do
             _ai_line="${_ai_line%%#*}"
-            _ai_line="${_ai_line#${_ai_line%%[![:space:]]*}}"
-            _ai_line="${_ai_line%${_ai_line##*[![:space:]]}}"
+            _ai_line="${_ai_line#"${_ai_line%%[![:space:]]*}"}"
+            _ai_line="${_ai_line%"${_ai_line##*[![:space:]]}"}"
             [[ -n "$_ai_line" ]] || continue
             _ai_list_ref+=("$_ai_line")
         done <"$_ai_list_file"

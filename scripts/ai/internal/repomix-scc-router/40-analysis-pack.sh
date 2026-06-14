@@ -45,7 +45,7 @@ run_scc_analysis() {
     fi
 
     (
-        cd "$ROOT"
+        cd "$ROOT" || exit
         if ((${#files[@]} > chunk_size)); then
             total=${#files[@]}
             while ((idx < total)); do
@@ -328,7 +328,7 @@ pack_group() {
 
         log "packing group '$group' -> $bundle_rel"
         (
-            cd "$ROOT"
+            cd "$ROOT" || exit
             repomix --stdin "${repomix_args[@]}" <"$list_file"
         )
 
@@ -339,7 +339,7 @@ pack_group() {
     include_pattern="$group/**"
     log "packing group '$group' -> $bundle_rel"
     (
-        cd "$ROOT"
+        cd "$ROOT" || exit
         repomix --include "$include_pattern" "${repomix_args[@]}"
     )
 }
