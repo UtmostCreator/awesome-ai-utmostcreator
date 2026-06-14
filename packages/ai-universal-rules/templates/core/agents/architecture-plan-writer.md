@@ -10,10 +10,30 @@ capabilities:
 permission:
   todowrite: allow
   task: deny
+  # Write surface is markdown plans under docs/tickets/ ONLY. OpenCode uses last-match-wins
+  # and matches the path string the write tool actually passes, which can be relative,
+  # ./-prefixed, or an absolute/home-expanded path depending on how the tool resolves it.
+  # List every realistic spelling of the same docs/tickets/ surface so a valid plan write is
+  # never silently denied by a path-spelling mismatch, while every non-tickets path stays denied.
   edit:
     '*': deny
     'docs/tickets/**': allow
+    './docs/tickets/**': allow
+    '~/Projects/awesome-ai-utmostcreator/docs/tickets/**': allow
+    '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/**': allow
     'docs/tickets/arch-todo-*/**': allow
+    './docs/tickets/arch-todo-*/**': allow
+    '~/Projects/awesome-ai-utmostcreator/docs/tickets/arch-todo-*/**': allow
+    '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/arch-todo-*/**': allow
+  # docs/tickets/ lives inside the working dir, but if the write tool resolves an absolute
+  # path OpenCode can treat it as external; allow the tickets surface explicitly so the
+  # external_directory guard does not block a legitimate plan write.
+  external_directory:
+    '~/Projects/awesome-ai-utmostcreator/docs/tickets/**': allow
+    '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/**': allow
+  # Keep doom_loop as ask: repeated identical writes usually mean a stuck agent, so a human
+  # should confirm rather than auto-approve a retry storm.
+  doom_loop: ask
   bash:
     '*': deny
     'command -v *': allow
@@ -180,9 +200,26 @@ Each step names the command or inspection surface that proves an AC.
 ## Handoff Notes
 ```
 
+## Archive On Completion
+
+When every Todo Plan item AND every Acceptance Criterion in a plan is checked complete (`- [x]`), move that plan into an `archive/` subfolder inside the same ticket folder so active and finished plans stay separated:
+
+```text
+docs/tickets/arch-todo-{name}-{timestamp}/plan.md
+  -> docs/tickets/arch-todo-{name}-{timestamp}/archive/plan.md
+```
+
+Rules for archiving:
+
+- Only archive when the file proves completion: every `- [ ]` in both `## Todo Plan` and `## Acceptance Criteria` is now `- [x]`. If any item is still unchecked, do not archive; leave the plan in place.
+- The archive target stays inside `docs/tickets/**`, so it is within this agent's allowed write surface. Use the `write` tool to create `archive/<original-filename>` with the full plan contents (use `mkdir -p docs/tickets/<ticket>/archive` first; it is allowed under the `mkdir -p docs/tickets/*` rule).
+- This agent's `bash` permission denies `mv`, `cp`, and `rm`, so do NOT shell-move the file. Instead: (1) `write` the full plan to the `archive/` path, then (2) replace the original `plan.md` with a one-line tombstone pointing to the archived copy, e.g. `Archived: ./archive/plan.md (all Todo items and Acceptance Criteria complete on {timestamp}).` Do not attempt to delete the original via shell.
+- Preserve the original filename inside `archive/` (e.g. `plan-phase4-x.md` -> `archive/plan-phase4-x.md`). If multiple plans in one ticket complete, archive each under the same `archive/` folder.
+- Record the archive action in your Final Output (archived path + completion evidence).
+
 ## Stop Conditions
 
-Stop and ask, or report a limitation, when: the target folder would be outside `docs/tickets/`, an actual `write`/`edit` tool call against a `docs/tickets/` path is denied or errors, the architect design is missing required scope or acceptance criteria, the task scope is ambiguous, or any non-`docs/tickets/` file would need to change. Do not report a write limitation before attempting the `write` call.
+Stop and ask, or report a limitation, when: the target folder would be outside `docs/tickets/`, an actual `write`/`edit` tool call against a `docs/tickets/` path is denied or errors, the architect design is missing required scope or acceptance criteria, the task scope is ambiguous, any non-`docs/tickets/` file would need to change, or an archive is requested while any Todo item or Acceptance Criterion is still unchecked. Do not report a write limitation before attempting the `write` call.
 
 ## Final Output
 
