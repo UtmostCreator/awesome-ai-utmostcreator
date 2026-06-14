@@ -42,6 +42,7 @@ Runs ai-search.sh MODE once per QUERY in a single invocation.
 Query modes:
   changed-text | staged-text | tracked | text | files | struct | docs
   diff | history | tests | config | deps | symbols | class
+  function | method | interface | enum | route | config-key
 
 File-list modes:
   changed-files | staged-files
@@ -88,6 +89,9 @@ changed-text | staged-text | tracked | text | files | struct | docs)
     mode_family="query"
     ;;
 diff | history | tests | config | deps | symbols | class)
+    mode_family="query"
+    ;;
+function | method | interface | enum | route | config-key)
     mode_family="query"
     ;;
 changed-files | staged-files)

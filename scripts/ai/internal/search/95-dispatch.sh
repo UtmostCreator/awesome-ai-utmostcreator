@@ -12,7 +12,7 @@
 # shellcheck disable=SC2034,SC2154
 
 # run_backend — dispatch the canonical (path:line:text) backends. Bespoke modes
-# (diff/history/todo/unsafe-patterns/struct/symbols/class/doctor) exit before
+    # (diff/history/todo/unsafe-patterns/struct/symbols/class/doctor) exit before
 # this point, so only the simple `out`-setting backends remain here.
 run_backend() {
     case "$mode" in
@@ -22,7 +22,8 @@ run_backend() {
     staged-text) backend_staged_text ;;
     tracked) backend_tracked ;;
     text) backend_text ;;
-    docs | tests | config | deps) backend_surface ;;
+    docs | tests | config | deps | route | config-key) backend_surface ;;
+    function | method | interface | enum) backend_shortcut_text ;;
     files) backend_files ;;
     *)
         fail "error" "unknown mode: $mode"
@@ -49,7 +50,7 @@ emit_results() {
         fi
 
         case "$route_mode" in
-        text | docs | tests | config | deps)
+        text | docs | tests | config | deps | route | config-key | function | method | interface | enum)
             root_abs="$(canonical_root "$root")"
             matches_json="$(printf '%s' "$out" | rg_json_to_matches)"
             g_results_json="$(printf '%s' "$out" | rg_json_to_results "rg" "$root_abs")"

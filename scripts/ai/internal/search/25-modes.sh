@@ -19,8 +19,8 @@ is_content_mode() {
     text | tracked | files | struct | docs | changed-text | staged-text) return 0 ;;
     # Phase 4 query-required repo-aware modes.
     diff | history | tests | config | deps) return 0 ;;
-    # Phase 5 structural modes take a pattern/name as the query.
-    symbols | class) return 0 ;;
+    # Phase 5 structural/shortcut modes take a pattern/name as the query.
+    symbols | class | function | method | interface | enum | route | config-key) return 0 ;;
     *) return 1 ;;
     esac
 }
@@ -45,7 +45,7 @@ is_no_query_mode() {
 # fixed glob set. `docs` is split out from `text` so it is truly scoped.
 is_surface_mode() {
     case "$1" in
-    docs | tests | config | deps) return 0 ;;
+    docs | tests | config | deps | route | config-key) return 0 ;;
     *) return 1 ;;
     esac
 }
@@ -69,5 +69,19 @@ surface_globs() {
             'package-lock.json' 'pnpm-lock.yaml' 'yarn.lock' 'flake.nix' \
             'go.mod' 'Cargo.toml' 'pyproject.toml'
         ;;
+    route)
+        printf '%s\n' '**/routes/**' '*routes*' '*.routes.*' '**/app/**/routes/**'
+        ;;
+    config-key)
+        printf '%s\n' '.env*' 'config/**' '*.yaml' '*.yml' '*.json' '*.toml' \
+            '*.ini' '*.nix' 'docker-compose*'
+        ;;
+    esac
+}
+
+is_shortcut_text_mode() {
+    case "$1" in
+    function | method | interface | enum) return 0 ;;
+    *) return 1 ;;
     esac
 }
