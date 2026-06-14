@@ -24,8 +24,6 @@ AI_OUTPUT=json bash scripts/ai/ai-search.sh MODE QUERY . --fixed
 - `docs` - text search (documentation surface)
 - `files` - filename search (fd)
 - `struct` - ast-grep structural pattern
-- `function`, `method`, `interface`, `enum` - read-only definition shortcuts
-- `route`, `config-key` - read-only route/config surface shortcuts
 - `doctor` - report available/missing tools and root state
 - `unsafe-all` - approval-gated; returns `blocked`
 

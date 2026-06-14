@@ -1,5 +1,5 @@
 ---
-applyTo: '.ai-install-manifest.json,.ai-logs,.ai,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,PLACEHOLDERS.md,README.md,composer.json,composer.lock,configs,docs,improvement-plan.md,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools'
+applyTo: '.ai-install-manifest.json,.ai-logs,.ai,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,LICENSE,PLACEHOLDERS.md,README.md,SECURITY.md,SUPPORT.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools'
 description: 'Architecture, ownership, layering, source-of-truth, and high-risk structural change guidance'
 ---
 

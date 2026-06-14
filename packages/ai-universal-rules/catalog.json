@@ -60,7 +60,7 @@
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 18,
         "root:github-copilot-skill": 19,
-        "root:opencode-agent": 18,
+        "root:opencode-agent": 13,
         "root:opencode-command": 20,
         "root:opencode-skill": 21,
         "root:php-reference": 3,
@@ -2317,46 +2317,6 @@
             "path": ".github/skills/verify-change/SKILL.md",
             "runtime": "github-copilot",
             "description": "Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "agent-creator-runtime-guardian",
-            "path": ".opencode/agents/agent-creator-runtime-guardian.md",
-            "runtime": "opencode",
-            "description": "Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "agent-creator-semantic-verifier",
-            "path": ".opencode/agents/agent-creator-semantic-verifier.md",
-            "runtime": "opencode",
-            "description": "Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "agent-creator-static-validator",
-            "path": ".opencode/agents/agent-creator-static-validator.md",
-            "runtime": "opencode",
-            "description": "Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "agent-creator-supervisor",
-            "path": ".opencode/agents/agent-creator-supervisor.md",
-            "runtime": "opencode",
-            "description": "Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "agent-creator",
-            "path": ".opencode/agents/agent-creator.md",
-            "runtime": "opencode",
-            "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly"
         },
         {
             "scope": "root",

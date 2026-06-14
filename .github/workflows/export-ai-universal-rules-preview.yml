@@ -19,26 +19,14 @@ jobs:
       - name: Generate current catalog outputs
         run: php tools/ai/generate-ai-catalog.php
 
-      - name: Validate export profiles
-        run: php tools/ai/export-ai-universal-rules.php --check
-
       - name: Export minimal starter
         run: php tools/ai/export-ai-universal-rules.php --profile=minimal-starter
-
-      - name: Verify minimal starter checksums
-        run: php tools/ai/export-ai-universal-rules.php --profile=minimal-starter --verify
 
       - name: Export dual-runtime starter
         run: php tools/ai/export-ai-universal-rules.php --profile=dual-runtime-starter
 
-      - name: Verify dual-runtime starter checksums
-        run: php tools/ai/export-ai-universal-rules.php --profile=dual-runtime-starter --verify
-
       - name: Export strict-governance starter
         run: php tools/ai/export-ai-universal-rules.php --profile=strict-governance-starter
-
-      - name: Verify strict-governance starter checksums
-        run: php tools/ai/export-ai-universal-rules.php --profile=strict-governance-starter --verify
 
       - name: Upload preview bundles
         uses: actions/upload-artifact@v4

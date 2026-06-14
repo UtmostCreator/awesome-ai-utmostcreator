@@ -6,9 +6,18 @@ Installed profile: `full-governance`
 
 ## Installed
 
+- `base`
+- `setup-docs`
+- `capabilities-core`
+- `capabilities-extended`
 - `capabilities-governance`
+- `adapter-copilot`
+- `adapter-opencode`
+- `scripts-pack`
+- `policy-pack`
 - `hooks-pack`
 - `ci-pack`
+- `evidence-pack`
 - `docs-reference-pack`
 - `delivery-pack`
 - `optional-agents-opencode-pack`
@@ -20,15 +29,8 @@ Installed profile: `full-governance`
 - `advisor-pack`
 - `target-tools-pack`
 - `shared-templates-pack`
-- `scripts-pack`
-- `policy-pack`
-- `evidence-pack`
-- `adapter-copilot`
-- `adapter-opencode`
-- `capabilities-extended`
-- `base`
-- `setup-docs`
-- `capabilities-core`
+- `package-source-pack`
+- `kit-authoring-pack`
 
 ## Add Later
 

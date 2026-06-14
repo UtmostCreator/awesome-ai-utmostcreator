@@ -39,6 +39,9 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `bash scripts/ai/ai-search.sh *`
 - `AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
 - `env AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
+- `bash scripts/ai/ai-search-multi.sh *`
+- `AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *`
 - `bash scripts/ai/preview-file.sh *`
 - `AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
 - `env AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
@@ -94,7 +97,7 @@ Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host 
 3. Search staged evidence next, then tracked evidence.
 4. Fall back to docs/tests/schema/text only when narrow evidence is insufficient.
 5. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
-6. Use `bash scripts/ai/query-usage.sh <symbol-or-path>` for usage, impact, or duplication questions.
+6. For usage, impact, or duplication questions, search with `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed` and `git grep`; `query-usage.sh <path>` only estimates the token/byte cost of a file or directory and is not a symbol search.
 
 ## Output expectations
 
