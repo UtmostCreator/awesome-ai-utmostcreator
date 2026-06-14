@@ -27,8 +27,8 @@ pack registries and generated manifests remain the executable source of truth.
 | `.opencode/` | shipped/source | OpenCode adapters. |
 | `.phpunit.result.cache` | repo-local | PHPUnit cache. |
 | `.vscode/` | shipped/source | Workspace defaults. |
-| `AGENTS.md`, `CLAUDE.md`, `README.md`, `llms.txt`, `PLACEHOLDERS.md`, `SECURITY.md`, `SUPPORT.md` | shipped/source | Root docs and adapter entrypoints. |
-| `ai-search-todo-tests.md`, `improvement-plan.md`, `readme-install.md`, `todo-*.md` | repo-local | Planning/history docs; archive under `docs/tickets/`. |
+| `AGENTS.md`, `CLAUDE.md`, `README.md`, `readme-install.md`, `llms.txt`, `PLACEHOLDERS.md`, `SECURITY.md`, `SUPPORT.md` | shipped/source | Root docs, install guide, and adapter entrypoints. |
+| `ai-search-todo-tests.md`, `improvement-plan.md`, `todo-*.md` | repo-local | Planning/history docs; archive under `docs/tickets/`. |
 | `composer.json`, `composer.lock`, `phpunit.xml.dist`, `justfile` | source | Source repo runtime and verification config. |
 | `configs/` | shipped/source | Starter config payloads. |
 | `dist/` | dependency/build | Build output; export-ignored. |

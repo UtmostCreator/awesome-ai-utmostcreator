@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 /**
  * validate-script-access.php — P10 consistency checks for the AI script-access
- * and agent-governance manifests (todo-agents-rework.md / todo-agents-script-
- * rework.md P10).
+ * and agent-governance manifests (archived todo-agents-rework.md /
+ * todo-agents-script-rework.md P10).
  *
  * Deterministic invariants enforced (no agent permission edits; inline
  * .opencode/agents permissions remain canonical per the adapter contract):
