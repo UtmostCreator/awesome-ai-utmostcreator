@@ -22,7 +22,7 @@
 # repo or rg/fd/ast-grep. If PHP or the introspector is unavailable it prints a
 # minimal fallback rather than crashing.
 if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
-    _here="$(CDPATH= cd -- "$(dirname -- "${AI_SEARCH_ENTRYPOINT:-${BASH_SOURCE[0]}}")" && pwd)"
+    _here="$(CDPATH='' cd -- "$(dirname -- "${AI_SEARCH_ENTRYPOINT:-${BASH_SOURCE[0]}}")" && pwd)"
     _introspector="$_here/../../tools/ai/sh-introspect.php"
     _php_bin="${PHP_BIN:-php}"
     if command -v "$_php_bin" >/dev/null 2>&1 && [[ -f "$_introspector" ]]; then

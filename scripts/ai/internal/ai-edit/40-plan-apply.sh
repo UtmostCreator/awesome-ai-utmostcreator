@@ -124,8 +124,8 @@ patch_materialize() {
 # `added<TAB>deleted<TAB>path`; renames render as `old => new` (or brace form)
 # and we keep the destination. /dev/null deletions are dropped.
 patch_changed_paths() {
-    git apply --numstat "$patch_file" 2>/dev/null \
-        | awk -F'\t' '
+    git apply --numstat "$patch_file" 2>/dev/null |
+        awk -F'\t' '
             NF >= 3 {
                 path = $3
                 # rename forms: "old => new" and "pre{old => new}post"
@@ -136,8 +136,8 @@ patch_changed_paths() {
                 if (path != "/dev/null" && path != "")
                     print path
             }
-        ' \
-        | sort -u
+        ' |
+        sort -u
 }
 
 # Block destinations that are unsafe to write from an opaque diff.

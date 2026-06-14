@@ -237,7 +237,7 @@ function aiInstallerParseArgs(array $argv): array
         throw new InvalidArgumentException('target directory not found: ' . $target);
     }
 
-    $allowedProfiles = ['minimal', 'copilot', 'opencode', 'dual', 'guarded', 'accelerated', 'full-governance', 'docs-reference', 'custom'];
+    $allowedProfiles = ['minimal', 'copilot', 'opencode', 'dual', 'guarded', 'accelerated', 'full-governance', 'docs-reference', 'custom', 'basic', 'standard', 'creator', 'full', 'agents-only'];
     if (!in_array($profile, $allowedProfiles, true)) {
         throw new InvalidArgumentException('unsupported profile: ' . $profile);
     }
@@ -326,6 +326,7 @@ Options:
   --target <dir>      Target repository root (default: .)
   --source <dir>      Source package/repo root (default: this repository root)
   --profile <name>    Install profile: minimal|copilot|opencode|dual|guarded|accelerated|full-governance|docs-reference (default: dual)
+                      Editions (aliases): basic|standard|creator|full|agents-only
   --runtime <name>    Runtime override: github-copilot|opencode|both
   --project-name <n>  Override inferred project name
   --force             Overwrite existing files

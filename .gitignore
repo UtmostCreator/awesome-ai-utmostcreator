@@ -4,6 +4,8 @@
 *.swp
 *.swo
 *~
+# Merge/patch backups (e.g. from shfmt -w, git rerere, manual merges). Never source.
+*.orig
 .idea/
 .phpunit.result.cache
 .phpunit.cache/
@@ -43,3 +45,5 @@ docs/ai/package/
 *.bak
 docs/ai/generated/
 # END ai-kit
+# Scratch review artifacts from AI review passes; not source.
+.ai-review/

@@ -71,6 +71,7 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `bash scripts/ai/run-repo-tests.sh*`
 - `bash scripts/ai/ai-structured.sh *`
 - `php tools/ai/validate-*.php *`
+- `php tools/ai/verify-install-placeholders.php*`
 - `php tools/ai/ai.php placeholders*`
 - `php tools/ai/ai.php verify*`
 - `php tools/ai/ai.php advisor*`

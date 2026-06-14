@@ -9,8 +9,8 @@ set -euo pipefail
 
 # Resolve the scripts/ai root: this shim lives at scripts/ai/bin/hooks/watch-loop.sh,
 # so the root is two directories up (hooks -> bin -> scripts/ai).
-_ai_shim_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-_ai_root="$(CDPATH= cd -- "$_ai_shim_dir/../.." && pwd)"
+_ai_shim_dir="$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+_ai_root="$(CDPATH='' cd -- "$_ai_shim_dir/../.." && pwd)"
 _ai_impl="$_ai_root/watch-loop.sh"
 
 # Introspection/help must report the IMPLEMENTATION's contract, not this shim's.

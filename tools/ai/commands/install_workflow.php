@@ -167,6 +167,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
             'summary' => ['create' => $creates, 'skip' => $skips],
             'install_kind' => $hasManifest ? 'reinstall' : 'fresh_install',
             'required_first' => ['preflight', 'package-verify', 'adapter-plan', 'install --backup-only'],
+            'warnings' => aiInstallerAgentDependencyWarnings($selectedPacks),
         ];
         $written = aiCliWriteArtifact($root, 'install', 'php tools/ai/ai.php install --dry-run', $data, 'ok', null, 'Run install --backup-only before install --apply.');
         fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
@@ -417,8 +418,8 @@ function aiRunInstallWizard(string $root): int
         $runtime = 'opencode';
     }
 
-    $profileMap = ['1' => 'minimal', '2' => 'copilot', '3' => 'opencode', '4' => 'dual', '5' => 'accelerated', '6' => 'full-governance', '7' => 'custom'];
-    $profileInput = strtolower(aiPromptLine('Select profile: [1] minimal, [2] copilot, [3] opencode, [4] dual, [5] accelerated, [6] full-governance, [7] custom (default 4): '));
+    $profileMap = ['1' => 'minimal', '2' => 'copilot', '3' => 'opencode', '4' => 'dual', '5' => 'accelerated', '6' => 'full-governance', '7' => 'custom', '8' => 'basic', '9' => 'standard', '10' => 'creator', '11' => 'full', '12' => 'agents-only'];
+    $profileInput = strtolower(aiPromptLine('Select profile: [1] minimal, [2] copilot, [3] opencode, [4] dual, [5] accelerated, [6] full-governance, [7] custom; editions: [8] basic, [9] standard, [10] creator, [11] full, [12] agents-only (default 4): '));
     $profile = $profileMap[$profileInput] ?? 'dual';
 
     $allFeatures = aiPromptYesNo('Install all available AI feature packs?', true);
@@ -435,7 +436,7 @@ function aiRunInstallWizard(string $root): int
     }
 
     $hookDriver = 'none';
-    if (in_array('hooks-pack', $with, true) || $allFeatures || in_array($profile, ['full-governance'], true)) {
+    if (in_array('hooks-pack', $with, true) || $allFeatures || in_array($profile, ['full-governance', 'full'], true)) {
         $wire = strtolower(aiPromptLine('Wire hooks now? [1] no, [2] husky, [3] lefthook, [4] native git hooks (default 1): '));
         $hookDriver = match ($wire) {
             '2', 'husky' => 'husky',
