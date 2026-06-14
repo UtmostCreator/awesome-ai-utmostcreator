@@ -1,0 +1,214 @@
+# AI script access tiers
+#
+# Risk-tiered access manifest for scripts/ai entrypoints, keyed on ROOT script
+# names (the registered public contract). This is the descriptive, non-enforced
+# source of access intent proposed by todo-agents-rework.md (tiers T0-T5) and
+# todo-agents-script-rework.md (P4). Roles/risk are derived from the canonical
+# classification in scripts/ai/MANIFEST.md.
+#
+# bin/ alias inheritance:
+#   scripts/ai/bin/<role>/<name>.sh are additive UNREGISTERED delegating shims
+#   that exec the canonical root impl scripts/ai/<name>.sh. An alias INHERITS the
+#   tier of its root script; it is never granted or denied independently.
+#
+# Internal modules under scripts/ai/internal/{lib,search}/ are implementation
+# details, are NOT entrypoints, and must never be granted to agents directly.
+# Agents use only the stable root entrypoints listed here.
+#
+# This manifest is descriptive classification, not a runtime enforcement gate.
+# Enforcement (if adopted) is a separate, later phase.
+
+version: 1
+
+tiers:
+  T0_help:
+    risk: low
+    description: Universal help / introspection. Allow to almost all agents.
+    scripts:
+      - sh-introspect.sh
+      - ai-search-introspect.sh
+      - query-usage.sh
+      - repo-tool-inventory.sh
+      - repo-stats.sh
+
+  T1_discovery:
+    risk: low
+    description: Safe read-only discovery. Allow to read/research/review agents.
+    scripts:
+      - ai-search.sh
+      - ai-search-multi.sh
+      - fd-files.sh
+      - rg-code.sh
+      - preview-file.sh
+      - ai-file-freshness.sh
+      - check-file-refs.sh
+
+  T2_context:
+    risk: low_medium
+    description: Context building. Allow to architect/reviewer/researcher agents.
+    scripts:
+      - pack-context.sh
+      - repomix-context-tree.sh
+      - repomix-scc-router.sh
+      - run-repomix-context.sh
+      - run-repomix-file.sh
+      - repomix-freshness.sh
+      - repomix-ensure-fresh.sh
+      - ai-diff-context.sh
+      - gh-pr-context.sh
+      - git-branch-origin.sh
+      - git-forensics.sh
+
+  T3_validation:
+    risk: medium
+    description: Validation / testing. Allow to validators, reviewers, release agents, implementers after edit.
+    scripts:
+      - ai-verify.sh
+      - ai-doc-check.sh
+      - ai-test-select.sh
+      - run-test-focused.sh
+      - run-repo-tests.sh
+      - ai-install-coverage.sh
+
+  T4_planning:
+    risk: medium
+    description: Structured planning / reporting. Allow to supervisor/planner/auditor agents.
+    scripts:
+      - ai-task.sh
+      - ai-structured.sh
+      - build-ai-help-bundle.sh
+      - session-checkpoint.sh
+
+  T5_mutation_recovery:
+    risk: high_critical
+    description: Guarded mutation, recovery, hooks, and broad/dangerous tools. Deny by default; grant only to specific agents.
+    scripts:
+      - ai-edit.sh
+      - ai-rollback.sh
+      - prune-shipped-targets.sh
+      - install-mandatory-tools.sh
+      - post-tool-use.sh
+      - pre-tool-use.sh
+      - all_in_one.sh
+      - watch-loop.sh
+
+# Per-agent access intent. allowed_tiers grant a whole tier; denied_scripts are
+# explicit exclusions that override a granted tier. Lifecycle mirrors
+# docs/ai/AGENTS-MANIFEST.md. This block is descriptive, not enforced.
+agents:
+  architect:
+    lifecycle: planning
+    allowed_tiers: [T0_help, T1_discovery, T2_context, T4_planning]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  architecture-plan-writer:
+    lifecycle: planning
+    allowed_tiers: [T0_help, T1_discovery, T4_planning]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  repository-researcher:
+    lifecycle: discovery
+    allowed_tiers: [T0_help, T1_discovery, T2_context]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  researcher:
+    lifecycle: discovery
+    allowed_tiers: [T0_help, T1_discovery, T2_context]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  repository-reviewer:
+    lifecycle: discovery/review
+    allowed_tiers: [T0_help, T1_discovery, T2_context, T3_validation]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  implementer:
+    lifecycle: execution
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    denied_scripts: [prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  super-implementer:
+    lifecycle: execution
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    denied_scripts: [prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  bugfix:
+    lifecycle: execution
+    allowed_tiers: [T0_help, T1_discovery, T2_context, T3_validation]
+    denied_scripts: [prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  refactorer:
+    lifecycle: execution
+    allowed_tiers: [T0_help, T1_discovery, T2_context, T3_validation]
+    denied_scripts: [prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  config-maintainer:
+    lifecycle: execution
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    denied_scripts: [prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  build-config:
+    lifecycle: execution
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    denied_scripts: [prune-shipped-targets.sh, all_in_one.sh, watch-loop.sh]
+
+  upgrade:
+    lifecycle: execution
+    allowed_tiers: [T0_help, T1_discovery, T2_context, T3_validation]
+    denied_scripts: [prune-shipped-targets.sh, all_in_one.sh, watch-loop.sh]
+
+  docs:
+    lifecycle: execution/release
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  workflow-auditor:
+    lifecycle: validation
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  infra-auditor:
+    lifecycle: validation
+    allowed_tiers: [T0_help, T1_discovery, T2_context, T3_validation]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  reviewer:
+    lifecycle: review
+    allowed_tiers: [T0_help, T1_discovery, T2_context, T3_validation]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  release-auditor:
+    lifecycle: release
+    allowed_tiers: [T0_help, T1_discovery, T2_context, T3_validation]
+    denied_scripts: [ai-edit.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  post-install:
+    lifecycle: post-install
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, all_in_one.sh, watch-loop.sh]
+
+  agent-creator:
+    lifecycle: agent-factory
+    allowed_tiers: [T0_help, T1_discovery]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  agent-creator-static-validator:
+    lifecycle: agent-factory
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  agent-creator-semantic-verifier:
+    lifecycle: agent-factory
+    allowed_tiers: [T0_help, T1_discovery]
+    denied_scripts: [ai-edit.sh, ai-rollback.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  agent-creator-runtime-guardian:
+    lifecycle: runtime-safety
+    # The only normal agent allowed pre-tool-use.sh / post-tool-use.sh.
+    allowed_tiers: [T0_help, T1_discovery, T3_validation]
+    allowed_scripts: [pre-tool-use.sh, post-tool-use.sh]
+    denied_scripts: [ai-edit.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]
+
+  agent-creator-supervisor:
+    lifecycle: orchestration
+    allowed_tiers: [T0_help, T1_discovery, T3_validation, T4_planning]
+    denied_scripts: [ai-edit.sh, prune-shipped-targets.sh, install-mandatory-tools.sh, all_in_one.sh, watch-loop.sh]

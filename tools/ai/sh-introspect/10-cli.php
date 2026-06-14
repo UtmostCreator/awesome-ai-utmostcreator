@@ -13,6 +13,7 @@ function shIntrospectMain(array $argv): int
     $strictRisk = false;
     $path = null;
     $outputPath = null; // when set, the report is written here instead of STDOUT
+    $pagerMode = 'auto'; // 'auto' | 'always' | 'never' — smart pager preference
     $expectFormat = false; // true after a bare `--format` awaiting its value
     $expectOutput = false; // true after a bare `--output` awaiting its value
 
@@ -24,12 +25,17 @@ function shIntrospectMain(array $argv): int
                 $forceJson = true;
                 continue;
             }
-            if ($arg === 'help') {
+            if ($arg === 'help' || $arg === 'summary') {
+                // `summary` is an alias of `help`: the compact contract summary.
                 $helpSummary = true;
                 continue;
             }
+            if ($arg === 'full') {
+                // `full` explicitly names the verbose text view (the default).
+                continue;
+            }
             $jsonMode = getenv('AI_OUTPUT') === 'json';
-            return shIntrospectFail($jsonMode, '', "unknown --format value: {$arg} (expected json or help)");
+            return shIntrospectFail($jsonMode, '', "unknown --format value: {$arg} (expected json, help, summary, or full)");
         }
         // Value for a preceding bare `--output` (space-separated form).
         if ($expectOutput) {
@@ -49,6 +55,17 @@ function shIntrospectMain(array $argv): int
         // --strict-risk: exit non-zero (3) when a critical risk is detected.
         if ($arg === '--strict-risk') {
             $strictRisk = true;
+            continue;
+        }
+        // Smart pager toggles. These only affect a human-readable report routed
+        // to an interactive TTY; JSON, --output, piped, and CI sinks are never
+        // paged regardless (see shIntrospectShouldPage).
+        if ($arg === '--no-pager') {
+            $pagerMode = 'never';
+            continue;
+        }
+        if ($arg === '--pager') {
+            $pagerMode = 'always';
             continue;
         }
         // Bare `--format VALUE` (space-separated); the value is the next arg.
@@ -75,13 +92,18 @@ function shIntrospectMain(array $argv): int
                 $forceJson = true;
                 continue;
             }
-            if ($value === 'help') {
+            if ($value === 'help' || $value === 'summary') {
+                // `summary` is an alias of `help`: the compact contract summary.
                 $helpSummary = true;
+                continue;
+            }
+            if ($value === 'full') {
+                // `full` explicitly names the verbose text view (the default).
                 continue;
             }
             // Honour AI_OUTPUT=json for the error envelope shape when present.
             $jsonMode = getenv('AI_OUTPUT') === 'json';
-            return shIntrospectFail($jsonMode, '', "unknown --format value: {$value} (expected json or help)");
+            return shIntrospectFail($jsonMode, '', "unknown --format value: {$value} (expected json, help, summary, or full)");
         }
         if (str_starts_with($arg, '--')) {
             // Unknown flags are ignored for forward-compat; the only meaningful
@@ -105,7 +127,7 @@ function shIntrospectMain(array $argv): int
     // compact per-file index. `$path`, when given, is treated as the discovery
     // root; otherwise the repo's scripts/ai directory is used.
     if ($all) {
-        return shIntrospectAllMain($jsonMode, $path, $strictRisk, $outputPath);
+        return shIntrospectAllMain($jsonMode, $path, $strictRisk, $outputPath, $pagerMode);
     }
 
     if ($path === null) {
@@ -150,7 +172,8 @@ function shIntrospectMain(array $argv): int
         $report = shIntrospectRenderText($result);
     }
 
-    if (!shIntrospectEmitReport($report, $outputPath, $jsonMode)) {
+    $pageReport = shIntrospectShouldPage($pagerMode, $jsonMode, $outputPath);
+    if (!shIntrospectEmitReport($report, $outputPath, $jsonMode, $pageReport)) {
         return 2;
     }
 
@@ -173,18 +196,29 @@ Usage:
     php tools/ai/sh-introspect.php FILE.sh            human-readable summary
     AI_OUTPUT=json php tools/ai/sh-introspect.php FILE.sh   JSON envelope
     php tools/ai/sh-introspect.php --format=json FILE.sh    force JSON
+    php tools/ai/sh-introspect.php --format=full FILE.sh    verbose text (default)
     php tools/ai/sh-introspect.php --format=help FILE.sh    compact help summary
+    php tools/ai/sh-introspect.php --format=summary FILE.sh alias of --format=help
     php tools/ai/sh-introspect.php --all [ROOT]            repo-wide index
     php tools/ai/sh-introspect.php --all --format json     index JSON envelope
     php tools/ai/sh-introspect.php --output PATH FILE.sh   write report to PATH
+    php tools/ai/sh-introspect.php --no-pager FILE.sh      never page output
+    php tools/ai/sh-introspect.php --pager FILE.sh         force pager on a TTY
     php tools/ai/sh-introspect.php --strict-risk FILE.sh   exit 3 on critical risk
     php tools/ai/sh-introspect.php --help | -h             this help
 
 The target script is never executed; FILE.sh is parsed statically as text.
 
---output PATH (or -o PATH / --output=PATH) writes the report to a file instead
-of STDOUT, creating parent directories as needed; a confirmation line goes to
-stderr. It works in text, --format=help, JSON, and --all modes.
+--format selects the view: full (verbose text, the default), help/summary
+(compact contract summary), or json (envelope). --output PATH (or -o PATH /
+--output=PATH) writes the report to a file instead of STDOUT, creating parent
+directories as needed; a confirmation line goes to stderr. It works in text,
+--format=help, JSON, and --all modes.
+
+A human-readable report is routed through a pager only on an interactive
+terminal (never for JSON, --output, piped, or CI output). Use --no-pager to
+disable it and --pager to force it on a TTY. The pager honours $AI_PAGER /
+$PAGER, defaulting to `less -R -F -X`; a missing pager falls back to STDOUT.
 Reports: functions, modes (with display_group), mode_contracts (per-mode
 deps/positionals/examples), params (with applies_to_modes + scope), positionals,
 case_labels, json_keys, json_key_candidates, json_paths (JSONPath + confidence),
@@ -204,10 +238,18 @@ TXT;
  * Emit a rendered report either to STDOUT or, when $outputPath is set, to that
  * file. Parent directories are created as needed. Returns false (and reports an
  * error envelope/stderr line) when the file could not be written.
+ *
+ * When $page is true the report is routed through a pager (interactive human
+ * text only; the caller is responsible for the gate). The pager changes only
+ * the sink — the report bytes are unchanged — and a missing/broken pager falls
+ * back to a direct STDOUT write so the run never fails for paging reasons.
  */
-function shIntrospectEmitReport(string $report, ?string $outputPath, bool $jsonMode): bool
+function shIntrospectEmitReport(string $report, ?string $outputPath, bool $jsonMode, bool $page = false): bool
 {
     if ($outputPath === null || $outputPath === '') {
+        if ($page && shIntrospectPageReport($report)) {
+            return true;
+        }
         fwrite(STDOUT, $report);
         return true;
     }

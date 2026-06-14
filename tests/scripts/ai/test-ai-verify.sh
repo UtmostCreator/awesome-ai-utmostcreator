@@ -98,10 +98,15 @@ load_scoping_functions() {
     VERIFY_AUTHOR=""
     # shellcheck disable=SC2034
     AI_VERIFY_SCOPE="branch"
-    # Pull only the function bodies (between the marked helpers) by sourcing the
-    # whole script in a guarded way: define a fake "cd"/main no-op is fragile, so
-    # instead we re-declare the functions verbatim via sed extraction.
-    eval "$(sed -n '/^resolve_branch_base() {/,/^}/p;/^branch_scoped_files() {/,/^}/p;/^scoped_php_files() {/,/^}/p;/^all_php_files_excluding_shipped() {/,/^}/p;/^is_shipped_ai_kit_shell_file() {/,/^}/p;/^is_shipped_ai_kit_php_file() {/,/^}/p;/^is_ai_kit_source_repo() {/,/^}/p;/^should_skip_shipped_ai_kit_shell_file() {/,/^}/p;/^should_skip_shipped_ai_kit_php_file() {/,/^}/p;/^is_changed_or_branch_scope() {/,/^}/p;/^tracked_existing_shell_files() {/,/^}/p' "$SCRIPT")"
+    # The scope/shipped-filter helpers live in load-ordered modules under
+    # scripts/ai/internal/ai-verify/ (the root ai-verify.sh is a thin loader).
+    # Source those modules directly to exercise the helpers in isolation. Order
+    # matches the root loader: shipped-filter predicates before the scope helpers
+    # that call them.
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/ai/internal/ai-verify/20-shipped-filters.sh"
+    # shellcheck disable=SC1091
+    source "$REPO_ROOT/scripts/ai/internal/ai-verify/10-scope.sh"
 }
 
 # resolve_branch_base prints a commit sha or fails cleanly

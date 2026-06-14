@@ -13,7 +13,7 @@
 #
 # Introspection target: sh-introspect.php inlines statically-resolvable sourced
 #   modules (see tools/ai/sh-introspect/22-source-inline.php), so introspecting
-#   the thin entrypoint aggregates the full contract from scripts/ai/ai-search/.
+#   the thin entrypoint aggregates the full contract from scripts/ai/internal/search/.
 
 # Early --help|-h delegate: render the JSON-driven help BEFORE sourcing any
 # runtime dependencies or dispatching search logic. This mirrors the

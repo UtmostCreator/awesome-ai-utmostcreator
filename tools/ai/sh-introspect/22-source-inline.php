@@ -8,7 +8,7 @@ declare(strict_types=1);
  * sh-introspect.php is a static single-file parser: it never executes the
  * target and cannot, on its own, see the contract of a thin entrypoint that
  * `source`s its real logic from sibling modules (e.g. scripts/ai/ai-search.sh
- * sourcing scripts/ai/ai-search/NN-*.sh).
+ * sourcing scripts/ai/internal/search/NN-*.sh).
  *
  * This module expands the raw script text BEFORE parsing by inlining the
  * contents of statically-resolvable, inside-repo `.sh` modules it sources, so

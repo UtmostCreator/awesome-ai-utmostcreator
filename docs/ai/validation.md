@@ -16,6 +16,7 @@ All validators live under `tools/ai/` and exit non-zero on failure:
 - `validate-command-policy.php` — compiled command-policy parity.
 - `validate-placeholders.php` — unresolved placeholder detection.
 - `validate-stub-surfaces.php`, `validate-mentor-parity.php`, `validate-context-budgets.php`, `validate-agent-spec.php` — focused surface checks.
+- `validate-script-access.php` — `.github/ai-script-access.yaml` tier/agent consistency: every root script tiered exactly once, dangerous scripts only in `T5_mutation_recovery`, internal modules never exposed, access-manifest agents exist in `docs/ai/AGENTS-MANIFEST.md`, and only the runtime guardian may use the tool-use hooks.
 
 ## Drift Terminology
 

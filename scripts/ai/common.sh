@@ -2,7 +2,7 @@
 # Shared compatibility facade for repository AI tooling scripts.
 #
 # This file is a thin facade. All logic lives in ordered modules under
-# scripts/ai/lib/, sourced here in 00->90 order. Each module is idempotent
+# scripts/ai/internal/lib/, sourced here in 00->90 order. Each module is idempotent
 # (unique source guard) so re-sourcing common.sh is safe. Dependent scripts
 # source ONLY this file; do not source lib modules directly.
 #
@@ -65,27 +65,27 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
 fi
 
 _AI_COMMON_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-_AI_COMMON_LIB_DIR="${_AI_COMMON_DIR}/lib"
+_AI_COMMON_LIB_DIR="${_AI_COMMON_DIR}/internal/lib"
 
-# shellcheck source=scripts/ai/lib/00-env.sh
+# shellcheck source=scripts/ai/internal/lib/00-env.sh
 source "${_AI_COMMON_LIB_DIR}/00-env.sh"
-# shellcheck source=scripts/ai/lib/05-core.sh
+# shellcheck source=scripts/ai/internal/lib/05-core.sh
 source "${_AI_COMMON_LIB_DIR}/05-core.sh"
-# shellcheck source=scripts/ai/lib/10-json.sh
+# shellcheck source=scripts/ai/internal/lib/10-json.sh
 source "${_AI_COMMON_LIB_DIR}/10-json.sh"
-# shellcheck source=scripts/ai/lib/20-paths.sh
+# shellcheck source=scripts/ai/internal/lib/20-paths.sh
 source "${_AI_COMMON_LIB_DIR}/20-paths.sh"
-# shellcheck source=scripts/ai/lib/30-logging.sh
+# shellcheck source=scripts/ai/internal/lib/30-logging.sh
 source "${_AI_COMMON_LIB_DIR}/30-logging.sh"
-# shellcheck source=scripts/ai/lib/40-session.sh
+# shellcheck source=scripts/ai/internal/lib/40-session.sh
 source "${_AI_COMMON_LIB_DIR}/40-session.sh"
-# shellcheck source=scripts/ai/lib/50-policy.sh
+# shellcheck source=scripts/ai/internal/lib/50-policy.sh
 source "${_AI_COMMON_LIB_DIR}/50-policy.sh"
-# shellcheck source=scripts/ai/lib/60-exec-guard.sh
+# shellcheck source=scripts/ai/internal/lib/60-exec-guard.sh
 source "${_AI_COMMON_LIB_DIR}/60-exec-guard.sh"
-# shellcheck source=scripts/ai/lib/70-secrets.sh
+# shellcheck source=scripts/ai/internal/lib/70-secrets.sh
 source "${_AI_COMMON_LIB_DIR}/70-secrets.sh"
-# shellcheck source=scripts/ai/lib/80-tokens.sh
+# shellcheck source=scripts/ai/internal/lib/80-tokens.sh
 source "${_AI_COMMON_LIB_DIR}/80-tokens.sh"
-# shellcheck source=scripts/ai/lib/90-snapshot.sh
+# shellcheck source=scripts/ai/internal/lib/90-snapshot.sh
 source "${_AI_COMMON_LIB_DIR}/90-snapshot.sh"

@@ -142,7 +142,9 @@ function aiInstallerPackRegistry(): array
         ],
         'scripts-pack' => [
             ['type' => 'file', 'source' => 'scripts/ai/common.sh', 'target' => 'scripts/ai/common.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'dir', 'source' => 'scripts/ai/lib', 'target' => 'scripts/ai/lib', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'scripts/ai/internal/lib', 'target' => 'scripts/ai/internal/lib', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'scripts/ai/internal/search', 'target' => 'scripts/ai/internal/search', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'scripts/ai/bin', 'target' => 'scripts/ai/bin', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-search.sh', 'target' => 'scripts/ai/ai-search.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-search-multi.sh', 'target' => 'scripts/ai/ai-search-multi.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-diff-context.sh', 'target' => 'scripts/ai/ai-diff-context.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -217,6 +219,7 @@ function aiInstallerPackRegistry(): array
         ],
         'docs-reference-pack' => [
             ['type' => 'file', 'source' => 'docs/ai/agent-ops.md', 'target' => 'docs/ai/agent-ops.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'docs/ai/AGENTS-MANIFEST.md', 'target' => 'docs/ai/AGENTS-MANIFEST.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/agent-ops-checklist.md', 'target' => 'docs/ai/agent-ops-checklist.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/failure-handling.md', 'target' => 'docs/ai/failure-handling.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/validation.md', 'target' => 'docs/ai/validation.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
