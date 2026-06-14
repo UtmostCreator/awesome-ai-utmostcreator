@@ -337,6 +337,46 @@ class AgentPermissionPolicyTest extends TestCase
         }
     }
 
+    /**
+     * Phase 4 permission-drift guard: the gateway `tool:run *` allow rule must never
+     * extend a plain `allow` to any `--apply` invocation. Any `tool:run` pattern that
+     * mentions `--apply` must resolve to `ask` (or `deny`), so the no-prompt mutation
+     * lane cannot silently re-open in either the template or the rendered config.
+     */
+    #[DataProvider('projectConfigProvider')]
+    public function testProjectConfigNeverPlainAllowsToolRunApply(string $relativePath): void
+    {
+        $bash = $this->loadProjectBashPermissions($relativePath);
+
+        $violations = [];
+        foreach ($bash as $pattern => $decision) {
+            if (str_contains($pattern, 'tool:run') && str_contains($pattern, '--apply') && $decision === 'allow') {
+                $violations[] = "$pattern => allow";
+            }
+        }
+
+        self::assertSame([], $violations, sprintf('%s must not plain-allow tool:run --apply: %s', $relativePath, implode('; ', $violations)));
+
+        // And the explicit ask override must be present so --apply always prompts.
+        self::assertSame(
+            'ask',
+            $bash['php tools/ai/ai.php tool:run * --apply*'] ?? null,
+            sprintf('%s must ask before tool:run --apply (Fix A defense-in-depth)', $relativePath)
+        );
+
+        // last-match-wins: the --apply ask override must come AFTER the tool:run * allow.
+        $keys = array_keys($bash);
+        $allowPos = array_search('php tools/ai/ai.php tool:run *', $keys, true);
+        $askPos = array_search('php tools/ai/ai.php tool:run * --apply*', $keys, true);
+        self::assertIsInt($allowPos, sprintf('%s must define tool:run * allow', $relativePath));
+        self::assertIsInt($askPos, sprintf('%s must define tool:run * --apply* ask', $relativePath));
+        self::assertGreaterThan(
+            $allowPos,
+            $askPos,
+            sprintf('%s: the --apply ask rule must come after tool:run * allow (last-match-wins)', $relativePath)
+        );
+    }
+
     #[DataProvider('projectConfigProvider')]
     public function testProjectConfigNeverAllowsForbiddenPatterns(string $relativePath): void
     {

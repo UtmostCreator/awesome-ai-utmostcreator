@@ -34,6 +34,9 @@ jobs:
       - name: Validate install surface references
         run: php tools/ai/validate-install-surface.php --strict
 
+      - name: Check script registry projection drift
+        run: php tools/ai/ai.php registry:export --check
+
       - name: Validate adapter drift on changed files
         env:
           GITHUB_BASE_REF: ${{ github.base_ref }}
