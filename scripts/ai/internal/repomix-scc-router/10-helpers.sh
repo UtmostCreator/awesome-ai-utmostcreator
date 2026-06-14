@@ -145,35 +145,15 @@ IGNORE_PATTERNS=()
 COLLECTED_FILES=()
 COLLECTED_CHANGED_FILES=()
 
-# Hardcoded safety excludes: ephemeral/runtime/generated state that must never
-# enter a context plan even when .repomixignore is missing or edited. These use
-# the recursive directory form that path_is_ignored() now understands, so they
-# apply in both the git and non-git collection branches.
-AI_CONTEXT_HARD_EXCLUDES=(
-    ".git"
-    ".ai-backups"
-    ".ai-logs"
-    ".cache"
-    ".next"
-    ".nuxt"
-    ".repomix-context"
-    ".turbo"
-    "docs/ai/generated"
-    "node_modules"
-    "vendor"
-    "dist"
-    "build"
-    "coverage"
-    "logs"
-    "tmp"
-    "temp"
-    "cache"
-    "storage/logs"
-    "storage/framework/cache"
-    "storage/framework/sessions"
-    "storage/framework/views"
-    "target"
-)
+# Safety excludes: ephemeral/runtime/generated state that must never enter a
+# context plan even when .repomixignore is missing or edited. These use the
+# recursive directory form that path_is_ignored() understands, so they apply in
+# both the git and non-git collection branches.
+AI_CONTEXT_HARD_EXCLUDES=()
+ai_load_config_list AI_CONTEXT_HARD_EXCLUDES "$COMMON_DIR/internal/config/source-exclude-dirs.txt" \
+    .git .ai-backups .ai-logs .cache .next .nuxt .repomix-context .turbo \
+    docs/ai/generated node_modules vendor dist build coverage logs tmp temp cache \
+    storage/logs storage/framework/cache storage/framework/sessions storage/framework/views target
 
 load_ignore_patterns() {
     local ignore_file="$ROOT/.repomixignore"

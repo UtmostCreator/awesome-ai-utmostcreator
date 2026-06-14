@@ -55,3 +55,25 @@ wait_for_capture_flag() {
     [[ -s "$f" ]] && return 0
     printf 'true' >"$f"
 }
+
+ai_load_config_list() {
+    local -n _ai_list_ref=$1
+    local _ai_list_file="$2"
+    shift 2
+
+    _ai_list_ref=()
+    if [[ -f "$_ai_list_file" ]]; then
+        local _ai_line
+        while IFS= read -r _ai_line || [[ -n "$_ai_line" ]]; do
+            _ai_line="${_ai_line%%#*}"
+            _ai_line="${_ai_line#${_ai_line%%[![:space:]]*}}"
+            _ai_line="${_ai_line%${_ai_line##*[![:space:]]}}"
+            [[ -n "$_ai_line" ]] || continue
+            _ai_list_ref+=("$_ai_line")
+        done <"$_ai_list_file"
+    fi
+
+    if ((${#_ai_list_ref[@]} == 0)); then
+        _ai_list_ref=("$@")
+    fi
+}
