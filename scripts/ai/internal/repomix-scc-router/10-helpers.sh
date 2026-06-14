@@ -253,7 +253,7 @@ collect_files() {
                 COLLECTED_FILES+=("$relative_path")
             fi
         done < <(
-            cd "$ROOT"
+            cd "$ROOT" || exit
             rg --files --hidden .
         )
     fi
