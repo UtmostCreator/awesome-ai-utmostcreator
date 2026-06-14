@@ -1,2537 +1,2798 @@
 {
-  "case_labels": [
-    {
-      "case_subject": "\"$case_mode\"",
-      "confidence": 70,
-      "line": 0,
-      "name": "ignore",
-      "source": "internal-case"
-    },
-    {
-      "case_subject": "\"$case_mode\"",
-      "confidence": 70,
-      "line": 0,
-      "name": "sensitive",
-      "source": "internal-case"
-    },
-    {
-      "case_subject": "\"$case_mode\"",
-      "confidence": 70,
-      "line": 0,
-      "name": "smart",
-      "source": "internal-case"
-    },
-    {
-      "case_subject": "\"$pattern_mode\"",
-      "confidence": 70,
-      "line": 0,
-      "name": "fixed",
-      "source": "internal-case"
-    },
-    {
-      "case_subject": "\"$pattern_mode\"",
-      "confidence": 70,
-      "line": 0,
-      "name": "pcre2",
-      "source": "internal-case"
-    },
-    {
-      "case_subject": "\"$route_mode\"",
-      "confidence": 70,
-      "line": 0,
-      "name": "__text_fallback",
-      "source": "internal-case"
-    },
-    {
-      "case_subject": "\"$count_mode\"",
-      "confidence": 70,
-      "line": 0,
-      "name": "count",
-      "source": "internal-case"
-    },
-    {
-      "case_subject": "\"$count_mode\"",
-      "confidence": 70,
-      "line": 0,
-      "name": "count-matches",
-      "source": "internal-case"
-    }
-  ],
-  "commands": [
-    {
-      "argv_hint": "cat <<'EOF'",
-      "effect": "filesystem-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "cat",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "if git -C \"$root_input\" rev-parse --show-toplevel >/dev/null 2>&1; then",
-      "effect": "git-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "git rev-parse",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "f=\"$(git config --get core.excludesfile 2>/dev/null || true)\"",
-      "effect": "git-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "git config",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "if mode_needs_rg \"$mode\" && ! command_exists rg; then",
-      "effect": "filesystem-read",
-      "kind": "dependency-check",
-      "line": 0,
-      "name": "rg",
-      "risk": "low",
-      "source": "command-check"
-    },
-    {
-      "argv_hint": "out=\"$(git -C \"$root\" diff --name-only 2>/dev/null | tr -d '\\r' || true)\"",
-      "effect": "git-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "git diff",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "add_warning \"fd/fdfind not installed; files mode degraded to 'git ls-files' (tracked files only; substring match, not...",
-      "effect": "git-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "git ls-files",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "add_warning \"fd/fdfind not installed; files mode degraded to 'git ls-files' (tracked files only; substring match, not...",
-      "effect": "filesystem-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "fd",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "out=\"$(cd \"$repo_root\" && rg \"${case_args[@]}\" \"${rg_fixed_args[@]}\" -H -n -- \"$query\" \"${cleaned[@]}\" 2>/dev/null)\" ...",
-      "effect": "filesystem-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "rg",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "out=\"$(git -C \"$root\" grep \"${git_grep_args[@]}\" -n -- \"$query\" 2>/dev/null)\" || rc=$?",
-      "effect": "git-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "git grep",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "patch=\"$(cd \"$repo_root\" && git show --format= --patch \"$commit_hash\" 2>/dev/null || true)\"",
-      "effect": "git-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "git show",
-      "risk": "low",
-      "source": "command-position"
-    },
-    {
-      "argv_hint": "command_exists ast-grep ||",
-      "effect": "filesystem-read",
-      "kind": "dependency-check",
-      "line": 0,
-      "name": "ast-grep",
-      "risk": "low",
-      "source": "command-check"
-    },
-    {
-      "argv_hint": "out=\"$(ast-grep run --lang \"$lang\" --pattern \"$pattern\" --json \"$root\" 2>/dev/null)\" || rc=$?",
-      "effect": "filesystem-read",
-      "kind": "invocation",
-      "line": 0,
-      "name": "ast-grep",
-      "risk": "low",
-      "source": "command-position"
-    }
-  ],
-  "dependencies": [
-    {
-      "category": "primary-tool",
-      "classification": "required",
-      "confidence": 90,
-      "name": "ast-grep",
-      "source": "command-check"
-    },
-    {
-      "category": "base-utility",
-      "classification": "candidate",
-      "confidence": 70,
-      "name": "awk",
-      "source": "invocation"
-    },
-    {
-      "category": "base-utility",
-      "classification": "candidate",
-      "confidence": 70,
-      "name": "cat",
-      "source": "invocation"
-    },
-    {
-      "category": "primary-tool",
-      "classification": "candidate",
-      "confidence": 70,
-      "name": "fd",
-      "source": "invocation"
-    },
-    {
-      "category": "base-utility",
-      "classification": "required",
-      "confidence": 90,
-      "name": "find",
-      "source": "command-check"
-    },
-    {
-      "category": "primary-tool",
-      "classification": "required",
-      "confidence": 90,
-      "name": "git",
-      "source": "command-check"
-    },
-    {
-      "category": "base-utility",
-      "classification": "candidate",
-      "confidence": 70,
-      "name": "grep",
-      "source": "invocation"
-    },
-    {
-      "category": "primary-tool",
-      "classification": "optional",
-      "confidence": 85,
-      "name": "jq",
-      "required_for_modes": [
-        "text"
-      ],
-      "source": "tool-loop"
-    },
-    {
-      "category": "primary-tool",
-      "classification": "required",
-      "confidence": 90,
-      "name": "rg",
-      "required_for_modes": [
-        "deps"
-      ],
-      "source": "command-check"
-    },
-    {
-      "category": "base-utility",
-      "classification": "candidate",
-      "confidence": 70,
-      "name": "sed",
-      "source": "invocation"
-    },
-    {
-      "category": "base-utility",
-      "classification": "candidate",
-      "confidence": 70,
-      "name": "tail",
-      "source": "invocation"
-    }
-  ],
-  "env_inputs": [
-    {
-      "confidence": 90,
-      "default": "${BASH_SOURCE[0]",
-      "line": 0,
-      "name": "AI_SEARCH_ENTRYPOINT",
-      "source": "param-expansion"
-    },
-    {
-      "confidence": 90,
-      "default": "php",
-      "line": 0,
-      "name": "PHP_BIN",
-      "source": "param-expansion"
-    },
-    {
-      "confidence": 90,
-      "default": "0",
-      "line": 0,
-      "name": "AI_SEARCH_STRICT",
-      "source": "param-expansion"
-    },
-    {
-      "confidence": 90,
-      "default": "",
-      "line": 0,
-      "name": "AI_OUTPUT",
-      "source": "param-expansion"
-    },
-    {
-      "confidence": 90,
-      "default": "$HOME/.config",
-      "line": 0,
-      "name": "XDG_CONFIG_HOME",
-      "source": "param-expansion"
-    },
-    {
-      "confidence": 90,
-      "default": "php",
-      "line": 0,
-      "name": "AI_LANG",
-      "source": "param-expansion"
-    }
-  ],
-  "errors": [],
-  "examples": [
-    {
-      "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh text TenantResolver . --fixed"
-    },
-    {
-      "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed"
-    },
-    {
-      "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged"
-    },
-    {
-      "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php"
-    }
-  ],
-  "examples_by_mode": [
-    {
-      "examples": [
-        "AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed"
-      ],
-      "mode": "changed-text"
-    },
-    {
-      "examples": [
-        "AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php"
-      ],
-      "mode": "class"
-    },
-    {
-      "examples": [
-        "AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged"
-      ],
-      "mode": "diff"
-    },
-    {
-      "examples": [
-        "AI_OUTPUT=json bash scripts/ai/ai-search.sh text TenantResolver . --fixed"
-      ],
-      "mode": "text"
-    }
-  ],
-  "file": "<REPO>/scripts/ai/ai-search.sh",
-  "functions": [
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "usage",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "introspect_help_summary",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "normalize_legacy_alias",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "add_warning",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "init_run_state",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "is_file_list_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "is_content_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "is_ast_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "is_no_query_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "is_surface_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "surface_globs",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "to_json_array",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "emit_json",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "fail",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "lines_to_matches",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "canonical_root",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "validate_non_negative_int",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "lines_to_structured_results",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "rg_json_to_results",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "rg_json_to_matches",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "context_lines_json",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "add_context_to_results",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "apply_max_bytes_to_results",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "parse_flags",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "interpret_positionals",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "handle_dry_run",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "build_case_pattern_args",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "resolve_global_gitignore",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "apply_global_gitignore",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "build_rg_scope_args",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "mode_needs_rg",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "mode_needs_git",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "mode_has_rg_fallback",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "check_tool_guards",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "require_git_root",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_changed_files",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_staged_files",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_files",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_files_fallback",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "search_git_scoped_files",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_changed_text",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_staged_text",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_tracked",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_text",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_text_fallback",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "backend_surface",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "query_matches_line",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "run_diff_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "run_history_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "run_todo_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "run_unsafe_patterns_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "run_ast_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "run_doctor_mode",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "run_backend",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "emit_results",
-      "source": "definition"
-    },
-    {
-      "confidence": 95,
-      "line": 0,
-      "name": "ai_search_main",
-      "source": "definition"
-    }
-  ],
-  "help": {
-    "json_output_env": "AI_OUTPUT=json",
-    "summary": "unified repository search entrypoint",
-    "usage": "ai-search.sh MODE [QUERY] [root] [flags]"
-  },
-  "json_key_candidates": [
-    {
-      "confidence": 55,
-      "name": "absolute",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "after",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "available",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "before",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "git_available",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "kind",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "lang",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "max_results",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "missing",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "new_line",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "path",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "result",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "returned",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "root",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "scope",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "source_tool",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "text",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "truncated",
-      "source": "code"
-    },
-    {
-      "confidence": 55,
-      "name": "us",
-      "source": "code"
-    }
-  ],
-  "json_keys": [
-    {
-      "confidence": 90,
-      "name": "errors",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "limits",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "matches",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "meta",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "mode",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "query",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "results",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "schema",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "status",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "summary",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "symbols",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "tool",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 90,
-      "name": "warnings",
-      "source": "usage-envelope"
-    }
-  ],
-  "json_paths": [
-    {
-      "confidence": 90,
-      "path": "$.errors",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 90,
-      "path": "$.limits",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 80,
-      "path": "$.limits.max_results",
-      "source": "jq-object"
-    },
-    {
-      "confidence": 90,
-      "path": "$.matches",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 90,
-      "path": "$.meta",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 80,
-      "path": "$.meta.returned",
-      "source": "jq-object"
-    },
-    {
-      "confidence": 80,
-      "path": "$.meta.truncated",
-      "source": "jq-object"
-    },
-    {
-      "confidence": 90,
-      "path": "$.mode",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 90,
-      "path": "$.query",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 90,
-      "path": "$.results",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 70,
-      "path": "$.results[].author",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.results[].commit",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.results[].count",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.results[].date",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.results[].message",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.results[].path",
-      "source": "array-element"
-    },
-    {
-      "confidence": 90,
-      "path": "$.schema",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 90,
-      "path": "$.status",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 90,
-      "path": "$.summary",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 90,
-      "path": "$.symbols",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 70,
-      "path": "$.symbols[].end",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.symbols[].kind",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.symbols[].language",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.symbols[].name",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.symbols[].path",
-      "source": "array-element"
-    },
-    {
-      "confidence": 70,
-      "path": "$.symbols[].start",
-      "source": "array-element"
-    },
-    {
-      "confidence": 90,
-      "path": "$.tool",
-      "source": "top-level-key"
-    },
-    {
-      "confidence": 90,
-      "path": "$.warnings",
-      "source": "top-level-key"
-    }
-  ],
-  "kind": "script",
-  "meta": {
-    "confidence": 90,
-    "parser": "php-static",
-    "target_executed": false
-  },
-  "mode_contracts": [
-    {
-      "dependencies": [
-        "git",
-        "jq"
-      ],
-      "deprecated": true,
-      "examples": [],
-      "family": "unknown",
-      "name": "changed",
-      "positionals": [
+    "case_labels": [
         {
-          "name": "MODE",
-          "required": true
+            "case_subject": "\"$case_mode\"",
+            "confidence": 70,
+            "line": 0,
+            "name": "ignore",
+            "source": "internal-case"
         },
         {
-          "name": "root",
-          "required": false
+            "case_subject": "\"$case_mode\"",
+            "confidence": 70,
+            "line": 0,
+            "name": "sensitive",
+            "source": "internal-case"
+        },
+        {
+            "case_subject": "\"$case_mode\"",
+            "confidence": 70,
+            "line": 0,
+            "name": "smart",
+            "source": "internal-case"
+        },
+        {
+            "case_subject": "\"$pattern_mode\"",
+            "confidence": 70,
+            "line": 0,
+            "name": "fixed",
+            "source": "internal-case"
+        },
+        {
+            "case_subject": "\"$pattern_mode\"",
+            "confidence": 70,
+            "line": 0,
+            "name": "pcre2",
+            "source": "internal-case"
+        },
+        {
+            "case_subject": "\"$route_mode\"",
+            "confidence": 70,
+            "line": 0,
+            "name": "__text_fallback",
+            "source": "internal-case"
+        },
+        {
+            "case_subject": "\"$count_mode\"",
+            "confidence": 70,
+            "line": 0,
+            "name": "count",
+            "source": "internal-case"
+        },
+        {
+            "case_subject": "\"$count_mode\"",
+            "confidence": 70,
+            "line": 0,
+            "name": "count-matches",
+            "source": "internal-case"
         }
-      ],
-      "query_required": false,
-      "replacements": [
-        "changed-files",
-        "changed-text"
-      ]
-    },
-    {
-      "dependencies": [
-        "git",
-        "jq"
-      ],
-      "description": "list unstaged-changed files",
-      "examples": [],
-      "family": "file-list",
-      "name": "changed-files",
-      "positionals": [
+    ],
+    "commands": [
         {
-          "name": "MODE",
-          "required": true
+            "argv_hint": "cat <<'EOF'",
+            "effect": "filesystem-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "cat",
+            "risk": "low",
+            "source": "command-position"
         },
         {
-          "name": "root",
-          "required": false
+            "argv_hint": "if git -C \"$root_input\" rev-parse --show-toplevel >/dev/null 2>&1; then",
+            "effect": "git-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "git rev-parse",
+            "risk": "low",
+            "source": "command-position"
+        },
+        {
+            "argv_hint": "f=\"$(git config --get core.excludesfile 2>/dev/null || true)\"",
+            "effect": "git-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "git config",
+            "risk": "low",
+            "source": "command-position"
+        },
+        {
+            "argv_hint": "if mode_needs_rg \"$mode\" && ! command_exists rg; then",
+            "effect": "filesystem-read",
+            "kind": "dependency-check",
+            "line": 0,
+            "name": "rg",
+            "risk": "low",
+            "source": "command-check"
+        },
+        {
+            "argv_hint": "out=\"$(git -C \"$root\" diff --name-only 2>/dev/null | tr -d '\\r' || true)\"",
+            "effect": "git-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "git diff",
+            "risk": "low",
+            "source": "command-position"
+        },
+        {
+            "argv_hint": "add_warning \"fd/fdfind not installed; files mode degraded to 'git ls-files' (tracked files only; substring match, not...",
+            "effect": "git-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "git ls-files",
+            "risk": "low",
+            "source": "command-position"
+        },
+        {
+            "argv_hint": "add_warning \"fd/fdfind not installed; files mode degraded to 'git ls-files' (tracked files only; substring match, not...",
+            "effect": "filesystem-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "fd",
+            "risk": "low",
+            "source": "command-position"
+        },
+        {
+            "argv_hint": "out=\"$(cd \"$repo_root\" && rg \"${case_args[@]}\" \"${rg_fixed_args[@]}\" -H -n -- \"$query\" \"${cleaned[@]}\" 2>/dev/null)\" ...",
+            "effect": "filesystem-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "rg",
+            "risk": "low",
+            "source": "command-position"
+        },
+        {
+            "argv_hint": "out=\"$(git -C \"$root\" grep \"${git_grep_args[@]}\" -n -- \"$query\" 2>/dev/null)\" || rc=$?",
+            "effect": "git-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "git grep",
+            "risk": "low",
+            "source": "command-position"
+        },
+        {
+            "argv_hint": "patch=\"$(cd \"$repo_root\" && git show --format= --patch \"$commit_hash\" 2>/dev/null || true)\"",
+            "effect": "git-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "git show",
+            "risk": "low",
+            "source": "command-position"
+        },
+        {
+            "argv_hint": "command_exists ast-grep ||",
+            "effect": "filesystem-read",
+            "kind": "dependency-check",
+            "line": 0,
+            "name": "ast-grep",
+            "risk": "low",
+            "source": "command-check"
+        },
+        {
+            "argv_hint": "out=\"$(ast-grep run --lang \"$lang\" --pattern \"$pattern\" --json \"$root\" 2>/dev/null)\" || rc=$?",
+            "effect": "filesystem-read",
+            "kind": "invocation",
+            "line": 0,
+            "name": "ast-grep",
+            "risk": "low",
+            "source": "command-position"
         }
-      ],
-      "query_required": false
-    },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "jq",
-        "rg"
-      ],
-      "description": "search only unstaged-changed files",
-      "examples": [
-        "AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed"
-      ],
-      "family": "content",
-      "name": "changed-text",
-      "positionals": [
+    ],
+    "dependencies": [
         {
-          "name": "MODE",
-          "required": true
+            "category": "primary-tool",
+            "classification": "required",
+            "confidence": 90,
+            "name": "ast-grep",
+            "source": "command-check"
         },
         {
-          "name": "QUERY",
-          "required": true
+            "category": "base-utility",
+            "classification": "candidate",
+            "confidence": 70,
+            "name": "awk",
+            "source": "invocation"
         },
         {
-          "name": "root",
-          "required": false
+            "category": "base-utility",
+            "classification": "candidate",
+            "confidence": 70,
+            "name": "cat",
+            "source": "invocation"
+        },
+        {
+            "category": "primary-tool",
+            "classification": "candidate",
+            "confidence": 70,
+            "name": "fd",
+            "source": "invocation"
+        },
+        {
+            "category": "base-utility",
+            "classification": "required",
+            "confidence": 90,
+            "name": "find",
+            "source": "command-check"
+        },
+        {
+            "category": "primary-tool",
+            "classification": "required",
+            "confidence": 90,
+            "name": "git",
+            "source": "command-check"
+        },
+        {
+            "category": "base-utility",
+            "classification": "candidate",
+            "confidence": 70,
+            "name": "grep",
+            "source": "invocation"
+        },
+        {
+            "category": "primary-tool",
+            "classification": "optional",
+            "confidence": 85,
+            "name": "jq",
+            "required_for_modes": [
+                "text"
+            ],
+            "source": "tool-loop"
+        },
+        {
+            "category": "primary-tool",
+            "classification": "required",
+            "confidence": 90,
+            "name": "rg",
+            "required_for_modes": [
+                "deps"
+            ],
+            "source": "command-check"
+        },
+        {
+            "category": "base-utility",
+            "classification": "candidate",
+            "confidence": 70,
+            "name": "sed",
+            "source": "invocation"
+        },
+        {
+            "category": "base-utility",
+            "classification": "candidate",
+            "confidence": 70,
+            "name": "tail",
+            "source": "invocation"
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [
-        "ast-grep",
-        "git",
-        "jq"
-      ],
-      "description": "class definitions only (symbols[] with kind=class)",
-      "examples": [
-        "AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php"
-      ],
-      "family": "content",
-      "name": "class",
-      "output_notes": "symbols[] with kind",
-      "positionals": [
+    ],
+    "env_inputs": [
         {
-          "name": "MODE",
-          "required": true
+            "confidence": 90,
+            "default": "${BASH_SOURCE[0]",
+            "line": 0,
+            "name": "AI_SEARCH_ENTRYPOINT",
+            "source": "param-expansion"
         },
         {
-          "name": "QUERY",
-          "required": true
+            "confidence": 90,
+            "default": "php",
+            "line": 0,
+            "name": "PHP_BIN",
+            "source": "param-expansion"
         },
         {
-          "name": "root",
-          "required": false
+            "confidence": 90,
+            "default": "0",
+            "line": 0,
+            "name": "AI_SEARCH_STRICT",
+            "source": "param-expansion"
+        },
+        {
+            "confidence": 90,
+            "default": "",
+            "line": 0,
+            "name": "AI_OUTPUT",
+            "source": "param-expansion"
+        },
+        {
+            "confidence": 90,
+            "default": "$HOME/.config",
+            "line": 0,
+            "name": "XDG_CONFIG_HOME",
+            "source": "param-expansion"
+        },
+        {
+            "confidence": 90,
+            "default": "php",
+            "line": 0,
+            "name": "AI_LANG",
+            "source": "param-expansion"
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "jq",
-        "rg"
-      ],
-      "description": ".env*/config/**/*.yaml|yml|json|toml|ini|nix/docker-compose*",
-      "examples": [],
-      "family": "content",
-      "name": "config",
-      "positionals": [
+    ],
+    "errors": [],
+    "examples": [
         {
-          "name": "MODE",
-          "required": true
+            "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh text TenantResolver . --fixed"
         },
         {
-          "name": "QUERY",
-          "required": true
+            "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed"
         },
         {
-          "name": "root",
-          "required": false
+            "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged"
+        },
+        {
+            "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php"
+        },
+        {
+            "text": "AI_OUTPUT=json bash scripts/ai/ai-search.sh function findUser ."
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "jq",
-        "rg"
-      ],
-      "description": "composer/package/lock files, flake.nix, go.mod, Cargo.toml, pyproject.toml",
-      "examples": [],
-      "family": "content",
-      "name": "deps",
-      "positionals": [
+    ],
+    "examples_by_mode": [
         {
-          "name": "MODE",
-          "required": true
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed"
+            ],
+            "mode": "changed-text"
         },
         {
-          "name": "QUERY",
-          "required": true
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php"
+            ],
+            "mode": "class"
         },
         {
-          "name": "root",
-          "required": false
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged"
+            ],
+            "mode": "diff"
+        },
+        {
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh function findUser ."
+            ],
+            "mode": "function"
+        },
+        {
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh text TenantResolver . --fixed"
+            ],
+            "mode": "text"
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "grep",
-        "jq"
-      ],
-      "description": "unstaged hunks; --staged or --base REF; results carry path/marker/new_line/text/scope",
-      "examples": [
-        "AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged"
-      ],
-      "family": "content",
-      "name": "diff",
-      "output_notes": "results carry path/marker/new_line/text/scope",
-      "positionals": [
+    ],
+    "file": "<REPO>/scripts/ai/ai-search.sh",
+    "functions": [
         {
-          "name": "MODE",
-          "required": true
+            "confidence": 95,
+            "line": 0,
+            "name": "usage",
+            "source": "definition"
         },
         {
-          "name": "QUERY",
-          "required": true
+            "confidence": 95,
+            "line": 0,
+            "name": "introspect_help_summary",
+            "source": "definition"
         },
         {
-          "name": "root",
-          "required": false
+            "confidence": 95,
+            "line": 0,
+            "name": "normalize_legacy_alias",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "add_warning",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "init_run_state",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "is_file_list_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "is_content_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "is_ast_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "is_no_query_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "is_surface_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "surface_globs",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "is_shortcut_text_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "to_json_array",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "emit_json",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "fail",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "lines_to_matches",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "canonical_root",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "validate_non_negative_int",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "lines_to_structured_results",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "rg_json_to_results",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "rg_json_to_matches",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "context_lines_json",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "add_context_to_results",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "apply_max_bytes_to_results",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "parse_flags",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "interpret_positionals",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "handle_dry_run",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "build_case_pattern_args",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "resolve_global_gitignore",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "apply_global_gitignore",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "build_rg_scope_args",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "mode_needs_rg",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "mode_needs_git",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "mode_has_rg_fallback",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "check_tool_guards",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "require_git_root",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_changed_files",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_staged_files",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_files",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_files_fallback",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "search_git_scoped_files",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_changed_text",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_staged_text",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_tracked",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_text",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_text_fallback",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_surface",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "regex_escape_literal",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "backend_shortcut_text",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "query_matches_line",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "run_diff_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "run_history_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "run_todo_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "run_unsafe_patterns_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "run_ast_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "run_doctor_mode",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "run_backend",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "emit_results",
+            "source": "definition"
+        },
+        {
+            "confidence": 95,
+            "line": 0,
+            "name": "ai_search_main",
+            "source": "definition"
         }
-      ],
-      "query_required": true
+    ],
+    "help": {
+        "json_output_env": "AI_OUTPUT=json",
+        "summary": "unified repository search entrypoint",
+        "usage": "ai-search.sh MODE [QUERY] [root] [flags]"
     },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "jq",
-        "rg"
-      ],
-      "description": "README*/CHANGELOG*/docs/**/*.md/*.rst/*.adoc",
-      "examples": [],
-      "family": "content",
-      "name": "docs",
-      "positionals": [
+    "json_key_candidates": [
         {
-          "name": "MODE",
-          "required": true
+            "confidence": 55,
+            "name": "absolute",
+            "source": "code"
         },
         {
-          "name": "QUERY",
-          "required": true
+            "confidence": 55,
+            "name": "after",
+            "source": "code"
         },
         {
-          "name": "root",
-          "required": false
+            "confidence": 55,
+            "name": "available",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "before",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "git_available",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "kind",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "lang",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "max_results",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "missing",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "new_line",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "path",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "result",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "returned",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "root",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "scope",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "source_tool",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "text",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "truncated",
+            "source": "code"
+        },
+        {
+            "confidence": 55,
+            "name": "us",
+            "source": "code"
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [],
-      "description": "diagnostics{} of available/missing/warnings/root/git_available",
-      "examples": [],
-      "family": "other",
-      "name": "doctor",
-      "positionals": [
+    ],
+    "json_keys": [
         {
-          "name": "MODE",
-          "required": true
+            "confidence": 90,
+            "name": "errors",
+            "source": "usage-envelope"
         },
         {
-          "name": "root",
-          "required": false
+            "confidence": 90,
+            "name": "limits",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "matches",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "meta",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "mode",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "query",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "results",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "schema",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "status",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "summary",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "symbols",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "tool",
+            "source": "usage-envelope"
+        },
+        {
+            "confidence": 90,
+            "name": "warnings",
+            "source": "usage-envelope"
         }
-      ],
-      "query_required": false
-    },
-    {
-      "dependencies": [
-        "awk",
-        "fd",
-        "find",
-        "git",
-        "jq",
-        "sed"
-      ],
-      "description": "filename search (fd; unavailable if fd absent)",
-      "examples": [],
-      "family": "content",
-      "name": "files",
-      "positionals": [
+    ],
+    "json_paths": [
         {
-          "name": "MODE",
-          "required": true
+            "confidence": 90,
+            "path": "$.errors",
+            "source": "top-level-key"
         },
         {
-          "name": "QUERY",
-          "required": true
+            "confidence": 90,
+            "path": "$.limits",
+            "source": "top-level-key"
         },
         {
-          "name": "root",
-          "required": false
+            "confidence": 80,
+            "path": "$.limits.max_results",
+            "source": "jq-object"
+        },
+        {
+            "confidence": 90,
+            "path": "$.matches",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 90,
+            "path": "$.meta",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 80,
+            "path": "$.meta.returned",
+            "source": "jq-object"
+        },
+        {
+            "confidence": 80,
+            "path": "$.meta.truncated",
+            "source": "jq-object"
+        },
+        {
+            "confidence": 90,
+            "path": "$.mode",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 90,
+            "path": "$.query",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 90,
+            "path": "$.results",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 70,
+            "path": "$.results[].author",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.results[].commit",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.results[].count",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.results[].date",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.results[].message",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.results[].path",
+            "source": "array-element"
+        },
+        {
+            "confidence": 90,
+            "path": "$.schema",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 90,
+            "path": "$.status",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 90,
+            "path": "$.summary",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 90,
+            "path": "$.symbols",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 70,
+            "path": "$.symbols[].end",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.symbols[].kind",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.symbols[].language",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.symbols[].name",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.symbols[].path",
+            "source": "array-element"
+        },
+        {
+            "confidence": 70,
+            "path": "$.symbols[].start",
+            "source": "array-element"
+        },
+        {
+            "confidence": 90,
+            "path": "$.tool",
+            "source": "top-level-key"
+        },
+        {
+            "confidence": 90,
+            "path": "$.warnings",
+            "source": "top-level-key"
         }
-      ],
-      "query_required": true
+    ],
+    "kind": "script",
+    "meta": {
+        "confidence": 90,
+        "parser": "php-static",
+        "target_executed": false
     },
-    {
-      "dependencies": [
-        "git",
-        "jq"
-      ],
-      "description": "git log pickaxe (-S; --regex -> -G); --messages, --patch; results carry commit/author/date/message/path",
-      "examples": [],
-      "family": "content",
-      "name": "history",
-      "output_notes": "results carry commit/author/date/message/path",
-      "positionals": [
+    "mode_contracts": [
         {
-          "name": "MODE",
-          "required": true
+            "dependencies": [
+                "git",
+                "jq"
+            ],
+            "deprecated": true,
+            "examples": [],
+            "family": "unknown",
+            "name": "changed",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": false,
+            "replacements": [
+                "changed-files",
+                "changed-text"
+            ]
         },
         {
-          "name": "QUERY",
-          "required": true
+            "dependencies": [
+                "git",
+                "jq"
+            ],
+            "description": "list unstaged-changed files",
+            "examples": [],
+            "family": "file-list",
+            "name": "changed-files",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": false
         },
         {
-          "name": "root",
-          "required": false
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "search only unstaged-changed files",
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed"
+            ],
+            "family": "content",
+            "name": "changed-text",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "ast-grep",
+                "git",
+                "jq"
+            ],
+            "description": "class definitions only (symbols[] with kind=class)",
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php"
+            ],
+            "family": "content",
+            "name": "class",
+            "output_notes": "symbols[] with kind",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": ".env*/config/**/*.yaml|yml|json|toml|ini|nix/docker-compose*",
+            "examples": [],
+            "family": "content",
+            "name": "config",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "config/env files matching QUERY",
+            "examples": [],
+            "family": "content",
+            "name": "config-key",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "composer/package/lock files, flake.nix, go.mod, Cargo.toml, pyproject.toml",
+            "examples": [],
+            "family": "content",
+            "name": "deps",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "grep",
+                "jq"
+            ],
+            "description": "unstaged hunks; --staged or --base REF; results carry path/marker/new_line/text/scope",
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged"
+            ],
+            "family": "content",
+            "name": "diff",
+            "output_notes": "results carry path/marker/new_line/text/scope",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "README*/CHANGELOG*/docs/**/*.md/*.rst/*.adoc",
+            "examples": [],
+            "family": "content",
+            "name": "docs",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [],
+            "description": "diagnostics{} of available/missing/warnings/root/git_available",
+            "examples": [],
+            "family": "other",
+            "name": "doctor",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": false
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg",
+                "sed"
+            ],
+            "description": "enum definitions matching NAME",
+            "examples": [],
+            "family": "content",
+            "name": "enum",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "fd",
+                "find",
+                "git",
+                "jq",
+                "sed"
+            ],
+            "description": "filename search (fd; unavailable if fd absent)",
+            "examples": [],
+            "family": "content",
+            "name": "files",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg",
+                "sed"
+            ],
+            "description": "function definitions matching NAME",
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh function findUser ."
+            ],
+            "family": "content",
+            "name": "function",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "git",
+                "jq"
+            ],
+            "description": "git log pickaxe (-S; --regex -> -G); --messages, --patch; results carry commit/author/date/message/path",
+            "examples": [],
+            "family": "content",
+            "name": "history",
+            "output_notes": "results carry commit/author/date/message/path",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg",
+                "sed"
+            ],
+            "description": "interface definitions matching NAME",
+            "examples": [],
+            "family": "content",
+            "name": "interface",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg",
+                "sed"
+            ],
+            "description": "method definitions matching NAME",
+            "examples": [],
+            "family": "content",
+            "name": "method",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "route files matching QUERY",
+            "examples": [],
+            "family": "content",
+            "name": "route",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "git",
+                "jq"
+            ],
+            "deprecated": true,
+            "examples": [],
+            "family": "unknown",
+            "name": "staged",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": false,
+            "replacements": [
+                "staged-files",
+                "staged-text"
+            ]
+        },
+        {
+            "dependencies": [
+                "git",
+                "jq"
+            ],
+            "description": "list staged files",
+            "examples": [],
+            "family": "file-list",
+            "name": "staged-files",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": false
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "search only staged files",
+            "examples": [],
+            "family": "content",
+            "name": "staged-text",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "ast-grep",
+                "git",
+                "jq"
+            ],
+            "description": "ast-grep pattern; --lang LANG (or AI_LANG, default php)",
+            "examples": [],
+            "family": "content",
+            "name": "struct",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "ast-grep",
+                "git",
+                "jq"
+            ],
+            "description": "resolve a symbol; emits symbols[] (kind/name/path/start/end/language)",
+            "examples": [],
+            "family": "content",
+            "name": "symbols",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "tests/**/__tests__/**/*.test.*/*.spec.*/*Test.php",
+            "examples": [],
+            "family": "content",
+            "name": "tests",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "grep",
+                "jq",
+                "rg"
+            ],
+            "description": "search a root (rg)",
+            "examples": [
+                "AI_OUTPUT=json bash scripts/ai/ai-search.sh text TenantResolver . --fixed"
+            ],
+            "family": "content",
+            "name": "text",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "TODO|FIXME|HACK|XXX|deprecated|temporary|workaround|legacy, grouped by file with tag/line/text",
+            "examples": [],
+            "family": "curated",
+            "name": "todo",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": false
+        },
+        {
+            "dependencies": [
+                "awk",
+                "git",
+                "grep",
+                "jq"
+            ],
+            "description": "git-grep over tracked files (requires git root)",
+            "examples": [],
+            "family": "content",
+            "name": "tracked",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "QUERY",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": true
+        },
+        {
+            "dependencies": [],
+            "description": "approval-gated; always returns status=blocked",
+            "examples": [],
+            "family": "other",
+            "name": "unsafe-all",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": false
+        },
+        {
+            "dependencies": [
+                "git",
+                "jq",
+                "rg"
+            ],
+            "description": "curated risky patterns with rule + severity",
+            "examples": [],
+            "family": "curated",
+            "name": "unsafe-patterns",
+            "positionals": [
+                {
+                    "name": "MODE",
+                    "required": true
+                },
+                {
+                    "name": "root",
+                    "required": false
+                }
+            ],
+            "query_required": false
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [
-        "git",
-        "jq"
-      ],
-      "deprecated": true,
-      "examples": [],
-      "family": "unknown",
-      "name": "staged",
-      "positionals": [
+    ],
+    "modes": [
         {
-          "name": "MODE",
-          "required": true
+            "confidence": 80,
+            "deprecated": true,
+            "family": "unknown",
+            "line": 0,
+            "name": "changed",
+            "query_required": false,
+            "source": "subject-case:mode"
         },
         {
-          "name": "root",
-          "required": false
+            "confidence": 80,
+            "deprecated": true,
+            "family": "unknown",
+            "line": 0,
+            "name": "staged",
+            "query_required": false,
+            "source": "subject-case:mode"
+        },
+        {
+            "confidence": 95,
+            "description": "list unstaged-changed files",
+            "display_group": "file-list",
+            "family": "file-list",
+            "line": 0,
+            "name": "changed-files",
+            "query_required": false,
+            "source": "mode-family:is_file_list_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "list staged files",
+            "display_group": "file-list",
+            "family": "file-list",
+            "line": 0,
+            "name": "staged-files",
+            "query_required": false,
+            "source": "mode-family:is_file_list_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "search a root (rg)",
+            "display_group": "content",
+            "family": "content",
+            "line": 0,
+            "name": "text",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "git-grep over tracked files (requires git root)",
+            "display_group": "content",
+            "family": "content",
+            "line": 0,
+            "name": "tracked",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "filename search (fd; unavailable if fd absent)",
+            "display_group": "content",
+            "family": "content",
+            "line": 0,
+            "name": "files",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "ast-grep pattern; --lang LANG (or AI_LANG, default php)",
+            "display_group": "structural",
+            "family": "content",
+            "line": 0,
+            "name": "struct",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "README*/CHANGELOG*/docs/**/*.md/*.rst/*.adoc",
+            "display_group": "surface",
+            "family": "content",
+            "line": 0,
+            "name": "docs",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "search only unstaged-changed files",
+            "display_group": "content",
+            "family": "content",
+            "line": 0,
+            "name": "changed-text",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "search only staged files",
+            "display_group": "content",
+            "family": "content",
+            "line": 0,
+            "name": "staged-text",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "unstaged hunks; --staged or --base REF; results carry path/marker/new_line/text/scope",
+            "display_group": "git-aware",
+            "family": "content",
+            "line": 0,
+            "name": "diff",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "git log pickaxe (-S; --regex -> -G); --messages, --patch; results carry commit/author/date/message/path",
+            "display_group": "git-aware",
+            "family": "content",
+            "line": 0,
+            "name": "history",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "tests/**/__tests__/**/*.test.*/*.spec.*/*Test.php",
+            "display_group": "surface",
+            "family": "content",
+            "line": 0,
+            "name": "tests",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": ".env*/config/**/*.yaml|yml|json|toml|ini|nix/docker-compose*",
+            "display_group": "surface",
+            "family": "content",
+            "line": 0,
+            "name": "config",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "composer/package/lock files, flake.nix, go.mod, Cargo.toml, pyproject.toml",
+            "display_group": "surface",
+            "family": "content",
+            "line": 0,
+            "name": "deps",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "resolve a symbol; emits symbols[] (kind/name/path/start/end/language)",
+            "display_group": "structural",
+            "family": "content",
+            "line": 0,
+            "name": "symbols",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "class definitions only (symbols[] with kind=class)",
+            "display_group": "structural",
+            "family": "content",
+            "line": 0,
+            "name": "class",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "function definitions matching NAME",
+            "display_group": "shortcut",
+            "family": "content",
+            "line": 0,
+            "name": "function",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "method definitions matching NAME",
+            "display_group": "shortcut",
+            "family": "content",
+            "line": 0,
+            "name": "method",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "interface definitions matching NAME",
+            "display_group": "shortcut",
+            "family": "content",
+            "line": 0,
+            "name": "interface",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "enum definitions matching NAME",
+            "display_group": "shortcut",
+            "family": "content",
+            "line": 0,
+            "name": "enum",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "route files matching QUERY",
+            "display_group": "shortcut",
+            "family": "content",
+            "line": 0,
+            "name": "route",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "config/env files matching QUERY",
+            "display_group": "shortcut",
+            "family": "content",
+            "line": 0,
+            "name": "config-key",
+            "query_required": true,
+            "source": "mode-family:is_content_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "TODO|FIXME|HACK|XXX|deprecated|temporary|workaround|legacy, grouped by file with tag/line/text",
+            "display_group": "curated",
+            "family": "curated",
+            "line": 0,
+            "name": "todo",
+            "query_required": false,
+            "source": "mode-family:is_no_query_mode"
+        },
+        {
+            "confidence": 95,
+            "description": "curated risky patterns with rule + severity",
+            "display_group": "curated",
+            "family": "curated",
+            "line": 0,
+            "name": "unsafe-patterns",
+            "query_required": false,
+            "source": "mode-family:is_no_query_mode"
+        },
+        {
+            "confidence": 90,
+            "description": "diagnostics{} of available/missing/warnings/root/git_available",
+            "display_group": "other",
+            "family": "other",
+            "line": 0,
+            "name": "doctor",
+            "query_required": false,
+            "source": "mode-equality-guard"
+        },
+        {
+            "confidence": 90,
+            "description": "approval-gated; always returns status=blocked",
+            "display_group": "other",
+            "family": "other",
+            "line": 0,
+            "name": "unsafe-all",
+            "query_required": false,
+            "source": "mode-equality-guard"
         }
-      ],
-      "query_required": false,
-      "replacements": [
-        "staged-files",
-        "staged-text"
-      ]
-    },
-    {
-      "dependencies": [
-        "git",
-        "jq"
-      ],
-      "description": "list staged files",
-      "examples": [],
-      "family": "file-list",
-      "name": "staged-files",
-      "positionals": [
+    ],
+    "output_schemas": [
         {
-          "name": "MODE",
-          "required": true
+            "confidence": 85,
+            "keys": [
+                "errors",
+                "limits",
+                "matches",
+                "meta",
+                "mode",
+                "query",
+                "results",
+                "schema",
+                "status",
+                "summary",
+                "symbols",
+                "tool",
+                "warnings"
+            ],
+            "name": "envelope",
+            "source": "usage-envelope"
         },
         {
-          "name": "root",
-          "required": false
+            "confidence": 75,
+            "keys": [
+                "errors",
+                "results",
+                "schema",
+                "status",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "changed-files",
+                "staged-files"
+            ],
+            "name": "file-list-result",
+            "source": "mode-family"
+        },
+        {
+            "confidence": 75,
+            "keys": [
+                "errors",
+                "limits",
+                "matches",
+                "meta",
+                "results",
+                "schema",
+                "status",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "changed-text",
+                "class",
+                "config",
+                "config-key",
+                "deps",
+                "diff",
+                "docs",
+                "enum",
+                "files",
+                "function",
+                "history",
+                "interface",
+                "method",
+                "route",
+                "staged-text",
+                "struct",
+                "symbols",
+                "tests",
+                "text",
+                "tracked"
+            ],
+            "name": "content-search-result",
+            "source": "mode-family"
+        },
+        {
+            "confidence": 75,
+            "keys": [
+                "errors",
+                "limits",
+                "matches",
+                "meta",
+                "results",
+                "schema",
+                "status",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "todo",
+                "unsafe-patterns"
+            ],
+            "name": "curated-result",
+            "source": "mode-family"
+        },
+        {
+            "confidence": 70,
+            "element_fields": [
+                "path",
+                "marker",
+                "new_line",
+                "text",
+                "scope"
+            ],
+            "element_key": "results",
+            "keys": [
+                "errors",
+                "results",
+                "schema",
+                "status",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "diff"
+            ],
+            "name": "diff-result",
+            "source": "mode-doc"
+        },
+        {
+            "confidence": 70,
+            "element_fields": [
+                "available",
+                "missing",
+                "warnings",
+                "root",
+                "git_available"
+            ],
+            "keys": [
+                "errors",
+                "schema",
+                "status",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "doctor"
+            ],
+            "name": "doctor-result",
+            "source": "mode-doc"
+        },
+        {
+            "confidence": 70,
+            "element_fields": [
+                "commit",
+                "author",
+                "date",
+                "message",
+                "path"
+            ],
+            "element_key": "results",
+            "keys": [
+                "errors",
+                "results",
+                "schema",
+                "status",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "history"
+            ],
+            "name": "history-result",
+            "source": "mode-doc"
+        },
+        {
+            "confidence": 70,
+            "element_fields": [
+                "kind",
+                "name",
+                "path",
+                "start",
+                "end",
+                "language"
+            ],
+            "element_key": "symbols",
+            "keys": [
+                "errors",
+                "schema",
+                "status",
+                "symbols",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "symbols"
+            ],
+            "name": "symbols-result",
+            "source": "mode-doc"
+        },
+        {
+            "confidence": 70,
+            "element_fields": [
+                "tag",
+                "line",
+                "text"
+            ],
+            "element_key": "results",
+            "keys": [
+                "errors",
+                "results",
+                "schema",
+                "status",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "todo"
+            ],
+            "name": "todo-result",
+            "source": "mode-doc"
+        },
+        {
+            "confidence": 70,
+            "element_fields": [
+                "rule",
+                "severity"
+            ],
+            "element_key": "results",
+            "keys": [
+                "errors",
+                "results",
+                "schema",
+                "status",
+                "tool",
+                "warnings"
+            ],
+            "modes": [
+                "unsafe-patterns"
+            ],
+            "name": "unsafe-patterns-result",
+            "source": "mode-doc"
         }
-      ],
-      "query_required": false
-    },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "jq",
-        "rg"
-      ],
-      "description": "search only staged files",
-      "examples": [],
-      "family": "content",
-      "name": "staged-text",
-      "positionals": [
+    ],
+    "params": [
         {
-          "name": "MODE",
-          "required": true
+            "aliases": [],
+            "confidence": 95,
+            "description": "literal fixed-string match",
+            "group": "pattern",
+            "line": 0,
+            "name": "--fixed",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
         },
         {
-          "name": "QUERY",
-          "required": true
+            "aliases": [],
+            "confidence": 95,
+            "description": "regex match (default)",
+            "group": "pattern",
+            "line": 0,
+            "name": "--regex",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
         },
         {
-          "name": "root",
-          "required": false
+            "aliases": [],
+            "confidence": 95,
+            "description": "PCRE2 regex",
+            "group": "pattern",
+            "line": 0,
+            "name": "--pcre2",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "add absolute_path to structured results",
+            "group": "scope",
+            "line": 0,
+            "name": "--absolute",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [
+                "-i"
+            ],
+            "confidence": 95,
+            "description": "case-insensitive",
+            "group": "pattern",
+            "line": 0,
+            "name": "--ignore-case",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "force case-sensitive",
+            "group": "pattern",
+            "line": 0,
+            "name": "--case-sensitive",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "case-insensitive unless query has uppercase (default)",
+            "group": "pattern",
+            "line": 0,
+            "name": "--smart-case",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "include glob (repeatable)",
+            "group": "scope",
+            "line": 0,
+            "name": "--glob",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "PATTERN"
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "rg type filter (repeatable)",
+            "group": "scope",
+            "line": 0,
+            "name": "--type",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "NAME"
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "exclude path (repeatable; on top of default excludes vendor,node_modules,dist,build,coverage,.git)",
+            "group": "scope",
+            "line": 0,
+            "name": "--exclude",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "PATH"
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "bound traversal depth",
+            "group": "scope",
+            "line": 0,
+            "name": "--max-depth",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "N"
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "disable ALL ignore sources (local+parent+global+.ignore)",
+            "group": "ignore",
+            "line": 0,
+            "name": "--no-ignore",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "disable local + parent .gitignore (keep global)",
+            "group": "ignore",
+            "line": 0,
+            "name": "--no-ignore-vcs",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "disable only the global gitignore",
+            "group": "ignore",
+            "line": 0,
+            "name": "--no-ignore-global",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "disable parent-directory ignore files",
+            "group": "ignore",
+            "line": 0,
+            "name": "--no-ignore-parent",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "disable .ignore / .rgignore files",
+            "group": "ignore",
+            "line": 0,
+            "name": "--no-ignore-dot",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "report dry_run without searching",
+            "group": "misc",
+            "line": 0,
+            "name": "--dry-run",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [
+                "-C"
+            ],
+            "confidence": 95,
+            "description": "N lines before+after",
+            "group": "context",
+            "line": 0,
+            "name": "--context",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "N"
+        },
+        {
+            "aliases": [
+                "-B"
+            ],
+            "confidence": 95,
+            "description": "N lines before match",
+            "group": "context",
+            "line": 0,
+            "name": "--before-context",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "N"
+        },
+        {
+            "aliases": [
+                "-A"
+            ],
+            "confidence": 95,
+            "description": "N lines after match",
+            "group": "context",
+            "line": 0,
+            "name": "--after-context",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "N"
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "drop context payload past N bytes; sets meta.truncated",
+            "group": "bounds",
+            "line": 0,
+            "name": "--max-bytes",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "N"
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "cap returned matches; default 100; sets meta.truncated",
+            "group": "bounds",
+            "line": 0,
+            "name": "--max-results",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "N"
+        },
+        {
+            "aliases": [
+                "-l"
+            ],
+            "confidence": 95,
+            "description": "results[] of {path} only + summary{}",
+            "group": "output",
+            "line": 0,
+            "name": "--files-with-matches",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "results[] of {path,count} + summary{}",
+            "group": "output",
+            "line": 0,
+            "name": "--count",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 95,
+            "description": "summary{} match totals only",
+            "group": "output",
+            "line": 0,
+            "name": "--count-matches",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "applies_to_modes": [
+                "diff"
+            ],
+            "confidence": 95,
+            "description": "diff: staged hunks",
+            "group": "git",
+            "line": 0,
+            "name": "--staged",
+            "repeatable": false,
+            "scope": "mode-specific",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "applies_to_modes": [
+                "diff"
+            ],
+            "confidence": 95,
+            "description": "diff: against REF",
+            "group": "git",
+            "line": 0,
+            "name": "--base",
+            "repeatable": false,
+            "scope": "mode-specific",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "REF"
+        },
+        {
+            "aliases": [],
+            "applies_to_modes": [
+                "history"
+            ],
+            "confidence": 95,
+            "description": "history: search commit messages",
+            "group": "git",
+            "line": 0,
+            "name": "--messages",
+            "repeatable": false,
+            "scope": "mode-specific",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "applies_to_modes": [
+                "history"
+            ],
+            "confidence": 95,
+            "description": "history: attach commit patch text",
+            "group": "git",
+            "line": 0,
+            "name": "--patch",
+            "repeatable": false,
+            "scope": "mode-specific",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "applies_to_modes": [
+                "class",
+                "struct",
+                "symbols"
+            ],
+            "confidence": 95,
+            "description": "struct/symbols/class language",
+            "group": "structural",
+            "line": 0,
+            "name": "--lang",
+            "repeatable": false,
+            "scope": "mode-specific",
+            "source": "parser-case",
+            "takes_value": true,
+            "value_hint": "LANG"
+        },
+        {
+            "aliases": [
+                "-h"
+            ],
+            "confidence": 95,
+            "description": "show this help",
+            "group": "misc",
+            "line": 0,
+            "name": "--help",
+            "repeatable": false,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [
+                "--no-ignore-vcs",
+                "--no-ignore-parent"
+            ],
+            "confidence": 95,
+            "description": "disable ALL ignore sources (local+parent+global+.ignore)",
+            "group": "ignore",
+            "line": 0,
+            "name": "--no-ignore",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [
+                "--no-ignore-dot"
+            ],
+            "confidence": 95,
+            "description": "disable only the global gitignore",
+            "group": "ignore",
+            "line": 0,
+            "name": "--no-ignore-global",
+            "repeatable": true,
+            "scope": "global",
+            "source": "parser-case",
+            "takes_value": false
+        },
+        {
+            "aliases": [],
+            "confidence": 75,
+            "description": "print full machine-readable JSON contract (sh-introspect)",
+            "group": "misc",
+            "line": 0,
+            "name": "--introspect",
+            "repeatable": false,
+            "scope": "global",
+            "source": "usage-doc",
+            "takes_value": false
         }
-      ],
-      "query_required": true
+    ],
+    "path": {
+        "absolute": "<REPO>/scripts/ai/ai-search.sh",
+        "relative": "scripts/ai/ai-search.sh"
     },
-    {
-      "dependencies": [
-        "ast-grep",
-        "git",
-        "jq"
-      ],
-      "description": "ast-grep pattern; --lang LANG (or AI_LANG, default php)",
-      "examples": [],
-      "family": "content",
-      "name": "struct",
-      "positionals": [
+    "positionals": [
         {
-          "name": "MODE",
-          "required": true
+            "name": "MODE",
+            "required": true,
+            "source": "usage"
         },
         {
-          "name": "QUERY",
-          "required": true
+            "name": "QUERY",
+            "required": false,
+            "source": "usage"
         },
         {
-          "name": "root",
-          "required": false
+            "name": "root",
+            "required": false,
+            "source": "usage"
         }
-      ],
-      "query_required": true
+    ],
+    "risk_findings": [],
+    "risk_summary": {
+        "has_dynamic_execution": false,
+        "has_mutation": false,
+        "has_unresolved_source": false,
+        "max_risk": "low"
     },
-    {
-      "dependencies": [
-        "ast-grep",
-        "git",
-        "jq"
-      ],
-      "description": "resolve a symbol; emits symbols[] (kind/name/path/start/end/language)",
-      "examples": [],
-      "family": "content",
-      "name": "symbols",
-      "positionals": [
+    "schema": "ai.sh-introspect/v1",
+    "side_effects": [
         {
-          "name": "MODE",
-          "required": true
+            "confidence": 70,
+            "type": "filesystem-read"
         },
         {
-          "name": "QUERY",
-          "required": true
-        },
-        {
-          "name": "root",
-          "required": false
+            "confidence": 75,
+            "type": "git-read"
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "jq",
-        "rg"
-      ],
-      "description": "tests/**/__tests__/**/*.test.*/*.spec.*/*Test.php",
-      "examples": [],
-      "family": "content",
-      "name": "tests",
-      "positionals": [
+    ],
+    "sources": [
         {
-          "name": "MODE",
-          "required": true
-        },
-        {
-          "name": "QUERY",
-          "required": true
-        },
-        {
-          "name": "root",
-          "required": false
+            "absolute": "<REPO>/scripts/ai/common.sh",
+            "confidence": 80,
+            "exists": true,
+            "inside_repo": true,
+            "line": 0,
+            "raw": "source \"$(dirname \"${AI_SEARCH_ENTRYPOINT:-${BASH_SOURCE[0]}}\")/common.sh\"",
+            "resolved": "scripts/ai/common.sh",
+            "target": "$(dirname \"${AI_SEARCH_ENTRYPOINT:-${BASH_SOURCE[0]}}\")/common.sh"
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "grep",
-        "jq",
-        "rg"
-      ],
-      "description": "search a root (rg)",
-      "examples": [
-        "AI_OUTPUT=json bash scripts/ai/ai-search.sh text TenantResolver . --fixed"
-      ],
-      "family": "content",
-      "name": "text",
-      "positionals": [
+    ],
+    "status": "ok",
+    "status_values": [
+        "ok",
+        "no_matches",
+        "error",
+        "unavailable",
+        "dry_run",
+        "blocked"
+    ],
+    "tool": "sh-introspect",
+    "unknown_option_handlers": [
         {
-          "name": "MODE",
-          "required": true
+            "action": "fail",
+            "line": 0,
+            "pattern": "--*"
         },
         {
-          "name": "QUERY",
-          "required": true
-        },
-        {
-          "name": "root",
-          "required": false
+            "action": "passthrough",
+            "line": 0,
+            "pattern": "*"
         }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [
-        "git",
-        "jq",
-        "rg"
-      ],
-      "description": "TODO|FIXME|HACK|XXX|deprecated|temporary|workaround|legacy, grouped by file with tag/line/text",
-      "examples": [],
-      "family": "curated",
-      "name": "todo",
-      "positionals": [
-        {
-          "name": "MODE",
-          "required": true
-        },
-        {
-          "name": "root",
-          "required": false
-        }
-      ],
-      "query_required": false
-    },
-    {
-      "dependencies": [
-        "awk",
-        "git",
-        "grep",
-        "jq"
-      ],
-      "description": "git-grep over tracked files (requires git root)",
-      "examples": [],
-      "family": "content",
-      "name": "tracked",
-      "positionals": [
-        {
-          "name": "MODE",
-          "required": true
-        },
-        {
-          "name": "QUERY",
-          "required": true
-        },
-        {
-          "name": "root",
-          "required": false
-        }
-      ],
-      "query_required": true
-    },
-    {
-      "dependencies": [],
-      "description": "approval-gated; always returns status=blocked",
-      "examples": [],
-      "family": "other",
-      "name": "unsafe-all",
-      "positionals": [
-        {
-          "name": "MODE",
-          "required": true
-        },
-        {
-          "name": "root",
-          "required": false
-        }
-      ],
-      "query_required": false
-    },
-    {
-      "dependencies": [
-        "git",
-        "jq",
-        "rg"
-      ],
-      "description": "curated risky patterns with rule + severity",
-      "examples": [],
-      "family": "curated",
-      "name": "unsafe-patterns",
-      "positionals": [
-        {
-          "name": "MODE",
-          "required": true
-        },
-        {
-          "name": "root",
-          "required": false
-        }
-      ],
-      "query_required": false
-    }
-  ],
-  "modes": [
-    {
-      "confidence": 80,
-      "deprecated": true,
-      "family": "unknown",
-      "line": 0,
-      "name": "changed",
-      "query_required": false,
-      "source": "subject-case:mode"
-    },
-    {
-      "confidence": 80,
-      "deprecated": true,
-      "family": "unknown",
-      "line": 0,
-      "name": "staged",
-      "query_required": false,
-      "source": "subject-case:mode"
-    },
-    {
-      "confidence": 95,
-      "description": "list unstaged-changed files",
-      "display_group": "file-list",
-      "family": "file-list",
-      "line": 0,
-      "name": "changed-files",
-      "query_required": false,
-      "source": "mode-family:is_file_list_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "list staged files",
-      "display_group": "file-list",
-      "family": "file-list",
-      "line": 0,
-      "name": "staged-files",
-      "query_required": false,
-      "source": "mode-family:is_file_list_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "search a root (rg)",
-      "display_group": "content",
-      "family": "content",
-      "line": 0,
-      "name": "text",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "git-grep over tracked files (requires git root)",
-      "display_group": "content",
-      "family": "content",
-      "line": 0,
-      "name": "tracked",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "filename search (fd; unavailable if fd absent)",
-      "display_group": "content",
-      "family": "content",
-      "line": 0,
-      "name": "files",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "ast-grep pattern; --lang LANG (or AI_LANG, default php)",
-      "display_group": "structural",
-      "family": "content",
-      "line": 0,
-      "name": "struct",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "README*/CHANGELOG*/docs/**/*.md/*.rst/*.adoc",
-      "display_group": "surface",
-      "family": "content",
-      "line": 0,
-      "name": "docs",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "search only unstaged-changed files",
-      "display_group": "content",
-      "family": "content",
-      "line": 0,
-      "name": "changed-text",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "search only staged files",
-      "display_group": "content",
-      "family": "content",
-      "line": 0,
-      "name": "staged-text",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "unstaged hunks; --staged or --base REF; results carry path/marker/new_line/text/scope",
-      "display_group": "git-aware",
-      "family": "content",
-      "line": 0,
-      "name": "diff",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "git log pickaxe (-S; --regex -> -G); --messages, --patch; results carry commit/author/date/message/path",
-      "display_group": "git-aware",
-      "family": "content",
-      "line": 0,
-      "name": "history",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "tests/**/__tests__/**/*.test.*/*.spec.*/*Test.php",
-      "display_group": "surface",
-      "family": "content",
-      "line": 0,
-      "name": "tests",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": ".env*/config/**/*.yaml|yml|json|toml|ini|nix/docker-compose*",
-      "display_group": "surface",
-      "family": "content",
-      "line": 0,
-      "name": "config",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "composer/package/lock files, flake.nix, go.mod, Cargo.toml, pyproject.toml",
-      "display_group": "surface",
-      "family": "content",
-      "line": 0,
-      "name": "deps",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "resolve a symbol; emits symbols[] (kind/name/path/start/end/language)",
-      "display_group": "structural",
-      "family": "content",
-      "line": 0,
-      "name": "symbols",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "class definitions only (symbols[] with kind=class)",
-      "display_group": "structural",
-      "family": "content",
-      "line": 0,
-      "name": "class",
-      "query_required": true,
-      "source": "mode-family:is_content_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "TODO|FIXME|HACK|XXX|deprecated|temporary|workaround|legacy, grouped by file with tag/line/text",
-      "display_group": "curated",
-      "family": "curated",
-      "line": 0,
-      "name": "todo",
-      "query_required": false,
-      "source": "mode-family:is_no_query_mode"
-    },
-    {
-      "confidence": 95,
-      "description": "curated risky patterns with rule + severity",
-      "display_group": "curated",
-      "family": "curated",
-      "line": 0,
-      "name": "unsafe-patterns",
-      "query_required": false,
-      "source": "mode-family:is_no_query_mode"
-    },
-    {
-      "confidence": 90,
-      "description": "diagnostics{} of available/missing/warnings/root/git_available",
-      "display_group": "other",
-      "family": "other",
-      "line": 0,
-      "name": "doctor",
-      "query_required": false,
-      "source": "mode-equality-guard"
-    },
-    {
-      "confidence": 90,
-      "description": "approval-gated; always returns status=blocked",
-      "display_group": "other",
-      "family": "other",
-      "line": 0,
-      "name": "unsafe-all",
-      "query_required": false,
-      "source": "mode-equality-guard"
-    }
-  ],
-  "output_schemas": [
-    {
-      "confidence": 85,
-      "keys": [
-        "errors",
-        "limits",
-        "matches",
-        "meta",
-        "mode",
-        "query",
-        "results",
-        "schema",
-        "status",
-        "summary",
-        "symbols",
-        "tool",
-        "warnings"
-      ],
-      "name": "envelope",
-      "source": "usage-envelope"
-    },
-    {
-      "confidence": 75,
-      "keys": [
-        "errors",
-        "results",
-        "schema",
-        "status",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "changed-files",
-        "staged-files"
-      ],
-      "name": "file-list-result",
-      "source": "mode-family"
-    },
-    {
-      "confidence": 75,
-      "keys": [
-        "errors",
-        "limits",
-        "matches",
-        "meta",
-        "results",
-        "schema",
-        "status",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "changed-text",
-        "class",
-        "config",
-        "deps",
-        "diff",
-        "docs",
-        "files",
-        "history",
-        "staged-text",
-        "struct",
-        "symbols",
-        "tests",
-        "text",
-        "tracked"
-      ],
-      "name": "content-search-result",
-      "source": "mode-family"
-    },
-    {
-      "confidence": 75,
-      "keys": [
-        "errors",
-        "limits",
-        "matches",
-        "meta",
-        "results",
-        "schema",
-        "status",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "todo",
-        "unsafe-patterns"
-      ],
-      "name": "curated-result",
-      "source": "mode-family"
-    },
-    {
-      "confidence": 70,
-      "element_fields": [
-        "path",
-        "marker",
-        "new_line",
-        "text",
-        "scope"
-      ],
-      "element_key": "results",
-      "keys": [
-        "errors",
-        "results",
-        "schema",
-        "status",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "diff"
-      ],
-      "name": "diff-result",
-      "source": "mode-doc"
-    },
-    {
-      "confidence": 70,
-      "element_fields": [
-        "available",
-        "missing",
-        "warnings",
-        "root",
-        "git_available"
-      ],
-      "keys": [
-        "errors",
-        "schema",
-        "status",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "doctor"
-      ],
-      "name": "doctor-result",
-      "source": "mode-doc"
-    },
-    {
-      "confidence": 70,
-      "element_fields": [
-        "commit",
-        "author",
-        "date",
-        "message",
-        "path"
-      ],
-      "element_key": "results",
-      "keys": [
-        "errors",
-        "results",
-        "schema",
-        "status",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "history"
-      ],
-      "name": "history-result",
-      "source": "mode-doc"
-    },
-    {
-      "confidence": 70,
-      "element_fields": [
-        "kind",
-        "name",
-        "path",
-        "start",
-        "end",
-        "language"
-      ],
-      "element_key": "symbols",
-      "keys": [
-        "errors",
-        "schema",
-        "status",
-        "symbols",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "symbols"
-      ],
-      "name": "symbols-result",
-      "source": "mode-doc"
-    },
-    {
-      "confidence": 70,
-      "element_fields": [
-        "tag",
-        "line",
-        "text"
-      ],
-      "element_key": "results",
-      "keys": [
-        "errors",
-        "results",
-        "schema",
-        "status",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "todo"
-      ],
-      "name": "todo-result",
-      "source": "mode-doc"
-    },
-    {
-      "confidence": 70,
-      "element_fields": [
-        "rule",
-        "severity"
-      ],
-      "element_key": "results",
-      "keys": [
-        "errors",
-        "results",
-        "schema",
-        "status",
-        "tool",
-        "warnings"
-      ],
-      "modes": [
-        "unsafe-patterns"
-      ],
-      "name": "unsafe-patterns-result",
-      "source": "mode-doc"
-    }
-  ],
-  "params": [
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "literal fixed-string match",
-      "group": "pattern",
-      "line": 0,
-      "name": "--fixed",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "regex match (default)",
-      "group": "pattern",
-      "line": 0,
-      "name": "--regex",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "PCRE2 regex",
-      "group": "pattern",
-      "line": 0,
-      "name": "--pcre2",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "add absolute_path to structured results",
-      "group": "scope",
-      "line": 0,
-      "name": "--absolute",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [
-        "-i"
-      ],
-      "confidence": 95,
-      "description": "case-insensitive",
-      "group": "pattern",
-      "line": 0,
-      "name": "--ignore-case",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "force case-sensitive",
-      "group": "pattern",
-      "line": 0,
-      "name": "--case-sensitive",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "case-insensitive unless query has uppercase (default)",
-      "group": "pattern",
-      "line": 0,
-      "name": "--smart-case",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "include glob (repeatable)",
-      "group": "scope",
-      "line": 0,
-      "name": "--glob",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "PATTERN"
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "rg type filter (repeatable)",
-      "group": "scope",
-      "line": 0,
-      "name": "--type",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "NAME"
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "exclude path (repeatable; on top of default excludes vendor,node_modules,dist,build,coverage,.git)",
-      "group": "scope",
-      "line": 0,
-      "name": "--exclude",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "PATH"
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "bound traversal depth",
-      "group": "scope",
-      "line": 0,
-      "name": "--max-depth",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "N"
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "disable ALL ignore sources (local+parent+global+.ignore)",
-      "group": "ignore",
-      "line": 0,
-      "name": "--no-ignore",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "disable local + parent .gitignore (keep global)",
-      "group": "ignore",
-      "line": 0,
-      "name": "--no-ignore-vcs",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "disable only the global gitignore",
-      "group": "ignore",
-      "line": 0,
-      "name": "--no-ignore-global",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "disable parent-directory ignore files",
-      "group": "ignore",
-      "line": 0,
-      "name": "--no-ignore-parent",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "disable .ignore / .rgignore files",
-      "group": "ignore",
-      "line": 0,
-      "name": "--no-ignore-dot",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "report dry_run without searching",
-      "group": "misc",
-      "line": 0,
-      "name": "--dry-run",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [
-        "-C"
-      ],
-      "confidence": 95,
-      "description": "N lines before+after",
-      "group": "context",
-      "line": 0,
-      "name": "--context",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "N"
-    },
-    {
-      "aliases": [
-        "-B"
-      ],
-      "confidence": 95,
-      "description": "N lines before match",
-      "group": "context",
-      "line": 0,
-      "name": "--before-context",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "N"
-    },
-    {
-      "aliases": [
-        "-A"
-      ],
-      "confidence": 95,
-      "description": "N lines after match",
-      "group": "context",
-      "line": 0,
-      "name": "--after-context",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "N"
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "drop context payload past N bytes; sets meta.truncated",
-      "group": "bounds",
-      "line": 0,
-      "name": "--max-bytes",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "N"
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "cap returned matches; default 100; sets meta.truncated",
-      "group": "bounds",
-      "line": 0,
-      "name": "--max-results",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "N"
-    },
-    {
-      "aliases": [
-        "-l"
-      ],
-      "confidence": 95,
-      "description": "results[] of {path} only + summary{}",
-      "group": "output",
-      "line": 0,
-      "name": "--files-with-matches",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "results[] of {path,count} + summary{}",
-      "group": "output",
-      "line": 0,
-      "name": "--count",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 95,
-      "description": "summary{} match totals only",
-      "group": "output",
-      "line": 0,
-      "name": "--count-matches",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "applies_to_modes": [
-        "diff"
-      ],
-      "confidence": 95,
-      "description": "diff: staged hunks",
-      "group": "git",
-      "line": 0,
-      "name": "--staged",
-      "repeatable": false,
-      "scope": "mode-specific",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "applies_to_modes": [
-        "diff"
-      ],
-      "confidence": 95,
-      "description": "diff: against REF",
-      "group": "git",
-      "line": 0,
-      "name": "--base",
-      "repeatable": false,
-      "scope": "mode-specific",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "REF"
-    },
-    {
-      "aliases": [],
-      "applies_to_modes": [
-        "history"
-      ],
-      "confidence": 95,
-      "description": "history: search commit messages",
-      "group": "git",
-      "line": 0,
-      "name": "--messages",
-      "repeatable": false,
-      "scope": "mode-specific",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "applies_to_modes": [
-        "history"
-      ],
-      "confidence": 95,
-      "description": "history: attach commit patch text",
-      "group": "git",
-      "line": 0,
-      "name": "--patch",
-      "repeatable": false,
-      "scope": "mode-specific",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "applies_to_modes": [
-        "class",
-        "struct",
-        "symbols"
-      ],
-      "confidence": 95,
-      "description": "struct/symbols/class language",
-      "group": "structural",
-      "line": 0,
-      "name": "--lang",
-      "repeatable": false,
-      "scope": "mode-specific",
-      "source": "parser-case",
-      "takes_value": true,
-      "value_hint": "LANG"
-    },
-    {
-      "aliases": [
-        "-h"
-      ],
-      "confidence": 95,
-      "description": "show this help",
-      "group": "misc",
-      "line": 0,
-      "name": "--help",
-      "repeatable": false,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [
-        "--no-ignore-vcs",
-        "--no-ignore-parent"
-      ],
-      "confidence": 95,
-      "description": "disable ALL ignore sources (local+parent+global+.ignore)",
-      "group": "ignore",
-      "line": 0,
-      "name": "--no-ignore",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [
-        "--no-ignore-dot"
-      ],
-      "confidence": 95,
-      "description": "disable only the global gitignore",
-      "group": "ignore",
-      "line": 0,
-      "name": "--no-ignore-global",
-      "repeatable": true,
-      "scope": "global",
-      "source": "parser-case",
-      "takes_value": false
-    },
-    {
-      "aliases": [],
-      "confidence": 75,
-      "description": "print full machine-readable JSON contract (sh-introspect)",
-      "group": "misc",
-      "line": 0,
-      "name": "--introspect",
-      "repeatable": false,
-      "scope": "global",
-      "source": "usage-doc",
-      "takes_value": false
-    }
-  ],
-  "path": {
-    "absolute": "<REPO>/scripts/ai/ai-search.sh",
-    "relative": "scripts/ai/ai-search.sh"
-  },
-  "positionals": [
-    {
-      "name": "MODE",
-      "required": true,
-      "source": "usage"
-    },
-    {
-      "name": "QUERY",
-      "required": false,
-      "source": "usage"
-    },
-    {
-      "name": "root",
-      "required": false,
-      "source": "usage"
-    }
-  ],
-  "risk_findings": [],
-  "risk_summary": {
-    "has_dynamic_execution": false,
-    "has_mutation": false,
-    "has_unresolved_source": false,
-    "max_risk": "low"
-  },
-  "schema": "ai.sh-introspect/v1",
-  "side_effects": [
-    {
-      "confidence": 70,
-      "type": "filesystem-read"
-    },
-    {
-      "confidence": 75,
-      "type": "git-read"
-    }
-  ],
-  "sources": [
-    {
-      "absolute": "<REPO>/scripts/ai/common.sh",
-      "confidence": 80,
-      "exists": true,
-      "inside_repo": true,
-      "line": 0,
-      "raw": "source \"$(dirname \"${AI_SEARCH_ENTRYPOINT:-${BASH_SOURCE[0]}}\")/common.sh\"",
-      "resolved": "scripts/ai/common.sh",
-      "target": "$(dirname \"${AI_SEARCH_ENTRYPOINT:-${BASH_SOURCE[0]}}\")/common.sh"
-    }
-  ],
-  "status": "ok",
-  "status_values": [
-    "ok",
-    "no_matches",
-    "error",
-    "unavailable",
-    "dry_run",
-    "blocked"
-  ],
-  "tool": "sh-introspect",
-  "unknown_option_handlers": [
-    {
-      "action": "fail",
-      "line": 0,
-      "pattern": "--*"
-    },
-    {
-      "action": "passthrough",
-      "line": 0,
-      "pattern": "*"
-    }
-  ],
-  "warnings": [
-    "contract aggregated from sourced modules (see inlined markers); target not executed"
-  ]
+    ],
+    "warnings": [
+        "contract aggregated from sourced modules (see inlined markers); target not executed"
+    ]
 }

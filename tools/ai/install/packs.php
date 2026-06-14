@@ -142,8 +142,12 @@ function aiInstallerPackRegistry(): array
         ],
         'scripts-pack' => [
             ['type' => 'file', 'source' => 'scripts/ai/common.sh', 'target' => 'scripts/ai/common.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'dir', 'source' => 'scripts/ai/internal/lib', 'target' => 'scripts/ai/internal/lib', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
-            ['type' => 'dir', 'source' => 'scripts/ai/internal/search', 'target' => 'scripts/ai/internal/search', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            // Ship the WHOLE internal module tree as one dir entry. The root scripts are thin
+            // loaders that source scripts/ai/internal/<name>/*.sh (Phase 5/7 splits), and
+            // internal/search reads internal/config/*.txt; shipping only lib+search left
+            // ai-verify, ai-edit, ai-diff-context, pre-tool-use, repomix-context-tree, and
+            // repomix-scc-router broken in installed targets (missing sourced modules).
+            ['type' => 'dir', 'source' => 'scripts/ai/internal', 'target' => 'scripts/ai/internal', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'scripts/ai/bin', 'target' => 'scripts/ai/bin', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-search.sh', 'target' => 'scripts/ai/ai-search.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-search-multi.sh', 'target' => 'scripts/ai/ai-search-multi.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -192,6 +196,10 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'tools/ai/repo-tool-inventory.php', 'target' => 'tools/ai/repo-tool-inventory.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/sh-introspect.sh', 'target' => 'scripts/ai/sh-introspect.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'tools/ai/sh-introspect.php', 'target' => 'tools/ai/sh-introspect.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            // sh-introspect.php is a thin loader that require_once's tools/ai/sh-introspect/*.php
+            // (numbered modules). Without the module dir, every --help/--introspect call in a
+            // target fatals; ship the whole dir.
+            ['type' => 'dir', 'source' => 'tools/ai/sh-introspect', 'target' => 'tools/ai/sh-introspect', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             // install-mandatory-tools.sh is intentionally excluded:
             // it installs workstation-level tooling and is meant to be run from this source repo only.
             ['type' => 'file', 'source' => 'docs/ai/repo-required-tools.md', 'target' => 'docs/ai/repo-required-tools.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
@@ -307,6 +315,8 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'tools/ai/validate-agent-spec.php', 'target' => 'tools/ai/validate-agent-spec.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'tools/ai/validate-schemas.php', 'target' => 'tools/ai/validate-schemas.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'tools/ai/validate-mentor-parity.php', 'target' => 'tools/ai/validate-mentor-parity.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'tools/ai/validate-agent-assessment.php', 'target' => 'tools/ai/validate-agent-assessment.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'tools/ai/validate-agent-assessment-values.php', 'target' => 'tools/ai/validate-agent-assessment-values.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'tools/ai/verify-install-placeholders.php', 'target' => 'tools/ai/verify-install-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/validate-placeholders.php', 'target' => 'tools/ai/validate-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/verify-full-install.php', 'target' => 'tools/ai/verify-full-install.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -319,6 +329,14 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'schemas/ai/generated-artifacts.schema.json', 'target' => 'schemas/ai/generated-artifacts.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
             ['type' => 'file', 'source' => 'schemas/ai/project-placeholders.schema.json', 'target' => 'schemas/ai/project-placeholders.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
             ['type' => 'file', 'source' => 'schemas/ai/verification-matrix.schema.json', 'target' => 'schemas/ai/verification-matrix.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/agent-assessment.schema.json', 'target' => 'schemas/ai/agent-assessment.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'schemas/ai/agent-assessment-values.schema.json', 'target' => 'schemas/ai/agent-assessment-values.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            // NOTE: docs/ai/agent-scores.yaml (the D3a VALUES SOURCE) is intentionally NOT
+            // shipped. Its keys must match the agent templates present in the target, which
+            // varies by profile/runtime; shipping the source-repo file (24 keys) into a
+            // core-only target (13 templates) makes its own validator report stale keys. The
+            // schema + validator ship so a target can author its own agent-scores.yaml; the
+            // ai-doc-check wiring is a no-op until that file exists locally.
         ],
         'shared-templates-pack' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/shared/project-interaction.md', 'target' => 'docs/ai/shared/project-interaction.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],

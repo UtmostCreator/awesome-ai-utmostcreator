@@ -1,0 +1,145 @@
+# Agent Assessment Values — SOURCE FILE (D3a)
+#
+# Human-authored upstream source for the per-agent `agent_assessment` block.
+# Validated by schemas/ai/agent-assessment-values.schema.json and enforced by
+# tools/ai/validate-agent-assessment-values.php.
+#
+# CONTRACT (D3a):
+# - Keyed by CANONICAL agent TEMPLATE key (the basename under
+#   packages/ai-universal-rules/templates/{core,optional}/agents/<key>.md),
+#   NEVER by a generated display name.
+# - Categorical values only: `risk_level` + `decision`. No numeric fields in v1.
+# - `rationale` is SOURCE-ONLY and must never be rendered into frontmatter.
+# - `risk_level` mirrors the existing docs/ai/AGENTS-MANIFEST.md Risk column
+#   (same low|medium|high|critical vocabulary — identity mapping, not invented).
+#
+# APPROVAL GATE:
+#   `approved: false` means these are DRAFT review input. The renderer (D3b) must
+#   NOT consume this file until a human reviews the categorical values and flips
+#   `approved` to true. `decision` values below are draft candidates pending that
+#   human approval.
+
+schema: ai.agent_assessment.values/v1
+approved: false
+
+agents:
+  agent-creator:
+    agent_assessment:
+      risk_level: high
+      decision: approve_with_minor_fixes
+    rationale: "Produces AgentSpec JSON; no mutation, but output influences future agents. Manifest risk: high."
+  agent-creator-static-validator:
+    agent_assessment:
+      risk_level: medium
+      decision: needs_refactor
+    rationale: "Mission requires running validator, but the rendered surface has no execute tool; reconcile capability vs mission."
+  agent-creator-semantic-verifier:
+    agent_assessment:
+      risk_level: medium
+      decision: approve_with_minor_fixes
+    rationale: "Read-only semantic review role; acceptable if validator execution claims are clear."
+  agent-creator-runtime-guardian:
+    agent_assessment:
+      risk_level: critical
+      decision: approve_with_minor_fixes
+    rationale: "Read-only guardrail design role; wording should not imply unsupported execution. Manifest risk: critical (runtime-safety gate)."
+  agent-creator-supervisor:
+    agent_assessment:
+      risk_level: high
+      decision: approve_with_minor_fixes
+    rationale: "Coordinator role is coherent, but subagent routing semantics must match provider reality. Manifest risk: high."
+  architect:
+    agent_assessment:
+      risk_level: high
+      decision: approve
+    rationale: "Read-only planning role with strong boundaries, ACs, source-of-truth, and handoff discipline. Manifest risk: high (planning gate)."
+  architecture-plan-writer:
+    agent_assessment:
+      risk_level: medium
+      decision: approve_with_minor_fixes
+    rationale: "Writes only Markdown under docs/tickets; path ACL is self-enforced plus external guard."
+  bootstrapper:
+    agent_assessment:
+      risk_level: high
+      decision: needs_refactor
+    rationale: "REVIEW NEEDED (not in original draft table): INTERNAL kit-install orchestration, mutating, OpenCode-only. Manifest risk: high. Human must confirm decision."
+  bugfix:
+    agent_assessment:
+      risk_level: medium
+      decision: needs_refactor
+    rationale: "Mission says fix/apply changes; rendered surface posture must match. Manifest risk: medium."
+  build-config:
+    agent_assessment:
+      risk_level: high
+      decision: needs_refactor
+    rationale: "Mission says update config; rendered surface posture must match. Manifest risk: high."
+  config-maintainer:
+    agent_assessment:
+      risk_level: high
+      decision: approve_with_minor_fixes
+    rationale: "Write/execute capable; coherent but high-risk. Manifest risk: high."
+  docs:
+    agent_assessment:
+      risk_level: low
+      decision: needs_refactor
+    rationale: "Mission says update docs; rendered surface posture must match. Manifest risk: low."
+  implementer:
+    agent_assessment:
+      risk_level: high
+      decision: approve_with_minor_fixes
+    rationale: "Write/execute capable; acceptable only with bounded scope and verification. Manifest risk: high."
+  infra-auditor:
+    agent_assessment:
+      risk_level: high
+      decision: approve
+    rationale: "Read-only audit role. Manifest risk: high (dependency/build/release audit)."
+  post-install:
+    agent_assessment:
+      risk_level: high
+      decision: needs_refactor
+    rationale: "Broad mutation/post-install role; delegation and provider semantics need tightening. Manifest risk: high."
+  refactorer:
+    agent_assessment:
+      risk_level: high
+      decision: approve_with_minor_fixes
+    rationale: "Write/execute capable; safe only with behavior-preservation proof. Manifest risk: high."
+  release-auditor:
+    agent_assessment:
+      risk_level: critical
+      decision: approve
+    rationale: "Read-only release-safety audit role. Manifest risk: critical (ship/no-ship gate)."
+  repository-researcher:
+    agent_assessment:
+      risk_level: low
+      decision: approve_with_minor_fixes
+    rationale: "Read-only research with constrained execution; acceptable if mutation remains denied. Manifest risk: low."
+  repository-reviewer:
+    agent_assessment:
+      risk_level: medium
+      decision: needs_refactor
+    rationale: "Requires script/git execution; rendered surface posture must match. Manifest risk: medium."
+  researcher:
+    agent_assessment:
+      risk_level: medium
+      decision: approve_with_minor_fixes
+    rationale: "Research role with constrained execution; write claims need provider alignment. Manifest risk: medium."
+  reviewer:
+    agent_assessment:
+      risk_level: high
+      decision: needs_refactor
+    rationale: "Requires git/script review flow; rendered surface posture must match. Manifest risk: high."
+  ui-builder:
+    agent_assessment:
+      risk_level: high
+      decision: needs_refactor
+    rationale: "REVIEW NEEDED (not in original draft table; not risk-classified in AGENTS-MANIFEST). Treated as execution/mutating pending human classification; conservative high + needs_refactor."
+  upgrade:
+    agent_assessment:
+      risk_level: critical
+      decision: needs_refactor
+    rationale: "Says plan/apply upgrades; strongest gates. Manifest risk: critical."
+  workflow-auditor:
+    agent_assessment:
+      risk_level: medium
+      decision: approve_with_minor_fixes
+    rationale: "Read-only audit role; execution wording must match provider surface. Manifest risk: medium."

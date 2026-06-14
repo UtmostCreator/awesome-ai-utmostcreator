@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://app-configs.local/schemas/agent-assessment-values.schema.json",
+  "title": "Agent Assessment Values Source File",
+  "description": "Shape of the human-authored SOURCE file docs/ai/agent-scores.yaml (D3a). This is the upstream source from which the renderer (D3b) projects the rendered agent_assessment frontmatter block validated by agent-assessment.schema.json. This source file is keyed by CANONICAL agent TEMPLATE key (e.g. 'architect'), never by a generated display name. It carries categorical values only (risk_level, decision) plus a source-only 'rationale' that MUST NOT be rendered to frontmatter. Numeric rubric fields (score, confidence, role_clarity, ...) are NOT permitted in D3a; they are gated to a separate human-approved numeric pass (D3c). This schema documents the contract; tools/ai/validate-agent-assessment-values.php enforces it (no YAML extension is required at runtime, matching validate-script-access.php).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "approved", "agents"],
+  "properties": {
+    "schema": {
+      "type": "string",
+      "const": "ai.agent_assessment.values/v1",
+      "description": "Source-file format identifier."
+    },
+    "approved": {
+      "type": "boolean",
+      "description": "Human approval gate. While false, the values are DRAFT review input and renderers (D3b) MUST NOT consume the file. Flip to true only after a human approves the categorical values."
+    },
+    "agents": {
+      "type": "object",
+      "description": "Map of canonical agent TEMPLATE key -> assessment entry. Every live agent template must have exactly one entry; no stale entries are allowed.",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["agent_assessment", "rationale"],
+        "properties": {
+          "agent_assessment": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["risk_level", "decision"],
+            "description": "Categorical-only assessment. Numeric fields are intentionally disallowed in v1 (D3a). The renderer copies ONLY the fields that agent-assessment.schema.json accepts.",
+            "properties": {
+              "risk_level": {
+                "type": "string",
+                "enum": ["low", "medium", "high", "critical"],
+                "description": "Sourced from the existing docs/ai/AGENTS-MANIFEST.md Risk classification (identity mapping, same vocabulary). Not invented."
+              },
+              "decision": {
+                "type": "string",
+                "enum": ["approve", "approve_with_minor_fixes", "needs_refactor", "block"]
+              }
+            }
+          },
+          "rationale": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-approved reason for the assessment. SOURCE-ONLY: must never be rendered into agent frontmatter."
+          }
+        }
+      }
+    }
+  }
+}
