@@ -161,6 +161,14 @@ run_drift() {
         run_step "validate-schemas" php tools/ai/validate-schemas.php --root=.
     fi
 
+    if [[ -f tools/ai/validate-agent-assessment.php ]]; then
+        run_step "validate-agent-assessment" php tools/ai/validate-agent-assessment.php --root=.
+    fi
+
+    if [[ -f tools/ai/validate-agent-assessment-values.php && -f docs/ai/agent-scores.yaml ]]; then
+        run_step "validate-agent-assessment-values" php tools/ai/validate-agent-assessment-values.php --root=.
+    fi
+
     if [[ -f tools/ai/validate-mentor-parity.php ]]; then
         run_step "validate-mentor-parity" php tools/ai/validate-mentor-parity.php
     fi

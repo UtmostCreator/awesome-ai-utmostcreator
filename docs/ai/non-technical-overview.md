@@ -29,6 +29,28 @@ blank slate.
 - It does **not** replace GitHub Copilot, OpenCode, or Claude — it configures them.
 - It does **not** make risky, automatic changes to your code on its own.
 
+## Mentor Mode (L0–L5)
+
+The kit can help in escalating layers instead of just handing over an answer, so you learn as
+you go. Each rung gives a little more:
+
+- **L0 Frame** — restates the problem and asks what you tried.
+- **L1 Probe** — names the concept or pattern that matters.
+- **L2 Hint** — points to the file, function, or doc to look at.
+- **L3 Scaffold** — gives structure or pseudocode, not the working code.
+- **L4 Worked-adjacent** — shows a close example with the key part left for you.
+- **L5 Direct solution** — gives the complete answer with explanation.
+
+A "struggle gate" and a quick teach-it-back step help the lesson stick. See the canonical
+definition in
+[docs/ai/capabilities/mentor-mode/CAPABILITY.md](capabilities/mentor-mode/CAPABILITY.md).
+
+## A Note On What To Expect
+
+This kit is **not** a universal tool that builds and ships software for you. It gives ideas,
+scaffolds, prepares, validates, and handles routine work so you can **maintain sanity** — the
+result stays in your hands, and human review remains the final authority.
+
 ## Who It's For
 
 - Teams that already use (or want to start using) AI coding tools.

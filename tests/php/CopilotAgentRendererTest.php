@@ -256,4 +256,33 @@ class CopilotAgentRendererTest extends TestCase
             $this->assertStringNotContainsString("'execute'", $content, "Installed agent '{$name}' must use fine-grained execute tools, not broad aliases");
         }
     }
+
+    // ----- Optional agent_assessment rubric projection (Plan D2) -----
+
+    public function testAssessmentBlockRoundTripsWhenPresent(): void
+    {
+        $src = "---\nid: sample\ndescription: demo\nagent_assessment:\n  risk_level: high\n  score: 80\n---\nbody\n";
+        $out = aiInstallerRenderCopilotAgent($src, 'sample', '/project/scripts/ai');
+        // The rubric must appear inside the rebuilt frontmatter (before the closing ---).
+        $this->assertMatchesRegularExpression('/^agent_assessment:\R\s+risk_level: high\R\s+score: 80/m', $out);
+        $fmEnd = strpos($out, "\n---\n");
+        $this->assertNotFalse($fmEnd);
+        $this->assertStringContainsString('agent_assessment:', substr($out, 0, $fmEnd));
+    }
+
+    public function testNoAssessmentBlockWhenAbsentFromTemplate(): void
+    {
+        $src = "---\nid: sample\ndescription: demo\nmode: subagent\n---\nbody\n";
+        $out = aiInstallerRenderCopilotAgent($src, 'sample', '/project/scripts/ai');
+        $this->assertStringNotContainsString('agent_assessment', $out);
+    }
+
+    public function testLiveArchitectTemplateProjectsPilotRubric(): void
+    {
+        // The architect template carries the D1 pilot block; it must round-trip.
+        // risk_level is reconciled to the authoritative AGENTS-MANIFEST.md value (high).
+        $out = aiInstallerRenderCopilotAgent($this->architectTemplate(), 'architect', '/project/scripts/ai');
+        $this->assertStringContainsString('agent_assessment:', $out);
+        $this->assertStringContainsString('risk_level: high', $out);
+    }
 }

@@ -38,6 +38,18 @@ ai-check:
   @php tools/ai/validate-ai-catalog.php
   @php tools/ai/generate-ai-catalog.php --check
 
+# Surface-integrity gate: validates the shipped agent/adapter/install/doc surfaces.
+# Wires the surface validators (config, adapter drift, install surface, agent
+# rubric, schemas) plus file-reference integrity into one runnable check.
+verify-surface:
+  @php tools/ai/validate-ai-config.php
+  @php tools/ai/validate-adapter-drift.php
+  @php tools/ai/validate-install-surface.php
+  @php tools/ai/validate-agent-assessment.php --root=.
+  @php tools/ai/validate-agent-assessment-values.php --root=.
+  @php tools/ai/validate-schemas.php --root=.
+  @bash scripts/ai/bin/verify/check-file-refs.sh
+
 context-analyze path='.' opts='':
   @bash -lc 'path="{{path}}"; opts="{{opts}}"; if [[ "$path" == opts=* ]] && [[ -z "$opts" ]]; then opts="${path#opts=}"; path="."; fi; bash scripts/ai/repomix-context-tree.sh analyze "$path" $opts'
 

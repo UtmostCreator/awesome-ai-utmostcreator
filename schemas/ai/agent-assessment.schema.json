@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://app-configs.local/schemas/agent-assessment.schema.json",
+  "title": "Agent Assessment Rubric",
+  "description": "Optional, unenforced operational-readiness rubric carried in agent frontmatter under the 'agent_assessment' key. All fields are optional; when present, values must satisfy the ranges/enums below. Per-agent values are sourced separately by a human-approved source (see docs/tickets/arch-todo-agent-score-frontmatter-*); this schema defines shape only and never invents values.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "score": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "confidence": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "role_clarity": { "type": "integer", "minimum": 0, "maximum": 15 },
+    "scope_control": { "type": "integer", "minimum": 0, "maximum": 15 },
+    "permission_safety": { "type": "integer", "minimum": 0, "maximum": 15 },
+    "output_contract": { "type": "integer", "minimum": 0, "maximum": 15 },
+    "evidence_required": { "type": "integer", "minimum": 0, "maximum": 15 },
+    "verification_strength": { "type": "integer", "minimum": 0, "maximum": 15 },
+    "handoff_quality": { "type": "integer", "minimum": 0, "maximum": 10 },
+    "risk_level": { "type": "string", "enum": ["low", "medium", "high", "critical"] },
+    "decision": {
+      "type": "string",
+      "enum": ["approve", "approve_with_minor_fixes", "needs_refactor", "block"]
+    }
+  }
+}

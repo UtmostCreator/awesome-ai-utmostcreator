@@ -3,6 +3,8 @@ ai-search.sh — unified repository search entrypoint
 Usage: ai-search.sh MODE [QUERY] [root] [flags]
 JSON output: AI_OUTPUT=json
 
+WARNING: contract aggregated from sourced modules (see inlined markers); target not executed
+
 Positionals: MODE [QUERY] [root]
 
 Status values: ok no_matches error unavailable dry_run blocked
@@ -41,6 +43,13 @@ Modes:
     doctor           diagnostics{} of
                      available/missing/warnings/root/git_available
     unsafe-all       approval-gated; always returns status=blocked
+  shortcut (query required):
+    config-key       config/env files matching QUERY
+    enum             enum definitions matching NAME
+    function         function definitions matching NAME
+    interface        interface definitions matching NAME
+    method           method definitions matching NAME
+    route            route files matching QUERY
   deprecated:
     changed staged  (see Deprecated modes below)
 
@@ -162,6 +171,7 @@ Examples:
   AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed
   AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged
   AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php
+  AI_OUTPUT=json bash scripts/ai/ai-search.sh function findUser .
 
 See also:
   ai-search.sh doctor          runtime diagnostics (missing tools / root / git state)

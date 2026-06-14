@@ -56,6 +56,10 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
     $tools       = aiCopilotAgentTools($id);
     $toolsYaml   = '[\'' . implode("', '", $tools) . "']";
 
+    // Optional agent_assessment rubric: carried through from the source template only
+    // when present, preserving keys/values exactly. Absent in the template -> absent here.
+    $assessmentBlock = isset($rawFm) ? aiCopilotExtractAssessmentBlock($rawFm) : '';
+
     // Format agent name: title-case from kebab-case
     $name = implode(' ', array_map('ucfirst', explode('-', $id)));
 
@@ -66,6 +70,7 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
     $copilotFm .= "tools: {$toolsYaml}\n";
     $copilotFm .= "user-invocable: true\n";
     $copilotFm .= "disable-model-invocation: false\n";
+    $copilotFm .= $assessmentBlock;
     $copilotFm .= "---\n";
 
     // --- Build enforcement boundary section ---
@@ -216,6 +221,47 @@ function aiInstallerRenderCopilotAgentsInto(string $src, string $dest, string $s
             throw new RuntimeException('failed to write rendered agent: ' . $destFile);
         }
     }
+}
+
+/**
+ * Extracts the OPTIONAL `agent_assessment:` mapping from raw OpenCode frontmatter and
+ * re-emits it as a normalized YAML block (without comment lines) suitable for inclusion
+ * in the rebuilt Copilot frontmatter. Returns '' when the block is absent, so agents
+ * without a rubric render byte-identically to the prior behavior.
+ *
+ * Only known scalar key: value pairs under the block are carried; the block ends at the
+ * first non-indented, non-comment line.
+ */
+function aiCopilotExtractAssessmentBlock(string $rawFm): string
+{
+    $lines = explode("\n", $rawFm);
+    $inBlock = false;
+    $entries = [];
+    foreach ($lines as $line) {
+        if (preg_match('/^agent_assessment:\s*$/', trim($line))) {
+            $inBlock = true;
+            continue;
+        }
+        if (!$inBlock) {
+            continue;
+        }
+        // End the block at the first non-indented, non-blank, non-comment line.
+        if (rtrim($line) !== '' && !preg_match('/^\s/', $line) && !preg_match('/^\s*#/', $line)) {
+            break;
+        }
+        if (trim($line) === '' || preg_match('/^\s*#/', $line)) {
+            continue;
+        }
+        if (preg_match('/^\s+([\w-]+):\s*(.+?)\s*$/', $line, $m)) {
+            $entries[] = "  {$m[1]}: {$m[2]}";
+        }
+    }
+
+    if (!$inBlock || $entries === []) {
+        return '';
+    }
+
+    return "agent_assessment:\n" . implode("\n", $entries) . "\n";
 }
 
 /**
