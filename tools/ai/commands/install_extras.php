@@ -514,8 +514,10 @@ function aiToolGatewayReasonCodes(): array
  */
 function aiToolGatewayReasonPayload(string $reason, string $safeNextStep, array $extra = []): array
 {
+    $blockedReasons = ['approval_required', 'mutating_requires_apply'];
+
     return array_merge([
-        'status' => $reason === 'approval_required' ? 'blocked' : 'failed',
+        'status' => in_array($reason, $blockedReasons, true) ? 'blocked' : 'failed',
         'reason' => $reason,
         'safe_next_step' => $safeNextStep,
     ], $extra);
@@ -689,6 +691,23 @@ function aiRunToolRunCommand(string $root, array $args): int
         $data = aiToolGatewayReasonPayload(
             'approval_required',
             'Stop and do not retry. Re-run with --apply only after explicit human approval.',
+            ['tool' => $toolId, 'requires_approval' => true]
+        );
+        $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'blocked', null, $data['safe_next_step']);
+        fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+        return 2;
+    }
+
+    // Phase 4 — Fix B (defense-in-depth, OQ-1-independent): the OpenCode `tool:run *` allow
+    // rule also matches `--apply`, so an agent could reach a mutating tool with no prompt.
+    // The gateway therefore refuses to actually EXECUTE an approval-required tool via --apply
+    // unless a human has explicitly opted in with AI_GATEWAY_ALLOW_APPLY=1 in their own shell.
+    // Agent bash contexts do not set this env, so the no-prompt mutation lane is closed here
+    // regardless of OpenCode tokenizer behavior. See docs/tickets/.../plan-phase4-apply-gate-hardening.md.
+    if ($descriptor['requires_approval'] && $wantsApply && getenv('AI_GATEWAY_ALLOW_APPLY') !== '1') {
+        $data = aiToolGatewayReasonPayload(
+            'mutating_requires_apply',
+            'Stop and do not retry. A human must run this mutating tool: set AI_GATEWAY_ALLOW_APPLY=1 in an interactive shell after explicit approval, or run the underlying ask-gated script directly.',
             ['tool' => $toolId, 'requires_approval' => true]
         );
         $written = aiCliWriteArtifact($root, 'tool-run', 'php tools/ai/ai.php tool:run ' . $toolId, $data, 'blocked', null, $data['safe_next_step']);

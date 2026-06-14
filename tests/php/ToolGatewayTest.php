@@ -222,6 +222,57 @@ class ToolGatewayTest extends TestCase
 
         $failed = aiToolGatewayReasonPayload('unknown_id', 'List tools first.');
         $this->assertSame('failed', $failed['status'], 'non-approval reasons map to failed status');
+
+        // Phase 4 — mutating_requires_apply is a blocked (not failed) outcome.
+        $mra = aiToolGatewayReasonPayload('mutating_requires_apply', 'human must opt in');
+        $this->assertSame('blocked', $mra['status'], 'mutating_requires_apply must map to blocked status');
+    }
+
+    // --- Phase 4: --apply no-prompt mutation lane is closed (Fix B) ---------
+
+    /**
+     * The OpenCode `tool:run *` allow rule also matches `--apply`. Fix B closes the
+     * no-prompt mutation lane in the gateway itself: an approval-required tool invoked
+     * with --apply but WITHOUT the explicit human env opt-in must be blocked (exit 2),
+     * never executed. This is the OQ-1-independent, statically-provable guard.
+     */
+    public function testToolRunMutatingWithApplyButNoEnvIsBlocked(): void
+    {
+        $mutating = $this->firstMutatingToolId();
+        $result = $this->runTool('php tools/ai/ai.php tool:run ' . escapeshellarg($mutating) . ' --apply');
+        $this->assertSame(
+            2,
+            $result['exit'],
+            "approval-required tool '$mutating' with --apply but no AI_GATEWAY_ALLOW_APPLY must stay blocked (exit 2)"
+        );
+    }
+
+    /**
+     * With the explicit human opt-in env set, the gateway must NOT early-return at the
+     * Fix B gate (it proceeds to normal execution). We invoke a mutating tool's --help
+     * surface so this is side-effect-free, and assert the exit code is no longer the
+     * Fix B block code path on a host where the tool's required tools are present.
+     */
+    public function testToolRunMutatingWithApplyAndEnvBypassesFixBGate(): void
+    {
+        $mutating = $this->firstMutatingToolId();
+        $result = $this->runTool(
+            'php tools/ai/ai.php tool:run ' . escapeshellarg($mutating) . ' --apply -- --help',
+            ['AI_GATEWAY_ALLOW_APPLY' => '1']
+        );
+        // With the env set the Fix B gate is bypassed; the run proceeds (exit 0 on a
+        // complete host, or 1 if the underlying --help path returns non-zero), but it
+        // must NOT be the no-env block. Assert it is not stuck behind the gate by
+        // confirming the artifact does not carry the mutating_requires_apply reason.
+        $artifact = self::$repoRoot . '/docs/ai/generated/tool-run.json';
+        $this->assertFileExists($artifact);
+        $decoded = json_decode((string) file_get_contents($artifact), true);
+        $reason = $decoded['data']['reason'] ?? null;
+        $this->assertNotSame(
+            'mutating_requires_apply',
+            $reason,
+            'with AI_GATEWAY_ALLOW_APPLY=1 the gateway must not block via the Fix B gate'
+        );
     }
 
     private function firstMutatingToolId(): string
@@ -235,17 +286,18 @@ class ToolGatewayTest extends TestCase
     }
 
     /**
+     * @param array<string,string> $extraEnv
      * @return array{stdout:string,stderr:string,exit:int}
      */
-    private function runTool(string $command): array
+    private function runTool(string $command, array $extraEnv = []): array
     {
         $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
-        $env = [
+        $env = array_merge([
             'HOME'              => sys_get_temp_dir(),
             'XDG_CONFIG_HOME'   => sys_get_temp_dir(),
             'GIT_CONFIG_GLOBAL' => '/dev/null',
             'PATH'              => (string) getenv('PATH'),
-        ];
+        ], $extraEnv);
         if (str_starts_with($command, 'php ')) {
             $command = escapeshellarg((string) PHP_BINARY) . substr($command, 3);
         }
