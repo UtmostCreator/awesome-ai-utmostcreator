@@ -143,4 +143,30 @@ class ShIntrospectHelpFormatTest extends ShIntrospectTestCase
         $this->assertNotSame(0, $result['exit'], 'unknown --format value must exit non-zero');
         $this->assertStringContainsString('ERROR', $result['stderr'], 'unknown --format value must report on stderr');
     }
+
+    public function testIncompleteHelpSurfaceEmitsWarning(): void
+    {
+        $path = tempnam(sys_get_temp_dir(), 'shintro_help_') . '.sh';
+        file_put_contents($path, <<<'SH'
+#!/usr/bin/env bash
+case "${1:-}" in
+  run) printf 'ok\n' ;;
+  --flag) printf 'flag\n' ;;
+esac
+SH);
+
+        try {
+            $json = $this->decodeJsonResult($this->runEngine([$path], true));
+            $this->assertContains(
+                'Help quality: incomplete — missing usage block, summary, Usage section, documented modes, documented flags',
+                $json['warnings'] ?? []
+            );
+
+            $help = $this->runEngine(['--format=help', $path], false);
+            $this->assertSame(0, $help['exit'], "--format=help failed:\n" . $help['stderr']);
+            $this->assertStringContainsString('WARNING: Help quality: incomplete', $help['stdout']);
+        } finally {
+            @unlink($path);
+        }
+    }
 }
