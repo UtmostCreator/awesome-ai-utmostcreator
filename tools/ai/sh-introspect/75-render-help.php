@@ -111,6 +111,14 @@ function shIntrospectRenderHelpSummary(array $env): string
         $blocks[] = implode("\n", $headerLines);
     }
 
+    $warnings = is_array($env['warnings'] ?? null) ? $env['warnings'] : [];
+    if ($warnings !== []) {
+        $blocks[] = implode("\n", array_map(
+            static fn(string $warning): string => 'WARNING: ' . $warning,
+            array_map('strval', $warnings)
+        ));
+    }
+
     // Positionals (kept as an explicit line for the contract surface).
     $positionalsLine = shIntrospectHelpPositionalsLine(
         is_array($env['positionals'] ?? null) ? $env['positionals'] : []

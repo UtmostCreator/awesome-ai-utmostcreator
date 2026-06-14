@@ -142,6 +142,10 @@ function shIntrospectParse(string $raw, string $file): array
         $warnings[] = 'risk_summary.has_unresolved_source=true: one or more `source`/`.` targets are dynamic and could not be statically resolved';
     }
 
+    foreach (shIntrospectHelpQualityWarnings($usageBlock, $helpMeta, $usageModeDocs, $usageParamDocs, $modes, $params) as $warning) {
+        $warnings[] = $warning;
+    }
+
     $env['kind'] = shIntrospectDetectKind($raw, $codeLines);
     $env['functions'] = array_values($functions);
     $env['status_values'] = $statusValues;
@@ -169,4 +173,50 @@ function shIntrospectParse(string $raw, string $file): array
     $env['meta']['confidence'] = shIntrospectOverallConfidence($env);
 
     return $env;
+}
+
+/**
+ * Emit a conservative warning when the human help surface is missing major
+ * pieces that the machine contract discovered. This is advisory only: the
+ * parser still returns status=ok because static introspection can succeed even
+ * when --help would be sparse.
+ *
+ * @param array<string,string> $helpMeta
+ * @param array<string,array<string,string>> $usageModeDocs
+ * @param array<string,array<string,mixed>> $usageParamDocs
+ * @param array<string,array<string,mixed>> $modes
+ * @param array<string,array<string,mixed>> $params
+ * @return array<int,string>
+ */
+function shIntrospectHelpQualityWarnings(
+    string $usageBlock,
+    array $helpMeta,
+    array $usageModeDocs,
+    array $usageParamDocs,
+    array $modes,
+    array $params
+): array {
+    $missing = [];
+
+    if (trim($usageBlock) === '') {
+        $missing[] = 'usage block';
+    }
+    if (!isset($helpMeta['summary'])) {
+        $missing[] = 'summary';
+    }
+    if (!isset($helpMeta['usage'])) {
+        $missing[] = 'Usage section';
+    }
+    if ($modes !== [] && $usageModeDocs === []) {
+        $missing[] = 'documented modes';
+    }
+    if ($params !== [] && $usageParamDocs === []) {
+        $missing[] = 'documented flags';
+    }
+
+    if ($missing === []) {
+        return [];
+    }
+
+    return ['Help quality: incomplete — missing ' . implode(', ', array_values(array_unique($missing)))];
 }
