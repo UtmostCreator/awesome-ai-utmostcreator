@@ -108,6 +108,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/bin/verify/check-file-refs.sh`
 - `scripts/ai/bin/verify/run-repo-tests.sh`
 - `scripts/ai/bin/verify/run-test-focused.sh`
+- `scripts/ai/bin/verify/ship-audit.sh`
 - `scripts/ai/build-ai-help-bundle.sh`
 - `scripts/ai/check-file-refs.sh`
 - `scripts/ai/common.sh`
@@ -191,6 +192,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/run-test-focused.sh`
 - `scripts/ai/session-checkpoint.sh`
 - `scripts/ai/sh-introspect.sh`
+- `scripts/ai/ship-audit.sh`
 - `scripts/ai/watch-loop.sh`
 - `scripts/doctor.sh`
 - `scripts/hooks/commit-msg.sh`
