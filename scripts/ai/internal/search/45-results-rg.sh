@@ -82,6 +82,7 @@ lines_to_structured_results() {
 
 # Shared jq prelude: language detection + repo-relative path. Reused by the
 # rg --json parsers below.
+# shellcheck disable=SC2016  # single-quoted on purpose: $p/$s/$x are jq variables, not shell.
 _rg_json_jq_prelude='
         def as_string: if type == "string" then . else "" end;
         def lang($p):

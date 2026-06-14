@@ -273,7 +273,10 @@ function aiInstallerRun(array $argv): int
         aiInstallerCompileCommandPolicy((string) $config['targetRoot']);
         $placeholderStatus = aiInstallerCollectPlaceholderStatus($config['targetRoot']);
 
-        $strictProfiles = ['guarded', 'accelerated', 'full-governance'];
+        // `full` is an alias of full-governance, so it inherits strict placeholder
+        // gating. standard/creator alias dual (non-strict) and basic/agents-only are
+        // intentionally non-strict, matching the profiles they alias.
+        $strictProfiles = ['guarded', 'accelerated', 'full-governance', 'full'];
         if (in_array((string) $config['profile'], $strictProfiles, true)
             && $placeholderStatus['unresolved_required'] !== []
             && !($config['allowPlaceholders'] ?? false)
@@ -402,6 +405,17 @@ function aiInstallerRun(array $argv): int
         aiInstallerLog('');
     }
 
+    // Agent-dependency warning: agents reference scripts/ai/*.sh in their permission
+    // allowlists. If an agent pack is selected without scripts-pack, the installed
+    // agents reference commands that do not exist. Detection is shared (packs.php).
+    $installWarnings = aiInstallerAgentDependencyWarnings($packs);
+    foreach ($installWarnings as $warning) {
+        aiInstallerLog('WARNING: ' . $warning);
+    }
+    if ($installWarnings !== []) {
+        aiInstallerLog('');
+    }
+
     aiInstallerLog('next steps:');
     aiInstallerLog('1) ✏  Edit docs/ai/project-context.md — replace every <PLACEHOLDER> with real project facts');
     aiInstallerLog('2) ✏  Edit .github/instructions/frontend.instructions.md — replace <FRONTEND_PATH_GLOB>');
@@ -430,6 +444,7 @@ function aiInstallerRun(array $argv): int
             'backup' => $backupInfo,
             'placeholders' => $placeholderStatus,
             'template_updates' => $templateRefreshes,
+            'warnings' => $installWarnings,
         ];
         $json = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL;
         file_put_contents((string) $config['outputJson'], $json);

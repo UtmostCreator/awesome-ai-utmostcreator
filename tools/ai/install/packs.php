@@ -489,6 +489,26 @@ function aiInstallerExpandProfilePacks(array $items, array $profileDefs, array $
     return array_values(array_unique($expanded));
 }
 
+/**
+ * Agents reference scripts/ai/*.sh in their permission allowlists and load capability
+ * docs. When an agent pack is selected without scripts-pack, the installed agents will
+ * reference commands that are not present. Returns operator-facing warning strings
+ * (empty when the selection is coherent). Shared by the install-ai-kit and ai.php
+ * install surfaces so the detection stays in one place.
+ *
+ * @param list<string> $selectedPacks
+ * @return list<string>
+ */
+function aiInstallerAgentDependencyWarnings(array $selectedPacks): array
+{
+    $warnings = [];
+    $agentPacks = ['adapter-copilot', 'adapter-opencode', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack'];
+    if (array_intersect($agentPacks, $selectedPacks) !== [] && !in_array('scripts-pack', $selectedPacks, true)) {
+        $warnings[] = 'Agents were installed without scripts-pack: agent permission allowlists reference scripts/ai/*.sh that are not present. Re-run with --with scripts-pack or use an edition that includes it (standard, creator, full, agents-only).';
+    }
+    return $warnings;
+}
+
 function aiInstallerPackToolRequirements(array $selectedPacks): array
 {
     $required = [];

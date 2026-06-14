@@ -220,6 +220,20 @@ How the profiles map to runtimes:
 | `full-governance` | Both + optional governance packs                |
 | `minimal`         | Base only (serves Claude via `AGENTS.md`) |
 
+Editions are user-facing aliases over the profiles above:
+
+| Edition       | Alias of / contents                                            |
+| ------------- | -------------------------------------------------------------- |
+| `basic`       | `minimal` — bare minimum (base + setup docs + core capabilities) |
+| `standard`    | `dual` — recommended (both runtimes, scripts, policy, hooks)   |
+| `creator`     | `standard` + the optional agent-creator agent suite           |
+| `full`        | `full-governance` — everything, governance-grade               |
+| `agents-only` | Agents for both runtimes **plus** their required `scripts-pack` and core capability docs |
+
+Note: agents reference `scripts/ai/*.sh` in their permission allowlists and load
+capability docs. Installing agents without `scripts-pack` triggers a dependency
+warning; the `standard`, `creator`, `full`, and `agents-only` editions include it.
+
 ### Case A — GitHub Copilot only
 
 ```bash

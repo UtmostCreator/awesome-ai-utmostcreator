@@ -107,6 +107,7 @@ permission:
     'bash scripts/ai/watch-loop.sh *': deny
     'bash scripts/ai/common.sh*': deny
     'php tools/ai/validate-*.php *': allow
+    'php tools/ai/verify-install-placeholders.php*': allow
     'php tools/ai/ai.php placeholders*': allow
     'php tools/ai/ai.php verify*': allow
     'php tools/ai/ai.php advisor*': allow

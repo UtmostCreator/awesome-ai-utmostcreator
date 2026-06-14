@@ -284,6 +284,88 @@ class InstallerSafetyTest extends TestCase
         $this->assertContains('scripts-pack', $packs);
     }
 
+    public function testInstallBasicEditionIsMinimalAlias(): void
+    {
+        $result = $this->runTool($this->aiCommand('install --profile basic --dry-run'));
+        $this->assertSame(0, $result['exit']);
+        $packs = $this->readGeneratedArtifact('install.json')['data']['packs'] ?? [];
+        $this->assertIsArray($packs);
+        $this->assertContains('base', $packs);
+        $this->assertContains('capabilities-core', $packs);
+        // basic ships no adapters or scripts.
+        $this->assertNotContains('scripts-pack', $packs);
+        $this->assertNotContains('adapter-opencode', $packs);
+    }
+
+    public function testInstallStandardEditionIsDualAlias(): void
+    {
+        $result = $this->runTool($this->aiCommand('install --profile standard --dry-run'));
+        $this->assertSame(0, $result['exit']);
+        $packs = $this->readGeneratedArtifact('install.json')['data']['packs'] ?? [];
+        $this->assertContains('scripts-pack', $packs);
+        $this->assertContains('adapter-copilot', $packs);
+        $this->assertContains('adapter-opencode', $packs);
+        $this->assertContains('capabilities-extended', $packs);
+    }
+
+    public function testInstallCreatorEditionShipsOptionalAgents(): void
+    {
+        $result = $this->runTool($this->aiCommand('install --profile creator --dry-run'));
+        $this->assertSame(0, $result['exit']);
+        $packs = $this->readGeneratedArtifact('install.json')['data']['packs'] ?? [];
+        $this->assertContains('optional-agents-opencode-pack', $packs);
+        $this->assertContains('optional-agents-copilot-pack', $packs);
+        $this->assertContains('scripts-pack', $packs);
+    }
+
+    public function testInstallFullEditionMatchesFullGovernanceSurface(): void
+    {
+        $result = $this->runTool($this->aiCommand('install --profile full --dry-run'));
+        $this->assertSame(0, $result['exit']);
+        $packs = $this->readGeneratedArtifact('install.json')['data']['packs'] ?? [];
+        $this->assertContains('advisor-pack', $packs);
+        $this->assertContains('ci-pack', $packs);
+        $this->assertContains('optional-agents-opencode-pack', $packs);
+        $this->assertContains('scripts-pack', $packs);
+    }
+
+    public function testInstallAgentsOnlyEditionIncludesScriptsDependency(): void
+    {
+        $result = $this->runTool($this->aiCommand('install --profile agents-only --dry-run'));
+        $this->assertSame(0, $result['exit']);
+        $decoded = $this->readGeneratedArtifact('install.json');
+        $packs = $decoded['data']['packs'] ?? [];
+        $this->assertContains('adapter-copilot', $packs);
+        $this->assertContains('adapter-opencode', $packs);
+        // agents-only MUST bundle the scripts agents depend on, so no warning fires.
+        $this->assertContains('scripts-pack', $packs);
+        $this->assertContains('capabilities-core', $packs);
+        $this->assertSame([], $decoded['data']['warnings'] ?? null);
+    }
+
+    public function testInstallAgentsWithoutScriptsPackEmitsDependencyWarning(): void
+    {
+        $result = $this->runTool($this->aiCommand('install --profile basic --with adapter-opencode --dry-run'));
+        $this->assertSame(0, $result['exit']);
+        $decoded = $this->readGeneratedArtifact('install.json');
+        $packs = $decoded['data']['packs'] ?? [];
+        $this->assertContains('adapter-opencode', $packs);
+        $this->assertNotContains('scripts-pack', $packs);
+        $warnings = $decoded['data']['warnings'] ?? [];
+        $this->assertIsArray($warnings);
+        $this->assertNotEmpty($warnings);
+        $this->assertStringContainsString('scripts-pack', $warnings[0]);
+    }
+
+    public function testInstallAgentsOnlyRuntimeOverrideKeepsSingleAdapter(): void
+    {
+        $result = $this->runTool($this->aiCommand('install --profile agents-only --runtime github-copilot --dry-run'));
+        $this->assertSame(0, $result['exit']);
+        $packs = $this->readGeneratedArtifact('install.json')['data']['packs'] ?? [];
+        $this->assertContains('adapter-copilot', $packs);
+        $this->assertNotContains('adapter-opencode', $packs);
+    }
+
     public function testInstallRunAfterInstallWorksWithDualDefaultScriptsPack(): void
     {
         $result = $this->runTool($this->aiCommand('install --profile dual --run-after-install=repomix-context --dry-run'));

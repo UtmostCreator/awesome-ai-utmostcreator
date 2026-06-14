@@ -15,6 +15,11 @@ Deterministic catalog generated from installer registries.
 - `full-governance`: `accelerated, capabilities-governance, hooks-pack, ci-pack, docs-reference-pack, delivery-pack, optional-agents-opencode-pack, optional-agents-copilot-pack, preview-environments-pack, evaluation-pack, service-boundary-pack, mcp-boundaries-pack, advisor-pack, target-tools-pack, shared-templates-pack`
 - `docs-reference`: `docs-reference-pack`
 - `custom`: ``
+- `basic`: `minimal`
+- `standard`: `dual`
+- `creator`: `standard, optional-agents-opencode-pack, optional-agents-copilot-pack`
+- `full`: `full-governance`
+- `agents-only`: `adapter-copilot, adapter-opencode, scripts-pack, capabilities-core`
 
 ## Packs
 

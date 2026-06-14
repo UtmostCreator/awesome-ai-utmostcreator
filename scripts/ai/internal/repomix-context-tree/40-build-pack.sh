@@ -20,6 +20,7 @@ generate_child_index() {
     [[ "$decision" == "split" ]] || return 0
     mkdir -p "$(dirname "$output_abs")"
 
+    # shellcheck disable=SC2016  # single-quoted printf formats: backticks are literal markdown, %s is filled by args.
     {
         printf '# Child Context Index\n\n'
         printf 'Route: `%s`\n\n' "$route"
@@ -215,6 +216,7 @@ build_plan() {
 }
 
 build_human_index() {
+    # shellcheck disable=SC2016  # single-quoted printf formats: backticks are literal markdown, %s is filled by args.
     {
         printf '# Context Index\n\n'
         printf '## Purpose\n\n'

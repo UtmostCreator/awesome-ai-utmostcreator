@@ -12,7 +12,7 @@
 # shellcheck disable=SC2034,SC2154
 
 # run_backend — dispatch the canonical (path:line:text) backends. Bespoke modes
-    # (diff/history/todo/unsafe-patterns/struct/symbols/class/doctor) exit before
+# (diff/history/todo/unsafe-patterns/struct/symbols/class/doctor) exit before
 # this point, so only the simple `out`-setting backends remain here.
 run_backend() {
     case "$mode" in

@@ -48,7 +48,10 @@ run_guarded() {
         [[ -n "$candidate" ]] || continue
         mkdir -p "$candidate" 2>/dev/null || continue
         [[ -w "$candidate" ]] || continue
-        out_file="$(mktemp "$candidate/ai-guard-out.XXXXXX" 2>/dev/null)" || { out_file=""; continue; }
+        out_file="$(mktemp "$candidate/ai-guard-out.XXXXXX" 2>/dev/null)" || {
+            out_file=""
+            continue
+        }
         err_file="$(mktemp "$candidate/ai-guard-err.XXXXXX" 2>/dev/null)" || {
             rm -f "$out_file" 2>/dev/null || true
             out_file=""
@@ -165,7 +168,10 @@ run_guarded() {
     fi
 
     local tail_out
-    tail_out="$(tail -c 400 "$out_file" 2>/dev/null; tail -c 400 "$err_file" 2>/dev/null)"
+    tail_out="$(
+        tail -c 400 "$out_file" 2>/dev/null
+        tail -c 400 "$err_file" 2>/dev/null
+    )"
 
     if ((killed)); then
         log_json "guard.killed" "$(jq -cn --arg label "$label" --arg reason "$reason" \

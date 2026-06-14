@@ -3,8 +3,8 @@
 # Role/risk alias for the canonical implementation at scripts/ai/ship-audit.sh.
 set -euo pipefail
 
-_ai_shim_dir="$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-_ai_root="$(CDPATH= cd -- "$_ai_shim_dir/../.." && pwd)"
+_ai_shim_dir="$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+_ai_root="$(CDPATH='' cd -- "$_ai_shim_dir/../.." && pwd)"
 _ai_impl="$_ai_root/ship-audit.sh"
 
 if [[ "${1:-}" == "--introspect" || "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then

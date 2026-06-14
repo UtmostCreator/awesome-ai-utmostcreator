@@ -19,7 +19,7 @@ _ai_guard_pid_jiffies() {
     # read returns nonzero on the no-trailing-newline herestring; tolerate it
     # so callers under `set -e` are not aborted.
     read -r -a a <<<"$rest" || true
-    printf '%s\n' "$(( ${a[11]:-0} + ${a[12]:-0} ))"
+    printf '%s\n' "$((${a[11]:-0} + ${a[12]:-0}))"
 }
 
 # Sum used CPU jiffies (utime+stime) for an entire process group, from /proc.
@@ -93,7 +93,10 @@ _ai_guard_cpu_percent_impl() {
             j0="$(_ai_guard_pid_jiffies "$pid")" || return 1
         fi
         sleep "$sample"
-        kill -0 "$pid" 2>/dev/null || { printf '0\n'; return 0; }
+        kill -0 "$pid" 2>/dev/null || {
+            printf '0\n'
+            return 0
+        }
         if ((group_mode)); then
             j1="$(_ai_guard_proc_jiffies "$pid")" || return 1
         else
