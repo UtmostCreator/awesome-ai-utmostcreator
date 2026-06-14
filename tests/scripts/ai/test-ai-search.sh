@@ -170,6 +170,7 @@ git -C "$p1_repo" branch -M main
 mkdir -p \
     "$p1_repo/app" \
     "$p1_repo/docs" \
+    "$p1_repo/routes" \
     "$p1_repo/tests" \
     "$p1_repo/__tests__" \
     "$p1_repo/config" \
@@ -189,6 +190,15 @@ class UserService
     {
         return "StructuredNeedle";
     }
+}
+
+interface UserContract
+{
+}
+
+enum UserStatus
+{
+    case Active;
 }
 
 // TODO: TodoNeedle refactor this legacy workaround.
@@ -285,7 +295,14 @@ JS
 
 cat >"$p1_repo/config/app.yaml" <<'YAML'
 name: ConfigNeedle
+service_key: ConfigKeyNeedle
 YAML
+
+cat >"$p1_repo/routes/web.php" <<'PHP'
+<?php
+Route::get('/users', [UserService::class, 'findUser']);
+// RouteNeedle
+PHP
 
 cat >"$p1_repo/.env.example" <<'ENV'
 APP_NAME=ConfigNeedle
@@ -1020,6 +1037,12 @@ expect_jq "multi deps mode allowed" '.[0].status == "ok"'
 run_multi tests TestNeedle "$p1_repo" --fixed
 expect_jq "multi tests mode allowed" '.[0].status == "ok"'
 
+run_multi route RouteNeedle "$p1_repo" --fixed
+expect_jq "multi route mode allowed" '.[0].status == "ok"'
+
+run_multi config-key ConfigKeyNeedle "$p1_repo" --fixed
+expect_jq "multi config-key mode allowed" '.[0].status == "ok"'
+
 # =============================================================================
 # Phase 5 — structural search
 # =============================================================================
@@ -1075,7 +1098,43 @@ else
     expect_jq "shortcut class returns class defs only" '
       all(.results[]; .kind == "class" and .name == "UserService")
     '
+
+    run_search function frontendFunction "$p1_repo" --lang js
+    expect_status "shortcut function frontendFunction -> ok" "ok"
+    expect_jq "shortcut function returns matching function definition" '
+      .results[] | select(.path == "app/frontend.js" and (.text|contains("function frontendFunction")))
+    '
+
+    run_search method findUser "$p1_repo" --lang php
+    expect_status "shortcut method findUser -> ok" "ok"
+    expect_jq "shortcut method returns matching method definition" '
+      .results[] | select(.path == "app/UserService.php" and (.text|contains("function findUser")))
+    '
+
+    run_search interface UserContract "$p1_repo" --lang php
+    expect_status "shortcut interface UserContract -> ok" "ok"
+    expect_jq "shortcut interface returns matching interface definition" '
+      .results[] | select(.path == "app/UserService.php" and (.text|contains("interface UserContract")))
+    '
+
+    run_search enum UserStatus "$p1_repo" --lang php
+    expect_status "shortcut enum UserStatus -> ok" "ok"
+    expect_jq "shortcut enum returns matching enum definition" '
+      .results[] | select(.path == "app/UserService.php" and (.text|contains("enum UserStatus")))
+    '
 fi
+
+run_search route RouteNeedle "$p1_repo" --fixed
+expect_status "shortcut route RouteNeedle -> ok" "ok"
+expect_jq "shortcut route is route-file scoped" '
+  all(.results[]; .path == "routes/web.php")
+'
+
+run_search config-key ConfigKeyNeedle "$p1_repo" --fixed
+expect_status "shortcut config-key ConfigKeyNeedle -> ok" "ok"
+expect_jq "shortcut config-key is config-file scoped" '
+  all(.results[]; .path == "config/app.yaml")
+'
 
 # =============================================================================
 # Phase 6 — self-introspection (--introspect / enriched --help)

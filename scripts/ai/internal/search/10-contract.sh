@@ -69,6 +69,14 @@ Structural modes (ast-grep; unavailable if ast-grep absent):
     symbols NAME            resolve a symbol; emits symbols[] (kind/name/path/start/end/language)
     class NAME              class definitions only (symbols[] with kind=class)
 
+Shortcut modes (QUERY required; read-only convenience lookups):
+    function NAME           function definitions matching NAME
+    method NAME             method definitions matching NAME
+    interface NAME          interface definitions matching NAME
+    enum NAME               enum definitions matching NAME
+    route QUERY             route files matching QUERY
+    config-key QUERY        config/env files matching QUERY
+
 Other modes:
     doctor                  diagnostics{} of available/missing/warnings/root/git_available
     unsafe-all              approval-gated; always returns status=blocked
@@ -127,6 +135,7 @@ Examples:
     AI_OUTPUT=json bash scripts/ai/ai-search.sh changed-text Tenant . --fixed
     AI_OUTPUT=json bash scripts/ai/ai-search.sh diff Needle . --fixed --staged
     AI_OUTPUT=json bash scripts/ai/ai-search.sh class UserService . --lang php
+    AI_OUTPUT=json bash scripts/ai/ai-search.sh function findUser .
 EOF
 }
 

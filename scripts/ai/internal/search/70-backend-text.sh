@@ -142,3 +142,29 @@ backend_surface() {
     [[ "$rc" -eq 2 ]] && fail "error" "search backend error (invalid regex or unreadable path): $query"
     return 0
 }
+
+regex_escape_literal() {
+    printf '%s' "$1" | sed 's/[][(){}.^$*+?|\\]/\\&/g'
+}
+
+backend_shortcut_text() {
+    local rc=0 escaped shortcut_query
+    escaped="$(regex_escape_literal "$query")"
+    case "$mode" in
+    function | method)
+        shortcut_query="\\bfunction[[:space:]]+${escaped}\\b"
+        ;;
+    interface)
+        shortcut_query="\\binterface[[:space:]]+${escaped}\\b"
+        ;;
+    enum)
+        shortcut_query="\\benum[[:space:]]+${escaped}\\b"
+        ;;
+    *)
+        fail "error" "unknown shortcut text mode: $mode"
+        ;;
+    esac
+    out="$(rg --json "${case_args[@]}" --pcre2 "${ignore_args[@]+"${ignore_args[@]}"}" "${rg_scope_args[@]}" -- "$shortcut_query" "$root" 2>/dev/null)" || rc=$?
+    [[ "$rc" -eq 2 ]] && fail "error" "search backend error (invalid shortcut regex): $query"
+    return 0
+}
