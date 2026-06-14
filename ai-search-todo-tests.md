@@ -6,31 +6,41 @@ plan phase is implemented. That is intended.
 
 ## Verification status of this file
 
+> STATUS (verified against live repo): the rebuild has advanced well past this
+> file's snapshot. Corrections:
+>
+> - Source moved: ai-search implementation is now `scripts/ai/internal/search/*`
+>   (root `scripts/ai/ai-search.sh` is a facade; `bin/read/ai-search.sh` is a
+>   shim). All `bash scripts/ai/ai-search.sh ...` commands below stay valid.
+> - NOW GREEN (was "RED/not implemented"): Phase 4 modes (`diff`, `history`,
+>   `tests`, `config`, `deps`, `todo`, `unsafe-patterns`) and Phase 5
+>   (`struct --lang`, `symbols`, `class`) are implemented in
+>   `scripts/ai/internal/search/25-modes.sh` and asserted `ok` in the suite.
+> - STILL RED (genuinely unimplemented): shortcut modes `function`, `method`,
+>   `interface`, `enum`, `route`, `config-key`, and the `external-*` /
+>   `--allow-outside-root` family.
+> - STALE LINE ANCHORS: the suite is now 1158 lines with a Phase 6
+>   (self-introspection). Old anchors are wrong — gate is at `:670` (not 586);
+>   Phase 3D at `:839` (not 755); Phase 4 at `:889` + multi `:1009` (not
+>   805/925); Phase 5 at `:1026` (not 942).
+
 - Test design verified statically against `docs/ai/tools/ai-search.md`,
-  `tools/ai/validate-ai-config.php`, and the live current script. The script
-  itself was not run against the full target contract (it is not built yet).
+  `tools/ai/validate-ai-config.php`, and the live script.
 - `jq any(.matches[]; cond)` two-argument syntax **verified working**.
 
 ### Implementation status (live, as of current branch)
 
 The canonical, runnable suite is `tests/scripts/ai/test-ai-search.sh` (registered
-in `run-all-tests.sh`). It encodes the full Phase 0–5 matrix. THIS markdown matrix
-is now a secondary design reference; prefer the shell suite for pass/fail truth.
+in `run-all-tests.sh`, ~1158 lines, includes Phase 6). THIS markdown matrix is a
+secondary design reference; prefer the shell suite for pass/fail truth.
 
-**RED gate (verified live):** the Phase 3+ block is gated by the
-`AI_SEARCH_RUN_P1_TESTS=1` env var (`test-ai-search.sh:586`), NOT by a `set -e`
-abort. Two distinct runs:
+**Gate:** the Phase 3+ block is gated by the `AI_SEARCH_RUN_P1_TESTS=1` env var
+(`test-ai-search.sh:670`), NOT by a `set -e` abort.
 
-- `bash tests/scripts/ai/test-ai-search.sh` → **GREEN** (Phase 0–2 + multi wiring).
-- `AI_SEARCH_RUN_P1_TESTS=1 bash tests/scripts/ai/test-ai-search.sh` → GREEN through
-  Phase **3D** (16/16 count/file-only assertions), now **RED at
-  `[phase4] diff unstaged -> ok`** (`unknown mode: diff`).
-
-**Tests for unbuilt phases already exist with fixtures.** Phase 3D (`:755`),
-Phase 4 (`:805` + multi `:925`), and Phase 5 (`:942`) all have complete `expect_*`
-assertions AND the `$p1_repo` fixtures they need. Remaining work is
-implementation-only. ast-grep is installed here, so Phase 5 positive cases run
-(the `unavailable` path is asserted only when ast-grep is absent).
+**Remaining RED is only the shortcut/external mode family** (function, method,
+interface, enum, route, config-key, external-*). Phases 0–5 core modes run GREEN.
+ast-grep is installed here, so Phase 5 positive cases run (the `unavailable` path
+is asserted only when ast-grep is absent).
 
 **GREEN and real-verified** (Phases 0, 1, 2, 3A, 3B, 3C):
 
@@ -56,12 +66,15 @@ implementation-only. ast-grep is installed here, so Phase 5 positive cases run
 
 **RED / not implemented yet** — tests exist but the modes/flags do not:
 
-- Phase 4 modes: `diff` (next RED), `history`, `tests`, `config`, `deps`, `todo`,
-  `unsafe-patterns`.
-- Phase 5: `struct --lang`, `symbols`, and shortcuts
-  (`class|function|method|interface|enum|route|config-key`).
+> CORRECTED: Phase 4 (`diff`, `history`, `tests`, `config`, `deps`, `todo`,
+> `unsafe-patterns`) and Phase 5 `struct --lang` / `symbols` / `class` are now
+> IMPLEMENTED and GREEN (`scripts/ai/internal/search/25-modes.sh`). Only the
+> shortcut and external families below remain RED.
+
+- Phase 5 shortcuts: `function`, `method`, `interface`, `enum`, `route`,
+  `config-key`.
 - External (`external-*`, `--allow-outside-root`, `.ai-search-roots.json`):
-  Phase 6, approval-gated, not started.
+  approval-gated, not started.
 
 > Caveat on this matrix's `doctor` test: it requires `diagnostics.available` to
 > include `bash`, which the live `doctor` does not report. Align the test or the

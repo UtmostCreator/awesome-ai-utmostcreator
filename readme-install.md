@@ -604,7 +604,7 @@ refreshed, not skipped). A mandatory backup is created first under
 
 Workstation configs are manual copy-and-merge. There is no automated installer.
 
-1. Read the relevant setup doc in `docs/` (e.g., `docs/nvim-setup.md`)
+1. Read the relevant setup doc in `docs/` if one exists for your tool
 2. Copy or merge the config from `configs/` into your local environment
 3. Replace machine-specific placeholders
 4. Run `just doctor` to verify your local toolchain
@@ -695,7 +695,6 @@ User runs: php tools/ai/ai.php install --profile full-governance --apply
 | `guarded`         | `dual` + hook policy + guard reminders                                                                    | Safety-conscious setup         |
 | `accelerated`     | `dual` + scripts + policy + evidence packs                                                                | Power-user setup               |
 | `full-governance` | Everything: `accelerated` + all capabilities + hooks + CI + advisor tooling + target-local PHP validators | **Recommended** — full setup   |
-| `scripts-only`    | Just the bash scripts from `scripts/ai/`                                                                  | Bash scripts without AI config |
 | `custom`          | Empty base — opt into packs with `--with`                                                                 | Cherry-pick specific packs     |
 
 ### Optional Packs (use with `--with`)
@@ -753,9 +752,9 @@ When you install `full-governance` into a target repo, these files are created:
 | ---------------------------------------- | ---------------------------------------------- |
 | `.github/copilot-instructions.md`        | Repository-wide Copilot instructions           |
 | `.github/instructions/*.instructions.md` | Path-specific Copilot rules (22 files)         |
-| `.github/agents/*.agent.md`              | Agent mode definitions (10 agents)             |
-| `.github/prompts/*.prompt.md`            | One-shot task prompts (16 prompts)             |
-| `.github/skills/*/SKILL.md`              | Runtime-loaded capability adapters (16 skills) |
+| `.github/agents/*.agent.md`              | Agent mode definitions (22 agents)             |
+| `.github/prompts/*.prompt.md`            | One-shot task prompts (18 prompts)             |
+| `.github/skills/*/SKILL.md`              | Runtime-loaded capability adapters (19 skills) |
 | `.github/hooks/tool-policy.json`         | Tool execution policy gate                     |
 
 ### `docs/ai/` — Canonical Documentation
@@ -1110,14 +1109,13 @@ php tools/ai/generate-ai-catalog.php --check
 
 ## Git Hooks
 
-This repo includes git hooks via **two systems** (only one is needed):
+> CORRECTED: this repo does **not** ship a Lefthook (`.lefthook.yml`) or Husky
+> (`.husky/`) config — neither file exists. The hook logic lives in plain
+> scripts under `scripts/hooks/`, wired via git's hooks path. Install them by
+> pointing git at the scripts (e.g. `git config core.hooksPath scripts/hooks`)
+> or copying them into `.git/hooks/`.
 
-| System       | Config File     | How It Runs                                                                                   |
-| ------------ | --------------- | --------------------------------------------------------------------------------------------- |
-| **Lefthook** | `.lefthook.yml` | `lefthook install` (recommended)                                                              |
-| **Husky**    | `.husky/`       | Requires `package.json` + `npm install` (currently non-functional — no `package.json` exists) |
-
-Both call the same underlying scripts:
+The hooks call these underlying scripts:
 
 - `scripts/hooks/pre-commit.sh` — checks for merge conflict markers, runs `php -l` on staged PHP files
 - `scripts/hooks/commit-msg.sh` — validates commit message format
@@ -1135,8 +1133,6 @@ include the generated artifacts. Installed target repositories do not have the
 `packages/ai-universal-rules/` source tree, so this auto-generation path is
 skipped there.
 
-**Recommendation**: Use Lefthook (`brew install lefthook && lefthook install`).
-
 ---
 
 ## Style and Linting Config Files
@@ -1149,10 +1145,6 @@ These files exist at the repo root. Some are active, some are **reference config
 | `.markdownlint-cli2.yaml` | Markdown lint rules            | **Active** — used by markdownlint            |
 | `.shellcheckrc`           | Shell lint rules               | **Active** — used by shellcheck              |
 | `.gitleaks.toml`          | Secret scanning rules          | **Active** — used by gitleaks                |
-| `.eslintrc.json`          | ESLint for Vue 3 + TypeScript  | **Reference only** — no JS/TS source in repo |
-| `.prettierrc.json`        | Prettier formatting rules      | **Reference only** — no JS/TS source in repo |
-| `.stylelintrc.json`       | Stylelint for Tailwind/Vue     | **Reference only** — no CSS source in repo   |
-| `configs/php/pint.json`   | Laravel Pint PHP formatter     | **Reference** — template for PHP projects    |
 
 ---
 
@@ -1196,8 +1188,6 @@ php tools/ai/maintenance-mode.php disable
 | Issue                                                                                             | Status            | Workaround                                                                                                                                                                                                   |
 | ------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | macOS Bash is 3.2; scripts need 4+                                                                | Known             | `brew install bash` + add to PATH via `~/.zprofile`                                                                                                                                                          |
-| `.husky/` exists but no `package.json`                                                            | Orphaned          | Use Lefthook instead                                                                                                                                                                                         |
-| `.eslintrc.json`, `.prettierrc.json`, `.stylelintrc.json` reference frameworks not present        | Reference configs | Not a bug — they serve as starter configs for target projects                                                                                                                                                |
 | `docs/ai/project-context.md` has `unknown` values                                                 | Intentional       | Template defaults — filled in per-project during install                                                                                                                                                     |
 | VS Code sandbox `deniedDomains` warning                                                           | Fixed             | Disappears after VS Code restart                                                                                                                                                                             |
 | Copilot `git` commands fail in the sandbox, then re-prompt to run without sandbox (wastes tokens) | Fixed             | `.vscode/settings.json` no longer denies writes to `./.git/`, so `git` can refresh its index/locks inside the sandbox; read-only `git` verbs are also terminal auto-approved. Restart VS Code after install. |

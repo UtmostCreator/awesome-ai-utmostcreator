@@ -1,5 +1,22 @@
 # AI Universal Rules — Consolidated Integration Plan
 
+> STATUS (verified): the `ac5cdf4` baseline below is **~86 commits stale**
+> (HEAD is now well past it). The entire MUST-HAVE body (RF-1..7 and Phases
+> 0–10) has **ALREADY LANDED**:
+>
+> - RF-1..7 closed (`084e42d`, `6b32160`, `252b95f`, `c67e264`); regression
+>   tests exist (`UninstallDirPruneTest`, `InstallLifecycleTest`).
+> - Phases 0–10 all `[x]` and confirmed by tracked artifacts (lock/ownership,
+>   `markers.php`, restore, policy compiler + compiled hooks, tool-guardian,
+>   stub/catalog-drift validators, `.ai/project.yml`, known-kit-checksums).
+> - Stated test counts (265/293/366/408) are stale; the suite has grown by
+>   ~30 commits (gateway + scripts-reorg). Treat counts as "see CI".
+> - STILL-VALID backlog only: Phase 11 `DOGFOODING.md`, Phase 12 context
+>   economy, Phase 13 release trust (SBOM/`composer audit`/PHAR), Phase 14
+>   `compatibility.md`, Phase 15 doc hygiene (`secret-scan.php` rename).
+>
+> Original (now-stale) baseline header preserved below for history:
+
 > Verified against commit `ac5cdf4` (branch `main`) on 2026-06-07.
 > Supersedes prior drafts. Integrates: verified-repo baseline (~82/100 at `e8fdf87`),
 > critical-only additions (CP-0–CP-4, M1–M3), and the corrected CP-5 user-content spec.
