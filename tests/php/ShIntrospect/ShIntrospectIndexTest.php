@@ -35,12 +35,12 @@ class ShIntrospectIndexTest extends ShIntrospectTestCase
             if (preg_match('#scripts/ai/[^/]+\.sh$#', $p)) {
                 $hasTopLevel = true;
             }
-            if (str_contains($p, 'scripts/ai/lib/')) {
+            if (str_contains($p, 'scripts/ai/internal/lib/')) {
                 $hasLib = true;
             }
         }
         $this->assertTrue($hasTopLevel, 'index must include scripts/ai/*.sh');
-        $this->assertTrue($hasLib, 'index must include scripts/ai/lib/*.sh');
+        $this->assertTrue($hasLib, 'index must include scripts/ai/internal/lib/*.sh');
 
         // ai-search.sh must be in the index with a rich contract.
         $byPath = [];

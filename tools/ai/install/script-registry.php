@@ -22,7 +22,7 @@ function aiInstallerScriptRegistry(): array
             'pack' => 'scripts-pack',
             // Core tools the wrapper always needs. Mode-specific tools (rg/fd/ast-grep)
             // live in optional_tools so a missing one does not block every mode: the
-            // backend's own per-mode guard (scripts/ai/ai-search/60-guards.sh,
+            // backend's own per-mode guard (scripts/ai/internal/search/60-guards.sh,
             // 85-backend-ast.sh) still fails closed for the modes that truly need them.
             'required_tools' => ['bash', 'git', 'jq'],
             'optional_tools' => ['rg', 'fd', 'ast-grep'],

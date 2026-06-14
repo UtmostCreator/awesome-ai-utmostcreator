@@ -56,6 +56,7 @@ require_once __DIR__ . '/sh-introspect/70-render-text.php';
 require_once __DIR__ . '/sh-introspect/75-render-help.php';
 require_once __DIR__ . '/sh-introspect/22-source-inline.php';
 require_once __DIR__ . '/sh-introspect/20-parse.php';
+require_once __DIR__ . '/sh-introspect/12-pager.php';
 require_once __DIR__ . '/sh-introspect/10-cli.php';
 
 exit(shIntrospectMain($argv));

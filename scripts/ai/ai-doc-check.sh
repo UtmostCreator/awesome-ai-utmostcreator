@@ -164,6 +164,10 @@ run_drift() {
     if [[ -f tools/ai/validate-mentor-parity.php ]]; then
         run_step "validate-mentor-parity" php tools/ai/validate-mentor-parity.php
     fi
+
+    if [[ -f tools/ai/validate-script-access.php ]]; then
+        run_step "validate-script-access" php tools/ai/validate-script-access.php
+    fi
 }
 
 main() {

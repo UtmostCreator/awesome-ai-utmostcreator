@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Compatibility test for the scripts/ai/common.sh facade split.
-# Verifies that after splitting common.sh into scripts/ai/lib/*.sh:
+# Verifies that after splitting common.sh into scripts/ai/internal/lib/*.sh:
 #   - every public function in the inventory still resolves,
 #   - the facade can be sourced twice (idempotent source guards),
 #   - the facade can be sourced from a subdirectory (BASH_SOURCE-relative lib dir).

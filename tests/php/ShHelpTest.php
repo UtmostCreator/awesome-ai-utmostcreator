@@ -41,7 +41,7 @@ class ShHelpTest extends TestCase
         self::$phpBin = (string) PHP_BINARY;
         self::$tool = 'tools/ai/sh-introspect.php';
         // ai-search.sh is a thin facade that sources its logic from
-        // scripts/ai/ai-search/NN-*.sh. sh-introspect.php inlines those
+        // scripts/ai/internal/search/NN-*.sh. sh-introspect.php inlines those
         // statically-resolvable sourced modules, so introspecting the
         // entrypoint yields the full aggregated contract. $script is the same
         // entrypoint (the runtime --help / -h wrapper).
@@ -467,6 +467,70 @@ class ShHelpTest extends TestCase
         $this->assertSame(0, $r['exit'], 'missing PHP must still exit 0 with minimal fallback');
         $this->assertStringContainsString('Usage: ai-search.sh', $r['stdout']);
         $this->assertStringContainsString('--introspect', $r['stdout']);
+    }
+
+    // ---- Phase 1: --format aliases + smart pager -------------------------
+
+    /** Run the engine with arbitrary args and return the raw result. */
+    private function engine(array $args, bool $jsonMode = false): array
+    {
+        return $this->runEngine($args, $jsonMode);
+    }
+
+    public function testFormatFullEqualsDefaultText(): void
+    {
+        $default = $this->engine([self::$target]);
+        $full = $this->engine(['--format=full', self::$target]);
+        $fullBare = $this->engine(['--format', 'full', self::$target]);
+        $this->assertSame(0, $full['exit']);
+        $this->assertSame(0, $fullBare['exit']);
+        $this->assertSame($default['stdout'], $full['stdout'], '--format=full must equal the default text view');
+        $this->assertSame($default['stdout'], $fullBare['stdout'], 'bare --format full must equal default');
+    }
+
+    public function testFormatSummaryEqualsHelp(): void
+    {
+        $help = $this->engine(['--format=help', self::$target]);
+        $summary = $this->engine(['--format=summary', self::$target]);
+        $summaryBare = $this->engine(['--format', 'summary', self::$target]);
+        $this->assertSame(0, $summary['exit']);
+        $this->assertSame(0, $summaryBare['exit']);
+        $this->assertSame($help['stdout'], $summary['stdout'], '--format=summary must alias --format=help');
+        $this->assertSame($help['stdout'], $summaryBare['stdout'], 'bare --format summary must alias help');
+    }
+
+    public function testUnknownFormatErrorListsAllValidNames(): void
+    {
+        foreach ([['--format=bogus', self::$target], ['--format', 'bogus', self::$target]] as $args) {
+            $r = $this->engine($args);
+            $this->assertSame(2, $r['exit'], 'unknown --format must exit 2');
+            $this->assertStringContainsString(
+                'expected json, help, summary, or full',
+                $r['stderr'],
+                'unknown --format error must list all four valid names'
+            );
+        }
+    }
+
+    public function testPagerFlagsAreByteIdenticalOnNonTty(): void
+    {
+        // Tests run with a piped (non-TTY) STDOUT, so the smart pager gate is
+        // never satisfied and output must stay byte-identical regardless of the
+        // pager flags. This pins the "never page non-interactive output" rule.
+        $default = $this->engine([self::$target]);
+        $noPager = $this->engine(['--no-pager', self::$target]);
+        $forcePager = $this->engine(['--pager', self::$target]);
+        $this->assertSame($default['stdout'], $noPager['stdout'], '--no-pager must not alter output');
+        $this->assertSame($default['stdout'], $forcePager['stdout'], '--pager on a non-TTY must not alter output');
+    }
+
+    public function testJsonOutputNeverPagedAndUnchanged(): void
+    {
+        $json = $this->engine(['--format=json', self::$target]);
+        $jsonForcePager = $this->engine(['--pager', '--format=json', self::$target]);
+        $this->assertSame($json['stdout'], $jsonForcePager['stdout'], '--pager must never page JSON output');
+        json_decode($json['stdout'], true);
+        $this->assertSame(JSON_ERROR_NONE, json_last_error(), 'JSON output must remain valid');
     }
 
     // ---- P3: golden snapshot ---------------------------------------------

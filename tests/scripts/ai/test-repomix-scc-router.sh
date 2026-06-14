@@ -6,6 +6,10 @@ BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 SCRIPT="$REPO_ROOT/scripts/ai/repomix-scc-router.sh"
+# The scope/ignore/collection helpers live in a load-ordered module (the root
+# script is a thin loader); the sed-extraction tests below read function bodies
+# from this module rather than the root file.
+HELPERS="$REPO_ROOT/scripts/ai/internal/repomix-scc-router/10-helpers.sh"
 cd "$REPO_ROOT"
 
 PASS=0 FAIL=0 SKIP=0
@@ -64,7 +68,7 @@ matcher_check() {
         check x "generated/**" "generated/cache.json" || exit 1
         # a non-matching path must NOT be ignored
         if check x "src/" "other/app.js"; then exit 1; fi
-    ' _ "$SCRIPT"
+    ' _ "$HELPERS"
 }
 run_test "path_is_ignored matches nested files under trailing-slash dirs" matcher_check
 
@@ -95,7 +99,7 @@ collect_ignored_check() {
         INCLUDE_IGNORED="$3"
         collect_files
         printf "%s\n" "${COLLECTED_FILES[@]}"
-    ' _ "$SCRIPT" "$repo" "$([[ "$want" == "ignored" ]] && echo 1 || echo 0)" >"$repo/.out"
+    ' _ "$HELPERS" "$repo" "$([[ "$want" == "ignored" ]] && echo 1 || echo 0)" >"$repo/.out"
 
     local rc=0
     if [[ "$want" == "ignored" ]]; then
@@ -145,7 +149,7 @@ repomixignore_bypass_check() {
         load_ignore_patterns
         collect_files
         printf "%s\n" "${COLLECTED_FILES[@]}"
-    ' _ "$SCRIPT" "$repo" "$([[ "$want" == "bypass" ]] && echo 1 || echo 0)" >"$repo/.out"
+    ' _ "$HELPERS" "$repo" "$([[ "$want" == "bypass" ]] && echo 1 || echo 0)" >"$repo/.out"
 
     local rc=0
     if [[ "$want" == "bypass" ]]; then

@@ -39,7 +39,7 @@ All scripts ship from and install to the listed path in `scripts-pack` unless no
 | `repomix-context-tree.sh` | Analyze or render a Repomix context tree. | Summarizes repository context shape before large packs. | Analysis/tree output; dry-run supported. | `--help`/`-h`. |
 | `repomix-scc-router.sh` | Create SCC-ranked Repomix context. | Prioritizes high-value files and avoids oversized context packs. | Ranked context output; dry-run supported. | `--help`/`-h`. |
 | `repomix-freshness.sh` | Check whether Repomix context is stale. | Warns or blocks agents from using outdated context. | Freshness status, often JSON; read-only. | `--help`/`-h`; supports JSON-style output. |
-| `repomix-ensure-fresh.sh` | Ask-gated check/regeneration helper for Repomix context. | Keeps context current while making regeneration explicit. | May write `.repomix-context/`; approval recommended. | `--help`/`-h`. |
+| `repomix-ensure-fresh.sh` | Ask-gated check/regeneration helper for Repomix context. | Keeps context current while making regeneration explicit. | May write generated Repomix context output; approval recommended. | `--help`/`-h`. |
 | `pack-context.sh` | Pack a task-specific AI context bundle. | Creates bounded context for planning or review. | Context bundle output; dry-run supported. | `--help`/`-h`. |
 | `ai-structured.sh` | Emit structured output from supported inputs such as CSV. | Normalizes machine-readable snippets for AI consumption. | Structured text/JSON-like output; read-only. | `--help`/`-h`. |
 | `ai-task.sh` | Generate or inspect task-context evidence. | Establishes task scope before non-trivial edits. | Task-context output/artifacts; read-only registry risk. | `--help`/`-h`. |

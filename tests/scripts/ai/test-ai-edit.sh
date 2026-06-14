@@ -193,6 +193,139 @@ else
     skip_test "sd apply modifies file and returns applied JSON" "requires rg, sd, jq"
 fi
 
+# --- patch mode -------------------------------------------------------------
+# patch mode needs only git + jq (git apply ships with git), so it does not
+# depend on rg/sd availability.
+need_patch() {
+    command -v git >/dev/null 2>&1 && command -v jq >/dev/null 2>&1
+}
+
+# Build a unified diff that turns a.txt's "OldName" line into "NewName" and
+# write it to $1, relative to the repo at $2.
+make_patch() {
+    local out="$1" work="$2"
+    cat >"$out" <<'EOF'
+diff --git a/a.txt b/a.txt
+index 0000000..1111111 100644
+--- a/a.txt
++++ b/a.txt
+@@ -1,2 +1,2 @@
+-OldName
++NewName
+ Keep
+EOF
+}
+
+if need_patch; then
+    test_patch_dry_run_plans_no_modify() {
+        local work="$TMP/patch-dry" out
+        make_repo "$work"
+        make_patch "$work/change.patch" "$work"
+        out="$(run_edit "$work" patch change.patch . --format json)"
+        jq -e '.status=="dry_run"
+            and (.plannedChanges|length)==1
+            and .plannedChanges[0].path=="a.txt"
+            and .plannedChanges[0].operation=="patch"' <<<"$out" >/dev/null
+        grep -q 'OldName' "$work/a.txt"
+        ! grep -q 'NewName' "$work/a.txt"
+    }
+    run_test "patch dry-run plans changed file and does not modify" test_patch_dry_run_plans_no_modify
+
+    test_patch_apply_modifies_file() {
+        local work="$TMP/patch-apply" out
+        make_repo "$work"
+        make_patch "$work/change.patch" "$work"
+        out="$(run_edit "$work" patch change.patch . --apply --no-verify --format json)"
+        jq -e '.status=="applied" and .apply==true and (.plannedChanges|length)==1' <<<"$out" >/dev/null
+        grep -q 'NewName' "$work/a.txt"
+    }
+    run_test "patch apply modifies file and returns applied JSON" test_patch_apply_modifies_file
+
+    test_patch_stdin_apply() {
+        local work="$TMP/patch-stdin" out
+        make_repo "$work"
+        make_patch "$work/change.patch" "$work"
+        out="$(
+            cd "$work"
+            AI_OUTPUT=json \
+            AI_LOG_DIR="$TMP/logs-patch-stdin" \
+            AI_EVENT_LOG="$TMP/logs-patch-stdin/events.jsonl" \
+            "$BASH_BIN" "$SCRIPT" patch - . --apply --no-verify <change.patch
+        )"
+        jq -e '.status=="applied"' <<<"$out" >/dev/null
+        grep -q 'NewName' "$work/a.txt"
+    }
+    run_test "patch reads diff from stdin and applies" test_patch_stdin_apply
+
+    test_patch_unsafe_path_blocked() {
+        local work="$TMP/patch-unsafe" out rc=0
+        make_repo "$work"
+        cat >"$work/evil.patch" <<'EOF'
+diff --git a/.git/config b/.git/config
+--- a/.git/config
++++ b/.git/config
+@@ -1 +1 @@
+-x
++y
+EOF
+        out="$(run_edit "$work" patch evil.patch . --format json 2>/dev/null)" || rc=$?
+        ((rc != 0))
+        jq -e '.status=="blocked" and (.errors|length)>=1' <<<"$out" >/dev/null
+    }
+    run_test "patch with .git path is blocked" test_patch_unsafe_path_blocked
+
+    test_patch_secret_path_blocked() {
+        local work="$TMP/patch-secret" out rc=0
+        make_repo "$work"
+        cat >"$work/secret.patch" <<'EOF'
+diff --git a/.env b/.env
+new file mode 100644
+--- /dev/null
++++ b/.env
+@@ -0,0 +1 @@
++TOKEN=abc
+EOF
+        out="$(run_edit "$work" patch secret.patch . --format json 2>/dev/null)" || rc=$?
+        ((rc != 0))
+        jq -e '.status=="blocked"' <<<"$out" >/dev/null
+        [[ ! -f "$work/.env" ]]
+    }
+    run_test "patch targeting .env is blocked" test_patch_secret_path_blocked
+
+    test_patch_does_not_apply_blocked() {
+        local work="$TMP/patch-conflict" out rc=0
+        make_repo "$work"
+        cat >"$work/bad.patch" <<'EOF'
+diff --git a/a.txt b/a.txt
+--- a/a.txt
++++ b/a.txt
+@@ -1,2 +1,2 @@
+-DoesNotExist
++Replacement
+ Keep
+EOF
+        out="$(run_edit "$work" patch bad.patch . --format json 2>/dev/null)" || rc=$?
+        ((rc != 0))
+        jq -e '.status=="blocked"' <<<"$out" >/dev/null
+        grep -q 'OldName' "$work/a.txt"
+    }
+    run_test "patch that does not apply cleanly is blocked" test_patch_does_not_apply_blocked
+
+    test_patch_introspect_lists_mode() {
+        "$BASH_BIN" "$SCRIPT" --introspect \
+            | jq -e '(.modes|map(.name)) as $m | ($m|index("patch"))' >/dev/null
+    }
+    run_test "--introspect lists patch mode" test_patch_introspect_lists_mode
+else
+    skip_test "patch dry-run plans changed file and does not modify" "requires git, jq"
+    skip_test "patch apply modifies file and returns applied JSON" "requires git, jq"
+    skip_test "patch reads diff from stdin and applies" "requires git, jq"
+    skip_test "patch with .git path is blocked" "requires git, jq"
+    skip_test "patch targeting .env is blocked" "requires git, jq"
+    skip_test "patch that does not apply cleanly is blocked" "requires git, jq"
+    skip_test "--introspect lists patch mode" "requires git, jq"
+fi
+
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
 

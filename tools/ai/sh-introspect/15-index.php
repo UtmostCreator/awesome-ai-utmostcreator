@@ -8,12 +8,12 @@ declare(strict_types=1);
  * envelope (schema ai.sh-introspect-index/v1). No target is ever executed.
  *
  * Discovery root: $root when given, else the directory containing this tool's
- * sibling `scripts/ai`. Globs: `scripts/ai/*.sh` and `scripts/ai/lib/*.sh`.
+ * sibling `scripts/ai`. Globs: `scripts/ai/*.sh` and `scripts/ai/internal/lib/*.sh`.
  *
  * In human mode a short table is printed; in JSON mode the full index envelope.
  * When $strictRisk is true, the run exits 3 if any indexed file is critical.
  */
-function shIntrospectAllMain(bool $jsonMode, ?string $root, bool $strictRisk = false, ?string $outputPath = null): int
+function shIntrospectAllMain(bool $jsonMode, ?string $root, bool $strictRisk = false, ?string $outputPath = null, string $pagerMode = 'auto'): int
 {
     $baseDir = shIntrospectResolveScanRoot($root);
     if ($baseDir === null) {
@@ -22,7 +22,8 @@ function shIntrospectAllMain(bool $jsonMode, ?string $root, bool $strictRisk = f
 
     $files = shIntrospectDiscoverScripts($baseDir);
     if ($files === []) {
-        // Still a valid, successful empty index.
+        // Still a valid, successful empty index. The empty index is always JSON
+        // and therefore never paged.
         $envelope = shIntrospectIndexEnvelope([], $baseDir);
         $envelope['warnings'][] = 'no shell scripts discovered under ' . $baseDir;
         if (!shIntrospectEmitReport(shIntrospectEncode($envelope) . "\n", $outputPath, $jsonMode)) {
@@ -44,7 +45,8 @@ function shIntrospectAllMain(bool $jsonMode, ?string $root, bool $strictRisk = f
     $report = $jsonMode
         ? shIntrospectEncode($envelope) . "\n"
         : shIntrospectRenderIndexText($envelope);
-    if (!shIntrospectEmitReport($report, $outputPath, $jsonMode)) {
+    $pageReport = shIntrospectShouldPage($pagerMode, $jsonMode, $outputPath);
+    if (!shIntrospectEmitReport($report, $outputPath, $jsonMode, $pageReport)) {
         return 2;
     }
 
@@ -100,15 +102,15 @@ function shIntrospectResolveScanRoot(?string $root): ?string
 
 /**
  * Discover the introspection targets under a `scripts/ai` directory:
- * `*.sh` directly inside it and `lib/*.sh` one level down. Symlinks and
- * non-readable files are skipped. Returns absolute paths.
+ * `*.sh` directly inside it and `internal/lib/*.sh` (shared library modules).
+ * Symlinks and non-readable files are skipped. Returns absolute paths.
  *
  * @return array<int,string>
  */
 function shIntrospectDiscoverScripts(string $baseDir): array
 {
     $found = [];
-    foreach ([rtrim($baseDir, '/') . '/*.sh', rtrim($baseDir, '/') . '/lib/*.sh'] as $glob) {
+    foreach ([rtrim($baseDir, '/') . '/*.sh', rtrim($baseDir, '/') . '/internal/lib/*.sh'] as $glob) {
         $matches = glob($glob);
         if ($matches === false) {
             continue;
