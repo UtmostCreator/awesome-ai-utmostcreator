@@ -47,6 +47,7 @@ covers the mega-plan decomposition. This file covers all plans.
 | — | D3b (render approved values) | renderer reads source; re-render generated surfaces | **human flips `approved: true`** + installer `--apply` approval | medium-high | **gated** |
 | — | D3c (numeric scoring) | numeric rubric + thresholds | human-approved numeric rubric | medium | backlog |
 | — | Backlog items 90/95/110/115/120/125 | see Plan G index | each needs own architect pass | mixed | backlog |
+| — | markdown-surface-reduction | Phase 1: `git rm -r docs/tickets/archive` (16 files, clean tree, isolated commit); Phase 2: read-only investigate `tools/ai/tools/{actions,examples}`. Capability sub-files + adapters + templates KEPT (runtime contract) | none (Phase 1) | low | **actionable (plan only)** |
 
 > NOTE: P1–P4 are completed by the current **uncommitted working tree** (verified: 721
 > tests pass, all surface validators exit 0). They are "done" pending commit, not pending
