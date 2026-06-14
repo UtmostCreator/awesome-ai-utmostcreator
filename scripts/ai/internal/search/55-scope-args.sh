@@ -13,7 +13,8 @@
 # shellcheck disable=SC2034,SC2154
 
 # Directories excluded by default; callers can extend via --exclude.
-DEFAULT_EXCLUDES=(vendor node_modules dist build coverage)
+DEFAULT_EXCLUDES=()
+ai_load_config_list DEFAULT_EXCLUDES "$_AI_COMMON_DIR/internal/config/exclude-dirs.txt" vendor node_modules dist build coverage
 
 # build_case_pattern_args — map case_mode/pattern_mode to rg flag arrays.
 build_case_pattern_args() {

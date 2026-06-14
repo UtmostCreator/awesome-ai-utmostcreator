@@ -52,6 +52,7 @@ categories for later phases, not active paths in this slice.
 | `scripts/ai/run-repomix-file.sh` | context | read-only | public | Repomix single-file pack. |
 | `scripts/ai/run-test-focused.sh` | verify | read-only | public | Focused test runner. |
 | `scripts/ai/session-checkpoint.sh` | hooks | mutating | public hook | Session continuity snapshot. |
+| `scripts/ai/ship-audit.sh` | verify | read-only | public | Installer pack forbidden-path audit. |
 | `scripts/ai/sh-introspect.sh` | read | read-only | public | Shell script introspection. |
 | `scripts/ai/watch-loop.sh` | hooks | read-only/long-running | public hook | Long-running watch helper; not a normal read command. |
 
@@ -167,6 +168,7 @@ for the approval-gated P3-P5 phases. No `scripts/ai/bin/**` or
 | `scripts/ai/check-file-refs.sh` | verify | `scripts/ai/bin/verify/check-file-refs.sh` |
 | `scripts/ai/run-repo-tests.sh` | verify | `scripts/ai/bin/verify/run-repo-tests.sh` |
 | `scripts/ai/run-test-focused.sh` | verify | `scripts/ai/bin/verify/run-test-focused.sh` |
+| `scripts/ai/ship-audit.sh` | verify | `scripts/ai/bin/verify/ship-audit.sh` |
 | `scripts/ai/ai-edit.sh` | edit | `scripts/ai/bin/edit/ai-edit.sh` |
 | `scripts/ai/ai-rollback.sh` | edit | `scripts/ai/bin/edit/ai-rollback.sh` |
 | `scripts/ai/all_in_one.sh` | admin | `scripts/ai/bin/admin/all_in_one.sh` |

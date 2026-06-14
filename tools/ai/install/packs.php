@@ -186,6 +186,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/ai-install-coverage.sh', 'target' => 'scripts/ai/ai-install-coverage.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/check-file-refs.sh', 'target' => 'scripts/ai/check-file-refs.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/repo-stats.sh', 'target' => 'scripts/ai/repo-stats.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'scripts/ai/ship-audit.sh', 'target' => 'scripts/ai/ship-audit.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'scripts/ai/watch-loop.sh', 'target' => 'scripts/ai/watch-loop.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/repo-tool-inventory.sh', 'target' => 'scripts/ai/repo-tool-inventory.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'tools/ai/repo-tool-inventory.php', 'target' => 'tools/ai/repo-tool-inventory.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],

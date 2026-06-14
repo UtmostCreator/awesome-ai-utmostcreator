@@ -69,6 +69,7 @@ tiers:
       - run-test-focused.sh
       - run-repo-tests.sh
       - ai-install-coverage.sh
+      - ship-audit.sh
 
   T4_planning:
     risk: medium

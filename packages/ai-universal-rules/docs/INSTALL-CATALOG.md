@@ -26,7 +26,7 @@ Deterministic catalog generated from installer registries.
 - `capabilities-extended` (2 items)
 - `capabilities-governance` (2 items)
 - `policy-pack` (3 items)
-- `scripts-pack` (53 items)
+- `scripts-pack` (54 items)
 - `hooks-pack` (8 items)
 - `ci-pack` (2 items)
 - `evidence-pack` (2 items)
@@ -81,6 +81,7 @@ Deterministic catalog generated from installer registries.
 - `check-file-refs` -> `scripts/ai/check-file-refs.sh`
 - `repo-stats` -> `scripts/ai/repo-stats.sh`
 - `repo-tool-inventory` -> `scripts/ai/repo-tool-inventory.sh`
+- `ship-audit` -> `scripts/ai/ship-audit.sh`
 - `sh-introspect` -> `scripts/ai/sh-introspect.sh`
 - `install-mandatory-tools` -> `scripts/ai/install-mandatory-tools.sh`
 - `watch-loop` -> `scripts/ai/watch-loop.sh`

@@ -234,7 +234,7 @@
             "supports_dry_run": false,
             "required_tools": [
                 "bash",
-                "git"
+                "php"
             ],
             "optional_tools": [],
             "writes_paths": []
@@ -796,6 +796,28 @@
             "id": "repo-tool-inventory",
             "source_path": "scripts/ai/repo-tool-inventory.sh",
             "installed_path": "scripts/ai/repo-tool-inventory.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "observe",
+            "profiles": [
+                "impl",
+                "readonly",
+                "verify"
+            ],
+            "mutates_state": false,
+            "requires_approval": false,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": []
+        },
+        "ship-audit": {
+            "id": "ship-audit",
+            "source_path": "scripts/ai/ship-audit.sh",
+            "installed_path": "scripts/ai/ship-audit.sh",
             "pack": "scripts-pack",
             "risk": "read-only",
             "autonomy_level": "observe",
