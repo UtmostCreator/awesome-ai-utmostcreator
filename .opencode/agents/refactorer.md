@@ -84,6 +84,9 @@ permission:
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
+    'bash scripts/ai/ai-search-multi.sh *': allow
+    'AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
+    'env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
@@ -207,6 +210,18 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Use smallest structural change that solves the stated maintainability problem.
 - Use `unknown` when evidence does not prove a claim.
 - Do not read, quote, summarize, or copy secrets.
+- Mandatory: after the refactor, run the tests covering the refactored scope and confirm they are 100% green with zero errors and zero failures before any handoff or stop.
+
+## Mandatory Test Gate
+
+This gate is non-negotiable and applies on every refactor:
+
+1. Identify the tests that cover the refactored scope (affected files, callers, and behavior).
+2. Run those tests with the smallest sufficient command (for example `bash scripts/ai/ai-test-select.sh`, a focused `phpunit --filter`, or `bash scripts/ai/run-repo-tests.sh` for broader scope).
+3. Require a 100% green result: zero failures, zero errors, and no skipped tests that hide the refactored behavior.
+4. If any test fails or errors, do not hand off and do not stop the pass. Fix within the refactor scope or revert, then re-run until green.
+5. Only after confirming all in-scope tests pass may you hand off to reviewer or stop the pass.
+6. Report the exact test command run and its pass/fail counts as evidence; never claim green without an executed run.
 
 ## Script Access
 
@@ -248,8 +263,8 @@ Score 0–100 across refactor target, behavior boundary, structural goal, scope 
 3. Identify duplication or structural smell.
 4. Search for existing pattern.
 5. Refactor smallest safe unit.
-6. Run focused behavior-preservation proof.
-7. Summarize changed structure and unchanged behavior.
+6. Run the in-scope tests and confirm 100% green (zero failures, zero errors) per the Mandatory Test Gate.
+7. Only after green: summarize changed structure and unchanged behavior, then hand off or stop the pass.
 
 ## Similarity And Duplication Rule
 
@@ -271,6 +286,8 @@ Stop when behavior is not yet correct, refactor requires architecture decision, 
 ## Duplication / Pattern Check
 
 ## Verification Run
+
+(Must include the in-scope test command and its pass/fail counts; handoff or stop only when 100% green.)
 
 ## Evidence
 

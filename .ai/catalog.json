@@ -37,7 +37,7 @@
         ]
     },
     "counts": {
-        "package:core-template": 27,
+        "package:core-template": 28,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 4,
@@ -56,13 +56,13 @@
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 21,
+        "root:github-copilot-agent": 22,
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 18,
-        "root:github-copilot-skill": 18,
-        "root:opencode-agent": 12,
+        "root:github-copilot-skill": 19,
+        "root:opencode-agent": 18,
         "root:opencode-command": 20,
-        "root:opencode-skill": 20,
+        "root:opencode-skill": 21,
         "root:php-reference": 3,
         "root:root-doc": 19,
         "root:schema": 1,
@@ -93,6 +93,14 @@
             "path": "packages/ai-universal-rules/templates/core/agents/architect.md",
             "runtime": "canonical",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "Architecture Plan Writer Agent",
+            "path": "packages/ai-universal-rules/templates/core/agents/architecture-plan-writer.md",
+            "runtime": "canonical",
+            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
         },
         {
             "scope": "package",
@@ -1713,6 +1721,14 @@
         {
             "scope": "root",
             "type": "github-copilot-agent",
+            "name": "Architecture Plan Writer",
+            "path": ".github/agents/architecture-plan-writer.agent.md",
+            "runtime": "github-copilot",
+            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-agent",
             "name": "Bugfix",
             "path": ".github/agents/bugfix.agent.md",
             "runtime": "github-copilot",
@@ -2153,6 +2169,14 @@
         {
             "scope": "root",
             "type": "github-copilot-skill",
+            "name": "architecture-plan-writer",
+            "path": ".github/skills/architecture-plan-writer/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use when an architect design or a bounded task/ticket must be persisted as a Todo architecture plan markdown file under docs/tickets, strictly scoped to the task with steps, things-to-avoid, and acceptance criteria"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
             "name": "architecture-plan",
             "path": ".github/skills/architecture-plan/SKILL.md",
             "runtime": "github-copilot",
@@ -2297,10 +2321,58 @@
         {
             "scope": "root",
             "type": "opencode-agent",
+            "name": "agent-creator-runtime-guardian",
+            "path": ".opencode/agents/agent-creator-runtime-guardian.md",
+            "runtime": "opencode",
+            "description": "Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "agent-creator-semantic-verifier",
+            "path": ".opencode/agents/agent-creator-semantic-verifier.md",
+            "runtime": "opencode",
+            "description": "Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "agent-creator-static-validator",
+            "path": ".opencode/agents/agent-creator-static-validator.md",
+            "runtime": "opencode",
+            "description": "Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "agent-creator-supervisor",
+            "path": ".opencode/agents/agent-creator-supervisor.md",
+            "runtime": "opencode",
+            "description": "Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "agent-creator",
+            "path": ".opencode/agents/agent-creator.md",
+            "runtime": "opencode",
+            "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
             "name": "architect",
             "path": ".opencode/agents/architect.md",
             "runtime": "opencode",
             "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "architecture-plan-writer",
+            "path": ".opencode/agents/architecture-plan-writer.md",
+            "runtime": "opencode",
+            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
         },
         {
             "scope": "root",
@@ -2565,6 +2637,14 @@
             "path": ".opencode/skills/ai-search/SKILL.md",
             "runtime": "opencode",
             "description": "Use ai-search to collect bounded repository evidence."
+        },
+        {
+            "scope": "root",
+            "type": "opencode-skill",
+            "name": "architecture-plan-writer",
+            "path": ".opencode/skills/architecture-plan-writer/SKILL.md",
+            "runtime": "opencode",
+            "description": "Use when an architect design or a bounded task/ticket must be persisted as a Todo architecture plan markdown file under docs/tickets, strictly scoped to the task with steps, things-to-avoid, and acceptance criteria"
         },
         {
             "scope": "root",

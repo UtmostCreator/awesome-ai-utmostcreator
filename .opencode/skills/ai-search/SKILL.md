@@ -54,11 +54,14 @@ Do not use raw `cat`, `sed`, `awk`, `grep`, `rg`, `find`, `fd`, glob, or list fo
 
 ## Usage tracing
 
-Before adding logic, changing a public contract, or claiming a symbol is unused, run:
+Before adding logic, changing a public contract, or claiming a symbol is unused, search for it:
 
 ```bash
-bash scripts/ai/query-usage.sh <symbol-or-path>
+AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed
 ```
+
+`query-usage.sh` does NOT trace symbols; it only estimates the token/byte cost of a PATH
+(`bash scripts/ai/query-usage.sh <path>`). Pass a real file or directory, not an identifier.
 
 Report the closest reuse candidate and whether overlap is roughly 75% or higher.
 

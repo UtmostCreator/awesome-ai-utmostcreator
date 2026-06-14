@@ -35,6 +35,8 @@ I produce a grounded implementation plan for medium or large changes, identifyin
 - affected paths and owners
 - verification scope and recommended next step
 
+Write durable plans to the committed `docs/tickets/` location (for example `docs/tickets/arch-todo-{slug}-{timestamp}/plan.md`, or `docs/tickets/{TICKET-ID}.md` when a ticket id exists). Never write durable plans under the gitignored `docs/ai/generated/`.
+
 ## Gotchas
 
 - do not implement as part of this workflow

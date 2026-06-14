@@ -71,6 +71,9 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `bash scripts/ai/ai-search.sh *`
 - `AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
 - `env AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
+- `bash scripts/ai/ai-search-multi.sh *`
+- `AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *`
 - `bash scripts/ai/preview-file.sh *`
 - `AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
 - `env AI_OUTPUT=json bash scripts/ai/preview-file.sh *`

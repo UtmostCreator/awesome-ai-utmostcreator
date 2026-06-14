@@ -42,7 +42,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 18
 - `root / github-copilot-skill` - 19
-- `root / opencode-agent` - 18
+- `root / opencode-agent` - 13
 - `root / opencode-command` - 20
 - `root / opencode-skill` - 21
 - `root / php-reference` - 3
@@ -187,11 +187,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|script-inventory|`.github/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-skill`|search-evidence|`.github/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`github-copilot-skill`|verify-change|`.github/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
-|`opencode-agent`|agent-creator-runtime-guardian|`.opencode/agents/agent-creator-runtime-guardian.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator|
-|`opencode-agent`|agent-creator-semantic-verifier|`.opencode/agents/agent-creator-semantic-verifier.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator|
-|`opencode-agent`|agent-creator-static-validator|`.opencode/agents/agent-creator-static-validator.md`|Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors|
-|`opencode-agent`|agent-creator-supervisor|`.opencode/agents/agent-creator-supervisor.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
-|`opencode-agent`|agent-creator|`.opencode/agents/agent-creator.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
 |`opencode-agent`|architect|`.opencode/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`opencode-agent`|architecture-plan-writer|`.opencode/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`opencode-agent`|bootstrapper|`.opencode/agents/bootstrapper.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|

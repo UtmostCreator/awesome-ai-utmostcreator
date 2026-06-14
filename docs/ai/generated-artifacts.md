@@ -3,10 +3,6 @@
 `docs/ai/generated/` holds machine-generated files produced by `php tools/ai/ai.php` subcommands.
 Files here are **not** tracked in git and are safe to delete and regenerate.
 
-> Durable AI plans and task context belong in `docs/tickets/` (committed). Everything under
-> `docs/ai/generated/` (including any `task-context/`) is ephemeral, gitignored, and safe to
-> delete — do not store durable plans there.
-
 ## When to Read What
 
 | If you want to...                | Read this file                            |
