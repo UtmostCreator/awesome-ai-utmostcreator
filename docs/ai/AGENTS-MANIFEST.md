@@ -13,8 +13,9 @@ The two adapter surfaces are NOT a 1:1 set. OpenCode agents live under
 `docs/ai/agents.md` and the capability docs; these adapter files stay thin per
 `docs/ai/adapter-contract.md`.
 
-Lifecycle labels below follow the event model proposed in
-`todo-agents-rework.md` (E00 intake .. E120 post-install) and are descriptive
+Lifecycle labels below follow the event model proposed in the archived planning
+doc `docs/tickets/archive/root-cleanup-20260614/todo-agents-rework.md`
+(E00 intake .. E120 post-install) and are descriptive
 classification only — they are not enforced runtime metadata. Risk reflects the
 agent's mutation/gate posture, not its quality.
 
@@ -37,7 +38,8 @@ agent's mutation/gate posture, not its quality.
 
 Mutating = the agent can edit repository files. Gate = the agent approves or
 blocks other work. These columns mirror the `can_mutate` / `can_gate` intent in
-`todo-agents-rework.md` and `todo-agents-script-rework.md` (P6) without adding
+`docs/tickets/archive/root-cleanup-20260614/todo-agents-rework.md` and
+`docs/tickets/archive/root-cleanup-20260614/todo-agents-script-rework.md` (P6) without adding
 enforced frontmatter.
 
 | Agent | OpenCode | GitHub | Lifecycle | Mutating | Gate | Risk | Purpose |
