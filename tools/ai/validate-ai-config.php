@@ -654,6 +654,12 @@ function stripJsonCommentsAndTrailingCommas(string $input): string
     $inBlockComment = false;
     $length = strlen($input);
 
+    // Index of the last comma emitted outside a string, plus the whitespace
+    // emitted after it, so a trailing comma can be dropped when the next
+    // structural char turns out to be `}` or `]`. Commas inside string literals
+    // are never tracked, so string contents like "a,}" survive untouched.
+    $pendingCommaPos = -1;
+
     for ($i = 0; $i < $length; $i++) {
         $char = $input[$i];
         $next = $i + 1 < $length ? $input[$i + 1] : '';
@@ -687,6 +693,7 @@ function stripJsonCommentsAndTrailingCommas(string $input): string
         }
 
         if ($char === '"') {
+            $pendingCommaPos = -1;
             $inString = true;
             $out .= $char;
             continue;
@@ -704,11 +711,32 @@ function stripJsonCommentsAndTrailingCommas(string $input): string
             continue;
         }
 
+        // Outside strings/comments: track a candidate trailing comma and drop it
+        // when the next non-whitespace structural char is `}` or `]`.
+        if ($char === ',') {
+            $pendingCommaPos = strlen($out);
+            $out .= $char;
+            continue;
+        }
+
+        if ($pendingCommaPos >= 0) {
+            if ($char === ' ' || $char === "\t" || $char === "\r" || $char === "\n") {
+                // Whitespace between the comma and a potential closer; keep it
+                // and keep the pending comma candidate alive.
+                $out .= $char;
+                continue;
+            }
+            if ($char === '}' || $char === ']') {
+                // Trailing comma: remove the previously emitted comma.
+                $out = substr($out, 0, $pendingCommaPos) . substr($out, $pendingCommaPos + 1);
+            }
+            $pendingCommaPos = -1;
+        }
+
         $out .= $char;
     }
 
-    // Remove trailing commas before } or ].
-    return (string) preg_replace('/,(\s*[}\]])/', '$1', $out);
+    return $out;
 }
 
 function validateOpenCodePermissions(array $config, array &$errors): void

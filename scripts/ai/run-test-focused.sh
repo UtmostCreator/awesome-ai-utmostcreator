@@ -33,7 +33,7 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
 fi
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 TEST_TIMEOUT="${TEST_TIMEOUT:-120}"
 PHP_BIN="${PHP_BIN:-}"

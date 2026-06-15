@@ -478,6 +478,14 @@ expect_status "legacy changed on non-git root -> error" "error"
 rmdir "$nogit" 2>/dev/null || true
 nogit=""
 
+# A file passed where a directory root is expected must error clearly (the real
+# cause is "root is a file", not "not a git repository"). Regression for the
+# misleading `git -C <file>` message in require_git_root.
+run_search tracked foo AGENTS.md --fixed
+expect_status "tracked with file root -> error" "error"
+expect_jq "file-root error names directory requirement" \
+    '(.errors|join(" ")) | test("must be a directory|got file"; "i")'
+
 # Missing rg in `text` mode degrades to git grep (P1b) with a parity warning,
 # instead of erroring — git grep yields the same path:line:text shape. Skip
 # cleanly if rg cannot be hidden from PATH in this environment.

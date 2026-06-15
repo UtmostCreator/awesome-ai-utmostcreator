@@ -25,7 +25,7 @@ if [[ "${1:-}" == "--help" || "${1:-}" == "-h" ]]; then
 fi
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-cd "$ROOT"
+cd "$ROOT" || exit 1
 
 PARATEST_PROCS="${PARATEST_PROCS:-12}"
 MAX_PARATEST_PROCS="${MAX_PARATEST_PROCS:-20}"
