@@ -58,6 +58,12 @@ check_tool_guards() {
 }
 
 require_git_root() {
+    # git -C requires a directory; a file path yields a misleading
+    # "Not a directory" / "not a git repository" message. Catch it first so the
+    # caller sees the real cause and the fix (scope a single file with --glob).
+    if [[ -e "$root" && ! -d "$root" ]]; then
+        fail "error" "root must be a directory (got file): $root; scope a single file with --glob"
+    fi
     git -C "$root" rev-parse --is-inside-work-tree >/dev/null 2>&1 ||
         fail "error" "not a git repository: $root"
 }

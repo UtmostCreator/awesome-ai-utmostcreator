@@ -147,6 +147,14 @@ if (preg_match_all('/`([a-z][a-z0-9-]*)`/', $agentManifest, $m)) {
         $manifestAgents[$name] = true;
     }
 }
+// Hook scripts whose grant is restricted to a single agent (invariant 5).
+$hookScripts = ['pre-tool-use.sh', 'post-tool-use.sh'];
+$hookPattern = '/\b(' . implode('|', array_map(
+    static fn (string $s): string => preg_quote($s, '/'),
+    $hookScripts
+)) . ')\b/';
+// True while consuming a multi-line `allowed_scripts:` block list for $curAgent.
+$inAllowedScriptsBlock = false;
 foreach (preg_split('/\R/', $access) ?: [] as $line) {
     if (preg_match('/^agents:\s*$/', $line)) {
         $inAgents = true;
@@ -157,14 +165,35 @@ foreach (preg_split('/\R/', $access) ?: [] as $line) {
     }
     if (preg_match('/^  ([\w-]+):\s*$/', $line, $mm)) {
         $curAgent = $mm[1];
+        $inAllowedScriptsBlock = false;
         if (!isset($manifestAgents[$curAgent])) {
             $errors[] = "access-manifest agent '{$curAgent}' is not in docs/ai/AGENTS-MANIFEST.md";
         }
         continue;
     }
-    if ($curAgent !== null
-        && preg_match('/allowed_scripts:.*(pre-tool-use\.sh|post-tool-use\.sh)/', $line)) {
-        $hookGrantedTo[$curAgent] = true;
+    if ($curAgent === null) {
+        continue;
+    }
+    // Continuation of a block-style list: `      - script.sh` entries.
+    if ($inAllowedScriptsBlock) {
+        if (preg_match('/^\s+-\s+(\S+)\s*$/', $line, $bm)) {
+            if (preg_match($hookPattern, $bm[1])) {
+                $hookGrantedTo[$curAgent] = true;
+            }
+            continue;
+        }
+        // Any non-list-item line ends the allowed_scripts block.
+        $inAllowedScriptsBlock = false;
+    }
+    if (preg_match('/^\s+allowed_scripts:\s*(.*)$/', $line, $am)) {
+        $rest = trim($am[1]);
+        if ($rest === '') {
+            // Block-style list follows on subsequent `- entry` lines.
+            $inAllowedScriptsBlock = true;
+        } elseif (preg_match($hookPattern, $rest)) {
+            // Inline-style list on the same line.
+            $hookGrantedTo[$curAgent] = true;
+        }
     }
 }
 $allowedHookAgent = ['agent-creator-runtime-guardian'];
