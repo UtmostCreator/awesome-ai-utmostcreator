@@ -31,6 +31,19 @@ check_decision() {
     fi
 }
 
+check_payload_decision() {
+    local input="$1" expected="$2"
+    local out decision
+
+    out="$(echo "$input" | "$BASH_BIN" "$SCRIPT" 2>/dev/null || true)"
+    if [[ -z "$out" ]]; then
+        [[ "$expected" == "allow" || "$expected" == "none" ]]
+    else
+        decision="$(echo "$out" | jq -r '.permissionDecision')"
+        [[ "$decision" == "$expected" ]]
+    fi
+}
+
 printf 'pre-tool-use.sh\n'
 
 # Missing stdin denies with JSON policy output
@@ -57,6 +70,17 @@ test_invalid_stdin_denied() {
 }
 run_test "invalid stdin is denied" test_invalid_stdin_denied
 
+# JSON decision fallback should work even when jq is unavailable.
+test_helper_json_fallback_without_jq() {
+    local out decision reason
+    out="$(PATH="/bin" "$BASH_BIN" -c 'source scripts/ai/internal/pre-tool-use/10-helpers.sh; ask "manual confirm"' 2>/dev/null || true)"
+    decision="$(echo "$out" | jq -r '.permissionDecision')"
+    reason="$(echo "$out" | jq -r '.permissionDecisionReason')"
+    [[ "$decision" == "ask" ]]
+    [[ "$reason" == "manual confirm" ]]
+}
+run_test "helper emits JSON fallback without jq" test_helper_json_fallback_without_jq
+
 # Non-terminal tools pass through
 test_non_terminal() {
     local input out
@@ -65,6 +89,26 @@ test_non_terminal() {
     [[ -z "$out" ]]
 }
 run_test "non-terminal tool passes through (no output)" test_non_terminal
+
+test_edit_modify_allowed() {
+    check_payload_decision '{"toolName":"edit/editFiles","toolArgs":{"edits":[{"type":"modify","filePath":"README.md","newText":"updated"}]}}' "allow"
+}
+run_test "edit payload without rename/delete is allowed" test_edit_modify_allowed
+
+test_edit_delete_ask() {
+    check_payload_decision '{"toolName":"edit/editFiles","toolArgs":{"edits":[{"type":"delete","filePath":"README.md"}]}}' "ask"
+}
+run_test "edit delete payload requires approval" test_edit_delete_ask
+
+test_edit_rename_ask() {
+    check_payload_decision '{"toolName":"edit/editFiles","toolArgs":{"edits":[{"type":"rename","from":"README.md","to":"README-old.md"}]}}' "ask"
+}
+run_test "edit rename payload requires approval" test_edit_rename_ask
+
+test_edit_create_delete_fallback_ask() {
+    check_payload_decision '{"toolName":"edit/editFiles","toolArgs":{"edits":[{"type":"create","filePath":"README-old.md","contents":"copy"},{"type":"delete","filePath":"README.md"}]}}' "ask"
+}
+run_test "create plus delete rename fallback requires approval" test_edit_create_delete_fallback_ask
 
 # Read-only tools are allowed
 test_rg_allowed() { check_decision "bash" "rg login ." "allow"; }
@@ -133,6 +177,23 @@ run_test "rg-code.sh is allowed" test_rg_code_allowed
 test_fd_files_allowed() { check_decision "bash" "bash scripts/ai/fd-files.sh app" "allow"; }
 run_test "fd-files.sh is allowed" test_fd_files_allowed
 
+test_run_repo_tests_allowed() { check_decision "bash" "bash scripts/ai/run-repo-tests.sh" "allow"; }
+run_test "run-repo-tests.sh is allowed" test_run_repo_tests_allowed
+
+test_run_test_focused_allowed() { check_decision "bash" "bash scripts/ai/run-test-focused.sh tests/php/CommandPolicyCompilerTest.php" "allow"; }
+run_test "run-test-focused.sh is allowed" test_run_test_focused_allowed
+
+test_run_all_tests_harness_allowed() { check_decision "bash" "bash tests/scripts/ai/run-all-tests.sh pre-tool-use" "allow"; }
+run_test "tests shell harness is allowed" test_run_all_tests_harness_allowed
+
+test_git_branch_origin_allowed() { check_decision "bash" "bash scripts/ai/git-branch-origin.sh --json" "allow"; }
+run_test "git-branch-origin.sh is allowed" test_git_branch_origin_allowed
+
+test_absolute_shell_prefix_allows_script() {
+    check_decision "bash" "/bin/bash scripts/ai/ai-search.sh query docs/ai" "allow"
+}
+run_test "absolute shell prefix still allows script" test_absolute_shell_prefix_allows_script
+
 # git commit requires confirmation
 test_git_commit_ask() { check_decision "bash" "git commit -m 'fix'" "ask"; }
 run_test "git commit requires confirmation" test_git_commit_ask
@@ -156,6 +217,14 @@ run_test "composer validate is allowed" test_composer_validate
 # vendor/bin/phpunit allowed
 test_phpunit() { check_decision "bash" "vendor/bin/phpunit" "allow"; }
 run_test "vendor/bin/phpunit is allowed" test_phpunit
+
+test_phpunit_dot_slash() { check_decision "bash" "./vendor/bin/phpunit" "allow"; }
+run_test "./vendor/bin/phpunit is allowed" test_phpunit_dot_slash
+
+test_phpunit_with_cd_prefix() {
+    check_decision "bash" "cd /tmp && ./vendor/bin/phpunit tests/Feature/ExampleTest.php --no-coverage 2>&1 | tail -30" "allow"
+}
+run_test "cd && ./vendor/bin/phpunit is allowed" test_phpunit_with_cd_prefix
 
 # Test: shellcheck command is allowed by the policy gate
 test_shellcheck() { check_decision "bash" "shellcheck scripts/ai/common.sh" "allow"; }

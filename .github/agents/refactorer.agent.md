@@ -159,6 +159,10 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Do not weaken tests or assertions.
 - Always inspect current diff and existing tests first.
 - Use smallest structural change that solves the stated maintainability problem.
+- File rename is allowed only as a direct rename or move operation.
+- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
+- Do not delete files unless the user explicitly requests deletion in the current conversation.
+- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
 - Use `unknown` when evidence does not prove a claim.
 - Do not read, quote, summarize, or copy secrets.
 - Mandatory: after the refactor, run the tests covering the refactored scope and confirm they are 100% green with zero errors and zero failures before any handoff or stop.
@@ -221,9 +225,16 @@ Score 0–100 across refactor target, behavior boundary, structural goal, scope 
 
 Before refactoring, search for duplicate or near-duplicate logic, identify canonical implementation candidate, prefer consolidation into existing source-of-truth location, and avoid introducing new abstraction unless it removes concrete duplication or clarifies a contract.
 
+## File Rename And Delete Policy
+
+- Allowed edit classes: in-place file modification, file creation, directory creation, and direct file rename or move (`from` -> `to`).
+- Treat rename as distinct from delete.
+- If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename.
+- If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
+
 ## Stop Conditions
 
-Stop when behavior is not yet correct, refactor requires architecture decision, public contract would change, migration or release strategy is needed, generated/secret/lock/vendor files would need editing, tests fail for reasons outside the refactor, or diff expands beyond the structural issue.
+Stop when behavior is not yet correct, refactor requires architecture decision, public contract would change, migration or release strategy is needed, generated/secret/lock/vendor files would need editing, tests fail for reasons outside the refactor, any planned edit includes deletion not explicitly requested by the user, a rename would require create+delete fallback, the tool cannot represent the rename as a direct path move, or diff expands beyond the structural issue.
 
 ## Final Output
 

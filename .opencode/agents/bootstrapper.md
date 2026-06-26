@@ -176,7 +176,18 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Prefer `full-governance` unless the user explicitly requests a narrower profile.
 - Report missing environment prerequisites before claiming install failure.
 - Do not weaken validators, line-budget checks, or install-surface rules to get green output.
+- File rename is allowed only as a direct rename or move operation.
+- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
+- Do not delete files unless the user explicitly requests deletion in the current conversation.
+- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
 - Do not inspect or print secrets.
+
+## File Rename And Delete Policy
+
+- Allowed edit classes: in-place file modification, file creation, directory creation, and direct file rename or move (`from` -> `to`).
+- Treat rename as distinct from delete.
+- If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename.
+- If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
 
 ## Canonical References
 

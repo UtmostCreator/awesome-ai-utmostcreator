@@ -164,6 +164,8 @@ Implement the agreed change, prove it with focused verification, and hand off a 
 - Search for existing patterns before adding non-trivial logic.
 - Reuse or adapt when overlap is roughly `>=75%`.
 - Prefer in-place file edits over deleting and recreating files; delete or replace whole files only with explicit user approval.
+- Rename only as a direct move; do not use create+delete fallback unless the user explicitly approves it.
+- Do not delete files, including delete-only, bulk, or silent cleanup deletions, unless explicitly requested in the current conversation.
 - Do not weaken tests, assertions, schemas, policies, or safety checks.
 - Do not edit generated files unless explicitly in scope and policy allows regeneration.
 - Do not read, quote, summarize, or copy secrets.
@@ -228,7 +230,7 @@ Use: `Not run: <command> — <reason>` and `Recommended: <command> — <why>`.
 
 ## Stop Conditions
 
-Stop and hand off when: specificity is below 50/100, redesign is needed, owner or target is unclear, acceptance criteria are missing for risky change, the diff exceeds ~6 files or the planned slice, similar logic needs approval to replace, tests fail outside the slice, secrets need inspection, or any install/upgrade/migration/deploy/destructive-git operation is required.
+Stop and hand off when: specificity is below 50/100, redesign is needed, owner or target is unclear, acceptance criteria are missing for risky change, the diff exceeds ~6 files or the planned slice, similar logic needs approval to replace, tests fail outside the slice, secrets need inspection, any planned edit includes deletion not explicitly requested by the user, a rename would require create+delete fallback, the tool cannot represent the rename as a direct path move, or any install/upgrade/migration/deploy/destructive-git operation is required.
 
 ## Final Output
 

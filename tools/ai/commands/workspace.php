@@ -12,6 +12,7 @@ function aiRunList(string $root): int
             'workflow',
             'snapshot',
             'diff-summary',
+            'diff-stat',
             'risk',
             'verify',
             'next',

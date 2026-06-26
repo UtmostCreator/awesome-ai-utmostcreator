@@ -17,6 +17,49 @@
 # $failures is a global assigned by the root loader (scripts/ai/ai-verify.sh)
 # before this module is sourced; this function intentionally mutates that global.
 # shellcheck disable=SC2154
+
+# Emit scoped changed files matching one or more git pathspec globs. The output
+# includes modified/staged/untracked files and is de-duplicated.
+scoped_changed_files_by_pathspec() {
+    local scope="${1:?scope required}"
+    shift
+
+    case "$scope" in
+    branch)
+        local pattern
+        for pattern in "$@"; do
+            branch_scoped_files "$pattern"
+        done
+        ;;
+    changed)
+        git diff --name-only --diff-filter=ACMRT -- "$@"
+        git diff --cached --name-only --diff-filter=ACMRT -- "$@"
+        git ls-files --others --exclude-standard -- "$@"
+        ;;
+    *)
+        return 0
+        ;;
+    esac | sort -u
+}
+
+# True when any scoped changed file is exactly one of the provided paths.
+scope_has_exact_changed_path() {
+    local scope="${1:?scope required}"
+    shift
+
+    local changed wanted
+    while IFS= read -r changed; do
+        [[ -n "$changed" ]] || continue
+        for wanted in "$@"; do
+            if [[ "$changed" == "$wanted" ]]; then
+                return 0
+            fi
+        done
+    done < <(scoped_changed_files_by_pathspec "$scope" "$@")
+
+    return 1
+}
+
 ai_verify_run() {
     if [[ "${AI_VERIFY_TEST_MODE:-0}" == "1" ]]; then
         echo "==> repository"
@@ -63,7 +106,23 @@ ai_verify_run() {
     fi
 
     if command -v actionlint >/dev/null 2>&1 && [[ -d .github/workflows ]]; then
-        run_step 'actionlint' actionlint
+        if is_changed_or_branch_scope; then
+            workflow_files=()
+            while IFS= read -r wf; do
+                [[ -n "$wf" ]] || continue
+                [[ -f "$wf" ]] || continue
+                should_skip_shipped_ai_kit_workflow_file "$wf" && continue
+                workflow_files+=("$wf")
+            done < <(scoped_changed_files_by_pathspec "$AI_VERIFY_SCOPE" '.github/workflows/*.yml' '.github/workflows/*.yaml')
+
+            if ((${#workflow_files[@]} > 0)); then
+                run_step "actionlint (${#workflow_files[@]} changed workflow file(s))" actionlint "${workflow_files[@]}"
+            else
+                log_warn "Skipping actionlint in $AI_VERIFY_SCOPE scope: no changed workflow files in scope."
+            fi
+        else
+            run_step 'actionlint' actionlint
+        fi
     fi
 
     if [[ "$VERIFY_LINKS" == "1" ]] && command -v lychee >/dev/null 2>&1; then
@@ -77,17 +136,27 @@ ai_verify_run() {
 
     if [[ -f composer.json ]]; then
         if command -v composer >/dev/null 2>&1; then
-            run_step 'composer validate --strict' composer validate --strict
-            run_step 'composer audit' composer audit
+            if is_changed_or_branch_scope; then
+                if scope_has_exact_changed_path "$AI_VERIFY_SCOPE" composer.json composer.lock; then
+                    run_step 'composer validate --strict' composer validate --strict
+                    run_step 'composer audit' composer audit
+                else
+                    log_warn "Skipping composer validate/audit in $AI_VERIFY_SCOPE scope: composer.json/composer.lock unchanged."
+                fi
+            else
+                run_step 'composer validate --strict' composer validate --strict
+                run_step 'composer audit' composer audit
+            fi
         fi
 
-        # Determine whether the PHP linters/analysers should be narrowed to the
-        # files changed on this branch, or run project-wide.
+        # Determine whether the PHP linters/analysers should be narrowed to
+        # changed files, branch files, or run project-wide.
         #
-        # Default (including the "ai" scope): narrow to changed files. With no local
-        # changes we fall back to files unique to the current feature branch via its
-        # merge-base (git-branch-origin.sh), so pint/phpstan/psalm never lint the
-        # whole project unless the caller explicitly asks with AI_VERIFY_SCOPE=all.
+        # Default "ai" scope is intentionally local/dirty-only (same as changed)
+        # so plain `bash scripts/ai/ai-verify.sh .` stays fast and bounded in
+        # shipped target repos. Use AI_VERIFY_SCOPE=branch to include committed
+        # files unique to the current branch, or AI_VERIFY_SCOPE=all for explicit
+        # project-wide verification.
         php_scoped=0
         php_all_excluding_shipped=0
         php_files=()
@@ -106,10 +175,16 @@ ai_verify_run() {
         changed)
             php_scoped=1
             ;;
-        *)
-            # ai (default) and branch both resolve to branch-aware scoping.
+        ai)
+            php_scoped=1
+            php_scope_source="changed"
+            ;;
+        branch)
             php_scoped=1
             php_scope_source="branch"
+            ;;
+        *)
+            die "unknown AI_VERIFY_SCOPE: $AI_VERIFY_SCOPE"
             ;;
         esac
 

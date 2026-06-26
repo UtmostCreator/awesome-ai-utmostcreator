@@ -2,11 +2,15 @@
 
 declare(strict_types=1);
 
+final class AiGitCommandException extends RuntimeException
+{
+}
+
 function aiGitLines(string $root, string $args): array
 {
     $result = aiRunCommand(
         $root,
-        'git -C ' . escapeshellarg($root) . ' ' . $args
+        aiGitCommand($root, $args)
     );
 
     $lines = preg_split('/\R/', $result['stdout']) ?: [];
@@ -67,6 +71,67 @@ function aiRunDiffSummary(string $root, array $args): int
         null,
         'Run risk and verify on this diff.'
     );
+    fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
+    return 0;
+}
+
+function aiRunDiffStat(string $root, array $args): int
+{
+    $base = aiBaseRefFromArgs($root, $args);
+    $head = trim(aiParseArg($args, 'head') ?? 'HEAD');
+    if ($head === '') {
+        $head = 'HEAD';
+    }
+
+    $mergeBaseResult = aiRunCommand(
+        $root,
+        aiGitCommand($root, 'merge-base ' . escapeshellarg($base) . ' ' . escapeshellarg($head))
+    );
+    if ($mergeBaseResult['exit'] !== 0) {
+        throw new AiGitCommandException('Unable to resolve merge-base for ' . $base . ' and ' . $head);
+    }
+
+    $mergeBase = trim($mergeBaseResult['stdout']);
+    if ($mergeBase === '') {
+        throw new AiGitCommandException('Merge-base command returned no commit for ' . $base . ' and ' . $head);
+    }
+
+    $diffRange = $mergeBase . '..' . $head;
+    $statResult = aiRunCommand(
+        $root,
+        aiGitCommand($root, 'diff --stat ' . escapeshellarg($diffRange))
+    );
+    if ($statResult['exit'] !== 0) {
+        throw new AiGitCommandException('Unable to compute git diff --stat for ' . $diffRange);
+    }
+
+    $statOutput = rtrim($statResult['stdout']);
+    $statLines = $statOutput === '' ? [] : preg_split('/\R/', $statOutput);
+
+    $data = [
+        'base' => $base,
+        'head' => $head,
+        'merge_base' => $mergeBase,
+        'diff_range' => $diffRange,
+        'stat_lines' => $statLines,
+    ];
+
+    $written = aiCliWriteArtifact(
+        $root,
+        'diff-stat',
+        'php tools/ai/ai.php diff-stat --base ' . $base . ' --head ' . $head,
+        $data,
+        'ok',
+        null,
+        $statLines === [] ? 'No changes found for the requested merge-base diff.' : 'Review the diff stat, then run focused checks if needed.'
+    );
+
+    if ($statLines === []) {
+        fwrite(STDOUT, '(no changes)' . PHP_EOL);
+    } else {
+        fwrite(STDOUT, $statOutput . PHP_EOL);
+    }
+
     fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
     return 0;
 }

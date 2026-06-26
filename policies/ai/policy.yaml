@@ -62,7 +62,10 @@ allow:
   # See docs/ai/command-risk-taxonomy.md for the full invocation matrix.
   - id: tier1-read-only-scripts
     reason: "Tier 1: read-only AI wrapper scripts (no source mutation)"
-    pattern: '^(bash\s+)?(\./)?scripts/ai/(ai-search|ai-verify|preview-file|fd-files|rg-code|git-forensics|repo-stats|query-usage)\.sh\b'
+    pattern: '^(bash\s+)?(\./)?scripts/ai/(ai-search|ai-verify|preview-file|fd-files|rg-code|git-forensics|repo-stats|query-usage|run-repo-tests|run-test-focused|git-branch-origin|ai-structured|ai-task|ai-test-select|ai-doc-check)\.sh\b'
+  - id: tier1-read-only-test-harness
+    reason: "Tier 1: shell test harness read-only execution"
+    pattern: '^(bash\s+)?(\./)?tests/scripts/ai/run-all-tests\.sh\b'
   # Tier 1† — read-only-adjacent scripts (write only to generated directories)
   - id: tier1-generated-output-scripts
     reason: "Tier 1\u2020: generated-output writes to .ai-logs/ or .repomix-context/ only"

@@ -166,6 +166,11 @@ function aiRunCommand(string $root, string $command): array
     ];
 }
 
+function aiGitCommand(string $root, string $args): string
+{
+    return 'git -C ' . escapeshellarg($root) . ' ' . $args;
+}
+
 function aiParseArg(array $args, string $name): ?string
 {
     for ($i = 0; $i < count($args); $i++) {

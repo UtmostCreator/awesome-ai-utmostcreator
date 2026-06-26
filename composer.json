@@ -32,3 +32,5 @@
     "test:profile": "Run PHPUnit and emit a JUnit XML report at docs/ai/generated/phpunit-junit.xml for slow-test ranking."
   }
 }
+
+

@@ -27,6 +27,24 @@ is_shipped_ai_kit_shell_file() {
     return 1
 }
 
+# Shipped AI-kit workflow files. In installed target repositories these files are
+# support scaffolding and should not become part of changed-scope verification.
+is_shipped_ai_kit_workflow_file() {
+    case "$1" in
+    .github/workflows/validate-ai-surface.yml | \
+        .github/workflows/test-external-install.yml | \
+        .github/workflows/export-ai-universal-rules-preview.yml | \
+        .github/workflows/architecture-plan-scope-guard.yml | \
+        .github/workflows/auto-pr-description.yml | \
+        .github/workflows/frontend-build.yml | \
+        .github/workflows/pr-validation.yml)
+        return 0
+        ;;
+    esac
+
+    return 1
+}
+
 # Shipped AI-kit PHP files. The kit ships its tooling under tools/ai/**, so in an
 # installed target repository those files are vendored support code, not the
 # user's project code to lint with pint/phpstan/psalm. A case-glob '*' matches
@@ -52,6 +70,12 @@ should_skip_shipped_ai_kit_shell_file() {
 # repository; inside the kit's own authoring repo it remains in scope.
 should_skip_shipped_ai_kit_php_file() {
     is_shipped_ai_kit_php_file "$1" && ! is_ai_kit_source_repo
+}
+
+# A shipped AI-kit workflow file should be skipped only in an installed target
+# repository; inside the kit's own authoring repo it remains in scope.
+should_skip_shipped_ai_kit_workflow_file() {
+    is_shipped_ai_kit_workflow_file "$1" && ! is_ai_kit_source_repo
 }
 
 # True only when running inside the AI-kit's own authoring repository, where the

@@ -9,14 +9,16 @@ like GitHub Copilot, OpenCode, and Claude have clear, shared rules to follow.
 
 ## At a Glance
 
-| Item                         | Answer                                                        |
-| ---------------------------- | ------------------------------------------------------------- |
-| What is this?                | AI workflow kit for software repositories                     |
-| Where do I run it?           | From this repo, pointed at another repo (the target)          |
-| What does it support?        | GitHub Copilot, OpenCode, Claude (`AGENTS.md` / `CLAUDE.md`)  |
-| Does it edit code by itself? | No — it scaffolds, prepares, and validates; you stay in control |
-| Risk level                   | Low by default (backs up and verifies); no guaranteed safety  |
-| Main command                 | `bash install-ai-kit.sh /path/to/your-project`               |
+<!-- markdownlint-disable MD060 -->
+| Item                         | Answer                                                           |
+| ---------------------------- | ---------------------------------------------------------------- |
+| What is this?                | AI workflow kit for software repositories                        |
+| Where do I run it?           | From this repo, pointed at another repo (the target)             |
+| What does it support?        | GitHub Copilot, OpenCode, Claude (`AGENTS.md` / `CLAUDE.md`)     |
+| Does it edit code by itself? | No — it scaffolds, prepares, and validates; you stay in control  |
+| Risk level                   | Low by default (backs up and verifies); no guaranteed safety     |
+| Main command                 | `bash install-ai-kit.sh /path/to/your-project`                  |
+<!-- markdownlint-enable MD060 -->
 
 ## What It Does
 
@@ -78,8 +80,11 @@ your setup are only available if you opt in to the optional agent-creator pack.
 ## What It Ships With — and Why
 
 - **AI agents and recommended order** — research → plan → implement → review → release. See the agent
-  roster and purpose in [docs/ai/agents.md](docs/ai/agents.md) and the chaining order in
-  [docs/ai/workflow.md](docs/ai/workflow.md). Chaining agents this way gives the best results.
+  roster, start-with guidance, and purpose in [docs/ai/agents.md](docs/ai/agents.md); the exact shipped
+  inventory and runtime-surface differences in [docs/ai/AGENTS-MANIFEST.md](docs/ai/AGENTS-MANIFEST.md);
+  and the chaining order in [docs/ai/workflow.md](docs/ai/workflow.md). For profile and edition coverage
+  (`basic`, `standard`, `creator`, `full`, `agents-only`), see [readme-install.md](readme-install.md).
+  Chaining agents this way gives the best results.
 - **Capabilities** — load-on-demand reusable workflows (bug-regression, release-safety,
   review-diff, and more). See [docs/ai/capabilities/README.md](docs/ai/capabilities/README.md).
 - **Gotchas** — each capability ships a `gotchas.md` capturing recurring traps and the safe
@@ -137,6 +142,8 @@ projects, and anyone who wants AI tools to follow shared rules instead of a blan
 ## Documentation
 
 - [Installation guide](readme-install.md) — full install, options, runtime selection, backup, rollback
+- [Agent routing guide](docs/ai/agents.md) — when to use which agent and common handoffs
+- [Shipped agent inventory](docs/ai/AGENTS-MANIFEST.md) — exact agent names, runtime coverage, and surface differences
 - [Non-technical overview](docs/ai/non-technical-overview.md) — plain-English explanation
 - [Maintainer guide](docs/ai/maintainer-guide.md) — working on the kit itself
 - [AI guardrails](docs/ai/AI-GUARDRAILS.md) — safety rules

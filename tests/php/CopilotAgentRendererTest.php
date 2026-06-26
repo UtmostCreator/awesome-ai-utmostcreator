@@ -43,6 +43,13 @@ class CopilotAgentRendererTest extends TestCase
         return (string) file_get_contents($path);
     }
 
+    private function bugfixTemplate(): string
+    {
+        $path = $this->repoRoot . '/packages/ai-universal-rules/templates/optional/agents/bugfix.md';
+        $this->assertFileExists($path, 'bugfix template must exist');
+        return (string) file_get_contents($path);
+    }
+
     private function removeTree(string $path): void
     {
         if (!file_exists($path)) {
@@ -158,6 +165,18 @@ class CopilotAgentRendererTest extends TestCase
     {
         $out = aiInstallerRenderCopilotAgent($this->implementerTemplate(), 'implementer', '/project/scripts/ai');
         $this->assertStringContainsString('## Shell Boundary', $out);
+    }
+
+    public function testBugfixOutputHasEditAndExecuteTools(): void
+    {
+        $out = aiInstallerRenderCopilotAgent($this->bugfixTemplate(), 'bugfix', '/project/scripts/ai');
+        if (preg_match('/^tools:\s*(.+)$/m', $out, $m)) {
+            $this->assertStringContainsString('edit/editFiles', $m[1]);
+            $this->assertStringContainsString('edit/createFile', $m[1]);
+            $this->assertStringContainsString('execute/runInTerminal', $m[1]);
+        } else {
+            $this->fail('tools: line not found in optional bugfix output');
+        }
     }
 
     public function testCopilotAgentCopyRefreshesWithoutDeletingDestinationTree(): void
