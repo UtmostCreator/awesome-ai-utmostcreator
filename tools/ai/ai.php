@@ -36,6 +36,7 @@ Usage:
 Commands:
   list           List available AI workflow commands
   diff-summary   Summarize current branch diff and changed files
+  diff-stat      Show git diff --stat from merge-base(base, head) to head
   risk           Score changed-slice risk using deterministic rules
   verify         Run repository AI verification digest
   next           Recommend the next required action
@@ -104,6 +105,7 @@ Examples:
   php tools/ai/ai.php workflow
   php tools/ai/ai.php snapshot
   php tools/ai/ai.php diff-summary --base main
+  php tools/ai/ai.php diff-stat --base stat-3.1.6 --head HEAD
   php tools/ai/ai.php risk --base main
   php tools/ai/ai.php verify --changed
   php tools/ai/ai.php next
@@ -174,6 +176,8 @@ try {
             exit(aiRunSnapshot($root));
         case 'diff-summary':
             exit(aiRunDiffSummary($root, $args));
+        case 'diff-stat':
+            exit(aiRunDiffStat($root, $args));
         case 'risk':
             exit(aiRunRisk($root, $args));
         case 'verify':
@@ -227,7 +231,6 @@ try {
         case 'audit-instructions':
             exit(aiRunAuditInstructions($root));
         case 'adapter-plan':
-            exit(aiRunAdapterPlan($root, $args));
         case 'plan':
             exit(aiRunAdapterPlan($root, $args));
         case 'install':

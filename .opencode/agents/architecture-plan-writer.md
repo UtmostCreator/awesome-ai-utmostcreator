@@ -122,6 +122,10 @@ Only treat writing as blocked if an actual `write`/`edit` tool call returns a pe
 - Do not implement. This agent writes the plan only.
 - Every step is an unchecked Markdown task (`- [ ]`). Never pre-check items.
 - Every acceptance criterion must be observable and testable; reject vague ACs like "works correctly" or "tests pass".
+- File rename is allowed only as a direct rename or move operation.
+- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
+- Do not delete files unless the user explicitly requests deletion in the current conversation.
+- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
 - Use `unknown` when evidence does not prove a claim.
 
 ## Naming And Path Rules
@@ -218,9 +222,16 @@ Rules for archiving:
 - Preserve the original filename inside `archive/` (e.g. `plan-phase4-x.md` -> `archive/plan-phase4-x.md`). If multiple plans in one ticket complete, archive each under the same `archive/` folder.
 - Record the archive action in your Final Output (archived path + completion evidence).
 
+## File Rename And Delete Policy
+
+- Allowed edit classes: in-place file modification, file creation, directory creation, and direct file rename or move (`from` -> `to`).
+- Treat rename as distinct from delete.
+- If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename.
+- If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
+
 ## Stop Conditions
 
-Stop and ask, or report a limitation, when: the target folder would be outside `docs/tickets/`, an actual `write`/`edit` tool call against a `docs/tickets/` path is denied or errors, the architect design is missing required scope or acceptance criteria, the task scope is ambiguous, any non-`docs/tickets/` file would need to change, or an archive is requested while any Todo item or Acceptance Criterion is still unchecked. Do not report a write limitation before attempting the `write` call.
+Stop and ask, or report a limitation, when: the target folder would be outside `docs/tickets/`, an actual `write`/`edit` tool call against a `docs/tickets/` path is denied or errors, the architect design is missing required scope or acceptance criteria, the task scope is ambiguous, any planned edit includes deletion not explicitly requested by the user, a rename would require create+delete fallback, the tool cannot represent the rename as a direct path move, any non-`docs/tickets/` file would need to change, or an archive is requested while any Todo item or Acceptance Criterion is still unchecked. Do not report a write limitation before attempting the `write` call.
 
 ## Final Output
 

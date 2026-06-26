@@ -39,16 +39,22 @@ function aiCopilotAgentToolRegistry(): array
     return [
         'architect'         => $readOnlyToolsWithQuestions,
         'architecture-plan-writer' => $editExecuteTools,
-        'reviewer'          => $readOnlyTools,
+        'reviewer'          => $executeToolsWithQuestions,
         'release-auditor'   => $readOnlyTools,
         'workflow-auditor'  => $readOnlyTools,
         'researcher'        => $executeToolsWithQuestions,
         'repository-researcher' => $executeToolsWithQuestions,
-        'repository-reviewer' => $readOnlyTools,
+        'repository-reviewer' => $executeToolsWithQuestions,
+        'bootstrapper'      => $editExecuteTools,
         'implementer'       => $editExecuteTools,
         'post-install'      => $editExecuteTools,
         'config-maintainer' => $editExecuteTools,
         'refactorer'        => $editExecuteTools,
+        'bugfix'            => $editExecuteTools,
+        'build-config'      => $editExecuteTools,
+        'docs'              => $editExecuteTools,
+        'ui-builder'        => $editExecuteTools,
+        'upgrade'           => $editExecuteTools,
     ];
 }
 

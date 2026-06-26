@@ -129,6 +129,15 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 
 Edits normally use the native path-scoped `edit:` permission. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
 
+File Rename And Delete Policy:
+
+- File rename is allowed only as a direct rename or move operation.
+- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
+- Do not delete files unless the user explicitly requests deletion in the current conversation.
+- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
+- If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename.
+- If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
+
 Goals:
 
 - reproduce the issue when practical

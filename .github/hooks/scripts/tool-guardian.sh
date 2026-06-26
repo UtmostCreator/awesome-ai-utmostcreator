@@ -12,18 +12,18 @@ set -u
 
 mode="block"
 if [ "${GUARD_MODE:-}" != "" ]; then
-    mode="$(printf '%s' "$GUARD_MODE" | tr '[:upper:]' '[:lower:]')"
+	mode="$(printf '%s' "$GUARD_MODE" | tr '[:upper:]' '[:lower:]')"
 fi
 
 if [ "${SKIP_TOOL_GUARD:-}" = "true" ]; then
-    exit 0
+	exit 0
 fi
 
 raw="$(cat)"
 
 # Empty payload: nothing to inspect.
 if [ -z "$(printf '%s' "$raw" | tr -d '[:space:]')" ]; then
-    exit 0
+	exit 0
 fi
 
 # Lowercase the whole payload; we match toolName + toolInput together exactly like the ps1,
@@ -33,11 +33,11 @@ combined="$(printf '%s' "$raw" | tr '[:upper:]' '[:lower:]' | tr '\n' ' ')"
 
 hits=""
 add_hit() {
-    # $1 = extended-regex pattern, $2 = message
-    if printf '%s' "$combined" | grep -Eq "$1"; then
-        hits="${hits}- $2
+	# $1 = extended-regex pattern, $2 = message
+	if printf '%s' "$combined" | grep -Eq "$1"; then
+		hits="${hits}- $2
 "
-    fi
+	fi
 }
 
 # Rule set mirrors tool-guardian.ps1 (keep in sync; parity is test-enforced).
@@ -62,13 +62,13 @@ add_hit '[^[:space:]"]+\.(pem|key)([^[:alnum:]_]|$)' 'Avoid touching private key
 add_hit 'base64[[:space:]]+(-d|--decode|-d[[:alpha:]]*).*\|[[:space:]]*(sh|bash|zsh|python|python3|php|node|ruby)' 'Blocked base64-decode piped to a shell (obfuscated execution).'
 
 if [ -z "$hits" ]; then
-    exit 0
+	exit 0
 fi
 
 printf 'Tool Guardian blocked the command because:\n%s' "$hits" >&2
 
 if [ "$mode" = "warn" ]; then
-    exit 0
+	exit 0
 fi
 
 exit 1

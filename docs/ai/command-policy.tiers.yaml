@@ -9,8 +9,29 @@ tiers:
   tier1:
     allow:
       - "bash scripts/ai/ai-search.sh *"
+      - "bash scripts/ai/ai-search.sh"
       - "bash scripts/ai/preview-file.sh *"
+      - "bash scripts/ai/preview-file.sh"
       - "bash scripts/ai/query-usage.sh *"
+      - "bash scripts/ai/query-usage.sh"
+      - "bash scripts/ai/ai-verify.sh *"
+      - "bash scripts/ai/ai-verify.sh"
+      - "bash scripts/ai/run-repo-tests.sh *"
+      - "bash scripts/ai/run-repo-tests.sh"
+      - "bash scripts/ai/run-test-focused.sh *"
+      - "bash scripts/ai/run-test-focused.sh"
+      - "bash tests/scripts/ai/run-all-tests.sh *"
+      - "bash tests/scripts/ai/run-all-tests.sh"
+      - "bash scripts/ai/git-branch-origin.sh *"
+      - "bash scripts/ai/git-branch-origin.sh"
+      - "bash scripts/ai/ai-task.sh *"
+      - "bash scripts/ai/ai-task.sh"
+      - "bash scripts/ai/ai-structured.sh *"
+      - "bash scripts/ai/ai-structured.sh"
+      - "bash scripts/ai/ai-test-select.sh *"
+      - "bash scripts/ai/ai-test-select.sh"
+      - "bash scripts/ai/ai-doc-check.sh *"
+      - "bash scripts/ai/ai-doc-check.sh"
       - "git status*"
       - "git diff*"
       - "git log*"
@@ -20,7 +41,6 @@ tiers:
   tier2:
     allow: []
     ask:
-      - "bash scripts/ai/ai-verify.sh *"
       - "bash scripts/ai/pack-context.sh *"
       - "git commit*"
     deny: []

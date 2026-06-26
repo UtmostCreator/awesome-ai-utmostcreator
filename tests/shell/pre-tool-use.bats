@@ -2,7 +2,8 @@
 # Tests for scripts/ai/pre-tool-use.sh
 #
 # Input contract: {"toolName":"bash","toolArgs":{"command":"..."}}
-# If toolName != "bash" the script exits 0 immediately (non-bash passthrough).
+# Terminal tools are evaluated by command policy; edit/editFiles payloads are
+# evaluated for rename/delete approval boundaries.
 # Output: JSON with permissionDecision = "allow" | "deny" | "ask"
 #
 # Requires: jq, yq (used internally by pre-tool-use.sh).
@@ -70,6 +71,26 @@ teardown() {
 @test "non-bash toolName with command field exits 0" {
     run _hook '{"toolName":"edit_file","toolArgs":{"command":"rm -rf /"}}'
     [ "$status" -eq 0 ]
+}
+
+@test "allows non-destructive edit payload" {
+    output=$(_hook '{"toolName":"edit/editFiles","toolArgs":{"edits":[{"type":"modify","filePath":"README.md","newText":"updated"}]}}')
+    [ "$(_decision "$output")" = "allow" ]
+}
+
+@test "asks for delete edit payload" {
+    output=$(_hook '{"toolName":"edit/editFiles","toolArgs":{"edits":[{"type":"delete","filePath":"README.md"}]}}')
+    [ "$(_decision "$output")" = "ask" ]
+}
+
+@test "asks for rename edit payload" {
+    output=$(_hook '{"toolName":"edit/editFiles","toolArgs":{"edits":[{"type":"rename","from":"README.md","to":"README-old.md"}]}}')
+    [ "$(_decision "$output")" = "ask" ]
+}
+
+@test "asks for create plus delete rename fallback payload" {
+    output=$(_hook '{"toolName":"edit/editFiles","toolArgs":{"edits":[{"type":"create","filePath":"README-old.md","contents":"copy"},{"type":"delete","filePath":"README.md"}]}}')
+    [ "$(_decision "$output")" = "ask" ]
 }
 
 # ---- deny tests ----

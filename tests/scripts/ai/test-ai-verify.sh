@@ -202,6 +202,123 @@ test_links_network_still_offline() {
 }
 run_test "VERIFY_LINKS_NETWORK=1 still runs lychee offline" test_links_network_still_offline
 
+# Run ai-verify with fake actionlint/composer binaries and capture invocations.
+run_with_fake_actionlint_and_composer() {
+    local mutate_mode="${1:-none}" # none | workflow | composer
+    local tmpbin record
+    tmpbin="$(mktemp -d)"
+    record="$tmpbin/tool.calls"
+
+    cat >"$tmpbin/actionlint" <<EOF
+#!/usr/bin/env bash
+printf 'actionlint:%s\n' "\$*" >>"$record"
+exit 0
+EOF
+    cat >"$tmpbin/composer" <<EOF
+#!/usr/bin/env bash
+printf 'composer:%s\n' "\$*" >>"$record"
+exit 0
+EOF
+    chmod +x "$tmpbin/actionlint" "$tmpbin/composer"
+
+    local work="$tmpbin/work"
+    mkdir -p "$work/.github/workflows" "$work/src"
+    printf '{"name":"t/t","require":{}}\n' >"$work/composer.json"
+    printf 'name: ci\non: [push]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ok\n' >"$work/.github/workflows/ci.yml"
+    printf '<?php\n' >"$work/src/App.php"
+
+    (
+        cd "$work"
+        git init -q
+        git config user.email test@example.test
+        git config user.name Test
+        # Avoid host/global ignore rules affecting fixture determinism.
+        git config core.excludesfile /dev/null
+        git add -f -A
+        git commit -q -m init
+
+        case "$mutate_mode" in
+        workflow)
+            printf '\n# changed\n' >>.github/workflows/ci.yml
+            ;;
+        composer)
+            printf '\n' >>composer.json
+            ;;
+        *)
+            printf '// changed\n' >>src/App.php
+            ;;
+        esac
+
+        PATH="$tmpbin:$PATH" AI_VERIFY_TEST_MODE=0 AI_VERIFY_SCOPE=changed \
+            VERIFY_LINECOUNT=0 VERIFY_SECRETS=0 VERIFY_FULL=0 VERIFY_LINKS=0 \
+            "$BASH_BIN" "$SCRIPT" "$work" >/dev/null 2>&1 || true
+    )
+
+    cat "$record" 2>/dev/null || true
+    rm -rf "$tmpbin"
+}
+
+test_changed_scope_skips_actionlint_and_composer_when_unrelated() {
+    local calls
+    calls="$(run_with_fake_actionlint_and_composer none)"
+    [[ "$calls" != *"actionlint:"* ]]
+    [[ "$calls" != *"composer:validate --strict"* ]]
+    [[ "$calls" != *"composer:audit"* ]]
+}
+run_test "changed scope skips actionlint/composer for unrelated edits" test_changed_scope_skips_actionlint_and_composer_when_unrelated
+
+test_changed_scope_runs_actionlint_for_workflow_changes() {
+    local calls
+    calls="$(run_with_fake_actionlint_and_composer workflow)"
+    [[ "$calls" == *"actionlint:"* ]]
+}
+run_test "changed scope runs actionlint for changed workflows" test_changed_scope_runs_actionlint_for_workflow_changes
+
+test_changed_scope_runs_composer_checks_for_composer_changes() {
+    local calls
+    calls="$(run_with_fake_actionlint_and_composer composer)"
+    [[ "$calls" == *"composer:validate --strict"* ]]
+    [[ "$calls" == *"composer:audit"* ]]
+}
+run_test "changed scope runs composer checks for composer changes" test_changed_scope_runs_composer_checks_for_composer_changes
+
+test_changed_scope_skips_shipped_kit_workflows_in_target_repo() {
+    local tmpbin record work calls
+    tmpbin="$(mktemp -d)"
+    record="$tmpbin/tool.calls"
+
+    cat >"$tmpbin/actionlint" <<EOF
+#!/usr/bin/env bash
+printf 'actionlint:%s\n' "\$*" >>"$record"
+exit 0
+EOF
+    chmod +x "$tmpbin/actionlint"
+
+    work="$tmpbin/work"
+    mkdir -p "$work/.github/workflows"
+    printf '{"name":"t/t","require":{}}\n' >"$work/composer.json"
+    printf 'name: kit\non: [push]\njobs:\n  t:\n    runs-on: ubuntu-latest\n    steps:\n      - run: echo ok\n' >"$work/.github/workflows/validate-ai-surface.yml"
+
+    (
+        cd "$work"
+        git init -q
+        git config user.email test@example.test
+        git config user.name Test
+        git config core.excludesfile /dev/null
+        git add -f -A
+        git commit -q -m init
+        printf '\n# changed\n' >>.github/workflows/validate-ai-surface.yml
+        PATH="$tmpbin:$PATH" AI_VERIFY_TEST_MODE=0 AI_VERIFY_SCOPE=changed \
+            VERIFY_LINECOUNT=0 VERIFY_SECRETS=0 VERIFY_FULL=0 VERIFY_LINKS=0 \
+            "$BASH_BIN" "$SCRIPT" "$work" >/dev/null 2>&1 || true
+    )
+
+    calls="$(cat "$record" 2>/dev/null || true)"
+    rm -rf "$tmpbin"
+    [[ "$calls" != *"actionlint:"* ]]
+}
+run_test "changed scope skips shipped kit workflow files in target repo" test_changed_scope_skips_shipped_kit_workflows_in_target_repo
+
 test_changed_scope_excludes_shipped_ai_scripts() {
     local tmp rc=0
     tmp="$(mktemp -d)"
@@ -411,21 +528,29 @@ test_all_scope_excludes_shipped_php_in_target() {
 }
 run_test "all scope excludes shipped tools/ai php in target repo" test_all_scope_excludes_shipped_php_in_target
 
-# Default (ai) scope must resolve PHP linting to branch scoping, not project-wide.
+# Default (ai) scope must resolve PHP linting to changed/dirty scoping, not
+# branch-wide or project-wide.
 # Verify by exercising the same case logic the script uses.
 test_default_scope_is_php_scoped() {
     local AI_VERIFY_SCOPE="ai" php_scoped=0 php_scope_source="ai"
     case "$AI_VERIFY_SCOPE" in
     all) ;;
     changed) php_scoped=1 ;;
-    *)
+    ai)
+        php_scoped=1
+        php_scope_source="changed"
+        ;;
+    branch)
         php_scoped=1
         php_scope_source="branch"
         ;;
+    *)
+        return 1
+        ;;
     esac
-    ((php_scoped == 1)) && [[ "$php_scope_source" == "branch" ]]
+    ((php_scoped == 1)) && [[ "$php_scope_source" == "changed" ]]
 }
-run_test "default (ai) scope narrows PHP linting to branch, not project-wide" test_default_scope_is_php_scoped
+run_test "default (ai) scope narrows PHP linting to changed, not branch/all" test_default_scope_is_php_scoped
 
 # ── Line-count guardrail ──────────────────────────────────────────────────────
 # Build an isolated git repo with files of known sizes so the tiered thresholds

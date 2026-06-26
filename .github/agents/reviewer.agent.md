@@ -1,7 +1,7 @@
 ---
 name: Reviewer
 description: 'Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification'
-tools: ['search/changes', 'search/codebase', 'search/fileSearch', 'search/listDirectory', 'search/textSearch', 'search/usages', 'read/readFile', 'read/problems']
+tools: ['search/changes', 'search/codebase', 'search/fileSearch', 'search/listDirectory', 'search/textSearch', 'search/usages', 'read/readFile', 'read/problems', 'execute/runInTerminal', 'vscode/askQuestions']
 user-invocable: true
 disable-model-invocation: false
 ---
@@ -11,14 +11,12 @@ disable-model-invocation: false
 
 This agent is configured for the GitHub Copilot VS Code surface.
 
-Available tools: `search/changes`, `search/codebase`, `search/fileSearch`, `search/listDirectory`, `search/textSearch`, `search/usages`, `read/readFile`, `read/problems`
+Available tools: `search/changes`, `search/codebase`, `search/fileSearch`, `search/listDirectory`, `search/textSearch`, `search/usages`, `read/readFile`, `read/problems`, `execute/runInTerminal`, `vscode/askQuestions`
 
 - **Edit:** not available — this agent is read-only
-- **Execute:** not available — this agent is read-only
+- **Execute:** available — constrained by the Shell Boundary below
 
-This agent is strictly read-only. It must not edit files, run shell commands, execute scripts, create commits, or claim that verification was executed.
-
-If the task requires file edits, command execution, or repository mutation, produce a handoff plan instead of performing the action.
+This agent is read-only for repository content. It must not edit files or create commits, but it may run approved read-only shell commands and scripts for evidence-based review.
 
 # Reviewer Agent
 

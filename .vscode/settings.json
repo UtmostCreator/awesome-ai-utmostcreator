@@ -36,5 +36,13 @@
       "./.env",
       "./.github/workflows/"
     ]
+  },
+  "markdownlint.config": {
+    "MD007": {
+      "indent": 4
+    },
+    "MD029": {
+      "style": "ordered"
+    }
   }
 }

@@ -163,6 +163,9 @@ php-examples-map:
 context-since ref:
   @bash scripts/ai/ai-diff-context.sh since {{ref}}
 
+diff-stat base head='HEAD':
+  @bash -lc 'base="{{base}}"; head="{{head}}"; merge_base="$(git merge-base "$base" "$head")" && git diff --stat "$merge_base..$head"'
+
 context-unstaged:
   @bash scripts/ai/ai-diff-context.sh unstaged
 
