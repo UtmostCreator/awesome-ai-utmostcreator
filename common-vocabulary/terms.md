@@ -1,0 +1,44 @@
+# AI And LLM Terms
+
+- AI workflow starter kit - A package you install into a software project so AI tools behave consistently and safely. Example: this repository adds project context, guardrails, scripts, and adapters instead of acting as a standalone app.
+- Agent - A bounded AI role with a specific job, posture, and handoff contract. Example: `researcher` gathers read-only evidence, while `implementer` applies a bounded change.
+- Runtime adapter - A surface-specific file set that tells a tool like Copilot or OpenCode how to behave without becoming the source of truth. Example: `AGENTS.md`, `.github/`, and `.opencode/` are adapter surfaces.
+- Adapter - A thin layer that routes a runtime back to canonical docs and rules instead of duplicating them. Example: `.github/copilot-instructions.md` points back to `docs/ai/` policy.
+- Canonical policy - The highest-authority documented workflow and rule set for AI behavior in the repository. Example: docs under `docs/ai/` are canonical, while adapter files are lower authority.
+- Source of truth - The priority order the repo uses when files disagree. Example: source code and tests outrank adapter files and generated docs.
+- Project context - Durable repository facts, active paths, commands, and boundaries. Example: `docs/ai/project-context.md` tells agents what the project is and where to look first.
+- Task context - The current task's grounded scope, affected files, and verification surface. Example: an agent should check the working tree and task docs before planning a change.
+- Capability - A reusable workflow package with gotchas, examples, and verification guidance. Example: `verify-change` or `review-diff`.
+- Skill - Runtime access to capability workflows. Example: a Copilot or OpenCode skill can expose `project-context` or `bug-regression` behavior.
+- Prompt - Optional surface-specific guidance, not guaranteed to be equivalent to commands or canonical workflow docs. Example: a prompt file may help with a one-off task, but it should not replace `docs/ai` workflow rules.
+- Command - An invocation wrapper or compatibility helper, not the canonical workflow definition. Example: a command can launch a routine task without redefining policy.
+- Hook - Deterministic enforcement wired into a runtime. Example: Copilot CLI `preToolUse` and `postToolUse` hooks can enforce command policy.
+- Guardrail - A safety rule that narrows what an AI tool may do. Example: asking before risky actions or blocking destructive shell commands.
+- Approval boundary - A line where the AI must stop and get human approval before mutating state or broadening access. Example: destructive git or mutating production-facing systems.
+- Workflow - The default sequence for completing non-trivial work. Example: load context, plan if needed, implement, verify, review, and add release safety when risk is medium or high.
+- Verification ladder - The repo's proof order from cheapest to broadest validation. Example: focused proof first, broader repository verification later.
+- Handoff - A structured transfer so the next human or agent can continue without guessing. Example: a reviewer handoff includes exact paths, evidence, and open questions.
+- Runtime - The execution surface where the AI workflow runs. Example: GitHub Copilot CLI, OpenCode, or editor and IDE agent surfaces.
+- Advisory - A rule or policy that exists but is not provably enforced by the runtime. Example: editor instruction files are advisory because the repo cannot prove a hook executed them.
+- Enforced - A control the repo can prove the runtime invokes. Example: Copilot CLI hook wiring is marked enforced in the security matrix.
+- Adapter drift - Divergence between adapter surfaces and canonical or template expectations. Example: `validate-adapter-drift.php` checks whether adapters still carry required references and stay thin.
+- Advisor scorecard drift - Score changes against an advisor baseline, unrelated to adapter or template parity. Example: `docs/ai/generated/advisor-drift.md` reports score deltas over time.
+- Autonomy level 1, Observe - Read bounded repository data and return output, with no writes or side effects. Example: searching docs and summarizing terms.
+- Autonomy level 2, Advise - Analyze, verify, and propose actions, possibly writing diagnostics but not mutating source. Example: generating a verification report.
+- Autonomy level 3, Act with approval - Make state-changing changes only after explicit human approval. Example: editing repository files or installing tools.
+- Autonomy level 4, Act autonomously - Mutate state without per-action approval, but only with strict deterministic controls. Example: the repo treats this as unsupported by default.
+- Context packing - Collecting bounded repository context for model use without overloading the context window or including secrets. Example: using the Repomix wrappers instead of dumping the whole repo.
+- Repomix bundle - A generated context package under `.repomix-context` used to feed repository state to a model. Example: a `tree-context` bundle selected from a route index.
+- Fresh context - Context bundle age under two days, considered safe to use. Example: a recent Repomix run can be used directly.
+- Stale context - Context bundle age between two and seven days, still usable but should be regenerated soon. Example: a stale tree bundle warns before use.
+- Expired context - Context older than seven days and rejected until regenerated. Example: `repomix-freshness.sh` exits non-zero when the bundle is too old.
+- LLM context - The repository information given to a language model so it can answer or act accurately. Example: a Repomix bundle for an advisor prompt.
+- Stale repository context - Old packed context that can mislead the model. Example: reading old `.repomix-context` data without freshness checks.
+- Prompt caching - Provider-specific reuse of prompt state to reduce cost and latency. Example: setting `setCacheKey` for Anthropic when supported.
+- MCP - Model Context Protocol style external tool or server access that extends what the AI can reach. Example: a read-only SQL replica exposed through an MCP server.
+- MCP boundary - The rule set that limits what external systems MCP-connected tools may touch. Example: separate read-only and mutating servers and require stronger approval for production-facing access.
+- MCP fallback - The behavior when an MCP server is unavailable. Example: the agent must say MCP is unavailable rather than invent database results.
+- Read-only posture - A tool or server arrangement that permits observation but not mutation. Example: the SQL replica example in the MCP docs.
+- Mutating posture - A tool or server arrangement that can change state and therefore needs stronger control. Example: a production-facing database MCP server.
+- Thin adapter - An adapter that keeps only routing, permissions, and posture, not duplicated long procedures. Example: adapter files that link back to `docs/ai` instead of restating the workflow.
+- `llms.txt` - A machine-readable project summary for AI tools. Example: generated project metadata meant for model-facing tooling.
