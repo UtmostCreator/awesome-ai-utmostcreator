@@ -28,7 +28,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / package-capability` - 43
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
-- `package / workflow-template` - 18
+- `package / workflow-template` - 19
 - `root / adapter-doc` - 1
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
@@ -40,11 +40,11 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / generator` - 1
 - `root / github-copilot-agent` - 22
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 18
-- `root / github-copilot-skill` - 19
+- `root / github-copilot-prompt` - 19
+- `root / github-copilot-skill` - 20
 - `root / opencode-agent` - 14
 - `root / opencode-command` - 20
-- `root / opencode-skill` - 21
+- `root / opencode-skill` - 22
 - `root / php-reference` - 3
 - `root / root-doc` - 19
 - `root / schema` - 1
@@ -160,6 +160,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|new-feature|`.github/prompts/new-feature.prompt.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-prompt`|plan-slice|`.github/prompts/plan-slice.prompt.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`github-copilot-prompt`|post-install-setup|`.github/prompts/post-install-setup.prompt.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
+|`github-copilot-prompt`|prd-and-tasks|`.github/prompts/prd-and-tasks.prompt.md`|Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan|
 |`github-copilot-prompt`|project-context|`.github/prompts/project-context.prompt.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`github-copilot-prompt`|regression-test|`.github/prompts/regression-test.prompt.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`github-copilot-prompt`|release-safety|`.github/prompts/release-safety.prompt.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
@@ -179,6 +180,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|new-feature|`.github/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-skill`|plan-slice|`.github/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`github-copilot-skill`|post-install-setup|`.github/skills/post-install-setup/SKILL.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
+|`github-copilot-skill`|prd-and-tasks|`.github/skills/prd-and-tasks/SKILL.md`|Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan|
 |`github-copilot-skill`|project-context|`.github/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`github-copilot-skill`|regression-test|`.github/skills/regression-test/SKILL.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`github-copilot-skill`|release-safety|`.github/skills/release-safety/SKILL.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
@@ -230,6 +232,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|dependency-upgrade|`.opencode/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`opencode-skill`|docs-sync|`.opencode/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-skill`|evidence-first-execution|`.opencode/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`opencode-skill`|graphify|`.opencode/skills/graphify/SKILL.md`|Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools.|
 |`opencode-skill`|mentor-mode|`.opencode/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-skill`|new-feature|`.opencode/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-skill`|plan-slice|`.opencode/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -418,6 +421,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-template`|new-feature|`packages/ai-universal-rules/templates/workflows/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`workflow-template`|plan-slice|`packages/ai-universal-rules/templates/workflows/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`workflow-template`|post-install-setup|`packages/ai-universal-rules/templates/workflows/post-install-setup.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
+|`workflow-template`|prd-and-tasks|`packages/ai-universal-rules/templates/workflows/prd-and-tasks.md`|Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan|
 |`workflow-template`|project-context|`packages/ai-universal-rules/templates/workflows/project-context.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`workflow-template`|regression-test|`packages/ai-universal-rules/templates/workflows/regression-test.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`workflow-template`|release-safety|`packages/ai-universal-rules/templates/workflows/release-safety.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|

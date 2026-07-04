@@ -520,13 +520,61 @@ Phase 3 — thinning, one runtime per slice (merges B-4, B-3, A-5; order set by 
 
 Phase 4 — PRD/task workflow family (merges C-3, C-3A, C-4, C-4A, C-5):
 
-- [ ] P1: Phase 4.1 — add the PRD and task-generation workflow family as new entries in
+- [x] P1: Phase 4.1 — add the PRD and task-generation workflow family as new entries in
       `templates/workflows/**`, reusing the clarification contract from Phase 2 rather
       than restating it. Include the two-phase pattern: parent tasks or high-level plan
       first, pause for confirmation where appropriate, then expand. Encode the F-10
       splitting rules: multi-project plans split per project starting with the most
       logical one, and each generated task is as close as possible to one unit of work
-      verifiable with the user or by focused test coverage.
+      verifiable with the user or by focused test coverage. Done: reuse check found
+      ~70-80% overlap with the existing `architecture-plan` / `plan-slice` /
+      `architecture-plan-writer` planning chain (same bounded-plan-under-docs/tickets
+      shape); per the `>=75%` rule, flagged this to the user before building, who chose
+      the thinnest non-duplicative option: one new
+      `templates/workflows/prd-and-tasks.md` (49 lines) that runs the
+      `clarification-and-handoff` capability on a raw idea, encodes the F-10
+      per-project-split and single-verifiable-unit rules, then explicitly hands off to
+      `architecture-plan-writer` for persistence — it does not restate the plan file
+      format. The two genuinely-missing primitives (raw-idea clarification front-end;
+      the parent-tasks-first pause-then-expand mechanic) were added as a compact
+      "Two-Phase Mode" section (23 lines) on `architecture-plan-writer.md` instead of
+      reinventing task-writing: parent-tasks-only mode writes only the Todo Plan's
+      P0/P1/P2 one-liners plus a `## Status` pause note, expand mode later fills the
+      remaining sections in place on the same file. `templates/workflows/**` is
+      registered as a whole directory in `tools/ai/install/packs.php` (not per-file),
+      so the new workflow needed no packs.php change; its 4 rendered projections
+      (`.github/prompts/prd-and-tasks.prompt.md`, `.github/skills/prd-and-tasks/SKILL.md`,
+      `.opencode/skills/prd-and-tasks/SKILL.md`, `.opencode/commands/prd-and-tasks.md`)
+      were hand-authored to match the template byte-for-byte (verified via `diff`,
+      same approved approach as every prior phase in this program) since this repo is
+      self-installed and full installer re-render still carries the same unrelated-
+      owned-file blast radius risk documented in the Phase 0-2 review-fix, regardless
+      of git-clean status. The `architecture-plan-writer` two-phase-mode addition was
+      likewise hand-synced into `.github/agents/architecture-plan-writer.agent.md` and
+      `.opencode/agents/architecture-plan-writer.md` — confirmed via `diff` that only
+      the pre-existing frontmatter/Enforcement-Boundary rendering differences remain,
+      the new body section is byte-identical. This slice does not touch
+      `templates/skills/**`/`templates/commands/**` (that stays gated by Phase 4.3);
+      `templates/workflows/**` already has an established, reachable render path used
+      by all 17 prior entries, so no new reachability question was raised. User-
+      approved generator run: `php tools/ai/generate-ai-catalog.php` (no `--check`) to
+      regenerate `packages/ai-universal-rules/catalog.json`, `docs/ai/catalog.md`, and
+      `packages/ai-universal-rules/docs/BROWSE.md`, which had drifted from the new
+      file (confirmed via `ai-doc-check.sh --check` before/after); the regen also
+      incidentally fixed a pre-existing missing `graphify` opencode-skill catalog row
+      as a side effect of the same full-scan generator, not a manual edit. Verified:
+      `validate-ai-config.php`, `validate-ai-catalog.php`, `validate-catalog-drift.php`
+      all exit 0 clean; `validate-install-surface.php` exit 1 on the same pre-existing
+      graphify-skill hard-max ERROR plus 3 new soft-max WARNs from the two-phase-mode
+      addition (`architecture-plan-writer.agent.md` 231/220, `.md` OpenCode variant
+      260/240, template 259/240 — expected and acceptable, since Phase 4 is additive
+      and not bound by Phase 3's thinning net-negative-line rule);
+      `validate-adapter-drift.php --fail-on-warn` exit 1 with only the expected new
+      warnings (the new workflow file lacks references to
+      `project-context.md`/`workflow.md`/`AI-GUARDRAILS.md`, the same pre-existing
+      warning class every other workflow file already carries — confirmed via `diff`
+      against the pre-slice baseline, no unexpected findings); `ai-doc-check.sh --check`
+      generated-artifacts section fully clean after the regen.
 - [ ] P1: Phase 4.2 — map runtime wrappers and fallback rules: where structured handoff
       metadata is possible, where prose-only fallback applies; record in
       `docs/ai/integration-matrix.md` and `docs/ai/adapter-contract.md`.

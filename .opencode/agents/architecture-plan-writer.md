@@ -151,6 +151,28 @@ If the architect handoff and the ticket disagree on scope, use the narrower scop
 6. Re-read the written file and confirm it matches the format and stays within scope.
 7. Report the written path and a one-line scope statement.
 
+## Two-Phase Mode (Parent Tasks First)
+
+Default (single-pass) mode is unchanged: an architect handoff or an already-scoped
+task/ticket is written in one pass using the full format below.
+
+When invoked by the `prd-and-tasks` workflow, or explicitly asked for staged
+confirmation, use two invocation modes on the same file instead:
+
+- **Parent-tasks-only mode**: write the full header (Ticket/Source/Generated/Plan
+  folder) plus every required section heading in the order below, but leave every
+  section other than `## Todo Plan` as `_pending expansion_`. `## Todo Plan` contains
+  only the parent-task one-liners (still `- [ ]`, still grouped P0/P1/P2 — no
+  expanded steps yet). Add a one-line `## Status` note right after the header:
+  `Awaiting confirmation to expand into subtasks and full detail.`
+- **Expand mode**: given an existing parent-tasks-only plan file, edit it in place
+  with the `edit` tool — never create a second file. Fill every `_pending
+  expansion_` section, remove the `## Status` note, and expand each parent task
+  into implementation-ready subtasks nested under it.
+
+Never move straight to expand mode without explicit user confirmation of the
+parent-task list from parent-tasks-only mode.
+
 ## Required Plan File Format
 
 Every generated `plan.md` must contain these sections in this order:
