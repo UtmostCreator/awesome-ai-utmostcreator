@@ -701,9 +701,38 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       (`diff` exit 0, zero new findings); `ai-doc-check.sh --check`
       generated-artifacts section clean after the regen (only the expected
       phantom-stub-surfaces file-count increase from Phase 4.1's new files).
-- [ ] P2: Phase 5.3 — add example-driven anti-pattern guidance (hidden assumptions,
+- [x] P2: Phase 5.3 — add example-driven anti-pattern guidance (hidden assumptions,
       overcomplication, drive-by changes, weak success criteria) as a shipped examples
-      surface referenced from the behavioral baseline.
+      surface referenced from the behavioral baseline. Done: added
+      `packages/ai-universal-rules/templates/snippets/anti-pattern-examples.md`
+      (56 lines, 4 examples matching each Behavioral Baseline rule) — placed in
+      `templates/snippets/` because it is already whole-directory registered in
+      `tools/ai/install/packs.php` (target `docs/ai/snippets/`), so it ships with
+      zero new pack-registration or generated-`docs/ai/installed-files.md` changes
+      (that file carries a `GENERATED — DO NOT EDIT` header written only by the
+      full-install manifest step, which this program has consistently avoided
+      running). Added one pointer line to the Behavioral Baseline bullet list in
+      the canonical snippet source, both templates (`AGENTS.template.md`,
+      `copilot-instructions.template.md`), and both rendered outputs (`AGENTS.md`,
+      `.github/copilot-instructions.md`) — verified via `diff` that only expected
+      placeholder/out-of-band-graphify differences remain against the templates.
+      Also fixed a pre-existing drift found while touching this folder:
+      `docs/ai/snippets/behavioral-baseline.snippet.md` was missing from this
+      repo's rendered `docs/ai/snippets/` mirror since Phase 1.1 added the source
+      file (`required: false` in its pack entry let this slip past validation
+      silently); synced it now, byte-identical via `diff`. Classified the new file
+      in `docs/ai/shipped-surface-inventory.md` as `deterministic-load`, not
+      `generated-or-install-only` like its snippet siblings, because it is the
+      only file in that folder actually named by path from an always-on surface
+      (the Behavioral Baseline itself), making it reachable at task time, not just
+      an install-time reference copy. Verified: `validate-ai-config.php`,
+      `validate-ai-catalog.php` exit 0 clean; `validate-adapter-drift.php
+      --fail-on-warn` byte-identical to the Phase 5.2 baseline (zero new
+      findings); `validate-install-surface.php` shows only the same pre-existing
+      graphify hard-max error plus the expected +1 line-count on two already-over-
+      soft-max warnings (`AGENTS.md`, `AGENTS.template.md`); `ai-doc-check.sh
+      --check` generated-artifacts section stayed clean with no regeneration
+      needed (the catalog generator does not itemize raw snippet files).
 - [ ] P2: Phase 5.4 — document the permanent maintenance loop in shipped
       `docs/ai/validation.md` / `docs/ai/adapter-contract.md`: change template source,
       re-prove coverage and reachability, re-render, run validator gate. Include the

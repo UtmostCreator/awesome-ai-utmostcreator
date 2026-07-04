@@ -52,6 +52,7 @@ Workflow rules:
 - When trading speed for caution, bias toward caution, clarity, and evidence over speculative speed.
 - Verify an edit landed before continuing; never re-apply or re-append content after a blocked or failed edit — stop and report the exact blocked path instead.
 - Stop and report after 3 failed attempts to land or fix the same edit, or after 3 repeated review/fix-loop iterations; surface unresolved tradeoffs clearly.
+- See `docs/ai/snippets/anti-pattern-examples.md` for concrete examples of hidden assumptions, overcomplication, drive-by changes, and weak success criteria that violate this baseline.
 
 ## Approval Required Before Proceeding
 
