@@ -390,10 +390,11 @@ pre-existing user or graphify-authored Claude files.
       produced `.claude/agents/architect.md` with exactly: `name: architect`, `description: ...`,
       `tools: Read, Grep, Glob, Bash, Agent`, `disallowedTools: Write, Edit`, `model: inherit`,
       `permissionMode: plan`, `agent_assessment:` block — no invented `handoffs:` field. Output
-      captured verbatim in the P2 verification notes below. **Recommended follow-up (non-blocking,
-      not done in this program)**: add this scenario as a permanent `InstallerSafetyTest.php` case
-      so it is regression-tested on every future `composer test:fast` run, not just this one-off
-      manual verification.
+      captured verbatim in the P2 verification notes below. **Follow-up closed** (commit
+      `04dc05b`): `InstallerSafetyTest::testDirectInstallerClaudeInstallMakesInstalledSurfaceVisible`
+      now makes this a permanent, always-run regression case (72 assertions) instead of a one-off
+      manual verification, mirroring the existing Copilot/OpenCode "make installed surface
+      visible" tests exactly.
 - [x] AC-4: Proven at the merge-function unit level (`ClaudeSettingsMergeTest::
       testPreservesPreExistingGraphifyHooksWhileAddingPermissions` +
       `testMergeIsIdempotentAcrossRepeatedInstalls` + `testUserAddedAllowRuleSurvivesReinstall`):
