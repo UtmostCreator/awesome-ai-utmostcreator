@@ -490,9 +490,33 @@ Phase 3 — thinning, one runtime per slice (merges B-4, B-3, A-5; order set by 
       at `docs/ai/maintainer-guide.md:92` (claimed `CLAUDE.md` was a `templates/core/`
       master copy, contradicting the CLAUDE.md-has-no-template fix at line 26 of the
       same file); both are now corrected.
-- [ ] P1: Phase 3 exit gate — each thinning slice proves critical-topic AND
+- [x] P1: Phase 3 exit gate — each thinning slice proves critical-topic AND
       clarification/handoff-primitive coverage after the change; a failed proof
-      restores the thicker baseline for that runtime only.
+      restores the thicker baseline for that runtime only. Done: applied the Phase
+      3.3 Semantic-Parity Review Methodology to Phases 3.1/3.2 together. Step 1
+      (identify touched rows): the OpenCode `instructions[]` removals (Phase 3.1) and
+      Copilot baseline removals (Phase 3.2) do not name any of the 17 rows in the
+      Critical-Topic Coverage Matrix as their coverage owner — reconfirmed by re-
+      reading every row's Copilot/OpenCode cell against the removed content. Step 2
+      (load-path class holds): reconfirmed live — `.github/instructions/copilot-script-enforcement.instructions.md`
+      and `.github/instructions/execution-protocol.instructions.md` still carry
+      `applyTo: '**'`; `.github/instructions/ai-file-standards.instructions.md` still
+      explicitly lists `.github/copilot-instructions.md` in its `applyTo`; `AGENTS.md`
+      still names `docs/ai/tools/tool-map.md` and `docs/ai/generated-artifacts.md` by
+      path, and `docs/ai/tools/tool-map.md`'s own "See Also" still names the other 3
+      removed tool docs (`ai-search.md`, `actions/preview-file.md`,
+      `actions/search-evidence.md`) — reachability chain intact. Step 3 (status diff):
+      no row's `Status` cell regressed; the only `partial` rows
+      (Clarification-before-action, Stop-or-assume rules) were already `partial`
+      before Phase 3 and are unrelated to the Phase 3.1/3.2 removals, not a new gap.
+      Step 4 (explicit asymmetry): Claude's advisory-only shell-policy note and
+      Copilot's intentionally-thicker baseline are both still stated in the matrix,
+      not silently dropped. Steps 5-6: no file-structure divergence introduced new
+      ambiguity; validator gate re-run clean/pre-existing-only (below). Step 7:
+      recorded here. Verified: `validate-install-surface.php` exit 1 (same pre-existing
+      graphify-skill hard-max ERROR only); `validate-adapter-drift.php --fail-on-warn`
+      exit 1, byte-identical to the Phase 3.3 post-fix run (`diff` exit 0 — zero new
+      findings); `validate-ai-config.php` and `validate-ai-catalog.php` exit 0 clean.
 
 Phase 4 — PRD/task workflow family (merges C-3, C-3A, C-4, C-4A, C-5):
 
