@@ -32,7 +32,7 @@ This repository is a configuration repo and a live example of cross-tool AI work
 
 - Safe repo-local read-only commands are approval-free by default.
 - Ask before changing secrets, machine-specific credentials, or broad compatibility posture.
-- Ask before deleting large example areas or removing a supported adapter surface.
+- Ask before deleting any file, even one that looks obviously safe to remove, large example areas, or removing a supported adapter surface.
 - Stop and ask before a read-only step needs privileged access, external side effects, or secret-bearing surfaces.
 
 ## Failure Handling

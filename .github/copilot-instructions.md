@@ -67,6 +67,7 @@ Do not claim verification is complete without running at least one of these comm
 - When trading speed for caution, bias toward caution, clarity, and evidence over speculative speed.
 - Verify an edit landed before continuing; never re-apply or re-append content after a blocked or failed edit — stop and report the exact blocked path instead.
 - Stop and report after 3 failed attempts to land or fix the same edit, or after 3 repeated review/fix-loop iterations; surface unresolved tradeoffs clearly.
+- Never delete a file, and never overwrite one whose existing content is unexpected or unfamiliar, without asking first — even a file that looks obviously safe to remove or replace; treat unfamiliar existing content as a pre-existing change to flag, not something to silently delete or clobber.
 - See `docs/ai/snippets/anti-pattern-examples.md` for concrete examples of hidden assumptions, overcomplication, drive-by changes, and weak success criteria that violate this baseline.
 
 ## Evidence-First Execution
@@ -96,6 +97,7 @@ Stop and ask or report a blocker when:
 - task context or a referenced ticket's description is missing (ticket ids are looked up in `docs/tickets/`)
 - the diff exceeds approved scope, or pre-existing working-tree changes fall outside it
 - destructive action is needed
+- any file deletion is needed, even a file that looks obviously safe to remove — ask first, every time
 - generated artifacts drift unexpectedly
 
 ## Common Gotchas
