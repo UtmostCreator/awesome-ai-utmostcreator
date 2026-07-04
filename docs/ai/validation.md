@@ -59,6 +59,19 @@ planned thinning slice:
 - Use `graphify update .`'s edge presence as a secondary signal only (Phase 5.5),
   never the sole evidence — it can reflect a stale node-ID scheme.
 
+### Multi-Scope Graph Maintenance (Optional, Graphify-Only)
+
+This only applies where `graphify` is separately installed (per
+`docs/ai/adapter-contract.md`'s "Out-Of-Band Local Additions" — it is not part of
+this kit's pack registry and must never be assumed present). Run
+`graphify update .` after a merged phase so the graph tracks restructured shipped
+surfaces. For an installed target with multiple independent scopes (for example a
+monorepo with separate app and doc scopes), the incremental sequence is:
+`graphify update <scope> --no-cluster` per scope, then `merge-graphs` to combine
+them, then a final `cluster-only` pass. Doc and config scopes need semantic
+re-extraction (a backend key), not just AST extraction, since their meaningful
+content is prose and structure rather than code symbols.
+
 ## Change-Type Routing (Maintainers)
 
 Edit the template source, never the rendered output. Route by change type:
