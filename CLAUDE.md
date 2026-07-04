@@ -7,6 +7,7 @@ This repository is a configuration repo and a live example of cross-tool AI work
 - `AGENTS.md`
 - `docs/ai/project-context.md`
 - `docs/ai/workflow.md`
+- `docs/ai/AI-GUARDRAILS.md`
 - `docs/ai/agents.md`
 - `docs/ai/failure-handling.md`
 - `docs/ai/agent-ops-checklist.md`

@@ -4,8 +4,11 @@
 - Source: architect design session (this conversation), 7-slice decomposition, specificity 90/100
 - Generated: 20260704-120000
 - Plan folder: docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000/
-- Status: **In Progress** (P0 complete, verified; P1/P2 not started)
-- Risk: **MEDIUM-HIGH** (new install surface touching packs/profiles/core dispatch; JSON-merge is new code; must not clobber existing user/graphify Claude files)
+- Status: **Done** (P0, P1, P2 all complete and verified; see Handoff Notes for suggested
+  non-blocking follow-ups)
+- Risk: **MEDIUM-HIGH at design time, verified low-risk at delivery** (additive-only: no
+  OpenCode/Copilot/base behavior changed; new install surface + JSON-merge primitive both
+  covered by focused tests and two real end-to-end installs)
 
 ## Context
 
@@ -273,33 +276,80 @@ pre-existing user or graphify-authored Claude files.
   folder appeared in the working tree with an mtime after this session's own activity — evidence
   of a concurrent, unrelated process; not committed as part of this slice.
 
-### P2 — Skills/commands mapping, drift, docs
+### P2 — Skills/commands mapping, drift, docs — **COMPLETE**
 
-- [ ] P2-1: Render `templates/workflows` → `.claude/skills` (reuse `skill-dirs` install_type if the
-      output shape matches; add a Claude-specific frontmatter transform only if Claude's skill
-      frontmatter contract differs materially — confirm via a second `docs.anthropic.com` fetch on
-      the Skills page before assuming parity).
-- [ ] P2-2: Render `templates/commands` → a Claude command surface (`.claude/commands/` or
-      documented equivalent) if Claude Code supports a directly analogous concept; otherwise mark
-      `unknown`/deferred with an explicit matrix note rather than inventing a mapping.
-- [ ] P2-3: Update `tools/ai/validate-adapter-drift.php` to include `.claude/agents/**` and
-      `CLAUDE.md` template parity checks (currently only referenced at L13 as a raw path, not
-      diffed against a template source).
-- [ ] P2-4: Update `docs/ai/integration-matrix.md`: flip the Claude "Runtime limitation notes" and
-      "Critical-Topic Coverage Matrix" cells that currently say "advisory only" / "ships no Claude
-      sub-agents folder" to reflect the new shipped reality; add a dated methodology note per the
-      existing Phase 3.1/3.2 convention; keep honest any residual gap (e.g., `AskUserQuestion`
-      unavailable inside Claude subagents).
-- [ ] P2-5: Update `docs/ai/adapter-contract.md`: remove the "CLAUDE.md is hand-maintained, not in
-      this kit's pack registry" claim (now false); keep the graphify out-of-band-addition guidance
-      (still true — graphify still appends independently of this kit's render).
-- [ ] P2-6: Update `docs/ai/handoff-contract.md` "Review Handoff" section / add a Claude row
-      alongside the existing Copilot/OpenCode handoff-mechanism table entries in the matrix.
-- [ ] P2-7: Update `docs/ai/ai-file-standards.md` line-budget table with a `.claude/agents/*.md`
-      row (model on the `.opencode/agents/*.md` row).
-- [ ] P2-8: Update `docs/ai/shipped-surface-inventory.md` with the new template subtree
-      classification (`always-on-critical` for `CLAUDE.template.md`, `deterministic-load` for
-      `.claude/agents/**`).
+- [x] P2-1: Fetched Claude Code's Skills documentation (2026-07-04). Confirmed
+      `.claude/skills/<name>/SKILL.md` is the identical directory shape `skill-dirs` already
+      produces, and Claude's native frontmatter fields (`name`, `description`, `argument-hint`,
+      etc.) already match the canonical `templates/workflows/*.md` source verbatim — **zero new
+      rendering code needed**. Added a registry entry reusing `skill-dirs` as-is.
+- [x] P2-2: Confirmed (same fetch): "custom commands have been merged into skills... a file at
+      `.claude/commands/deploy.md`... work[s] the same way" as a skill — identical flat-file shape
+      to what `opencode-commands` already produces. Added a registry entry reusing
+      `opencode-commands` as-is for `templates/commands` → `.claude/commands`. **Deliberately did
+      not** dual-ship `templates/workflows` to `.claude/commands` too (unlike OpenCode): Claude's
+      own docs say skills and commands register the same `/name` slash command and recommend
+      skills, so dual-shipping would only register duplicate commands for no benefit.
+      Verified end-to-end with a real isolated install (`--profile claude --runtime claude-code
+      --apply`): 12 agents, 18 skills, 4 commands, `CLAUDE.md`, and `.claude/settings.json` all
+      rendered correctly; only `.claude/**` + the cross-cutting `hooks-pack` `.github/hooks/*`
+      installed, confirming no `.github/agents`/`.github/instructions`/`.opencode` leakage.
+- [x] P2-3: Extended `tools/ai/validate-adapter-drift.php` with a `.claude/**` markdown scan
+      (mirrors the existing `.opencode` scan). **Scope-corrected during implementation**: initially
+      also added a scan of the canonical `templates/core/agents/` source, but reverted it after
+      confirming it surfaced 17 pre-existing warnings unrelated to this program (gaps in existing
+      canonical agent templates, not caused by this slice) — out of scope, would have been drive-by
+      expansion of the validator's blast radius.
+- [x] P2-4: Updated `docs/ai/integration-matrix.md`: Runtime Surface Matrix Claude row, two new
+      "Runtime limitation notes" bullets (coarser settings.json enforcement; `AskUserQuestion`
+      unavailable in subagents so `task: ask` has no safe Claude equivalent), the Handoff Mechanism
+      table's Claude row, the "Shell-policy boundaries" coverage row, and a dated
+      "Claude adapter parity program" note following the existing Phase 3.1/3.2 convention.
+- [x] P2-5: Updated `docs/ai/adapter-contract.md`: `CLAUDE.md` moved from the "hand-maintained, not
+      in registry" bullet into the kit-managed list alongside `AGENTS.md`/`copilot-instructions.md`;
+      updated the Out-Of-Band Local Additions section's stale claim ("`CLAUDE.md` has no template
+      and is never touched by render, so it carries no such risk" → now carries the same graphify
+      re-render hazard as `AGENTS.md`).
+- [x] P2-6: Confirmed `docs/ai/handoff-contract.md` is runtime-agnostic prose with no per-runtime
+      table (that table lives in `integration-matrix.md`, already updated in P2-4) — no change
+      needed there.
+- [x] P2-7: Updated `docs/ai/ai-file-standards.md` line-budget table: added `.claude/agents/*.md`,
+      `.claude/skills/*/SKILL.md`, `.claude/commands/*.md` rows (mirroring their OpenCode/Copilot
+      counterparts) and a `CLAUDE.md` row.
+- [x] P2-8: Updated `docs/ai/shipped-surface-inventory.md`: added `core/CLAUDE.template.md`
+      (`always-on-critical`), extended the `core/agents/**` section to name the `.claude/agents/*.md`
+      render target, and added a new `claude/` section for `claude/settings.json`
+      (`deterministic-load`).
+- **Additional stale-doc fix (touched-scope sweep, not separately planned)**: found and fixed
+  `docs/ai/maintainer-guide.md`, which still asserted "`CLAUDE.md` (hand-maintained, no template)"
+  in three places — a direct, immediate consequence of this program's P1-1 change, fixed in the
+  same slice per this repo's own stale-sweep rule rather than left dangling.
+
+**P2 verification (all run, evidence below):**
+- Real isolated end-to-end install (`--profile claude --runtime claude-code --apply` into a fresh
+  temp git repo): confirmed `.claude/agents/` (12 files), `.claude/skills/` (18 dirs),
+  `.claude/commands/` (4 files), `CLAUDE.md` (placeholders correctly resolved to the target
+  project name), and `.claude/settings.json` (correct baseline permissions) all render exactly as
+  designed; spot-checked rendered `architect.md` frontmatter matches the P0 design exactly.
+- `vendor/bin/phpunit tests/php/InstallerSafetyTest.php` → 67/67 pass after the skills/commands
+  registry additions.
+- `php tools/ai/validate-adapter-drift.php` (plain, non-strict): went from 516 to 515 warning
+  lines — the one directly-attributable CLAUDE.md → AI-GUARDRAILS.md reference gap was fixed (in
+  both the new template and this repo's own live root `CLAUDE.md`, hand-synced per the same
+  precedent already documented for `AGENTS.md`/`copilot-instructions.md`); the new `.claude/**`
+  scan is currently a no-op (this repo has not yet self-installed `.claude/agents/**`). **AC-6
+  corrected**: `--fail-on-warn` already failed with 515 pre-existing, unrelated warnings across
+  the whole repo before this program touched anything — the honest claim is "this program did not
+  increase that count and fixed the one warning it could legitimately attribute to itself," not a
+  full `--fail-on-warn` pass (which was never true repo-wide).
+- `php tools/ai/validate-ai-config.php` → caught 4 broken doc cross-references I introduced (bare
+  filenames/URLs in backticks that a path-reference checker tried to resolve as repo files) and
+  fixed all four to match this file's own existing safe convention (full paths, or prose without
+  backticks for external URLs) — now passes clean.
+- `composer test:fast` (755 tests) → stable at exactly 10 pre-existing unrelated failures across
+  two more consecutive clean runs (the same parallel-runner (`--processes=12`) terminal-output
+  artifact reappeared once more mid-session and was re-confirmed as non-substantive by an exact
+  numbered-block count, consistent with the P1 investigation).
 
 ## Acceptance Criteria
 
@@ -334,14 +384,17 @@ pre-existing user or graphify-authored Claude files.
       not enforced code. This AC as originally worded implied automated preservation; the actual,
       honest behavior mirrors the pre-existing `AGENTS.md` hazard rather than solving it. Documented
       in `docs/ai/adapter-contract.md` (P2-5) rather than silently left unstated.
-- [ ] AC-6: `php tools/ai/validate-adapter-drift.php --fail-on-warn` passes with the new Claude
-      surfaces included in its checks. **P2 scope, not yet done.**
+- [x] AC-6 (corrected wording): `.claude/**` scanning added to `validate-adapter-drift.php`; the
+      one warning legitimately attributable to this program (CLAUDE.md missing an
+      AI-GUARDRAILS.md reference) is fixed. A literal `--fail-on-warn` full pass is not claimed —
+      it already failed repo-wide (515 pre-existing, unrelated warnings) before this program.
 - [x] AC-7: `tests/php/ClaudeAgentRendererTest.php` passes and covers architect (read-only →
       `plan` mode, no Edit/Write tools, `Agent` tool present), implementer (`default` mode,
       Edit/Write present), and `agent_assessment` carried through unchanged.
-- [ ] AC-8: `docs/ai/integration-matrix.md`'s Claude column no longer states "ships no Claude
-      sub-agents folder" as a gap. **P2 scope, not yet done** — the matrix still reflects the
-      pre-this-program state.
+- [x] AC-8: `docs/ai/integration-matrix.md`'s Claude column no longer states "ships no Claude
+      sub-agents folder" as a gap (fixed in P2-4). Residual, honestly-documented gaps: coarser
+      settings.json enforcement than OpenCode's per-command block, and no safe Claude equivalent
+      for `task: ask` (subagents cannot interactively ask).
 - [x] AC-9: `--runtime claude-code` on the `dual` profile strips `adapter-copilot`/`adapter-opencode`
       and adds `adapter-claude` — confirmed via dry-run (see P1 verification notes above).
 

@@ -56,6 +56,10 @@ Generated outputs are excluded from line limits, but must not be manually edited
 | `.github/skills/*/SKILL.md` | 80-180 | 250 | 350 |
 | `.opencode/agents/*.md` | 80-170 | 240 | 320 |
 | `.opencode/commands/*.md` | 15-50 | 80 | 120 |
+| `.claude/agents/*.md` | 80-170 | 240 | 320 |
+| `.claude/skills/*/SKILL.md` | 80-180 | 250 | 350 |
+| `.claude/commands/*.md` | 15-50 | 80 | 120 |
+| `CLAUDE.md` | 40-90 | 140 | 180 |
 | `.opencode/skills/*/SKILL.md` | 80-180 | 250 | 350 |
 | Root `AGENTS.md` template | 60-120 | 180 | 250 |
 | `.github/copilot-instructions.md` template | 40-100 | 150 | 220 |

@@ -17,11 +17,23 @@ when the runtime loads it without any agent choice.
 |---|---|---|---|
 | Copilot | `.github/copilot-instructions.md` | `.github/instructions/*.instructions.md` via `applyTo` globs | `.github/hooks/tool-policy.json` + guardian scripts |
 | OpenCode | `AGENTS.md` plus the `opencode.jsonc` `instructions[]` doc set | agents, commands, skills loaded by explicit invocation | `opencode.jsonc` `permission` block |
-| Claude | `CLAUDE.md`, `AGENTS.md` | docs reached from CLAUDE.md "Read First" routing | none by default (prompt-level only) |
+| Claude | `CLAUDE.md`, `AGENTS.md` | docs reached from CLAUDE.md "Read First" routing; `.claude/agents/*.md`, `.claude/skills/**`, `.claude/commands/*.md` loaded by explicit invocation (Claude adapter parity plan, `docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000`) | `.claude/settings.json` `permissions.allow`/`permissions.deny` (baseline read-only allow + destructive/secrets deny; narrower than OpenCode's per-command `permission` block — per-command bash allowlists cannot be expressed in Claude frontmatter, only tool-level) |
 
 Runtime limitation notes (no false parity):
 
-- Claude has no shipped hook/permission enforcement; shell-policy topics are advisory there.
+- Claude's `.claude/settings.json` permission enforcement (added by the Claude adapter parity
+  plan) is coarser than OpenCode's: it enforces a small baseline allow/deny command-pattern list,
+  not the full per-command allowlist each canonical agent carries. Each rendered
+  `.claude/agents/*.md` file carries that full per-command list only as an advisory "Bash Command
+  Policy" body section, exactly as Copilot's "Shell Boundary" section already does — this is
+  Claude's own frontmatter limitation (tool-level `tools`/`disallowedTools`/`permissionMode` only),
+  not an oversight.
+- Claude subagents cannot interactively ask for approval: `AskUserQuestion` is a main-session-only
+  tool per Claude Code's own sub-agent documentation (fetched 2026-07-04), unavailable inside a
+  subagent. A canonical agent's `permission.task: ask` therefore has no safe Claude equivalent;
+  the Claude agent-tool registry (`tools/ai/install/claude-agent-tool-registry.php`) conservatively
+  omits the `Agent` (subagent-spawn) tool for any agent that is not explicitly `task: allow` in the
+  canonical source, rather than approximating `ask` with an unsafe default.
 - Copilot `applyTo` loading is deterministic per touched path, not per session; `applyTo: "**"` files are the practical always-on set.
 - OpenCode `instructions[]` docs load every session; this was the broadest always-on surface and the first thinning target; reduced in Phase 3.1 (see below).
 - Phase 3.1: the OpenCode `instructions[]` set was reduced from 13 to 8 docs
@@ -54,6 +66,24 @@ Runtime limitation notes (no false parity):
   to match, same approved approach as Phase 0-2 and Phase 3.1 (installer render cannot
   regenerate it without an unrelated blast radius on other pending working-tree files);
   a full-file diff against the template shows only expected `<PLACEHOLDER>` resolution.
+- Claude adapter parity program (`docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000`,
+  P0-P2, 2026-07-04): Claude moved from "no shipped sub-agents folder, prompt-level-only
+  enforcement" to a rendered adapter mirroring Copilot/OpenCode. Shipped: `.claude/agents/*.md`
+  (rendered from the same canonical source via `tools/ai/install/claude-agent-renderer.php`), a
+  rendered `CLAUDE.md` (`packages/ai-universal-rules/templates/core/CLAUDE.template.md`,
+  replacing the prior hand-maintained file — see `docs/ai/adapter-contract.md`),
+  `.claude/settings.json` `permissions` (merged via a narrow, purpose-built JSON merge —
+  `tools/ai/install/claude-settings-merge.php` — that never clobbers a pre-existing file, e.g.
+  graphify's own hooks additions), `.claude/skills/**`, and `.claude/commands/*.md`
+  (both reused the existing runtime-agnostic `skill-dirs`/`opencode-commands` install types
+  as-is — no new rendering code needed, confirmed via Claude's own skills documentation that
+  the directory/frontmatter shape already matches). Two runtime-limitation gaps remain
+  honestly documented rather than papered over: (1) per-command bash enforcement is advisory
+  in Claude (tool-level frontmatter only — see "Runtime limitation notes" above), and (2)
+  Claude subagents cannot interactively ask for approval, so `task: ask` has no safe Claude
+  equivalent and is conservatively omitted rather than approximated. No OpenCode/Copilot
+  rendered output changed as a side effect (regression-tested via the existing
+  `CopilotAgentRendererTest`/`InstallerSafetyTest` suites throughout).
 
 ## Handoff Mechanism Per Runtime
 
@@ -61,7 +91,7 @@ Runtime limitation notes (no false parity):
 |---|---|---|
 | Copilot (VS Code custom agents, `.github/agents/*.agent.md`) | `handoffs:` frontmatter array (`label`, `agent`, `prompt`, `send`, `model`) — verified against VS Code's Custom Agents documentation (fetched 2026-07-04); renders a clickable handoff button after a chat response | `docs/ai/handoff-contract.md` "Recommended next step" sentence |
 | OpenCode (`.opencode/agents/*.md`, `.opencode/commands/*.md`) | none found in this repo's rendered agent/command frontmatter or in OpenCode's own schema; not shipped | same prose sentence, for example `implementer means implementer agent handoff using OpenCode command: /implement` |
-| Claude (`CLAUDE.md`; this kit ships no Claude sub-agents folder) | none — VS Code's own Claude sub-agent format documentation lists only `name`/`description`/`tools`/`disallowedTools` fields, no handoffs field | same prose sentence, routed through `CLAUDE.md` |
+| Claude (`CLAUDE.md`, `.claude/agents/*.md` — rendered by the Claude adapter parity plan, `docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000`) | none — Claude Code's own sub-agent documentation (fetched 2026-07-04 from docs.anthropic.com) lists frontmatter fields `name`/`description`/`tools`/`disallowedTools`/`model`/`permissionMode`/`hooks`/`skills`, no handoffs field | same prose sentence, routed through `CLAUDE.md` and preserved verbatim in each rendered agent's body (carried through unchanged from the canonical source by `tools/ai/install/claude-agent-renderer.php`) |
 
 Fallback rule (Chunk 5 / C-5): the prose "Recommended next step" sentence in
 `docs/ai/handoff-contract.md` is the guaranteed baseline on every runtime and must
@@ -86,7 +116,7 @@ Status: `covered` = guaranteed-load today; `partial` = present but not guarantee
 | Verification honesty | `.github/instructions/execution-protocol.instructions.md` (`**`) | `docs/ai/execution-protocol.md` (always-on) | `AGENTS.md` verification rules | covered |
 | Escalation | copilot-instructions "Hard Stops" | `AGENTS.md` escalation rules | `AGENTS.md` escalation rules | covered |
 | Runtime limitations | copilot-instructions "Limits" | `docs/ai/adapter-contract.md` (always-on) | `CLAUDE.md` fallback note | covered |
-| Shell-policy boundaries | `.github/instructions/copilot-script-enforcement.instructions.md` (`**`) + hooks (enforced) | `opencode.jsonc` `permission` (enforced) | `CLAUDE.md` approval section (advisory only) | covered, Claude advisory |
+| Shell-policy boundaries | `.github/instructions/copilot-script-enforcement.instructions.md` (`**`) + hooks (enforced) | `opencode.jsonc` `permission` (enforced) | `CLAUDE.md` approval section (advisory) + `.claude/settings.json` `permissions` (enforced, but a coarser baseline allow/deny list than OpenCode's per-command block — see "Runtime limitation notes" above) + per-agent "Bash Command Policy" body section (advisory) | covered, Claude partially enforced (baseline) + advisory (per-command nuance) |
 | Clarification-before-action | `.github/instructions/context-gate.instructions.md` + `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` | `AGENTS.md` workflow rules + `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` | `AGENTS.md` + `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` | partial — deterministic-load capability, not guaranteed-load on any runtime; see Phase 3+ for a possible always-on pointer |
 | Stop-or-assume rules | `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` "Stop-Or-Assume Branch" | same | same | partial — deterministic-load capability, not guaranteed-load on any runtime |
 | Preserved handoff payload | `docs/ai/handoff-contract.md` (canonical, routed) | `docs/ai/handoff-contract.md` (canonical, routed) | `docs/ai/handoff-contract.md` via routing | covered (Phase 2.1) |
