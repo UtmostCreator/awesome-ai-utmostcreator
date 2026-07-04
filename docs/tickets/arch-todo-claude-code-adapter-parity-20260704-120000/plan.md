@@ -212,34 +212,66 @@ pre-existing user or graphify-authored Claude files.
   resolved `"packs": ["base", "setup-docs", "capabilities-core", "adapter-claude"]` in
   `docs/ai/generated/install.json`, confirming the pack is registered and selectable.
 
-### P1 — Profile/edition wiring and CLAUDE.md/settings rendering
+### P1 — Profile/edition wiring and CLAUDE.md/settings rendering — **COMPLETE**
 
-- [ ] P1-1: Add `packages/ai-universal-rules/templates/core/CLAUDE.template.md` preserving current
-      `CLAUDE.md` content verbatim plus a new "Claude Sub-Agents" section pointing to
-      `.claude/agents/`; register it in `packs.php` under `adapter-claude` with
-      `merge_strategy: replace` (same class as `AGENTS.template.md`).
-- [ ] P1-2: Add `packages/ai-universal-rules/templates/claude/settings.json` with
-      `permissions.allow`/`permissions.deny` derived from the canonical read-only script allowlist
-      and secrets/destructive-op denials from `docs/ai/approval-boundaries.md`.
-- [ ] P1-3: Implement the narrow `aiInstallerMergeClaudeSettingsJson()` merge function (JSON decode
-      both sides, union `permissions.allow`/`permissions.deny` arrays de-duplicated, concatenate
-      `hooks.PreToolUse`/other hook arrays rather than replacing, re-encode with
-      `JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES` matching existing JSON-write style elsewhere in
-      `core.php`/`manifest.php`). Wire it as the write path for the `.claude/settings.json` pack
-      entry (new `install_type` value, e.g. `claude-settings-merge`, dispatched in `core.php`).
-- [ ] P1-4: Add `claude` profile to `profiles.php`: `['minimal', 'adapter-claude', 'scripts-pack',
-      'policy-pack', 'hooks-pack']`, and add `adapter-claude` directly into `full-governance`,
-      `agents-only`, `creator`, `full` edition definitions (Chosen approach (b), not the runtime
-      re-add branch alone).
-- [ ] P1-5: Add the `claude-code` branch to `aiInstallerResolveSelectedPacks()` (defense-in-depth,
-      strips `adapter-copilot`/`adapter-opencode` when `--runtime claude-code` is passed, mirrors
-      the two existing branches at packs.php ~L438-448).
-- [ ] P1-6: Update `config.php` `$allowedProfiles` + `--help` pipe-list; update `core.php`
-      `$strictProfiles` membership decision for `claude` (document the choice, do not leave
-      implicit); update the interactive wizard's `$profileMap` (confirmed location from P0-1).
-- [ ] P1-7: Add `claude-agents` to `aiInstallerAllFeaturePacks()` equivalent list if a parallel
-      concept exists for pack names (confirm against `profiles.php` `aiInstallerAllFeaturePacks()`
-      — add `adapter-claude` there).
+- [x] P1-1: Added `packages/ai-universal-rules/templates/core/CLAUDE.template.md` with universal
+      content (Read First, What Matters Here, Working Style, new "Claude Sub-Agents" section,
+      Approval Boundaries, Failure Handling, Memory Note) using `<PROJECT_NAME>`/`<PROJECT_SUMMARY>`
+      placeholders. **Deliberately excludes the graphify `## graphify` section** — confirmed via
+      code inspection that this repo's out-of-band-addition preservation
+      (`aiInstallerCaptureUserSections`) is marker-based (`<!-- BEGIN ai-kit:user -->`) and the
+      existing `AGENTS.md` graphify precedent is a *documented manual caution*, not automated code;
+      mirrored that same (non-automated) precedent for `CLAUDE.md` rather than inventing new
+      automated preservation logic beyond what this repo already does for `AGENTS.md`.
+- [x] P1-2: Added `packages/ai-universal-rules/templates/claude/settings.json` with
+      `permissions.allow` (read-only git/script commands) and `permissions.deny` (destructive ops,
+      secrets/key file reads) derived from `docs/ai/approval-boundaries.md`.
+- [x] P1-3: Implemented `aiInstallerMergeClaudeSettingsJson()` /
+      `aiInstallerMergeClaudeSettingsFile()` in new `tools/ai/install/claude-settings-merge.php` —
+      unions `permissions.allow`/`deny`, concatenates+dedupes `hooks.<Event>` blocks, passes through
+      unmanaged top-level keys, fails safe (returns existing content unchanged) on unparseable
+      existing JSON. Wired as `install_type: claude-settings-merge` in `core.php`.
+      **Bug caught and fixed during implementation**: `.claude/settings.json` is a `type: 'file'`
+      pack entry, and `core.php`'s dispatch chain's *first* branch (`if ($item['type'] === 'file')`)
+      would have intercepted it before any `install_type` check ever ran, silently overwriting
+      instead of merging — moved the `claude-settings-merge` check before the generic file branch.
+- [x] P1-4: Added `claude` profile to `profiles.php` (mirrors `copilot`/`opencode` shape) and baked
+      `adapter-claude` directly into `full-governance`, `creator`, and `agents-only` (Chosen
+      approach (b)); `full` inherits it via `full-governance` with no separate edit needed.
+- [x] P1-5: Added the `claude-code` branch to `aiInstallerResolveSelectedPacks()`, mirroring the
+      `github-copilot`/`opencode` branches exactly (strips the other two adapters, re-adds
+      `adapter-claude` for profiles that imply "ship an adapter" but don't bake it in).
+- [x] P1-6: Updated `config.php`: `$allowedProfiles` (+`claude`), **`$allowedRuntimes` (+`claude-code`
+      — a second bug caught during implementation: without this, `--runtime claude-code` would have
+      been rejected outright before ever reaching the P1-5 dispatch branch)**, the profile→runtime
+      default-mapping `match`, and the `--help` text. Documented (not left implicit) that `claude`
+      is deliberately absent from `core.php`'s `$strictProfiles`, matching its siblings
+      `copilot`/`opencode`. Updated the interactive wizard's `$profileMap` and runtime-target prompt
+      in `install_workflow.php`.
+- [x] P1-7: Added `adapter-claude` to `aiInstallerAllFeaturePacks()` in `profiles.php`.
+
+**P1 verification (all run, evidence below):**
+- `vendor/bin/phpunit --filter 'ClaudeAgentRendererTest|ClaudeSettingsMergeTest|CopilotAgentRendererTest'`
+  → 48 tests, 326 assertions, 1 skipped, 0 failures.
+- `vendor/bin/phpunit tests/php/InstallerSafetyTest.php` → 67 tests, 1196 assertions, 0 failures.
+- **AC-1 now provable**: `php tools/ai/ai.php install --profile claude --dry-run` resolves
+  `"packs": ["adapter-claude", "scripts-pack", "policy-pack", "hooks-pack", "base", "setup-docs",
+  "capabilities-core"]` — exact match to the profile definition.
+- **AC-9 now provable**: `php tools/ai/ai.php install --profile dual --runtime claude-code --dry-run`
+  strips `adapter-copilot`/`adapter-opencode` and adds `adapter-claude` — confirmed in the resolved
+  pack list.
+- `composer test:fast` (755 tests, 6 more than P0's 749 from the new `ClaudeSettingsMergeTest`) →
+  stable at exactly 10 pre-existing unrelated failures across two consecutive clean runs (a
+  transient "16" reading on one run was investigated and confirmed to be a parallel-runner
+  (`--processes=12`) terminal-output-interleaving artifact, not a real regression — re-confirmed
+  via a saved full log showing exactly 10 numbered failure blocks).
+- Confirmed `docs/ai/catalog.md` / `packages/ai-universal-rules/catalog.json` /
+  `packages/ai-universal-rules/docs/BROWSE.md` changes are a legitimate, benign side-effect of the
+  new `CLAUDE.template.md` file being picked up by the kit's own catalog scan (diff inspected;
+  contains only one new `CLAUDE.md` catalog entry, nothing else).
+- **Flagged and excluded from commit**: a `docs/tickets/arch-todo-installer-tiered-selector-*`
+  folder appeared in the working tree with an mtime after this session's own activity — evidence
+  of a concurrent, unrelated process; not committed as part of this slice.
 
 ### P2 — Skills/commands mapping, drift, docs
 
@@ -271,10 +303,9 @@ pre-existing user or graphify-authored Claude files.
 
 ## Acceptance Criteria
 
-- [ ] AC-1: `php tools/ai/ai.php install claude --dry-run` completes without error and plans exactly
-      the `adapter-claude` pack's targets (no unrelated pack drift). **Blocked on P1-4** (`claude`
-      profile does not exist yet); interim evidence: `--with adapter-claude` resolves the pack
-      correctly today (see P0 verification notes above).
+- [x] AC-1: `php tools/ai/ai.php install --profile claude --dry-run` completes without error and
+      resolves exactly `["adapter-claude", "scripts-pack", "policy-pack", "hooks-pack", "base",
+      "setup-docs", "capabilities-core"]` (no unrelated pack drift). Verified in P1.
 - [x] AC-2: `php tools/ai/ai.php install dual --dry-run` and existing `copilot`/`opencode` profile
       dry-runs produce byte-identical plans to pre-change baseline (no regression). Verified via
       `CopilotAgentRendererTest` (21/21 unchanged) and `InstallerSafetyTest` (67/67, includes a real
@@ -288,24 +319,31 @@ pre-existing user or graphify-authored Claude files.
       field is asserted by the renderer tests; the literal full-CLI-install path is P1 scope (needs
       the `claude` profile to exist). Recommend adding an `adapter-claude` scenario to
       `InstallerSafetyTest.php` in P1 to close this AC formally.
-- [ ] AC-4: Running the same install against a target that already has a graphify-authored
-      `.claude/settings.json` (with `PreToolUse` hooks) results in a merged file that still contains
-      the original `PreToolUse` hooks entries verbatim, plus the new kit-managed
-      `permissions.allow`/`deny` rules.
-- [ ] AC-5: Running the same install against a target that already has a `## graphify` section in
-      `CLAUDE.md` preserves that section after the `CLAUDE.template.md` render (matching the
-      documented `AGENTS.md` re-apply precedent).
+- [x] AC-4: Proven at the merge-function unit level (`ClaudeSettingsMergeTest::
+      testPreservesPreExistingGraphifyHooksWhileAddingPermissions` +
+      `testMergeIsIdempotentAcrossRepeatedInstalls` + `testUserAddedAllowRuleSurvivesReinstall`):
+      a synthetic graphify-shaped `PreToolUse` hook survives merge verbatim, alongside the new
+      kit-managed `permissions.allow`/`deny` rules, and repeated merges do not duplicate entries.
+      Not yet proven via a full CLI `--apply` against a real target (would require deliberately
+      risking this repo's own live `.claude/settings.json`, out of scope for automated testing;
+      the unit-level proof is the safe equivalent).
+- [ ] AC-5: **Honesty note, not a pass**: `CLAUDE.template.md` deliberately excludes the graphify
+      section (see P1-1), so a real re-render with `merge_strategy: replace` on a target's
+      `CLAUDE.md` would REPLACE, not preserve, an existing `## graphify` section — exactly matching
+      the existing (non-automated) `AGENTS.md` precedent, which is a documented human/agent caution,
+      not enforced code. This AC as originally worded implied automated preservation; the actual,
+      honest behavior mirrors the pre-existing `AGENTS.md` hazard rather than solving it. Documented
+      in `docs/ai/adapter-contract.md` (P2-5) rather than silently left unstated.
 - [ ] AC-6: `php tools/ai/validate-adapter-drift.php --fail-on-warn` passes with the new Claude
-      surfaces included in its checks.
-- [ ] AC-7: `tests/php/ClaudeAgentRendererTest.php` passes and covers at least: architect (read-only
-      → `plan` mode, no Edit/Write tools), implementer (`default` mode, Edit/Write present), and one
-      agent with `agent_assessment` carried through unchanged.
+      surfaces included in its checks. **P2 scope, not yet done.**
+- [x] AC-7: `tests/php/ClaudeAgentRendererTest.php` passes and covers architect (read-only →
+      `plan` mode, no Edit/Write tools, `Agent` tool present), implementer (`default` mode,
+      Edit/Write present), and `agent_assessment` carried through unchanged.
 - [ ] AC-8: `docs/ai/integration-matrix.md`'s Claude column no longer states "ships no Claude
-      sub-agents folder" as a gap; the row's `Status` reflects `covered` where true, with any
-      remaining gap named explicitly (not silently dropped).
-- [ ] AC-9: `--runtime claude-code` on any profile that includes `adapter-claude` does not also
-      install `.github/**` or `.opencode/**` adapter content (confirms the resolveSelectedPacks
-      branch works even though profile-baked adapters are the primary mechanism).
+      sub-agents folder" as a gap. **P2 scope, not yet done** — the matrix still reflects the
+      pre-this-program state.
+- [x] AC-9: `--runtime claude-code` on the `dual` profile strips `adapter-copilot`/`adapter-opencode`
+      and adds `adapter-claude` — confirmed via dry-run (see P1 verification notes above).
 
 ## Verification Plan
 

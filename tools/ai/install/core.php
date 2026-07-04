@@ -13,6 +13,7 @@ require_once __DIR__ . '/toolchain.php';
 require_once __DIR__ . '/script-runner.php';
 require_once __DIR__ . '/copilot-agent-renderer.php';
 require_once __DIR__ . '/claude-agent-renderer.php';
+require_once __DIR__ . '/claude-settings-merge.php';
 require_once __DIR__ . '/backup.php';
 require_once __DIR__ . '/migrations.php';
 
@@ -211,7 +212,12 @@ function aiInstallerRun(array $argv): int
 
         $src = $config['sourceRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['source']);
         $dest = $config['targetRoot'] . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $item['target']);
-        if ($item['type'] === 'file') {
+        // claude-settings-merge is a 'file'-type item but must never take the plain copy path:
+        // it merges with a pre-existing .claude/settings.json (e.g. graphify's own hooks) instead
+        // of overwriting it. Must be checked BEFORE the generic file-type branch below.
+        if (($item['install_type'] ?? '') === 'claude-settings-merge') {
+            aiInstallerMergeClaudeSettingsFile($src, $dest);
+        } elseif ($item['type'] === 'file') {
             aiInstallerCopyFile($src, $dest);
         } elseif (($item['install_type'] ?? '') === 'copilot-agents') {
             $scriptsRoot = $config['targetRoot'] . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai';
@@ -279,7 +285,10 @@ function aiInstallerRun(array $argv): int
 
         // `full` is an alias of full-governance, so it inherits strict placeholder
         // gating. standard/creator alias dual (non-strict) and basic/agents-only are
-        // intentionally non-strict, matching the profiles they alias.
+        // intentionally non-strict, matching the profiles they alias. `claude` is
+        // deliberately non-strict too, matching its single-runtime siblings `copilot`/
+        // `opencode` (neither of which is in this list either) — decided, not omitted by
+        // oversight (Claude adapter parity plan, P1-6).
         $strictProfiles = ['guarded', 'accelerated', 'full-governance', 'full'];
         if (in_array((string) $config['profile'], $strictProfiles, true)
             && $placeholderStatus['unresolved_required'] !== []

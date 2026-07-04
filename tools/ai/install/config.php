@@ -237,7 +237,7 @@ function aiInstallerParseArgs(array $argv): array
         throw new InvalidArgumentException('target directory not found: ' . $target);
     }
 
-    $allowedProfiles = ['minimal', 'copilot', 'opencode', 'dual', 'guarded', 'accelerated', 'full-governance', 'docs-reference', 'custom', 'basic', 'standard', 'creator', 'full', 'agents-only'];
+    $allowedProfiles = ['minimal', 'copilot', 'opencode', 'claude', 'dual', 'guarded', 'accelerated', 'full-governance', 'docs-reference', 'custom', 'basic', 'standard', 'creator', 'full', 'agents-only'];
     if (!in_array($profile, $allowedProfiles, true)) {
         throw new InvalidArgumentException('unsupported profile: ' . $profile);
     }
@@ -246,10 +246,11 @@ function aiInstallerParseArgs(array $argv): array
         $runtime = match ($profile) {
             'copilot' => 'github-copilot',
             'opencode' => 'opencode',
+            'claude' => 'claude-code',
             default => 'both',
         };
     }
-    $allowedRuntimes = ['github-copilot', 'opencode', 'both'];
+    $allowedRuntimes = ['github-copilot', 'opencode', 'claude-code', 'both'];
     if (!in_array($runtime, $allowedRuntimes, true)) {
         throw new InvalidArgumentException('unsupported runtime: ' . $runtime);
     }
@@ -325,9 +326,9 @@ Usage:
 Options:
   --target <dir>      Target repository root (default: .)
   --source <dir>      Source package/repo root (default: this repository root)
-  --profile <name>    Install profile: minimal|copilot|opencode|dual|guarded|accelerated|full-governance|docs-reference (default: dual)
+  --profile <name>    Install profile: minimal|copilot|opencode|claude|dual|guarded|accelerated|full-governance|docs-reference (default: dual)
                       Editions (aliases): basic|standard|creator|full|agents-only
-  --runtime <name>    Runtime override: github-copilot|opencode|both
+  --runtime <name>    Runtime override: github-copilot|opencode|claude-code|both
   --project-name <n>  Override inferred project name
   --force             Overwrite existing files
   --adopt             Adopt pre-existing foreign files at kit-claimed paths (record + overwrite)

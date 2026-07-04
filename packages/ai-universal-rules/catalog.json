@@ -37,7 +37,7 @@
         ]
     },
     "counts": {
-        "package:core-template": 28,
+        "package:core-template": 29,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 4,
@@ -77,6 +77,14 @@
             "path": "packages/ai-universal-rules/templates/core/AGENTS.template.md",
             "runtime": "canonical",
             "description": "<!-- GENERATED \u2014 DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/AGENTS.template.md. Edit the template or .ai/project.yml, not this file. -->"
+        },
+        {
+            "scope": "package",
+            "type": "core-template",
+            "name": "CLAUDE.md",
+            "path": "packages/ai-universal-rules/templates/core/CLAUDE.template.md",
+            "runtime": "canonical",
+            "description": "<!-- GENERATED \u2014 DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/CLAUDE.template.md. Edit the template or .ai/project.yml, not this file. -->"
         },
         {
             "scope": "package",

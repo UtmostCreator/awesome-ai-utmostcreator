@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git ls-files*)",
+      "Bash(git blame*)",
+      "Bash(git branch*)",
+      "Bash(scripts/ai/ai-search.sh *)",
+      "Bash(scripts/ai/ai-search-multi.sh *)",
+      "Bash(scripts/ai/preview-file.sh *)",
+      "Bash(scripts/ai/query-usage.sh *)",
+      "Bash(scripts/ai/ai-diff-context.sh *)",
+      "Bash(scripts/ai/git-forensics.sh *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(curl * | sh)",
+      "Bash(curl * | bash)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/id_rsa*)"
+    ]
+  }
+}
