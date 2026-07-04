@@ -6,12 +6,14 @@ Adapters for Copilot, OpenCode, and Claude must preserve canonical rules from `d
 
 These files are runtime adapters, not canonical policy:
 
-- `AGENTS.md`, `.github/copilot-instructions.md` — kit-managed; rendered from
-  `packages/ai-universal-rules/templates/core/AGENTS.template.md` and
-  `templates/core/copilot-instructions.template.md`
-- `CLAUDE.md` — hand-maintained; **not** part of this kit's pack registry
-  (`tools/ai/install/packs.php`) and has no template source. Never overwritten by
-  installer render; edit it directly.
+- `AGENTS.md`, `.github/copilot-instructions.md`, `CLAUDE.md` — kit-managed; rendered from
+  `packages/ai-universal-rules/templates/core/AGENTS.template.md`,
+  `templates/core/copilot-instructions.template.md`, and `templates/core/CLAUDE.template.md`
+  respectively. `CLAUDE.md` became kit-managed as of the Claude adapter parity plan
+  (`docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000`, P1-1); before that it
+  was hand-maintained with no template source. It ships via the `adapter-claude` pack with
+  `merge_strategy: replace`, the same class as `AGENTS.md`, and carries the same out-of-band
+  re-render hazard described below.
 - `.github/agents/**`, `.github/instructions/**`, `.github/prompts/**`, `.github/skills/**`, `.github/workflows/**`
 - `.opencode/agents/**`, `.opencode/commands/**`, `.opencode/skills/**`
 - their render sources under `packages/ai-universal-rules/templates/**`
@@ -30,13 +32,14 @@ Rules for this class of addition:
 - It is not an adapter-drift bug to be "fixed" by deleting it — it is intentional,
   third-party, install-time content. `validate-adapter-drift.php`'s content-parity
   gap (see below) will not and should not flag it as a required-reference violation.
-- It is a real regeneration hazard for `AGENTS.md` specifically: the pack registry
-  renders `AGENTS.md` with `merge_strategy: replace`, so a future full re-render from
-  `AGENTS.template.md` (for example after a template edit followed by
-  `php tools/ai/ai.php install --apply`) will silently overwrite it. Before running a
-  full re-render of `AGENTS.md`, check for a trailing `## graphify` (or similar
-  out-of-band) section and re-apply it afterward, or re-run that tool's own installer.
-  `CLAUDE.md` has no template and is never touched by render, so it carries no such risk.
+- It is a real regeneration hazard for `AGENTS.md` and, as of the Claude adapter parity
+  plan (`docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000`, P1-1),
+  `CLAUDE.md` too: the pack registry renders both with `merge_strategy: replace`, so a
+  future full re-render from `AGENTS.template.md` or `CLAUDE.template.md` (for example
+  after a template edit followed by `php tools/ai/ai.php install --apply`) will silently
+  overwrite either file's out-of-band section. Before running a full re-render of either
+  file, check for a trailing `## graphify` (or similar out-of-band) section and re-apply
+  it afterward, or re-run that tool's own installer.
 - Do not bake tool-specific, existence-conditional content (for example "this project
   has a knowledge graph at `graphify-out/`") into the universal `AGENTS.template.md`
   source — that would assert a false claim on every other install target that does not

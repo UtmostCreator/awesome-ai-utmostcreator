@@ -54,6 +54,18 @@ if (is_dir($opencodeRoot)) {
         }
     }
 }
+// Claude adapter parity plan (docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000,
+// P2-3): mirrors the .opencode scan above for .claude/{agents,skills,commands}.
+$claudeRoot = $root . '/.claude';
+if (is_dir($claudeRoot)) {
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($claudeRoot, FilesystemIterator::SKIP_DOTS));
+    foreach ($it as $entry) {
+        if ($entry->isFile() && str_ends_with($entry->getFilename(), '.md')) {
+            $path = str_replace('\\', '/', $entry->getPathname());
+            $adapterFiles[] = str_replace('\\', '/', substr($path, strlen($root) + 1));
+        }
+    }
+}
 foreach (['agents', 'commands', 'instructions', 'skills', 'workflows'] as $templateSurface) {
     $surfaceRoot = $root . '/packages/ai-universal-rules/templates/' . $templateSurface;
     if (!is_dir($surfaceRoot)) {

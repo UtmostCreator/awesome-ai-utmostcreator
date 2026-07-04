@@ -16,6 +16,7 @@ Roles: `always-on-critical` / `deterministic-load` / `optional-support` / `gener
 |---|---|---|
 | `core/AGENTS.template.md` | always-on-critical | renders to root `AGENTS.md` (`packs.php` base pack) |
 | `core/copilot-instructions.template.md` | always-on-critical | renders to `.github/copilot-instructions.md` (`packs.php` adapter-copilot pack) |
+| `core/CLAUDE.template.md` | always-on-critical | renders to root `CLAUDE.md` (`packs.php` adapter-claude pack); added by the Claude adapter parity plan (`docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000`, P1-1), replacing the prior hand-maintained `CLAUDE.md` |
 | `core/opencode.json` | always-on-critical | renders to `opencode.jsonc`, `never_auto_merge` (`packs.php` adapter-opencode pack) |
 | `core/project-context.template.md` | always-on-critical | renders to `docs/ai/project-context.md`; listed in OpenCode `instructions[]` |
 | `core/project-context.placeholders.md` | optional-support | renders to `docs/ai/project-context-placeholders.md`, reference companion |
@@ -33,11 +34,20 @@ Roles: `always-on-critical` / `deterministic-load` / `optional-support` / `gener
 ## core/agents/** — base staged-agent roles (13 files)
 
 All render through the runtime-specific agent renderer into `.github/agents/*.agent.md`
-(`adapter-copilot` pack) and `.opencode/agents/*.md` (`adapter-opencode` pack): `architect.md`,
-`architecture-plan-writer.md`, `bootstrapper.md`, `config-maintainer.md`, `implementer.md`,
-`post-install.md`, `refactorer.md`, `release-auditor.md`, `repository-researcher.md`,
-`repository-reviewer.md`, `researcher.md`, `reviewer.md`, `workflow-auditor.md`.
-Role: `deterministic-load` (agent invocation on both runtimes).
+(`adapter-copilot` pack), `.opencode/agents/*.md` (`adapter-opencode` pack), and — as of the
+Claude adapter parity plan (`docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000`,
+P0) — `.claude/agents/*.md` (`adapter-claude` pack, via `claude-agent-renderer.php`):
+`architect.md`, `architecture-plan-writer.md`, `bootstrapper.md`, `config-maintainer.md`,
+`implementer.md`, `post-install.md`, `refactorer.md`, `release-auditor.md`,
+`repository-researcher.md`, `repository-reviewer.md`, `researcher.md`, `reviewer.md`,
+`workflow-auditor.md`.
+Role: `deterministic-load` (agent invocation on all three runtimes).
+
+## claude/ — Claude-specific templates (added by the Claude adapter parity plan)
+
+| File | Role | Load path |
+|---|---|---|
+| `claude/settings.json` | deterministic-load | merged (never replaced) into `.claude/settings.json` via `claude-settings-merge.php`, `adapter-claude` pack; carries `permissions.allow`/`deny` baseline |
 
 ## instructions/*.instructions.md — Copilot path/topic rules (22 files)
 

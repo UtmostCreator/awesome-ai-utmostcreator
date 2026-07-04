@@ -137,6 +137,18 @@ function aiInstallerPackRegistry(): array
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/core/agents', 'target' => '.claude/agents', 'install_type' => 'claude-agents', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/core/CLAUDE.template.md', 'target' => 'CLAUDE.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/claude/settings.json', 'target' => '.claude/settings.json', 'install_type' => 'claude-settings-merge', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            // P2-1/P2-2: reuses skill-dirs / opencode-commands as-is (both are already
+            // runtime-agnostic - confirmed by inspecting core.php: aiInstallerCopyDirAsSkillDirs
+            // and aiInstallerCopyDirAsOpenCodeCommands do a generic marker-inject copy with no
+            // Copilot/OpenCode-specific frontmatter transform). Claude's own docs (fetched
+            // 2026-07-04) confirm `.claude/skills/<name>/SKILL.md` is the identical directory
+            // shape, and its `name`/`description`/`argument-hint` frontmatter fields already match
+            // the canonical source verbatim. Unlike OpenCode, templates/workflows is NOT also
+            // dual-shipped to .claude/commands: Claude's own docs state skills and commands
+            // register the same `/name` slash command and "skills are recommended", so
+            // dual-shipping would just register duplicate commands for no benefit.
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/workflows', 'target' => '.claude/skills', 'install_type' => 'skill-dirs', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/commands', 'target' => '.claude/commands', 'install_type' => 'opencode-commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
         'capabilities-extended' => [
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/bug-regression', 'target' => 'docs/ai/capabilities/bug-regression', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],

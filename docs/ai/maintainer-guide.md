@@ -23,8 +23,8 @@ describes. This repository is in the **self-installed source kit** state:
 | Layer | Paths | Rule |
 | --- | --- | --- |
 | **Start here** (control entrypoints) | `docs/ai/maintainer-guide.md` (maintainers), `docs/ai/validation.md` (change-type routing), `docs/ai/integration-matrix.md` (coverage + surface classification) | route every kit change through the change-type table in `validation.md` |
-| **Edit here** (source layer) | `packages/ai-universal-rules/templates/**`, `docs/ai/**` files without a GENERATED header, `tools/ai/**`, `schemas/ai/**`, root `CLAUDE.md` (hand-maintained, no template — see `docs/ai/adapter-contract.md`) | the only hand-edit layer for shipped behavior |
-| **Generated here** (render outputs) | root `AGENTS.md`, `.github/**` adapter files, `.opencode/**`, files with a `GENERATED — DO NOT EDIT` header, `docs/ai/generated/**` | never hand-edit; re-render from the source layer and gate with validators |
+| **Edit here** (source layer) | `packages/ai-universal-rules/templates/**`, `docs/ai/**` files without a GENERATED header, `tools/ai/**`, `schemas/ai/**` | the only hand-edit layer for shipped behavior |
+| **Generated here** (render outputs) | root `AGENTS.md`, root `CLAUDE.md` (kit-managed as of the Claude adapter parity plan, `docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000` — see `docs/ai/adapter-contract.md`), `.github/**` adapter files, `.opencode/**`, `.claude/**`, files with a `GENERATED — DO NOT EDIT` header, `docs/ai/generated/**` | never hand-edit; re-render from the source layer and gate with validators |
 
 ## Repository Layout
 
@@ -65,7 +65,7 @@ by render/self-install and must never be hand-edited where a GENERATED header ap
 | File                        | Purpose                                                           |
 | --------------------------- | ----------------------------------------------------------------- |
 | `AGENTS.md`                 | AI agent instructions — consumed by OpenCode and Claude           |
-| `CLAUDE.md`                 | Claude-specific adapter pointing to canonical docs                |
+| `CLAUDE.md`                 | Claude-specific adapter pointing to canonical docs (kit-managed, rendered from `templates/core/CLAUDE.template.md`) |
 | `README.md`                 | Project overview and beginner-first entry point                   |
 | `readme-install.md`         | Complete installation guide with every tool and script documented |
 | `llms.txt`                  | Machine-readable project summary for AI tools                     |
@@ -89,7 +89,8 @@ every file that the installer copies into target projects:
 
 | Subfolder                 | Contains                                               |
 | ------------------------- | ------------------------------------------------------ |
-| `templates/core/`         | AGENTS.md, Copilot instructions, opencode.json, VS Code settings templates (no `CLAUDE.md` — it has no template source, see `docs/ai/adapter-contract.md`) |
+| `templates/core/`         | AGENTS.md, CLAUDE.md, Copilot instructions, opencode.json, VS Code settings templates, and `templates/core/agents/` (canonical agent source rendered into `.github/agents/`, `.opencode/agents/`, and `.claude/agents/`) |
+| `templates/claude/`       | Claude-specific templates (`.claude/settings.json` permission baseline) |
 | `templates/instructions/` | Copilot `.instructions.md` files (path-specific rules) |
 | `templates/github/`       | Copilot agents, prompts, skills                        |
 | `templates/commands/`     | OpenCode command definitions                           |
