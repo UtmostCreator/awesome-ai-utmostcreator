@@ -114,13 +114,14 @@ dead-file drift). Files: `agent-creator.md`, `agent-creator-runtime-guardian.md`
 `always-on-critical` for `guardrails/AI-GUARDRAILS.md` (base pack, required); the rest are
 `deterministic-load`/`optional-support` via `shared-templates-pack`.
 
-## snippets/** — shared render-source snippets (6 files)
+## snippets/** — shared render-source snippets (7 files)
 
 | File | Role | Load path |
 |---|---|---|
 | `snippets/agent-tools-execute.snippet.md` | deterministic-load | synced into agent bodies by `tools/ai/generate-agent-snippets.php` |
 | `snippets/agent-tools-readonly.snippet.md` | deterministic-load | synced into agent bodies by `tools/ai/generate-agent-snippets.php` |
 | `snippets/behavioral-baseline.snippet.md` | generated-or-install-only | canonical source manually mirrored into `core/AGENTS.template.md` and `core/copilot-instructions.template.md`; also copied wholesale via `shared-templates-pack` to `docs/ai/snippets/` |
+| `snippets/anti-pattern-examples.md` | deterministic-load (Phase 5.3) | named by path from the always-on Behavioral Baseline bullet list in `AGENTS.template.md`/`copilot-instructions.template.md` (and their rendered outputs), so it is reachable at task time, not just an install-time reference copy; also copied via `shared-templates-pack` to `docs/ai/snippets/` |
 | `snippets/approvals.snippet.md` | generated-or-install-only | no content-injection consumer found; reachable only via the whole-dir `shared-templates-pack` copy to `docs/ai/snippets/` (install-time reference copy, not read at task time) |
 | `snippets/verification.snippet.md` | generated-or-install-only | same as `approvals.snippet.md` |
 | `snippets/workflow.snippet.md` | generated-or-install-only | same as `approvals.snippet.md` |
