@@ -733,10 +733,26 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       soft-max warnings (`AGENTS.md`, `AGENTS.template.md`); `ai-doc-check.sh
       --check` generated-artifacts section stayed clean with no regeneration
       needed (the catalog generator does not itemize raw snippet files).
-- [ ] P2: Phase 5.4 — document the permanent maintenance loop in shipped
+- [x] P2: Phase 5.4 — document the permanent maintenance loop in shipped
       `docs/ai/validation.md` / `docs/ai/adapter-contract.md`: change template source,
       re-prove coverage and reachability, re-render, run validator gate. Include the
-      dead-file review model so weakly referenced installed files are caught.
+      dead-file review model so weakly referenced installed files are caught. Done:
+      added a "Permanent Maintenance Loop" section to `docs/ai/validation.md`
+      (5-step cycle: change source, re-prove coverage via the Phase 3.3 Semantic-
+      Parity Review Methodology, re-prove reachability, re-render/hand-sync, run the
+      gate) and a "Dead-File Review Model" subsection operationalizing
+      `docs/ai/integration-matrix.md`'s existing Reachability Rules: search by exact
+      path before treating a file as dead (a maintainer-doc reference still counts,
+      using this program's own `templates/capabilities/README.md` finding from
+      Phase 5.2 as the worked example), record the kept-or-removed reasoning in the
+      same slice, and treat `graphify update .` edge presence as secondary signal
+      only (ties into Phase 5.5). Placed in `docs/ai/validation.md` (not
+      `docs/ai/adapter-contract.md`, which already covers adapter-specific drift
+      rules and is closer to its `ai-file-standards.md` line budget); cross-linked
+      from there instead of duplicated. Verified: `validate-ai-config.php`,
+      `validate-ai-catalog.php` exit 0 clean; `validate-adapter-drift.php
+      --fail-on-warn` and `validate-install-surface.php` byte-identical to the
+      Phase 5.3 baseline (zero new findings).
 - [ ] P2: Phase 5.5 — run `graphify update .` after each merged phase so the knowledge
       graph tracks the restructured surfaces, and use edge presence as a secondary
       reachability signal in reviews. Add shipped guidance for multi-scope installed
