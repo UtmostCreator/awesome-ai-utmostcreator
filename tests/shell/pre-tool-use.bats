@@ -236,3 +236,49 @@ EOF
     # ls in an allow-listed dir — decision is allow
     [ "$decision" = "allow" ]
 }
+
+# ---- F-1 fail-safe: internal hook error must never silently deny ----
+#
+# These simulate jq failing partway through decision logic on a well-formed
+# payload (for example a timeout or OOM on a resource-heavy request) with a
+# fake `jq` that succeeds only for the initial `-e .` validity check and
+# fails for every other call. Before the F-1 fix, this crashed pre-tool-use.sh
+# with no decision JSON at all (fail-closed with no diagnosis, even for a
+# read-only command). After the fix, a valid decision is always emitted.
+
+_with_broken_jq() {
+    local payload="$1"
+    local fakebin
+    fakebin="$(mktemp -d)"
+    local real_jq
+    real_jq="$(command -v jq)"
+    cat >"$fakebin/jq" <<EOF
+#!/usr/bin/env bash
+if [[ "\$1" == "-e" && "\$2" == "." ]]; then
+    exec "$real_jq" "\$@"
+fi
+echo "fake jq: simulated internal failure" >&2
+exit 1
+EOF
+    chmod +x "$fakebin/jq"
+    echo "$payload" | PATH="$fakebin:$PATH" bash "$SCRIPT"
+    local exit_code=$?
+    rm -rf "$fakebin"
+    return $exit_code
+}
+
+@test "F-1: internal jq failure on a read-only command still allows" {
+    output="$(_with_broken_jq '{"toolName":"bash","toolArgs":{"command":"git status"}}')"
+    [ "$(_decision "$output")" = "allow" ]
+}
+
+@test "F-1: internal jq failure on a mutating command still denies" {
+    output="$(_with_broken_jq '{"toolName":"bash","toolArgs":{"command":"rm -rf /tmp/whatever"}}' || true)"
+    [ "$(_decision "$output")" = "deny" ]
+}
+
+@test "F-1: internal jq failure always emits valid decision JSON" {
+    output="$(_with_broken_jq '{"toolName":"bash","toolArgs":{"command":"git status"}}')"
+    echo "$output" | jq . >/dev/null
+    echo "$output" | jq -e '.permissionDecisionReason' >/dev/null
+}

@@ -18,6 +18,28 @@ Reads a JSON tool request from stdin and emits a permission decision when policy
 EOF
 }
 
+# F-1 fail-safe: invoked directly (not via a trap) from pre-tool-use.sh when
+# the pre_tool_use_decide subshell exited without ever printing valid decision
+# JSON — an internal crash (for example jq failing on a well-formed but
+# resource-heavy payload), not an intentional deny/ask/allow. Classifies the
+# raw payload with a dependency-free, best-effort text match (no jq/yq — those
+# may be exactly what failed) so a hook-internal error never silently denies a
+# read-only command with no output. Deny (with a remediation message) whenever
+# read-only cannot be confirmed; this stays fail-closed for anything mutating
+# or unknown.
+pre_tool_use_error_fallback() {
+    local failed_exit_code="$1"
+    local raw_input="${2:-}"
+
+    if [[ -n "$raw_input" ]] && printf '%s' "$raw_input" | grep -Eiq '"(command|commandLine|text)"[[:space:]]*:[[:space:]]*"(git[[:space:]]+(status|diff|log|show|branch|grep|blame|ls-files|rev-parse|describe)|ls|pwd|rg|fd|cat[[:space:]]|wc[[:space:]]|(bash[[:space:]]+)?(\./)?scripts/ai/(ai-search|preview-file|query-usage|ai-verify|run-repo-tests|run-test-focused|git-branch-origin)\.sh)([[:space:]"]|$)'; then
+        printf '{"permissionDecision":"allow","permissionDecisionReason":"internal hook error (exit %s) after the command was classified as read-only by the fail-safe fallback; allowing. See docs/ai/tool-policy.md to diagnose the hook failure."}\n' "$failed_exit_code"
+        exit 0
+    fi
+
+    printf '{"permissionDecision":"deny","permissionDecisionReason":"internal hook error (exit %s); could not confirm the command is read-only, so denying by default. Re-run scripts/ai/pre-tool-use.sh with the same JSON payload manually to diagnose."}\n' "$failed_exit_code"
+    exit 1
+}
+
 deny() {
     emit_decision_json "deny" "$1"
 }

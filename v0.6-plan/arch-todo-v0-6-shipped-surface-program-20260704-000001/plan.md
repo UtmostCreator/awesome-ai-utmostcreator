@@ -880,13 +880,58 @@ Phase 6 — shipped-enforcement reliability, field-failure remediation (Track F;
 in parallel with Phases 0-2 because it touches hook scripts and conventions, not the
 instruction-thinning surfaces):
 
-- [ ] P0: Phase 6.1 — fix the hook error path (F-1): shipped pre-tool-use hook sources
+- [x] P0: Phase 6.1 — fix the hook error path (F-1): shipped pre-tool-use hook sources
       (`templates/github/hooks/scripts/tool-guardian.sh`, `tool-guardian.ps1`,
       `command-policy.compiled.sh`) must never hard-deny read-only commands because the
       hook itself errored. Define the contract: on internal hook error, allow read-only
       command classes, deny mutating classes, and emit a clear remediation message.
       Add a regression test for the errored-hook path. Checks:
       `shellcheck` on touched scripts, focused hook test, per-slice validator gate.
+      Done: investigation found the actual vulnerable file differs from the plan's
+      guess — `tool-guardian.sh`/`.ps1` are already fail-open by design (only deny
+      on an explicit pattern match; any internal issue falls through to allow),
+      and `command-policy.compiled.sh`'s `case` statement defaults to `allow` for
+      anything unmatched, so neither can hard-deny from an internal error. The
+      real F-1 vector is `scripts/ai/pre-tool-use.sh` (the actual `preToolUse`
+      hook registered in `.github/hooks/tool-policy.json`) plus its sourced
+      modules (`scripts/ai/internal/pre-tool-use/{10-helpers,20-decide}.sh`),
+      which run under `set -euo pipefail`: any unguarded internal command
+      failure (reproduced with a fault-injected `jq` that fails only past the
+      initial validity check, simulating a timeout/OOM on a well-formed
+      resource-heavy payload) crashed the whole script with no decision JSON
+      and a non-zero exit — fail-closed with no diagnosis, denying even
+      `git status`. Fix: capture stdin once at the root, run the decision logic
+      in an explicit subshell (`set -eo pipefail` scoped to that subshell only)
+      so an internal crash stops immediately without corrupting shared state,
+      capture its stdout/exit code in the un-subshelled root process, and treat
+      any output that is not valid decision JSON (and not the pre-existing
+      legitimate silent pass-through for non-terminal tools) as an internal
+      error routed to a new `pre_tool_use_error_fallback()` in `10-helpers.sh`:
+      a dependency-free, best-effort read-only classifier (no jq/yq, since
+      those may be exactly what failed) that allows only confirmed read-only
+      commands and denies everything else with a remediation message. Learned
+      and reverted one wrong approach first: an ERR trap (`set -E`) does not
+      work here, because the failure happens inside the subshell `$(...)`
+      creates, so the trap's own `exit` only terminates that subshell — its
+      stdout becomes the substitution's captured value and the main script
+      keeps running with garbage input, which is worse than the original bug;
+      documented this in the script's own header comment so it is not
+      re-attempted. Added 3 permanent regression tests to
+      `tests/shell/pre-tool-use.bats` (fault-injected fake `jq`, matching the
+      reproduction): read-only command still allows, mutating command still
+      denies, output is always valid decision JSON. Verified:
+      `bats tests/shell/pre-tool-use.bats` 32/32 pass (29 pre-existing + 3 new);
+      `bash tests/scripts/ai/test-pre-tool-use.sh` (the parallel non-bats
+      harness) 42/42 pass, confirming no behavior change on any existing path;
+      `bats tests/shell/` (full suite) 65/65 pass; `shellcheck` on all 3 touched
+      files shows only pre-existing SC2034/SC1091 findings (confirmed via
+      `git stash` diff — identical before/after, just shifted line numbers from
+      added comments); `validate-ai-config.php`, `validate-ai-catalog.php` exit
+      0 clean; `validate-adapter-drift.php --fail-on-warn` and
+      `validate-install-surface.php` byte-identical to the Phase 5.8 baseline
+      (zero new findings — expected, since `scripts/ai/**` and `tests/**` are
+      self-sourced top-level trees, not `packages/ai-universal-rules/templates/**`,
+      so no separate template/render sync was needed).
 - [ ] P0: Phase 6.2 — agent duty vs permission parity (F-3, F-5): audit every shipped
       agent template (`templates/core/agents/**`, `templates/optional/agents/**`)
       against the permissions it ships with; fix templates where a declared duty
