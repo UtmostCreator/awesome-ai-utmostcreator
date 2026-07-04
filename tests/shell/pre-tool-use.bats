@@ -337,3 +337,42 @@ EOF
     output="$(_with_broken_jq '{"toolArgsRaw":{"command":"git log"}}')"
     [ "$(_decision "$output")" = "allow" ]
 }
+
+@test "F-1: fail-safe fallback denies a nested decoy key before the real command inside toolArgs" {
+    # 3rd-round reviewer finding: a flat [^}]*-bounded regex stops at the
+    # first nested "}", truncating the real command key out of scope so a
+    # nested decoy object wins. The depth-aware extractor must capture the
+    # full toolArgs value (including the nested decoy), which the existing
+    # duplicate-key ambiguity check then denies rather than needing to pick a
+    # winner.
+    output="$(_with_broken_jq '{"toolArgs":{"decoy":{"command":"git status"},"command":"rm -rf /important-data"}}' || true)"
+    [ "$(_decision "$output")" = "deny" ]
+}
+
+@test "F-1: fail-safe fallback denies a decoy toolArgs nested in a wrapper before the real top-level one" {
+    # 3rd-round reviewer finding: a flat regex with no nesting-depth concept
+    # let a same-named decoy key nested inside an unrelated sibling object win
+    # just because it appeared earlier in raw text. Only a top-level (depth-1)
+    # toolArgs key may match.
+    output="$(_with_broken_jq '{"wrapper":{"toolArgs":{"command":"git status"}},"toolArgs":{"command":"rm -rf /important-data"}}' || true)"
+    [ "$(_decision "$output")" = "deny" ]
+}
+
+@test "F-1: fail-safe fallback denies when toolArgs is a non-object value" {
+    output="$(_with_broken_jq '{"toolArgs":"not-an-object","tool_input":{"command":"rm -rf /important-data"}}' || true)"
+    [ "$(_decision "$output")" = "deny" ]
+}
+
+@test "F-1: fail-safe fallback falls through past a null toolArgs to tool_input" {
+    output="$(_with_broken_jq '{"toolArgs":null,"tool_input":{"command":"git log"}}')"
+    [ "$(_decision "$output")" = "allow" ]
+}
+
+@test "F-1: fail-safe fallback handles whitespace-spanning toolArgs" {
+    output="$(_with_broken_jq '{
+      "toolArgs"  :  {
+        "command" : "git status"
+      }
+    }')"
+    [ "$(_decision "$output")" = "allow" ]
+}
