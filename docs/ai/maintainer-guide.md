@@ -23,8 +23,8 @@ describes. This repository is in the **self-installed source kit** state:
 | Layer | Paths | Rule |
 | --- | --- | --- |
 | **Start here** (control entrypoints) | `docs/ai/maintainer-guide.md` (maintainers), `docs/ai/validation.md` (change-type routing), `docs/ai/integration-matrix.md` (coverage + surface classification) | route every kit change through the change-type table in `validation.md` |
-| **Edit here** (source layer) | `packages/ai-universal-rules/templates/**`, `docs/ai/**` files without a GENERATED header, `tools/ai/**`, `schemas/ai/**` | the only hand-edit layer for shipped behavior |
-| **Generated here** (render outputs) | root `AGENTS.md`, `CLAUDE.md`, `.github/**` adapter files, `.opencode/**`, files with a `GENERATED — DO NOT EDIT` header, `docs/ai/generated/**` | never hand-edit; re-render from the source layer and gate with validators |
+| **Edit here** (source layer) | `packages/ai-universal-rules/templates/**`, `docs/ai/**` files without a GENERATED header, `tools/ai/**`, `schemas/ai/**`, root `CLAUDE.md` (hand-maintained, no template — see `docs/ai/adapter-contract.md`) | the only hand-edit layer for shipped behavior |
+| **Generated here** (render outputs) | root `AGENTS.md`, `.github/**` adapter files, `.opencode/**`, files with a `GENERATED — DO NOT EDIT` header, `docs/ai/generated/**` | never hand-edit; re-render from the source layer and gate with validators |
 
 ## Repository Layout
 
@@ -89,7 +89,7 @@ every file that the installer copies into target projects:
 
 | Subfolder                 | Contains                                               |
 | ------------------------- | ------------------------------------------------------ |
-| `templates/core/`         | AGENTS.md, CLAUDE.md, VS Code settings templates       |
+| `templates/core/`         | AGENTS.md, Copilot instructions, opencode.json, VS Code settings templates (no `CLAUDE.md` — it has no template source, see `docs/ai/adapter-contract.md`) |
 | `templates/instructions/` | Copilot `.instructions.md` files (path-specific rules) |
 | `templates/github/`       | Copilot agents, prompts, skills                        |
 | `templates/commands/`     | OpenCode command definitions                           |
@@ -120,6 +120,13 @@ every file that the installer copies into target projects:
   `opencode` profile.
 - `.github/` is the GitHub Copilot adapter (instructions, agents, prompts, skills, hooks). It is
   created by the installer or by self-install.
+- Two separate OpenCode config files intentionally coexist: root `opencode.jsonc` is the
+  kit-rendered configuration (`instructions[]`, `permission`, watcher) from
+  `packages/ai-universal-rules/templates/core/opencode.json`; `.opencode/opencode.json` is a
+  separately installed, non-kit-managed config (currently registers the `graphify` plugin only).
+  OpenCode merges config from both locations; if a second plugin or setting needs to be added to
+  `.opencode/opencode.json`, confirm the merge behavior with the installed OpenCode version first
+  rather than assuming precedence.
 - `schemas/ai/` holds the JSON schemas that define the expected shape of catalog files, manifests,
   command policies, and other structured metadata used by the PHP validators.
 

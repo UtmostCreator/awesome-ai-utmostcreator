@@ -452,11 +452,44 @@ Phase 3 — thinning, one runtime per slice (merges B-4, B-3, A-5; order set by 
       `bugfix.agent.md`/`build-config.agent.md`/`docs.agent.md`/`upgrade.agent.md`
       placeholder errors, agent/root soft-max warnings) — none touch
       `copilot-instructions.md` or its template.
-- [ ] P1: Phase 3.3 — add the runtime surface matrix (one maintained shipped doc
+- [x] P1: Phase 3.3 — add the runtime surface matrix (one maintained shipped doc
       describing practical Copilot/OpenCode/Claude differences without implying parity),
       including the explicit semantic-parity review methodology (B-10): how a reviewer
       compares pre-thinning and post-thinning topic coverage when file structures
-      diverge across runtimes.
+      diverge across runtimes. Done: the existing "Guaranteed-Load Surfaces Per
+      Runtime" table/notes in `docs/ai/integration-matrix.md` is now explicitly framed
+      as the maintained runtime surface matrix (A-5); a new "Semantic-Parity Review
+      Methodology (B-10)" section documents the 7-step reviewer procedure (identify
+      touched matrix rows, confirm load-path class holds per runtime, diff
+      covered/partial/gap status, require explicit not silent asymmetry per
+      `adapter-contract.md`'s no-false-parity rule (A-12), compare by topic content
+      when file structures diverge, run the validator gate, record the outcome in the
+      matrix). `docs/ai/adapter-contract.md` Contract Rules cross-references the new
+      section so the existing "document the fallback instead of implying parity" rule
+      has a concrete review procedure attached. No template source exists for either
+      doc (both are shipped canonical docs consumed directly, not rendered), so no
+      render/hand-sync step was needed. Also kept and verified the pre-existing
+      uncommitted working-tree correction to these same two files (CLAUDE.md has no
+      template/pack-registry entry and is hand-maintained directly, not rendered;
+      `.opencode/opencode.json` vs root `opencode.jsonc` distinction) — confirmed
+      accurate against `tools/ai/install/packs.php` (no CLAUDE.md entry) and the
+      `.opencode/opencode.json` file contents (graphify plugin registration only)
+      before building on it, per user approval. Verified: `validate-install-surface.php`
+      and `validate-install-surface.php --strict` both exit 1, but only on the same
+      pre-existing `.opencode/skills/graphify/SKILL.md` hard-max ERROR and soft-max
+      WARNs already recorded in Phase 3.1/3.2 (none reference the 2 files touched
+      here); `validate-adapter-drift.php --fail-on-warn` exits 1 on pre-existing
+      `should reference docs/ai/AI-GUARDRAILS.md`-class warnings, confirmed
+      byte-identical before/after this slice via a `git stash` scoped to the touched
+      files (zero new findings); `validate-ai-config.php` and `validate-ai-catalog.php`
+      exit 0 clean; `ai-doc-check.sh --check` exits 1 with output identical before/after
+      this slice (only a timing string differs) — same pre-existing failures already
+      recorded in Phase 3.1/3.2, unrelated to the 2 files touched here. A reviewer pass
+      on this slice caught this note originally mis-stating those pre-existing exit
+      codes as "clean"/"exit 0" and caught a self-contradiction this slice introduced
+      at `docs/ai/maintainer-guide.md:92` (claimed `CLAUDE.md` was a `templates/core/`
+      master copy, contradicting the CLAUDE.md-has-no-template fix at line 26 of the
+      same file); both are now corrected.
 - [ ] P1: Phase 3 exit gate — each thinning slice proves critical-topic AND
       clarification/handoff-primitive coverage after the change; a failed proof
       restores the thicker baseline for that runtime only.

@@ -6,12 +6,41 @@ Adapters for Copilot, OpenCode, and Claude must preserve canonical rules from `d
 
 These files are runtime adapters, not canonical policy:
 
-- `AGENTS.md`, `CLAUDE.md`, `.github/copilot-instructions.md`
+- `AGENTS.md`, `.github/copilot-instructions.md` — kit-managed; rendered from
+  `packages/ai-universal-rules/templates/core/AGENTS.template.md` and
+  `templates/core/copilot-instructions.template.md`
+- `CLAUDE.md` — hand-maintained; **not** part of this kit's pack registry
+  (`tools/ai/install/packs.php`) and has no template source. Never overwritten by
+  installer render; edit it directly.
 - `.github/agents/**`, `.github/instructions/**`, `.github/prompts/**`, `.github/skills/**`, `.github/workflows/**`
 - `.opencode/agents/**`, `.opencode/commands/**`, `.opencode/skills/**`
 - their render sources under `packages/ai-universal-rules/templates/**`
 
 Canonical policy lives in `docs/ai/**` and repository code. Per `docs/ai/source-of-truth.md`, adapter files are lower authority than canonical docs; when they disagree, the canonical doc wins.
+
+## Out-Of-Band Local Additions (Non-Kit-Managed)
+
+A separately installed tool may append content directly to a rendered adapter surface
+outside this kit's render pipeline. The current example: the `graphify` skill's own
+installer appends a `## graphify` section to `AGENTS.md` and `CLAUDE.md` directly; this
+section does not exist in `AGENTS.template.md` and is not part of any pack entry.
+
+Rules for this class of addition:
+
+- It is not an adapter-drift bug to be "fixed" by deleting it — it is intentional,
+  third-party, install-time content. `validate-adapter-drift.php`'s content-parity
+  gap (see below) will not and should not flag it as a required-reference violation.
+- It is a real regeneration hazard for `AGENTS.md` specifically: the pack registry
+  renders `AGENTS.md` with `merge_strategy: replace`, so a future full re-render from
+  `AGENTS.template.md` (for example after a template edit followed by
+  `php tools/ai/ai.php install --apply`) will silently overwrite it. Before running a
+  full re-render of `AGENTS.md`, check for a trailing `## graphify` (or similar
+  out-of-band) section and re-apply it afterward, or re-run that tool's own installer.
+  `CLAUDE.md` has no template and is never touched by render, so it carries no such risk.
+- Do not bake tool-specific, existence-conditional content (for example "this project
+  has a knowledge graph at `graphify-out/`") into the universal `AGENTS.template.md`
+  source — that would assert a false claim on every other install target that does not
+  have the tool installed.
 
 ## Contract Rules
 
@@ -20,6 +49,11 @@ Canonical policy lives in `docs/ai/**` and repository code. Per `docs/ai/source-
 - Do not introduce policy in an adapter that contradicts canonical docs.
 - When a runtime cannot support a feature, document the fallback instead of implying parity.
 - Kit-managed adapters are re-rendered from `packages/ai-universal-rules/templates/**`; edit the template (and keep any committed render in sync), not only the rendered copy. See `docs/ai/source-of-truth.md` for editable-vs-generated classification.
+- When a change thins, relocates, or merges a shipped surface across runtimes, review
+  it with the semantic-parity methodology in `docs/ai/integration-matrix.md`
+  ("Semantic-Parity Review Methodology") — compare topic-level coverage, not file
+  structure, since Copilot/OpenCode/Claude load surfaces through different
+  mechanisms by design.
 
 ## Two Different "Drift" Concepts
 
