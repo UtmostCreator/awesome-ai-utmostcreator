@@ -753,12 +753,27 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       `validate-ai-catalog.php` exit 0 clean; `validate-adapter-drift.php
       --fail-on-warn` and `validate-install-surface.php` byte-identical to the
       Phase 5.3 baseline (zero new findings).
-- [ ] P2: Phase 5.5 — run `graphify update .` after each merged phase so the knowledge
+- [x] P2: Phase 5.5 — run `graphify update .` after each merged phase so the knowledge
       graph tracks the restructured surfaces, and use edge presence as a secondary
       reachability signal in reviews. Add shipped guidance for multi-scope installed
       targets (F-8): incremental `graphify update <scope> --no-cluster`, then
       `merge-graphs`, then `cluster-only`; note that doc/config scopes need semantic
-      re-extraction with a backend key.
+      re-extraction with a backend key. Done: ran `graphify update .` covering
+      Phases 0-5.4 (8334 nodes, 9999 edges, 959 communities, up from the pre-
+      session 3,717/5,664/47 baseline); the ~150k-line diff (mostly regenerated AST
+      cache) was flagged and, per user direction, committed as its own separate
+      commit so it does not obscure the docs-only program commits.
+      `graph.html` is no longer regenerated past the 5000-node HTML viz limit.
+      Added a "Multi-Scope Graph Maintenance (Optional, Graphify-Only)" subsection
+      to `docs/ai/validation.md`, explicitly scoped as conditional per
+      `docs/ai/adapter-contract.md`'s Out-Of-Band Local Additions rule (graphify is
+      not part of this kit's pack registry and must never be assumed present):
+      `graphify update <scope> --no-cluster` per scope, then `merge-graphs`, then a
+      final `cluster-only` pass; doc/config scopes need semantic re-extraction (a
+      backend key), not just AST extraction. Verified: `validate-ai-config.php`,
+      `validate-ai-catalog.php` exit 0 clean; `validate-adapter-drift.php
+      --fail-on-warn` and `validate-install-surface.php` byte-identical to the
+      Phase 5.4 baseline (zero new findings).
 - [ ] P2: Phase 5.6 — tighten routing-role overlap across the shipped docs
       `docs/ai/agents.md`, `docs/ai/AGENTS-MANIFEST.md` (ship-status: unknown — verify
       first), and `docs/ai/workflow.md` so each has one clear job (A-6); separate
