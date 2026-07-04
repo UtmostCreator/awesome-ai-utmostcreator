@@ -93,6 +93,30 @@ class ClaudeSettingsMergeTest extends TestCase
         $this->assertSame($invalidExisting, $merged, 'must never silently discard or corrupt unparseable existing content');
     }
 
+    public function testMalformedPermissionsBlockDoesNotCorruptOrWarn(): void
+    {
+        // permissions is a scalar, not an object - a hand-corrupted but still valid-JSON file.
+        // Must not trigger PHP "Illegal string offset" behavior or leak stray characters into
+        // the merged allow/deny arrays.
+        $malformedExisting = (string) json_encode(['permissions' => 'oops']);
+        $merged = aiInstallerMergeClaudeSettingsJson($this->incomingTemplate(), $malformedExisting);
+        $decoded = json_decode($merged, true);
+
+        $this->assertSame(['Bash(git status*)', 'Bash(git diff*)'], $decoded['permissions']['allow']);
+        $this->assertSame(['Bash(rm -rf *)', 'Bash(sudo *)'], $decoded['permissions']['deny']);
+    }
+
+    public function testMalformedHooksBlockDoesNotCorruptOrWarn(): void
+    {
+        // hooks is a scalar, not an object - same corruption class as the permissions test above.
+        $malformedExisting = (string) json_encode(['hooks' => 'oops']);
+        $merged = aiInstallerMergeClaudeSettingsJson($this->incomingTemplate(), $malformedExisting);
+        $decoded = json_decode($merged, true);
+
+        $this->assertSame(['Bash(git status*)', 'Bash(git diff*)'], $decoded['permissions']['allow']);
+        $this->assertIsArray($decoded['hooks'] ?? null);
+    }
+
     public function testMergeFileWritesDestinationAndCreatesParentDir(): void
     {
         $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'claude_settings_merge_' . uniqid('', true);

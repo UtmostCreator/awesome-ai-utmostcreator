@@ -43,11 +43,21 @@ function aiInstallerMergeClaudeSettingsJson(string $incomingJson, string $existi
     }
 
     $merged = $existing;
+    // Normalize both write targets to arrays before this function assigns into them below.
+    // `$merged = $existing` shallow-copies whatever `permissions`/`hooks` currently are; if a
+    // hand-corrupted existing file has either as a scalar (e.g. `"permissions": "oops"`), writing
+    // `$merged['permissions'][$key] = ...` on a copied string throws "Cannot access offset of type
+    // string on string" in PHP 8 strict mode. Force both to arrays first so the later assignments
+    // are always safe, regardless of what the existing file's scalar-vs-object shape happened to be.
+    $merged['permissions'] = (array) ($merged['permissions'] ?? []);
+    $merged['hooks'] = (array) ($merged['hooks'] ?? []);
 
     // --- permissions.allow / permissions.deny: de-duplicated union ---
+    $existingPermissions = (array) ($existing['permissions'] ?? []);
+    $incomingPermissions = (array) ($incoming['permissions'] ?? []);
     foreach (['allow', 'deny'] as $key) {
-        $existingList = (array) ($existing['permissions'][$key] ?? []);
-        $incomingList = (array) ($incoming['permissions'][$key] ?? []);
+        $existingList = (array) ($existingPermissions[$key] ?? []);
+        $incomingList = (array) ($incomingPermissions[$key] ?? []);
         if ($existingList === [] && $incomingList === []) {
             continue;
         }

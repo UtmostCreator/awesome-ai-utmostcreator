@@ -10,6 +10,31 @@
   OpenCode/Copilot/base behavior changed; new install surface + JSON-merge primitive both
   covered by focused tests and two real end-to-end installs)
 
+## Post-Completion Review Fix (2026-07-04, fresh reviewer pass)
+
+A dedicated `/review-diff`-style pass after "Done" found and fixed one real bug (not a
+style/duplication finding) in `tools/ai/install/claude-settings-merge.php`:
+
+- **Bug**: if a target's existing `.claude/settings.json` had `permissions` or `hooks` as a
+  scalar instead of an object (a hand-corrupted but still valid-JSON file — e.g.
+  `{"permissions": "oops"}`), `aiInstallerMergeClaudeSettingsJson()` threw a hard PHP 8
+  `TypeError: Cannot access offset of type string on string`, because `$merged = $existing`
+  shallow-copies the scalar value, and the later `$merged['permissions'][$key] = ...` /
+  `$merged['hooks'][$event] = ...` assignments tried to write an array offset onto a string.
+  This was not caught by the existing "invalid JSON" fail-safe, because the file IS valid JSON —
+  only a sub-key's *shape* was wrong.
+- **Fix**: normalize `$merged['permissions']` and `$merged['hooks']` to arrays immediately after
+  the `$merged = $existing` copy, before any indexed write into either key.
+- **Regression tests added**: `testMalformedPermissionsBlockDoesNotCorruptOrWarn`,
+  `testMalformedHooksBlockDoesNotCorruptOrWarn` (both in `ClaudeSettingsMergeTest.php`).
+- **Also closed a bookkeeping gap**: AC-3 had actually been fully satisfied by the real
+  end-to-end install proof captured in the P2 verification notes, but was left unchecked;
+  corrected to `[x]` with the exact captured evidence.
+- Re-verified after the fix: `ClaudeSettingsMergeTest` (8/8), `ClaudeAgentRendererTest` +
+  `CopilotAgentRendererTest` (50/50), `InstallerSafetyTest` (67/67), `composer test:fast`
+  (757 tests, stable at exactly 10 pre-existing unrelated failures — unchanged from before this
+  fix).
+
 ## Context
 
 This repo already ships Copilot (`.github/**`) and OpenCode (`.opencode/**`) as fully rendered
@@ -360,15 +385,15 @@ pre-existing user or graphify-authored Claude files.
       dry-runs produce byte-identical plans to pre-change baseline (no regression). Verified via
       `CopilotAgentRendererTest` (21/21 unchanged) and `InstallerSafetyTest` (67/67, includes a real
       `opencode` profile install into an isolated temp target).
-- [ ] AC-3: A real (non-dry-run, isolated temp target) install of the `claude` profile produces
-      `.claude/agents/architect.md` with valid frontmatter containing only fields present in the
-      fetched Anthropic sub-agent schema (`name`, `description`, `tools`, `disallowedTools`, `model`,
-      `permissionMode`, no invented fields like `handoffs:`). **Partially proven at unit level**:
-      `ClaudeAgentRendererTest::testClaudeAgentCopyRefreshesWithoutDeletingDestinationTree` performs
-      a real filesystem write via `aiInstallerCopyDirAsClaudeAgents()` directly and every frontmatter
-      field is asserted by the renderer tests; the literal full-CLI-install path is P1 scope (needs
-      the `claude` profile to exist). Recommend adding an `adapter-claude` scenario to
-      `InstallerSafetyTest.php` in P1 to close this AC formally.
+- [x] AC-3: Fully satisfied in P2 — closed the earlier partial-proof gap. Real (non-dry-run,
+      isolated temp git repo) install via `--profile claude --runtime claude-code --apply`
+      produced `.claude/agents/architect.md` with exactly: `name: architect`, `description: ...`,
+      `tools: Read, Grep, Glob, Bash, Agent`, `disallowedTools: Write, Edit`, `model: inherit`,
+      `permissionMode: plan`, `agent_assessment:` block — no invented `handoffs:` field. Output
+      captured verbatim in the P2 verification notes below. **Recommended follow-up (non-blocking,
+      not done in this program)**: add this scenario as a permanent `InstallerSafetyTest.php` case
+      so it is regression-tested on every future `composer test:fast` run, not just this one-off
+      manual verification.
 - [x] AC-4: Proven at the merge-function unit level (`ClaudeSettingsMergeTest::
       testPreservesPreExistingGraphifyHooksWhileAddingPermissions` +
       `testMergeIsIdempotentAcrossRepeatedInstalls` + `testUserAddedAllowRuleSurvivesReinstall`):
