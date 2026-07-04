@@ -55,6 +55,24 @@ Runtime limitation notes (no false parity):
   regenerate it without an unrelated blast radius on other pending working-tree files);
   a full-file diff against the template shows only expected `<PLACEHOLDER>` resolution.
 
+## Handoff Mechanism Per Runtime
+
+| Runtime | Structured handoff metadata | Prose fallback (always present) |
+|---|---|---|
+| Copilot (VS Code custom agents, `.github/agents/*.agent.md`) | `handoffs:` frontmatter array (`label`, `agent`, `prompt`, `send`, `model`) — verified against VS Code's Custom Agents documentation (fetched 2026-07-04); renders a clickable handoff button after a chat response | `docs/ai/handoff-contract.md` "Recommended next step" sentence |
+| OpenCode (`.opencode/agents/*.md`, `.opencode/commands/*.md`) | none found in this repo's rendered agent/command frontmatter or in OpenCode's own schema; not shipped | same prose sentence, for example `implementer means implementer agent handoff using OpenCode command: /implement` |
+| Claude (`CLAUDE.md`; this kit ships no Claude sub-agents folder) | none — VS Code's own Claude sub-agent format documentation lists only `name`/`description`/`tools`/`disallowedTools` fields, no handoffs field | same prose sentence, routed through `CLAUDE.md` |
+
+Fallback rule (Chunk 5 / C-5): the prose "Recommended next step" sentence in
+`docs/ai/handoff-contract.md` is the guaranteed baseline on every runtime and must
+never be dropped. Structured metadata (currently only Copilot's `handoffs:`
+frontmatter) is strictly additive on top of that baseline, never a replacement for
+it — adding `handoffs:` to a Copilot agent template while dropping the prose
+sentence would be a false-parity regression (Copilot users would gain a button
+while every other runtime silently lost the guidance). No shipped agent template
+emits `handoffs:` yet; adding it to specific agent pairs (architect -> plan-writer,
+implementer -> reviewer) is Phase 6.15's job, gated on this decision.
+
 ## Critical-Topic Coverage Matrix
 
 Status: `covered` = guaranteed-load today; `partial` = present but not guaranteed on every runtime; `gap` = pending the named program phase.
