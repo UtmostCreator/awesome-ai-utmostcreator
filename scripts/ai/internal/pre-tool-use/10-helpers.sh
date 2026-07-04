@@ -51,6 +51,92 @@ EOF
 # (winning) one. `grep -c` occurrence counting on the scoped object closes
 # this: more than one key match inside the same scope is ambiguous input for
 # a text-only classifier, so it denies rather than guessing which one wins.
+#
+# Fourth/fifth review findings (fixed): a flat `[^}]*`-bounded regex is not
+# JSON-depth-aware, which allowed two more bypasses of the same shape: (a) a
+# nested object placed before the real `command` key inside `toolArgs` (for
+# example `{"toolArgs":{"decoy":{"command":"..."},"command":"..."}}`) made the
+# regex stop at the decoy's own `}`, truncating the real key out of scope
+# entirely; (b) a same-named decoy key nested inside an unrelated sibling
+# object, positioned earlier in raw text than the real top-level key, won
+# because the extraction had no concept of nesting depth. Both are closed by
+# replacing the flat regex with `_pre_tool_use_extract_top_level_object`
+# below: a small brace-and-string-aware scanner that only matches a key at
+# the payload's outermost object level and captures its full, correctly
+# brace-balanced value (so a nested decoy inside the real value is included
+# in the scope, not mistaken for it — the existing duplicate-key ambiguity
+# check above then safely denies on the resulting multiple `command`-like
+# matches rather than needing to pick a winner).
+_pre_tool_use_extract_top_level_object() {
+    local input="$1" key="$2"
+    local len=${#input}
+    local i=0 depth=0 in_string=0 escape=0
+    local cur_string="" pending_key=""
+    local value_start=-1 value_depth=0
+    local c j peek
+
+    while ((i < len)); do
+        c="${input:i:1}"
+
+        if ((in_string)); then
+            if ((escape)); then
+                escape=0
+            elif [[ "$c" == "\\" ]]; then
+                escape=1
+            elif [[ "$c" == '"' ]]; then
+                in_string=0
+                if ((depth == 1)) && ((value_start == -1)); then
+                    j=$((i + 1))
+                    while ((j < len)); do
+                        peek="${input:j:1}"
+                        [[ "$peek" == ' ' || "$peek" == $'\t' || "$peek" == $'\n' || "$peek" == $'\r' ]] || break
+                        ((j++))
+                    done
+                    if ((j < len)) && [[ "${input:j:1}" == ':' ]]; then
+                        pending_key="$cur_string"
+                    else
+                        pending_key=""
+                    fi
+                fi
+                cur_string=""
+            else
+                cur_string+="$c"
+            fi
+            ((i++))
+            continue
+        fi
+
+        case "$c" in
+        '"')
+            in_string=1
+            cur_string=""
+            ;;
+        '{')
+            if ((value_start == -1)) && ((depth == 1)) && [[ "$pending_key" == "$key" ]]; then
+                value_start=$i
+                value_depth=1
+            elif ((value_start >= 0)); then
+                ((value_depth++))
+            fi
+            ((depth++))
+            ;;
+        '}')
+            if ((value_start >= 0)); then
+                ((value_depth--))
+                if ((value_depth == 0)); then
+                    printf '%s' "${input:value_start:i - value_start + 1}"
+                    return 0
+                fi
+            fi
+            ((depth--))
+            ;;
+        esac
+        ((i++))
+    done
+
+    return 1
+}
+
 pre_tool_use_error_fallback() {
     local failed_exit_code="$1"
     local raw_input="${2:-}"
@@ -58,7 +144,7 @@ pre_tool_use_error_fallback() {
 
     if [[ -n "$raw_input" ]]; then
         for field in toolArgs toolArgsRaw tool_input; do
-            args_scope="$(printf '%s' "$raw_input" | grep -Eo "\"$field\"[[:space:]]*:[[:space:]]*\\{[^}]*\\}" | head -n 1)"
+            args_scope="$(_pre_tool_use_extract_top_level_object "$raw_input" "$field" || true)"
             [[ -n "$args_scope" ]] && break
         done
 

@@ -1017,6 +1017,54 @@ instruction-thinning surfaces):
       overlap between the new shared baseline bullet and pre-existing
       delete-related bullets in the same files; plan-note accuracy) required
       no action — both were explicitly non-blocking.
+
+      Third review round (reviewer agent via `/review-diff` on commit
+      `52e7fb7`, verdict FAIL, explicitly instructed to hunt adversarially
+      since 2 rounds in a row had each found a live bypass): found 2 more
+      empirically-confirmed Critical bypasses, both rooted in one shared cause
+      — the flat `[^}]*`-bounded regex extraction had no JSON nesting-depth
+      awareness. (1) A nested decoy object placed before the real `command`
+      key inside `toolArgs` (for example
+      `{"toolArgs":{"decoy":{"command":"..."},"command":"..."}}`) made the
+      regex stop at the decoy's own `}`, truncating the real key out of
+      scope. (2) A same-named decoy `toolArgs` key nested inside an unrelated
+      sibling object, positioned earlier in raw text than the real top-level
+      key, won because the extraction had no concept of nesting depth. Given
+      the whack-a-mole pattern across 3 rounds of literal-shape patches, this
+      round replaced the extraction entirely instead of adding a third patch:
+      a new `_pre_tool_use_extract_top_level_object()` — a small,
+      dependency-free, brace-and-string-aware scanner (tracks quote/escape
+      state and brace depth character-by-character, distinguishes a JSON key
+      from a JSON value by peeking past whitespace for a following `:`, and
+      only matches a key at depth 1, i.e. the payload's outermost object
+      level) that correctly captures the full, properly brace-balanced value
+      for `toolArgs`/`toolArgsRaw`/`tool_input` regardless of what is nested
+      inside or where a same-named decoy sits elsewhere in the payload.
+      Adversarially tested well beyond the 2 confirmed findings: escaped
+      quotes and escaped braces inside command values, a non-object (string)
+      `toolArgs` value, a `null` `toolArgs` value correctly falling through to
+      `tool_input` (matching jq's real `//` semantics), and a
+      whitespace/multi-line-spanning `toolArgs` object — all confirmed correct
+      by direct execution. Performance-checked with a ~5KB payload (0.147s,
+      well inside the hook's 10s `timeoutSec` budget). Fixed 1 shellcheck
+      finding introduced by the new scanner (SC1003, an ambiguous single-quote
+      backslash literal — reworded to a clear double-quoted `"\\"`). Fixed the
+      1 remaining Minor finding: the round-2 grammar fix for `CLAUDE.md`'s
+      delete bullet was itself still ambiguous (an em-dash aside without a
+      following comma); reworded with parentheses instead. Added 6 more
+      regression tests covering both confirmed bypasses plus the 4 additional
+      adversarial cases. Verified: `bats tests/shell/pre-tool-use.bats` 43/43
+      pass (38 + 5 new); `bash tests/scripts/ai/test-pre-tool-use.sh` 42/42
+      pass; `shellcheck` on all 3 files together exits 0 after the SC1003 fix;
+      `validate-ai-config.php`, `validate-ai-catalog.php` exit 0 clean. Noted
+      but explicitly out of
+      scope: `bats tests/shell/` (full suite) shows 2 pre-existing failures in
+      `doctor.bats` (catalog.json/catalog.md/BROWSE.md drift) caused by the
+      concurrent, unrelated session's in-progress files (confirmed via `grep`
+      that `catalog.json`'s only references to this round's touched files are
+      a pre-existing, unaffected metadata entry for `pre-tool-use.sh`'s path
+      and description, not its internals) — not this session's regression,
+      left for that session to resolve on its own commit.
 - [ ] P0: Phase 6.2 — agent duty vs permission parity (F-3, F-5): audit every shipped
       agent template (`templates/core/agents/**`, `templates/optional/agents/**`)
       against the permissions it ships with; fix templates where a declared duty
