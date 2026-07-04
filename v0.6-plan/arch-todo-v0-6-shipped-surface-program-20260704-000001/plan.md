@@ -601,12 +601,32 @@ Phase 4 — PRD/task workflow family (merges C-3, C-3A, C-4, C-4A, C-5):
       `validate-adapter-drift.php --fail-on-warn` and `validate-install-surface.php`
       byte-identical to the pre-slice baseline (`diff` exit 0 on both — zero new
       findings).
-- [ ] P2: Phase 4.3 — only after reachability rules from Phase 0 exist: add skills or
+- [x] P2: Phase 4.3 — only after reachability rules from Phase 0 exist: add skills or
       commands wrappers under `templates/skills/**` / `templates/commands/**` where a
       runtime genuinely needs them. Each new wrapper must name its guaranteed
-      reachability path or it is not added.
-- [ ] P1: Phase 4 exit gate — no wrapper duplicates contract text; each new file has a
-      reachability entry; validator gate passes.
+      reachability path or it is not added. Done (evaluated, none added): the
+      Phase 4.1 `prd-and-tasks` capability already gets full multi-runtime
+      reachability from the established `templates/workflows/**` mechanism (renders
+      to `.github/prompts/*.prompt.md`, `.github/skills/*/SKILL.md`,
+      `.opencode/skills/*/SKILL.md`, `.opencode/commands/*.md` — the same 4-surface
+      projection used by all 18 prior workflow entries, confirmed in
+      `docs/ai/shipped-surface-inventory.md`'s workflows/** row). No runtime lacks a
+      reachable entry point for it, so no standalone `templates/skills/**`/
+      `templates/commands/**` wrapper is genuinely needed; adding one would violate
+      this phase's own reachability-first gate by creating a duplicate route to the
+      same capability. `templates/skills/**` and `templates/commands/**` stay at
+      their existing 2/4-file counts.
+- [x] P1: Phase 4 exit gate — no wrapper duplicates contract text; each new file has a
+      reachability entry; validator gate passes. Done: `prd-and-tasks.md` references
+      (not restates) `clarification-and-handoff` and `architecture-plan-writer`; its
+      reachability entry is recorded in `docs/ai/shipped-surface-inventory.md`'s
+      workflows/** row (Phase 4.3 confirmed no additional wrapper is needed or
+      added). Full validator gate re-run at exit: `validate-ai-config.php`,
+      `validate-ai-catalog.php`, `validate-catalog-drift.php` exit 0 clean;
+      `validate-install-surface.php` and `validate-adapter-drift.php --fail-on-warn`
+      show only the same pre-existing findings plus the Phase 4.1-disclosed new
+      soft-max/missing-reference warnings, confirmed unchanged since Phase 4.2's
+      `diff` checks.
 
 Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..16, A-15, B-8, B-9, B-11, B-12, C-6..9):
 
