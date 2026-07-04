@@ -61,8 +61,8 @@
         "root:github-copilot-prompt": 19,
         "root:github-copilot-skill": 20,
         "root:opencode-agent": 14,
-        "root:opencode-command": 20,
-        "root:opencode-skill": 22,
+        "root:opencode-command": 21,
+        "root:opencode-skill": 23,
         "root:php-reference": 3,
         "root:root-doc": 19,
         "root:schema": 1,
@@ -2545,6 +2545,14 @@
         {
             "scope": "root",
             "type": "opencode-command",
+            "name": "prd-and-tasks",
+            "path": ".opencode/commands/prd-and-tasks.md",
+            "runtime": "opencode",
+            "description": "Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-command",
             "name": "project-context",
             "path": ".opencode/commands/project-context.md",
             "runtime": "opencode",
@@ -2733,6 +2741,14 @@
             "path": ".opencode/skills/post-install-setup/SKILL.md",
             "runtime": "opencode",
             "description": "Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-skill",
+            "name": "prd-and-tasks",
+            "path": ".opencode/skills/prd-and-tasks/SKILL.md",
+            "runtime": "opencode",
+            "description": "Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan"
         },
         {
             "scope": "root",

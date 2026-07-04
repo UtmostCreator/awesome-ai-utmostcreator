@@ -115,6 +115,8 @@ Safe next step: <NEXT_STEP>
 
 ## 11) Workflow Notes
 
+- Task-to-capability router: `docs/ai/capabilities/README.md` — check it before
+  writing new procedure text; extend an existing capability at `>=75%` overlap.
 - Capability composition hints: `<CAPABILITY_COMPOSITION_NOTES>`
 - Release safety notes: `<RELEASE_SAFETY_NOTES>`
 - Known gotcha themes: `<KNOWN_GOTCHA_THEMES>`

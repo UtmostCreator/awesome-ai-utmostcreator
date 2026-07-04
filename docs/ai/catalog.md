@@ -43,8 +43,8 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / github-copilot-prompt` - 19
 - `root / github-copilot-skill` - 20
 - `root / opencode-agent` - 14
-- `root / opencode-command` - 20
-- `root / opencode-skill` - 22
+- `root / opencode-command` - 21
+- `root / opencode-skill` - 23
 - `root / php-reference` - 3
 - `root / root-doc` - 19
 - `root / schema` - 1
@@ -213,6 +213,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|new-feature|`.opencode/commands/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-command`|plan-slice|`.opencode/commands/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`opencode-command`|post-install-setup|`.opencode/commands/post-install-setup.md`|Guided post-install setup for installed projects|
+|`opencode-command`|prd-and-tasks|`.opencode/commands/prd-and-tasks.md`|Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan|
 |`opencode-command`|project-context|`.opencode/commands/project-context.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`opencode-command`|regression-test|`.opencode/commands/regression-test.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`opencode-command`|release-safety|`.opencode/commands/release-safety.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
@@ -237,6 +238,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|new-feature|`.opencode/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-skill`|plan-slice|`.opencode/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
 |`opencode-skill`|post-install-setup|`.opencode/skills/post-install-setup/SKILL.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
+|`opencode-skill`|prd-and-tasks|`.opencode/skills/prd-and-tasks/SKILL.md`|Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan|
 |`opencode-skill`|project-context|`.opencode/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`opencode-skill`|regression-test|`.opencode/skills/regression-test/SKILL.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`opencode-skill`|release-safety|`.opencode/skills/release-safety/SKILL.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|

@@ -665,10 +665,42 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       bounded Phase-3-style thinning slice, not this audit phase. Conclusion: no
       unsafe or `>=75%`-triggering duplication found; no consolidation was safely
       actionable beyond what Phase 3 already completed.
-- [ ] P2: Phase 5.2 — strengthen `templates/capabilities/README.md` (33 lines) into an
+- [x] P2: Phase 5.2 — strengthen `templates/capabilities/README.md` (33 lines) into an
       operational task-to-capability router; strengthen
       `core/project-context.template.md` and `core/project/**` starter docs (this single
-      slice replaces both Track A chunk 4 and Track B chunk 6 — deduplicated).
+      slice replaces both Track A chunk 4 and Track B chunk 6 — deduplicated). Done:
+      research clarified the router target: `packages/ai-universal-rules/templates/capabilities/README.md`
+      (34 lines) is a source-repo-only contributor doc referenced only from
+      `packages/ai-universal-rules/docs/CAPABILITY-MODEL.md` (never installed —
+      confirmed absent from `tools/ai/install/packs.php`); the actual shipped,
+      agent-read router is `docs/ai/capabilities/README.md` (self-sourced in
+      `packs.php`, `source == target`, only 3 lines). Strengthened that file
+      (3 -> 29 lines): a 9-row task-signal-to-capability table covering all 9
+      shipped capabities, a composition-order rule (`project-context` first,
+      task-specific capability, `verify-change` last), and a "when to add a new
+      capability" note citing the `>=75%` overlap rule. Left
+      `templates/capabilities/README.md` untouched — its contributor-facing content
+      is accurate and serves a different audience; forcing it into router shape
+      would duplicate the real router, not strengthen anything. Cross-referenced
+      the router from `templates/core/project-context.template.md` §11 (and hand-
+      synced the rendered `docs/ai/project-context.md`, verified via `diff` —
+      placeholder differences only) and from `templates/core/project/README.md`
+      (hand-synced this repo's already-materialized `docs/ai/project/README.md`
+      too, even though its `skip-if-exists` merge strategy means the installer
+      itself would never re-render it). Fixed one validator regression during the
+      slice: an early draft of the router's "Adding A New Capability" section used
+      backtick-quoted bare filenames (`CAPABILITY.md`, `checklist.md`, etc.) that
+      `validate-ai-config.php` correctly flagged as broken path references (same
+      class of finding as the Phase 4.2 `.claude/agents` fix); reworded to describe
+      the file roles without asserting unresolvable literal paths. User-approved
+      generator run (repeat of the Phase 4.1 pattern): `php tools/ai/generate-ai-catalog.php`
+      to resync `catalog.json`/`docs/ai/catalog.md` after the router's description
+      text changed. Verified: `validate-ai-config.php`, `validate-ai-catalog.php`
+      exit 0 clean; `validate-adapter-drift.php --fail-on-warn` and
+      `validate-install-surface.php` byte-identical to the Phase 4.2 baseline
+      (`diff` exit 0, zero new findings); `ai-doc-check.sh --check`
+      generated-artifacts section clean after the regen (only the expected
+      phantom-stub-surfaces file-count increase from Phase 4.1's new files).
 - [ ] P2: Phase 5.3 — add example-driven anti-pattern guidance (hidden assumptions,
       overcomplication, drive-by changes, weak success criteria) as a shipped examples
       surface referenced from the behavioral baseline.
