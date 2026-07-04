@@ -799,7 +799,7 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       Verified: `validate-ai-config.php`, `validate-ai-catalog.php` exit 0 clean;
       `validate-adapter-drift.php --fail-on-warn` and `validate-install-surface.php`
       byte-identical to the Phase 5.5 baseline (zero new findings).
-- [ ] P1: Phase 5.7 — portable policy compilation (B-11, strengthened by external
+- [x] P1: Phase 5.7 — portable policy compilation (B-11, strengthened by external
       gap-list validation and by field evidence F-1/L-2 that hand-authored per-runtime
       policy drifts): define one canonical policy source (the existing
       `docs/ai/command-policy.tiers.yaml` plus the script-access manifest are the
@@ -807,7 +807,34 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       OpenCode `permission` blocks, Copilot hook policy, Claude settings — with drift
       detection between compiled outputs and the source. Decision-and-design in this
       program; compiler implementation needs separate approval. Check:
-      `php tools/ai/validate-command-policy.php`.
+      `php tools/ai/validate-command-policy.php`. Done (design/decision only, no
+      compiler built, per this phase's own scope): research found the "proto-
+      version" is already further along than assumed — `tools/ai/compile-command-policy.php`
+      already compiles `docs/ai/command-policy.tiers.yaml` +
+      `docs/ai/script-registry.json` into `.github/hooks/scripts/command-policy.compiled.sh`
+      (Copilot), checked by `validate-command-policy.php`. The real, confirmed gap:
+      the OpenCode `opencode.jsonc` `permission` block is hand-authored separately
+      in a structurally different shape (`read`/`edit`/`bash` sub-blocks vs. the
+      tiers file's `tier0`/`tier1`/... `allow`/`ask`/`deny` lists), with no
+      compiled-output check between the two — exactly the F-1/L-2 drift risk.
+      Claude has no hook/permission enforcement surface at all, so there is
+      nothing to compile to there (already correctly documented, not a gap).
+      Recorded the decision in a new "Portable Policy Compilation (Design
+      Decision, Not Yet Implemented)" section in `docs/ai/command-policy.md`:
+      extend the existing compiler with an OpenCode-shaped output target and a
+      matching drift check, rather than building a second compiler; flagged the
+      implementation as needing separate approval since it touches a live tool-
+      execution safety gate. Fixed 2 validator regressions during the slice: a
+      draft referenced `templates/core/opencode.json` and bare `opencode.json` as
+      backtick paths that `validate-ai-config.php` correctly flagged as broken
+      path references (same class as the Phase 4.2/5.2 fixes); reworded to the
+      full resolvable path and to `opencode.jsonc` (the actual rendered filename).
+      Verified: `validate-ai-config.php`, `validate-ai-catalog.php` exit 0 clean;
+      `php tools/ai/validate-command-policy.php` reports `"status": "passed"`
+      (policy_score 85, only pre-existing minor metadata-completeness findings
+      unrelated to this doc change); `validate-adapter-drift.php --fail-on-warn`
+      and `validate-install-surface.php` byte-identical to the Phase 5.6 baseline
+      (zero new findings).
 - [ ] P2: Phase 5.8 — decide whether additional maintained index surfaces are needed to
       keep shipped-surface inventory and runtime differences accurate over time (A-14);
       add a contributor quickstart layer only if routing gaps remain after Phases 0 and
