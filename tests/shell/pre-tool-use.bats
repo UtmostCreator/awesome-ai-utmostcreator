@@ -282,3 +282,35 @@ EOF
     echo "$output" | jq . >/dev/null
     echo "$output" | jq -e '.permissionDecisionReason' >/dev/null
 }
+
+@test "F-1: fail-safe fallback ignores a decoy read-only field outside toolArgs" {
+    # Reviewer-found bypass: a sibling key elsewhere in the payload that
+    # happens to contain a read-only-looking "command" value must not flip
+    # the real (mutating) toolArgs.command to allow. The fallback must scope
+    # its match to toolArgs/toolArgsRaw/tool_input only.
+    output="$(_with_broken_jq '{"toolName":"bash","toolArgs":{"command":"rm -rf /important-data"},"decoyField":{"command":"git status"}}' || true)"
+    [ "$(_decision "$output")" = "deny" ]
+}
+
+@test "F-1: fail-safe fallback allows cat/wc with a real argument" {
+    # Regression for a dead-code regex bug: the cat/wc alternatives previously
+    # embedded an extra space that, combined with the trailing anchor, only
+    # matched the bare literal "cat"/"wc" with no argument.
+    output="$(_with_broken_jq '{"toolName":"bash","toolArgs":{"command":"cat README.md"}}')"
+    [ "$(_decision "$output")" = "allow" ]
+}
+
+@test "helper module source failure still emits valid deny JSON" {
+    local fakeroot
+    fakeroot="$(mktemp -d)"
+    mkdir -p "$fakeroot/scripts/ai/internal/pre-tool-use"
+    cp "$SCRIPT" "$fakeroot/scripts/ai/pre-tool-use.sh"
+    cp "$REPO_ROOT/scripts/ai/internal/pre-tool-use/20-decide.sh" "$fakeroot/scripts/ai/internal/pre-tool-use/"
+    printf '%s\n' 'this is not valid bash syntax {{{ [[[' >"$fakeroot/scripts/ai/internal/pre-tool-use/10-helpers.sh"
+
+    output="$(echo '{"toolName":"bash","toolArgs":{"command":"git status"}}' | bash "$fakeroot/scripts/ai/pre-tool-use.sh" 2>/dev/null || true)"
+    rm -rf "$fakeroot"
+
+    echo "$output" | jq . >/dev/null
+    [ "$(_decision "$output")" = "deny" ]
+}

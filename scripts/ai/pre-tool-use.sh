@@ -41,11 +41,23 @@ POLICY_FILE="${AI_POLICY_FILE:-${COPILOT_POLICY_FILE:-policies/ai/policy.yaml}}"
 MAINTENANCE_STATE_FILE="${AI_MAINTENANCE_STATE_FILE:-${COPILOT_MAINTENANCE_STATE_FILE:-.ai-logs/maintenance-mode.json}}"
 # maintenance mode allows repository-delivered scripts only
 
+# Last-resort fallback for the one gap the F-1 subshell fix does not cover on
+# its own: if a module below fails to `source` (missing/unreadable file,
+# syntax error), `pre_tool_use_error_fallback` itself would not be defined
+# yet, and the script would otherwise die with "command not found" (exit 127)
+# and no decision JSON — the exact original F-1 symptom, via a different
+# trigger. This function is deliberately self-contained: no dependency on
+# anything sourced below.
+_ai_pre_tool_use_emergency_fallback() {
+    printf '{"permissionDecision":"deny","permissionDecisionReason":"internal hook error: failed to load scripts/ai/internal/pre-tool-use/%s; denying by default. Check the file exists and is readable."}\n' "$1"
+    exit 1
+}
+
 _ai_pre_tool_use_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/internal/pre-tool-use"
 # shellcheck source=scripts/ai/internal/pre-tool-use/10-helpers.sh
-source "$_ai_pre_tool_use_dir/10-helpers.sh"
+source "$_ai_pre_tool_use_dir/10-helpers.sh" || _ai_pre_tool_use_emergency_fallback "10-helpers.sh"
 # shellcheck source=scripts/ai/internal/pre-tool-use/20-decide.sh
-source "$_ai_pre_tool_use_dir/20-decide.sh"
+source "$_ai_pre_tool_use_dir/20-decide.sh" || _ai_pre_tool_use_emergency_fallback "20-decide.sh"
 
 case "${1:-}" in
 --help | -h)

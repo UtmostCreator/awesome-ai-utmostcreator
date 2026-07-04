@@ -932,6 +932,62 @@ instruction-thinning surfaces):
       (zero new findings — expected, since `scripts/ai/**` and `tests/**` are
       self-sourced top-level trees, not `packages/ai-universal-rules/templates/**`,
       so no separate template/render sync was needed).
+
+      Review-fix round (reviewer agent via `/review-diff`, verdict FAIL): found
+      a Major security regression in `pre_tool_use_error_fallback` — its
+      read-only classifier matched anywhere in the raw JSON payload, so a
+      decoy sibling key (for example `"decoyField":{"command":"git status"}`)
+      could flip a genuinely mutating `toolArgs.command` (for example `rm -rf
+      /important-data`) to `allow`; empirically confirmed with the reviewer's
+      exact repro. Fixed by scoping the match to the actual
+      `toolArgs`/`toolArgsRaw`/`tool_input` object only (extracted with a
+      dependency-free `grep -Eo` pass), mirroring the primary path's own field
+      fallback order. Also fixed 2 Minor findings: (1) the `cat`/`wc`
+      alternatives had a dead-code regex bug (embedded space plus trailing
+      anchor together only matched the bare literal with no argument) — now
+      matches like the other alternatives; (2) a `source` failure in
+      `10-helpers.sh`/`20-decide.sh` themselves would leave
+      `pre_tool_use_error_fallback` undefined and reproduce the original F-1
+      symptom via "command not found" (exit 127) — added a self-contained
+      `_ai_pre_tool_use_emergency_fallback` in the root script (no dependency
+      on the modules it guards) so a source failure still emits valid deny
+      JSON. Added 3 more regression tests for all three fixes (decoy-field
+      bypass, cat/wc with a real argument, source-failure). Verified again
+      after the fixes: `bats tests/shell/pre-tool-use.bats` 35/35 pass (32 +
+      3 new); `bash tests/scripts/ai/test-pre-tool-use.sh` 42/42 pass;
+      `shellcheck` on all 3 files together exits 0 (resolves the SC1091 source
+      references, matching the reviewer's own independent shellcheck
+      cross-check); `validate-ai-config.php`, `validate-ai-catalog.php` exit 0
+      clean; `validate-adapter-drift.php --fail-on-warn` and
+      `validate-install-surface.php` byte-identical to the Phase 5.8 baseline
+      aside from a concurrent, unrelated ticket's in-progress edits to
+      `architecture-plan-writer.md` (a separate active session's
+      `arch-todo-speckit-comparison-adoption-20260704-223159` ticket, correctly
+      out of this slice's scope — confirmed via `git status` that no files
+      were deleted and that ticket's own plan explicitly marks this repo's
+      dirty `10-helpers.sh` as out of its scope).
+
+      Separately, per explicit user request while reviewing the concurrent-
+      session situation: strengthened the shared file-deletion policy across
+      all three runtimes. `copilot-instructions.template.md` (+ rendered
+      `.github/copilot-instructions.md`) Hard Stops previously had only a
+      generic "destructive action is needed" bullet with no explicit
+      deletion callout (unlike `AGENTS.md`'s existing "Do not delete files...
+      without approval."); added an explicit "any file deletion is needed...
+      ask first, every time" bullet. `CLAUDE.md`'s delete bullet was narrower
+      ("large example areas" / adapter surfaces only); broadened to any file.
+      Added one new shared Behavioral Baseline bullet (snippet source, both
+      templates, both rendered outputs, and the `docs/ai/snippets/` mirror):
+      "Never delete a file, and never overwrite one whose existing content is
+      unexpected or unfamiliar, without asking first... treat unfamiliar
+      existing content as a pre-existing change to flag, not something to
+      silently delete or clobber." This reinforces the rule for every current
+      and future agent on all three runtimes — including
+      `.opencode/agents/super-implementer.md`, which was deliberately left
+      untouched per the user's explicit instruction, since it already inherits
+      this baseline via `AGENTS.md`'s always-on `instructions[]` entry and via
+      the actual `pre-tool-use.sh` runtime enforcement (bare `rm` denied,
+      delete-edit-payloads ask), rather than needing an agent-specific edit.
 - [ ] P0: Phase 6.2 — agent duty vs permission parity (F-3, F-5): audit every shipped
       agent template (`templates/core/agents/**`, `templates/optional/agents/**`)
       against the permissions it ships with; fix templates where a declared duty

@@ -27,13 +27,27 @@ EOF
 # read-only command with no output. Deny (with a remediation message) whenever
 # read-only cannot be confirmed; this stays fail-closed for anything mutating
 # or unknown.
+#
+# Review finding (fixed): the classifier must only look at the actual
+# executed-args object (`toolArgs`/`toolArgsRaw`/`tool_input`, mirroring the
+# same field fallback order `pre_tool_use_decide` uses), never the whole raw
+# payload as unstructured text. Matching anywhere in the payload lets an
+# unrelated sibling key (for example a decoy field that happens to contain the
+# literal text `"command":"git status"`) flip a genuinely mutating command
+# (in the real `toolArgs.command`) to "allow". Scoping first closes that gap;
+# see the smuggled-payload regression test in tests/shell/pre-tool-use.bats.
 pre_tool_use_error_fallback() {
     local failed_exit_code="$1"
     local raw_input="${2:-}"
+    local args_scope
 
-    if [[ -n "$raw_input" ]] && printf '%s' "$raw_input" | grep -Eiq '"(command|commandLine|text)"[[:space:]]*:[[:space:]]*"(git[[:space:]]+(status|diff|log|show|branch|grep|blame|ls-files|rev-parse|describe)|ls|pwd|rg|fd|cat[[:space:]]|wc[[:space:]]|(bash[[:space:]]+)?(\./)?scripts/ai/(ai-search|preview-file|query-usage|ai-verify|run-repo-tests|run-test-focused|git-branch-origin)\.sh)([[:space:]"]|$)'; then
-        printf '{"permissionDecision":"allow","permissionDecisionReason":"internal hook error (exit %s) after the command was classified as read-only by the fail-safe fallback; allowing. See docs/ai/tool-policy.md to diagnose the hook failure."}\n' "$failed_exit_code"
-        exit 0
+    if [[ -n "$raw_input" ]]; then
+        args_scope="$(printf '%s' "$raw_input" | grep -Eo '"(toolArgs|toolArgsRaw|tool_input)"[[:space:]]*:[[:space:]]*\{[^}]*\}' | head -n 1)"
+        if [[ -n "$args_scope" ]] && printf '%s' "$args_scope" | grep -Eiq '"(command|commandLine|text)"[[:space:]]*:[[:space:]]*"(git[[:space:]]+(status|diff|log|show|branch|grep|blame|ls-files|rev-parse|describe)|ls|pwd|rg|fd|cat|wc)([[:space:]"]|$)' ||
+            printf '%s' "$args_scope" | grep -Eiq '"(command|commandLine|text)"[[:space:]]*:[[:space:]]*"(bash[[:space:]]+)?(\./)?scripts/ai/(ai-search|preview-file|query-usage|ai-verify|run-repo-tests|run-test-focused|git-branch-origin)\.sh([[:space:]"]|$)'; then
+            printf '{"permissionDecision":"allow","permissionDecisionReason":"internal hook error (exit %s) after the command was classified as read-only by the fail-safe fallback; allowing. See docs/ai/tool-policy.md to diagnose the hook failure."}\n' "$failed_exit_code"
+            exit 0
+        fi
     fi
 
     printf '{"permissionDecision":"deny","permissionDecisionReason":"internal hook error (exit %s); could not confirm the command is read-only, so denying by default. Re-run scripts/ai/pre-tool-use.sh with the same JSON payload manually to diagnose."}\n' "$failed_exit_code"
