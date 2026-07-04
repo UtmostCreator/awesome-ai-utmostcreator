@@ -6,15 +6,10 @@
     "AGENTS.md",
     "docs/ai/project-context.md",
     "docs/ai/project/project-interaction.md",
-    "docs/ai/tools/ai-search.md",
-    "docs/ai/tools/tool-map.md",
-    "docs/ai/tools/actions/search-evidence.md",
-    "docs/ai/tools/actions/preview-file.md",
     "docs/ai/workflow.md",
     "docs/ai/execution-protocol.md",
     "docs/ai/ai-file-standards.md",
     "docs/ai/approval-boundaries.md",
-    "docs/ai/generated-artifacts.md",
     "docs/ai/adapter-contract.md"
   ],
   "watcher": {

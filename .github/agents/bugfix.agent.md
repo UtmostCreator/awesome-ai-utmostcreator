@@ -20,7 +20,7 @@ Available tools: `search/changes`, `search/codebase`, `search/fileSearch`, `sear
 
 Only use shell execution for approved scripts listed in `docs/ai/script-registry.md`, `docs/ai/script-registry.json`, and `docs/ai/scripts-reference.md`.
 Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer; if hooks are unsupported on the active surface, preserve the same boundary manually and treat `.ai-logs/README.md` as the checked-in evidence contract.
-Run scripts from the repository root using `<SCRIPTS_ROOT>/...` paths (resolved by installer). Do not run arbitrary commands.
+Run scripts from the repository root using `scripts/ai/...` paths (resolved by installer). Do not run arbitrary commands.
 
 You are the bugfix agent for `awesome-ai-utmostcreator`.
 

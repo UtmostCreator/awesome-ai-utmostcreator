@@ -167,6 +167,7 @@ $liveFiles = [
     'docs/ai/capabilities/preview-environments/CAPABILITY.md',
     'docs/ai/capabilities/service-boundary-patterns/CAPABILITY.md',
     'docs/ai/capabilities/evidence-first-execution/CAPABILITY.md',
+    'docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md',
     'packages/ai-universal-rules/manifest.json',
     'packages/ai-universal-rules/catalog.json',
     'packages/ai-universal-rules/docs/BROWSE.md',

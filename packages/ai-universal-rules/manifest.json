@@ -36,6 +36,7 @@
     "templates/capabilities/verify-change/CAPABILITY.md",
     "templates/capabilities/review-diff/CAPABILITY.md",
     "templates/capabilities/evidence-first-execution/CAPABILITY.md",
+    "templates/capabilities/clarification-and-handoff/CAPABILITY.md",
     "templates/instructions/execution-protocol.instructions.md",
     "templates/shared/guardrails/AI-GUARDRAILS.md"
   ],

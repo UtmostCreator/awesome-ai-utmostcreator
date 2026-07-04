@@ -169,7 +169,22 @@ emit_results() {
             emit_json "ok" "$matches_json"
         fi
     else
-        printf '%s\n' "$out"
+        # Plain (non-JSON) output. The JSON branch caps matches at g_max_results;
+        # mirror that here so a degenerate match-everything query (e.g.
+        # `tracked .`) cannot dump every line of every tracked file. Without this
+        # cap, plain mode streams the entire backend output unbounded.
+        local total_lines capped
+        if [[ -z "$out" ]]; then
+            return 0
+        fi
+        total_lines="$(printf '%s\n' "$out" | wc -l | tr -d ' ')"
+        if [[ "$total_lines" -gt "$g_max_results" ]]; then
+            printf '%s\n' "$out" | head -n "$g_max_results"
+            printf '... (truncated: showed %s of %s matches; use --max-results N or a narrower query)\n' \
+                "$g_max_results" "$total_lines" >&2
+        else
+            printf '%s\n' "$out"
+        fi
     fi
 }
 

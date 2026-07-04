@@ -50,6 +50,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 
 - `.github/hooks/scripts/command-policy.compiled.sh`
 - `.github/hooks/scripts/tool-guardian.sh`
+- `bin/local.sh`
 - `install-ai-kit.sh`
 - `packages/ai-universal-rules/templates/github/hooks/scripts/command-policy.compiled.sh`
 - `packages/ai-universal-rules/templates/github/hooks/scripts/tool-guardian.sh`

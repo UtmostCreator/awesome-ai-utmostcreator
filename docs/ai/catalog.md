@@ -25,7 +25,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / opencode-command-template` - 4
 - `package / operations-doc` - 6
 - `package / optional-template` - 13
-- `package / package-capability` - 42
+- `package / package-capability` - 43
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
 - `package / workflow-template` - 18
@@ -34,7 +34,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / adapter-hook-script` - 1
 - `root / adapter-policy` - 1
 - `root / ai-script` - 27
-- `root / capability` - 16
+- `root / capability` - 17
 - `root / cli` - 1
 - `root / exporter` - 1
 - `root / generator` - 1
@@ -42,7 +42,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 18
 - `root / github-copilot-skill` - 19
-- `root / opencode-agent` - 13
+- `root / opencode-agent` - 14
 - `root / opencode-command` - 20
 - `root / opencode-skill` - 21
 - `root / php-reference` - 3
@@ -91,6 +91,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`capability`|agent-observability-and-evidence|`docs/ai/capabilities/agent-observability-and-evidence/CAPABILITY.md`|Capture command evidence, verification results, and handoff context without exposing secrets.|
 |`capability`|authorization-and-tool-governance|`docs/ai/capabilities/authorization-and-tool-governance/CAPABILITY.md`|Use policy gates and approval boundaries before running commands that mutate state or broaden access.|
 |`capability`|bug-regression|`docs/ai/capabilities/bug-regression/CAPABILITY.md`|Reproduce a bug with the smallest practical test or deterministic check, apply a minimal fix, and prove the regression is closed.|
+|`capability`|clarification-and-handoff|`docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md`|Decide when to ask instead of assume, and preserve enough context in every handoff|
 |`capability`|config-change-safety|`docs/ai/capabilities/config-change-safety/CAPABILITY.md`|Validate schemas and preserve existing behavior when changing JSON, YAML, shell, or runtime configuration.|
 |`capability`|dependency-upgrade|`docs/ai/capabilities/dependency-upgrade/CAPABILITY.md`|Evaluate and implement a dependency upgrade with attention to compatibility, verification depth, and release risk.|
 |`capability`|docs-sync|`docs/ai/capabilities/docs-sync/CAPABILITY.md`|Update documentation when behavior, commands, paths, or installation workflow changes.|
@@ -199,6 +200,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-agent`|repository-reviewer|`.opencode/agents/repository-reviewer.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`opencode-agent`|researcher|`.opencode/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`opencode-agent`|reviewer|`.opencode/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
+|`opencode-agent`|script-runner|`.opencode/agents/script-runner.md`|Use when work should run ONLY this repository's registered scripts/ai/*.sh wrappers (read/analysis allowed, mutating ones gated by ask) and every other bash command, file edit, and external action is blocked|
 |`opencode-agent`|workflow-auditor|`.opencode/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`opencode-command`|architecture-plan|`.opencode/commands/architecture-plan.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`opencode-command`|bug-regression|`.opencode/commands/bug-regression.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
@@ -361,6 +363,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`package-capability`|Bug Regression Examples|`packages/ai-universal-rules/templates/capabilities/bug-regression/examples.md`|- Reproduction: add a feature test for applying the same coupon twice through cart recalculation|
 |`package-capability`|Bug Regression Gotchas|`packages/ai-universal-rules/templates/capabilities/bug-regression/gotchas.md`|- Do not weaken assertions to make the new test pass.|
 |`package-capability`|Bug Regression Reference|`packages/ai-universal-rules/templates/capabilities/bug-regression/reference.md`|Use this file for stable regression-testing facts:|
+|`package-capability`|Clarification And Handoff Capability|`packages/ai-universal-rules/templates/capabilities/clarification-and-handoff/CAPABILITY.md`|Decide when to ask instead of assume, and preserve enough context in every handoff|
 |`package-capability`|Dependency Upgrade Capability|`packages/ai-universal-rules/templates/capabilities/dependency-upgrade/CAPABILITY.md`|Evaluate and implement a dependency upgrade with attention to compatibility, verification depth, and release risk.|
 |`package-capability`|Dependency Upgrade Checklist|`packages/ai-universal-rules/templates/capabilities/dependency-upgrade/checklist.md`|1. What dependency is changing and why?|
 |`package-capability`|Dependency Upgrade Examples|`packages/ai-universal-rules/templates/capabilities/dependency-upgrade/examples.md`|- Scope: web app framework from one minor version to the next|

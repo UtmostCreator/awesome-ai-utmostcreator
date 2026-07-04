@@ -1,9 +1,30 @@
 # Maintainer Guide
 
 Developer and maintainer reference for working on the kit itself (not for installing it).
+This document is **source-repo-only**: it is not listed in `docs/ai/installed-files.md`
+and never ships to installed targets.
 
 If you only want to install the kit into a project, use the [installation guide](../../readme-install.md)
 instead.
+
+## Repository States (Read This First)
+
+Every doc that touches install-time surfaces must state which of these states it
+describes. This repository is in the **self-installed source kit** state:
+
+| State | What it means | `.github/`, `docs/`, `scripts/` |
+| --- | --- | --- |
+| Source kit | The kit's template sources and tooling, before self-install | would not exist yet |
+| Self-installed source kit (**this repo**) | The kit installed into itself; rendered outputs are **tracked** and refreshed by render | tracked in git, regenerated from `packages/ai-universal-rules/templates/**` |
+| Installed target | An external project the kit was installed into | created by the installer, owned by that project |
+
+## Start Here / Edit Here / Generated Here
+
+| Layer | Paths | Rule |
+| --- | --- | --- |
+| **Start here** (control entrypoints) | `docs/ai/maintainer-guide.md` (maintainers), `docs/ai/validation.md` (change-type routing), `docs/ai/integration-matrix.md` (coverage + surface classification) | route every kit change through the change-type table in `validation.md` |
+| **Edit here** (source layer) | `packages/ai-universal-rules/templates/**`, `docs/ai/**` files without a GENERATED header, `tools/ai/**`, `schemas/ai/**` | the only hand-edit layer for shipped behavior |
+| **Generated here** (render outputs) | root `AGENTS.md`, `CLAUDE.md`, `.github/**` adapter files, `.opencode/**`, files with a `GENERATED — DO NOT EDIT` header, `docs/ai/generated/**` | never hand-edit; re-render from the source layer and gate with validators |
 
 ## Repository Layout
 
@@ -19,18 +40,25 @@ instead.
 | `tests/`      | PHPUnit + Bash test suites and fixtures                        | Maintainers, CI                         |
 | `tools/`      | **PHP installer, validators, generators**, AI tooling CLI      | Maintainers, AI agents                  |
 
-### Untracked Folders (generated or installed at runtime)
+### Installer-Produced Folders (tracked here, installer output in targets)
 
-These folders exist on disk after installation or generation but are not committed to this repository:
+Because this repository is a **self-installed source kit**, these folders are tracked
+in git here. In installed targets the installer creates them; here they are refreshed
+by render/self-install and must never be hand-edited where a GENERATED header applies:
 
-| Folder              | Purpose                                                               | How It Appears                       |
-| ------------------- | --------------------------------------------------------------------- | ------------------------------------ |
-| `.github/`          | GitHub Copilot adapter (instructions, agents, prompts, skills, hooks) | Created by installer or self-install |
-| `docs/`             | Canonical AI workflow documentation and generated artifacts           | Created by installer or self-install |
-| `scripts/`          | Bash helper scripts (search, verify, context, hooks)                  | Created by installer or self-install |
-| `.ai-logs/`         | Local AI evidence logs (gitignored)                                   | Created at runtime by AI tools       |
-| `.repomix-context/` | Generated context bundles for AI consumption                          | Created by context packing scripts   |
-| `vendor/`           | Composer dependencies                                                 | Created by `composer install`        |
+| Folder     | Purpose                                                                | State in this repo | State in installed targets |
+| ---------- | ---------------------------------------------------------------------- | ------------------ | -------------------------- |
+| `.github/` | GitHub Copilot adapter (instructions, agents, prompts, skills, hooks)  | tracked, rendered  | created by installer       |
+| `docs/`    | Canonical AI workflow docs (`docs/ai/generated/**` stays gitignored)   | tracked            | created by installer       |
+| `scripts/` | Bash helper scripts (search, verify, context, hooks)                   | tracked            | created by installer       |
+
+### Untracked Folders (runtime or dependency output)
+
+| Folder              | Purpose                                       | How It Appears                     |
+| ------------------- | ---------------------------------------------- | ---------------------------------- |
+| `.ai-logs/`         | Local AI evidence logs (gitignored)            | Created at runtime by AI tools     |
+| `.repomix-context/` | Generated context bundles for AI consumption   | Created by context packing scripts |
+| `vendor/`           | Composer dependencies                          | Created by `composer install`      |
 
 ### Root-Level Files Explained
 
