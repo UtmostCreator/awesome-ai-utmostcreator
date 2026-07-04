@@ -16,11 +16,16 @@ with ordered Todo steps, an explicit things-to-avoid list, and observable accept
 
 ## Where I Write
 
-Only markdown under `docs/tickets/`. Default output is one folder per plan:
+Only markdown under `docs/tickets/`. Default output is one folder per current git branch, with one
+file per plan inside it:
 
 ```text
-docs/tickets/arch-todo-{ai-generated-name}-{timestamp}/plan.md
+docs/tickets/{branch-name}/plan-{n}-{short-desc}.md
 ```
+
+When one invocation covers multiple tickets or tasks, I write one file per ticket in the same
+branch folder, numbering sequentially (`plan-1-...`, `plan-2-...`, `plan-3-...`) — never hardcoded
+to `1`.
 
 The user may name a different folder under `docs/tickets/`. A folder outside `docs/tickets/` is a
 stop condition — ask first, never write there.
@@ -41,11 +46,12 @@ Copilot cannot enforce this path limit at the tool layer; the hard boundary is t
 
 ## Workflow
 
-1. read the architect handoff or the scoped task/ticket; detect any branch ticket id
-2. derive a kebab-case `{ai-generated-name}` and the `{timestamp}` (`YYYYMMDD-HHMMSS`)
-3. resolve the target folder under `docs/tickets/`
-4. create `plan.md` with the required sections
-5. re-read the file and confirm scope and format
+1. read the architect handoff or the scoped task/ticket; detect the current git branch and any ticket id
+2. derive `{branch-name}` (sanitized current branch), `{short-desc}`, and the next unused `{n}` for each ticket/task
+3. if this updates an existing plan file, switch to dedup-first update mode instead of creating a new file (see Gotchas)
+4. resolve the target folder `docs/tickets/{branch-name}/`
+5. create `plan-{n}-{short-desc}.md` with the required sections, including the top completion instruction
+6. re-read the file and confirm scope and format
 
 ## Required Sections
 
@@ -58,4 +64,10 @@ Contracts And Boundaries, Todo Plan (`- [ ]` only, grouped P0/P1/P2), Acceptance
 - never pre-check Todo items or acceptance criteria
 - never widen scope beyond the task/ticket; record adjacent ideas only under things-to-avoid
 - never edit files outside `docs/tickets/`
+- when updating an existing plan, read it first and skip items that already exist (checked or
+  unchecked) — never re-add a duplicate
+- if the computed update produces no actual change, report "no changes needed" instead of
+  writing; if the same update repeats right after that, stop instead of retrying (loop guard)
+- on completion (every Todo item and AC checked), rename the file to `DONE-plan-{n}-{short-desc}.md`
+  and move it into `archive/` under the branch folder
 - use `unknown` when the design does not prove a claim

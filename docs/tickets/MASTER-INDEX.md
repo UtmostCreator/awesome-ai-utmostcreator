@@ -48,6 +48,7 @@ covers the mega-plan decomposition. This file covers all plans.
 | — | D3c (numeric scoring) | numeric rubric + thresholds | human-approved numeric rubric | medium | backlog |
 | — | Backlog items 90/95/110/115/120/125 | see Plan G index | each needs own architect pass | mixed | backlog |
 | — | markdown-surface-reduction | Phase 1: `git rm -r docs/tickets/archive` (16 files, clean tree, isolated commit); Phase 2: read-only investigate `tools/ai/tools/{actions,examples}`. Capability sub-files + adapters + templates KEPT (runtime contract) | none (Phase 1) | low | **actionable (plan only)** |
+| — | speckit-comparison-adoption | 3-phase / 9-slice program (S1–S9): resolve `.ai/project.yml` unknowns + re-render, pass context-budget validator, relocate `v0.5-upgrade/`+`v0.6-plan/` into `docs/tickets/`, FR-###/T-### plan discipline, durable `spec.md`, stronger clarify gate, new analyze-plan capability, adapter content-parity validator, decision-gated surface consolidation | installer `--apply` (S1/S2/S4/S5/S7); `git mv` approval (S3); owner decision (S9); reviewer (S7), reviewer+release-auditor (S8) | mixed (S1/S7/S8 medium) | **actionable (plan only)** |
 
 > NOTE: P1–P4 are completed by the current **uncommitted working tree** (verified: 721
 > tests pass, all surface validators exit 0). They are "done" pending commit, not pending
@@ -135,6 +136,7 @@ These landed; their folders were moved to `docs/tickets/archive/completed-202606
 | `arch-todo-doc-surface-hardening-20260614-104815` (Plan C) | done (verified) | items 30 (committed) / 40b / 85 (working tree) / 75 (docs ≥26 lines) / 80 (`dedup-analysis.md`) all complete; safe to archive after commit |
 | `arch-todo-agent-score-frontmatter-20260614-104816` (Plan D) | D1+D2 done; **D3a done (draft)**; D3b gated | per-agent value SOURCE now exists (`docs/ai/agent-scores.yaml`, draft); D3b needs human approval + re-render |
 | `arch-todo-ai-search-external-access-20260614-104818` (Plan F) | blocked → architect | re-framed as a SECURITY FIX (confinement + secret block); release-safety review recorded |
+| `arch-todo-speckit-comparison-adoption-20260704-223159` | actionable (plan only) | spec-kit comparison program: 3 phases / 9 slices (S1–S9), execute in order; S1 first; S9 decision-gated; excludes pre-existing dirty `scripts/ai/internal/pre-tool-use/10-helpers.sh` from all commits |
 
 ### Index (not an implementation slice)
 
