@@ -835,11 +835,26 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       unrelated to this doc change); `validate-adapter-drift.php --fail-on-warn`
       and `validate-install-surface.php` byte-identical to the Phase 5.6 baseline
       (zero new findings).
-- [ ] P2: Phase 5.8 — decide whether additional maintained index surfaces are needed to
+- [x] P2: Phase 5.8 — decide whether additional maintained index surfaces are needed to
       keep shipped-surface inventory and runtime differences accurate over time (A-14);
       add a contributor quickstart layer only if routing gaps remain after Phases 0 and
       5.6, and only for shipped docs (A-16 — README-level routing in this source repo
-      is out of program scope under the shipped-files constraint).
+      is out of program scope under the shipped-files constraint). Done: decision is
+      no new index surface and no separate quickstart layer are needed. Audited
+      current shipped-doc ship-status first (`docs/ai/maintainer-guide.md` is
+      explicitly source-repo-only per its own header, not a candidate for this
+      shipped-docs-only decision) and confirmed the remaining routing surfaces are
+      shipped and already sufficient: `docs/ai/project-context.md` (entrypoint),
+      `docs/ai/workflow.md` + `docs/ai/capabilities/README.md` (task routing,
+      strengthened Phase 5.2), `docs/ai/agents.md` (agent routing, fixed Phase
+      5.6), `docs/ai/integration-matrix.md` + `docs/ai/shipped-surface-inventory.md`
+      (coverage/reachability), and this file's Change-Type Routing table
+      (maintainer change routing). Recorded the decision as an "Index Surface
+      Sufficiency (Decision)" section in `docs/ai/validation.md`, explicitly
+      re-stating the A-16 README-level out-of-scope boundary. Verified:
+      `validate-ai-config.php`, `validate-ai-catalog.php` exit 0 clean;
+      `validate-adapter-drift.php --fail-on-warn` and `validate-install-surface.php`
+      byte-identical to the Phase 5.7 baseline (zero new findings).
 - [ ] P2: Phase 5 exit gate — final program review confirms the three tracks reinforce
       each other; `bash scripts/ai/ai-verify.sh .` as the closing broad check.
 
