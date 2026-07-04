@@ -10,7 +10,7 @@
 pre_tool_use_decide() {
     local input tool_name tool_args_raw command compact strict_allowlist executed_script
 
-    input="$(cat)"
+    input="${1:-}"
     if [[ -z "$input" ]]; then
         deny "JSON tool request required on stdin"
         exit 1
