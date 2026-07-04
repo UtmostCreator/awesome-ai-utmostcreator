@@ -28,6 +28,7 @@ Deterministic catalog generated from installer registries.
 - `base` (18 items)
 - `adapter-copilot` (9 items)
 - `adapter-opencode` (7 items)
+- `adapter-claude` (1 items)
 - `capabilities-extended` (2 items)
 - `capabilities-governance` (2 items)
 - `policy-pack` (3 items)

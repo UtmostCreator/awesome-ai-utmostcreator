@@ -129,6 +129,13 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-search/SKILL.md', 'target' => '.opencode/skills/ai-search/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md', 'target' => '.opencode/skills/ai-scripts/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
+        // P0 scope (Claude adapter parity plan, docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000):
+        // renders the same canonical agent source as adapter-copilot/adapter-opencode into
+        // .claude/agents/*.md via the Claude sub-agent renderer. CLAUDE.template.md and the
+        // .claude/settings.json permission merge are P1 scope, added in a follow-up slice.
+        'adapter-claude' => [
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/core/agents', 'target' => '.claude/agents', 'install_type' => 'claude-agents', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+        ],
         'capabilities-extended' => [
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/bug-regression', 'target' => 'docs/ai/capabilities/bug-regression', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/release-safety', 'target' => 'docs/ai/capabilities/release-safety', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],

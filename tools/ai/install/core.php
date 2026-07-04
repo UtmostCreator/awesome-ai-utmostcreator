@@ -12,6 +12,7 @@ require_once __DIR__ . '/docs.php';
 require_once __DIR__ . '/toolchain.php';
 require_once __DIR__ . '/script-runner.php';
 require_once __DIR__ . '/copilot-agent-renderer.php';
+require_once __DIR__ . '/claude-agent-renderer.php';
 require_once __DIR__ . '/backup.php';
 require_once __DIR__ . '/migrations.php';
 
@@ -231,6 +232,9 @@ function aiInstallerRun(array $argv): int
             }
         } elseif (($item['install_type'] ?? '') === 'opencode-agents') {
             aiInstallerCopyDirAsOpenCodeAgents($src, $dest);
+        } elseif (($item['install_type'] ?? '') === 'claude-agents') {
+            $scriptsRoot = $config['targetRoot'] . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai';
+            aiInstallerCopyDirAsClaudeAgents($src, $dest, $scriptsRoot);
         } elseif (($item['install_type'] ?? '') === 'skill-dirs') {
             aiInstallerCopyDirAsSkillDirs($src, $dest);
         } elseif (($item['install_type'] ?? '') === 'opencode-commands') {

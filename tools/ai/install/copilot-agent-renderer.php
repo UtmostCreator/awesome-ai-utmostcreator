@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/copilot-agent-tool-registry.php';
 require_once __DIR__ . '/generated-header.php';
+require_once __DIR__ . '/canonical-agent-frontmatter.php';
 
 /**
  * Renders a canonical OpenCode agent template as a Copilot VS Code-native .agent.md file.
@@ -21,35 +22,12 @@ require_once __DIR__ . '/generated-header.php';
  */
 function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, string $scriptsRoot): string
 {
-    // --- Extract OpenCode frontmatter ---
-    $frontMatter = [];
-    $body = $srcContent;
-    if (preg_match('/^---\R(.*?)\R---\R?/s', $srcContent, $fm)) {
-        $rawFm = $fm[1];
-        $body = substr($srcContent, strlen($fm[0]));
-
-        // Parse simple key: value lines (not nested YAML — we only need top-level scalars)
-        foreach (explode("\n", $rawFm) as $line) {
-            if (preg_match('/^(\w[\w-]*):\s+(.+)$/', trim($line), $m)) {
-                $frontMatter[$m[1]] = trim($m[2]);
-            }
-        }
-
-        // Collect allowed bash commands for the policy section
-        $allowedBash = [];
-        if (preg_match('/bash:\s*\R((?:\s+.+\R)*)/s', $rawFm, $bashMatch)) {
-            foreach (explode("\n", $bashMatch[1]) as $bashLine) {
-                if (preg_match("/^\\s+'([^']+)':\\s*allow/", $bashLine, $bm)) {
-                    $cmd = $bm[1];
-                    if ($cmd !== '*') {
-                        $allowedBash[] = $cmd;
-                    }
-                }
-            }
-        }
-    } else {
-        $allowedBash = [];
-    }
+    // --- Extract OpenCode frontmatter (shared parser; see canonical-agent-frontmatter.php) ---
+    $parsed      = aiInstallerParseCanonicalAgentFrontmatter($srcContent);
+    $rawFm       = $parsed['rawFm'];
+    $body        = $parsed['body'];
+    $frontMatter = $parsed['frontMatter'];
+    $allowedBash = $parsed['allowedBash'];
 
     $id          = $frontMatter['id'] ?? $agentId;
     $description = $frontMatter['description'] ?? '';
@@ -58,7 +36,7 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
 
     // Optional agent_assessment rubric: carried through from the source template only
     // when present, preserving keys/values exactly. Absent in the template -> absent here.
-    $assessmentBlock = isset($rawFm) ? aiCopilotExtractAssessmentBlock($rawFm) : '';
+    $assessmentBlock = $rawFm !== '' ? aiCopilotExtractAssessmentBlock($rawFm) : '';
 
     // Format agent name: title-case from kebab-case
     $name = implode(' ', array_map('ucfirst', explode('-', $id)));
