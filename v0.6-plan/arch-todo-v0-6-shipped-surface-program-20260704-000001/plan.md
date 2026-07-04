@@ -774,10 +774,31 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       `validate-ai-catalog.php` exit 0 clean; `validate-adapter-drift.php
       --fail-on-warn` and `validate-install-surface.php` byte-identical to the
       Phase 5.4 baseline (zero new findings).
-- [ ] P2: Phase 5.6 — tighten routing-role overlap across the shipped docs
+- [x] P2: Phase 5.6 — tighten routing-role overlap across the shipped docs
       `docs/ai/agents.md`, `docs/ai/AGENTS-MANIFEST.md` (ship-status: unknown — verify
       first), and `docs/ai/workflow.md` so each has one clear job (A-6); separate
       user-facing navigation from maintainer-facing internals in the touched docs (A-7).
+      Done: verified ship-status first — `docs/ai/AGENTS-MANIFEST.md` IS shipped
+      (`tools/ai/install/packs.php`, self-sourced, `merge_strategy: skip-if-exists`,
+      also listed in `docs/ai/installed-files.md:147`), resolving the "unknown"
+      flag. The 3-doc role split was already sound (A-7 essentially already
+      satisfied): `docs/ai/agents.md` = user-facing "which agent to start with"
+      navigation, `docs/ai/AGENTS-MANIFEST.md` = maintainer-facing lifecycle/risk
+      inventory (already self-labeled "lower authority... inventory/classification
+      aid" at its own line 93-94), `docs/ai/workflow.md` = task-flow sequence, not
+      agent-specific. Found and fixed one real A-6 defect instead: `agents.md`'s own
+      "Which Agent To Start With" table referenced 2 agents (`bugfix`, `docs`) that
+      were absent from its own "Live Agent Index" table above it, so a reader
+      following the file's own instructed order ("Use this file to decide which
+      agent to start with") would hit undefined agent names. Added the 6 missing
+      surface-specific agents (`bugfix`, `build-config`, `docs`, `infra-auditor`,
+      `super-implementer`, `upgrade`) to the Live Agent Index with their
+      GitHub-only/OpenCode-only constraint noted inline, matching the existing
+      `bootstrapper` row's pattern — the file is now internally consistent with
+      itself. No AGENTS-MANIFEST.md or workflow.md content changes were needed.
+      Verified: `validate-ai-config.php`, `validate-ai-catalog.php` exit 0 clean;
+      `validate-adapter-drift.php --fail-on-warn` and `validate-install-surface.php`
+      byte-identical to the Phase 5.5 baseline (zero new findings).
 - [ ] P1: Phase 5.7 — portable policy compilation (B-11, strengthened by external
       gap-list validation and by field evidence F-1/L-2 that hand-authored per-runtime
       policy drifts): define one canonical policy source (the existing
