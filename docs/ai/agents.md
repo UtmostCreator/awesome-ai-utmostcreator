@@ -16,14 +16,20 @@ Use this file to decide which agent to start with. For the exact shipped invento
 | Architect                | `architect`                | Scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation.                            |
 | Architecture Plan Writer | `architecture-plan-writer` | Persist a bounded architecture plan as a Todo markdown file under `docs/tickets/`; receives the architect handoff and never edits outside `docs/tickets/`. |
 | Bootstrapper             | `bootstrapper`             | OpenCode-internal: installing or rehydrating the repository AI workflow surface. Not shipped to installed projects and has no Copilot adapter file. |
+| Bugfix                   | `bugfix`                   | GitHub-only: reproduce, isolate, fix, and verify a reported bug with a minimal change.                                                         |
+| Build Config             | `build-config`             | GitHub-only: build, packaging, or verification config edits.                                                                                   |
 | Config Maintainer        | `config-maintainer`        | Changing editor, shell, runtime, or tool configuration while preserving current behavior.                                                      |
+| Docs                     | `docs`                     | GitHub-only: documentation alignment after behavior is already verified and settled.                                                           |
 | Implementer              | `implementer`              | A bounded implementation slice is clear and focused verification should happen in this repository.                                             |
+| Infra Auditor            | `infra-auditor`            | GitHub-only: dependency, build, release, or compatibility risk audit.                                                                          |
 | Refactorer               | `refactorer`               | Behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability.                       |
 | Release Auditor          | `release-auditor`          | Medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review.                              |
 | Repository Researcher    | `repository-researcher`    | Strict script-first repository researcher using ai-search before raw search.                                                                   |
 | Repository Reviewer      | `repository-reviewer`      | Strict script-first diff reviewer using ai-search and validator evidence.                                                                      |
 | Researcher               | `researcher`               | Read-only repository grounding before planning, implementation, or review.                                                                     |
 | Reviewer                 | `reviewer`                 | Reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification.                         |
+| Super Implementer        | `super-implementer`        | OpenCode-only: implementation slice variant with the same bounded-scope contract as Implementer.                                               |
+| Upgrade                  | `upgrade`                  | GitHub-only: dependency or platform upgrades; the strongest gates in the roster.                                                               |
 | Workflow Auditor         | `workflow-auditor`         | Reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims.                                            |
 <!-- markdownlint-enable MD060 -->
 
