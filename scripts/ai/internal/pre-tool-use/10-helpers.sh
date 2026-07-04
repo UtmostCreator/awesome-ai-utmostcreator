@@ -36,17 +36,40 @@ EOF
 # literal text `"command":"git status"`) flip a genuinely mutating command
 # (in the real `toolArgs.command`) to "allow". Scoping first closes that gap;
 # see the smuggled-payload regression test in tests/shell/pre-tool-use.bats.
+#
+# Second review finding (fixed): scoping to first-text-occurrence among
+# `toolArgs`/`toolArgsRaw`/`tool_input` is not the same as the primary path's
+# actual `.toolArgs // .toolArgsRaw // .tool_input` priority — `toolArgs` must
+# win whenever present, regardless of where it sits in the raw text, so each
+# field is tried independently in priority order instead of taking whichever
+# occurs first.
+#
+# Third review finding (fixed): a single `toolArgs` object with a duplicate
+# `command`/`commandLine`/`text` key (valid JSON; jq/JSON parsing is
+# last-key-wins) let the scoped-but-unstructured regex match on an earlier,
+# read-only-looking decoy value while the real, mutating value was the later
+# (winning) one. `grep -c` occurrence counting on the scoped object closes
+# this: more than one key match inside the same scope is ambiguous input for
+# a text-only classifier, so it denies rather than guessing which one wins.
 pre_tool_use_error_fallback() {
     local failed_exit_code="$1"
     local raw_input="${2:-}"
-    local args_scope
+    local args_scope="" field key_matches
 
     if [[ -n "$raw_input" ]]; then
-        args_scope="$(printf '%s' "$raw_input" | grep -Eo '"(toolArgs|toolArgsRaw|tool_input)"[[:space:]]*:[[:space:]]*\{[^}]*\}' | head -n 1)"
-        if [[ -n "$args_scope" ]] && printf '%s' "$args_scope" | grep -Eiq '"(command|commandLine|text)"[[:space:]]*:[[:space:]]*"(git[[:space:]]+(status|diff|log|show|branch|grep|blame|ls-files|rev-parse|describe)|ls|pwd|rg|fd|cat|wc)([[:space:]"]|$)' ||
-            printf '%s' "$args_scope" | grep -Eiq '"(command|commandLine|text)"[[:space:]]*:[[:space:]]*"(bash[[:space:]]+)?(\./)?scripts/ai/(ai-search|preview-file|query-usage|ai-verify|run-repo-tests|run-test-focused|git-branch-origin)\.sh([[:space:]"]|$)'; then
-            printf '{"permissionDecision":"allow","permissionDecisionReason":"internal hook error (exit %s) after the command was classified as read-only by the fail-safe fallback; allowing. See docs/ai/tool-policy.md to diagnose the hook failure."}\n' "$failed_exit_code"
-            exit 0
+        for field in toolArgs toolArgsRaw tool_input; do
+            args_scope="$(printf '%s' "$raw_input" | grep -Eo "\"$field\"[[:space:]]*:[[:space:]]*\\{[^}]*\\}" | head -n 1)"
+            [[ -n "$args_scope" ]] && break
+        done
+
+        if [[ -n "$args_scope" ]]; then
+            key_matches="$(printf '%s' "$args_scope" | grep -Eio '"(command|commandLine|text)"[[:space:]]*:' | wc -l)"
+            if [[ "$key_matches" -eq 1 ]] &&
+                { printf '%s' "$args_scope" | grep -Eiq '"(command|commandLine|text)"[[:space:]]*:[[:space:]]*"(git[[:space:]]+(status|diff|log|show|branch|grep|blame|ls-files|rev-parse|describe)|ls|pwd|rg|fd|cat|wc)([[:space:]"]|$)' ||
+                    printf '%s' "$args_scope" | grep -Eiq '"(command|commandLine|text)"[[:space:]]*:[[:space:]]*"(bash[[:space:]]+)?(\./)?scripts/ai/(ai-search|preview-file|query-usage|ai-verify|run-repo-tests|run-test-focused|git-branch-origin)\.sh([[:space:]"]|$)'; }; then
+                printf '{"permissionDecision":"allow","permissionDecisionReason":"internal hook error (exit %s) after the command was classified as read-only by the fail-safe fallback; allowing. See docs/ai/tool-policy.md to diagnose the hook failure."}\n' "$failed_exit_code"
+                exit 0
+            fi
         fi
     fi
 

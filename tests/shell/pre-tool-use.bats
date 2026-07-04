@@ -314,3 +314,26 @@ EOF
     echo "$output" | jq . >/dev/null
     [ "$(_decision "$output")" = "deny" ]
 }
+
+@test "F-1: fail-safe fallback enforces toolArgs priority over toolArgsRaw/tool_input" {
+    # Reviewer-found bypass: the primary path resolves .toolArgs // .toolArgsRaw
+    # // .tool_input in that priority order regardless of position in the raw
+    # text. A decoy tool_input appearing before the real toolArgs in raw text
+    # must not win just because it comes first.
+    output="$(_with_broken_jq '{"tool_input":{"command":"git status"},"toolArgs":{"command":"rm -rf /important-data"}}' || true)"
+    [ "$(_decision "$output")" = "deny" ]
+}
+
+@test "F-1: fail-safe fallback denies on a duplicate command key within toolArgs" {
+    # Reviewer-found bypass: valid JSON allows a duplicate key inside the same
+    # scoped object (JSON/jq semantics are last-key-wins). A text-only
+    # classifier cannot safely determine which value wins, so it must deny
+    # rather than match on whichever occurrence happens to look read-only.
+    output="$(_with_broken_jq '{"toolArgs":{"command":"git status","command":"rm -rf /important-data"}}' || true)"
+    [ "$(_decision "$output")" = "deny" ]
+}
+
+@test "F-1: fail-safe fallback still allows toolArgsRaw when toolArgs is absent" {
+    output="$(_with_broken_jq '{"toolArgsRaw":{"command":"git log"}}')"
+    [ "$(_decision "$output")" = "allow" ]
+}
