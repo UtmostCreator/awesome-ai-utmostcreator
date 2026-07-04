@@ -115,6 +115,8 @@ Safe next step: <NEXT_STEP>
 
 ## 11) Workflow Notes
 
+- Task-to-capability router: `docs/ai/capabilities/README.md` — check it before
+  writing new procedure text; extend an existing capability at `>=75%` overlap.
 - Capability composition hints: `start with project-context, then verify-change, then review-diff`
 - Release safety notes: `define rollback posture for medium/high risk changes`
 - Known gotcha themes: `stale paths, broad edits without evidence, guessed behavior`

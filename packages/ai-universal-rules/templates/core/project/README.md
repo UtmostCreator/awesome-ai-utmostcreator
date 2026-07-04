@@ -16,6 +16,10 @@ Reference these files from `.ai/project.yml` under `context.extraDocs:` so every
 instruction surface points back to them. They survive re-render because they are listed in
 `project.yml`, not embedded in generated files.
 
+Before adding project-specific workflow guidance here, check
+`docs/ai/capabilities/README.md`'s task-to-capability router first — it may already
+cover the workflow you are about to describe.
+
 ## What you can edit
 
 These three files (and `.ai/project.yml`, `docs/ai/project-stack.md`) are **user-owned**: edit
