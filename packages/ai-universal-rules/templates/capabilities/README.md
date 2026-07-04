@@ -22,6 +22,7 @@ Recommended next capabilities for many repositories:
 
 - `release-safety`
 - `dependency-upgrade`
+- `clarification-and-handoff`
 
 Tool adapters should stay thin:
 

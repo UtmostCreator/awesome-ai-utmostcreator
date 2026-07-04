@@ -35,17 +35,23 @@ Workflow rules:
 - Before changing code, config, docs, or workflow logic, search for similar existing patterns in the touched area and nearby owners and report the closest overlap as a percentage.
 - If overlap is roughly `>=75%`, flag reuse or replacement immediately and recommend updating the existing pattern instead of adding a duplicate.
 - After completing the change, run a touched-scope stale sweep on edited files and nearby references for stale methods, stale data assumptions, stale commands/paths, outdated docs, unresolved placeholders, and generated-output drift.
-- When the repository includes a tool map or command wrappers, load that routing first and prefer `rg`, `fd`, `ast-grep`/`sg`, and structured queries over raw `grep`, `find`, or broad file dumps.
+- When the repository includes a tool map or command wrappers, load that routing first (see `docs/ai/tools/tool-map.md`, which routes to `docs/ai/tools/ai-search.md` and the action docs under `docs/ai/tools/actions/`) and prefer `rg`, `fd`, `ast-grep`/`sg`, and structured queries over raw `grep`, `find`, or broad file dumps.
 - Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer; when a surface cannot auto-load repository hooks, preserve the same boundary manually and use `.ai-logs/` as the canonical local evidence root.
 - Document and flag any command, tool, verification failure, or permission block immediately in the completion report with exact command and status; do not silently omit failed checks.
-- Keep stable policy here and move procedural depth into capabilities, prompts, commands, or staged agents.
 - For non-trivial work, classify risk as `low`, `medium`, or `high` to choose review and verification depth.
-- Ground decisions in active code and configuration, not aspiration.
 - Do not invent systems, services, persistence layers, or infrastructure that are not present.
 - Escalate when ambiguity would change architecture, persistence shape, public interfaces, dependency surface, security posture, or rollout risk.
 - Say `unknown` when the repository does not prove something.
 - If a slice grows beyond roughly 6 files or 300-500 changed lines, pause and confirm it is still one bounded outcome.
-- Stop repeated review or fix loops after three iterations and surface unresolved tradeoffs clearly.
+
+## Behavioral Baseline
+
+- Ask instead of guessing when a repository fact, convention, or requirement is missing; do not invent new conventions.
+- Prefer simplicity over speculative abstraction; add structure only when the current task actually needs it.
+- Make surgical, task-scoped changes; avoid drive-by edits outside any task, including during bug fixes.
+- When trading speed for caution, bias toward caution, clarity, and evidence over speculative speed.
+- Verify an edit landed before continuing; never re-apply or re-append content after a blocked or failed edit — stop and report the exact blocked path instead.
+- Stop and report after 3 failed attempts to land or fix the same edit, or after 3 repeated review/fix-loop iterations; surface unresolved tradeoffs clearly.
 
 ## Approval Required Before Proceeding
 
@@ -74,10 +80,8 @@ and mark the missing external context or edit as a limitation.
 
 ## Core Engineering Rules
 
-- Keep behavior explicit.
-- Prefer existing repository patterns over introducing new ones.
+- Keep behavior explicit and prefer existing repository patterns over introducing new ones.
 - Keep orchestration and state ownership out of presentation code when the repository already separates those concerns.
-- Avoid unrelated refactors during bug fixes.
 - Do not modify inactive or legacy paths unless the task explicitly requires it.
 
 ## Read This First
@@ -90,6 +94,7 @@ Inspect the current implementation before making architectural or behavioral cha
 - `docs/ai/failure-handling.md` for blocked, failed, or partial work
 - `docs/ai/ai-file-standards.md` before adding or expanding AI workflow files
 - `docs/ai/agent-ops-checklist.md` and `docs/ai/integration-matrix.md` for agent operations and compatibility checks
+- `docs/ai/generated-artifacts.md` before reading, deleting, or regenerating anything under `docs/ai/generated/`
 
 ## Architecture Notes
 
@@ -108,10 +113,8 @@ Inspect the current implementation before making architectural or behavioral cha
 
 ## Entry Point Rules
 
-- Use prompt files or commands for recurring one-off tasks.
-- Use staged agents when fresh context, tool boundaries, or handoffs improve safety.
-- Use capability folders or skills for deeper optional procedures.
-- Do not turn this file into the only bug-fix, release, or migration workflow definition.
+- Use prompt files or commands for recurring one-off tasks, and staged agents when fresh context, tool boundaries, or handoffs improve safety.
+- Use capability folders or skills for deeper optional procedures; do not turn this file into the only bug-fix, release, or migration workflow definition.
 
 ## Execution Protocol
 
@@ -128,8 +131,7 @@ Minimum flow:
 
 ## Release and Migration Safety
 
-- For `medium` and `high` risk changes, define rollback or disable path before implementation.
-- For `medium` and `high` risk changes, define what observable signal confirms success after deployment.
+- For `medium` and `high` risk changes, define the rollback or disable path and the observable signal that confirms success after deployment.
 - Use a feature flag for `medium` or `high` risk behavior changes when practical.
 - For additive-only migrations, document rollback posture and proceed.
 - For migrations that drop, rename, or restructure existing data, use an expand-contract strategy.
@@ -164,8 +166,7 @@ Minimum flow:
 
 ## Evidence Expectations
 
-- State which command or check produced the claim.
-- Separate direct evidence from inference.
+- State which command or check produced the claim, and separate direct evidence from inference.
 - For behavior changes, name the focused test, flow, or assertion that proves the result.
 - For `medium` and `high` risk work, state rollback path and success signal alongside verification.
 - Do not report recommendations, assumptions, or unrun checks as completed work.
@@ -182,8 +183,7 @@ Minimum flow:
 
 ## Documentation Rules
 
-- Distinguish current implementation from future ideas.
-- Prefer code-verified statements over planning assumptions.
+- Distinguish current implementation from future ideas; prefer code-verified statements over planning assumptions.
 - Use exact commands that work in the repository.
 - Keep reusable workflow guidance in capability support files with examples and checklists.
 

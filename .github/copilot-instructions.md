@@ -35,7 +35,7 @@ Apply relevant files under `.github/instructions/`, especially context gate, too
 ## Copilot-Specific: Shell Script Enforcement
 
 Copilot VS Code built-in tools (`grep_search`, `read_file`, `file_search`, etc.) are preferred for search and read operations.
-However, for **verification, validation, workflow commands, and git forensics**, you MUST use `run_in_terminal` with the repository shell scripts listed in `.github/instructions/copilot-script-enforcement.instructions.md`.
+However, for **verification, validation, workflow commands, and git forensics**, you MUST use `run_in_terminal` with the repository shell scripts listed in `.github/instructions/copilot-script-enforcement.instructions.md`, restricted to entries in `docs/ai/script-registry.md` and `docs/ai/script-registry.json`.
 
 Mandatory before committing any code change:
 
@@ -48,59 +48,39 @@ Do not claim verification is complete without running at least one of these comm
 
 ## Working Style
 
-- Prefer the smallest safe change.
 - For non-trivial work, classify risk as `low`, `medium`, or `high` to set review and verification depth.
-- Read existing code before proposing structural changes.
+- Read existing code and follow established repository patterns before proposing structural changes or new abstractions.
 - When the repository includes a tool map or command wrappers, load that routing first and prefer `rg`, `fd`, `ast-grep`/`sg`, and structured queries over raw `grep`, `find`, or broad file dumps.
-- Follow established repository patterns before inventing new abstractions.
-- Keep this file policy-focused and use prompt files, skills, or agents for deeper procedures.
-- Treat the selected custom agent `.agent.md` tools list as the hard upper bound for tool use.
-- Do not let prompt files widen the selected agent tool surface; prompt-file `tools:` must be equal or narrower than the agent.
-- For repository shell work, prefer approved wrappers from `docs/ai/script-registry.md`, `docs/ai/script-registry.json`, and `docs/ai/scripts-reference.md` over ad hoc terminal commands.
+- Treat the selected custom agent `.agent.md` tools list as the hard upper bound for tool use; prompt-file `tools:` must be equal or narrower than the agent, never wider.
 - Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer; when the runtime supports repository hooks, keep them wired through `.github/hooks/tool-policy.json`, and when it does not, preserve the same boundary without claiming automatic enforcement.
-- Approval-free read-only commands should stay read-only: searches, file reads, diagnostics, diff/history inspection, and approved registry scripts.
-- Approval-free read-only commands include: `git status*`, `git diff*`, `git log*`, `bash scripts/ai/ai-search.sh *`, `AI_OUTPUT=json bash scripts/ai/ai-search.sh *`, `bash scripts/ai/preview-file.sh *`, `AI_OUTPUT=json bash scripts/ai/preview-file.sh *`, `bash scripts/ai/query-usage.sh *`, `bash scripts/ai/git-forensics.sh *`, and validator/check commands that do not mutate source.
+- Approval-free read-only commands stay read-only — searches, file reads, diagnostics, diff/history inspection, and approved registry scripts such as `git status*`, `git diff*`, `git log*`, `bash scripts/ai/ai-search.sh *`, `AI_OUTPUT=json bash scripts/ai/ai-search.sh *`, `bash scripts/ai/preview-file.sh *`, `AI_OUTPUT=json bash scripts/ai/preview-file.sh *`, `bash scripts/ai/query-usage.sh *`, `bash scripts/ai/git-forensics.sh *`, and validator/check commands that do not mutate source.
 - Ask for approval before making: `secrets, destructive changes, auth or billing changes`
 - A human approver must be able to explain each changed section well enough to own the merge.
-- Distinguish current implementation from planned or hypothetical systems.
-- Say `unknown` instead of guessing when repository evidence is missing.
+- Distinguish current implementation from planned or hypothetical systems, and say `unknown` instead of guessing when repository evidence is missing.
 - If a slice grows beyond roughly 6 files or 300-500 changed lines, pause and confirm it is still one bounded outcome.
-- Prefer reusable capability folders for workflow-specific guidance when the repository provides them.
+
+## Behavioral Baseline
+
+- Ask instead of guessing when a repository fact, convention, or requirement is missing; do not invent new conventions.
+- Prefer simplicity over speculative abstraction; add structure only when the current task actually needs it.
+- Make surgical, task-scoped changes; avoid drive-by edits outside any task, including during bug fixes.
+- When trading speed for caution, bias toward caution, clarity, and evidence over speculative speed.
+- Verify an edit landed before continuing; never re-apply or re-append content after a blocked or failed edit — stop and report the exact blocked path instead.
+- Stop and report after 3 failed attempts to land or fix the same edit, or after 3 repeated review/fix-loop iterations; surface unresolved tradeoffs clearly.
 
 ## Evidence-First Execution
 
-Follow `docs/ai/execution-protocol.md` for non-trivial planning, editing, review, and verification.
-
-Before edits:
-
-- classify task mode
-- check `git status --short`
-- inspect relevant diffs
-- avoid overwriting pre-existing user changes
-- keep edits inside declared scope
-
-Final responses for code changes must include changed files, verification status, rollback path for medium/high risk, and remaining risks.
+Follow `docs/ai/execution-protocol.md` and `.github/instructions/execution-protocol.instructions.md` for non-trivial planning, editing, review, and verification: classify task mode, inspect `git status --short` and relevant diffs, protect pre-existing user changes, keep edits inside declared scope, and end with changed files, verification status, rollback path for medium/high risk, and remaining risks.
 
 ## Core Workflow
 
-Default workflow:
-
-1. load task context
-2. identify affected files and targets
-3. classify risk
-4. check approval boundaries
-5. plan the smallest safe change
-6. implement
-7. verify
-8. report evidence
+Follow the default task flow in `docs/ai/workflow.md`: load task context -> identify affected files and targets -> classify risk -> check approval boundaries -> plan the smallest safe change -> implement -> verify -> report evidence.
 
 ## Quality Bar
 
-- Keep logic close to its existing owner.
-- Add focused tests when behavior changes.
+- Keep logic close to its existing owner and add focused tests when behavior changes.
 - Prioritize review around: `correctness, regressions, configuration drift`
-- Use `unknown` as the main verification command unless the task needs a narrower command first.
-- Start with the smallest relevant verification and escalate only when needed.
+- Use `unknown` as the main verification command, but start with the smallest relevant verification and escalate only when needed.
 - Use the verification ladder: focused proof first -> affected layer tests second -> broader repository verification third -> build as a smoke check when relevant -> release-safety review only when risk warrants it.
 - For `medium` and `high` risk changes, define rollback or disable path and post-deploy confirmation signal.
 - For migrations that drop, rename, or restructure existing data, use expand-contract.
@@ -112,8 +92,7 @@ Stop and ask or report a blocker when:
 
 - ownership is unclear
 - test failures are unexplained
-- task context is missing for implementation
-- a ticket id is referenced but no ticket description is provided or found in `docs/tickets/`
+- task context or a referenced ticket's description is missing (ticket ids are looked up in `docs/tickets/`)
 - the diff exceeds approved scope, or pre-existing working-tree changes fall outside it
 - destructive action is needed
 - generated artifacts drift unexpectedly
@@ -134,7 +113,5 @@ Stop and ask or report a blocker when:
 - Stronger VS Code posture: combine fine-grained custom-agent tools, terminal auto-approval allowlists, repo hook policy, and sandbox/network restrictions instead of relying on prompts alone.
 - Copilot terminal posture: allow simple read-only git and inventory commands, but do not auto-approve heredocs, inline interpreters (`python3`, `php -r`), write redirects, destructive git, or piped network installers; keep sandbox and network filters enabled.
 - Local evidence artifacts default to `.ai-logs/` as documented in `.ai-logs/README.md`.
-- Do not assume prompt file support on every Copilot surface.
-- Do not assume custom-agent properties, handoffs, or advanced workflows behave the same on every Copilot surface.
-- Do not imply tool features that are not clearly supported in the current environment.
-- Treat hooks, skills, and MCP as surface-aware features with explicit fallbacks.
+- Do not assume prompt file support, custom-agent properties, handoffs, or advanced workflows behave the same on every Copilot surface.
+- Treat hooks, skills, and MCP as surface-aware features with explicit fallbacks, and do not imply tool features that are not clearly supported in the current environment.

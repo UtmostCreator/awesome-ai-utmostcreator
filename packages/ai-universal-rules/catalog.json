@@ -43,7 +43,7 @@
         "package:opencode-command-template": 4,
         "package:operations-doc": 6,
         "package:optional-template": 13,
-        "package:package-capability": 42,
+        "package:package-capability": 43,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
         "package:workflow-template": 18,
@@ -52,7 +52,7 @@
         "root:adapter-hook-script": 1,
         "root:adapter-policy": 1,
         "root:ai-script": 27,
-        "root:capability": 16,
+        "root:capability": 17,
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
@@ -60,7 +60,7 @@
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 18,
         "root:github-copilot-skill": 19,
-        "root:opencode-agent": 13,
+        "root:opencode-agent": 14,
         "root:opencode-command": 20,
         "root:opencode-skill": 21,
         "root:php-reference": 3,
@@ -757,6 +757,14 @@
             "path": "packages/ai-universal-rules/templates/capabilities/bug-regression/reference.md",
             "runtime": "canonical",
             "description": "Use this file for stable regression-testing facts:"
+        },
+        {
+            "scope": "package",
+            "type": "package-capability",
+            "name": "Clarification And Handoff Capability",
+            "path": "packages/ai-universal-rules/templates/capabilities/clarification-and-handoff/CAPABILITY.md",
+            "runtime": "canonical",
+            "description": "Decide when to ask instead of assume, and preserve enough context in every handoff"
         },
         {
             "scope": "package",
@@ -1549,6 +1557,14 @@
             "path": "docs/ai/capabilities/bug-regression/CAPABILITY.md",
             "runtime": "canonical",
             "description": "Reproduce a bug with the smallest practical test or deterministic check, apply a minimal fix, and prove the regression is closed."
+        },
+        {
+            "scope": "root",
+            "type": "capability",
+            "name": "clarification-and-handoff",
+            "path": "docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md",
+            "runtime": "canonical",
+            "description": "Decide when to ask instead of assume, and preserve enough context in every handoff"
         },
         {
             "scope": "root",
@@ -2413,6 +2429,14 @@
             "path": ".opencode/agents/reviewer.md",
             "runtime": "opencode",
             "description": "Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "script-runner",
+            "path": ".opencode/agents/script-runner.md",
+            "runtime": "opencode",
+            "description": "Use when work should run ONLY this repository's registered scripts/ai/*.sh wrappers (read/analysis allowed, mutating ones gated by ask) and every other bash command, file edit, and external action is blocked"
         },
         {
             "scope": "root",

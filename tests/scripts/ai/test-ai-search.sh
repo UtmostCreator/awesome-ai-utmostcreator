@@ -572,6 +572,25 @@ expect_count "max-results 1 -> <=1" "<=" 1
 expect_jq "max-results echoed in limits" '.limits.max_results == 1'
 expect_jq "max-results truncation flagged" '.meta.truncated == true'
 
+# Regression: a degenerate match-everything query (e.g. `tracked .`) must not
+# stream unbounded output. JSON mode caps matches at g_max_results; plain mode
+# (no AI_OUTPUT=json) must apply the same cap instead of dumping every line of
+# every tracked file. See scripts/ai/internal/search/95-dispatch.sh emit_results.
+run_search tracked . "$phase2_repo"
+expect_status "tracked degenerate '.' JSON -> ok" "ok"
+expect_count "tracked degenerate '.' JSON capped at max_results" "<=" 100
+
+set +e
+PLAIN_OUT="$("$BASH_BIN" "$SCRIPT" tracked . "$phase2_repo" 2>/dev/null)"
+set -e
+PLAIN_LINES="$(printf '%s\n' "$PLAIN_OUT" | wc -l | tr -d ' ')"
+if [[ "$PLAIN_LINES" -le 100 ]]; then
+    printf '  PASS tracked degenerate '\''.'\'' plain mode bounded (%s <= 100 lines)\n' "$PLAIN_LINES"
+else
+    printf '  FAIL tracked degenerate '\''.'\'' plain mode unbounded (%s lines > 100)\n' "$PLAIN_LINES" >&2
+    exit 1
+fi
+
 # =============================================================================
 # Phase 2A — backward-compatible aliasing
 # =============================================================================
