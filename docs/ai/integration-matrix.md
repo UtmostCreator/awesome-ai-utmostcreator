@@ -6,9 +6,12 @@ This document is also the canonical coverage matrix: it maps every critical topi
 workflow-critical primitive to the surface that guarantees it loads on each runtime,
 and it classifies shipped template surfaces so dead files can be flagged.
 
-## Guaranteed-Load Surfaces Per Runtime
+## Guaranteed-Load Surfaces Per Runtime (Runtime Surface Matrix)
 
-A surface is **guaranteed-load** when the runtime loads it without any agent choice.
+This table and its notes are the maintained runtime surface matrix: the practical
+Copilot/OpenCode/Claude differences in how a shipped surface actually loads, without
+implying the runtimes are structurally equivalent. A surface is **guaranteed-load**
+when the runtime loads it without any agent choice.
 
 | Runtime | Always-on surfaces | Deterministic-load surfaces | Enforced (non-prompt) surfaces |
 |---|---|---|---|
@@ -78,6 +81,46 @@ Status: `covered` = guaranteed-load today; `partial` = present but not guarantee
 
 Thinning rule: no thinning slice may remove a surface named in this matrix until the
 matrix row names the replacement surface and the per-slice validator gate passes.
+
+## Semantic-Parity Review Methodology (B-10)
+
+Copilot, OpenCode, and Claude load shipped surfaces through different mechanisms
+(`applyTo` globs, `instructions[]` entries, prose "Read First" routing), so file
+structure diverges across runtimes by design. That divergence is not itself a defect.
+A reviewer checks **semantic** coverage parity, not structural parity, using this
+procedure whenever a slice thins, relocates, or merges a shipped surface:
+
+1. Identify every row in the Critical-Topic Coverage Matrix touched by the diff
+   (content added, removed, or relocated in an always-on or deterministic-load
+   surface for any runtime).
+2. For each affected runtime column, confirm the row's post-change owning surface
+   still satisfies its load-path class from the table above: always-on surfaces
+   must still load every session; deterministic-load surfaces must still resolve
+   their trigger (glob match, `instructions[]` entry, or a named path reachable from
+   an always-on surface per the Reachability Rules below).
+3. Diff the row's `Status` column (`covered` / `partial` / `gap`) before and after
+   the change. A `covered` -> `partial`/`gap` transition on any runtime is a
+   regression and blocks the slice unless this matrix is updated in the same slice
+   to name the replacement surface (the Thinning Rule above).
+4. Confirm cross-runtime asymmetry is explicit, not silent. Per
+   `docs/ai/adapter-contract.md` ("document the fallback instead of implying
+   parity"), a runtime that structurally cannot carry a topic (for example Claude's
+   lack of hook/permission enforcement) must say so in its matrix cell or in
+   "Runtime limitation notes" — a vague or empty cell where another runtime has a
+   concrete surface is a false-parity defect, not an accepted gap.
+5. Where file structures diverge (for example one topic split across two Copilot
+   instruction files but merged into a single OpenCode doc), compare by topic
+   content, not by file count or file name: list the specific rules that must
+   survive, then confirm each one survives on each runtime, regardless of which
+   file carries it.
+6. Run the per-slice validator gate (`docs/ai/validation.md`).
+   `validate-adapter-drift.php --fail-on-warn` catches missing canonical references
+   and oversized bodies but not topic-level semantic loss — steps 1-5 are the
+   human/reviewer-agent check that closes that gap; no validator performs them.
+7. Record the outcome in this matrix: update the row's `Status` cell and add a
+   dated note describing what moved and why coverage held (see the Phase 3.1/3.2
+   notes above for the expected shape), so later reviewers audit reasoning instead
+   of re-deriving it.
 
 ## Shipped Surface Role Classification
 
