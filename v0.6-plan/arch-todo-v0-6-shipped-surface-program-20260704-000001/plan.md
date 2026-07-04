@@ -630,7 +630,7 @@ Phase 4 — PRD/task workflow family (merges C-3, C-3A, C-4, C-4A, C-5):
 
 Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..16, A-15, B-8, B-9, B-11, B-12, C-6..9):
 
-- [ ] P2: Phase 5.1 — audit the 22 `templates/instructions/*.instructions.md` sources;
+- [x] P2: Phase 5.1 — audit the 22 `templates/instructions/*.instructions.md` sources;
       consolidate or reduce at the template layer only, with an audit note before any
       removal and coverage proof after. Use mechanical duplication evidence for this audit and for every thinning slice:
       `jscpd` with JSON reporter and a threshold gate for verbatim code/markdown
@@ -638,7 +638,33 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       optional differential sweep, and a MinHash/heading-chunk pass for paraphrased
       instruction prose. This mechanizes the repository's >=75% overlap rule
       (currently agent judgment) and produces before/after duplication percentages as
-      thinning proof. Do not use the abandoned phpcpd.
+      thinning proof. Do not use the abandoned phpcpd. Done: `jscpd` was not
+      installed; user approved `npx --yes jscpd` (on-demand fetch, no persistent
+      install, confirmed version 5.0.11). Ran it against all 22 instruction
+      templates (`--min-lines 3 --min-tokens 10`, JSON + console reporters):
+      **0 exact clones, 0.00% duplicated lines**. Note on tool scope, reported
+      honestly: jscpd's markdown format only tokenizes fenced code blocks (5 of the
+      22 files contain a bash fence; the other 17 produced zero comparable
+      "sources"), so this result is real evidence against verbatim *code-block*
+      duplication, not a full prose-duplication measurement — PMD CPD would hit the
+      same code-fence-only limitation for markdown, and no MinHash/heading-chunk
+      tool exists in this environment, so the paraphrased-prose sweep was done as a
+      manual qualitative read-through instead (documented as a gap, not silently
+      skipped). Qualitative findings: applyTo globs and rule content across the 22
+      files are legitimately distinct (registry rules vs. search-tool contract vs.
+      general tool preference vs. per-stack instruction sets); the closest
+      candidates (`ai-scripts.instructions.md`'s registry-doc-alignment bullet vs.
+      `ai-tooling.instructions.md`'s registry-PHP-source-alignment bullet) address
+      different alignment axes (docs-to-registry vs. PHP-source-to-registry), not a
+      genuine `>=75%` duplicate, so no merge was made. One structural observation
+      recorded for future reference, not acted on in this slice: 8 of the 22 files
+      carry `applyTo: '**'` (`approval-boundaries`, `base`, `context-gate`,
+      `copilot-script-enforcement`, `execution-protocol`, `security`, `targets`,
+      `tools` — all always-on for Copilot per the Phase 3 runtime matrix) totaling
+      ~408 lines always-on; re-auditing that cluster is a candidate for a future
+      bounded Phase-3-style thinning slice, not this audit phase. Conclusion: no
+      unsafe or `>=75%`-triggering duplication found; no consolidation was safely
+      actionable beyond what Phase 3 already completed.
 - [ ] P2: Phase 5.2 — strengthen `templates/capabilities/README.md` (33 lines) into an
       operational task-to-capability router; strengthen
       `core/project-context.template.md` and `core/project/**` starter docs (this single
