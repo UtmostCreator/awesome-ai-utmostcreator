@@ -735,6 +735,80 @@ class InstallerSafetyTest extends TestCase
         }
     }
 
+    public function testDirectInstallerClaudeInstallMakesInstalledSurfaceVisible(): void
+    {
+        // Permanent regression coverage for the Claude adapter parity plan
+        // (docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000, recommended
+        // follow-up recorded during the P0-P2 review pass), mirroring
+        // testDirectInstallerCopilotInstallMakesInstalledSurfaceVisible and
+        // testDirectInstallerOpenCodeInstallMakesInstalledSurfaceVisible above.
+        $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
+
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'install_ai_claude_visible_' . uniqid('', true);
+        $this->makeTargetRepo($target);
+
+        try {
+            $command = implode(' ', [
+                escapeshellarg((string) PHP_BINARY),
+                'tools/ai/install-ai-kit.php',
+                '--target',
+                escapeshellarg($target),
+                '--runtime',
+                'claude-code',
+                '--profile',
+                'claude',
+                '--force',
+            ]);
+
+            $result = $this->runTool($command);
+            $this->assertSame(0, $result['exit'], $result['stderr']);
+
+            $sourceAgents = array_values(array_filter(
+                $this->relativeGlob('packages/ai-universal-rules/templates/core/agents/*.md'),
+                function (string $relPath): bool {
+                    $content = (string) file_get_contents(self::$repoRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relPath));
+                    return !preg_match('/^---\R(.*?)\R---/s', $content, $fm) || !preg_match('/^hidden:\s*true\s*$/m', $fm[1]);
+                }
+            ));
+            $sourceWorkflows = $this->relativeGlob('packages/ai-universal-rules/templates/workflows/*.md');
+            $sourceCommands = $this->relativeGlob('packages/ai-universal-rules/templates/commands/*.md');
+            $installedAgents = $this->targetGlob($target, '.claude/agents/*.md');
+            $installedSkills = $this->targetGlob($target, '.claude/skills/*/SKILL.md');
+            $installedCommands = $this->targetGlob($target, '.claude/commands/*.md');
+
+            $this->assertCount(count($sourceAgents), $installedAgents, 'Claude install should expose every non-hidden canonical agent as a .claude/agents/*.md file');
+            $this->assertCount(count($sourceWorkflows), $installedSkills, 'Claude install should expose every workflow as a .claude/skills/*/SKILL.md file');
+            // Unlike OpenCode, Claude does NOT dual-ship workflows to .claude/commands/ too
+            // (Claude's own docs: skills and commands register the same slash command, and
+            // skills are recommended) - only templates/commands/*.md land in .claude/commands/.
+            $this->assertCount(count($sourceCommands), $installedCommands, 'Claude install should expose only templates/commands (not workflows) under .claude/commands/');
+
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'CLAUDE.md');
+            $settingsPath = $target . DIRECTORY_SEPARATOR . '.claude' . DIRECTORY_SEPARATOR . 'settings.json';
+            $this->assertFileExists($settingsPath);
+            $settings = json_decode((string) file_get_contents($settingsPath), true);
+            $this->assertIsArray($settings);
+            $this->assertContains('Bash(git status*)', $settings['permissions']['allow'] ?? []);
+            $this->assertContains('Bash(rm -rf *)', $settings['permissions']['deny'] ?? []);
+
+            // Confirm no Copilot/OpenCode adapter content leaked in under --runtime claude-code.
+            $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.opencode');
+            $this->assertDirectoryDoesNotExist($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents');
+
+            foreach (glob($target . DIRECTORY_SEPARATOR . '.claude' . DIRECTORY_SEPARATOR . 'agents' . DIRECTORY_SEPARATOR . '*.md') ?: [] as $file) {
+                $content = (string) file_get_contents($file);
+                $name = basename($file);
+                $this->assertStringContainsString('name:', $content, 'Claude agent must declare name frontmatter: ' . $name);
+                $this->assertStringContainsString('description:', $content, 'Claude agent must declare description frontmatter: ' . $name);
+                $this->assertStringNotContainsString("\nid:", $content, 'Claude agent must not carry the OpenCode id field: ' . $name);
+                $this->assertStringNotContainsString('permission:', $content, 'Claude agent must not carry the OpenCode permission block: ' . $name);
+                $this->assertStringNotContainsString('handoffs:', $content, 'Claude agent must not invent a handoffs field: ' . $name);
+            }
+        } finally {
+            $this->removeTree($target);
+        }
+    }
+
     public function testDirectInstallerOpenCodeWithoutTargetToolsShipsPlaceholderRegistryAndVerifier(): void
     {
         $this->skipIfToolchainMissing(['fd', 'ast-grep', 'scc']);
