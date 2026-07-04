@@ -54,6 +54,10 @@ Rules for this class of addition:
   ("Semantic-Parity Review Methodology") — compare topic-level coverage, not file
   structure, since Copilot/OpenCode/Claude load surfaces through different
   mechanisms by design.
+- Handoffs follow `docs/ai/integration-matrix.md` ("Handoff Mechanism Per Runtime"):
+  the prose "Recommended next step" sentence from `docs/ai/handoff-contract.md` is
+  the mandatory baseline on every runtime; Copilot's structured `handoffs:`
+  frontmatter (where used) is additive on top of it, never a replacement.
 
 ## Two Different "Drift" Concepts
 

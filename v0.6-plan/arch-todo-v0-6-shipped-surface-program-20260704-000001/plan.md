@@ -575,9 +575,32 @@ Phase 4 — PRD/task workflow family (merges C-3, C-3A, C-4, C-4A, C-5):
       warning class every other workflow file already carries — confirmed via `diff`
       against the pre-slice baseline, no unexpected findings); `ai-doc-check.sh --check`
       generated-artifacts section fully clean after the regen.
-- [ ] P1: Phase 4.2 — map runtime wrappers and fallback rules: where structured handoff
+- [x] P1: Phase 4.2 — map runtime wrappers and fallback rules: where structured handoff
       metadata is possible, where prose-only fallback applies; record in
-      `docs/ai/integration-matrix.md` and `docs/ai/adapter-contract.md`.
+      `docs/ai/integration-matrix.md` and `docs/ai/adapter-contract.md`. Done: added
+      a "Handoff Mechanism Per Runtime" table to `docs/ai/integration-matrix.md`,
+      grounded in a verified external fetch of VS Code's Custom Agents documentation
+      (code.visualstudio.com/docs/copilot/customization/custom-agents, fetched
+      2026-07-04): Copilot's `.github/agents/*.agent.md` supports structured
+      `handoffs:` frontmatter (`label`/`agent`/`prompt`/`send`/`model`) rendering a
+      clickable handoff button; OpenCode and Claude have no equivalent field (grep-
+      confirmed no `handoffs:` key exists in any shipped `.opencode/agents/**` file
+      or in VS Code's own documented Claude sub-agent frontmatter fields). Recorded
+      the fallback rule (Chunk 5 / C-5): the prose "Recommended next step" sentence
+      in `docs/ai/handoff-contract.md` is the mandatory baseline on every runtime;
+      structured metadata is additive only, never a replacement — this is the
+      false-parity guard for a future Phase 6.15 that actually adds `handoffs:` to
+      specific agent pairs. Cross-referenced from `docs/ai/adapter-contract.md`
+      Contract Rules. No shipped agent template emits `handoffs:` yet in this slice
+      (design/mapping only, per the phase's own scope). Fixed one validator
+      regression caught during this slice: an initial draft referenced `.claude/agents`
+      as a backtick path, which `validate-ai-config.php` correctly flagged as a
+      broken path reference since this kit ships no such folder; reworded to
+      describe the format without asserting a non-existent shipped path. Verified:
+      `validate-ai-config.php` and `validate-ai-catalog.php` exit 0 clean;
+      `validate-adapter-drift.php --fail-on-warn` and `validate-install-surface.php`
+      byte-identical to the pre-slice baseline (`diff` exit 0 on both — zero new
+      findings).
 - [ ] P2: Phase 4.3 — only after reachability rules from Phase 0 exist: add skills or
       commands wrappers under `templates/skills/**` / `templates/commands/**` where a
       runtime genuinely needs them. Each new wrapper must name its guaranteed
