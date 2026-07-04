@@ -9,17 +9,18 @@ Deterministic catalog generated from installer registries.
 - `minimal`: `base, setup-docs, capabilities-core`
 - `copilot`: `minimal, adapter-copilot, scripts-pack, policy-pack, hooks-pack`
 - `opencode`: `minimal, adapter-opencode, scripts-pack, policy-pack, hooks-pack`
+- `claude`: `minimal, adapter-claude, scripts-pack, policy-pack, hooks-pack`
 - `dual`: `minimal, adapter-copilot, adapter-opencode, capabilities-extended, scripts-pack, policy-pack, hooks-pack`
 - `guarded`: `dual, policy-pack, hooks-pack, evidence-pack`
 - `accelerated`: `dual, scripts-pack, policy-pack, evidence-pack`
-- `full-governance`: `accelerated, capabilities-governance, hooks-pack, ci-pack, docs-reference-pack, delivery-pack, optional-agents-opencode-pack, optional-agents-copilot-pack, preview-environments-pack, evaluation-pack, service-boundary-pack, mcp-boundaries-pack, advisor-pack, target-tools-pack, shared-templates-pack`
+- `full-governance`: `accelerated, adapter-claude, capabilities-governance, hooks-pack, ci-pack, docs-reference-pack, delivery-pack, optional-agents-opencode-pack, optional-agents-copilot-pack, preview-environments-pack, evaluation-pack, service-boundary-pack, mcp-boundaries-pack, advisor-pack, target-tools-pack, shared-templates-pack`
 - `docs-reference`: `docs-reference-pack`
 - `custom`: ``
 - `basic`: `minimal`
 - `standard`: `dual`
-- `creator`: `standard, optional-agents-opencode-pack, optional-agents-copilot-pack`
+- `creator`: `standard, adapter-claude, optional-agents-opencode-pack, optional-agents-copilot-pack`
 - `full`: `full-governance`
-- `agents-only`: `adapter-copilot, adapter-opencode, scripts-pack, capabilities-core`
+- `agents-only`: `adapter-copilot, adapter-opencode, adapter-claude, scripts-pack, capabilities-core`
 
 ## Packs
 
@@ -28,7 +29,7 @@ Deterministic catalog generated from installer registries.
 - `base` (18 items)
 - `adapter-copilot` (9 items)
 - `adapter-opencode` (7 items)
-- `adapter-claude` (1 items)
+- `adapter-claude` (3 items)
 - `capabilities-extended` (2 items)
 - `capabilities-governance` (2 items)
 - `policy-pack` (3 items)

@@ -410,16 +410,18 @@ function aiRunInstallWizard(string $root): int
     fwrite(STDOUT, "AI Installer Wizard\n");
     fwrite(STDOUT, "Select runtime target and install profile with optional packs.\n\n");
 
-    $target = strtolower(aiPromptLine('Select targets: [1] both, [2] copilot, [3] opencode (default 1): '));
+    $target = strtolower(aiPromptLine('Select targets: [1] both, [2] copilot, [3] opencode, [4] claude (default 1): '));
     $runtime = 'both';
     if ($target === '2' || $target === 'copilot') {
         $runtime = 'github-copilot';
     } elseif ($target === '3' || $target === 'opencode') {
         $runtime = 'opencode';
+    } elseif ($target === '4' || $target === 'claude') {
+        $runtime = 'claude-code';
     }
 
-    $profileMap = ['1' => 'minimal', '2' => 'copilot', '3' => 'opencode', '4' => 'dual', '5' => 'accelerated', '6' => 'full-governance', '7' => 'custom', '8' => 'basic', '9' => 'standard', '10' => 'creator', '11' => 'full', '12' => 'agents-only'];
-    $profileInput = strtolower(aiPromptLine('Select profile: [1] minimal, [2] copilot, [3] opencode, [4] dual, [5] accelerated, [6] full-governance, [7] custom; editions: [8] basic, [9] standard, [10] creator, [11] full, [12] agents-only (default 4): '));
+    $profileMap = ['1' => 'minimal', '2' => 'copilot', '3' => 'opencode', '4' => 'dual', '5' => 'accelerated', '6' => 'full-governance', '7' => 'custom', '8' => 'basic', '9' => 'standard', '10' => 'creator', '11' => 'full', '12' => 'agents-only', '13' => 'claude'];
+    $profileInput = strtolower(aiPromptLine('Select profile: [1] minimal, [2] copilot, [3] opencode, [4] dual, [5] accelerated, [6] full-governance, [7] custom; editions: [8] basic, [9] standard, [10] creator, [11] full, [12] agents-only, [13] claude (default 4): '));
     $profile = $profileMap[$profileInput] ?? 'dual';
 
     $allFeatures = aiPromptYesNo('Install all available AI feature packs?', true);

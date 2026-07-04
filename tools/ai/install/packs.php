@@ -129,12 +129,14 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-search/SKILL.md', 'target' => '.opencode/skills/ai-search/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md', 'target' => '.opencode/skills/ai-scripts/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
-        // P0 scope (Claude adapter parity plan, docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000):
-        // renders the same canonical agent source as adapter-copilot/adapter-opencode into
-        // .claude/agents/*.md via the Claude sub-agent renderer. CLAUDE.template.md and the
-        // .claude/settings.json permission merge are P1 scope, added in a follow-up slice.
+        // Claude adapter parity plan: docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000.
+        // Renders the same canonical agent source as adapter-copilot/adapter-opencode into
+        // .claude/agents/*.md, a rendered CLAUDE.md (P1), and a merged .claude/settings.json (P1)
+        // that never clobbers a pre-existing file (e.g. graphify's own hooks additions).
         'adapter-claude' => [
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/core/agents', 'target' => '.claude/agents', 'install_type' => 'claude-agents', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/core/CLAUDE.template.md', 'target' => 'CLAUDE.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/claude/settings.json', 'target' => '.claude/settings.json', 'install_type' => 'claude-settings-merge', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
         'capabilities-extended' => [
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/capabilities/bug-regression', 'target' => 'docs/ai/capabilities/bug-regression', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
@@ -443,14 +445,25 @@ function aiInstallerResolveSelectedPacks(array $config, array $registry): array
     }
 
     if ($runtime === 'github-copilot') {
-        $packs = array_values(array_filter($packs, static fn(string $p): bool => $p !== 'adapter-opencode'));
+        $packs = array_values(array_filter($packs, static fn(string $p): bool => $p !== 'adapter-opencode' && $p !== 'adapter-claude'));
         if (in_array($profile, ['copilot', 'dual', 'accelerated', 'full-governance'], true) && !in_array('adapter-copilot', $packs, true)) {
             $packs[] = 'adapter-copilot';
         }
     } elseif ($runtime === 'opencode') {
-        $packs = array_values(array_filter($packs, static fn(string $p): bool => $p !== 'adapter-copilot'));
+        $packs = array_values(array_filter($packs, static fn(string $p): bool => $p !== 'adapter-copilot' && $p !== 'adapter-claude'));
         if (in_array($profile, ['opencode', 'dual', 'accelerated', 'full-governance'], true) && !in_array('adapter-opencode', $packs, true)) {
             $packs[] = 'adapter-opencode';
+        }
+    } elseif ($runtime === 'claude-code') {
+        // Defense-in-depth only (Claude adapter parity plan, Chosen approach (b)): every profile
+        // that ships adapter-claude already bakes it directly into its own definition above, so
+        // this branch's job is narrower than the two above it — it only needs to strip the OTHER
+        // two adapters when a caller explicitly forces --runtime claude-code, and re-add
+        // adapter-claude for profiles that imply "ship some adapter" but do not bake it in
+        // (dual/accelerated), mirroring the copilot/opencode branches' shape exactly.
+        $packs = array_values(array_filter($packs, static fn(string $p): bool => $p !== 'adapter-copilot' && $p !== 'adapter-opencode'));
+        if (in_array($profile, ['claude', 'dual', 'accelerated', 'full-governance'], true) && !in_array('adapter-claude', $packs, true)) {
+            $packs[] = 'adapter-claude';
         }
     }
 

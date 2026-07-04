@@ -19,7 +19,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 
 ## Highlights
 
-- `package / core-template` - 28
+- `package / core-template` - 29
 - `package / foundation-doc` - 6
 - `package / github-copilot-instruction-template` - 22
 - `package / opencode-command-template` - 4
@@ -283,6 +283,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 | Type | Name | Path | Description |
 | --- | --- | --- | --- |
 |`core-template`|<PROJECT_NAME> - Repository Instructions|`packages/ai-universal-rules/templates/core/AGENTS.template.md`|<!-- GENERATED — DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/AGENTS.template.md. Edit the template or .ai/project.yml, not this file. -->|
+|`core-template`|CLAUDE.md|`packages/ai-universal-rules/templates/core/CLAUDE.template.md`|<!-- GENERATED — DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/CLAUDE.template.md. Edit the template or .ai/project.yml, not this file. -->|
 |`core-template`|Post-Install Checklist|`packages/ai-universal-rules/templates/core/POST-INSTALL.template.md`|Your AI workflow kit was installed successfully. **Complete every item below before running write-capable AI agents.**|
 |`core-template`|Architect Agent|`packages/ai-universal-rules/templates/core/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`core-template`|Architecture Plan Writer Agent|`packages/ai-universal-rules/templates/core/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
