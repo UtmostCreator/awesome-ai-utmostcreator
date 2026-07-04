@@ -855,8 +855,26 @@ Phase 5 — consolidation and maintenance loop (merges rerouted A-6, A-7, A-10..
       `validate-ai-config.php`, `validate-ai-catalog.php` exit 0 clean;
       `validate-adapter-drift.php --fail-on-warn` and `validate-install-surface.php`
       byte-identical to the Phase 5.7 baseline (zero new findings).
-- [ ] P2: Phase 5 exit gate — final program review confirms the three tracks reinforce
-      each other; `bash scripts/ai/ai-verify.sh .` as the closing broad check.
+- [x] P2: Phase 5 exit gate — final program review confirms the three tracks reinforce
+      each other; `bash scripts/ai/ai-verify.sh .` as the closing broad check. Done:
+      Track A (repo clarity: control entrypoint, maintainer routing, agents.md
+      consistency), Track B (thinning: opencode.json/Copilot baseline reduction,
+      instruction-duplication audit, capability router), and Track C
+      (clarification/PRD/handoff: capability, handoff-contract minimum payload,
+      prd-and-tasks family) all reinforce the same evidence base (the Phase 3.3
+      runtime matrix and Semantic-Parity Review Methodology were reused, not
+      restated, by Phase 3 exit gate, Phase 4.2's handoff mapping, and Phase 5.4's
+      maintenance loop). User-approved run: `timeout 300 bash scripts/ai/ai-verify.sh .`
+      as the closing broad check — completed in well under the budget (no L-8
+      hang reproduced this run), exit 1 on 4 pre-existing shellcheck/shfmt
+      findings (`ai-search.sh` SC1007, `ship-audit.sh`, `internal/pre-tool-use/10-helpers.sh`,
+      `repomix-context-tree.sh` — none touched by this program) plus 87 semgrep
+      findings (all pre-existing `proc_open`/exec-use patterns in PHP tooling this
+      program never edited); `gitleaks detect` found no leaks; `composer validate
+      --strict` and `composer audit` passed clean; no scope-leak (L-7) or hang
+      (L-8) evidence reproduced in this run — those remain Phase 6.12/6.13's job
+      to fix regardless, since a single clean run does not disprove an
+      intermittent, param-dependent bug.
 
 Phase 6 — shipped-enforcement reliability, field-failure remediation (Track F; can run
 in parallel with Phases 0-2 because it touches hook scripts and conventions, not the
