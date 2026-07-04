@@ -252,7 +252,7 @@ The handoff to `architecture-plan-writer` must carry, unchanged and no wider tha
 - acceptance criteria (explicit, inferred, negative)
 - contracts, affected paths, verification plan, risks/rollback
 
-Default output is `docs/tickets/arch-todo-{ai-generated-name}-{timestamp}/plan.md`; the user may override the folder only within `docs/tickets/`. If the design is incomplete, do not hand off to the plan writer — resolve the stop condition first.
+Default output is `docs/tickets/{branch-name}/plan-{n}-{short-desc}.md` (one folder per current git branch, one numbered file per plan — never a hardcoded `plan-1-...` when multiple tickets are in scope); the user may override the folder only within `docs/tickets/`. If the design is incomplete, do not hand off to the plan writer — resolve the stop condition first.
 
 ## Final Output
 

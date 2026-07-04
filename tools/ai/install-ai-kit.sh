@@ -1,3 +1,6 @@
 #!/usr/bin/env bash
-printf install\n
-# changed
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+exec php "$SCRIPT_DIR/install-ai-kit.php" "$@"

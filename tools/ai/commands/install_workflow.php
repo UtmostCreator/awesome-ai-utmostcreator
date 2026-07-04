@@ -7,6 +7,9 @@ declare(strict_types=1);
 // dependency explicitly so this file is self-contained regardless of test/worker load
 // order. core.php is idempotent (require_once + top-level functions), so this is safe.
 require_once __DIR__ . '/../install/core.php';
+// selection-engine.php provides the tiered SelectionEngine (aiSelection*) used by
+// aiRunInstallWizard() for registry-sourced, backend-detected interactive prompts.
+require_once __DIR__ . '/../install/selection-engine.php';
 
 /**
  * Merge workflow-level install metadata onto the canonical manifest written by the
@@ -90,7 +93,7 @@ function aiRunInstallWorkflow(string $root, array $args): int
     $noInteraction = in_array('--no-interaction', $args, true);
     $isInteractiveEntry = in_array('--wizard', $args, true);
     if ($isInteractiveEntry) {
-        return aiRunInstallWizard($root);
+        return aiRunInstallWizard($root, $args);
     }
 
     $preflight = aiRunPreflight($root);
@@ -405,7 +408,12 @@ function aiInstallerBuildSubprocessInstallCommand(string $runtime, string $profi
     return $cmd;
 }
 
-function aiRunInstallWizard(string $root): int
+/**
+ * @param list<string> $args install-workflow CLI args (used for CI/AI_AGENT/TTY
+ *        runtime-mode detection). Optional so existing/legacy callers keep working;
+ *        falls back to the process argv when not supplied.
+ */
+function aiRunInstallWizard(string $root, array $args = []): int
 {
     fwrite(STDOUT, "AI Installer Wizard\n");
     fwrite(STDOUT, "Select runtime target and install profile with optional packs.\n\n");
@@ -424,16 +432,24 @@ function aiRunInstallWizard(string $root): int
     $profileInput = strtolower(aiPromptLine('Select profile: [1] minimal, [2] copilot, [3] opencode, [4] dual, [5] accelerated, [6] full-governance, [7] custom; editions: [8] basic, [9] standard, [10] creator, [11] full, [12] agents-only, [13] claude (default 4): '));
     $profile = $profileMap[$profileInput] ?? 'dual';
 
-    $allFeatures = aiPromptYesNo('Install all available AI feature packs?', true);
+    // Backend detection is forced to 'stdin' in CI / AI_AGENT / non-TTY (behavior contract);
+    // richer backends slot in later without changing this call site (selection-engine.php).
+    // Prefer the workflow args (carry --ci/--agent/--interactive); fall back to process argv.
+    $runtimeMode = aiDetectRuntimeMode($args !== [] ? $args : ($GLOBALS['argv'] ?? []));
+    $selectionBackend = aiSelectionDetectBackend($runtimeMode, $root);
+    $registryForSelection = aiInstallerPackRegistry();
+
+    $allFeatures = aiSelectionConfirm($selectionBackend, 'Install all available AI feature packs?', true);
     $with = [];
     if (!$allFeatures) {
-        $customize = aiPromptYesNo('Customize optional packs?', true);
+        $customize = aiSelectionConfirm($selectionBackend, 'Customize optional packs?', true);
         if ($customize || $profile === 'custom') {
-            foreach (['scripts-pack', 'policy-pack', 'hooks-pack', 'ci-pack', 'evidence-pack', 'docs-reference-pack', 'capabilities-governance', 'delivery-pack', 'optional-agents-pack', 'optional-prompts-pack'] as $pack) {
-                if (aiPromptYesNo('Install ' . $pack . '?', true)) {
-                    $with[] = $pack;
-                }
-            }
+            // Optional pack keys are sourced DYNAMICALLY from the live registry (no hardcoded,
+            // stale list). Any selection is later validated against the registry by
+            // aiInstallerResolveSelectedPacks(), so unknown keys can never be installed.
+            $packOptions = aiSelectionOptionalPackOptions($registryForSelection);
+            $packDefaults = array_map(static fn(array $o): string => (string) $o['key'], $packOptions);
+            $with = aiSelectionMultiselect($selectionBackend, 'Optional packs:', $packOptions, $packDefaults);
         }
     }
 
@@ -532,6 +548,21 @@ function aiRunInstallWizard(string $root): int
         if ($runAfterInstall !== 'none') {
             $planArgs[] = '--run-after-install';
             $planArgs[] = $runAfterInstall;
+        }
+    }
+
+    // Dependency-warning gate: surface agent-pack-without-scripts-pack (and any future
+    // dependency) warnings BEFORE the final apply action. aiInstallerPackToolRequirements()
+    // is already surfaced above via the missing-tool counts; this adds the reuse-gap fix.
+    $dependencyWarnings = aiInstallerAgentDependencyWarnings($packs);
+    if ($dependencyWarnings !== []) {
+        fwrite(STDOUT, "\nDependency warnings:\n");
+        foreach ($dependencyWarnings as $warning) {
+            fwrite(STDOUT, '- ' . $warning . "\n");
+        }
+        if (!aiSelectionConfirm($selectionBackend, 'Proceed despite the dependency warnings above?', false)) {
+            fwrite(STDOUT, "Cancelled: resolve the dependency warnings and re-run.\n");
+            return 0;
         }
     }
 
