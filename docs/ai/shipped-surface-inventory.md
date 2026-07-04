@@ -73,9 +73,11 @@ Each file renders three ways from the same source: `.github/prompts/*.prompt.md`
 `.opencode/skills/*/SKILL.md` and `.opencode/commands/*.md` (`adapter-opencode`).
 Role: `deterministic-load` (explicit human/agent invocation). Files: `architecture-plan`,
 `bug-regression`, `dependency-upgrade`, `docs-sync`, `evidence-first-execution`,
-`mentor-mode`, `new-feature`, `plan-slice`, `post-install-setup`, `project-context`,
-`regression-test`, `release-safety`, `repo-investigation`, `review-diff`,
-`review-search-tool`, `script-inventory`, `search-evidence`, `verify-change`.
+`mentor-mode`, `new-feature`, `plan-slice`, `post-install-setup`, `prd-and-tasks`
+(Phase 4.1; reuses `clarification-and-handoff` and `architecture-plan-writer` rather
+than restating them), `project-context`, `regression-test`, `release-safety`,
+`repo-investigation`, `review-diff`, `review-search-tool`, `script-inventory`,
+`search-evidence`, `verify-change`.
 
 ## commands/** — OpenCode-only command wrappers (4 files)
 
