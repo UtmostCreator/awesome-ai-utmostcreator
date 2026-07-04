@@ -988,6 +988,35 @@ instruction-thinning surfaces):
       this baseline via `AGENTS.md`'s always-on `instructions[]` entry and via
       the actual `pre-tool-use.sh` runtime enforcement (bare `rm` denied,
       delete-edit-payloads ask), rather than needing an agent-specific edit.
+
+      Second review-fix round (reviewer agent via `/review-diff` on commit
+      `937a810`, verdict FAIL): found 2 more Major bypasses of the same
+      vulnerability class in the code the first round had just fixed, both
+      empirically confirmed by the reviewer. (1) The scoped-object extraction
+      picked whichever of `toolArgs`/`toolArgsRaw`/`tool_input` occurred first
+      in raw text, not the primary path's actual `.toolArgs // .toolArgsRaw //
+      .tool_input` priority order — a decoy `tool_input` positioned before the
+      real `toolArgs` in the payload text won incorrectly. Fixed by trying
+      each field independently in explicit priority order (`toolArgs` first,
+      then `toolArgsRaw`, then `tool_input`) instead of taking the first text
+      occurrence. (2) A single `toolArgs` object with a duplicate
+      `command`/`commandLine`/`text` key (valid JSON; JSON/jq parsing is
+      last-key-wins) reproduced the original bypass entirely inside the
+      correctly-scoped object, since a text-only regex match cannot tell
+      which of two matches is the one that actually wins. Fixed by counting
+      key occurrences within the scoped object (`grep -c` equivalent) and
+      denying whenever more than one is found — ambiguous input for a
+      text-only classifier fails closed rather than guessing. Added 3 more
+      regression tests. Also fixed the 1 Minor finding: awkward grammar in the
+      broadened `CLAUDE.md` delete bullet. Verified:
+      `bats tests/shell/pre-tool-use.bats` 38/38 pass (35 + 3 new);
+      `bash tests/scripts/ai/test-pre-tool-use.sh` 42/42 pass;
+      `bats tests/shell/` (full suite) 71/71 pass; `shellcheck` on all 3 files
+      together exits 0; `validate-ai-config.php`, `validate-ai-catalog.php`
+      exit 0 clean. The reviewer's 2 remaining Notes (moderate, sub-75%
+      overlap between the new shared baseline bullet and pre-existing
+      delete-related bullets in the same files; plan-note accuracy) required
+      no action — both were explicitly non-blocking.
 - [ ] P0: Phase 6.2 — agent duty vs permission parity (F-3, F-5): audit every shipped
       agent template (`templates/core/agents/**`, `templates/optional/agents/**`)
       against the permissions it ships with; fix templates where a declared duty
