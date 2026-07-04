@@ -19,6 +19,46 @@ bash scripts/ai/ai-doc-check.sh --check
 Separate pre-existing failures from failures introduced by the current change;
 report both classes, but only new failures block the slice.
 
+## Permanent Maintenance Loop
+
+Every kit change follows the same repeatable cycle, not only this program's slices:
+
+1. **Change the template source** — never the rendered output (see Change-Type
+   Routing below).
+2. **Re-prove coverage** — for any topic in `docs/ai/integration-matrix.md`'s
+   Critical-Topic Coverage Matrix, confirm the row's `Status` still holds; when the
+   change thins, relocates, or merges a surface across runtimes, use the
+   Semantic-Parity Review Methodology there instead of comparing file structure.
+3. **Re-prove reachability** — see Dead-File Review Model below. A slice that adds a
+   shipped file must name its load path; a slice that removes one must show it is
+   dead.
+4. **Re-render or hand-sync** — re-render via the installer where safe; where a full
+   re-render would touch unrelated owned-modified files (the recurring blast-radius
+   risk seen throughout this program), hand-edit the rendered copy to match the
+   template byte-for-byte and verify with `diff`.
+5. **Run the validator gate** — the per-slice gate above. Separate pre-existing
+   failures from new ones; only new failures block the slice.
+
+### Dead-File Review Model
+
+Run this whenever a shipped file's reachability is in question, not only during a
+planned thinning slice:
+
+- A file counts as dead per the four Reachability Rules in
+  `docs/ai/integration-matrix.md` ("When An Installed File Is Dead").
+- Before treating a file as dead, search for it by exact path (not just by name)
+  across `docs/ai/**`, `packages/ai-universal-rules/templates/**`, and
+  `packages/ai-universal-rules/docs/**` — a reference from a maintainer-facing doc
+  still counts as a legitimate, if narrow, reachability path. `templates/capabilities/README.md`
+  is the worked example: absent from the pack registry, but genuinely referenced
+  from `packages/ai-universal-rules/docs/CAPABILITY-MODEL.md`, so it is
+  optional-support, not dead.
+- Record the review outcome (kept because reachable via `<path>`, or removed
+  because dead by rules 1-3) in the same slice that touches the file, so the
+  reasoning is auditable later rather than re-derived.
+- Use `graphify update .`'s edge presence as a secondary signal only (Phase 5.5),
+  never the sole evidence — it can reflect a stale node-ID scheme.
+
 ## Change-Type Routing (Maintainers)
 
 Edit the template source, never the rendered output. Route by change type:
