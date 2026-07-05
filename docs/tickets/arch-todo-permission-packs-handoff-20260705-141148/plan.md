@@ -311,9 +311,11 @@ requested `Rule`/`BashPattern`/`AgentSpec`/`RenderSpec`/`PackSet` OOP shapes int
   gap — see Slice 5 note); graphify-owned `.claude/settings.json` hooks confirmed preserved.
 - [x] AC-04: DONE — `PermissionComposeTest::testEveryComposedScriptReferenceIsRegistered()`
   present and green.
-- [x] AC-05: DONE — checks 1/2/4/5/6/7 landed as hard tests (all clean against all 13 agents);
-  check 3 landed as a ratchet test (pre-existing, cross-cutting gap — see Slice 9 note); N-8
-  duplicate check landed. No shipped agent flipped red.
+- [x] AC-05: DONE, fully hard-enforced — all seven checks landed as zero-tolerance tests (all
+  clean against all 13 agents); check 3's original cross-cutting gap was closed by the
+  raw-tool-ask-gate policy decision (continuation session #4), not left as a ratchet; N-8
+  duplicate check landed. No shipped agent flipped red without an enumerated, intentional
+  change.
 - [x] AC-06: PARTIAL BY DESIGN — `render-agent-permissions.php` deletion explicitly deferred
   (no approval given this session, re-confirmed dead); `command-policy.tiers.yaml` confirmed
   live and untouched; 3 of 4 named docs updated (`generated-artifacts.md` is a different
@@ -343,6 +345,39 @@ requested `Rule`/`BashPattern`/`AgentSpec`/`RenderSpec`/`PackSet` OOP shapes int
 | Pack extraction changes rendered output | `--check` must be byte-identical after every migration; deeper model-equality spot-check available |
 | Slice 5 surface regen drops graphify hooks | Merge-only `claude-settings-merge.php` + ClaudeSettingsMergeTest; manual hook check |
 | Rollback | Every change git revert-clean; shipped files regenerate from source layers; no data/migration surface |
+
+## Approval-Gated Follow-Ups Actioned (2026-07-05, continuation session #4)
+
+Per explicit user direction, both previously-deferred items were completed:
+
+- **`.claude/agents/**` generated for the first time in this repo.** Called
+  `aiInstallerCopyDirAsClaudeAgents()` directly (the real installer renderer function,
+  `tools/ai/install/claude-agent-renderer.php`) with this repo's own source/target/scriptsRoot
+  (`packages/ai-universal-rules/templates/core/agents` → `.claude/agents`), bypassing the full
+  installer pipeline to avoid touching the large, unrelated concurrent dirty tree. Produced 12
+  files (`bootstrapper.md` correctly excluded — `hidden: true`; `super-implementer.md`
+  correctly excluded — no template counterpart). Verified: `ClaudeAgentRendererTest` +
+  `ClaudeSettingsMergeTest` green (50 tests); `validate-adapter-drift.php` clean (only
+  pre-existing, unrelated warnings); regenerated a second time after the raw-tool policy
+  change below to stay in sync.
+- **Slice 9 check 3 policy decision: raw-tool-allow-in-write-profile tightened.** Added
+  `core.safe_read.raw_read_ask_gate` pack (`rg`/`bat`/`jq`/`yq`/`head`/`tail`/`sed -n`, all
+  `ask`) to `packs.php`; applied via `askPacks` to all 5 impl-profile agents (`refactorer`,
+  `implementer`, `bootstrapper`, `super-implementer`, `post-install`). Found and correctly
+  handled a subtlety: `post-install` already denied `head`/`tail`/`sed -n` (stricter than
+  `ask`) — applying the pack naively would have **loosened** those 3 from `deny` to `ask`
+  (askPacks apply after deny_packs in merge order), so an explicit `sed -n *: deny` exception
+  was added for `post-install` (head/tail already had one) to preserve its existing stricter
+  posture; only `rg`/`bat`/`jq`/`yq` were newly tightened for that agent. The other 4 agents
+  got all 7 patterns tightened. Slice 9 check 3 test upgraded from the ratchet
+  (`testRawReadToolAllowInWriteProfileDoesNotGrow`) to a hard zero-tolerance check
+  (`testRawReadToolsAreNeverAllowedInWriteProfileAgents`) plus a genuine failing-fixture proof
+  (`testRawReadToolCheckCatchesAnAllowedRawTool`). Regenerated all 5 agents' `.opencode`/
+  template files (a real, intentional file content change this time, not byte-identical —
+  fewer commands now silently allowed).
+- **Verification:** `generate-agent-permissions.php --check` / `generate-agent-snippets.php
+  --check` green; full permission/renderer/policy filter — 240 tests green; `composer
+  test:fast` — 863 tests, same 10 pre-existing baseline failures, 0 new regressions.
 
 ## Review Pass (2026-07-05, continuation session #3, reviewer-agent posture)
 

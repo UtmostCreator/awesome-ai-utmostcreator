@@ -1,169 +1,115 @@
 ---
-id: refactorer
+name: refactorer
 description: Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability
-mode: subagent
-hidden: false
-temperature: 0.1
-capabilities:
-  - review-diff
-  - verify-change
-  - docs-sync
-  - service-boundary-patterns
-  - config-change-safety
-permission:
-  todowrite: allow
-  edit:
-    'src/**': allow
-    'app/**': allow
-    'packages/**': allow
-    'configs/**': allow
-    'scripts/**': allow
-    'tools/**': allow
-    'tests/**': allow
-    'docs/**': allow
-    'vendor/**': deny
-    'node_modules/**': deny
-    '.git/**': deny
-    'dist/**': deny
-    'build/**': deny
-    'coverage/**': deny
-    '.cache/**': deny
-    'docs/ai/generated/**': deny
-    'docs/generated/**': deny
-    '*.generated.*': deny
-    '*.lock': deny
-    'composer.lock': deny
-    'package-lock.json': deny
-    'pnpm-lock.yaml': deny
-    'yarn.lock': deny
-    'bun.lockb': deny
-    '*.pem': deny
-    '*.key': deny
-    '*.crt': deny
-    '.env*': deny
-    'secrets.*': deny
-    'credentials.*': deny
-    'auth.json': deny
-  bash:
-    'command -v *': allow
-    'test -f *': allow
-    'test -x *': allow
-    'test -d *': allow
-    'stat *': allow
-    'pwd': allow
-    'ls *': allow
-    'fd *': allow
-    'eza *': allow
-    'rg *': ask
-    'git grep *': allow
-    'sed -n *': ask
-    'head *': ask
-    'tail *': ask
-    'nl *': allow
-    'jq *': ask
-    'yq *': ask
-    'scc *': allow
-    'tokei *': allow
-    'ast-grep *': allow
-    'bat *': ask
-    'fx *': allow
-    'glow *': allow
-    'difft *': allow
-    'delta *': allow
-    'ls -1 scripts/ai/*.sh | sort': allow
-    'git status*': allow
-    'git diff*': allow
-    'git log*': allow
-    'git show*': allow
-    'git ls-files*': allow
-    'git blame*': allow
-    'git branch*': allow
-    'git rev-parse*': allow
-    'bash scripts/ai/pack-context.sh *': ask
-    'bash scripts/ai/run-repomix-context.sh *': ask
-    'bash scripts/ai/repomix-context-tree.sh *': ask
-    'bash scripts/ai/repomix-scc-router.sh *': ask
-    'bash scripts/ai/ai-search.sh *': allow
-    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
-    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
-    'bash scripts/ai/ai-search-multi.sh *': allow
-    'AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
-    'env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
-    'bash scripts/ai/preview-file.sh *': allow
-    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
-    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
-    'bash scripts/ai/rg-code.sh *': allow
-    'bash scripts/ai/fd-files.sh *': allow
-    'bash scripts/ai/query-usage.sh *': allow
-    'bash scripts/ai/git-branch-origin.sh *': allow
-    'bash scripts/ai/git-forensics.sh *': allow
-    'bash scripts/ai/repo-stats.sh *': allow
-    'bash scripts/ai/repo-tool-inventory.sh *': allow
-    'bash scripts/ai/ai-file-freshness.sh *': allow
-    'bash scripts/ai/check-file-refs.sh *': allow
-    'bash scripts/ai/ai-diff-context.sh *': allow
-    'bash scripts/ai/ai-doc-check.sh *': allow
-    'bash scripts/ai/ai-structured.sh *': allow
-    'bash scripts/ai/repomix-freshness.sh *': allow
-    'bash scripts/ai/ai-test-select.sh *': allow
-    'bash scripts/ai/run-repo-tests.sh*': allow
-    'bash scripts/ai/ai-verify.sh *': ask
-    'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
-    'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
-    'bash scripts/ai/ai-edit.sh *': ask
-    'bash scripts/ai/ai-rollback.sh *': ask
-    'bash scripts/ai/session-checkpoint.sh *': ask
-    'bash scripts/ai/install-mandatory-tools.sh *': ask
-    'git add*': ask
-    'git commit*': ask
-    'git restore *': ask
-    'git stash push*': ask
-    'git stash pop*': ask
-    'git stash apply*': ask
-    'git stash drop*': ask
-    'php tools/ai/ai.php placeholders*': allow
-    'php tools/ai/ai.php verify*': allow
-    'php tools/ai/ai.php preflight*': allow
-    'php tools/ai/ai.php list': allow
-    'php tools/ai/ai.php next*': allow
-    'php tools/ai/ai.php freshness*': allow
-    'php tools/ai/ai.php packs*': allow
-    'php tools/ai/ai.php env-check*': allow
-    'php tools/ai/ai.php install-docs --check': allow
-    'lychee *': allow
-    'actionlint*': allow
-    'shfmt -d *': allow
-    'shellcheck *': allow
-    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
-    'git stash list*': allow
-    'git stash show*': allow
-    'bash -n scripts/*.sh': allow
-    'bash -n scripts/**/*.sh': allow
-    'bash -n scripts/doctor.sh': allow
-    'bash scripts/doctor.sh': allow
-    'bash scripts/doctor.sh *': allow
-    'php -l *': allow
-    'vendor/bin/phpunit *': allow
-    './vendor/bin/phpunit *': allow
-    'phpunit *': allow
-    'npm test*': allow
-    'npm run test*': allow
-    'npm run lint*': allow
-    'npm run typecheck*': allow
-    'pnpm test*': allow
-    'pnpm run test*': allow
-    'pnpm run lint*': allow
-    'pnpm run typecheck*': allow
-    'php tools/ai/validate-*.php *': allow
-    'php tools/ai/generate-*.php --check*': allow
-    'markdownlint-cli2 *': allow
-    'semgrep *': allow
-    'repomix *': ask
-    'files-to-prompt *': ask
-    'code2prompt *': ask
-    '*': deny
+tools: Read, Grep, Glob, Bash, Write, Edit
+model: inherit
+permissionMode: default
 ---
-<!-- GENERATED — DO NOT EDIT: generated by ai-kit installer from packages/ai-universal-rules/templates/core/agents. -->
+<!-- GENERATED — DO NOT EDIT: generated by ai-kit installer (Claude agent renderer) from packages/ai-universal-rules/templates/core/agents. -->
+
+## Bash Command Policy
+
+Claude Code frontmatter cannot express per-command bash allowlists — only the
+tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+
+Approved scripts (run from the repository root using `<SCRIPTS_ROOT>`):
+
+- `command -v *`
+- `test -f *`
+- `test -x *`
+- `test -d *`
+- `stat *`
+- `pwd`
+- `ls *`
+- `fd *`
+- `eza *`
+- `git grep *`
+- `nl *`
+- `scc *`
+- `tokei *`
+- `ast-grep *`
+- `fx *`
+- `glow *`
+- `difft *`
+- `delta *`
+- `ls -1 <SCRIPTS_ROOT>/*.sh | sort`
+- `git status*`
+- `git diff*`
+- `git log*`
+- `git show*`
+- `git ls-files*`
+- `git blame*`
+- `git branch*`
+- `git rev-parse*`
+- `bash <SCRIPTS_ROOT>/ai-search.sh *`
+- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search.sh *`
+- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search.sh *`
+- `bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
+- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
+- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
+- `bash <SCRIPTS_ROOT>/preview-file.sh *`
+- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/preview-file.sh *`
+- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/preview-file.sh *`
+- `bash <SCRIPTS_ROOT>/rg-code.sh *`
+- `bash <SCRIPTS_ROOT>/fd-files.sh *`
+- `bash <SCRIPTS_ROOT>/query-usage.sh *`
+- `bash <SCRIPTS_ROOT>/git-branch-origin.sh *`
+- `bash <SCRIPTS_ROOT>/git-forensics.sh *`
+- `bash <SCRIPTS_ROOT>/repo-stats.sh *`
+- `bash <SCRIPTS_ROOT>/repo-tool-inventory.sh *`
+- `bash <SCRIPTS_ROOT>/ai-file-freshness.sh *`
+- `bash <SCRIPTS_ROOT>/check-file-refs.sh *`
+- `bash <SCRIPTS_ROOT>/ai-diff-context.sh *`
+- `bash <SCRIPTS_ROOT>/ai-doc-check.sh *`
+- `bash <SCRIPTS_ROOT>/ai-structured.sh *`
+- `bash <SCRIPTS_ROOT>/repomix-freshness.sh *`
+- `bash <SCRIPTS_ROOT>/ai-test-select.sh *`
+- `bash <SCRIPTS_ROOT>/run-repo-tests.sh*`
+- `AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash <SCRIPTS_ROOT>/ai-verify.sh *`
+- `env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash <SCRIPTS_ROOT>/ai-verify.sh *`
+- `php tools/ai/ai.php placeholders*`
+- `php tools/ai/ai.php verify*`
+- `php tools/ai/ai.php preflight*`
+- `php tools/ai/ai.php list`
+- `php tools/ai/ai.php next*`
+- `php tools/ai/ai.php freshness*`
+- `php tools/ai/ai.php packs*`
+- `php tools/ai/ai.php env-check*`
+- `php tools/ai/ai.php install-docs --check`
+- `lychee *`
+- `actionlint*`
+- `shfmt -d *`
+- `shellcheck *`
+- `git stash list*`
+- `git stash show*`
+- `bash -n scripts/*.sh`
+- `bash -n scripts/**/*.sh`
+- `bash -n scripts/doctor.sh`
+- `bash scripts/doctor.sh`
+- `bash scripts/doctor.sh *`
+- `php -l *`
+- `vendor/bin/phpunit *`
+- `./vendor/bin/phpunit *`
+- `phpunit *`
+- `npm test*`
+- `npm run test*`
+- `npm run lint*`
+- `npm run typecheck*`
+- `pnpm test*`
+- `pnpm run test*`
+- `pnpm run lint*`
+- `pnpm run typecheck*`
+- `php tools/ai/validate-*.php *`
+- `php tools/ai/generate-*.php --check*`
+- `markdownlint-cli2 *`
+- `semgrep *`
+
+Do not run arbitrary shell commands. Do not run commands not in this list.
+Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+
+Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
+`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
+disagree, `.claude/settings.json` wins — it is the enforced surface, not this body text.
 
 # Refactorer Agent
 

@@ -55,18 +55,18 @@ permission:
     "pwd": allow
     "ls *": allow
     "fd *": allow
-    "rg *": allow
+    "rg *": ask
     "git grep *": allow
-    "sed -n *": allow
-    "head *": allow
-    "tail *": allow
+    "sed -n *": ask
+    "head *": ask
+    "tail *": ask
     "wc *": allow
-    "jq *": allow
-    "yq *": allow
+    "jq *": ask
+    "yq *": ask
     "scc *": allow
     "tokei *": allow
     "ast-grep *": allow
-    "bat *": allow
+    "bat *": ask
     "fx *": allow
     "glow *": allow
     "difft *": allow

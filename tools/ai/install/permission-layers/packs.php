@@ -266,6 +266,23 @@ function aiPermissionPacks(): array
         'install.docs_allow' => aiPermissionEntries('bash', [
             'php tools/ai/ai.php install-docs*' => 'allow',
         ]),
+
+        // Slice 9 check-3 policy decision (docs/tickets/arch-todo-permission-packs-handoff-*
+        // plan.md): raw read tools were `allow` by default (core:safe-read) for every
+        // impl-profile agent — a real, cross-cutting exposure the Slice 9 landing pass
+        // deliberately left as a ratchet test rather than fixing. Explicit follow-up decision:
+        // ask-gate them instead of silently allowing. Prefer the `preview-file.sh`/
+        // `rg-code.sh`/`fd-files.sh` wrappers first; this pack is the approval fallback for
+        // when a raw tool is genuinely needed.
+        'core.safe_read.raw_read_ask_gate' => aiPermissionEntries('bash', [
+            'rg *' => 'ask',
+            'bat *' => 'ask',
+            'jq *' => 'ask',
+            'yq *' => 'ask',
+            'head *' => 'ask',
+            'tail *' => 'ask',
+            'sed -n *' => 'ask',
+        ]),
     ];
 }
 

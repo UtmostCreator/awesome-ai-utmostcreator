@@ -60,13 +60,13 @@ permission:
     'pwd': allow
     'ls *': allow
     'fd *': allow
-    'rg *': allow
-    'jq *': allow
-    'yq *': allow
+    'rg *': ask
+    'jq *': ask
+    'yq *': ask
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow
-    'bat *': allow
+    'bat *': ask
     'fx *': allow
     'glow *': allow
     'difft *': allow

@@ -1,174 +1,100 @@
 ---
-id: post-install
+name: post-install
 description: Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification
-mode: subagent
-hidden: false
-temperature: 0.0
-capabilities:
-  - project-context
-  - docs-sync
-  - verify-change
-  - authorization-and-tool-governance
-permission:
-  todowrite: allow
-  edit:
-    'AGENTS.md': allow
-    'README.md': allow
-    'PLACEHOLDERS.md': allow
-    '.ai-install-manifest.json': allow
-    'docs/ai/**': allow
-    'docs/**/*.md': allow
-    '.github/agents/**': allow
-    '.github/instructions/**': allow
-    '.github/prompts/**': allow
-    '.opencode/agents/**': allow
-    '.opencode/commands/**': allow
-    '.opencode/skills/**': allow
-    'opencode.jsonc': allow
-    'scripts/ai/**': allow
-    'tools/ai/**': deny
-    'vendor/**': deny
-    'node_modules/**': deny
-    '.git/**': deny
-    'dist/**': deny
-    'build/**': deny
-    'coverage/**': deny
-    '.cache/**': deny
-    'docs/ai/generated/**': deny
-    'docs/generated/**': deny
-    '*.generated.*': deny
-    '*.lock': deny
-    'composer.lock': deny
-    'package-lock.json': deny
-    'pnpm-lock.yaml': deny
-    'yarn.lock': deny
-    'bun.lockb': deny
-    '*.pem': deny
-    '*.key': deny
-    '*.crt': deny
-    '.env*': deny
-    'secrets.*': deny
-    'credentials.*': deny
-    'auth.json': deny
-  task: allow
-  bash:
-    'command -v *': allow
-    'test -f *': allow
-    'test -x *': allow
-    'test -d *': allow
-    'stat *': allow
-    'pwd': allow
-    'ls *': allow
-    'fd *': allow
-    'rg *': ask
-    'jq *': ask
-    'yq *': ask
-    'scc *': allow
-    'tokei *': allow
-    'ast-grep *': allow
-    'bat *': ask
-    'fx *': allow
-    'glow *': allow
-    'difft *': allow
-    'delta *': allow
-    'ls -1 scripts/ai/*.sh | sort': allow
-    'git status*': allow
-    'git diff*': allow
-    'git log*': allow
-    'git show*': allow
-    'git ls-files*': allow
-    'git branch*': allow
-    'git rev-parse*': allow
-    'bash scripts/ai/pack-context.sh *': ask
-    'bash scripts/ai/run-repomix-context.sh *': ask
-    'bash scripts/ai/repomix-context-tree.sh *': ask
-    'bash scripts/ai/repomix-scc-router.sh *': ask
-    'bash scripts/ai/ai-search.sh *': allow
-    'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
-    'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
-    'bash scripts/ai/ai-search-multi.sh *': allow
-    'AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
-    'env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
-    'bash scripts/ai/preview-file.sh *': allow
-    'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
-    'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
-    'bash scripts/ai/rg-code.sh *': allow
-    'bash scripts/ai/fd-files.sh *': allow
-    'bash scripts/ai/query-usage.sh *': allow
-    'bash scripts/ai/git-branch-origin.sh *': allow
-    'bash scripts/ai/git-forensics.sh *': allow
-    'bash scripts/ai/repo-stats.sh *': allow
-    'bash scripts/ai/repo-tool-inventory.sh *': allow
-    'bash scripts/ai/ai-file-freshness.sh *': allow
-    'bash scripts/ai/check-file-refs.sh *': allow
-    'bash scripts/ai/ai-diff-context.sh *': allow
-    'bash scripts/ai/ai-doc-check.sh *': allow
-    'bash scripts/ai/ai-structured.sh *': allow
-    'bash scripts/ai/repomix-freshness.sh *': allow
-    'bash scripts/ai/ai-test-select.sh *': allow
-    'bash scripts/ai/run-repo-tests.sh*': allow
-    'bash scripts/ai/ai-verify.sh *': ask
-    'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
-    'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
-    'bash scripts/ai/install-mandatory-tools.sh *': ask
-    'git add*': ask
-    'git commit*': ask
-    'git restore *': ask
-    'git reset*': ask
-    'git stash push*': ask
-    'git stash pop*': ask
-    'git stash apply*': ask
-    'git stash drop*': ask
-    'git fetch*': ask
-    'git merge*': ask
-    'git pull*': ask
-    'git checkout*': ask
-    'git switch*': ask
-    'git tag*': ask
-    'git cherry-pick*': ask
-    'git revert*': ask
-    'composer install*': ask
-    'composer update*': ask
-    'composer require*': ask
-    'npm install*': ask
-    'npm ci*': ask
-    'pnpm install*': ask
-    'pnpm add*': ask
-    'yarn install*': ask
-    'yarn add*': ask
-    'bun install*': ask
-    'bun add*': ask
-    'php tools/ai/ai.php placeholders*': allow
-    'php tools/ai/ai.php verify*': allow
-    'php tools/ai/ai.php preflight*': allow
-    'php tools/ai/ai.php list': allow
-    'php tools/ai/ai.php next*': allow
-    'php tools/ai/ai.php freshness*': allow
-    'php tools/ai/ai.php packs*': allow
-    'php tools/ai/ai.php env-check*': allow
-    'php tools/ai/ai.php install-docs --check': allow
-    'lychee *': allow
-    'actionlint*': allow
-    'shfmt -d *': allow
-    'shellcheck *': allow
-    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
-    'git stash list*': allow
-    'git stash show*': allow
-    'bash scripts/ai/ai-install-coverage.sh *': allow
-    'php tools/ai/validate-*.php *': allow
-    'bash -n scripts/*.sh': allow
-    'bash -n scripts/**/*.sh': allow
-    'bash -n scripts/doctor.sh': allow
-    'bash scripts/doctor.sh': allow
-    'bash scripts/doctor.sh *': allow
-    'php tools/ai/ai.php install-docs*': allow
-    'php tools/ai/verify-install-placeholders.php*': allow
-    'php tools/ai/ai.php advisor*': allow
-    'rm *': ask
-    'git clean*': ask
-    '*': deny
+tools: Read, Grep, Glob, Bash, Write, Edit, Agent
+model: inherit
+permissionMode: default
 ---
-<!-- GENERATED — DO NOT EDIT: generated by ai-kit installer from packages/ai-universal-rules/templates/core/agents. -->
+<!-- GENERATED — DO NOT EDIT: generated by ai-kit installer (Claude agent renderer) from packages/ai-universal-rules/templates/core/agents. -->
+
+## Bash Command Policy
+
+Claude Code frontmatter cannot express per-command bash allowlists — only the
+tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+
+Approved scripts (run from the repository root using `<SCRIPTS_ROOT>`):
+
+- `command -v *`
+- `test -f *`
+- `test -x *`
+- `test -d *`
+- `stat *`
+- `pwd`
+- `ls *`
+- `fd *`
+- `scc *`
+- `tokei *`
+- `ast-grep *`
+- `fx *`
+- `glow *`
+- `difft *`
+- `delta *`
+- `ls -1 <SCRIPTS_ROOT>/*.sh | sort`
+- `git status*`
+- `git diff*`
+- `git log*`
+- `git show*`
+- `git ls-files*`
+- `git branch*`
+- `git rev-parse*`
+- `bash <SCRIPTS_ROOT>/ai-search.sh *`
+- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search.sh *`
+- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search.sh *`
+- `bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
+- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
+- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
+- `bash <SCRIPTS_ROOT>/preview-file.sh *`
+- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/preview-file.sh *`
+- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/preview-file.sh *`
+- `bash <SCRIPTS_ROOT>/rg-code.sh *`
+- `bash <SCRIPTS_ROOT>/fd-files.sh *`
+- `bash <SCRIPTS_ROOT>/query-usage.sh *`
+- `bash <SCRIPTS_ROOT>/git-branch-origin.sh *`
+- `bash <SCRIPTS_ROOT>/git-forensics.sh *`
+- `bash <SCRIPTS_ROOT>/repo-stats.sh *`
+- `bash <SCRIPTS_ROOT>/repo-tool-inventory.sh *`
+- `bash <SCRIPTS_ROOT>/ai-file-freshness.sh *`
+- `bash <SCRIPTS_ROOT>/check-file-refs.sh *`
+- `bash <SCRIPTS_ROOT>/ai-diff-context.sh *`
+- `bash <SCRIPTS_ROOT>/ai-doc-check.sh *`
+- `bash <SCRIPTS_ROOT>/ai-structured.sh *`
+- `bash <SCRIPTS_ROOT>/repomix-freshness.sh *`
+- `bash <SCRIPTS_ROOT>/ai-test-select.sh *`
+- `bash <SCRIPTS_ROOT>/run-repo-tests.sh*`
+- `AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash <SCRIPTS_ROOT>/ai-verify.sh *`
+- `env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash <SCRIPTS_ROOT>/ai-verify.sh *`
+- `php tools/ai/ai.php placeholders*`
+- `php tools/ai/ai.php verify*`
+- `php tools/ai/ai.php preflight*`
+- `php tools/ai/ai.php list`
+- `php tools/ai/ai.php next*`
+- `php tools/ai/ai.php freshness*`
+- `php tools/ai/ai.php packs*`
+- `php tools/ai/ai.php env-check*`
+- `php tools/ai/ai.php install-docs --check`
+- `lychee *`
+- `actionlint*`
+- `shfmt -d *`
+- `shellcheck *`
+- `git stash list*`
+- `git stash show*`
+- `bash <SCRIPTS_ROOT>/ai-install-coverage.sh *`
+- `php tools/ai/validate-*.php *`
+- `bash -n scripts/*.sh`
+- `bash -n scripts/**/*.sh`
+- `bash -n scripts/doctor.sh`
+- `bash scripts/doctor.sh`
+- `bash scripts/doctor.sh *`
+- `php tools/ai/ai.php install-docs*`
+- `php tools/ai/verify-install-placeholders.php*`
+- `php tools/ai/ai.php advisor*`
+
+Do not run arbitrary shell commands. Do not run commands not in this list.
+Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+
+Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
+`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
+disagree, `.claude/settings.json` wins — it is the enforced surface, not this body text.
 
 # POST-Install Agent
 
