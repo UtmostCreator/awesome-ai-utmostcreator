@@ -109,6 +109,9 @@ permission:
     'pnpm install*': ask
     'yarn install*': ask
     'grep *': deny
+agent_assessment:
+  risk_level: critical
+  decision: needs_refactor
 ---
 
 You are the upgrade agent for `<PROJECT_NAME>`.

@@ -11,6 +11,59 @@ require_once __DIR__ . '/../../tools/ai/install/permission-layers/compose.php';
 
 final class PermissionComposeTest extends TestCase
 {
+    /**
+     * Slice D de-pollution proof (docs/tickets/arch-todo-complete-permission-composition-
+     * migration/plan.md, AC-D3): a composition with no `language_overlays` key gets NONE of
+     * the PHP/JS atomic overlay patterns — proving a hypothetical non-PHP/non-JS consumer
+     * agent is not polluted with these commands merely by using the 'impl' profile.
+     */
+    public function testCompositionWithoutLanguageOverlaysGetsNoPhpOrJsPatterns(): void
+    {
+        $result = aiPermissionComposeFromSpec([
+            'profile' => 'impl',
+            'edit_surface' => 'none',
+            'verify_tier' => 'verify-none',
+        ]);
+
+        foreach (['php -l *', 'vendor/bin/phpunit *', 'composer validate*', 'npm test*', 'pnpm test*'] as $pattern) {
+            $key = aiPermissionModelKey('bash', $pattern);
+            self::assertArrayNotHasKey($key, $result['model'], "'{$pattern}' must not appear without an explicit language_overlays entry");
+        }
+    }
+
+    /**
+     * Slice D: the 4 new atomic overlay keys grant exactly their intended pattern set and
+     * nothing more — proving each is a precise, additive, single-purpose overlay rather than
+     * a hidden re-bundling of the old coarse packs.
+     */
+    public function testAtomicLanguageOverlaysGrantExactlyTheirOwnPatterns(): void
+    {
+        $result = aiPermissionComposeFromSpec([
+            'profile' => 'readonly',
+            'edit_surface' => 'none',
+            'verify_tier' => 'verify-none',
+            'language_overlays' => ['php-lint', 'php-phpunit', 'php-composer-validate', 'js-core'],
+        ]);
+
+        foreach ([
+            'php -l *',
+            'vendor/bin/phpunit *', './vendor/bin/phpunit *', 'phpunit *',
+            'composer validate*',
+            'npm test*', 'npm run test*', 'npm run lint*', 'npm run typecheck*',
+            'pnpm test*', 'pnpm run test*', 'pnpm run lint*', 'pnpm run typecheck*',
+        ] as $pattern) {
+            $key = aiPermissionModelKey('bash', $pattern);
+            self::assertSame('allow', $result['model'][$key]['effect'] ?? null, "'{$pattern}' must be granted");
+        }
+
+        // Not part of these 4 atomic overlays (yarn/bun/paratest are only in the coarse
+        // 'php'/'js-ts' overlays, e.g. implementer's wiring).
+        foreach (['yarn test*', 'bun test*', 'paratest *'] as $pattern) {
+            $key = aiPermissionModelKey('bash', $pattern);
+            self::assertArrayNotHasKey($key, $result['model'], "'{$pattern}' must not leak from the 4 atomic overlays");
+        }
+    }
+
     public function testLaterLayerWinsBeforeImmutableFloor(): void
     {
         $result = aiPermissionComposeFromSpec([
@@ -261,17 +314,19 @@ final class PermissionComposeTest extends TestCase
     /**
      * AC-8 (docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md): every
      * agent in the single agent->profile map (aiInstallerAgentProfiles(), script-registry.php) must
-     * have a permission composition, except the one remaining documented, intentional exclusion
-     * (architecture-plan-writer — pending Slice C of
-     * docs/tickets/arch-todo-complete-permission-composition-migration/plan.md; release-auditor
-     * was migrated in that plan's Slice A). This prevents the two maps from silently forking as
-     * new agents are added.
+     * have a permission composition. Both previously-documented intentional exclusions
+     * (release-auditor, architecture-plan-writer) were migrated in Slices A and C of
+     * docs/tickets/arch-todo-complete-permission-composition-migration/plan.md — the exclusion
+     * list is now empty. Kept as an explicit empty array (not deleted) so a future agent
+     * needing a temporary, documented exclusion has an obvious place to add one, and so this
+     * test's intent (compositions.php key set tracks aiInstallerAgentProfiles() 1:1, modulo any
+     * documented exclusion) stays self-explanatory.
      */
     public function testCompositionsKeySetMatchesAgentProfilesExceptDocumentedExclusions(): void
     {
         require_once __DIR__ . '/../../tools/ai/install/script-registry.php';
 
-        $intentionalExclusions = ['architecture-plan-writer'];
+        $intentionalExclusions = [];
 
         $compositionKeys = array_keys(aiPermissionAgentCompositions());
         $profileKeys = array_keys(aiInstallerAgentProfiles());
@@ -285,14 +340,6 @@ final class PermissionComposeTest extends TestCase
             $compositionKeys,
             'compositions.php key set must match aiInstallerAgentProfiles() minus the documented exclusions'
         );
-
-        foreach ($intentionalExclusions as $excluded) {
-            self::assertArrayNotHasKey(
-                $excluded,
-                aiPermissionAgentCompositions(),
-                "{$excluded} is an intentional exclusion and must not gain a composition without updating this test"
-            );
-        }
     }
 
     /**

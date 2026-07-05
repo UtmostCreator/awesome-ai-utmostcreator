@@ -55,9 +55,37 @@ class InstallerSelectionEngineTest extends TestCase
 
     public function testDetectBackendOnlyResolvesToStdinInP0Slice(): void
     {
-        // P0 implements only the stdin backend; no richer backend may be returned yet.
+        // Under PHPUnit, STDIN is never a real TTY, so the forced-stdin gate in
+        // aiSelectionDetectBackend() short-circuits before the Laravel Prompts
+        // precedence check is ever consulted — this holds regardless of whether the
+        // optional laravel/prompts package is installed (P1) or not.
         foreach (['CI', 'AI_AGENT', 'HUMAN_TTY', 'anything-else'] as $mode) {
             $this->assertSame('stdin', aiSelectionDetectBackend($mode, self::$repoRoot));
+        }
+    }
+
+    // (f) P1: Laravel Prompts backend availability + graceful degradation.
+
+    public function testLaravelPromptsAvailableWhenPackageIsInstalled(): void
+    {
+        // laravel/prompts is a require-dev dependency (never `require`); the repo's own
+        // vendor/ has it installed, so availability must resolve true here.
+        $this->assertTrue(aiSelectionLaravelPromptsAvailable(self::$repoRoot));
+    }
+
+    public function testLaravelPromptsUnavailableWhenAutoloadMissingFallsThroughToStdin(): void
+    {
+        // A root with no vendor/autoload.php at all (as in a fresh consumer repo that
+        // never installed the optional dependency) must degrade silently: no fatal
+        // error, no warning, availability simply resolves false (AC-07).
+        $bareRoot = sys_get_temp_dir() . '/ai-selection-no-autoload-' . uniqid('', true);
+        mkdir($bareRoot, 0777, true);
+        try {
+            $this->assertFalse(aiSelectionLaravelPromptsAvailable($bareRoot));
+            // Detection still degrades to stdin end-to-end (non-TTY under PHPUnit).
+            $this->assertSame('stdin', aiSelectionDetectBackend('HUMAN_TTY', $bareRoot));
+        } finally {
+            rmdir($bareRoot);
         }
     }
 

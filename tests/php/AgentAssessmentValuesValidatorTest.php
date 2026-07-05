@@ -33,12 +33,17 @@ class AgentAssessmentValuesValidatorTest extends TestCase
         $this->assertContains('approved', $decoded['required'] ?? []);
     }
 
-    public function testLiveSourceFilePassesAndIsDraft(): void
+    public function testLiveSourceFilePassesAndIsApproved(): void
     {
+        // D3a -> D3b gate: the human reviewed the categorical values (including the
+        // bootstrapper/ui-builder REVIEW-NEEDED entries) and flipped `approved: true`
+        // on 2026-07-05 (see docs/ai/agent-scores.yaml header comment and
+        // docs/tickets/arch-todo-agent-score-frontmatter-20260614-104816/D3-plan.md).
+        // The D3b renderer now consumes this file; this assertion pins that gate.
         [$code, $out] = $this->runValidator(self::root() . '/docs/ai/agent-scores.yaml', self::root());
         $this->assertSame(0, $code, "live source should validate:\n" . $out);
         $this->assertStringContainsString('1:1 with live templates', $out);
-        $this->assertStringContainsString('DRAFT', $out, 'live source must still be DRAFT (approved: false) until human approval');
+        $this->assertStringContainsString('APPROVED', $out, 'live source must be APPROVED (approved: true) now that D3b has landed');
     }
 
     public function testLiveSourceCoversEveryTemplateExactlyOnce(): void

@@ -196,19 +196,27 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
 - **Acceptance:**
   - [x] OQ-1 resolved with a live OpenCode run showing `tool:run <id> -- <args>` (with quoted
         args) matches a single allow rule — OR the custom-tool route (OQ-6) is chosen instead.
-  - [ ] gateway returns machine-readable approval reason codes (`reason=approval_required`,
-        `safe_alternative`) so agent wording can be "stop, do not retry".
+  - [x] gateway returns machine-readable approval reason codes (`reason=approval_required`,
+        `safe_alternative`) so agent wording can be "stop, do not retry". DONE — the box was
+        stale; `aiToolGatewayReasonCodes()` + `aiToolGatewayReasonPayload()` already ship at
+        `tools/ai/commands/install_extras.php:493-524`.
 
 ### P2c — Registry ↔ generated-permission drift test  `[NEW]`  (bind to P2b, not before P1)
 - **What:** A test asserting registry/permission consistency. Becomes meaningful only once P2b
   introduces `tool:*` rules; no equivalent exists today (`CommandPolicyCompilerTest` only checks
   compiled-artifact staleness; `AgentPermissionPolicyTest` checks agent bash patterns).
-- **Risk:** low. **Status:** NEW (sequenced with P2b).
-- **Acceptance:**
-  - [ ] registry id without a generated permission path fails the test.
-  - [ ] generated permission referencing a missing registry id fails.
-  - [ ] rendered `opencode.jsonc` differing from its template source fails (parity).
-  - [ ] installed `.opencode/**` copies are not edited directly.
+- **Risk:** low. **Status:** SUPERSEDED — see
+  `docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md` (Slice 6).
+  Do not re-implement here; cross-link only.
+- **Acceptance (superseded, not completed in this ticket):**
+  - [ ] registry id without a generated permission path fails the test. SUPERSEDED — covered by
+        `PermissionComposeTest::testEveryComposedScriptReferenceIsRegistered()`.
+  - [ ] generated permission referencing a missing registry id fails. SUPERSEDED — covered by
+        `PermissionComposeTest`/`AgentPermissionDriftTest.php`.
+  - [ ] rendered `opencode.jsonc` differing from its template source fails (parity). SUPERSEDED —
+        covered by `AgentPermissionDriftTest.php`.
+  - [ ] installed `.opencode/**` copies are not edited directly. SUPERSEDED — covered by the same
+        composition-ticket test suite.
 
 ### P3 — Focused-test runner tool id  `[NEW]`
 - **What:** A registry id/mode that runs `phpunit --filter`/single file, distinct from
@@ -241,9 +249,16 @@ missing `fd`/`ast-grep`. This removes the dominant reason agents fall back to ra
 - **What:** ~6-line agent guidance (native reads; never pipe; one gateway command per call;
   stop-don't-retry on `approval_required`) plus the matching Copilot reference line.
 - **Files:** templates under `packages/ai-universal-rules/templates/**` only.
-- **Risk:** low. **Status:** NEW (Phase 1 P3 deferred).
-- **Acceptance:** [ ] per-agent bash matrices replaced by the compact block in templates;
-  [ ] Copilot adapter references canonical policy, does not restate it.
+- **Risk:** low. **Status:** SUPERSEDED (substantially) — see
+  `docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md`. 13 of 15 core
+  agents are now composed from the shared permission model; Copilot/Claude renderers resolve
+  `allowedBash` from that composed model instead of restating per-agent matrices. NOT 100%
+  closed: the 2 excluded agents still hand-ship the same literal bash matrices (per that plan's
+  own note). Do not re-implement here; cross-link only.
+- **Acceptance:** [ ] SUPERSEDED — per-agent bash matrices replaced by the compact block for 13
+  of 15 core agents via the composed model (see status above; 2 agents remain unmigrated, not
+  100% closed); [ ] SUPERSEDED — Copilot adapter references canonical policy via the composed
+  model, does not restate it (see status above).
 
 ## Things to avoid (rejected)
 

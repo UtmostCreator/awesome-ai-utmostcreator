@@ -167,6 +167,9 @@ permission:
     'rm *': ask
     'git clean*': ask
     '*': deny
+agent_assessment:
+  risk_level: high
+  decision: needs_refactor
 ---
 
 # POST-Install Agent
@@ -232,18 +235,8 @@ Gate proof (both must pass before the gate is cleared): `php tools/ai/ai.php pla
 - Do not edit `docs/ai/generated/**`, vendored dependencies, cache/build/dist/coverage outputs, lock files, or secret/key/env files.
 - Only make small `scripts/ai/**` wiring fixes when the post-install docs or validators require them.
 - Do not bypass the Placeholder Resolution Gate above for any reason.
-- File rename is allowed only as a direct rename or move operation.
-- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
-- Do not delete files unless the user explicitly requests deletion in the current conversation.
-- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
 - Do not delete this agent automatically. After the placeholder gate is cleared, successful verification, and no remaining install tasks, recommend removing `.opencode/agents/post-install.md` and/or `.github/agents/post-install.agent.md`; delete only if the user explicitly approves.
-
-## File Rename And Delete Policy
-
-- Allowed edit classes: in-place file modification, file creation, directory creation, and direct file rename or move (`from` -> `to`).
-- Treat rename as distinct from delete.
-- If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename.
-- If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
+- File rename/delete policy (allowed edit classes, direct-rename-only, `needs-delete-approval`/`needs-rename-approval` stop-and-report codes) follows `docs/ai/approval-boundaries.md` ("File Rename And Delete Policy") without exception.
 
 ## Workflow
 

@@ -12,16 +12,19 @@ declare(strict_types=1);
  */
 
 /**
- * `refactorer` and `implementer` share this exact 7-pack proof-tooling combination.
+ * `refactorer` and `implementer` share this proof-tooling combination. Reconciled to 4
+ * packs (Slice D, docs/tickets/arch-todo-complete-permission-composition-migration/plan.md):
+ * `proof.php_lint`/`proof.phpunit_direct`/`proof.js_test_lint_typecheck` were dropped because
+ * both agents now source PHP/JS commands via language overlays instead (refactorer:
+ * `php-lint`+`php-phpunit`+`js-core`; implementer: the coarse `php`+`js-ts` union) — see each
+ * agent's own composition entry for its overlay wiring. The remaining 4 (kit-tooling, not
+ * language-specific) stay as explicit packs since both agents still need them identically.
  *
  * @return list<string>
  */
 function aiPermissionPackSetFullProof(): array
 {
     return [
-        'proof.php_lint',
-        'proof.phpunit_direct',
-        'proof.js_test_lint_typecheck',
         'proof.validate_script',
         'proof.generate_check',
         'proof.markdown',

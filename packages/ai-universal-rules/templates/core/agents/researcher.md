@@ -111,6 +111,9 @@ permission:
     "gh repo view*": allow
     "scc --no-complexity --no-cocomo *": allow
     "*": deny
+agent_assessment:
+  risk_level: medium
+  decision: approve_with_minor_fixes
 ---
 
 # Researcher Agent

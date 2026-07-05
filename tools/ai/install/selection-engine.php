@@ -7,11 +7,12 @@ declare(strict_types=1);
 // Procedural (`aiSelection*`) to match the codebase's `aiInstaller*` convention; no
 // classes (see plan Contracts And Boundaries: procedural preferred, class not justified).
 //
-// P0 slice: only the guaranteed StdinSelector path is implemented, wrapping the existing
-// aiPromptLine()/aiPromptYesNo() primitives from tools/ai/commands/helpers.php. Backend
-// detection is structured so Laravel Prompts (P1), fzf (P2), and gum (P3) can be slotted
-// in later without reworking callers — but those backends are intentionally NOT built yet,
-// and aiSelectionDetectBackend() therefore always resolves to 'stdin' in this slice.
+// P0 slice implemented the guaranteed StdinSelector path, wrapping the existing
+// aiPromptLine()/aiPromptYesNo() primitives from tools/ai/commands/helpers.php.
+// P1 slice adds the optional Laravel Prompts backend: it is used only when
+// vendor/autoload.php exists AND the `laravel/prompts` package is installed AND a real
+// TTY is available; its absence changes nothing (silent degradation to stdin). fzf (P2)
+// and gum (P3) are structured to slot in the same way but are NOT built yet.
 //
 // helpers.php owns aiPromptLine()/aiPromptYesNo()/aiDetectRuntimeMode(); this file assumes
 // they are already loaded by the wizard's include chain (install_workflow.php). It is not
@@ -43,11 +44,12 @@ function aiSelectionDetectBackend(string $runtimeMode, string $root): string
 
     // Precedence scaffold — richer backends are added in later slices (P1/P2/P3).
     // Each check must degrade silently to the next option and finally to 'stdin'.
-    // Intentionally not yet wired:
-    //   if (aiSelectionLaravelPromptsAvailable($root)) { return 'laravel-prompts'; }
+    if (aiSelectionLaravelPromptsAvailable($root)) {
+        return 'laravel-prompts';
+    }
+    // Not yet wired (P2/P3):
     //   if (aiSelectionFzfAvailable()) { return 'fzf'; }
     //   if (aiSelectionGumAvailable()) { return 'gum'; }
-    unset($root);
 
     return 'stdin';
 }
@@ -72,7 +74,8 @@ function aiSelectionStdinIsInteractive(): bool
 function aiSelectionMultiselect(string $backend, string $title, array $options, array $defaults): array
 {
     return match ($backend) {
-        // Future backends slot in here (laravel-prompts/fzf/gum) without touching callers.
+        'laravel-prompts' => aiSelectionLaravelPromptsMultiselect($title, $options, $defaults),
+        // Future backends slot in here (fzf/gum) without touching callers.
         default => aiSelectionStdinMultiselect($title, $options, $defaults),
     };
 }
@@ -83,6 +86,7 @@ function aiSelectionMultiselect(string $backend, string $title, array $options, 
 function aiSelectionConfirm(string $backend, string $prompt, bool $default): bool
 {
     return match ($backend) {
+        'laravel-prompts' => aiSelectionLaravelPromptsConfirm($prompt, $default),
         default => aiSelectionStdinConfirm($prompt, $default),
     };
 }
@@ -95,6 +99,7 @@ function aiSelectionConfirm(string $backend, string $prompt, bool $default): boo
 function aiSelectionChoose(string $backend, string $prompt, array $options, string $default): string
 {
     return match ($backend) {
+        'laravel-prompts' => aiSelectionLaravelPromptsChoose($prompt, $options, $default),
         default => aiSelectionStdinChoose($prompt, $options, $default),
     };
 }
@@ -163,6 +168,99 @@ function aiSelectionStdinChoose(string $prompt, array $options, string $default)
         return $default;
     }
     return $keys[$answer] ?? $default;
+}
+
+/**
+ * True when the optional `laravel/prompts` backend can be used: `vendor/autoload.php`
+ * exists AND the package's `Laravel\Prompts\{multiselect,confirm,select}` functions are
+ * (or become, once the autoloader is required) callable.
+ *
+ * Guarded per the plan's graceful-degradation contract: a missing autoloader or a missing
+ * package silently returns false so the caller falls through to the next backend. No
+ * fatal error, no warning, for consumers who never installed the optional dependency.
+ *
+ * The real-TTY gate is enforced once by the caller (aiSelectionDetectBackend(), via
+ * aiSelectionStdinIsInteractive()) before this function is ever consulted, so it is not
+ * re-checked here.
+ */
+function aiSelectionLaravelPromptsAvailable(string $root): bool
+{
+    $autoload = rtrim($root, '/') . '/vendor/autoload.php';
+    if (!file_exists($autoload)) {
+        return false;
+    }
+    if (!function_exists('Laravel\\Prompts\\multiselect')) {
+        require_once $autoload;
+    }
+
+    return function_exists('Laravel\\Prompts\\multiselect')
+        && function_exists('Laravel\\Prompts\\confirm')
+        && function_exists('Laravel\\Prompts\\select');
+}
+
+/**
+ * Laravel Prompts multiselect: builds a [key => label] options map and passes
+ * per-option defaults through, matching aiSelectionStdinMultiselect()'s default
+ * resolution (explicit $defaults list OR the option's own `default` flag).
+ *
+ * @param list<array{key:string,label:string,default:bool}> $options
+ * @param list<string> $defaults
+ * @return list<string>
+ */
+function aiSelectionLaravelPromptsMultiselect(string $title, array $options, array $defaults): array
+{
+    $choices = [];
+    $selectedDefaults = [];
+    foreach ($options as $option) {
+        $key = (string) ($option['key'] ?? '');
+        if ($key === '') {
+            continue;
+        }
+        $choices[$key] = (string) ($option['label'] ?? $key);
+        if (in_array($key, $defaults, true) || (bool) ($option['default'] ?? false)) {
+            $selectedDefaults[] = $key;
+        }
+    }
+
+    $selected = \Laravel\Prompts\multiselect(
+        label: $title !== '' ? $title : 'Select options:',
+        options: $choices,
+        default: $selectedDefaults
+    );
+
+    return array_values(array_map('strval', $selected));
+}
+
+/**
+ * Laravel Prompts confirm: thin wrapper over Laravel\Prompts\confirm().
+ */
+function aiSelectionLaravelPromptsConfirm(string $prompt, bool $default): bool
+{
+    return (bool) \Laravel\Prompts\confirm(label: $prompt, default: $default);
+}
+
+/**
+ * Laravel Prompts single choice: thin wrapper over Laravel\Prompts\select(). Falls back
+ * to $default (or the first option) when $default is not among the offered keys.
+ *
+ * @param list<array{key:string,label:string}> $options
+ */
+function aiSelectionLaravelPromptsChoose(string $prompt, array $options, string $default): string
+{
+    $choices = [];
+    foreach ($options as $option) {
+        $key = (string) ($option['key'] ?? '');
+        if ($key === '') {
+            continue;
+        }
+        $choices[$key] = (string) ($option['label'] ?? $key);
+    }
+    if ($choices === []) {
+        return $default;
+    }
+    $defaultKey = array_key_exists($default, $choices) ? $default : (string) array_key_first($choices);
+
+    return (string) \Laravel\Prompts\select(label: $prompt, options: $choices, default: $defaultKey);
 }
 
 /**

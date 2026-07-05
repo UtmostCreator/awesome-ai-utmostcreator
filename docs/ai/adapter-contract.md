@@ -69,6 +69,23 @@ These are distinct and must not be conflated:
 - Adapter drift (this contract): enforced by `tools/ai/validate-adapter-drift.php`. It checks adapter surfaces for required canonical references, oversize bodies, and non-agnostic literals. It does not yet do full content parity against template sources; treat that as a known limitation, not a guarantee.
 - Advisor scorecard drift: produced by `tools/ai/advisor/drift.php` into `docs/ai/generated/advisor-drift.md`. It reports per-area advisor score deltas versus a saved baseline. It is unrelated to adapter/template parity.
 
+## Provider-Agnostic Design Rule
+
+For multi-provider AI surfaces, the architect agent designs to this pipeline shape,
+never a provider-specific duplication:
+
+```text
+canonical source
+→ provider registry
+→ provider renderer
+→ provider-specific output
+→ validation/drift check
+```
+
+Use this for agents, commands, skills, prompts, instructions, hooks, and generated catalog
+entries. If two providers differ only by folder names/frontmatter, design a renderer mapping;
+if semantics differ by provider, model them as provider capabilities, not string replacements.
+
 ## Permission Projection Seam
 
 `tools/ai/install/permission-layers/render-adapters.php` (`aiPermissionRenderAdapters()`) is a

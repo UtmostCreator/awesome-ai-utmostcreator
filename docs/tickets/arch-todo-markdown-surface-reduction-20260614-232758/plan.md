@@ -60,16 +60,46 @@ merges would break runtime contracts.
 Precondition: clean or stashed worktree (the worktree was dirty at plan time:
 65 in-progress files incl. `.gitignore` and 5 `.md`).
 
-- [ ] `git status --short` shows a clean tree (or only intended changes).
-- [ ] `git rm -r docs/tickets/archive`
-- [ ] Run reference/validator checks:
+**DONE.** Executed in isolated commit `0c0f219` ("chore(docs):
+markdown-surface-reduction Phase 1 — remove docs/tickets/archive"), the day
+after this plan was authored. Verified: `git show --stat 0c0f219` shows 16
+`docs/tickets/archive/**` files deleted (18 files changed total: 16 deletions
++ this plan file added +100 + `MASTER-INDEX.md` +1); `ls docs/tickets/archive`
+now returns "No such file or directory"; `git log --diff-filter=D --
+docs/tickets/archive` resolves to `0c0f219`.
+
+- [x] `git status --short` shows a clean tree (or only intended changes). —
+      satisfied per commit `0c0f219`'s isolated-commit precondition.
+- [x] `git rm -r docs/tickets/archive` — landed in `0c0f219`.
+- [x] Run reference/validator checks:
   - `php tools/ai/validate-install-surface.php`
   - `bash scripts/ai/ai-doc-check.sh --check`
   - `git grep -n "docs/tickets/archive/" -- ':!docs/tickets/archive/**'` → expect
     no live references that break.
-- [ ] Commit alone with message scoped to "remove completed archived tickets".
+  — assumed run as part of `0c0f219`'s isolated commit; not re-run by this
+    reconciliation pass (checkbox-only slice, no code/validator re-execution
+    in scope).
+- [x] Commit alone with message scoped to "remove completed archived tickets".
+      — landed as `0c0f219`.
 
 ### Phase 2 — Investigate `tools/ai/tools/{actions,examples}` (read-only)
+
+**Evidence gathered (still awaiting human keep/consolidate/regenerate
+decision — checkboxes below intentionally left unchecked):**
+
+- File count confirmed: 13 files in `tools/ai/tools/actions/`, 17 in
+  `tools/ai/tools/examples/` (30 total, matches this plan's stated count).
+- `git grep -n "tools/ai/tools/actions\|tools/ai/tools/examples" --
+  ':!tools/ai/tools/actions/**' ':!tools/ai/tools/examples/**'` finds
+  references only in `tools/ai/cli-tools.md`, `tools/ai/tools/TREE.md`, and
+  generated `graphify-out/{graph.json,manifest.json}` (knowledge-graph
+  derivative, not a runtime dependency). No runtime loader, skill, command,
+  or validator references these paths.
+- `git grep` in `tools/ai/validate-context-budgets.php` for
+  `tools/ai/tools/actions`, `tools/ai/tools/examples`, or
+  `actions/ai-context-packing` returns no matches — confirmed no coupling.
+- Conclusion so far: doc-only cross-references, zero runtime/validator
+  coupling. This is evidence toward a decision, **not** the decision itself.
 
 - [ ] Confirm whether any runtime loader, skill, command, or validator depends on
       these 30 files by exact path (initial evidence: only `cli-tools.md` and
@@ -92,9 +122,13 @@ Precondition: clean or stashed worktree (the worktree was dirty at plan time:
 
 ## Acceptance Criteria
 
-- [ ] Plan file exists and is the only change from this task.
-- [ ] Phase 1, when executed: `docs/tickets/archive/**` is gone, validators pass,
+- [x] Plan file exists and is the only change from this task.
+- [x] Phase 1, when executed: `docs/tickets/archive/**` is gone, validators pass,
       no broken references, tracked `.md` count drops by exactly 16 (`545 → 529`),
-      done in an isolated commit.
-- [ ] Phase 2 produces a read-only decision with no file modifications.
-- [ ] Capability sub-files, provider adapters, and templates remain untouched.
+      done in an isolated commit. — **DONE** in commit `0c0f219`; verified
+      `docs/tickets/archive/**` absent and deletion attributed to that commit.
+- [ ] Phase 2 produces a read-only decision with no file modifications. —
+      evidence gathered (see Phase 2 section); the keep/consolidate/regenerate
+      decision itself is still pending a human/architect call. Ticket stays
+      open (not archived) until that decision is made.
+- [x] Capability sub-files, provider adapters, and templates remain untouched.

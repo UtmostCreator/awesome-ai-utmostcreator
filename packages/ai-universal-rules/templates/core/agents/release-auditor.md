@@ -97,6 +97,9 @@ permission:
     'php tools/ai/generate-*.php --check*': allow
     'bash scripts/ai/ai-verify.sh *': ask
     '*': deny
+agent_assessment:
+  risk_level: critical
+  decision: approve
 ---
 
 # Release Auditor Agent

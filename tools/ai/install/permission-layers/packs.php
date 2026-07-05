@@ -170,32 +170,20 @@ function aiPermissionPacks(): array
         // want proof.validate_script, repository-reviewer wants validate_script+generate_check but
         // not php_lint/phpunit_direct. A coarse bundle would force partial-match agents back into
         // duplicated exceptions, recreating the exact problem this refactor removes.
-        'proof.php_lint' => aiPermissionEntries('bash', [
-            'php -l *' => 'allow',
-        ]),
-        'proof.phpunit_direct' => aiPermissionEntries('bash', [
-            'vendor/bin/phpunit *' => 'allow',
-            './vendor/bin/phpunit *' => 'allow',
-            'phpunit *' => 'allow',
-        ]),
+        //
+        // NOTE (Slice D, docs/tickets/arch-todo-complete-permission-composition-migration/
+        // plan.md): 'proof.php_lint', 'proof.phpunit_direct', and 'proof.js_test_lint_typecheck'
+        // (formerly here) were RETIRED — every agent that referenced them (config-maintainer,
+        // reviewer, refactorer, bootstrapper, implementer) now sources the same commands via the
+        // 'php-lint'/'php-phpunit'/'js-core' atomic language overlays or the coarse 'php'/'js-ts'
+        // overlays instead (language-overlays.php), so a non-PHP/non-JS consumer install no
+        // longer inherits these grants as a universal pack. Confirmed via grep before removal:
+        // no composition referenced these 3 pack names by string at retirement time.
         'proof.validate_script' => aiPermissionEntries('bash', [
             'php tools/ai/validate-*.php *' => 'allow',
         ]),
         'proof.generate_check' => aiPermissionEntries('bash', [
             'php tools/ai/generate-*.php --check*' => 'allow',
-        ]),
-
-        // Shared by implementer + refactorer; yarn/bun variants are not part of this pack (only
-        // implementer's ground truth grants those — kept as an agent-specific inline addition).
-        'proof.js_test_lint_typecheck' => aiPermissionEntries('bash', [
-            'npm test*' => 'allow',
-            'npm run test*' => 'allow',
-            'npm run lint*' => 'allow',
-            'npm run typecheck*' => 'allow',
-            'pnpm test*' => 'allow',
-            'pnpm run test*' => 'allow',
-            'pnpm run lint*' => 'allow',
-            'pnpm run typecheck*' => 'allow',
         ]),
 
         'proof.markdown' => aiPermissionEntries('bash', [
@@ -233,6 +221,26 @@ function aiPermissionPacks(): array
         'core.safe_read.deny_rg' => aiPermissionEntries('bash', [
             'rg *' => 'deny',
         ]),
+        // Extracted (Slice C, docs/tickets/arch-todo-complete-permission-composition-
+        // migration/plan.md) from workflow-auditor's inline exception so
+        // architecture-plan-writer can share the exact same tightening without violating
+        // the no-duplicated-exception-pattern test.
+        'core.safe_read.deny_test_x' => aiPermissionEntries('bash', [
+            'test -x *' => 'deny',
+        ]),
+        // Extracted (Slice C) from researcher's + architecture-plan-writer's identical
+        // jq/yq-deny exceptions (always co-occurring in ground truth, kept as one pack
+        // rather than two atomic ones to match that real usage pattern).
+        'core.safe_read.deny_jq_yq' => aiPermissionEntries('bash', [
+            'jq *' => 'deny',
+            'yq *' => 'deny',
+        ]),
+        // Extracted (Slice C) from post-install's + architecture-plan-writer's identical
+        // head/tail-deny exceptions (always co-occurring in ground truth).
+        'core.safe_read.deny_head_tail' => aiPermissionEntries('bash', [
+            'head *' => 'deny',
+            'tail *' => 'deny',
+        ]),
         // Not a "safe read" tool (chown is a mutation), but grouped here for the same reason
         // as the other atomic single-pattern packs: script-runner and post-install both
         // explicitly tighten it beyond the '*' floor's default posture for their profile.
@@ -260,9 +268,10 @@ function aiPermissionPacks(): array
         'impl.sg_allow' => aiPermissionEntries('bash', [
             'sg *' => 'allow',
         ]),
-        'impl.composer_validate_allow' => aiPermissionEntries('bash', [
-            'composer validate*' => 'allow',
-        ]),
+        // NOTE (Slice D): 'impl.composer_validate_allow' (formerly here) was RETIRED —
+        // bootstrapper now sources 'composer validate*' via the 'php-composer-validate'
+        // atomic language overlay, and implementer via the coarse 'php' overlay. See the
+        // same note above 'proof.validate_script' for the retirement rationale.
         'install.docs_allow' => aiPermissionEntries('bash', [
             'php tools/ai/ai.php install-docs*' => 'allow',
         ]),

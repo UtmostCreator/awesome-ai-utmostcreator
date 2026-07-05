@@ -81,9 +81,9 @@ P0:
 
 P1:
 
-- [ ] P1: Add `aiSelectionLaravelPromptsAvailable()` (guarded `file_exists(vendor/autoload.php)` + callable check + TTY) and `aiSelectionLaravelPromptsMultiselect/Confirm/Choose()` using Laravel Prompts checkbox/multiselect.
-- [ ] P1: Add `laravel/prompts` to `composer.json` `require-dev` and `suggest` only (never `require`).
-- [ ] P1: Insert dependency-warning gate before final apply: call `aiInstallerAgentDependencyWarnings()` + `aiInstallerPackToolRequirements()`, print, and confirm.
+- [x] P1: Add `aiSelectionLaravelPromptsAvailable()` (guarded `file_exists(vendor/autoload.php)` + callable check + TTY) and `aiSelectionLaravelPromptsMultiselect/Confirm/Choose()` using Laravel Prompts checkbox/multiselect.
+- [x] P1: Add `laravel/prompts` to `composer.json` `require-dev` and `suggest` only (never `require`).
+- [x] P1: Insert dependency-warning gate before final apply: call `aiInstallerAgentDependencyWarnings()` + `aiInstallerPackToolRequirements()`, print, and confirm. (Confirmed already wired at `install_workflow.php:173,527,578` as part of the committed P0 slice — no further change needed here.)
 
 P2:
 
@@ -104,7 +104,7 @@ P3:
 - [ ] AC-06: When agent adapter packs are selected without `scripts-pack`, `aiInstallerAgentDependencyWarnings()` output is printed before the final apply prompt.
 - [ ] AC-07: With NO `vendor/autoload.php` present, the wizard runs to completion with the stdin backend and emits no fatal error and no warning about missing Laravel Prompts (graceful degradation verified).
 - [ ] AC-08: When Laravel Prompts + TTY are available, `aiSelectionDetectBackend()` returns `laravel-prompts`; when only fzf is present it returns `fzf`; when only gum is present it returns `gum` (precedence unit-tested with detection stubs).
-- [ ] AC-09: `composer.json` contains `laravel/prompts` under `require-dev`/`suggest` only and NOT under `require`; `composer validate` passes.
+- [x] AC-09: `composer.json` contains `laravel/prompts` under `require-dev`/`suggest` only and NOT under `require`; `composer validate` passes.
 - [ ] AC-10: The two bash entrypoints either exec the PHP installer with forwarded args (verified by a smoke invocation printing the installer banner) OR are documented as deprecated and `readme-install.md` no longer advertises a non-working primary path.
 - [ ] AC-11: `composer test` (and `composer test:fast`) pass, including the new `InstallerSelectionEngineTest`.
 

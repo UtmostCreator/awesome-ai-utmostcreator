@@ -109,6 +109,9 @@ permission:
     'pnpm install*': ask
     'yarn install*': ask
     'grep *': deny
+agent_assessment:
+  risk_level: high
+  decision: needs_refactor
 ---
 
 You are the build-config agent for `<PROJECT_NAME>`.

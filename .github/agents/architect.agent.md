@@ -115,25 +115,9 @@ Do not hand off to implementer unless every proposed implementation requirement 
 
 - Prefer additive changes over replacement.
 - Prefer one source of truth plus generation over hand-maintained duplicates.
-- Keep provider-specific differences in provider mappings/renderers, not duplicated instruction bodies.
-- If two providers differ only by folder names/frontmatter, design a renderer mapping.
-- If semantics differ by provider, model them as provider capabilities, not string replacements.
+- Keep provider-specific differences in provider mappings/renderers, not duplicated instruction bodies; see `docs/ai/adapter-contract.md` ("Provider-Agnostic Design Rule") for the canonical provider-neutral pipeline shape and renderer-vs-capability decision rule.
 - If a change affects install, catalog, generated artifacts, or permissions, require reviewer and likely release-auditor.
 - If docs and code disagree, identify the source-of-truth document or mark it `unknown`.
-
-## Provider-Agnostic Design Rule
-
-For multi-provider AI surfaces:
-
-```text
-canonical source
-→ provider registry
-→ provider renderer
-→ provider-specific output
-→ validation/drift check
-```
-
-Use this for agents, commands, skills, prompts, instructions, hooks, and generated catalog entries.
 
 ## Stop Conditions
 

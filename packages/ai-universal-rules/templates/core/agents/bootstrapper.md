@@ -159,17 +159,17 @@ permission:
     "files-to-prompt *": ask
     "code2prompt *": ask
     "bash scripts/ai/repomix-ensure-fresh.sh *": ask
-    "git stash list*": allow
-    "git stash show*": allow
     "php -l *": allow
     "vendor/bin/phpunit *": allow
     "./vendor/bin/phpunit *": allow
     "phpunit *": allow
+    "composer validate*": allow
+    "git stash list*": allow
+    "git stash show*": allow
     "php tools/ai/validate-*.php *": allow
     "php tools/ai/generate-*.php --check*": allow
     "bash scripts/ai/ai-install-coverage.sh *": allow
     "sg *": allow
-    "composer validate*": allow
     "php tools/ai/ai.php install-docs*": allow
     "bash scripts/ai/ai-doc-check.sh --check*": allow
     "shellcheck *": allow
@@ -187,6 +187,9 @@ permission:
     "php tools/ai/ai.php run-script *": allow
     "php tools/ai/ai.php hooks*": allow
     "*": deny
+agent_assessment:
+  risk_level: high
+  decision: needs_refactor
 ---
 
 # Bootstrapper Agent

@@ -73,6 +73,39 @@ EOF
 }
 run_test "generated paths are exempt" test_generated_paths_are_exempt
 
+test_fail_allowlist_downgrades_hard_max_violation() {
+    local root="$TMP/fail-allowlist"
+    mkdir -p "$root/packages/ai-universal-rules/policies"
+    cat >"$root/packages/ai-universal-rules/policies/ai-file-standards.json" <<'EOF'
+{"line_limits":[{"id":"sample","patterns":["docs/*.md"],"warn_above":3,"fail_above":6,"fail_allowlist":[{"path":"docs/over-hard.md","reason":"Third-party out-of-band content, allowlisted intentionally."}]}]}
+EOF
+    write_lines "$root/docs/over-hard.md" 7
+    local out rc=0
+    out="$($PHP_BIN "$SCRIPT" "$root" 2>&1)" || rc=$?
+    [[ "$rc" -eq 0 ]]
+    [[ "$out" == *"ALLOWLISTED-FAIL sample docs/over-hard.md = 7 lines > hard max 6"* ]]
+    [[ "$out" != *"FAIL sample docs/over-hard.md"* ]]
+    [[ "$out" == *"failures=0"* ]]
+}
+run_test "fail_allowlist downgrades a hard-max violation to ALLOWLISTED-FAIL" test_fail_allowlist_downgrades_hard_max_violation
+
+test_fail_allowlist_does_not_cover_other_files() {
+    local root="$TMP/fail-allowlist-scoped"
+    mkdir -p "$root/packages/ai-universal-rules/policies"
+    cat >"$root/packages/ai-universal-rules/policies/ai-file-standards.json" <<'EOF'
+{"line_limits":[{"id":"sample","patterns":["docs/*.md"],"warn_above":3,"fail_above":6,"fail_allowlist":[{"path":"docs/allowlisted.md","reason":"Intentional third-party content, not this repo's to trim."}]}]}
+EOF
+    write_lines "$root/docs/allowlisted.md" 7
+    write_lines "$root/docs/not-allowlisted.md" 7
+    local out rc=0
+    out="$($PHP_BIN "$SCRIPT" "$root" 2>&1)" || rc=$?
+    [[ "$rc" -ne 0 ]]
+    [[ "$out" == *"ALLOWLISTED-FAIL sample docs/allowlisted.md = 7 lines > hard max 6"* ]]
+    [[ "$out" == *"FAIL sample docs/not-allowlisted.md = 7 lines > hard max 6"* ]]
+    [[ "$out" == *"failures=1"* ]]
+}
+run_test "fail_allowlist only covers its listed path, not siblings" test_fail_allowlist_does_not_cover_other_files
+
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
 if ((FAIL == 0)); then

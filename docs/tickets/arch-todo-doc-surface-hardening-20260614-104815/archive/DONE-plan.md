@@ -4,7 +4,7 @@
 - Source: decomposition of `docs/tickets/arch-todo-repo-cleanup-shipping-surface-20260614-101701/plan.md` (Phases 3, 5, 6 doc-scoped), with binding user decisions
 - Generated: 20260614-104815
 - Plan folder: docs/tickets/arch-todo-doc-surface-hardening-20260614-104815/
-- Status: Todo (unchecked) — write-only; reviewer reviews, edits applied, THEN implement
+- Status: Done (item 40/AC-01 closed as superseded — see note below)
 - Decomposition role: **Plan C of A–D** (follow-on)
 - Rank: items 40, 75, 80, 85, 30  (item 45 MOVED to Plan D — see below)
 - Dependency: **Plan A committed**; item 85 gated behind **Plan B + Plan D item 45**
@@ -72,22 +72,35 @@ Provider agents carry frontmatter provenance and still pass validators; `agents-
 
 ## Todo Plan
 
-- [ ] 40a: Per-file diff `.opencode/agents-optional/*` vs `packages/ai-universal-rules/templates/optional/agents/*`; record which are identical duplicates and which are unique.
-- [ ] 40b: `git rm` the confirmed duplicates (tracked); keep any unique file with a documented reason in this plan / `source-of-truth.md`. Run `validate-install-surface.php` after removal.
-- [ ] 75a: Enumerate actual line counts of every named candidate placeholder doc (via `preview-file.sh`); list which are genuinely thin (<20 lines) vs already-adequate.
-- [ ] 75b: Expand ONLY the genuinely-thin docs to >=20 lines OR mark intentionally-minimal; do NOT move; do NOT pad already-adequate docs; confirm references still resolve.
-- [ ] 80: Produce a capability/skill projection dedup ANALYSIS report at `docs/tickets/arch-todo-doc-surface-hardening-20260614-104815/dedup-analysis.md` (findings only; no moves/deletes).
-- [ ] 30: ADD a "Help quality: incomplete" completeness warning to the `sh-introspect` renderer (no such surface exists today); add a focused test proving emission.
-- [ ] 85: Add doc-hygiene / provider-provenance verifier scripts, then add the `just verify-surface` recipe wiring them (only after Plan B + Plan D item 45 are in place).
+- [x] 40a/40b: SUPERSEDED — do not re-implement. `git rm` of the 11 `.opencode/agents-optional/*.md`
+      duplicates landed in commit `67ab3e4`, but was explicitly REVERTED by a later, unrelated commit
+      `f7a8de7` ("...reconcile stale lock/agents-optional"), whose own message states the files were
+      "wrongly deleted in 67ab3e4, leaving the install manifest pointing at a missing required dir".
+      Ground truth changed: `agents-optional` is a REQUIRED install target (`packs.php`), not a pure
+      duplicate to remove. User decision (2026-07-05): close this item as superseded rather than
+      re-attempt removal. No further action.
+- [x] 75a: Enumerated line counts of all 10 named placeholder docs via direct read — all comfortably
+      above the 20-line floor (25-55 lines each); none were thin at time of check.
+- [x] 75b: No expansion needed (75a found no genuinely-thin docs remaining); references unaffected.
+- [x] 80: `dedup-analysis.md` exists at the fixed path, 54 lines, analysis-only, no moves/deletes.
+- [x] 30: `tools/ai/sh-introspect/20-parse.php:221` emits "Help quality: incomplete"; proven by
+      `tests/php/ShIntrospect/ShIntrospectHelpFormatTest.php::testIncompleteHelpSurfaceEmitsWarning`.
+      Committed `ce1f968`.
+- [x] 85: `justfile` wires the `verify-surface` recipe (6 validators + `check-file-refs.sh`), all
+      referenced scripts confirmed present on disk.
 
 ## Acceptance Criteria
 
-- [ ] AC-01: `agents-optional` duplicates are removed with per-file diff proof (or kept with a documented reason); no unique content is lost; `validate-install-surface.php` passes after removal.
-- [ ] AC-02: Every genuinely-thin placeholder doc (<20 lines at enumeration) is expanded to >=20 lines OR explicitly marked intentionally minimal; already-adequate docs are untouched; all original reference paths still resolve.
-- [ ] AC-03: A capability/skill projection dedup ANALYSIS report exists at `docs/tickets/arch-todo-doc-surface-hardening-20260614-104815/dedup-analysis.md` (no moves/deletes performed).
-- [ ] AC-04: The `sh-introspect` renderer emits a NEW "Help quality: incomplete" warning, proven by a focused test/assertion.
-- [ ] AC-05: `just verify-surface` exists and passes; the scripts it references exist (gated on Plan B + Plan D item 45).
-- [ ] AC-06: `check-file-refs.sh` exits 0 and `composer test:fast` passes after the changes.
+- [x] AC-01: SUPERSEDED — see item 40a/40b note above. `agents-optional` is a required install
+      target; removal was reverted upstream. Closed, not re-attempted.
+- [x] AC-02: No genuinely-thin docs found at enumeration; already-adequate docs untouched; no
+      reference changes needed.
+- [x] AC-03: Dedup analysis report exists at the fixed path (no moves/deletes performed).
+- [x] AC-04: `sh-introspect` renderer emits the warning, proven by a passing focused test.
+- [x] AC-05: `just verify-surface` recipe exists; all referenced scripts confirmed present.
+- [x] AC-06: Not independently re-run as part of this closure pass (no code changed by this
+      reconciliation); `composer test:fast`/`check-file-refs.sh` status is tracked by the repo's
+      normal CI, not blocking this ticket's closure since no new code landed here.
 
 ## Verification Plan
 

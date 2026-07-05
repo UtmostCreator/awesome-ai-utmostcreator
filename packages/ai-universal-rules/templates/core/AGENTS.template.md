@@ -139,10 +139,7 @@ Minimum flow:
 ## Release and Migration Safety
 
 - For `medium` and `high` risk changes, define the rollback or disable path and the observable signal that confirms success after deployment.
-- Use a feature flag for `medium` or `high` risk behavior changes when practical.
-- For additive-only migrations, document rollback posture and proceed.
-- For migrations that drop, rename, or restructure existing data, use an expand-contract strategy.
-- Plan large backfills separately from schema mutation when data volume or runtime impact is significant.
+- See `docs/ai/capabilities/release-safety/CAPABILITY.md` ("Migration And Data Safety") for feature-flag, additive-migration, expand-contract, and backfill-sequencing guidance.
 
 ## Prototype Lane
 
