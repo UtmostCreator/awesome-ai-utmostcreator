@@ -10,11 +10,6 @@ capabilities:
 permission:
   todowrite: allow
   task: deny
-  # Write surface is markdown plans under docs/tickets/ ONLY. OpenCode uses last-match-wins
-  # and matches the path string the write tool actually passes, which can be relative,
-  # ./-prefixed, or an absolute/home-expanded path depending on how the tool resolves it.
-  # List every realistic spelling of the same docs/tickets/ surface so a valid plan write is
-  # never silently denied by a path-spelling mismatch, while every non-tickets path stays denied.
   edit:
     '*': deny
     'docs/tickets/**': allow
@@ -25,33 +20,20 @@ permission:
     './docs/tickets/arch-todo-*/**': allow
     '~/Projects/awesome-ai-utmostcreator/docs/tickets/arch-todo-*/**': allow
     '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/arch-todo-*/**': allow
-  # docs/tickets/ lives inside the working dir, but if the write tool resolves an absolute
-  # path OpenCode can treat it as external; allow the tickets surface explicitly so the
-  # external_directory guard does not block a legitimate plan write.
   external_directory:
     '~/Projects/awesome-ai-utmostcreator/docs/tickets/**': allow
     '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/**': allow
-  # Keep doom_loop as ask: repeated identical writes usually mean a stuck agent, so a human
-  # should confirm rather than auto-approve a retry storm.
   doom_loop: ask
   bash:
-    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -d *': allow
-    'pwd': allow
     'date *': allow
-    'date': allow
-    # OpenCode bash permission wildcards are NOT path-aware globs: `*` compiles to
-    # regex `.*` (dotAll) over the whole command string, so it matches `/` too.
-    # This single rule therefore already covers nested paths, e.g.
-    # `mkdir -p docs/tickets/{branch-name}/archive` — no separate `**` rule needed.
-    'mkdir -p docs/tickets/*': allow
+    'pwd': allow
     'ls *': allow
     'fd *': allow
     'rg *': allow
     'git grep *': allow
-    'grep *': deny
     'git status*': allow
     'git diff*': allow
     'git log*': allow
@@ -59,7 +41,6 @@ permission:
     'git ls-files*': allow
     'git branch*': allow
     'git rev-parse*': allow
-    # --- read-only AI script access; see docs/ai/agent-script-access.md ---
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
@@ -67,31 +48,12 @@ permission:
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/ai-diff-context.sh *': allow
-    # --- observability: scoped evidence writer (ask); never widens write scope ---
-    'bash scripts/ai/post-tool-use.sh *': ask
-    # --- hard stop for write/mutation bypasses; last-match wins ---
-    'bash scripts/ai/ai-edit.sh *': deny
-    'bash scripts/ai/ai-rollback.sh *': deny
-    'bash scripts/ai/ai-verify.sh *': deny
-    'bash scripts/ai/run-repo-tests.sh*': deny
-    'bash scripts/ai/pre-tool-use.sh *': deny
-    'bash scripts/ai/common.sh*': deny
-    'tee *': deny
-    'cat > *': deny
-    'cat >> *': deny
-    'cp *': deny
-    'mv *': deny
-    'rm *': deny
-    'python3 *': deny
-    'php -r *': deny
-    'php *': deny
-    'node *': deny
-    'sed -i *': deny
-    'perl *': deny
-    'awk *': deny
-    '* > *': deny
-    '* >> *': deny
-    '* <<*': deny
+    'date': allow
+    'mkdir -p docs/tickets/*': allow
+    '*': deny
+agent_assessment:
+  risk_level: medium
+  decision: approve_with_minor_fixes
 ---
 
 # Architecture Plan Writer Agent

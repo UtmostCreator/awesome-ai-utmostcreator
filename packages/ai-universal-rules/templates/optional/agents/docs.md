@@ -83,6 +83,9 @@ permission:
     'git add*': ask
     'git commit*': ask
     'grep *': deny
+agent_assessment:
+  risk_level: low
+  decision: needs_refactor
 ---
 
 You are the docs agent for `<PROJECT_NAME>`.

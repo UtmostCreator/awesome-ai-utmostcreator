@@ -160,6 +160,13 @@ function aiPermissionLayersCore(): array
             'shellcheck *' => 'allow',
             'bash scripts/ai/repomix-ensure-fresh.sh *' => 'ask',
         ]),
+        // Slice C (docs/tickets/arch-todo-complete-permission-composition-migration/plan.md):
+        // architecture-plan-writer is the first readonly-profile agent whose shipped block
+        // grants NONE of shipped-cli-readonly's entries (no ai.php subcommands, no
+        // lychee/actionlint/shfmt/shellcheck) — an intentionally empty cli-tools variant so
+        // its composition can opt out via `cli_tools: 'none'` instead of hand-denying every
+        // shipped-cli-readonly pattern back with agent-unique exceptions.
+        'shipped-cli-none' => [],
         // Ground truth: packages/ai-universal-rules/templates/snippets/agent-tools-execute.snippet.md.
         'shipped-cli-execute' => aiPermissionEntries('bash', [
             'php tools/ai/ai.php placeholders*' => 'allow',

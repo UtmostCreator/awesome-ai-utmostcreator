@@ -81,6 +81,9 @@ permission:
     '* <<*': deny
     'php tools/ai/validate-agent-spec.php *': allow
     'php tools/ai/validate-*.php *': allow
+agent_assessment:
+  risk_level: high
+  decision: approve_with_minor_fixes
 ---
 
 # Agent Creator Supervisor

@@ -126,6 +126,9 @@ permission:
     'watch *': deny
     'git push*': deny
     'bash scripts/ai/common.sh*': deny
+agent_assessment:
+  risk_level: medium
+  decision: needs_refactor
 ---
 
 # Repository Reviewer

@@ -41,6 +41,13 @@ Assess rollout, rollback, observability, and compatibility posture for changes w
 - Local tests do not replace rollout planning for risky changes.
 - If rollback is impossible, that should be stated explicitly.
 
+## Migration And Data Safety
+
+- For `medium` and `high` risk behavior changes, use a feature flag when practical.
+- For additive-only migrations, document rollback posture and proceed.
+- For migrations that drop, rename, or restructure existing data, use an expand-contract strategy.
+- Plan large backfills separately from schema mutation when data volume or runtime impact is significant.
+
 ## Output Contract
 
 - rollout considerations

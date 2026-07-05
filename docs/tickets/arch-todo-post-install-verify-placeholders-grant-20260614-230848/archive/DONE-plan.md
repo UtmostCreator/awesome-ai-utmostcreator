@@ -4,7 +4,9 @@
 - Source: agent permission audit (researcher session ses_137a8cae2ffe), 3-slice decomposition
 - Generated: 20260614-230848
 - Plan folder: docs/tickets/arch-todo-post-install-verify-placeholders-grant-20260614-230848/
-- Status: **Todo** (unchecked)
+- Status: **Done** (verified 2026-07-05; independently re-confirmed against current repo state
+  during doc-hygiene reconciliation — implemented in commit
+  `f7a8de711042a3961332759d122376126c3cc039`, already on `main` for weeks)
 - Rank: Slice 1 of 3
 - Risk: **LOW** (single permission line in one agent template + re-render)
 
@@ -27,15 +29,29 @@ explicitly elsewhere, confirming the pattern.
 
 ## Goal / Acceptance Criteria
 
-- AC-1: `templates/core/agents/post-install.md` grants `php tools/ai/verify-install-placeholders.php`
+- [x] AC-1: `templates/core/agents/post-install.md` grants `php tools/ai/verify-install-placeholders.php`
   in its `bash:` permission map (allow), placed near the existing `validate-*.php` grant (line ~112).
-- AC-2: The grant is a literal/prefix match that the OpenCode glob resolves before the `"*": deny`
+  **VERIFIED:** `'php tools/ai/verify-install-placeholders.php*': allow` present at
+  `packages/ai-universal-rules/templates/core/agents/post-install.md:165`, directly below the
+  `validate-*.php` grant.
+- [x] AC-2: The grant is a literal/prefix match that the OpenCode glob resolves before the `"*": deny`
   catch-all (last-match-wins ordering preserved; deny baseline stays at top as it is now).
-- AC-3: Re-render adapters so the installed `.opencode/agents` / `.github/agents` copies (if present
+  **VERIFIED:** the grant is at line 165; the `'*': deny` catch-all is at line 169 (after it); no
+  reordering of the baseline.
+- [x] AC-3: Re-render adapters so the installed `.opencode/agents` / `.github/agents` copies (if present
   in this repo) reflect the template, OR confirm the render pipeline is the source-of-truth path.
-- AC-4: `php tools/ai/validate-script-access.php` passes (no new violations).
-- AC-5: Any existing agent-permission test still passes; if a test asserts post-install's grants,
+  **VERIFIED:** grant present in all three rendered adapter copies in this repo:
+  `.opencode/agents/post-install.md:165`, `.github/agents/post-install.agent.md:77`, and
+  `.claude/agents/post-install.md:89`.
+- [x] AC-4: `php tools/ai/validate-script-access.php` passes (no new violations).
+  **VERIFIED:** re-ran `php tools/ai/validate-script-access.php` —
+  `OK: script-access + agent-governance consistency checks passed`.
+- [x] AC-5: Any existing agent-permission test still passes; if a test asserts post-install's grants,
   extend it to assert the new grant.
+  **VERIFIED:** `verify-install-placeholders.php` is referenced by name in
+  `tests/php/InstallerSafetyTest.php` (lines 838, 848, 1802, 2046) and
+  `tests/php/PlaceholderRegistryTest.php:98`; the gate-clearance grant itself is exercised via
+  `php tools/ai/validate-script-access.php` (AC-4) rather than a standalone permission-map assertion.
 
 ## Steps
 

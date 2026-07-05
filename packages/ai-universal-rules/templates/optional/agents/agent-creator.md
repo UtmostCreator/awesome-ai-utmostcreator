@@ -78,6 +78,9 @@ permission:
     'python3 *': deny
     'php -r *': deny
     '* <<*': deny
+agent_assessment:
+  risk_level: high
+  decision: approve_with_minor_fixes
 ---
 
 # Agent Creator

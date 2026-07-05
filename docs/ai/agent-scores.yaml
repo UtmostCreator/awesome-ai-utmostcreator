@@ -20,7 +20,7 @@
 #   human approval.
 
 schema: ai.agent_assessment.values/v1
-approved: false
+approved: true # approved by user 2026-07-05, including bootstrapper/ui-builder REVIEW NEEDED entries
 
 agents:
   agent-creator:

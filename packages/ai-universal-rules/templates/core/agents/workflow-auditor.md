@@ -85,6 +85,9 @@ permission:
     'php tools/ai/validate-*.php *': allow
     'bash scripts/ai/ai-verify.sh *': ask
     '*': deny
+agent_assessment:
+  risk_level: medium
+  decision: approve_with_minor_fixes
 ---
 
 # Workflow Auditor Agent

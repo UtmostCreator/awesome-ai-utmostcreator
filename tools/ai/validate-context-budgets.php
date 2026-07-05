@@ -22,6 +22,7 @@ if (!is_array($lineLimits) || $lineLimits === []) {
 
 $warnings = [];
 $failures = [];
+$allowlistedFailures = [];
 $checked = 0;
 
 foreach ($lineLimits as $rule) {
@@ -33,7 +34,8 @@ foreach ($lineLimits as $rule) {
     $patterns = $rule['patterns'] ?? null;
     $warnAbove = (int) ($rule['warn_above'] ?? 0);
     $failAbove = (int) ($rule['fail_above'] ?? 0);
-    $warnAllowlist = lineLimitWarnAllowlist($rule);
+    $warnAllowlist = lineLimitAllowlist($rule, 'warn_allowlist');
+    $failAllowlist = lineLimitAllowlist($rule, 'fail_allowlist');
 
     if (!is_array($patterns) || $patterns === [] || $warnAbove < 1 || $failAbove < 1) {
         continue;
@@ -50,6 +52,18 @@ foreach ($lineLimits as $rule) {
             $checked++;
 
             if ($lineCount > $failAbove) {
+                if (isset($failAllowlist[$relativePath])) {
+                    $allowlistedFailures[] = sprintf(
+                        'ALLOWLISTED-FAIL %s %s = %d lines > hard max %d; reason: %s',
+                        $id,
+                        $relativePath,
+                        $lineCount,
+                        $failAbove,
+                        $failAllowlist[$relativePath]
+                    );
+                    continue;
+                }
+
                 $failures[] = sprintf(
                     'FAIL %s %s = %d lines > hard max %d',
                     $id,
@@ -77,6 +91,10 @@ foreach ($warnings as $warning) {
     fwrite(STDOUT, $warning . "\n");
 }
 
+foreach ($allowlistedFailures as $allowlistedFailure) {
+    fwrite(STDOUT, $allowlistedFailure . "\n");
+}
+
 foreach ($failures as $failure) {
     fwrite(STDERR, $failure . "\n");
 }
@@ -91,10 +109,10 @@ printf(
 exit($failures === [] ? 0 : 1);
 
 /** @return array<string,string> */
-function lineLimitWarnAllowlist(array $rule): array
+function lineLimitAllowlist(array $rule, string $key): array
 {
     $allowlist = [];
-    foreach (($rule['warn_allowlist'] ?? []) as $entry) {
+    foreach (($rule[$key] ?? []) as $entry) {
         if (!is_array($entry) || !is_string($entry['path'] ?? null)) {
             continue;
         }

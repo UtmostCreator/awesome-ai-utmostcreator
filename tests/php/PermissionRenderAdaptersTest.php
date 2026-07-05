@@ -93,4 +93,79 @@ final class PermissionRenderAdaptersTest extends TestCase
 
         self::assertSame($legacy, $resolved, 'non-composed agents must pass through the legacy list unchanged');
     }
+
+    /**
+     * Slice B (docs/tickets/arch-todo-complete-permission-composition-migration/plan.md):
+     * proves the new optional `extra_scalars_before_edit` / `external_directory` render-spec
+     * keys render in the exact order architecture-plan-writer.md needs — todowrite, task,
+     * edit, external_directory, doom_loop, bash — and that omitting them changes nothing
+     * (back-compat for the 13 pre-existing render specs).
+     */
+    public function testRenderOpenCodeBlockEmitsNestedExternalDirectoryMappingInOrder(): void
+    {
+        $model = [
+            aiPermissionModelKey('edit', '*') => ['permission' => 'edit', 'pattern' => '*', 'effect' => 'deny', 'class' => 'layer', 'layer' => 'test'],
+            aiPermissionModelKey('edit', 'docs/tickets/**') => ['permission' => 'edit', 'pattern' => 'docs/tickets/**', 'effect' => 'allow', 'class' => 'layer', 'layer' => 'test'],
+            aiPermissionModelKey('bash', '*') => ['permission' => 'bash', 'pattern' => '*', 'effect' => 'deny', 'class' => 'floor', 'layer' => 'test'],
+        ];
+        $render = aiPermissionRenderArchitecturePlanWriter();
+
+        $rendered = aiPermissionRenderOpenCodeBlock($model, $render);
+        $lines = explode("\n", $rendered);
+
+        self::assertSame('permission:', $lines[0]);
+        self::assertSame('  todowrite: allow', $lines[1]);
+        self::assertSame('  task: deny', $lines[2], 'task must render BEFORE edit for this agent shape');
+        self::assertSame('  edit:', $lines[3]);
+        self::assertSame("    '*': deny", $lines[4]);
+        self::assertSame("    'docs/tickets/**': allow", $lines[5]);
+        self::assertSame('  external_directory:', $lines[6], 'external_directory mapping must render immediately after edit');
+        self::assertSame("    '~/Projects/awesome-ai-utmostcreator/docs/tickets/**': allow", $lines[7]);
+        self::assertSame("    '\$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/**': allow", $lines[8]);
+        self::assertSame('  doom_loop: ask', $lines[9], 'doom_loop must render after external_directory, before bash');
+        self::assertSame('  bash:', $lines[10]);
+    }
+
+    public function testRenderOpenCodeBlockOmitsNewKeysWhenRenderSpecDoesNotSetThem(): void
+    {
+        // Back-compat proof: an existing-shape render spec (no extra_scalars_before_edit,
+        // no external_directory) must render identically to before Slice B.
+        $model = [
+            aiPermissionModelKey('bash', '*') => ['permission' => 'bash', 'pattern' => '*', 'effect' => 'deny', 'class' => 'floor', 'layer' => 'test'],
+        ];
+        $render = aiPermissionRenderTaskAsk();
+
+        $rendered = aiPermissionRenderOpenCodeBlock($model, $render);
+
+        self::assertStringNotContainsString('external_directory:', $rendered);
+        self::assertSame("permission:\n  todowrite: allow\n  edit: deny\n  task: ask\n  bash:\n    '*': deny", $rendered);
+    }
+
+    /**
+     * Slice B: proves the extended `tickets` edit surface produces all 8 path spellings
+     * (plus the explicit '*': deny baseline) that architecture-plan-writer.md ships.
+     */
+    public function testTicketsEditSurfaceHasAllEightSpellingsPlusDenyBaseline(): void
+    {
+        $surfaces = aiPermissionEditSurfaces();
+        self::assertArrayHasKey('tickets', $surfaces);
+
+        $patterns = array_column($surfaces['tickets'], 'pattern');
+        self::assertSame([
+            '*',
+            'docs/tickets/**',
+            './docs/tickets/**',
+            '~/Projects/awesome-ai-utmostcreator/docs/tickets/**',
+            '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/**',
+            'docs/tickets/arch-todo-*/**',
+            './docs/tickets/arch-todo-*/**',
+            '~/Projects/awesome-ai-utmostcreator/docs/tickets/arch-todo-*/**',
+            '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/arch-todo-*/**',
+        ], $patterns);
+
+        foreach ($surfaces['tickets'] as $entry) {
+            $expected = $entry['pattern'] === '*' ? 'deny' : 'allow';
+            self::assertSame($expected, $entry['effect'], "pattern '{$entry['pattern']}' has unexpected effect");
+        }
+    }
 }

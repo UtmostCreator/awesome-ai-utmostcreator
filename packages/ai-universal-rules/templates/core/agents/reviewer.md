@@ -93,6 +93,10 @@ permission:
     'shfmt -d *': allow
     'shellcheck *': allow
     'bash scripts/ai/repomix-ensure-fresh.sh *': ask
+    'php -l *': allow
+    'vendor/bin/phpunit *': allow
+    './vendor/bin/phpunit *': allow
+    'phpunit *': allow
     'bash scripts/ai/ai-test-select.sh *': allow
     'bash scripts/ai/run-repo-tests.sh*': allow
     'bash scripts/ai/ai-install-coverage.sh *': allow
@@ -107,10 +111,6 @@ permission:
     'git cherry -v*': allow
     'git for-each-ref*': allow
     'git config --get-regexp ^alias\\.': allow
-    'php -l *': allow
-    'vendor/bin/phpunit *': allow
-    './vendor/bin/phpunit *': allow
-    'phpunit *': allow
     'php tools/ai/validate-*.php *': allow
     'php tools/ai/generate-*.php --check*': allow
     'markdownlint-cli2 *': allow
@@ -120,6 +120,9 @@ permission:
     'files-to-prompt *': ask
     'code2prompt *': ask
     '*': deny
+agent_assessment:
+  risk_level: high
+  decision: needs_refactor
 ---
 
 # Reviewer Agent

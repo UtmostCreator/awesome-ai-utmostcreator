@@ -8,6 +8,37 @@ require_once __DIR__ . '/core.php';
 function aiPermissionLanguageOverlays(): array
 {
     return [
+        // 4 atomic overlay keys (Slice D, docs/tickets/arch-todo-complete-permission-
+        // composition-migration/plan.md) — verbatim copies of existing atomic packs
+        // (proof.php_lint, proof.phpunit_direct, impl.composer_validate_allow,
+        // proof.js_test_lint_typecheck respectively), added so 5 agent compositions can
+        // source PHP/JS commands from the language-overlay path (conditionally injectable
+        // per detected stack for consumer projects) instead of hand-typed universal packs
+        // that would otherwise reach every impl/verify agent regardless of language. The
+        // coarse `'php'`/`'js-ts'` keys below are untouched and remain load-bearing for
+        // `stacks/php.json`, `stacks/js-ts.json`, and `StackRegistryTest.php` — these 4 are
+        // purely additive, no rename/narrowing of the existing keys.
+        'php-lint' => aiPermissionEntries('bash', [
+            'php -l *' => 'allow',
+        ]),
+        'php-phpunit' => aiPermissionEntries('bash', [
+            'vendor/bin/phpunit *' => 'allow',
+            './vendor/bin/phpunit *' => 'allow',
+            'phpunit *' => 'allow',
+        ]),
+        'php-composer-validate' => aiPermissionEntries('bash', [
+            'composer validate*' => 'allow',
+        ]),
+        'js-core' => aiPermissionEntries('bash', [
+            'npm test*' => 'allow',
+            'npm run test*' => 'allow',
+            'npm run lint*' => 'allow',
+            'npm run typecheck*' => 'allow',
+            'pnpm test*' => 'allow',
+            'pnpm run test*' => 'allow',
+            'pnpm run lint*' => 'allow',
+            'pnpm run typecheck*' => 'allow',
+        ]),
         'php' => aiPermissionEntries('bash', [
             'php -l *' => 'allow',
             'vendor/bin/phpunit *' => 'allow',

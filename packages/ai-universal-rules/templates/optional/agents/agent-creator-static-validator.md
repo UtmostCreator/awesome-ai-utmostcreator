@@ -77,6 +77,9 @@ permission:
     'php -r *': deny
     '* <<*': deny
     'php tools/ai/validate-agent-spec.php *': allow
+agent_assessment:
+  risk_level: medium
+  decision: needs_refactor
 ---
 
 # Agent Creator Static Validator

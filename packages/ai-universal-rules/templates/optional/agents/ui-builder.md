@@ -87,6 +87,9 @@ permission:
     'bash scripts/ai/watch-loop.sh *': deny
     'bash scripts/ai/common.sh*': deny
   webfetch: deny
+agent_assessment:
+  risk_level: high
+  decision: needs_refactor
 ---
 
 You are the UI builder for `<PROJECT_NAME>`.

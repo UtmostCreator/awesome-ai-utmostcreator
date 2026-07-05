@@ -147,7 +147,13 @@
       "target_min": 80,
       "target_max": 180,
       "warn_above": 250,
-      "fail_above": 350
+      "fail_above": 350,
+      "fail_allowlist": [
+        {
+          "path": ".opencode/skills/graphify/SKILL.md",
+          "reason": "Third-party out-of-band skill install (not rendered from this kit's templates); see docs/ai/adapter-contract.md 'Out-Of-Band Local Additions'. Content is owned by the graphify installer, not this repo, so it cannot be trimmed here."
+        }
+      ]
     },
     {
       "id": "package-root-instructions-template",

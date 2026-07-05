@@ -1,5 +1,7 @@
 # Architecture Plan — v0.6 Review-Fix: reconcile rendered surfaces, installed-path references, per-file classification, and package drift for the completed Phase 0–2 slice
 
+> **Traceability note:** Landed via commits d3121ee and 937a810 (not scoped to this ticket ID) — see docs/tickets/arch-todo-v0-6-review-fix-20260704-000002/ for the original reconciliation plan.
+
 - Ticket: none
 - Source: architect design handoff
 - Generated: 20260704-000002

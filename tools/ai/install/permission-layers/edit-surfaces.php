@@ -41,7 +41,22 @@ function aiPermissionEditSurfaces(): array
         // plan.md, N-3). Do not reuse this surface for any other agent without an explicit,
         // reviewed decision: it grants edit access to every path, including secrets/lockfiles.
         'unrestricted' => aiPermissionEntries('edit', ['*' => 'allow']),
-        'tickets' => aiPermissionEntries('edit', ['docs/tickets/**' => 'allow']),
+        // Extended for Slice B (docs/tickets/arch-todo-complete-permission-composition-
+        // migration/plan.md) to all 8 path spellings `architecture-plan-writer.md` ships
+        // (plus the explicit '*': deny baseline its shipped block also carries) — the only
+        // consumer of this surface; confirmed via grep that no other composition references
+        // editSurface:'tickets', so widening it here is additive with zero blast radius.
+        'tickets' => aiPermissionEntries('edit', [
+            '*' => 'deny',
+            'docs/tickets/**' => 'allow',
+            './docs/tickets/**' => 'allow',
+            '~/Projects/awesome-ai-utmostcreator/docs/tickets/**' => 'allow',
+            '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/**' => 'allow',
+            'docs/tickets/arch-todo-*/**' => 'allow',
+            './docs/tickets/arch-todo-*/**' => 'allow',
+            '~/Projects/awesome-ai-utmostcreator/docs/tickets/arch-todo-*/**' => 'allow',
+            '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/arch-todo-*/**' => 'allow',
+        ]),
         'research-sessions' => aiPermissionEntries('edit', ['.opencode/research-sessions/**' => 'allow']),
         'code' => aiPermissionEntries('edit', array_merge([
             'src/**' => 'allow',

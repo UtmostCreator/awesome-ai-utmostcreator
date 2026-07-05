@@ -32,14 +32,33 @@ function aiPermissionRenderAdapters(): array
  * seam (Slice 8) without behavior change; the generator now requires this file instead of
  * defining the function locally, so all three runtime projections share one adapter home.
  *
+ * Slice B (docs/tickets/arch-todo-complete-permission-composition-migration/plan.md) adds
+ * two optional, additive render-spec keys, both defaulting to `[]` so every one of the 13
+ * pre-existing render specs (none of which set them) renders byte-identically to before:
+ *   - `extra_scalars_before_edit`: an ordered `key: value` map emitted between `todowrite:`
+ *     and `edit:` (only `architecture-plan-writer` needs `task:` in this position — every
+ *     other migrated agent's `task`/other scalars render via the existing `extra_scalars`
+ *     key, unchanged, after `edit:`).
+ *   - `external_directory`: an ordered `pattern: effect` map emitted as a nested mapping
+ *     immediately after `edit:` and before `extra_scalars`/`bash:`. This is a pure render-spec
+ *     concept, not part of the composed model — it carries no reuse across agents today (only
+ *     `architecture-plan-writer` needs a nested mapping; `script-runner` already renders a
+ *     scalar `external_directory: allow` via the pre-existing flat `extra_scalars` mechanism,
+ *     untouched here) — so it does not need layer/pack/exception machinery or hard-deny-floor
+ *     participation.
+ *
  * @param array<string,array{permission:string,pattern:string,effect:string,class:string,layer:string}> $model
- * @param array{extra_scalars:array<string,string>,quote:string} $render
+ * @param array{extra_scalars:array<string,string>,quote:string,extra_scalars_before_edit?:array<string,string>,external_directory?:array<string,string>} $render
  */
 function aiPermissionRenderOpenCodeBlock(array $model, array $render): string
 {
     $quote = $render['quote'] === 'double' ? '"' : "'";
     $lines = ['permission:'];
     $lines[] = '  todowrite: allow';
+
+    foreach ($render['extra_scalars_before_edit'] ?? [] as $key => $value) {
+        $lines[] = '  ' . $key . ': ' . $value;
+    }
 
     $editEntries = array_values(array_filter($model, static fn (array $e): bool => $e['permission'] === 'edit'));
     // Cosmetic normalization (matches every currently shipped read-only agent's convention):
@@ -54,6 +73,14 @@ function aiPermissionRenderOpenCodeBlock(array $model, array $render): string
         $lines[] = '  edit:';
         foreach ($editEntries as $entry) {
             $lines[] = '    ' . $quote . $entry['pattern'] . $quote . ': ' . $entry['effect'];
+        }
+    }
+
+    $externalDirectory = $render['external_directory'] ?? [];
+    if ($externalDirectory !== []) {
+        $lines[] = '  external_directory:';
+        foreach ($externalDirectory as $pattern => $effect) {
+            $lines[] = '    ' . $quote . $pattern . $quote . ': ' . $effect;
         }
     }
 

@@ -135,13 +135,6 @@ permission:
     'shfmt -d *': allow
     'shellcheck *': allow
     'bash scripts/ai/repomix-ensure-fresh.sh *': ask
-    'git stash list*': allow
-    'git stash show*': allow
-    'bash -n scripts/*.sh': allow
-    'bash -n scripts/**/*.sh': allow
-    'bash -n scripts/doctor.sh': allow
-    'bash scripts/doctor.sh': allow
-    'bash scripts/doctor.sh *': allow
     'php -l *': allow
     'vendor/bin/phpunit *': allow
     './vendor/bin/phpunit *': allow
@@ -154,6 +147,13 @@ permission:
     'pnpm run test*': allow
     'pnpm run lint*': allow
     'pnpm run typecheck*': allow
+    'git stash list*': allow
+    'git stash show*': allow
+    'bash -n scripts/*.sh': allow
+    'bash -n scripts/**/*.sh': allow
+    'bash -n scripts/doctor.sh': allow
+    'bash scripts/doctor.sh': allow
+    'bash scripts/doctor.sh *': allow
     'php tools/ai/validate-*.php *': allow
     'php tools/ai/generate-*.php --check*': allow
     'markdownlint-cli2 *': allow
@@ -162,6 +162,9 @@ permission:
     'files-to-prompt *': ask
     'code2prompt *': ask
     '*': deny
+agent_assessment:
+  risk_level: high
+  decision: approve_with_minor_fixes
 ---
 
 # Refactorer Agent

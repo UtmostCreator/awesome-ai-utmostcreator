@@ -49,8 +49,9 @@ function aiPermissionAgentCompositions(): array
             editSurface: 'research-sessions',
             render: aiPermissionRenderTaskAsk('double'),
             // Researcher's git/gh command set and script tightening are otherwise unique
-            // among migrated agents; only the 'rg *' deny is shared (with script-runner).
-            denyPacks: ['core.safe_read.deny_rg'],
+            // among migrated agents; the 'rg *' deny is shared with script-runner, and the
+            // jq/yq deny is shared with architecture-plan-writer (Slice C).
+            denyPacks: ['core.safe_read.deny_rg', 'core.safe_read.deny_jq_yq'],
             exceptions: [
                 // Path-scoped write surface replaces prior mkdir/printf>>/cat>> shell-append
                 // patterns (AC-4): researcher may also append research evidence to
@@ -61,11 +62,6 @@ function aiPermissionAgentCompositions(): array
                 aiPermissionBashAllow('date -u +%Y-%m-%dT%H:%M:%SZ'),
                 aiPermissionBashDeny('date *'),
                 aiPermissionBashAllow('uuidgen'),
-
-                // Researcher tightens two more generic safe-read tools to deny (uses git grep
-                // instead of rg/grep for search discipline; jq/yq are not part of its toolkit).
-                aiPermissionBashDeny('jq *'),
-                aiPermissionBashDeny('yq *'),
 
                 // Extra read-only git/gh commands used for research history/PR context.
                 aiPermissionBashAllow(aiPatternGit('remote*')),
@@ -126,13 +122,15 @@ function aiPermissionAgentCompositions(): array
                 'git.pr_context_allow',
                 'git.branch_narrow_read',
                 'git.review_extra',
-                'proof.php_lint',
-                'proof.phpunit_direct',
                 'proof.validate_script',
                 'proof.generate_check',
                 'proof.markdown',
                 'proof.security',
             ],
+            // Slice D: 'php -l *' + phpunit-direct now sourced via language overlays instead
+            // of the 'proof.php_lint'/'proof.phpunit_direct' universal packs (de-pollution).
+            // Byte-stable: ground truth shows no composer-validate/paratest grant to reviewer.
+            languageOverlays: ['php-lint', 'php-phpunit'],
             askPacks: ['verify.manual_ask', 'context.packaging'],
         ),
 
@@ -169,6 +167,7 @@ function aiPermissionAgentCompositions(): array
                 'core.safe_read.deny_sed_n',
                 'core.safe_read.deny_nl',
                 'core.safe_read.deny_file_probe',
+                'core.safe_read.deny_test_x',
                 'git.deny_blame',
                 'git.deny_rev_parse',
             ],
@@ -176,7 +175,6 @@ function aiPermissionAgentCompositions(): array
             askPacks: ['verify.manual_ask'],
             exceptions: [
                 // Agent-specific narrowing beyond the shared deny packs.
-                aiPermissionBashDeny('test -x *'),
                 aiPermissionBashDeny(aiPatternGit('branch*')),
             ],
         ),
@@ -219,6 +217,96 @@ function aiPermissionAgentCompositions(): array
             askPacks: ['verify.manual_ask'],
         ),
 
+        // architecture-plan-writer (Slice C, docs/tickets/arch-todo-complete-permission-
+        // composition-migration/plan.md): the narrowest composed agent — a write-only
+        // markdown-plan writer with a bespoke render shape (task before edit, nested
+        // external_directory mapping, doom_loop) via aiPermissionRenderArchitecturePlanWriter()
+        // (Slice B). `cli_tools: 'none'` opts out of shipped-cli-readonly entirely (ground
+        // truth: shipped block has zero ai.php/lychee/actionlint/shfmt/shellcheck grants).
+        // Ground truth also grants only 4 of the 16 script-tiers:ai-read baseline scripts and
+        // none of the 4 ai-context-ask scripts — both unconditional layers for every agent —
+        // so the 12 unwanted ai-read scripts and all 4 context-ask scripts are denied back via
+        // exceptions (agent-unique narrowing; no other agent shares this shape). `git.deny_blame`/
+        // `core.safe_read.deny_file_probe`/`deny_nl`/`deny_sed_n`/`deny_eza`/`deny_test_x` are
+        // reused packs (shared with other agents), not new exceptions. This agent's own design
+        // ("do not widen scope") means core:safe-read's ~19-entry CLI toolkit (stat/uuidgen/wc/
+        // sort/uniq/du-h/head/tail/jq/yq/scc/tokei/ast-grep/bat/fx/glow/difft/delta/ls-1-scripts)
+        // is deliberately denied back too, matching its actual narrow shipped surface (rg/git
+        // grep stay allowed — those ARE shipped) rather than accepted as a "low risk" widening.
+        'architecture-plan-writer' => aiPermissionAgentSpecReadonly(
+            editSurface: 'tickets',
+            render: aiPermissionRenderArchitecturePlanWriter(),
+            cliTools: 'none',
+            denyPacks: [
+                'git.deny_blame',
+                'core.safe_read.deny_file_probe',
+                'core.safe_read.deny_nl',
+                'core.safe_read.deny_sed_n',
+                'core.safe_read.deny_eza',
+                'core.safe_read.deny_test_x',
+                // Shared with researcher (jq/yq) — this agent has no askPacks layer, so a
+                // denyPack (applied before exceptions) is sufficient with no override risk.
+                'core.safe_read.deny_jq_yq',
+                // Shared with post-install (head/tail); same no-askPacks reasoning.
+                'core.safe_read.deny_head_tail',
+                // Combo pack also denies date* (this agent wants date* allowed) — reopened
+                // via an exception below (exceptions apply after deny_packs, later wins).
+                'core.safe_read.deny_common_generics',
+            ],
+            exceptions: [
+                // Re-open date* (deny_common_generics denies it, but shipped grants it) plus
+                // the exact-match bare 'date' pattern (a separate literal, not covered by any
+                // layer) and the mkdir allow (agent-unique, not covered by any layer/pack).
+                aiPermissionBashAllow('date *'),
+                aiPermissionBashAllow('date'),
+                aiPermissionBashAllow('mkdir -p docs/tickets/*'),
+                // Deny back the remaining core:safe-read CLI tools with no dedicated atomic
+                // pack (agent-unique narrowing; not shared with any other composed agent).
+                aiPermissionBashDeny('stat *'),
+                aiPermissionBashDeny('scc *'),
+                aiPermissionBashDeny('tokei *'),
+                aiPermissionBashDeny('ast-grep *'),
+                aiPermissionBashDeny('bat *'),
+                aiPermissionBashDeny('fx *'),
+                aiPermissionBashDeny('glow *'),
+                aiPermissionBashDeny('difft *'),
+                aiPermissionBashDeny('delta *'),
+                aiPermissionBashDeny('ls -1 scripts/ai/*.sh | sort'),
+                // Also deny back the extra preview-file.sh JSON-variant that ai-read's
+                // baseline would grant (shipped file only lists 2 of the 3 variants).
+                aiPermissionBashDeny('env AI_OUTPUT=json bash scripts/ai/preview-file.sh *'),
+                // NOTE: shipped file grants 'post-tool-use.sh': ask, but post-tool-use.sh is on
+                // the TRUE immutable hard-deny floor (core.php:43), not just the ai-deny-
+                // dangerous layer — no composed agent may override it (confirmed: none of the
+                // other 14 composed agents grant it either). Composing this agent therefore
+                // intentionally NARROWS it from ask to deny (safety-increasing, not a
+                // widening) rather than violating aiPermissionAssertNoHardDenyWeakening.
+                // Deny back the 4 script-tiers:ai-context-ask scripts (unconditional 'ask'
+                // layer for every agent) — this agent has no context-packing need at all.
+                aiPermissionBashDeny(aiPatternAiScript('pack-context.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('run-repomix-context.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('repomix-context-tree.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('repomix-scc-router.sh')),
+                // Deny back the 12 of 16 script-tiers:ai-read baseline scripts this agent does
+                // not grant (ground truth: only ai-search/preview-file/query-usage/
+                // ai-diff-context are shipped as allow).
+                aiPermissionBashDeny(aiPatternAiScript('ai-search-multi.sh')),
+                aiPermissionBashDeny('AI_OUTPUT=json ' . aiPatternAiScript('ai-search-multi.sh')),
+                aiPermissionBashDeny('env AI_OUTPUT=json ' . aiPatternAiScript('ai-search-multi.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('rg-code.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('fd-files.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('git-branch-origin.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('git-forensics.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('repo-stats.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('repo-tool-inventory.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('ai-file-freshness.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('check-file-refs.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('ai-doc-check.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('ai-structured.sh')),
+                aiPermissionBashDeny(aiPatternAiScript('repomix-freshness.sh')),
+            ],
+        ),
+
         'config-maintainer' => aiPermissionAgentSpecVerify(
             editSurface: 'config',
             render: aiPermissionRenderTaskAsk(),
@@ -238,10 +326,15 @@ function aiPermissionAgentCompositions(): array
                 'git.stash_read',
                 'verify.install_coverage_allow',
                 'doctor.scripts',
-                'proof.php_lint',
                 'proof.validate_script',
                 'proof.security',
             ],
+            // Slice D (docs/tickets/arch-todo-complete-permission-composition-migration/
+            // plan.md): 'php -l *' now sourced via the 'php-lint' language overlay instead
+            // of the 'proof.php_lint' universal pack (de-pollution — a non-PHP consumer
+            // install no longer inherits this grant). Byte-stable: this agent's only PHP
+            // exposure was ever 'php -l *' (verified: no phpunit/composer-validate grants).
+            languageOverlays: ['php-lint'],
             askPacks: ['context.packaging', 'script.ai_write_ask'],
             exceptions: [
                 // Ground truth grants these despite the 'verify' profile not including
@@ -267,6 +360,12 @@ function aiPermissionAgentCompositions(): array
                 'doctor.scripts',
                 ...aiPermissionPackSetFullProof(),
             ],
+            // Slice D: php-lint/phpunit-direct/js-core now sourced via language overlays
+            // instead of the (reconciled) aiPermissionPackSetFullProof() bundle's former
+            // proof.php_lint/proof.phpunit_direct/proof.js_test_lint_typecheck members.
+            // Byte-stable: js-core is an exact copy of proof.js_test_lint_typecheck (no
+            // yarn/bun — refactorer never granted those, unlike implementer).
+            languageOverlays: ['php-lint', 'php-phpunit', 'js-core'],
             askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate'],
             exceptions: [
                 // Ground truth: refactorer's git-mutating-ask grants are narrower than
@@ -307,19 +406,21 @@ function aiPermissionAgentCompositions(): array
                 'doctor.scripts',
                 ...aiPermissionPackSetFullProof(),
                 'impl.sg_allow',
-                'impl.composer_validate_allow',
             ],
+            // Slice D: implementer is the one genuine byte-exact match for the FULL 'php'+
+            // 'js-ts' overlay union (verified line-by-line: php overlay's 3 paratest-ask
+            // lines + composer-validate exactly replace 'impl.composer_validate_allow' plus
+            // the 3 inline paratest exceptions below; js-ts overlay's yarn/bun lines exactly
+            // replace the 3 inline yarn/bun exceptions below) — so it uses the existing
+            // coarse keys directly, not the 4 new atomic ones.
+            languageOverlays: ['php', 'js-ts'],
             askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate'],
             exceptions: [
                 aiPermissionBashAsk(aiPatternAiTool('install * --apply')),
                 aiPermissionBashAsk('php tools/ai/install-ai-kit.php *'),
-                aiPermissionBashAsk('./vendor/bin/paratest *'),
-                aiPermissionBashAsk('vendor/bin/paratest *'),
-                aiPermissionBashAsk('paratest *'),
-                // Not part of proof.js_test_lint_typecheck (only implementer grants these).
-                aiPermissionBashAllow('yarn test*'),
-                aiPermissionBashAllow('yarn lint*'),
-                aiPermissionBashAllow('bun test*'),
+                // paratest (3x) and yarn/bun (3x) exceptions removed here (Slice D): fully
+                // redundant with the 'php'/'js-ts' language overlays above, which already
+                // grant the exact same 6 patterns.
             ],
         ),
 
@@ -333,15 +434,17 @@ function aiPermissionAgentCompositions(): array
             // earlier handoff note guessed — corrected here via the ground-truth diff.
             allowPacks: [
                 'git.stash_read',
-                'proof.php_lint',
-                'proof.phpunit_direct',
                 'proof.validate_script',
                 'proof.generate_check',
                 'verify.install_coverage_allow',
                 'impl.sg_allow',
-                'impl.composer_validate_allow',
                 'install.docs_allow',
             ],
+            // Slice D: php-lint/phpunit-direct/composer-validate now sourced via language
+            // overlays instead of the 'proof.php_lint'/'proof.phpunit_direct'/
+            // 'impl.composer_validate_allow' universal packs (de-pollution). Byte-stable:
+            // ground truth shows no paratest grant to bootstrapper.
+            languageOverlays: ['php-lint', 'php-phpunit', 'php-composer-validate'],
             denyPacks: [
                 'core.safe_read.deny_eza',
                 'core.safe_read.deny_nl',

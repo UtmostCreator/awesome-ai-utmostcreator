@@ -171,18 +171,16 @@ permission:
     'shfmt -d *': allow
     'shellcheck *': allow
     'bash scripts/ai/repomix-ensure-fresh.sh *': ask
-    'git stash list*': allow
-    'git stash show*': allow
-    'bash scripts/ai/ai-install-coverage.sh *': allow
-    'bash -n scripts/*.sh': allow
-    'bash -n scripts/**/*.sh': allow
-    'bash -n scripts/doctor.sh': allow
-    'bash scripts/doctor.sh': allow
-    'bash scripts/doctor.sh *': allow
     'php -l *': allow
     'vendor/bin/phpunit *': allow
     './vendor/bin/phpunit *': allow
     'phpunit *': allow
+    './vendor/bin/paratest *': ask
+    'vendor/bin/paratest *': ask
+    'paratest *': ask
+    'composer validate*': allow
+    'php tools/ai/validate-*.php *': allow
+    'php tools/ai/generate-*.php --check*': allow
     'npm test*': allow
     'npm run test*': allow
     'npm run lint*': allow
@@ -191,24 +189,29 @@ permission:
     'pnpm run test*': allow
     'pnpm run lint*': allow
     'pnpm run typecheck*': allow
-    'php tools/ai/validate-*.php *': allow
-    'php tools/ai/generate-*.php --check*': allow
+    'yarn test*': allow
+    'yarn lint*': allow
+    'bun test*': allow
+    'git stash list*': allow
+    'git stash show*': allow
+    'bash scripts/ai/ai-install-coverage.sh *': allow
+    'bash -n scripts/*.sh': allow
+    'bash -n scripts/**/*.sh': allow
+    'bash -n scripts/doctor.sh': allow
+    'bash scripts/doctor.sh': allow
+    'bash scripts/doctor.sh *': allow
     'markdownlint-cli2 *': allow
     'semgrep *': allow
     'sg *': allow
-    'composer validate*': allow
     'repomix *': ask
     'files-to-prompt *': ask
     'code2prompt *': ask
     'php tools/ai/ai.php install * --apply': ask
     'php tools/ai/install-ai-kit.php *': ask
-    './vendor/bin/paratest *': ask
-    'vendor/bin/paratest *': ask
-    'paratest *': ask
-    'yarn test*': allow
-    'yarn lint*': allow
-    'bun test*': allow
     '*': deny
+agent_assessment:
+  risk_level: high
+  decision: approve_with_minor_fixes
 ---
 
 # Implementer Agent

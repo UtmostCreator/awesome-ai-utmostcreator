@@ -28,19 +28,29 @@ function aiPermissionAgentSpecReadonly(
     array $allowPacks = [],
     array $askPacks = [],
     array $exceptions = [],
-    string $verifyTier = 'verify-none'
+    string $verifyTier = 'verify-none',
+    string $cliTools = '',
+    array $languageOverlays = []
 ): array {
+    $composeSpec = [
+        'profile' => 'readonly',
+        'edit_surface' => $editSurface,
+        'verify_tier' => $verifyTier,
+        'shipped_star_baseline' => $starBaseline,
+        'deny_packs' => $denyPacks,
+        'allow_packs' => $allowPacks,
+        'ask_packs' => $askPacks,
+        'exceptions' => $exceptions,
+    ];
+    if ($cliTools !== '') {
+        $composeSpec['cli_tools'] = $cliTools;
+    }
+    if ($languageOverlays !== []) {
+        $composeSpec['language_overlays'] = $languageOverlays;
+    }
+
     return [
-        'compose_spec' => [
-            'profile' => 'readonly',
-            'edit_surface' => $editSurface,
-            'verify_tier' => $verifyTier,
-            'shipped_star_baseline' => $starBaseline,
-            'deny_packs' => $denyPacks,
-            'allow_packs' => $allowPacks,
-            'ask_packs' => $askPacks,
-            'exceptions' => $exceptions,
-        ],
+        'compose_spec' => $composeSpec,
         'render' => $render,
     ];
 }
@@ -66,19 +76,25 @@ function aiPermissionAgentSpecVerify(
     array $allowPacks = [],
     array $askPacks = [],
     array $exceptions = [],
-    string $verifyTier = 'verify-none'
+    string $verifyTier = 'verify-none',
+    array $languageOverlays = []
 ): array {
+    $composeSpec = [
+        'profile' => 'verify',
+        'edit_surface' => $editSurface,
+        'verify_tier' => $verifyTier,
+        'shipped_star_baseline' => $starBaseline,
+        'deny_packs' => $denyPacks,
+        'allow_packs' => $allowPacks,
+        'ask_packs' => $askPacks,
+        'exceptions' => $exceptions,
+    ];
+    if ($languageOverlays !== []) {
+        $composeSpec['language_overlays'] = $languageOverlays;
+    }
+
     return [
-        'compose_spec' => [
-            'profile' => 'verify',
-            'edit_surface' => $editSurface,
-            'verify_tier' => $verifyTier,
-            'shipped_star_baseline' => $starBaseline,
-            'deny_packs' => $denyPacks,
-            'allow_packs' => $allowPacks,
-            'ask_packs' => $askPacks,
-            'exceptions' => $exceptions,
-        ],
+        'compose_spec' => $composeSpec,
         'render' => $render,
     ];
 }
@@ -100,7 +116,8 @@ function aiPermissionAgentSpecImpl(
     array $askPacks = [],
     array $exceptions = [],
     string $verifyTier = 'verify-none',
-    string $cliTools = ''
+    string $cliTools = '',
+    array $languageOverlays = []
 ): array {
     $composeSpec = [
         'profile' => 'impl',
@@ -114,6 +131,9 @@ function aiPermissionAgentSpecImpl(
     ];
     if ($cliTools !== '') {
         $composeSpec['cli_tools'] = $cliTools;
+    }
+    if ($languageOverlays !== []) {
+        $composeSpec['language_overlays'] = $languageOverlays;
     }
 
     return [

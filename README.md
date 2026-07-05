@@ -3,9 +3,9 @@
 A ready-to-use **AI workflow** starter kit you install into your own project so AI tools work
 consistently and safely from day one.
 
-Think of it as a starter kit you install into your own project — not an app you run on its own.
-It copies tested templates, helper scripts, and safety rules into your repository so AI tools
-like GitHub Copilot, OpenCode, and Claude have clear, shared rules to follow.
+Think of it as a starter kit you install into your own project, not an app you run on its own. It
+copies tested templates, helper scripts, and safety rules into your repo so GitHub Copilot,
+OpenCode, and Claude have clear, shared rules to follow.
 
 ## At a Glance
 
@@ -22,14 +22,13 @@ like GitHub Copilot, OpenCode, and Claude have clear, shared rules to follow.
 
 ## What It Does
 
-It adds ready-made **configuration** for AI tools (sensible shared rules), safety rules so tools ask
-before risky actions, helper scripts that keep the setup correct, and tooling that prepares your
-files for AI tools — all from one source supporting GitHub Copilot, OpenCode, and Claude.
+It adds ready-made **configuration** (sensible shared rules), safety rules so tools ask before risky
+actions, helper scripts that keep the setup correct, and tooling that prepares your files — all from one source supporting GitHub Copilot, OpenCode, and Claude.
 
 ## How It Works
 
-This repository is the **source kit**. You run its installer and point it at a separate target
-project — the kit is never the project you are building.
+This repository is the **source kit** — you run its installer and point it at a separate target
+project; the kit is never the project you are building.
 
 ```text
   this source repo            your project
@@ -43,8 +42,7 @@ project — the kit is never the project you are building.
 
 ## What This Is Not
 
-- It is **not** an AI model, an IDE, or a chatbot.
-- It does **not** replace GitHub Copilot, OpenCode, or Claude — it configures them.
+- It is **not** an AI model, an IDE, or a chatbot, and does **not** replace GitHub Copilot, OpenCode, or Claude — it configures them.
 - It does **not** make risky, automatic changes to your code on its own.
 - It is **not** a universal tool that builds and ships software for you. It gives ideas, scaffolds,
   prepares, validates, and does routine work so you can **maintain sanity** — the result is in your
@@ -59,9 +57,9 @@ bash install-ai-kit.sh /path/to/your-project
 ```
 
 That validates this source checkout, installs into your project with a backup, and runs
-verification. For an explicit project name, reinstalls with `--force`, runtime selection
-(Copilot-only / OpenCode-only / Claude-via-base), backups and rollback, and the advanced cross-repo
-sequence, see the [installation guide](readme-install.md). The installed surfaces are listed in
+verification. For reinstalls with `--force`, runtime selection (Copilot-only / OpenCode-only /
+Claude-via-base), backups, rollback, and the advanced cross-repo sequence, see the
+[installation guide](readme-install.md). Installed surfaces are listed in
 [What Gets Added](#what-gets-added-to-your-project) below.
 
 ## After Installing — Do These (recommended)
@@ -71,29 +69,26 @@ php tools/ai/ai.php verify                # validate the install
 php tools/ai/ai.php placeholders --fail   # check no placeholders are left
 ```
 
-Then, in the installed project: run the `post-install-setup` agent/command to update all required
-files; build `docs/ai/project-context.md` yourself or with the `researcher` agent; and put
-cross-project logic in the shared file `docs/ai/shared/project-interaction.md` (per-project
-collaboration defaults go in `docs/ai/project/project-interaction.md`). Custom agents and rules for
-your setup are only available if you opt in to the optional agent-creator pack.
+Then, in the installed project: run the `post-install-setup` agent/command to update required files;
+build `docs/ai/project-context.md` yourself or with the `researcher` agent; and put cross-project
+logic in `docs/ai/shared/project-interaction.md` (per-project defaults go in
+`docs/ai/project/project-interaction.md`). Custom agents/rules need the optional agent-creator pack.
 
 ## What It Ships With — and Why
 
-- **AI agents and recommended order** — research → plan → implement → review → release. See the agent
-  roster, start-with guidance, and purpose in [docs/ai/agents.md](docs/ai/agents.md); the exact shipped
-  inventory and runtime-surface differences in [docs/ai/AGENTS-MANIFEST.md](docs/ai/AGENTS-MANIFEST.md);
-  and the chaining order in [docs/ai/workflow.md](docs/ai/workflow.md). For profile and edition coverage
-  (`basic`, `standard`, `creator`, `full`, `agents-only`), see [readme-install.md](readme-install.md).
-  Chaining agents this way gives the best results.
+- **AI agents and recommended order** — research → plan → implement → review → release, chained for
+  best results. See the roster and purpose in [docs/ai/agents.md](docs/ai/agents.md), the shipped
+  inventory and runtime differences in [docs/ai/AGENTS-MANIFEST.md](docs/ai/AGENTS-MANIFEST.md), the
+  chaining order in [docs/ai/workflow.md](docs/ai/workflow.md), and profile/edition coverage
+  (`basic`, `standard`, `creator`, `full`, `agents-only`) in [readme-install.md](readme-install.md).
 - **Capabilities** — load-on-demand reusable workflows (bug-regression, release-safety,
   review-diff, and more). See [docs/ai/capabilities/README.md](docs/ai/capabilities/README.md).
 - **Gotchas** — each capability ships a `gotchas.md` capturing recurring traps and the safe
   response, kept next to the workflow. See [docs/ai/ai-file-standards.md](docs/ai/ai-file-standards.md).
-- **Mentor mode (L0–L5)** — help is given in escalating layers so you learn instead of just
-  receiving answers: **L0** frame, **L1** name the concept, **L2** point to the file/doc, **L3**
-  scaffold, **L4** worked-adjacent example, **L5** direct solution; a struggle gate and teach-it-back
-  step reinforce retention. See
-  [docs/ai/capabilities/mentor-mode/CAPABILITY.md](docs/ai/capabilities/mentor-mode/CAPABILITY.md).
+- **Mentor mode (L0–L5)** — help escalates in layers so you learn instead of just receiving answers:
+  **L0** frame, **L1** name the concept, **L2** point to the file/doc, **L3** scaffold, **L4**
+  worked-adjacent example, **L5** direct solution; a struggle gate and teach-it-back step reinforce
+  retention. See [docs/ai/capabilities/mentor-mode/CAPABILITY.md](docs/ai/capabilities/mentor-mode/CAPABILITY.md).
 - **AI builder (agent-creator)** — an opt-in pipeline (supervisor → creator → validators) plus the
   architecture-plan-writer to scaffold new agents safely. It is **optional**
   (`optional-agents-opencode-pack` / `optional-agents-copilot-pack`, removable with `--without ...`).
@@ -101,8 +96,8 @@ your setup are only available if you opt in to the optional agent-creator pack.
 
 ## Safety and Scope
 
-The kit ships rules, checks, and safer defaults — not guaranteed safety. Agents are designed to
-work only within the scope you give them:
+The kit ships rules, checks, and safer defaults — not guaranteed safety — and agents work only
+within the scope you give them:
 
 - They stay read-only until scope and ownership are clear, ask one clarifying question when scope is
   missing, and never implement from memory or proceed past unclear scope.
@@ -136,8 +131,7 @@ work only within the scope you give them:
 
 ## Who Should Use This
 
-Teams adopting AI coding tools, maintainers who want one consistent and safe AI setup across many
-projects, and anyone who wants AI tools to follow shared rules instead of a blank slate.
+Teams adopting AI coding tools, maintainers who want one consistent, safe AI setup across many projects, and anyone who wants AI tools to follow shared rules instead of a blank slate.
 
 ## Documentation
 

@@ -247,7 +247,7 @@ test`, or `just ci` invocation.
 
 Phase 1 — Documentation formalization (LOW risk, no special approval):
 
-- [ ] P0: Create NEW `docs/ai/recommended-optional-tools.md` with a "Tier A — optional-first,
+- [x] P0: Create NEW `docs/ai/recommended-optional-tools.md` with a "Tier A — optional-first,
   directly integrated" section covering: Infection (mutation testing, cross-reference to
   Phase 2's `just mutation-test`), markdownlint (invoked as plain `markdownlint` in
   `scripts/ai/ai-doc-check.sh:111-112` behind a `command -v` guard; config at
@@ -260,30 +260,30 @@ Phase 1 — Documentation formalization (LOW risk, no special approval):
   fixing it is OUT OF SCOPE for this ticket — file it as its own follow-up bug),
   actionlint/shellcheck/shfmt (already wired into `just lint`/`just ci`; confirm, no
   action).
-- [ ] P0: In the same new doc, add a "Tier B — recommended for consumer repos only,
+- [x] P0: In the same new doc, add a "Tier B — recommended for consumer repos only,
   never bundled" section covering: OSV-Scanner (`osv-scanner .`, zero-config, scans
   `composer.lock`), jscpd (Node-based copy-paste detection; not applicable to this kit,
   no `package.json`; recommend for consumer repos or as a fully optional dev tool),
   Trivy (secondary to OSV-Scanner; ~40% overlap with existing gitleaks/trufflehog; doc
   mention only), Renovate (recommend to consumer repos; low ROI for this kit's 2 dev
   deps), Serena/Aider (ecosystem-adjacent agent tooling; doc mention only).
-- [ ] P0: In the same new doc, add a "Tier C — evaluated and discarded" section:
+- [x] P0: In the same new doc, add a "Tier C — evaluated and discarded" section:
   name-only list (CodeQL, Deptrac/PHAT/Pest-Arch, Kubernetes/Helm/Terraform/OpenTofu/
   Ansible/Vault/SOPS/Argo/Flux, k6/Playwright/Cypress/Percy/axe-core/Maestro,
   oasdiff/Schemathesis, Knip/publint/StrykerJS, PhpMetrics/PHP-Insights,
   PyDriller/git-of-theseus) with one-line rationale ("no API/frontend/K8s/QA-team/
   service exists in this repo") and a pointer to this ticket for the full reasoning —
   no duplication of the long rationale.
-- [ ] P0: In the same new doc, add an "AI-eval frameworks (deferred)" note stating that
+- [x] P0: In the same new doc, add an "AI-eval frameworks (deferred)" note stating that
   Promptfoo/DeepEval/OpenAI-Evals overlap with the existing `evaluation-pack`
   (`docs/ai/capabilities/evaluation-and-regression/`) is unresolved, is explicitly OUT
   of scope here, and needs its own `>=75%`-overlap audit per
   `docs/ai/capabilities/README.md`.
-- [ ] P0: EDIT `docs/ai/toolchain-requirements.md` — append one sentence
+- [x] P0: EDIT `docs/ai/toolchain-requirements.md` — append one sentence
   cross-referencing the new doc, e.g.: "See `docs/ai/recommended-optional-tools.md`
   for recommended-but-optional quality/security tooling (mutation testing, link/markdown
   lint, dependency/secret scanning) not part of the baseline or referenced-tools list."
-- [ ] P0: Confirm no edit is made to `docs/ai/repo-required-tools.md` or
+- [x] P0: Confirm no edit is made to `docs/ai/repo-required-tools.md` or
   `tools/ai/repo-tool-inventory.php` in this phase (`git diff` should show zero changes
   to either).
 
@@ -365,13 +365,13 @@ approval before implementation — STOP and obtain approval before starting this
 
 ## Acceptance Criteria
 
-- [ ] AC-01: `docs/ai/recommended-optional-tools.md` exists and contains all four
+- [x] AC-01: `docs/ai/recommended-optional-tools.md` exists and contains all four
   sections (Tier A, Tier B, Tier C, AI-eval deferred note) as specified in the Todo
   Plan Phase 1 items.
-- [ ] AC-02: `docs/ai/toolchain-requirements.md` contains exactly one new
+- [x] AC-02: `docs/ai/toolchain-requirements.md` contains exactly one new
   cross-reference sentence pointing to `docs/ai/recommended-optional-tools.md`; `git
   diff` shows no other change to that file.
-- [ ] AC-03: `git diff docs/ai/repo-required-tools.md` shows zero changes after Phase 1
+- [x] AC-03: `git diff docs/ai/repo-required-tools.md` shows zero changes after Phase 1
   and after Phase 2.
 - [ ] AC-04: `composer.json` contains a new top-level `"suggest"` block with exactly
   one `infection/infection` entry; `require` remains `{"php": ">=8.2"}` unchanged;

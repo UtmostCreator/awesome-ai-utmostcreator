@@ -47,3 +47,25 @@ function aiPermissionRenderScriptRunner(): array
         'quote' => 'double',
     ];
 }
+
+/**
+ * architecture-plan-writer's unique render shape (Slice C,
+ * docs/tickets/arch-todo-complete-permission-composition-migration/plan.md) — the only
+ * migrated agent needing `task:` BEFORE `edit:` and a nested `external_directory:` mapping
+ * AFTER `edit:` but before `doom_loop:`/`bash:`. Kept as a dedicated one-off builder (same
+ * precedent as aiPermissionRenderScriptRunner()) since no other agent shares this shape.
+ *
+ * @return array{extra_scalars:array<string,string>,extra_scalars_before_edit:array<string,string>,external_directory:array<string,string>,quote:string}
+ */
+function aiPermissionRenderArchitecturePlanWriter(): array
+{
+    return [
+        'extra_scalars_before_edit' => ['task' => 'deny'],
+        'external_directory' => [
+            '~/Projects/awesome-ai-utmostcreator/docs/tickets/**' => 'allow',
+            '$HOME/Projects/awesome-ai-utmostcreator/docs/tickets/**' => 'allow',
+        ],
+        'extra_scalars' => ['doom_loop' => 'ask'],
+        'quote' => 'single',
+    ];
+}

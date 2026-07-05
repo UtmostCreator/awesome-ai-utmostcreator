@@ -126,6 +126,7 @@ permission:
     'shfmt -d *': allow
     'shellcheck *': allow
     'bash scripts/ai/repomix-ensure-fresh.sh *': ask
+    'php -l *': allow
     'git stash list*': allow
     'git stash show*': allow
     'bash scripts/ai/ai-install-coverage.sh *': allow
@@ -134,7 +135,6 @@ permission:
     'bash -n scripts/doctor.sh': allow
     'bash scripts/doctor.sh': allow
     'bash scripts/doctor.sh *': allow
-    'php -l *': allow
     'php tools/ai/validate-*.php *': allow
     'semgrep *': allow
     'repomix *': ask
