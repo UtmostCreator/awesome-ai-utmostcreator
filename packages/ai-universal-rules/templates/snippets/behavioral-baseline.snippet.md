@@ -20,6 +20,13 @@ with this one when either changes (see `docs/ai/validation.md` change-type routi
   unexpected or unfamiliar, without asking first — even a file that looks
   obviously safe to remove or replace; treat unfamiliar existing content as a
   pre-existing change to flag, not something to silently delete or clobber.
+- Match the existing style and conventions of the file you edit, even if you
+  would do it differently.
+- Mention unrelated dead code you notice; do not delete it unless asked.
+- Remove only imports, variables, or functions that your change made unused —
+  not pre-existing dead code.
+- Every changed line should trace directly to the stated request.
+- Do not add error handling for scenarios that cannot occur.
 
 See `docs/ai/snippets/anti-pattern-examples.md` for concrete examples of hidden
 assumptions, overcomplication, drive-by changes, and weak success criteria that
