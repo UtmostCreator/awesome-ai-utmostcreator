@@ -46,7 +46,7 @@
         "package:package-capability": 43,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
-        "package:workflow-template": 20,
+        "package:workflow-template": 21,
         "root:adapter-doc": 1,
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
@@ -58,11 +58,11 @@
         "root:generator": 1,
         "root:github-copilot-agent": 22,
         "root:github-copilot-instruction": 22,
-        "root:github-copilot-prompt": 20,
-        "root:github-copilot-skill": 21,
+        "root:github-copilot-prompt": 21,
+        "root:github-copilot-skill": 22,
         "root:opencode-agent": 14,
-        "root:opencode-command": 22,
-        "root:opencode-skill": 24,
+        "root:opencode-command": 23,
+        "root:opencode-skill": 25,
         "root:php-reference": 3,
         "root:root-doc": 19,
         "root:schema": 1,
@@ -1177,6 +1177,14 @@
         {
             "scope": "package",
             "type": "workflow-template",
+            "name": "generate-permissions",
+            "path": "packages/ai-universal-rules/templates/workflows/generate-permissions.md",
+            "runtime": "dual-runtime",
+            "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
             "name": "mentor-mode",
             "path": "packages/ai-universal-rules/templates/workflows/mentor-mode.md",
             "runtime": "dual-runtime",
@@ -2105,6 +2113,14 @@
         {
             "scope": "root",
             "type": "github-copilot-prompt",
+            "name": "generate-permissions",
+            "path": ".github/prompts/generate-permissions.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
             "name": "mentor-mode",
             "path": ".github/prompts/mentor-mode.prompt.md",
             "runtime": "github-copilot",
@@ -2269,6 +2285,14 @@
             "path": ".github/skills/evidence-first-execution/SKILL.md",
             "runtime": "github-copilot",
             "description": "Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "generate-permissions",
+            "path": ".github/skills/generate-permissions/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
         },
         {
             "scope": "root",
@@ -2545,6 +2569,14 @@
         {
             "scope": "root",
             "type": "opencode-command",
+            "name": "generate-permissions",
+            "path": ".opencode/commands/generate-permissions.md",
+            "runtime": "opencode",
+            "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-command",
             "name": "mentor-mode",
             "path": ".opencode/commands/mentor-mode.md",
             "runtime": "opencode",
@@ -2741,6 +2773,14 @@
             "path": ".opencode/skills/evidence-first-execution/SKILL.md",
             "runtime": "opencode",
             "description": "Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output."
+        },
+        {
+            "scope": "root",
+            "type": "opencode-skill",
+            "name": "generate-permissions",
+            "path": ".opencode/skills/generate-permissions/SKILL.md",
+            "runtime": "opencode",
+            "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
         },
         {
             "scope": "root",

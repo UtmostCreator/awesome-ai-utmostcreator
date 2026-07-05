@@ -28,7 +28,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / package-capability` - 43
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
-- `package / workflow-template` - 20
+- `package / workflow-template` - 21
 - `root / adapter-doc` - 1
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
@@ -40,11 +40,11 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / generator` - 1
 - `root / github-copilot-agent` - 22
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 20
-- `root / github-copilot-skill` - 21
+- `root / github-copilot-prompt` - 21
+- `root / github-copilot-skill` - 22
 - `root / opencode-agent` - 14
-- `root / opencode-command` - 22
-- `root / opencode-skill` - 24
+- `root / opencode-command` - 23
+- `root / opencode-skill` - 25
 - `root / php-reference` - 3
 - `root / root-doc` - 19
 - `root / schema` - 1
@@ -156,6 +156,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|dependency-upgrade|`.github/prompts/dependency-upgrade.prompt.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`github-copilot-prompt`|docs-sync|`.github/prompts/docs-sync.prompt.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`github-copilot-prompt`|evidence-first-execution|`.github/prompts/evidence-first-execution.prompt.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`github-copilot-prompt`|generate-permissions|`.github/prompts/generate-permissions.prompt.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
 |`github-copilot-prompt`|mentor-mode|`.github/prompts/mentor-mode.prompt.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-prompt`|new-feature|`.github/prompts/new-feature.prompt.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-prompt`|plan-slice|`.github/prompts/plan-slice.prompt.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -177,6 +178,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|dependency-upgrade|`.github/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`github-copilot-skill`|docs-sync|`.github/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`github-copilot-skill`|evidence-first-execution|`.github/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`github-copilot-skill`|generate-permissions|`.github/skills/generate-permissions/SKILL.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
 |`github-copilot-skill`|mentor-mode|`.github/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-skill`|new-feature|`.github/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-skill`|plan-slice|`.github/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -211,6 +213,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|dependency-upgrade|`.opencode/commands/dependency-upgrade.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`opencode-command`|docs-sync|`.opencode/commands/docs-sync.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-command`|evidence-first-execution|`.opencode/commands/evidence-first-execution.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`opencode-command`|generate-permissions|`.opencode/commands/generate-permissions.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
 |`opencode-command`|mentor-mode|`.opencode/commands/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-command`|new-feature|`.opencode/commands/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-command`|plan-slice|`.opencode/commands/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -236,6 +239,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|dependency-upgrade|`.opencode/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`opencode-skill`|docs-sync|`.opencode/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-skill`|evidence-first-execution|`.opencode/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`opencode-skill`|generate-permissions|`.opencode/skills/generate-permissions/SKILL.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
 |`opencode-skill`|graphify|`.opencode/skills/graphify/SKILL.md`|Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools.|
 |`opencode-skill`|mentor-mode|`.opencode/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-skill`|new-feature|`.opencode/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
@@ -424,6 +428,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-template`|dependency-upgrade|`packages/ai-universal-rules/templates/workflows/dependency-upgrade.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`workflow-template`|docs-sync|`packages/ai-universal-rules/templates/workflows/docs-sync.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`workflow-template`|evidence-first-execution|`packages/ai-universal-rules/templates/workflows/evidence-first-execution.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`workflow-template`|generate-permissions|`packages/ai-universal-rules/templates/workflows/generate-permissions.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
 |`workflow-template`|mentor-mode|`packages/ai-universal-rules/templates/workflows/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`workflow-template`|new-feature|`packages/ai-universal-rules/templates/workflows/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`workflow-template`|plan-slice|`packages/ai-universal-rules/templates/workflows/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
