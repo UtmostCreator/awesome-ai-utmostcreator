@@ -3,22 +3,22 @@ schemaVersion: "1"
 projectName: "awesome-ai-utmostcreator"
 projectType: "php project"
 projectSummary: "AI workflow starter for awesome-ai-utmostcreator"
-primaryLanguage: "unknown"
-primaryRuntime: "unknown"
+primaryLanguage: "PHP"
+primaryRuntime: "PHP >=8.2"
 primaryEntrypoints: "README.md, docs/ai/project-context.md"
-primaryVerifyCommand: "unknown"
-primaryBuildCommand: "unknown"
-primaryTestCommand: "unknown"
+primaryVerifyCommand: "composer test"
+primaryBuildCommand: "none (PHP tooling/docs kit; no compiled build step)"
+primaryTestCommand: "composer test (composer test:fast for parallel)"
 # Optional project-fact values (uncomment to override kit defaults):
 # targetPlatforms: unknown
-# sourceDirs: unknown
-# testDirs: unknown
-# testCommand: unknown
-# buildCommand: unknown
+sourceDirs: "tools/ai, scripts/ai, packages/ai-universal-rules"
+testDirs: "tests/php"
+testCommand: "composer test"
+buildCommand: "none (PHP tooling/docs kit; no compiled build step)"
 # lintCommand: unknown
 # formatCommand: unknown
 # installCommand: unknown
-# packageManager: unknown
+packageManager: "composer"
 # ciCommands: unknown
 # protectedPaths: unknown
 # generatedFiles: unknown

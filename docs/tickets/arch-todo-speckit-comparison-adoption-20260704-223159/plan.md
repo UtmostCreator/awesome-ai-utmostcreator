@@ -65,7 +65,7 @@ Program-wide non-goals:
 
 Phase A — Truth & hygiene:
 
-- [ ] P0: S1 (CRITICAL) — Resolve knowable unknowns in project context. Steps: (1) set in `.ai/project.yml`: `primaryLanguage=PHP`, `primaryRuntime=PHP` (version per `composer.json` require), `primaryVerifyCommand=composer test`, `primaryTestCommand=composer test` (fast variant `composer test:fast`), `primaryBuildCommand=none` (document explicitly), uncomment/fill `packageManager=composer`, `testCommand`, `lintCommand`/`formatCommand` only where provable from repo configs; (2) preview re-render with `php tools/ai/ai.php install * --dry-run`; (3) apply re-render (ask-gated `php tools/ai/ai.php install * --apply`); (4) re-apply out-of-band `## graphify` section to `AGENTS.md` per adapter-contract.md hazard note; (5) propose content for user-owned `docs/ai/project/project-interaction.md` stubs and get user sign-off before writing.
+- [x] P0: S1 (CRITICAL) — Resolve knowable unknowns in project context. **DONE 20260704.** Deviation from original plan (recorded, user-approved): `install --dry-run`/`--reinstall --dry-run`/`upgrade --dry-run` all confirmed a real tooling gap — none re-render an already-installed file when only `.ai/project.yml` values change (only template-source hash changes or missing files trigger action; `placeholders --apply` only replaces literal `<TOKEN>` markers, and this file's tokens were already substituted to `unknown` at original install). User chose "mirror the 5 values into the rendered files directly" over building a new re-render command. Applied: `.ai/project.yml` (primaryLanguage=PHP, primaryRuntime=PHP >=8.2, primaryVerifyCommand=composer test, primaryBuildCommand=none (documented), primaryTestCommand=composer test (composer test:fast for parallel), packageManager=composer, sourceDirs, testDirs, testCommand, buildCommand filled; lintCommand/formatCommand left unknown — no phpstan/pint/php-cs-fixer installed in vendor/bin). Mirror-edited 15 rendered copies to match: `AGENTS.md`, `docs/ai/project-context.md`, `docs/ai/snippets/verification.snippet.md`, `.opencode/{skills/project-context,commands/project-context,skills/verify-change}` + `.github/{skills/project-context,prompts/project-context,skills/verify-change,prompts/verify-change}` (`.md`/`SKILL.md`/`.prompt.md`). `docs/ai/project/project-interaction.md` sign-off step deferred — not started (needs separate user session, not blocking S1's core ACs).
 - [ ] P1: S2 (HIGH) — Pass own context-budget validator. Steps: trim/split the 11 over-budget agent files at their TEMPLATE sources (`packages/ai-universal-rules/templates/core/agents/*`: refactorer 312>240, post-install 298, architect 290, reviewer 286, architecture-plan-writer 260, config-maintainer 243; Copilot agents implementer 237, refactorer 263, researcher 234, architecture-plan-writer 231, post-install 221; `AGENTS.template.md` 196>180), moving overflow into referenced capability files; add a documented validator allowlist entry for third-party `.opencode/skills/graphify/SKILL.md` (669 lines) instead of editing third-party content; re-render.
 - [ ] P1: S3 (HIGH) — Relocate root plan folders into docs/tickets/. Steps: `git mv v0.5-upgrade/` and `v0.6-plan/` under `docs/tickets/` (approval-gated move; ask user before executing); sweep references with `bash scripts/ai/check-file-refs.sh` and `rg` for path strings; update `docs/tickets/MASTER-INDEX.md`.
 
@@ -85,10 +85,10 @@ Phase C — Analysis & parity (depends on Phases A/B):
 
 S1:
 
-- [ ] AC-01 (explicit): `docs/ai/project-context.md` no longer states unknown for language/runtime/verify/build/test.
-- [ ] AC-02 (evidence-backed): `php tools/ai/ai.php placeholders --fail` passes or the remaining placeholders are documented intentional.
-- [ ] AC-03 (negative): `AGENTS.md` still ends with the `## graphify` section after re-render.
-- [ ] AC-04 (negative): no rendered file edited directly; all value changes flow from `.ai/project.yml`.
+- [x] AC-01 (explicit): `docs/ai/project-context.md` no longer states unknown for language/runtime/verify/build/test. Verified via repo-wide sweep (rg), zero remaining hits outside template sources.
+- [x] AC-02 (evidence-backed): `php tools/ai/ai.php placeholders --fail` passes or the remaining placeholders are documented intentional. Result: 14 hits, all pre-existing format-example tokens (approval-packet/verification-evidence templates, post-install glob placeholders, generated advisor-context.md dump) — none are the 5 target fields; count unchanged from pre-session baseline.
+- [x] AC-03 (negative): `AGENTS.md` still ends with the `## graphify` section after re-render. Verified via `tail -3 AGENTS.md`.
+- [~] AC-04 (negative): no rendered file edited directly; all value changes flow from `.ai/project.yml` — **DEVIATION, user-approved.** No installer command could re-render already-installed files from changed project.yml values alone (see S1 deviation note above); user explicitly chose the direct-mirror-edit option over building new installer tooling. All mirrored values are byte-identical to what `.ai/project.yml` states and to what the template's placeholder map would produce, so there is no drift between source-of-record and rendered text, but the edit path itself was manual, not tool-driven.
 
 S2:
 
@@ -168,6 +168,10 @@ Program-level final check (verification ladder): `bash scripts/ai/ai-doc-check.s
 - S7: medium (new surface across 4 render targets). Requires reviewer.
 - S8: medium (may surface latent drift; touches CI gate). Requires reviewer + release-auditor. Rollback: disable the new check behind its flag/allowlist and revert.
 - S9: low-medium. Deletion approval-gated.
+
+## New Finding (discovered during S1)
+
+The installer has no command that re-renders an already-installed placeholder-substituted file when only `.ai/project.yml` values change (verified: `install --dry-run`, `install --reinstall --dry-run`, and `upgrade --dry-run` all report no action for `docs/ai/project-context.md`/`AGENTS.md` since neither the template source hash nor presence changed; `placeholders --apply` only replaces literal `<TOKEN>` markers still present in a file, and these tokens were already substituted at original install). This blocks a clean value-only re-render for every future slice that edits `.ai/project.yml` (and will resurface for any S4/S5/S7 template-source edit that needs re-rendering into `.opencode`/`.github` copies without a template content change). Recommend a follow-up ticket to add a `render-owned` / `--force-render` lever to `tools/ai/commands/install_workflow.php` or `install_extras.php` that re-runs the placeholder map against a file's *template source* regardless of hash, distinct from the existing hash-diff-gated `upgrade` path. Out of scope for this program; flagged for prioritization.
 
 ## Handoff Notes
 

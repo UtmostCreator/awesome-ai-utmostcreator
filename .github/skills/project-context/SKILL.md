@@ -33,8 +33,8 @@ Load the smallest relevant task context first when available. If none exists, st
 
 - Project type: `php project`
 - Summary: `AI workflow starter for awesome-ai-utmostcreator`
-- Primary language: `unknown`
-- Primary runtime: `unknown`
+- Primary language: `PHP`
+- Primary runtime: `PHP >=8.2`
 - Active paths: `.ai-install-manifest.json,.ai-logs,.ai,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,LICENSE,PLACEHOLDERS.md,README.md,SECURITY.md,SUPPORT.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools`
 - Inactive paths: `unknown`
 - Targets: `unknown`
@@ -47,9 +47,9 @@ Load the smallest relevant task context first when available. If none exists, st
 
 ## Verification Expectations
 
-- Main verification command: `unknown`
-- Main build command: `unknown`
-- Main test command: `unknown`
+- Main verification command: `composer test`
+- Main build command: `none (PHP tooling/docs kit; no compiled build step)`
+- Main test command: `composer test (composer test:fast for parallel)`
 - Preferred narrow-first pattern: `start with the narrowest repo-local check and escalate only if needed`
 
 ## Review Priorities
