@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "java",
+  "label": "Java / Kotlin (Gradle/Maven)",
+  "description": "Java or Kotlin projects using Gradle or Maven",
+  "category": "language",
+  "detection": {
+    "files": ["build.gradle", "build.gradle.kts", "pom.xml", "settings.gradle"],
+    "globs": ["src/main/java/**/*.java", "src/main/kotlin/**/*.kt"],
+    "commands": [],
+    "scc_languages": ["Java", "Kotlin"],
+    "confidence": { "build.gradle": 90, "build.gradle.kts": 90, "pom.xml": 90, "settings.gradle": 70, "scc:Java": 55, "scc:Kotlin": 55 }
+  },
+  "version_checks": [
+    { "id": "java", "tool": "java", "args": ["--version"], "required": false }
+  ],
+  "permission_overlays": { "language_overlays": ["java"], "extra_layers": [] },
+  "project_context": { "primaryLanguage": "Java/Kotlin", "primaryRuntime": "JVM", "packageManager": "gradle/maven", "primaryTestCommand": "./gradlew test", "primaryVerifyCommand": "./gradlew test" },
+  "recommended_commands": { "install": "./gradlew build --dry-run", "test": "./gradlew test", "lint": "./gradlew check" },
+  "package_managers": ["gradle", "maven"],
+  "conflicts": [],
+  "implies": ["markdown"],
+  "merge_priority": 50
+}

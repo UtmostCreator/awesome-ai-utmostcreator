@@ -453,6 +453,23 @@ function aiRunInstallWizard(string $root, array $args = []): int
         }
     }
 
+    // Stack detection: scan the target root for language/toolchain signals (composer.json,
+    // package.json, .github/workflows/*.yml, ...) and let the user confirm/override before
+    // the plan is built. See tools/ai/commands/stack_selection.php.
+    require_once __DIR__ . '/stack_selection.php';
+    $stackRegistry = aiStackLoadRegistry($root);
+    $detectedStacks = aiStackDetect($root, $stackRegistry);
+    $stackOptions = [];
+    foreach ($stackRegistry as $stackId => $stackDescriptor) {
+        $stackOptions[] = [
+            'key' => $stackId,
+            'label' => (string) $stackDescriptor['label'] . (isset($detectedStacks[$stackId]) ? ' (detected)' : ''),
+            'default' => isset($detectedStacks[$stackId]),
+        ];
+    }
+    $stackDefaults = array_keys($detectedStacks);
+    $selectedStacks = $stackOptions === [] ? [] : aiSelectionMultiselect($selectionBackend, 'Project stacks:', $stackOptions, $stackDefaults);
+
     $hookDriver = 'none';
     if (in_array('hooks-pack', $with, true) || $allFeatures || in_array($profile, ['full-governance', 'full'], true)) {
         $wire = strtolower(aiPromptLine('Wire hooks now? [1] no, [2] husky, [3] lefthook, [4] native git hooks (default 1): '));
@@ -478,6 +495,10 @@ function aiRunInstallWizard(string $root, array $args = []): int
     if ($hookDriver !== 'none') {
         $planArgs[] = '--hook-driver';
         $planArgs[] = $hookDriver;
+    }
+    if ($selectedStacks !== []) {
+        $planArgs[] = '--stacks';
+        $planArgs[] = implode(',', $selectedStacks);
     }
 
     $cfg = aiInstallerConfigFromAiArgs($root, $planArgs, true);

@@ -24,7 +24,19 @@ function aiInstallerRun(array $argv): int
         aiInstallerUsage();
         return 0;
     }
+    if (($config['stackDetectOnly'] ?? false) === true) {
+        require_once __DIR__ . '/../commands/stack_selection.php';
+        $resolved = aiStackSelectionResolve((string) $config['targetRoot'], $config);
+        fwrite(STDOUT, aiStackSelectionSummary($resolved) . PHP_EOL);
+        return 0;
+    }
     aiInstallerAssertLockCompatible((string) $config['targetRoot']);
+
+    // Resolve stack detection/selection BEFORE any kit content is copied into the target:
+    // detecting against the target's pre-existing files only avoids falsely attributing the
+    // kit's own shipped files (e.g. .github/workflows/*.yml) to the target project's stack.
+    require_once __DIR__ . '/../commands/stack_selection.php';
+    $stackResolved = aiStackSelectionResolve((string) $config['targetRoot'], $config);
 
     aiInstallerBootstrapPath();
 
@@ -269,6 +281,8 @@ function aiInstallerRun(array $argv): int
             aiInstallBackupUpdateState($config['targetRoot'], (string) $backupInfo['backup_id'], 'applying');
         }
         aiInstallerEnsureProjectValuesFile($config['targetRoot'], $config['projectName']);
+        aiInstallerApplyStackSelectionToProjectValues((string) $config['targetRoot'], $stackResolved);
+        aiInstallerWriteStackDetectionEvidence((string) $config['targetRoot'], $stackResolved);
         aiInstallerApplyPlaceholders(
             $config['targetRoot'],
             $config['projectName'],
@@ -1109,6 +1123,7 @@ function aiInstallerEnsureProjectValuesFile(string $targetRoot, string $projectN
         'riskAreas', 'approvalRequiredChanges', 'inactivePaths', 'availableCapabilities',
         'primaryStack', 'filePlacementRules', 'namingRules', 'goldenExamples',
         'formatterConfigFiles', 'linterConfigFiles', 'editorconfigPath', 'ignoreFiles',
+        'selectedStacks', 'detectedStacks', 'stackToolVersions', 'recommendedVerificationCommands',
     ];
     $lines[] = '# Optional project-fact values (uncomment to override kit defaults):';
     foreach ($optionalKeys as $key) {
@@ -1159,6 +1174,13 @@ function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): 
         'linterConfigFiles' => 'unknown',
         'editorconfigPath' => 'unknown',
         'ignoreFiles' => 'unknown',
+        // Dynamic stack selection scalar summaries (docs/tickets/arch-todo-dynamic-stack-
+        // permission-selection-*, Slice 4). Comma-separated stack ids / human-readable
+        // summaries only; structured evidence lives in .ai/stack-detection.json instead.
+        'selectedStacks' => 'unknown',
+        'detectedStacks' => 'unknown',
+        'stackToolVersions' => 'unknown',
+        'recommendedVerificationCommands' => 'unknown',
     ];
 
     $path = aiInstallerProjectValuesPath($targetRoot);
@@ -1181,6 +1203,139 @@ function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): 
     }
 
     return $defaults;
+}
+
+/**
+ * Write-through selected/detected stack summaries into `.ai/project.yml` (Slice 4 of
+ * docs/tickets/arch-todo-dynamic-stack-permission-selection-20260705T011906Z/plan.md).
+ *
+ * Only touches a key when its current value is 'unknown' or the key is absent/commented
+ * out — an explicit user value (anything else) is never overwritten, matching the file's
+ * "template/user-owned: edit values here" contract.
+ *
+ * @param array{selected:list<string>,detected:array<string,array{id:string,confidence:int,signals:list<string>}>,versions:array<string,array{id:string,tool:string,available:bool,output:string}>} $resolved
+ */
+function aiInstallerApplyStackSelectionToProjectValues(string $targetRoot, array $resolved): void
+{
+    if ($resolved['selected'] === [] && $resolved['detected'] === []) {
+        return; // nothing detected or selected; do not touch the file.
+    }
+
+    $path = aiInstallerProjectValuesPath($targetRoot);
+    if (!is_file($path)) {
+        return; // aiInstallerEnsureProjectValuesFile() must run first.
+    }
+
+    $updates = [
+        'selectedStacks' => $resolved['selected'] === [] ? 'unknown' : implode(',', $resolved['selected']),
+        'detectedStacks' => $resolved['detected'] === [] ? 'unknown' : implode(',', array_map(
+            static fn (array $e): string => $e['id'] . ':' . $e['confidence'],
+            array_values($resolved['detected'])
+        )),
+        'primaryStack' => aiInstallerPrimaryStack($resolved),
+        'stackToolVersions' => aiInstallerSummarizeStackVersions($resolved['versions']),
+    ];
+
+    $raw = (string) file_get_contents($path);
+    $lines = explode("\n", $raw);
+    $seen = [];
+
+    foreach ($lines as $i => $line) {
+        $trimmed = ltrim($line, '# ');
+        foreach ($updates as $key => $value) {
+            if (!str_starts_with($trimmed, $key . ':')) {
+                continue;
+            }
+            $currentValue = aiInstallerProjectYamlUnquote(trim(substr($trimmed, strlen($key) + 1)));
+            $seen[$key] = true;
+            if ($currentValue !== 'unknown' && $currentValue !== '') {
+                continue; // explicit user value; do not overwrite.
+            }
+            $lines[$i] = $key . ': ' . aiInstallerProjectYamlQuote($value);
+        }
+    }
+
+    foreach ($updates as $key => $value) {
+        if (isset($seen[$key])) {
+            continue;
+        }
+        $lines[] = $key . ': ' . aiInstallerProjectYamlQuote($value);
+    }
+
+    file_put_contents($path, implode("\n", $lines));
+}
+
+/**
+ * Pick the primary stack: the selected stack with the highest detection confidence
+ * (ties broken alphabetically for determinism), not simply the first selected id
+ * alphabetically — `sort()` order is not a confidence signal.
+ *
+ * @param array{selected:list<string>,detected:array<string,array{id:string,confidence:int,signals:list<string>}>} $resolved
+ */
+function aiInstallerPrimaryStack(array $resolved): string
+{
+    if ($resolved['selected'] === []) {
+        return 'unknown';
+    }
+
+    $best = null;
+    $bestConfidence = -1;
+    foreach ($resolved['selected'] as $id) {
+        $confidence = $resolved['detected'][$id]['confidence'] ?? -1;
+        if ($confidence > $bestConfidence || ($confidence === $bestConfidence && ($best === null || $id < $best))) {
+            $best = $id;
+            $bestConfidence = $confidence;
+        }
+    }
+
+    return $best ?? $resolved['selected'][0];
+}
+
+/**
+ * @param array<string,array{id:string,tool:string,available:bool,output:string}> $versions
+ */
+function aiInstallerSummarizeStackVersions(array $versions): string
+{
+    if ($versions === []) {
+        return 'unknown';
+    }
+
+    $parts = [];
+    foreach ($versions as $entry) {
+        $parts[] = $entry['tool'] . '=' . ($entry['available'] ? (aiInstallerFirstLine($entry['output']) ?: 'ok') : 'unavailable');
+    }
+
+    return implode(', ', $parts);
+}
+
+function aiInstallerFirstLine(string $text): string
+{
+    $lines = preg_split('/\R/', trim($text)) ?: [];
+
+    return (string) ($lines[0] ?? '');
+}
+
+/**
+ * Informational-only stack detection/version-check evidence, gitignored, never read
+ * back as a write allowlist (same posture as .ai/local-manifest.json).
+ *
+ * @param array{selected:list<string>,detected:array<string,array{id:string,confidence:int,signals:list<string>}>,versions:array<string,array{id:string,tool:string,available:bool,output:string,error:string,required:bool}>} $resolved
+ */
+function aiInstallerWriteStackDetectionEvidence(string $targetRoot, array $resolved): void
+{
+    $payload = [
+        'schemaVersion' => 1,
+        'informational' => true,
+        'not_a_write_allowlist' => true,
+        'generatedAt' => gmdate('c'),
+        'detected' => $resolved['detected'],
+        'selected' => $resolved['selected'],
+        'versionChecks' => $resolved['versions'],
+    ];
+
+    $path = $targetRoot . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'stack-detection.json';
+    aiInstallerMkdir(dirname($path));
+    file_put_contents($path, json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
 }
 
 /** @param array<string,string> $values @return array<string,string> */

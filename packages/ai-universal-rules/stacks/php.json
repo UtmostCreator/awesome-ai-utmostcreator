@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "php",
+  "label": "PHP",
+  "description": "PHP Composer/PHPUnit projects",
+  "category": "language",
+  "detection": {
+    "files": ["composer.json"],
+    "globs": ["*.php", "src/**/*.php", "tests/**/*.php"],
+    "commands": [],
+    "scc_languages": ["PHP"],
+    "confidence": { "composer.json": 95, "*.php": 40, "src/**/*.php": 50, "tests/**/*.php": 50, "scc:PHP": 60 }
+  },
+  "version_checks": [
+    { "id": "php", "tool": "php", "args": ["-v"], "required": false },
+    { "id": "composer", "tool": "composer", "args": ["--version"], "required": false }
+  ],
+  "permission_overlays": { "language_overlays": ["php"], "extra_layers": [] },
+  "project_context": { "primaryLanguage": "PHP", "primaryRuntime": "PHP", "packageManager": "composer", "primaryTestCommand": "composer test", "primaryVerifyCommand": "composer test" },
+  "recommended_commands": { "install": "composer install", "test": "composer test", "lint": "php -l <changed-files>" },
+  "package_managers": ["composer"],
+  "conflicts": [],
+  "implies": ["markdown", "shell"],
+  "merge_priority": 50
+}

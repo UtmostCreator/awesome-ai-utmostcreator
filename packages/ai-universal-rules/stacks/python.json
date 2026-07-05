@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "python",
+  "label": "Python",
+  "description": "Python projects using pip/poetry/uv",
+  "category": "language",
+  "detection": {
+    "files": ["pyproject.toml", "requirements.txt", "setup.py", "Pipfile"],
+    "globs": ["*.py", "src/**/*.py", "tests/**/*.py"],
+    "commands": [],
+    "scc_languages": ["Python"],
+    "confidence": { "pyproject.toml": 95, "requirements.txt": 80, "setup.py": 80, "Pipfile": 80, "*.py": 40, "scc:Python": 55 }
+  },
+  "version_checks": [
+    { "id": "python3", "tool": "python3", "args": ["--version"], "required": false },
+    { "id": "pip3", "tool": "pip3", "args": ["--version"], "required": false }
+  ],
+  "permission_overlays": { "language_overlays": ["python"], "extra_layers": [] },
+  "project_context": { "primaryLanguage": "Python", "primaryRuntime": "Python", "packageManager": "pip/poetry/uv", "primaryTestCommand": "pytest", "primaryVerifyCommand": "pytest" },
+  "recommended_commands": { "install": "pip install -r requirements.txt", "test": "pytest", "lint": "ruff check ." },
+  "package_managers": ["pip", "poetry", "uv"],
+  "conflicts": [],
+  "implies": ["markdown"],
+  "merge_priority": 50
+}

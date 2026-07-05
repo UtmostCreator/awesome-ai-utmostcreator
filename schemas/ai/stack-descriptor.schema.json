@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://awesome-ai.local/schemas/ai/stack-descriptor.schema.json",
+  "title": "AI Stack Descriptor",
+  "type": "object",
+  "required": ["schema_version", "id", "label", "detection", "permission_overlays", "project_context"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "label": { "type": "string", "minLength": 1 },
+    "description": { "type": "string" },
+    "category": { "type": "string" },
+    "detection": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "files": { "type": "array", "items": { "type": "string" } },
+        "globs": { "type": "array", "items": { "type": "string" } },
+        "commands": { "type": "array", "items": { "type": "object" } },
+        "scc_languages": { "type": "array", "items": { "type": "string" } },
+        "confidence": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0, "maximum": 100 } }
+      }
+    },
+    "version_checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "tool", "args", "required"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+          "tool": { "type": "string", "pattern": "^[A-Za-z0-9._+-]+$" },
+          "args": {
+            "oneOf": [
+              { "type": "array", "maxItems": 0 },
+              { "type": "array", "prefixItems": [{ "const": "--version" }], "minItems": 1, "maxItems": 1 },
+              { "type": "array", "prefixItems": [{ "const": "-v" }], "minItems": 1, "maxItems": 1 },
+              { "type": "array", "prefixItems": [{ "const": "version" }], "minItems": 1, "maxItems": 1 }
+            ]
+          },
+          "required": { "type": "boolean" }
+        }
+      }
+    },
+    "permission_overlays": {
+      "type": "object",
+      "required": ["language_overlays"],
+      "additionalProperties": false,
+      "properties": {
+        "language_overlays": { "type": "array", "items": { "type": "string" } },
+        "extra_layers": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "project_context": { "type": "object", "additionalProperties": { "type": "string" } },
+    "recommended_commands": { "type": "object", "additionalProperties": { "type": "string" } },
+    "package_managers": { "type": "array", "items": { "type": "string" } },
+    "conflicts": { "type": "array", "items": { "type": "string" } },
+    "implies": { "type": "array", "items": { "type": "string" } },
+    "merge_priority": { "type": "integer" },
+    "extends": { "type": "string" },
+    "override": { "type": "boolean" }
+  }
+}

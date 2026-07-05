@@ -1,0 +1,786 @@
+{
+    "schema_version": "1.0.0",
+    "stacks": {
+        "dotnet": {
+            "schema_version": 1,
+            "id": "dotnet",
+            "label": ".NET",
+            "description": ".NET / C# projects",
+            "category": "language",
+            "detection": {
+                "files": [
+                    "global.json"
+                ],
+                "globs": [
+                    "*.csproj",
+                    "*.sln",
+                    "src/**/*.cs"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "C#"
+                ],
+                "confidence": {
+                    "global.json": 70,
+                    "*.csproj": 90,
+                    "*.sln": 80,
+                    "src/**/*.cs": 40,
+                    "scc:C#": 55
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "dotnet",
+                    "tool": "dotnet",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "dotnet"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "C#",
+                "primaryRuntime": ".NET",
+                "packageManager": "nuget",
+                "primaryTestCommand": "dotnet test",
+                "primaryVerifyCommand": "dotnet test"
+            },
+            "recommended_commands": {
+                "install": "dotnet restore",
+                "test": "dotnet test",
+                "lint": "dotnet format --verify-no-changes"
+            },
+            "package_managers": [
+                "nuget"
+            ],
+            "conflicts": [],
+            "implies": [
+                "markdown"
+            ],
+            "merge_priority": 50
+        },
+        "github-actions": {
+            "schema_version": 1,
+            "id": "github-actions",
+            "label": "GitHub Actions",
+            "description": "GitHub Actions workflow configuration",
+            "category": "ci",
+            "detection": {
+                "files": [],
+                "globs": [
+                    ".github/workflows/*.yml",
+                    ".github/workflows/*.yaml"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "YAML"
+                ],
+                "confidence": {
+                    ".github/workflows/*.yml": 95,
+                    ".github/workflows/*.yaml": 95,
+                    "scc:YAML": 20
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "actionlint",
+                    "tool": "actionlint",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "github-actions"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryVerifyCommand": "actionlint"
+            },
+            "recommended_commands": {
+                "lint": "actionlint"
+            },
+            "package_managers": [],
+            "conflicts": [],
+            "implies": [
+                "markdown"
+            ],
+            "merge_priority": 30
+        },
+        "go": {
+            "schema_version": 1,
+            "id": "go",
+            "label": "Go",
+            "description": "Go modules projects",
+            "category": "language",
+            "detection": {
+                "files": [
+                    "go.mod",
+                    "go.sum"
+                ],
+                "globs": [
+                    "*.go"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "Go"
+                ],
+                "confidence": {
+                    "go.mod": 95,
+                    "go.sum": 70,
+                    "*.go": 40,
+                    "scc:Go": 55
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "go",
+                    "tool": "go",
+                    "args": [
+                        "version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "go"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "Go",
+                "primaryRuntime": "Go",
+                "packageManager": "go modules",
+                "primaryTestCommand": "go test ./...",
+                "primaryVerifyCommand": "go test ./..."
+            },
+            "recommended_commands": {
+                "install": "go mod download",
+                "test": "go test ./...",
+                "lint": "gofmt -l ."
+            },
+            "package_managers": [
+                "go"
+            ],
+            "conflicts": [],
+            "implies": [
+                "markdown"
+            ],
+            "merge_priority": 50
+        },
+        "java": {
+            "schema_version": 1,
+            "id": "java",
+            "label": "Java / Kotlin (Gradle/Maven)",
+            "description": "Java or Kotlin projects using Gradle or Maven",
+            "category": "language",
+            "detection": {
+                "files": [
+                    "build.gradle",
+                    "build.gradle.kts",
+                    "pom.xml",
+                    "settings.gradle"
+                ],
+                "globs": [
+                    "src/main/java/**/*.java",
+                    "src/main/kotlin/**/*.kt"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "Java",
+                    "Kotlin"
+                ],
+                "confidence": {
+                    "build.gradle": 90,
+                    "build.gradle.kts": 90,
+                    "pom.xml": 90,
+                    "settings.gradle": 70,
+                    "scc:Java": 55,
+                    "scc:Kotlin": 55
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "java",
+                    "tool": "java",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "java"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "Java/Kotlin",
+                "primaryRuntime": "JVM",
+                "packageManager": "gradle/maven",
+                "primaryTestCommand": "./gradlew test",
+                "primaryVerifyCommand": "./gradlew test"
+            },
+            "recommended_commands": {
+                "install": "./gradlew build --dry-run",
+                "test": "./gradlew test",
+                "lint": "./gradlew check"
+            },
+            "package_managers": [
+                "gradle",
+                "maven"
+            ],
+            "conflicts": [],
+            "implies": [
+                "markdown"
+            ],
+            "merge_priority": 50
+        },
+        "js-ts": {
+            "schema_version": 1,
+            "id": "js-ts",
+            "label": "JavaScript / TypeScript",
+            "description": "Node.js projects using npm, pnpm, yarn, or bun",
+            "category": "language",
+            "detection": {
+                "files": [
+                    "package.json",
+                    "pnpm-lock.yaml",
+                    "yarn.lock",
+                    "bun.lockb",
+                    "tsconfig.json"
+                ],
+                "globs": [
+                    "*.js",
+                    "*.ts",
+                    "src/**/*.js",
+                    "src/**/*.ts",
+                    "tests/**/*.ts"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "JavaScript",
+                    "TypeScript"
+                ],
+                "confidence": {
+                    "package.json": 95,
+                    "tsconfig.json": 80,
+                    "*.js": 35,
+                    "*.ts": 45,
+                    "scc:JavaScript": 55,
+                    "scc:TypeScript": 60
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "node",
+                    "tool": "node",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                },
+                {
+                    "id": "npm",
+                    "tool": "npm",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "js-ts"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "JavaScript/TypeScript",
+                "primaryRuntime": "Node.js",
+                "packageManager": "npm/pnpm/yarn/bun",
+                "primaryTestCommand": "npm test",
+                "primaryVerifyCommand": "npm test"
+            },
+            "recommended_commands": {
+                "install": "npm install",
+                "test": "npm test",
+                "lint": "npm run lint"
+            },
+            "package_managers": [
+                "npm",
+                "pnpm",
+                "yarn",
+                "bun"
+            ],
+            "conflicts": [],
+            "implies": [
+                "markdown"
+            ],
+            "merge_priority": 50
+        },
+        "make": {
+            "schema_version": 1,
+            "id": "make",
+            "label": "Make",
+            "description": "Makefile-driven build/test automation",
+            "category": "tooling",
+            "detection": {
+                "files": [
+                    "Makefile",
+                    "makefile"
+                ],
+                "globs": [],
+                "commands": [],
+                "scc_languages": [
+                    "Makefile"
+                ],
+                "confidence": {
+                    "Makefile": 80,
+                    "makefile": 80,
+                    "scc:Makefile": 60
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "make",
+                    "tool": "make",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "make"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryVerifyCommand": "make test"
+            },
+            "recommended_commands": {
+                "test": "make test",
+                "lint": "make lint"
+            },
+            "package_managers": [],
+            "conflicts": [],
+            "implies": [],
+            "merge_priority": 40
+        },
+        "markdown": {
+            "schema_version": 1,
+            "id": "markdown",
+            "label": "Markdown",
+            "description": "Markdown documentation projects",
+            "category": "docs",
+            "detection": {
+                "files": [
+                    "README.md",
+                    ".markdownlint-cli2.yaml"
+                ],
+                "globs": [
+                    "*.md",
+                    "docs/**/*.md"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "Markdown"
+                ],
+                "confidence": {
+                    "README.md": 60,
+                    ".markdownlint-cli2.yaml": 80,
+                    "*.md": 35,
+                    "docs/**/*.md": 55,
+                    "scc:Markdown": 50
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "markdownlint-cli2",
+                    "tool": "markdownlint-cli2",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "markdown"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "Markdown",
+                "primaryVerifyCommand": "markdownlint-cli2 <changed-files>"
+            },
+            "recommended_commands": {
+                "lint": "markdownlint-cli2 <changed-files>"
+            },
+            "package_managers": [],
+            "conflicts": [],
+            "implies": [],
+            "merge_priority": 20
+        },
+        "php": {
+            "schema_version": 1,
+            "id": "php",
+            "label": "PHP",
+            "description": "PHP Composer/PHPUnit projects",
+            "category": "language",
+            "detection": {
+                "files": [
+                    "composer.json"
+                ],
+                "globs": [
+                    "*.php",
+                    "src/**/*.php",
+                    "tests/**/*.php"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "PHP"
+                ],
+                "confidence": {
+                    "composer.json": 95,
+                    "*.php": 40,
+                    "src/**/*.php": 50,
+                    "tests/**/*.php": 50,
+                    "scc:PHP": 60
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "php",
+                    "tool": "php",
+                    "args": [
+                        "-v"
+                    ],
+                    "required": false
+                },
+                {
+                    "id": "composer",
+                    "tool": "composer",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "php"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "PHP",
+                "primaryRuntime": "PHP",
+                "packageManager": "composer",
+                "primaryTestCommand": "composer test",
+                "primaryVerifyCommand": "composer test"
+            },
+            "recommended_commands": {
+                "install": "composer install",
+                "test": "composer test",
+                "lint": "php -l <changed-files>"
+            },
+            "package_managers": [
+                "composer"
+            ],
+            "conflicts": [],
+            "implies": [
+                "markdown",
+                "shell"
+            ],
+            "merge_priority": 50
+        },
+        "python": {
+            "schema_version": 1,
+            "id": "python",
+            "label": "Python",
+            "description": "Python projects using pip/poetry/uv",
+            "category": "language",
+            "detection": {
+                "files": [
+                    "pyproject.toml",
+                    "requirements.txt",
+                    "setup.py",
+                    "Pipfile"
+                ],
+                "globs": [
+                    "*.py",
+                    "src/**/*.py",
+                    "tests/**/*.py"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "Python"
+                ],
+                "confidence": {
+                    "pyproject.toml": 95,
+                    "requirements.txt": 80,
+                    "setup.py": 80,
+                    "Pipfile": 80,
+                    "*.py": 40,
+                    "scc:Python": 55
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "python3",
+                    "tool": "python3",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                },
+                {
+                    "id": "pip3",
+                    "tool": "pip3",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "python"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "Python",
+                "primaryRuntime": "Python",
+                "packageManager": "pip/poetry/uv",
+                "primaryTestCommand": "pytest",
+                "primaryVerifyCommand": "pytest"
+            },
+            "recommended_commands": {
+                "install": "pip install -r requirements.txt",
+                "test": "pytest",
+                "lint": "ruff check ."
+            },
+            "package_managers": [
+                "pip",
+                "poetry",
+                "uv"
+            ],
+            "conflicts": [],
+            "implies": [
+                "markdown"
+            ],
+            "merge_priority": 50
+        },
+        "ruby": {
+            "schema_version": 1,
+            "id": "ruby",
+            "label": "Ruby",
+            "description": "Ruby / Bundler projects",
+            "category": "language",
+            "detection": {
+                "files": [
+                    "Gemfile",
+                    "Gemfile.lock"
+                ],
+                "globs": [
+                    "*.rb",
+                    "lib/**/*.rb"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "Ruby"
+                ],
+                "confidence": {
+                    "Gemfile": 90,
+                    "Gemfile.lock": 70,
+                    "*.rb": 40,
+                    "lib/**/*.rb": 45,
+                    "scc:Ruby": 55
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "ruby",
+                    "tool": "ruby",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                },
+                {
+                    "id": "bundle",
+                    "tool": "bundle",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "ruby"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "Ruby",
+                "primaryRuntime": "Ruby",
+                "packageManager": "bundler",
+                "primaryTestCommand": "bundle exec rspec",
+                "primaryVerifyCommand": "bundle exec rspec"
+            },
+            "recommended_commands": {
+                "install": "bundle install",
+                "test": "bundle exec rspec",
+                "lint": "rubocop"
+            },
+            "package_managers": [
+                "bundler"
+            ],
+            "conflicts": [],
+            "implies": [
+                "markdown"
+            ],
+            "merge_priority": 50
+        },
+        "rust": {
+            "schema_version": 1,
+            "id": "rust",
+            "label": "Rust",
+            "description": "Rust Cargo projects",
+            "category": "language",
+            "detection": {
+                "files": [
+                    "Cargo.toml",
+                    "Cargo.lock"
+                ],
+                "globs": [
+                    "src/**/*.rs"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "Rust"
+                ],
+                "confidence": {
+                    "Cargo.toml": 95,
+                    "Cargo.lock": 70,
+                    "src/**/*.rs": 45,
+                    "scc:Rust": 55
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "cargo",
+                    "tool": "cargo",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "rust"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "Rust",
+                "primaryRuntime": "Rust",
+                "packageManager": "cargo",
+                "primaryTestCommand": "cargo test",
+                "primaryVerifyCommand": "cargo test"
+            },
+            "recommended_commands": {
+                "install": "cargo fetch",
+                "test": "cargo test",
+                "lint": "cargo clippy"
+            },
+            "package_managers": [
+                "cargo"
+            ],
+            "conflicts": [],
+            "implies": [
+                "markdown"
+            ],
+            "merge_priority": 50
+        },
+        "shell": {
+            "schema_version": 1,
+            "id": "shell",
+            "label": "Shell",
+            "description": "Shell scripts and command-line automation",
+            "category": "tooling",
+            "detection": {
+                "files": [
+                    ".shellcheckrc"
+                ],
+                "globs": [
+                    "*.sh",
+                    "scripts/**/*.sh"
+                ],
+                "commands": [],
+                "scc_languages": [
+                    "Shell"
+                ],
+                "confidence": {
+                    "*.sh": 45,
+                    "scripts/**/*.sh": 70,
+                    ".shellcheckrc": 75,
+                    "scc:Shell": 60
+                }
+            },
+            "version_checks": [
+                {
+                    "id": "bash",
+                    "tool": "bash",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                },
+                {
+                    "id": "shellcheck",
+                    "tool": "shellcheck",
+                    "args": [
+                        "--version"
+                    ],
+                    "required": false
+                }
+            ],
+            "permission_overlays": {
+                "language_overlays": [
+                    "shell"
+                ],
+                "extra_layers": []
+            },
+            "project_context": {
+                "primaryLanguage": "Shell",
+                "primaryRuntime": "bash",
+                "primaryVerifyCommand": "shellcheck <changed-files>"
+            },
+            "recommended_commands": {
+                "lint": "shellcheck <changed-files>"
+            },
+            "package_managers": [],
+            "conflicts": [],
+            "implies": [],
+            "merge_priority": 30
+        }
+    }
+}
