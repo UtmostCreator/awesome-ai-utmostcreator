@@ -115,6 +115,22 @@ final class StackProjectDocTest extends TestCase
         self::assertStringContainsString('Detected stacks:', $result['stdout']);
         self::assertStringNotContainsString('Wrote docs/ai/project/stack.md', $result['stdout']);
         self::assertDirectoryDoesNotExist($target . '/docs/ai/project');
+        self::assertFileDoesNotExist($target . '/.ai/stack-detection.json', '--no-write must skip the evidence file too');
+    }
+
+    public function testStackDetectCliWritesFreshScanEvidenceForGeneratePermissionsGate(): void
+    {
+        $target = $this->makeTempRoot();
+        file_put_contents($target . '/composer.json', '{}');
+
+        $result = $this->runStackDetectCli($target, []);
+
+        self::assertSame(0, $result['exit']);
+        self::assertFileExists($target . '/.ai/stack-detection.json', 'generate-permissions refuses to proceed without this freshness signal');
+        $evidence = json_decode((string) file_get_contents($target . '/.ai/stack-detection.json'), true);
+        self::assertIsArray($evidence);
+        self::assertTrue($evidence['informational'] ?? null);
+        self::assertContains('php', $evidence['selected'] ?? []);
     }
 
     public function testStackDetectCliStacksFlagOverridesSelectionButStillDetects(): void
