@@ -46,7 +46,7 @@
         "package:package-capability": 43,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
-        "package:workflow-template": 19,
+        "package:workflow-template": 20,
         "root:adapter-doc": 1,
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
@@ -58,11 +58,11 @@
         "root:generator": 1,
         "root:github-copilot-agent": 22,
         "root:github-copilot-instruction": 22,
-        "root:github-copilot-prompt": 19,
-        "root:github-copilot-skill": 20,
+        "root:github-copilot-prompt": 20,
+        "root:github-copilot-skill": 21,
         "root:opencode-agent": 14,
-        "root:opencode-command": 21,
-        "root:opencode-skill": 23,
+        "root:opencode-command": 22,
+        "root:opencode-skill": 24,
         "root:php-reference": 3,
         "root:root-doc": 19,
         "root:schema": 1,
@@ -300,7 +300,7 @@
             "name": "Workflow",
             "path": "packages/ai-universal-rules/templates/core/workflow.template.md",
             "runtime": "canonical",
-            "description": "For non-trivial work, follow `docs/ai/execution-protocol.md`."
+            "description": "See `docs/ai/index.md` for a curated, annotated entry point into `docs/ai/**`."
         },
         {
             "scope": "package",
@@ -1265,6 +1265,14 @@
         {
             "scope": "package",
             "type": "workflow-template",
+            "name": "scan-stack",
+            "path": "packages/ai-universal-rules/templates/workflows/scan-stack.md",
+            "runtime": "dual-runtime",
+            "description": "Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
             "name": "script-inventory",
             "path": "packages/ai-universal-rules/templates/workflows/script-inventory.md",
             "runtime": "dual-runtime",
@@ -2185,6 +2193,14 @@
         {
             "scope": "root",
             "type": "github-copilot-prompt",
+            "name": "scan-stack",
+            "path": ".github/prompts/scan-stack.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
             "name": "script-inventory",
             "path": ".github/prompts/script-inventory.prompt.md",
             "runtime": "github-copilot",
@@ -2341,6 +2357,14 @@
             "path": ".github/skills/review-search-tool/SKILL.md",
             "runtime": "github-copilot",
             "description": "Review ai-search implementation and contract safety"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "scan-stack",
+            "path": ".github/skills/scan-stack/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection"
         },
         {
             "scope": "root",
@@ -2609,6 +2633,14 @@
         {
             "scope": "root",
             "type": "opencode-command",
+            "name": "scan-stack",
+            "path": ".opencode/commands/scan-stack.md",
+            "runtime": "opencode",
+            "description": "Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-command",
             "name": "script-inventory",
             "path": ".opencode/commands/script-inventory.md",
             "runtime": "opencode",
@@ -2805,6 +2837,14 @@
             "path": ".opencode/skills/review-search-tool/SKILL.md",
             "runtime": "opencode",
             "description": "Review ai-search implementation and contract safety"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-skill",
+            "name": "scan-stack",
+            "path": ".opencode/skills/scan-stack/SKILL.md",
+            "runtime": "opencode",
+            "description": "Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection"
         },
         {
             "scope": "root",

@@ -22,6 +22,7 @@ require_once __DIR__ . '/commands/analysis.php';
 require_once __DIR__ . '/commands/workspace.php';
 require_once __DIR__ . '/commands/decisions.php';
 require_once __DIR__ . '/commands/install_commands.php';
+require_once __DIR__ . '/commands/stack_detect_command.php';
 require_once __DIR__ . '/commands/advisor_command.php';
 require_once __DIR__ . '/commands/descriptors_command.php';
 
@@ -85,6 +86,7 @@ Commands:
                  .ai/project.yml values. Use --apply to write; --fail for strict
                  gate. Never touches packages/ template sources.
   hooks          Hook wiring and status helpers (compatibility surface)
+  stack-detect   Detect project stacks and write docs/ai/project/stack.md
   toolchain      Check/install-plan/apply safe AI toolchain dependencies
   run-script     Run approved scripts-pack helper scripts by registry id
   tool:list      List gateway tools, optionally filtered by --profile=<role>
@@ -153,6 +155,8 @@ Examples:
   php tools/ai/ai.php placeholders --apply --files=AGENTS.md,docs/ai/project-context.md
   php tools/ai/ai.php project-values-sync
   php tools/ai/ai.php project-values-sync --apply
+  php tools/ai/ai.php stack-detect
+  php tools/ai/ai.php stack-detect --stacks php,markdown
   php tools/ai/ai.php version
 TXT;
 
@@ -260,6 +264,8 @@ try {
             exit(aiRunProjectValuesSync($root, $args));
         case 'hooks':
             exit(aiRunHooks($root, $args));
+        case 'stack-detect':
+            exit(aiRunStackDetect($root, $args));
         case 'toolchain':
             exit(aiRunToolchain($root, $args));
         case 'run-script':

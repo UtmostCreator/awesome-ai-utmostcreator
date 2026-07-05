@@ -800,6 +800,14 @@ function validateShippedDocReferenceIntegrity(string $root, array $packTargets, 
         if (str_starts_with($relPath, 'docs/ai/generated/')) {
             return true;
         }
+        // docs/ai/project/stack.md is a per-project doc produced on demand by the
+        // `stack-detect` CLI verb / scan-stack skill after install (not shipped by the
+        // installer itself and never baked into packages/**; see
+        // docs/tickets/arch-todo-stack-permission-placeholder-skill-trio-20260705T151632Z).
+        // A reference to it from a shipped doc is intentional, not a dangling link.
+        if ($relPath === 'docs/ai/project/stack.md') {
+            return true;
+        }
         // A file shipped as part of a dir-type pack target counts as shipped.
         foreach ($dirTargets as $dir) {
             if ($dir !== '' && str_starts_with($relPath, rtrim($dir, '/') . '/')) {
