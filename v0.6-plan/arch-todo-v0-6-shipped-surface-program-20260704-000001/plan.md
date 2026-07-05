@@ -1065,13 +1065,80 @@ instruction-thinning surfaces):
       a pre-existing, unaffected metadata entry for `pre-tool-use.sh`'s path
       and description, not its internals) — not this session's regression,
       left for that session to resolve on its own commit.
-- [ ] P0: Phase 6.2 — agent duty vs permission parity (F-3, F-5): audit every shipped
+- [x] P0: Phase 6.2 — agent duty vs permission parity (F-3, F-5): audit every shipped
       agent template (`templates/core/agents/**`, `templates/optional/agents/**`)
       against the permissions it ships with; fix templates where a declared duty
       (for example move or edit files) is blocked by its own boundary; convert agents
       to skills where the boundary defeats the agent's purpose. Record the
       duty-vs-permission check in the Phase 0 classification so future agents cannot
-      ship with this mismatch.
+      ship with this mismatch. Done: audited all 24 shipped agent templates (13
+      `core/agents/**` + 11 `optional/agents/**`) body-duty vs frontmatter-permission,
+      one file at a time (delegated first pass to a read-only research session,
+      independently re-confirmed both findings below by direct file read before
+      fixing). Found and fixed 2 real defects, no SKILL-CANDIDATE case (every
+      audited agent's stated duties are achievable inside its own boundary once
+      these 2 fixes land; no agent boundary defeats its own purpose): (1)
+      `release-auditor.md` Hard Rule "Do not run broad CI" was directly
+      contradicted by its own frontmatter granting unconditional `allow` on
+      `'bash scripts/ai/ai-test-select.sh *'` and `'bash scripts/ai/run-repo-tests.sh*'`,
+      and its own Script Access prose then documented running them as an expected
+      tool — while sibling audit-tier agents (`workflow-auditor.md`,
+      `infra-auditor.md`) correctly `deny` the same two scripts. Fixed by changing
+      both to `deny` and rewording the Script Access "use"/"denied" prose to match
+      (auditor reads verification evidence others already produced; it does not run
+      the suite itself), propagated identically to `.opencode/agents/release-auditor.md`
+      and `.github/agents/release-auditor.agent.md` (Copilot's own tool list has no
+      `execute` capability for this agent at all, so it was never actually
+      reachable there, but the mirrored prose text needed the same correction for
+      consistency). (2) `architecture-plan-writer.md` had 3 sibling keys
+      (`'date': allow`, the 4-line comment above it, `'mkdir -p docs/tickets/*':
+      allow`, `'ls *': allow`) indented 5 spaces inside a `bash:` block mapping
+      whose other ~30 sibling keys are all indented 4 spaces — a real, byte-verified
+      YAML indentation defect present in both the template and the rendered
+      `.opencode/agents/architecture-plan-writer.md` (i.e., it ships as-is; the
+      render pipeline does not normalize it). These two rules are load-bearing for
+      this agent's only stated duty (create the plan folder via `mkdir -p
+      docs/tickets/...`, list existing plan files via `ls` to derive the next
+      sequence number) — a YAML parser that rejects or mis-nests a sibling-indent
+      mismatch inside an otherwise-flat block mapping would silently drop or
+      misinterpret exactly the two permissions this agent's core duty depends on;
+      confirmed the rendered `.github/agents/architecture-plan-writer.agent.md`'s
+      flat command list matches the intended semantics but could not verify it was
+      itself derived from parsing this malformed YAML (no `yaml` PHP extension,
+      `js-yaml`/`yaml` npm package, or `symfony/yaml` vendor package available in
+      this environment to execute a parse-behavior check; installing one needs
+      separate approval and was out of this bounded slice's scope, so the parser
+      *outcome* is reported `unknown`, but the indentation defect itself is
+      directly evidenced, not speculative). Fixed by normalizing all 3 lines to
+      4-space indentation in the template, propagated identically to
+      `.opencode/agents/architecture-plan-writer.md`. No `templates/optional/agents/**`
+      or other `templates/core/agents/**` file showed a duty asserted in body text
+      that its own frontmatter's `allow`/`ask`/`deny` set directly blocks. Recorded
+      the check itself (not just this slice's 2 findings) as a permanent maintainer
+      gate: added an "Agent Duty-Vs-Permission Check (F-3)" subsection to
+      `docs/ai/validation.md` directly under the existing Change-Type Routing row
+      for `templates/core/agents/**`/`templates/optional/agents/**`, naming both
+      fixed defects as the worked examples and stating the bidirectional check
+      (duty blocked by missing permission; permission grant unused by any duty)
+      plus the skill-conversion fallback (F-5) for a future agent whose own
+      boundary would defeat its purpose. Confirmed `.claude/agents/**` is not
+      currently materialized in this working tree at all (untracked, not
+      gitignored) despite `docs/ai/shipped-surface-inventory.md` documenting a
+      Claude agent-render target for `core/agents/**`; out of this slice's scope
+      (no Claude-rendered copy of either touched file exists to sync), noted here
+      so a future slice does not assume parity that was never verified. Verified:
+      `validate-ai-config.php` and `validate-ai-catalog.php` exit 0 clean;
+      `validate-adapter-drift.php --fail-on-warn` and `validate-install-surface.php`
+      byte-identical to the Phase 6.1-review-round baseline (`diff` against a
+      `git stash`-scoped pre-slice run, zero new findings on both); `ai-doc-check.sh
+      --check` output identical before/after aside from an expected timing-string
+      difference; `composer test` shows the same 10 pre-existing failures with
+      identical names before and after this slice (`AgentsManifestTest` x2,
+      `CliToolsTest` x2, `ShHelpTest`, `ShIntrospectRegressionTest`,
+      `ShipReferenceIntegrityTest` x4 — none touch `release-auditor.md` or
+      `architecture-plan-writer.md`; confirmed via `git stash` that these same 10
+      fail identically with this slice's edits removed, so they predate and are
+      unrelated to Phase 6.2).
 - [ ] P0: Phase 6.3 — blocked-edit fallback protocol (F-4): add to the behavioral
       baseline and the relevant agent templates: verify write success after every edit,
       never re-append content after a blocked or failed edit, stop and report with the

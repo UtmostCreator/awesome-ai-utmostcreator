@@ -72,8 +72,8 @@ permission:
     'bash scripts/ai/ai-diff-context.sh *': allow
     'bash scripts/ai/ai-doc-check.sh *': allow
     'bash scripts/ai/ai-verify.sh *': ask
-    'bash scripts/ai/ai-test-select.sh *': allow
-    'bash scripts/ai/run-repo-tests.sh*': allow
+    'bash scripts/ai/ai-test-select.sh *': deny
+    'bash scripts/ai/run-repo-tests.sh*': deny
     'bash scripts/ai/ai-structured.sh *': allow
     'bash scripts/ai/ai-task.sh *': deny
     'bash scripts/ai/ai-edit.sh *': deny
@@ -149,10 +149,10 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground rollout evidence; expect hits, file content, usage maps.
 - `git-forensics.sh` / `git-branch-origin.sh` / `gh-pr-context.sh` — for release/PR history; expect blame, branch base, PR metadata.
-- `ai-diff-context.sh` / `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to confirm verification depth; expect diff bundle and test results.
+- `ai-diff-context.sh` / `ai-verify.sh` (`ask`) — to confirm verification depth; expect diff bundle and test results already produced by prior implementer/reviewer runs.
 - `ai-doc-check.sh` / `check-file-refs.sh` / `ai-install-coverage.sh` — to catch drift and install gaps; expect lint and coverage results.
 
-Denied: write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Auditor inspects and verifies; it does not mutate or deploy.
+Denied: `ai-test-select`, `run-repo-tests` (this agent does not run broad CI; it reads verification evidence others produced), and write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Auditor inspects and verifies; it does not mutate or deploy.
 
 ## Canonical References
 
