@@ -184,6 +184,15 @@ The installer has no command that re-renders an already-installed placeholder-su
 
 This is a genuinely new, generalizable lever (not duplicating `placeholders --apply`, which only targets literal unresolved `<TOKEN>` markers) and directly de-risks S4/S5/S7's later template-source edits needing re-render into installed copies.
 
+**Reviewer pass (20260704, `reviewer` agent on `f45d31d..a0db988`): PASS WITH NOTES.** Findings and resolution:
+
+- medium (correctness): CRLF-terminated lines were silently skipped in both check and apply mode (`str_ends_with($line, '`')` false when a trailing `\r` survives an explode-on-`\n`-only split). **Fixed**: match against the line with trailing `\r` stripped, re-append it on write to preserve the original line ending. Regression test added (`testCrlfTerminatedLinesAreDetectedAndFixedPreservingLineEnding`).
+- medium (duplicate-logic, non-blocking per reviewer): the scan-root file-walking boilerplate is now a 3rd near-identical copy alongside `aiRunPlaceholders` and `aiPlaceholderApplyFromProjectValues` in `install_extras.php`. **Deferred by design**: the two existing walks already differ from each other (only one carries the `aiInstallerShouldSkipPlaceholderScanPath` guard), so extracting a shared helper now would require changing pre-existing, unrelated command behavior outside this bounded slice — reviewer marked this "optional/lower priority", tracked here for a dedicated follow-up refactor slice.
+- low (missing coverage): no test proved `aiRunProjectValuesSync`'s `--fail`/`--apply` CLI-layer exit codes or multiple-mismatches-in-one-file. **Fixed**: added `testMultipleMismatchesInOneFileAreAllSynced`, `testRunProjectValuesSyncFailFlagReturnsExitOneOnMismatch`, `testRunProjectValuesSyncApplyReturnsExitZeroAndWritesArtifact` (4 new tests total; 10/10 pass).
+- low (registry convention): confirmed no action needed — no existing `tools/ai/ai.php` subcommand has a `script-registry.json` entry (that registry covers `scripts/ai/*.sh` wrappers only), so `project-values-sync` correctly follows the existing convention by not adding one.
+
+Verification after fixes: `vendor/bin/phpunit tests/php/ProjectValuesSyncTest.php` 10/10 pass, 44 assertions. `composer test:fast`: 784 tests (780 + 4 new), same 10 pre-existing failures, 0 new regressions.
+
 ## Handoff Notes
 
 - Ordering and dependencies: S1 -> S2 -> S3 (independent of each other but do Phase A first) -> S4 -> S5 -> S6 -> S7 (needs S4/S5 IDs) -> S8 (any time after S2; benefits from S7 surfaces existing) -> S9 (last, decision-gated).

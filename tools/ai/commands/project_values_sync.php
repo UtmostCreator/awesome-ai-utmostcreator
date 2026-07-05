@@ -134,16 +134,22 @@ function aiProjectValuesSyncFile(
     $changed = false;
 
     foreach ($lines as $i => $line) {
+        // Tolerate CRLF-terminated content (e.g. a locally-edited copy on Windows):
+        // match against the line with any trailing \r stripped, then re-append it
+        // on write so the file's original line ending is preserved either way.
+        $hasCr = str_ends_with($line, "\r");
+        $matchLine = $hasCr ? substr($line, 0, -1) : $line;
+
         foreach ($registry as $field => $labels) {
             if (!isset($fieldValues[$field])) {
                 continue;
             }
             $expectedValue = $fieldValues[$field];
             foreach ($labels as $label) {
-                if (!str_starts_with($line, $label) || !str_ends_with($line, '`')) {
+                if (!str_starts_with($matchLine, $label) || !str_ends_with($matchLine, '`')) {
                     continue;
                 }
-                $current = substr($line, strlen($label), -1);
+                $current = substr($matchLine, strlen($label), -1);
                 // Never touch an unresolved template placeholder token — that means this
                 // file is a template source or an unrendered stub, not an installed copy.
                 if ($current !== '' && $current[0] === '<' && str_ends_with($current, '>')) {
@@ -160,7 +166,7 @@ function aiProjectValuesSyncFile(
                     'expected' => $expectedValue,
                 ];
                 if ($apply) {
-                    $lines[$i] = $label . $expectedValue . '`';
+                    $lines[$i] = $label . $expectedValue . '`' . ($hasCr ? "\r" : '');
                     $changed = true;
                 }
             }
