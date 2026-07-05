@@ -28,7 +28,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / package-capability` - 43
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
-- `package / workflow-template` - 21
+- `package / workflow-template` - 22
 - `root / adapter-doc` - 1
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
@@ -40,11 +40,11 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / generator` - 1
 - `root / github-copilot-agent` - 22
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 21
-- `root / github-copilot-skill` - 22
+- `root / github-copilot-prompt` - 22
+- `root / github-copilot-skill` - 23
 - `root / opencode-agent` - 14
-- `root / opencode-command` - 23
-- `root / opencode-skill` - 25
+- `root / opencode-command` - 24
+- `root / opencode-skill` - 26
 - `root / php-reference` - 3
 - `root / root-doc` - 19
 - `root / schema` - 1
@@ -165,6 +165,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|project-context|`.github/prompts/project-context.prompt.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`github-copilot-prompt`|regression-test|`.github/prompts/regression-test.prompt.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`github-copilot-prompt`|release-safety|`.github/prompts/release-safety.prompt.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
+|`github-copilot-prompt`|replace-placeholders|`.github/prompts/replace-placeholders.prompt.md`|Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values|
 |`github-copilot-prompt`|repo-investigation|`.github/prompts/repo-investigation.prompt.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`github-copilot-prompt`|review-diff|`.github/prompts/review-diff.prompt.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`github-copilot-prompt`|review-search-tool|`.github/prompts/review-search-tool.prompt.md`|Review ai-search implementation and contract safety|
@@ -187,6 +188,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|project-context|`.github/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`github-copilot-skill`|regression-test|`.github/skills/regression-test/SKILL.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`github-copilot-skill`|release-safety|`.github/skills/release-safety/SKILL.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
+|`github-copilot-skill`|replace-placeholders|`.github/skills/replace-placeholders/SKILL.md`|Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values|
 |`github-copilot-skill`|repo-investigation|`.github/skills/repo-investigation/SKILL.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`github-copilot-skill`|review-diff|`.github/skills/review-diff/SKILL.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`github-copilot-skill`|review-search-tool|`.github/skills/review-search-tool/SKILL.md`|Review ai-search implementation and contract safety|
@@ -222,6 +224,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|project-context|`.opencode/commands/project-context.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`opencode-command`|regression-test|`.opencode/commands/regression-test.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`opencode-command`|release-safety|`.opencode/commands/release-safety.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
+|`opencode-command`|replace-placeholders|`.opencode/commands/replace-placeholders.md`|Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values|
 |`opencode-command`|repo-investigation|`.opencode/commands/repo-investigation.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`opencode-command`|review-diff|`.opencode/commands/review-diff.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`opencode-command`|review-search-tool|`.opencode/commands/review-search-tool.md`|Review ai-search implementation and contract safety|
@@ -249,6 +252,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|project-context|`.opencode/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`opencode-skill`|regression-test|`.opencode/skills/regression-test/SKILL.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`opencode-skill`|release-safety|`.opencode/skills/release-safety/SKILL.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
+|`opencode-skill`|replace-placeholders|`.opencode/skills/replace-placeholders/SKILL.md`|Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values|
 |`opencode-skill`|repo-investigation|`.opencode/skills/repo-investigation/SKILL.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`opencode-skill`|review-diff|`.opencode/skills/review-diff/SKILL.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`opencode-skill`|review-search-tool|`.opencode/skills/review-search-tool/SKILL.md`|Review ai-search implementation and contract safety|
@@ -437,6 +441,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-template`|project-context|`packages/ai-universal-rules/templates/workflows/project-context.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
 |`workflow-template`|regression-test|`packages/ai-universal-rules/templates/workflows/regression-test.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
 |`workflow-template`|release-safety|`packages/ai-universal-rules/templates/workflows/release-safety.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
+|`workflow-template`|replace-placeholders|`packages/ai-universal-rules/templates/workflows/replace-placeholders.md`|Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values|
 |`workflow-template`|repo-investigation|`packages/ai-universal-rules/templates/workflows/repo-investigation.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`workflow-template`|review-diff|`packages/ai-universal-rules/templates/workflows/review-diff.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`workflow-template`|review-search-tool|`packages/ai-universal-rules/templates/workflows/review-search-tool.md`|Review ai-search implementation and contract safety|
