@@ -6,11 +6,11 @@ Use this file as durable, canonical project context for instructions, agents, pr
 
 - Project type: `php project`
 - Summary: `AI workflow starter for awesome-ai-utmostcreator`
-- Primary language: `unknown`
-- Primary runtime: `unknown`
+- Primary language: `PHP`
+- Primary runtime: `PHP >=8.2`
 - Supported targets: `unknown`
 - Primary stack: `unknown`
-- Package manager: `unknown`
+- Package manager: `composer`
 
 ## 2) Scope and Ownership
 
@@ -80,9 +80,9 @@ Do not edit generated files directly unless the task explicitly requires regener
 
 ## 8) Verification Commands
 
-- Main verification command: `unknown`
-- Main build command: `unknown`
-- Main test command: `unknown`
+- Main verification command: `composer test`
+- Main build command: `none (PHP tooling/docs kit; no compiled build step)`
+- Main test command: `composer test (composer test:fast for parallel)`
 - Preferred narrow-first strategy: `start with the narrowest repo-local check and escalate only if needed`
 
 Additional project commands:

@@ -7,8 +7,8 @@
 - Project: `awesome-ai-utmostcreator`
 - Type: `php project`
 - Summary: `AI workflow starter for awesome-ai-utmostcreator`
-- Primary language: `unknown`
-- Primary runtime: `unknown`
+- Primary language: `PHP`
+- Primary runtime: `PHP >=8.2`
 - Active paths: `.ai-install-manifest.json,.ai-logs,.ai,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,LICENSE,PLACEHOLDERS.md,README.md,SECURITY.md,SUPPORT.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools`
 - Inactive or legacy paths: `unknown`
 - Primary entrypoints: `README.md, docs/ai/project-context.md`
@@ -156,9 +156,9 @@ Minimum flow:
 
 ## Verification Rules
 
-- Primary verification command: `unknown`
-- Primary build command: `unknown`
-- Primary test command: `unknown`
+- Primary verification command: `composer test`
+- Primary build command: `none (PHP tooling/docs kit; no compiled build step)`
+- Primary test command: `composer test (composer test:fast for parallel)`
 - Profile slow tests: `composer test:profile` then `composer test:slow [N]`
 - Preferred narrow-first verification pattern: `start with the narrowest repo-local check and escalate only if needed`
 - Verification ladder: focused proof first -> affected layer tests second -> broader repository verification third -> build as a smoke check when relevant -> release-safety review only when risk warrants it.

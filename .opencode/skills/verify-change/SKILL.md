@@ -25,9 +25,9 @@ I select and run the most relevant verification path for a change and separate e
 
 ## Project Commands
 
-- Main verification command: `unknown`
-- Main build command: `unknown`
-- Main test command: `unknown`
+- Main verification command: `composer test`
+- Main build command: `none (PHP tooling/docs kit; no compiled build step)`
+- Main test command: `composer test (composer test:fast for parallel)`
 - Preferred narrow-first pattern: `start with the narrowest repo-local check and escalate only if needed`
 
 ## Output
