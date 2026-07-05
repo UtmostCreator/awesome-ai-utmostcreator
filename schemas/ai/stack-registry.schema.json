@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://awesome-ai.local/schemas/ai/stack-registry.schema.json",
+  "title": "AI Stack Registry Projection",
+  "type": "object",
+  "required": ["schema_version", "stacks"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": { "type": "string" },
+    "stacks": {
+      "type": "object",
+      "additionalProperties": { "$ref": "https://awesome-ai.local/schemas/ai/stack-descriptor.schema.json" }
+    }
+  }
+}

@@ -35,6 +35,9 @@ function aiInstallerParseArgs(array $argv): array
     $upgradeSuffix = '';
     $allowNonGit = false;
     $adopt = false;
+    $stacks = [];
+    $noStackDetect = false;
+    $stackDetectOnly = false;
 
     for ($i = 1; $i < count($argv); $i++) {
         $arg = $argv[$i];
@@ -218,6 +221,22 @@ function aiInstallerParseArgs(array $argv): array
             $projectName = $argv[++$i] ?? '';
             continue;
         }
+        if (str_starts_with($arg, '--stacks=')) {
+            $stacks = array_merge($stacks, aiInstallerParseCsvList(substr($arg, 9)));
+            continue;
+        }
+        if ($arg === '--stacks') {
+            $stacks = array_merge($stacks, aiInstallerParseCsvList($argv[++$i] ?? ''));
+            continue;
+        }
+        if ($arg === '--no-stack-detect') {
+            $noStackDetect = true;
+            continue;
+        }
+        if ($arg === '--stack-detect-only') {
+            $stackDetectOnly = true;
+            continue;
+        }
         throw new InvalidArgumentException("unknown option '{$arg}'");
     }
 
@@ -306,6 +325,9 @@ function aiInstallerParseArgs(array $argv): array
         'upgradeSuffix' => $upgradeSuffix,
         'allowNonGit' => $allowNonGit,
         'adopt' => $adopt,
+        'stacks' => array_values(array_unique($stacks)),
+        'noStackDetect' => $noStackDetect,
+        'stackDetectOnly' => $stackDetectOnly,
     ];
 }
 
@@ -352,6 +374,9 @@ Options:
   --toolchain-apply   Apply safe tool installs only
   --toolchain-tools <list> Extra tools to include in toolchain check
   --run-after-install <id> Run registered helper script after successful apply
+  --stacks <list>     Select project stacks (comma-separated ids); overrides auto-detection
+  --no-stack-detect   Skip stack auto-detection entirely (empty detected set)
+  --stack-detect-only Print detected stacks and exit without installing
   --dry-run           Print planned actions only
   --help              Show this help
 TXT;

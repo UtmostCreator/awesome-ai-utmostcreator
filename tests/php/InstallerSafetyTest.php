@@ -2003,6 +2003,10 @@ class InstallerSafetyTest extends TestCase
                 'both',
                 '--project-name',
                 'app-configs',
+                // This test targets placeholder resolution, not stack detection; the
+                // pre-seeded docs/ai/project-context.md fixture would otherwise be
+                // legitimately detected as a 'markdown' stack signal.
+                '--no-stack-detect',
             ]);
 
             $result = $this->runTool($command);

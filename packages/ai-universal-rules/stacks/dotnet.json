@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "dotnet",
+  "label": ".NET",
+  "description": ".NET / C# projects",
+  "category": "language",
+  "detection": {
+    "files": ["global.json"],
+    "globs": ["*.csproj", "*.sln", "src/**/*.cs"],
+    "commands": [],
+    "scc_languages": ["C#"],
+    "confidence": { "global.json": 70, "*.csproj": 90, "*.sln": 80, "src/**/*.cs": 40, "scc:C#": 55 }
+  },
+  "version_checks": [
+    { "id": "dotnet", "tool": "dotnet", "args": ["--version"], "required": false }
+  ],
+  "permission_overlays": { "language_overlays": ["dotnet"], "extra_layers": [] },
+  "project_context": { "primaryLanguage": "C#", "primaryRuntime": ".NET", "packageManager": "nuget", "primaryTestCommand": "dotnet test", "primaryVerifyCommand": "dotnet test" },
+  "recommended_commands": { "install": "dotnet restore", "test": "dotnet test", "lint": "dotnet format --verify-no-changes" },
+  "package_managers": ["nuget"],
+  "conflicts": [],
+  "implies": ["markdown"],
+  "merge_priority": 50
+}

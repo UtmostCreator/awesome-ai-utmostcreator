@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "id": "rust",
+  "label": "Rust",
+  "description": "Rust Cargo projects",
+  "category": "language",
+  "detection": {
+    "files": ["Cargo.toml", "Cargo.lock"],
+    "globs": ["src/**/*.rs"],
+    "commands": [],
+    "scc_languages": ["Rust"],
+    "confidence": { "Cargo.toml": 95, "Cargo.lock": 70, "src/**/*.rs": 45, "scc:Rust": 55 }
+  },
+  "version_checks": [
+    { "id": "cargo", "tool": "cargo", "args": ["--version"], "required": false }
+  ],
+  "permission_overlays": { "language_overlays": ["rust"], "extra_layers": [] },
+  "project_context": { "primaryLanguage": "Rust", "primaryRuntime": "Rust", "packageManager": "cargo", "primaryTestCommand": "cargo test", "primaryVerifyCommand": "cargo test" },
+  "recommended_commands": { "install": "cargo fetch", "test": "cargo test", "lint": "cargo clippy" },
+  "package_managers": ["cargo"],
+  "conflicts": [],
+  "implies": ["markdown"],
+  "merge_priority": 50
+}

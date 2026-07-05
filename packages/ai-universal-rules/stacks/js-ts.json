@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "js-ts",
+  "label": "JavaScript / TypeScript",
+  "description": "Node.js projects using npm, pnpm, yarn, or bun",
+  "category": "language",
+  "detection": {
+    "files": ["package.json", "pnpm-lock.yaml", "yarn.lock", "bun.lockb", "tsconfig.json"],
+    "globs": ["*.js", "*.ts", "src/**/*.js", "src/**/*.ts", "tests/**/*.ts"],
+    "commands": [],
+    "scc_languages": ["JavaScript", "TypeScript"],
+    "confidence": { "package.json": 95, "tsconfig.json": 80, "*.js": 35, "*.ts": 45, "scc:JavaScript": 55, "scc:TypeScript": 60 }
+  },
+  "version_checks": [
+    { "id": "node", "tool": "node", "args": ["--version"], "required": false },
+    { "id": "npm", "tool": "npm", "args": ["--version"], "required": false }
+  ],
+  "permission_overlays": { "language_overlays": ["js-ts"], "extra_layers": [] },
+  "project_context": { "primaryLanguage": "JavaScript/TypeScript", "primaryRuntime": "Node.js", "packageManager": "npm/pnpm/yarn/bun", "primaryTestCommand": "npm test", "primaryVerifyCommand": "npm test" },
+  "recommended_commands": { "install": "npm install", "test": "npm test", "lint": "npm run lint" },
+  "package_managers": ["npm", "pnpm", "yarn", "bun"],
+  "conflicts": [],
+  "implies": ["markdown"],
+  "merge_priority": 50
+}
