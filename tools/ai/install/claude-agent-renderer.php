@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/claude-agent-tool-registry.php';
 require_once __DIR__ . '/generated-header.php';
 require_once __DIR__ . '/canonical-agent-frontmatter.php';
+require_once __DIR__ . '/permission-layers/render-adapters.php';
 // Reuses aiAgentIsHiddenInternalOnly() and aiCopilotExtractAssessmentBlock(), which already
 // live in the Copilot renderer file because core.php's opencode-agents dispatch shares the
 // former too (see core.php L14/L232-233).
@@ -36,7 +37,8 @@ function aiInstallerRenderClaudeAgent(string $srcContent, string $agentId, strin
     $rawFm       = $parsed['rawFm'];
     $body        = $parsed['body'];
     $frontMatter = $parsed['frontMatter'];
-    $allowedBash = $parsed['allowedBash'];
+    // Slice 8 adapter seam: see the matching note in copilot-agent-renderer.php.
+    $allowedBash = aiPermissionResolveAllowedBash($agentId, $parsed['allowedBash']);
 
     $id             = $frontMatter['id'] ?? $agentId;
     $description    = $frontMatter['description'] ?? '';

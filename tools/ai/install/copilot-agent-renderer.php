@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/copilot-agent-tool-registry.php';
 require_once __DIR__ . '/generated-header.php';
 require_once __DIR__ . '/canonical-agent-frontmatter.php';
+require_once __DIR__ . '/permission-layers/render-adapters.php';
 
 /**
  * Renders a canonical OpenCode agent template as a Copilot VS Code-native .agent.md file.
@@ -27,7 +28,13 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
     $rawFm       = $parsed['rawFm'];
     $body        = $parsed['body'];
     $frontMatter = $parsed['frontMatter'];
-    $allowedBash = $parsed['allowedBash'];
+    // Slice 8 adapter seam: for agents with a registered permission composition
+    // (aiPermissionAgentCompositions(), keyed by filename stem), project allowedBash from the
+    // composed model instead of re-parsing frontmatter text (the legacy parser is
+    // single-quote-only and silently returns an empty list for any agent rendered with
+    // `quote: 'double'`, e.g. researcher.md since Slice 2). Not-yet-migrated agents fall back
+    // to the legacy parsed list unchanged.
+    $allowedBash = aiPermissionResolveAllowedBash($agentId, $parsed['allowedBash']);
 
     $id          = $frontMatter['id'] ?? $agentId;
     $description = $frontMatter['description'] ?? '';
