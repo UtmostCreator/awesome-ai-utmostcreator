@@ -5,6 +5,12 @@ Canonical per-script guidance for every agent. Each agent frontmatter lists all
 only **tighten** the global `opencode.jsonc` policy, never widen it. Out-of-role
 scripts are set to `deny` in the agent.
 
+For 13 of the 15 shipped agents, this per-script guidance is generated from
+`tools/ai/install/permission-layers/` (compositions + reusable packs), not hand-maintained —
+see `docs/ai/source-of-truth.md` and
+`docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md`. `release-auditor`
+and `architecture-plan-writer` remain hand-maintained pending a coordination gate.
+
 Format: `script — when to use — why — expect after`.
 
 ## Native reads first; never pipe (read this first)

@@ -1,0 +1,135 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/compose.php';
+
+/**
+ * Harness-agnostic projection adapters over a composed permission model
+ * (tools/ai/install/permission-layers/compose.php).
+ *
+ * Contract (docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md,
+ * Slice 8): each adapter is a pure function of the composed model — no adapter re-reads
+ * frontmatter. Adding a new harness is one callable in aiPermissionRenderAdapters(), one
+ * renderer file, and one round-trip test; no change to layers, compositions, or the
+ * generator itself.
+ *
+ * @return array<string,callable>
+ */
+function aiPermissionRenderAdapters(): array
+{
+    return [
+        'opencode' => 'aiPermissionRenderOpenCodeBlock',
+        'copilot' => 'aiPermissionAllowedBashFromModel',
+        'claude' => 'aiPermissionAllowedBashFromModel',
+    ];
+}
+
+/**
+ * Renders the OpenCode `permission:` frontmatter block from a composed model.
+ *
+ * Moved from tools/ai/generate-agent-permissions.php (Slice 2) into this shared adapter
+ * seam (Slice 8) without behavior change; the generator now requires this file instead of
+ * defining the function locally, so all three runtime projections share one adapter home.
+ *
+ * @param array<string,array{permission:string,pattern:string,effect:string,class:string,layer:string}> $model
+ * @param array{extra_scalars:array<string,string>,quote:string} $render
+ */
+function aiPermissionRenderOpenCodeBlock(array $model, array $render): string
+{
+    $quote = $render['quote'] === 'double' ? '"' : "'";
+    $lines = ['permission:'];
+    $lines[] = '  todowrite: allow';
+
+    $editEntries = array_values(array_filter($model, static fn (array $e): bool => $e['permission'] === 'edit'));
+    // Cosmetic normalization (matches every currently shipped read-only agent's convention):
+    // when the edit surface reduces to exactly the universal deny entry, render the scalar
+    // shorthand `edit: deny` instead of a one-entry mapping. Semantically identical either way.
+    $isUniversalEditDenyOnly = count($editEntries) === 1
+        && $editEntries[0]['pattern'] === '*'
+        && $editEntries[0]['effect'] === 'deny';
+    if ($editEntries === [] || $isUniversalEditDenyOnly) {
+        $lines[] = '  edit: deny';
+    } else {
+        $lines[] = '  edit:';
+        foreach ($editEntries as $entry) {
+            $lines[] = '    ' . $quote . $entry['pattern'] . $quote . ': ' . $entry['effect'];
+        }
+    }
+
+    foreach ($render['extra_scalars'] as $key => $value) {
+        $lines[] = '  ' . $key . ': ' . $value;
+    }
+
+    // Any bash entry whose effect exactly matches the '*' wildcard's effect is a no-op
+    // restatement (the runtime already falls through to '*' for that pattern) — omitting it
+    // shrinks the rendered file with zero behavior change. This mirrors what hand-authored
+    // agent files already did (they never explicitly restated every hard-deny entry either),
+    // and is required to keep composed agents under the shipped .opencode/agents/*.md line
+    // budget (docs/ai/ai-file-standards.md).
+    $starEffect = $model[aiPermissionModelKey('bash', '*')]['effect'] ?? null;
+
+    $lines[] = '  bash:';
+    foreach ($model as $entry) {
+        if ($entry['permission'] !== 'bash') {
+            continue;
+        }
+        if ($entry['pattern'] !== '*' && $starEffect !== null && $entry['effect'] === $starEffect) {
+            continue;
+        }
+        $lines[] = '    ' . $quote . $entry['pattern'] . $quote . ': ' . $entry['effect'];
+    }
+
+    return implode("\n", $lines);
+}
+
+/**
+ * Returns the bash patterns that are `allow`-effect in a composed model, in merge order,
+ * excluding the universal `*` floor entry — the shared "allowedBash" projection consumed by
+ * both Copilot's Shell Boundary section and Claude's Bash Command Policy body. This replaces
+ * re-parsing rendered frontmatter text (tools/ai/install/canonical-agent-frontmatter.php's
+ * `allowedBash`, which is single-quote-only and silently returns an empty list for any agent
+ * rendered with `quote: 'double'`, e.g. researcher.md since Slice 2 — see the Slice 8 bug-fix
+ * note in the plan).
+ *
+ * @param array<string,array{permission:string,pattern:string,effect:string,class:string,layer:string}> $model
+ * @return list<string>
+ */
+function aiPermissionAllowedBashFromModel(array $model): array
+{
+    $allowed = [];
+    foreach ($model as $entry) {
+        if ($entry['permission'] !== 'bash' || $entry['effect'] !== 'allow') {
+            continue;
+        }
+        if ($entry['pattern'] === '*') {
+            continue;
+        }
+        $allowed[] = $entry['pattern'];
+    }
+
+    return $allowed;
+}
+
+/**
+ * Resolves the `allowedBash` list a Copilot/Claude renderer should use for one agent:
+ * the composed-model projection when that agent has a registered composition
+ * (aiPermissionAgentCompositions()), otherwise the legacy frontmatter-parsed list unchanged.
+ * This is the fallback seam that lets migrated and not-yet-migrated agents render correctly
+ * side by side during the Slice 3/4 rollout (agent keys are filename stems, never frontmatter
+ * `id`; callers must pass the filename stem, matching the compositions keying rule).
+ *
+ * @param list<string> $legacyAllowedBash
+ * @return list<string>
+ */
+function aiPermissionResolveAllowedBash(string $agentId, array $legacyAllowedBash): array
+{
+    $compositions = aiPermissionAgentCompositions();
+    if (!array_key_exists($agentId, $compositions)) {
+        return $legacyAllowedBash;
+    }
+
+    $composed = aiPermissionCompose($agentId);
+
+    return aiPermissionAllowedBashFromModel($composed['model']);
+}

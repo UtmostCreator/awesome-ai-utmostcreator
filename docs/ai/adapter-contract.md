@@ -69,7 +69,19 @@ These are distinct and must not be conflated:
 - Adapter drift (this contract): enforced by `tools/ai/validate-adapter-drift.php`. It checks adapter surfaces for required canonical references, oversize bodies, and non-agnostic literals. It does not yet do full content parity against template sources; treat that as a known limitation, not a guarantee.
 - Advisor scorecard drift: produced by `tools/ai/advisor/drift.php` into `docs/ai/generated/advisor-drift.md`. It reports per-area advisor score deltas versus a saved baseline. It is unrelated to adapter/template parity.
 
+## Permission Projection Seam
+
+`tools/ai/install/permission-layers/render-adapters.php` (`aiPermissionRenderAdapters()`) is a
+single composed-model projection seam for the OpenCode, Copilot, and Claude permission
+adapters: OpenCode renders the `permission:` YAML block; Copilot and Claude resolve
+`allowedBash` via `aiPermissionResolveAllowedBash()` for the 13 agents composed from
+`tools/ai/install/permission-layers/` (see `docs/ai/source-of-truth.md`), falling back to
+legacy frontmatter parsing for the 2 not-yet-migrated agents. Adding a harness is one callable
+in `aiPermissionRenderAdapters()` plus one renderer file plus one round-trip test — no change
+to layers, compositions, or the generator.
+
 ## Verification
 
 - `php tools/ai/validate-adapter-drift.php` — adapter surface checks (`--fail-on-warn` to gate, `--changed-only` for diff scope).
+- `php tools/ai/generate-agent-permissions.php --check` — composed permission-block parity gate.
 - See `docs/ai/validation.md` for the full validator set.

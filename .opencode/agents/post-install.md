@@ -11,7 +11,6 @@ capabilities:
   - authorization-and-tool-governance
 permission:
   todowrite: allow
-  task: allow
   edit:
     'AGENTS.md': allow
     'README.md': allow
@@ -19,7 +18,6 @@ permission:
     '.ai-install-manifest.json': allow
     'docs/ai/**': allow
     'docs/**/*.md': allow
-    'docs/ai/generated/**': deny
     '.github/agents/**': allow
     '.github/instructions/**': allow
     '.github/prompts/**': allow
@@ -28,13 +26,15 @@ permission:
     '.opencode/skills/**': allow
     'opencode.jsonc': allow
     'scripts/ai/**': allow
-    '.git/**': deny
+    'tools/ai/**': deny
     'vendor/**': deny
     'node_modules/**': deny
-    '.cache/**': deny
-    'build/**': deny
+    '.git/**': deny
     'dist/**': deny
+    'build/**': deny
     'coverage/**': deny
+    '.cache/**': deny
+    'docs/ai/generated/**': deny
     'docs/generated/**': deny
     '*.generated.*': deny
     '*.lock': deny
@@ -43,15 +43,15 @@ permission:
     'pnpm-lock.yaml': deny
     'yarn.lock': deny
     'bun.lockb': deny
-    '.env*': deny
     '*.pem': deny
     '*.key': deny
     '*.crt': deny
+    '.env*': deny
     'secrets.*': deny
     'credentials.*': deny
     'auth.json': deny
+  task: allow
   bash:
-    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -x *': allow
@@ -63,12 +63,26 @@ permission:
     'rg *': allow
     'jq *': allow
     'yq *': allow
+    'scc *': allow
+    'tokei *': allow
+    'ast-grep *': allow
+    'bat *': allow
+    'fx *': allow
+    'glow *': allow
+    'difft *': allow
+    'delta *': allow
+    'ls -1 scripts/ai/*.sh | sort': allow
     'git status*': allow
     'git diff*': allow
     'git log*': allow
     'git show*': allow
     'git ls-files*': allow
-    # --- full AI script access; see docs/ai/agent-script-access.md ---
+    'git branch*': allow
+    'git rev-parse*': allow
+    'bash scripts/ai/pack-context.sh *': ask
+    'bash scripts/ai/run-repomix-context.sh *': ask
+    'bash scripts/ai/repomix-context-tree.sh *': ask
+    'bash scripts/ai/repomix-scc-router.sh *': ask
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
@@ -83,60 +97,28 @@ permission:
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/git-branch-origin.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
-    'bash scripts/ai/gh-pr-context.sh *': deny
     'bash scripts/ai/repo-stats.sh *': allow
     'bash scripts/ai/repo-tool-inventory.sh *': allow
     'bash scripts/ai/ai-file-freshness.sh *': allow
-    'bash scripts/ai/ai-install-coverage.sh *': allow
     'bash scripts/ai/check-file-refs.sh *': allow
-    'bash scripts/ai/pack-context.sh *': ask
-    'bash scripts/ai/run-repomix-context.sh *': ask
-    'bash scripts/ai/repomix-context-tree.sh *': ask
-    'bash scripts/ai/repomix-scc-router.sh *': ask
     'bash scripts/ai/ai-diff-context.sh *': allow
     'bash scripts/ai/ai-doc-check.sh *': allow
-    'bash scripts/ai/ai-verify.sh *': ask
+    'bash scripts/ai/ai-structured.sh *': allow
+    'bash scripts/ai/repomix-freshness.sh *': allow
     'bash scripts/ai/ai-test-select.sh *': allow
     'bash scripts/ai/run-repo-tests.sh*': allow
-    'bash scripts/ai/ai-structured.sh *': allow
-    'bash scripts/ai/ai-task.sh *': deny
-    'bash scripts/ai/ai-edit.sh *': deny
-    'bash scripts/ai/ai-rollback.sh *': deny
-    'bash scripts/ai/session-checkpoint.sh *': deny
-    'bash scripts/ai/pre-tool-use.sh *': deny
-    'bash scripts/ai/post-tool-use.sh *': deny
-    'bash scripts/ai/install-mandatory-tools.sh *': ask
-    'bash scripts/ai/prune-shipped-targets.sh *': deny
-    'bash scripts/ai/watch-loop.sh *': deny
-    'bash scripts/ai/common.sh*': deny
-    'php tools/ai/validate-*.php *': allow
-    'php tools/ai/verify-install-placeholders.php*': allow
-    'php tools/ai/ai.php placeholders*': allow
-    'php tools/ai/ai.php verify*': allow
-    'php tools/ai/ai.php advisor*': allow
-    'php tools/ai/ai.php install-docs*': allow
+    'bash scripts/ai/ai-verify.sh *': ask
     'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
     'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
-    'bash scripts/doctor.sh': allow
-    'bash scripts/doctor.sh *': allow
-    'bash -n scripts/*.sh': allow
-    'bash -n scripts/**/*.sh': allow
-    'sudo *': deny
-    'chown *': deny
-    'rm *': ask
-    'rm -rf *': deny
-    'git push*': deny
-    'git reset*': ask
-    'git clean*': ask
+    'bash scripts/ai/install-mandatory-tools.sh *': ask
     'git add*': ask
     'git commit*': ask
     'git restore *': ask
+    'git reset*': ask
     'git stash push*': ask
     'git stash pop*': ask
     'git stash apply*': ask
     'git stash drop*': ask
-    'git stash list*': allow
-    'git stash show*': allow
     'git fetch*': ask
     'git merge*': ask
     'git pull*': ask
@@ -145,8 +127,6 @@ permission:
     'git tag*': ask
     'git cherry-pick*': ask
     'git revert*': ask
-    'git branch*': allow
-    'git rev-parse*': allow
     'composer install*': ask
     'composer update*': ask
     'composer require*': ask
@@ -158,8 +138,6 @@ permission:
     'yarn add*': ask
     'bun install*': ask
     'bun add*': ask
-    # --- shipped CLI tool access (shared snippet: agent-tools-readonly) ---
-    # --- read-only ai.php subcommands (advisory; write only to docs/ai/generated) ---
     'php tools/ai/ai.php placeholders*': allow
     'php tools/ai/ai.php verify*': allow
     'php tools/ai/ai.php preflight*': allow
@@ -169,29 +147,26 @@ permission:
     'php tools/ai/ai.php packs*': allow
     'php tools/ai/ai.php env-check*': allow
     'php tools/ai/ai.php install-docs --check': allow
-    'scc *': allow
-    'tokei *': allow
-    'ast-grep *': allow
-    'bat *': allow
-    'fx *': allow
-    'glow *': allow
-    'difft *': allow
-    'delta *': allow
     'lychee *': allow
     'actionlint*': allow
     'shfmt -d *': allow
     'shellcheck *': allow
-    # --- repomix freshness check ---
-    'bash scripts/ai/repomix-freshness.sh *': allow
     'bash scripts/ai/repomix-ensure-fresh.sh *': ask
-    # --- safe compound read-only helpers; last-match wins ---
-    'ls -1 scripts/ai/*.sh | sort': allow
-    'git status --short; echo "---BRANCH---"; git branch --show-current': allow
-    'git status --short && git branch --show-current': allow
-    # --- hard stop for ad hoc mutation scripts; last-match wins ---
-    'python3 *': deny
-    'php -r *': deny
-    '* <<*': deny
+    'git stash list*': allow
+    'git stash show*': allow
+    'bash scripts/ai/ai-install-coverage.sh *': allow
+    'php tools/ai/validate-*.php *': allow
+    'bash -n scripts/*.sh': allow
+    'bash -n scripts/**/*.sh': allow
+    'bash -n scripts/doctor.sh': allow
+    'bash scripts/doctor.sh': allow
+    'bash scripts/doctor.sh *': allow
+    'php tools/ai/ai.php install-docs*': allow
+    'php tools/ai/verify-install-placeholders.php*': allow
+    'php tools/ai/ai.php advisor*': allow
+    'rm *': ask
+    'git clean*': ask
+    '*': deny
 ---
 <!-- GENERATED — DO NOT EDIT: generated by ai-kit installer from packages/ai-universal-rules/templates/core/agents. -->
 

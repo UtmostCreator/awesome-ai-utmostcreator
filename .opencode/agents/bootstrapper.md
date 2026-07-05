@@ -29,7 +29,14 @@ permission:
     "coverage/**": deny
     ".cache/**": deny
     "docs/ai/generated/**": deny
+    "docs/generated/**": deny
+    "*.generated.*": deny
     "*.lock": deny
+    "composer.lock": deny
+    "package-lock.json": deny
+    "pnpm-lock.yaml": deny
+    "yarn.lock": deny
+    "bun.lockb": deny
     "*.pem": deny
     "*.key": deny
     "*.crt": deny
@@ -38,7 +45,6 @@ permission:
     "credentials.*": deny
     "auth.json": deny
   bash:
-    "*": deny
     "command -v *": allow
     "test -f *": allow
     "test -x *": allow
@@ -51,13 +57,21 @@ permission:
     "fd *": allow
     "rg *": allow
     "git grep *": allow
-    "sg *": allow
     "sed -n *": allow
     "head *": allow
     "tail *": allow
     "wc *": allow
     "jq *": allow
     "yq *": allow
+    "scc *": allow
+    "tokei *": allow
+    "ast-grep *": allow
+    "bat *": allow
+    "fx *": allow
+    "glow *": allow
+    "difft *": allow
+    "delta *": allow
+    "ls -1 scripts/ai/*.sh | sort": allow
     "git status*": allow
     "git diff*": allow
     "git log*": allow
@@ -66,91 +80,113 @@ permission:
     "git blame*": allow
     "git branch*": allow
     "git rev-parse*": allow
-    "git stash list*": allow
-    "git stash show*": allow
-    "git add*": ask
-    "git commit*": ask
-    "git restore *": ask
-    "git stash push*": ask
-    "git stash pop*": ask
-    "git stash apply*": ask
-    "git stash drop*": ask
+    "bash scripts/ai/pack-context.sh *": ask
+    "bash scripts/ai/run-repomix-context.sh *": ask
+    "bash scripts/ai/repomix-context-tree.sh *": ask
+    "bash scripts/ai/repomix-scc-router.sh *": ask
     "bash scripts/ai/ai-search.sh *": allow
     "AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
     "env AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
+    "bash scripts/ai/ai-search-multi.sh *": allow
+    "AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *": allow
+    "env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *": allow
+    "bash scripts/ai/preview-file.sh *": allow
     "AI_OUTPUT=json bash scripts/ai/preview-file.sh *": allow
     "env AI_OUTPUT=json bash scripts/ai/preview-file.sh *": allow
     "bash scripts/ai/rg-code.sh *": allow
     "bash scripts/ai/fd-files.sh *": allow
-    "bash scripts/ai/preview-file.sh *": allow
     "bash scripts/ai/query-usage.sh *": allow
+    "bash scripts/ai/git-branch-origin.sh *": allow
     "bash scripts/ai/git-forensics.sh *": allow
-    "bash scripts/ai/ai-verify.sh *": allow
-    "bash scripts/ai/ai-doc-check.sh --check*": allow
+    "bash scripts/ai/repo-stats.sh *": allow
+    "bash scripts/ai/repo-tool-inventory.sh *": allow
     "bash scripts/ai/ai-file-freshness.sh *": allow
-    "bash scripts/ai/ai-install-coverage.sh *": allow
     "bash scripts/ai/check-file-refs.sh *": allow
+    "bash scripts/ai/ai-diff-context.sh *": allow
+    "bash scripts/ai/ai-doc-check.sh *": allow
+    "bash scripts/ai/ai-structured.sh *": allow
+    "bash scripts/ai/repomix-freshness.sh *": allow
+    "bash scripts/ai/ai-test-select.sh *": allow
+    "bash scripts/ai/run-repo-tests.sh*": allow
+    "bash scripts/ai/ai-verify.sh *": allow
+    "AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *": allow
+    "env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *": allow
+    "bash scripts/ai/ai-edit.sh *": ask
+    "bash scripts/ai/ai-rollback.sh *": ask
+    "bash scripts/ai/session-checkpoint.sh *": ask
+    "bash scripts/ai/install-mandatory-tools.sh *": ask
+    "git add*": ask
+    "git commit*": ask
+    "git restore *": ask
+    "git reset*": ask
+    "git stash push*": ask
+    "git stash pop*": ask
+    "git stash apply*": ask
+    "git stash drop*": ask
+    "git fetch*": ask
+    "git merge*": ask
+    "git pull*": ask
+    "git checkout*": ask
+    "git switch*": ask
+    "git tag*": ask
+    "git cherry-pick*": ask
+    "git revert*": ask
+    "composer install*": ask
+    "composer update*": ask
+    "composer require*": ask
+    "npm install*": ask
+    "npm ci*": ask
+    "pnpm install*": ask
+    "pnpm add*": ask
+    "yarn install*": ask
+    "yarn add*": ask
+    "bun install*": ask
+    "bun add*": ask
+    "php tools/ai/ai.php placeholders*": allow
+    "php tools/ai/ai.php verify*": allow
+    "php tools/ai/ai.php preflight*": allow
+    "php tools/ai/ai.php list": allow
+    "php tools/ai/ai.php next*": allow
+    "php tools/ai/ai.php freshness*": allow
+    "php tools/ai/ai.php packs*": allow
+    "php tools/ai/ai.php env-check*": allow
+    "php tools/ai/ai.php install-docs --check": allow
+    "lychee *": allow
+    "actionlint*": allow
+    "shfmt -d *": allow
+    "semgrep *": allow
+    "repomix *": ask
+    "files-to-prompt *": ask
+    "code2prompt *": ask
+    "bash scripts/ai/repomix-ensure-fresh.sh *": ask
+    "git stash list*": allow
+    "git stash show*": allow
     "php -l *": allow
     "vendor/bin/phpunit *": allow
     "./vendor/bin/phpunit *": allow
     "phpunit *": allow
-    "composer validate*": allow
-    "shellcheck *": allow
-    "markdownlint-cli2 *": allow
     "php tools/ai/validate-*.php *": allow
     "php tools/ai/generate-*.php --check*": allow
+    "bash scripts/ai/ai-install-coverage.sh *": allow
+    "sg *": allow
+    "composer validate*": allow
+    "php tools/ai/ai.php install-docs*": allow
+    "bash scripts/ai/ai-doc-check.sh --check*": allow
+    "shellcheck *": allow
+    "markdownlint-cli2 *": allow
     "php tools/ai/install-ai-kit.php *": allow
     "bash tools/ai/install-ai-kit.sh *": allow
     "bash tools/ai/install-copilot-kit.sh *": allow
     "bash tools/ai/install-opencode-kit.sh *": allow
     "php tools/ai/verify-full-install.php *": allow
     "php tools/ai/full-install-validation.php *": allow
-    "php tools/ai/ai.php preflight*": allow
     "php tools/ai/ai.php package-verify*": allow
     "php tools/ai/ai.php adapter-plan*": allow
     "php tools/ai/ai.php install*": allow
-    "php tools/ai/ai.php verify*": allow
-    "php tools/ai/ai.php install-docs*": allow
     "php tools/ai/ai.php toolchain*": allow
     "php tools/ai/ai.php run-script *": allow
     "php tools/ai/ai.php hooks*": allow
-    # --- shipped CLI tool access (shared snippet: agent-tools-execute) ---
-    # --- read-only ai.php subcommands (advisory; write only to docs/ai/generated) ---
-    'php tools/ai/ai.php placeholders*': allow
-    'php tools/ai/ai.php verify*': allow
-    'php tools/ai/ai.php preflight*': allow
-    'php tools/ai/ai.php list': allow
-    'php tools/ai/ai.php next*': allow
-    'php tools/ai/ai.php freshness*': allow
-    'php tools/ai/ai.php packs*': allow
-    'php tools/ai/ai.php env-check*': allow
-    'php tools/ai/ai.php install-docs --check': allow
-    'scc *': allow
-    'tokei *': allow
-    'ast-grep *': allow
-    'bat *': allow
-    'fx *': allow
-    'glow *': allow
-    'difft *': allow
-    'delta *': allow
-    'lychee *': allow
-    'actionlint*': allow
-    'shfmt -d *': allow
-    'semgrep *': allow
-    'repomix *': ask
-    'files-to-prompt *': ask
-    'code2prompt *': ask
-    # --- repomix freshness check ---
-    'bash scripts/ai/repomix-freshness.sh *': allow
-    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
-    # --- safe compound read-only helpers; last-match wins ---
-    'ls -1 scripts/ai/*.sh | sort': allow
-    'git status --short; echo "---BRANCH---"; git branch --show-current': allow
-    'git status --short && git branch --show-current': allow
-    # --- hard stop for ad hoc mutation scripts; last-match wins ---
-    'python3 *': deny
-    'php -r *': deny
-    '* <<*': deny
+    "*": deny
 ---
 
 # Bootstrapper Agent (Internal)

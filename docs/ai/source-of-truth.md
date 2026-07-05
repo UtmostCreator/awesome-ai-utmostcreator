@@ -54,3 +54,10 @@ Kit-managed files are re-rendered on every upgrade; user-owned files are install
 | foreign (pre-existing at kit path) | Yes | Untouched unless `--adopt` |
 
 Files that say `GENERATED — DO NOT EDIT` or `Managed by ai-kit` are kit-managed.
+
+The `permission:` block inside 13 of the 15 shipped `.opencode/agents/*.md` files (and their
+`packages/ai-universal-rules/templates/core/agents/*.md` sources) is itself generated from
+`tools/ai/install/permission-layers/` via `php tools/ai/generate-agent-permissions.php --write`
+— edit `compositions.php`/`packs.php` and regenerate, never hand-edit the rendered block (see
+`docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md`). `release-auditor`
+and `architecture-plan-writer` remain inline-canonical (not yet migrated; coordination gate).
