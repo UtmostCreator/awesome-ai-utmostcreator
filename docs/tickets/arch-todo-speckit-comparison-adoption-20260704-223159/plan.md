@@ -169,9 +169,20 @@ Program-level final check (verification ladder): `bash scripts/ai/ai-doc-check.s
 - S8: medium (may surface latent drift; touches CI gate). Requires reviewer + release-auditor. Rollback: disable the new check behind its flag/allowlist and revert.
 - S9: low-medium. Deletion approval-gated.
 
-## New Finding (discovered during S1)
+## New Finding (discovered during S1) — CLOSED 20260704
 
-The installer has no command that re-renders an already-installed placeholder-substituted file when only `.ai/project.yml` values change (verified: `install --dry-run`, `install --reinstall --dry-run`, and `upgrade --dry-run` all report no action for `docs/ai/project-context.md`/`AGENTS.md` since neither the template source hash nor presence changed; `placeholders --apply` only replaces literal `<TOKEN>` markers still present in a file, and these tokens were already substituted at original install). This blocks a clean value-only re-render for every future slice that edits `.ai/project.yml` (and will resurface for any S4/S5/S7 template-source edit that needs re-rendering into `.opencode`/`.github` copies without a template content change). Recommend a follow-up ticket to add a `render-owned` / `--force-render` lever to `tools/ai/commands/install_workflow.php` or `install_extras.php` that re-runs the placeholder map against a file's *template source* regardless of hash, distinct from the existing hash-diff-gated `upgrade` path. Out of scope for this program; flagged for prioritization.
+The installer has no command that re-renders an already-installed placeholder-substituted file when only `.ai/project.yml` values change (verified: `install --dry-run`, `install --reinstall --dry-run`, and `upgrade --dry-run` all report no action for `docs/ai/project-context.md`/`AGENTS.md` since neither the template source hash nor presence changed; `placeholders --apply` only replaces literal `<TOKEN>` markers still present in a file, and these tokens were already substituted at original install). This blocked a clean value-only re-render for S1 and would have resurfaced for S4/S5/S7.
+
+**Closed**, per explicit user request following review: added `php tools/ai/ai.php project-values-sync [--apply] [--fail]` (`tools/ai/commands/project_values_sync.php`, wired into `tools/ai/commands/install_commands.php` facade + `tools/ai/ai.php` dispatcher/usage). Design:
+
+- Reuses the exact same scan roots as the existing `placeholders` scanner (`['AGENTS.md', 'docs/ai', '.github', '.opencode']`), so `packages/ai-universal-rules/templates/**` (canonical `<TOKEN>` template sources, which MUST stay generic placeholders for every other project installing this kit) is structurally out of reach — verified by a dedicated test (`testPackagesTemplateDirectoryIsStructurallyOutOfScanScope`).
+- Line-scoped, label-anchored replacement (6 known fields: `primaryLanguage`, `primaryRuntime`, `primaryVerifyCommand`, `primaryBuildCommand`, `primaryTestCommand`, `packageManager`) — never a whole-file overwrite, so unrelated content/user edits elsewhere in a rendered file survive untouched.
+- Skips any line whose current value is still a literal `<TOKEN>` (unrendered template/placeholder-guide content) so it never clobbers an intentionally-unresolved placeholder.
+- Only syncs a field when its `.ai/project.yml` value is set and not the literal `unknown` (mirrors the existing P4-a override-when-set rule).
+- Idempotent: a second `--apply` run is a no-op once values match.
+- Coverage: `tests/php/ProjectValuesSyncTest.php` (6 tests: check-mode detects without writing, apply rewrites only matching lines, idempotency, template-token guard, unset-value guard, scan-root safety invariant) — all pass; `composer test:fast` shows the same 10 pre-existing failures as before this change (780 tests now vs 774, 0 new regressions).
+
+This is a genuinely new, generalizable lever (not duplicating `placeholders --apply`, which only targets literal unresolved `<TOKEN>` markers) and directly de-risks S4/S5/S7's later template-source edits needing re-render into installed copies.
 
 ## Handoff Notes
 
