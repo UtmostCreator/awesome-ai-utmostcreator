@@ -41,13 +41,13 @@ permission:
     'test -d *': allow
     'pwd': allow
     'date *': allow
-     'date': allow
-     # OpenCode bash permission wildcards are NOT path-aware globs: `*` compiles to
-     # regex `.*` (dotAll) over the whole command string, so it matches `/` too.
-     # This single rule therefore already covers nested paths, e.g.
-     # `mkdir -p docs/tickets/{branch-name}/archive` — no separate `**` rule needed.
-     'mkdir -p docs/tickets/*': allow
-     'ls *': allow
+    'date': allow
+    # OpenCode bash permission wildcards are NOT path-aware globs: `*` compiles to
+    # regex `.*` (dotAll) over the whole command string, so it matches `/` too.
+    # This single rule therefore already covers nested paths, e.g.
+    # `mkdir -p docs/tickets/{branch-name}/archive` — no separate `**` rule needed.
+    'mkdir -p docs/tickets/*': allow
+    'ls *': allow
     'fd *': allow
     'rg *': allow
     'git grep *': allow
