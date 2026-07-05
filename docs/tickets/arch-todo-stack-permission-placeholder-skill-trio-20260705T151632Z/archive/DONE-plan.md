@@ -3,8 +3,8 @@
 - Ticket: `arch-todo-stack-permission-placeholder-skill-trio-20260705T151632Z`
 - Source: split out of `docs/tickets/arch-todo-core-package-updates-20260705T135348Z/plan.md` (former P4 workstream), per explicit user decision to make this its own independent ticket/branch
 - Generated: 2026-07-05T15:16:32Z
-- Plan file: docs/tickets/arch-todo-stack-permission-placeholder-skill-trio-20260705T151632Z/plan.md
-- Status: `PLAN ONLY — nothing implemented`
+- Plan file: docs/tickets/arch-todo-stack-permission-placeholder-skill-trio-20260705T151632Z/archive/DONE-plan.md
+- Status: `DONE — all 3 skills (scan-stack, generate-permissions, replace-placeholders) implemented, each as its own isolated commit: b693c39, 01ec0d7, 579b0c1`
 - Risk: `medium` (shipped template surfaces + new CLI verbs + permission/placeholder machinery; no runtime/data change beyond generated project-local artifacts)
 
 > **Completion instruction:** When every `## Todo Plan` item and every `## Acceptance Criteria` item below is checked `[x]`, rename this file to `DONE-plan.md` and move it into `archive/` under this ticket folder (`docs/tickets/arch-todo-stack-permission-placeholder-skill-trio-20260705T151632Z/archive/DONE-plan.md`).
