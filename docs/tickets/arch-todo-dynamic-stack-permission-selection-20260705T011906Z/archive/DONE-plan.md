@@ -7,7 +7,7 @@
 
 ## Context
 
-Risk: medium-high. This is a follow-up to layered permission Slice 1. Slice 1 of [`docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md`](../arch-todo-permission-layer-composition-20260705T004618Z/plan.md) introduced PHP-array permission layers and `aiPermissionComposeFromSpec()`. This follow-up makes stack overlays dynamic at install/wizard time.
+Risk: medium-high. This is a follow-up to layered permission Slice 1. Slice 1 of [`docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md`](../../arch-todo-permission-layer-composition-20260705T004618Z/plan.md) introduced PHP-array permission layers and `aiPermissionComposeFromSpec()`. This follow-up makes stack overlays dynamic at install/wizard time.
 
 ## Problem
 

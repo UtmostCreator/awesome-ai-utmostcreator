@@ -22,6 +22,21 @@ Prefer the smallest safe change that is easy for humans to read, maintain, and m
 - `not-verified`
 - `failed-verification`
 
+## Terminal Signal Line
+
+End any non-trivial agent response with exactly one machine-parseable line:
+
+```text
+signal: <token>
+```
+
+`<token>` is one of:
+
+- `verified` / `partially-verified` / `not-verified` / `failed-verification` — mirrors the verification status above; use when the response involved running or skipping verification.
+- `blocked: <UNKNOWN>` — insufficient evidence to proceed; pair with the `Blocked by unknown:` block defined in `docs/ai/project-context.md` section 10 (do not redefine that block here).
+- `done` — the response is complete and none of the verification tokens applies (for example a scoping handoff, a persisted plan, or an informational answer).
+- `error: <one-line reason>` — an unrecoverable failure not caused by a failed verification check (for example a blocked tool call or permission denial).
+
 ## Related Docs
 
 - `docs/ai/source-of-truth.md`

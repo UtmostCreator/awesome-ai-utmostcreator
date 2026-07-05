@@ -75,6 +75,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/command-policy.tiers.yaml', 'target' => 'docs/ai/command-policy.tiers.yaml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/security.md', 'target' => 'docs/ai/security.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/catalog.md', 'target' => 'docs/ai/catalog.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
+            ['type' => 'file', 'source' => 'docs/ai/index.md', 'target' => 'docs/ai/index.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'llms.txt', 'target' => 'llms.txt', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'tools/ai/verify-install-placeholders.php', 'target' => 'tools/ai/verify-install-placeholders.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             // SETUP.md and package-boundaries.md intentionally excluded: source-repo-specific generated/meta files

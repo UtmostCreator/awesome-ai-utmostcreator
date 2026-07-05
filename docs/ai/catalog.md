@@ -28,7 +28,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / package-capability` - 43
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
-- `package / workflow-template` - 19
+- `package / workflow-template` - 20
 - `root / adapter-doc` - 1
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
@@ -40,11 +40,11 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / generator` - 1
 - `root / github-copilot-agent` - 22
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 19
-- `root / github-copilot-skill` - 20
+- `root / github-copilot-prompt` - 20
+- `root / github-copilot-skill` - 21
 - `root / opencode-agent` - 14
-- `root / opencode-command` - 21
-- `root / opencode-skill` - 23
+- `root / opencode-command` - 22
+- `root / opencode-skill` - 24
 - `root / php-reference` - 3
 - `root / root-doc` - 19
 - `root / schema` - 1
@@ -167,6 +167,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|repo-investigation|`.github/prompts/repo-investigation.prompt.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`github-copilot-prompt`|review-diff|`.github/prompts/review-diff.prompt.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`github-copilot-prompt`|review-search-tool|`.github/prompts/review-search-tool.prompt.md`|Review ai-search implementation and contract safety|
+|`github-copilot-prompt`|scan-stack|`.github/prompts/scan-stack.prompt.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`github-copilot-prompt`|script-inventory|`.github/prompts/script-inventory.prompt.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-prompt`|search-evidence|`.github/prompts/search-evidence.prompt.md`|Collect repository evidence using ai-search|
 |`github-copilot-prompt`|verify-change|`.github/prompts/verify-change.prompt.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
@@ -187,6 +188,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|repo-investigation|`.github/skills/repo-investigation/SKILL.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`github-copilot-skill`|review-diff|`.github/skills/review-diff/SKILL.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`github-copilot-skill`|review-search-tool|`.github/skills/review-search-tool/SKILL.md`|Review ai-search implementation and contract safety|
+|`github-copilot-skill`|scan-stack|`.github/skills/scan-stack/SKILL.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`github-copilot-skill`|script-inventory|`.github/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-skill`|search-evidence|`.github/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`github-copilot-skill`|verify-change|`.github/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
@@ -220,6 +222,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|repo-investigation|`.opencode/commands/repo-investigation.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`opencode-command`|review-diff|`.opencode/commands/review-diff.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`opencode-command`|review-search-tool|`.opencode/commands/review-search-tool.md`|Review ai-search implementation and contract safety|
+|`opencode-command`|scan-stack|`.opencode/commands/scan-stack.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`opencode-command`|script-inventory|`.opencode/commands/script-inventory.md`|Build AI script inventory with risk and parity checks|
 |`opencode-command`|search-evidence|`.opencode/commands/search-evidence.md`|Collect script-first repository evidence using ai-search|
 |`opencode-command`|verify-ai-wiring|`.opencode/commands/verify-ai-wiring.md`|Verify OpenCode script-first AI wiring|
@@ -245,6 +248,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|repo-investigation|`.opencode/skills/repo-investigation/SKILL.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`opencode-skill`|review-diff|`.opencode/skills/review-diff/SKILL.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`opencode-skill`|review-search-tool|`.opencode/skills/review-search-tool/SKILL.md`|Review ai-search implementation and contract safety|
+|`opencode-skill`|scan-stack|`.opencode/skills/scan-stack/SKILL.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`opencode-skill`|script-inventory|`.opencode/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
 |`opencode-skill`|search-evidence|`.opencode/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`opencode-skill`|verify-change|`.opencode/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
@@ -310,7 +314,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`core-template`|<PROJECT_NAME> — Project AI Notes|`packages/ai-universal-rules/templates/core/project/README.md`|This directory holds **your** project-specific AI guidance. The AI kit installs these|
 |`core-template`|<PROJECT_NAME> — Conventions|`packages/ai-universal-rules/templates/core/project/conventions.md`|User-owned. Durable conventions for this repository. The kit installs this once and never|
 |`core-template`|<PROJECT_NAME> — AI Interaction Guide|`packages/ai-universal-rules/templates/core/project/project-interaction.md`|User-owned. Describe how you want AI agents to collaborate on this repository. The kit|
-|`core-template`|Workflow|`packages/ai-universal-rules/templates/core/workflow.template.md`|For non-trivial work, follow `docs/ai/execution-protocol.md`.|
+|`core-template`|Workflow|`packages/ai-universal-rules/templates/core/workflow.template.md`|See `docs/ai/index.md` for a curated, annotated entry point into `docs/ai/**`.|
 |`foundation-doc`|Capability Model|`packages/ai-universal-rules/docs/foundations/CAPABILITY-MODEL.md`|Capabilities are the canonical reusable workflow layer in this kit.|
 |`foundation-doc`|Compatibility|`packages/ai-universal-rules/docs/foundations/COMPATIBILITY.md`|This package is intentionally asymmetric.|
 |`foundation-doc`|Control Model|`packages/ai-universal-rules/docs/foundations/CONTROL-MODEL.md`|This package separates advisory controls from deterministic controls.|
@@ -431,6 +435,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-template`|repo-investigation|`packages/ai-universal-rules/templates/workflows/repo-investigation.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`workflow-template`|review-diff|`packages/ai-universal-rules/templates/workflows/review-diff.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`workflow-template`|review-search-tool|`packages/ai-universal-rules/templates/workflows/review-search-tool.md`|Review ai-search implementation and contract safety|
+|`workflow-template`|scan-stack|`packages/ai-universal-rules/templates/workflows/scan-stack.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`workflow-template`|script-inventory|`packages/ai-universal-rules/templates/workflows/script-inventory.md`|Build AI script inventory with risk and parity checks|
 |`workflow-template`|search-evidence|`packages/ai-universal-rules/templates/workflows/search-evidence.md`|Collect repository evidence using ai-search|
 |`workflow-template`|verify-change|`packages/ai-universal-rules/templates/workflows/verify-change.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
