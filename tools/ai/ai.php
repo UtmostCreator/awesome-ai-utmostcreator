@@ -79,6 +79,11 @@ Commands:
   placeholders   Scan and manage unresolved placeholders
                  Use --apply to substitute registry-mapped tokens from .ai/project.yml
                  (optionally scoped with --files=a,b,c); --fail for strict gate
+  project-values-sync
+                 Sync known project-value lines (language/runtime/verify/build/
+                 test/package-manager) in already-installed files to current
+                 .ai/project.yml values. Use --apply to write; --fail for strict
+                 gate. Never touches packages/ template sources.
   hooks          Hook wiring and status helpers (compatibility surface)
   toolchain      Check/install-plan/apply safe AI toolchain dependencies
   run-script     Run approved scripts-pack helper scripts by registry id
@@ -146,6 +151,8 @@ Examples:
   php tools/ai/ai.php placeholders --fail
   php tools/ai/ai.php placeholders --apply
   php tools/ai/ai.php placeholders --apply --files=AGENTS.md,docs/ai/project-context.md
+  php tools/ai/ai.php project-values-sync
+  php tools/ai/ai.php project-values-sync --apply
   php tools/ai/ai.php version
 TXT;
 
@@ -249,6 +256,8 @@ try {
             exit(aiRunPacks($root, $args));
         case 'placeholders':
             exit(aiRunPlaceholders($root, $args));
+        case 'project-values-sync':
+            exit(aiRunProjectValuesSync($root, $args));
         case 'hooks':
             exit(aiRunHooks($root, $args));
         case 'toolchain':
