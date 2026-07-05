@@ -61,6 +61,15 @@ LINECOUNT_INFO="${LINECOUNT_INFO:-350}"
 LINECOUNT_WARN="${LINECOUNT_WARN:-550}"
 LINECOUNT_ERROR="${LINECOUNT_ERROR:-800}"
 
+# Optional jscpd duplication guardrail. Off by default like VERIFY_LINKS; set
+# VERIFY_JSCPD=1 to enable. WARN at JSCPD_WARN_PCT; JSCPD_FAIL_PCT stays empty
+# (advisory-only) unless a project explicitly opts into a hard-fail threshold.
+VERIFY_JSCPD="${VERIFY_JSCPD:-0}"
+JSCPD_MIN_TOKENS="${JSCPD_MIN_TOKENS:-50}"
+JSCPD_WARN_PCT="${JSCPD_WARN_PCT:-5}"
+JSCPD_FAIL_PCT="${JSCPD_FAIL_PCT:-}"
+JSCPD_PATHS="${JSCPD_PATHS:-}"
+
 failures=0
 
 cd "$root"
@@ -76,6 +85,8 @@ source "$_ai_verify_dir/internal/ai-verify/10-scope.sh"
 source "$_ai_verify_dir/internal/ai-verify/30-linecount.sh"
 # shellcheck source=scripts/ai/internal/ai-verify/40-step-runner.sh
 source "$_ai_verify_dir/internal/ai-verify/40-step-runner.sh"
+# shellcheck source=scripts/ai/internal/ai-verify/35-jscpd.sh
+source "$_ai_verify_dir/internal/ai-verify/35-jscpd.sh"
 # shellcheck source=scripts/ai/internal/ai-verify/90-run.sh
 source "$_ai_verify_dir/internal/ai-verify/90-run.sh"
 

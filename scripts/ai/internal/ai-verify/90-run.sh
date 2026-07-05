@@ -70,6 +70,7 @@ ai_verify_run() {
             log_warn "Skipping full PHP test suite. Use VERIFY_FULL=1 to run phpunit/pest."
         fi
         check_line_counts
+        check_jscpd
         echo "==> done"
         # Test mode stubs the heavy steps but still surfaces a real line-count
         # failure so the URGENT-refactor gate is exercisable without a full run.
@@ -81,6 +82,7 @@ ai_verify_run() {
     git status --short || true
 
     check_line_counts
+    check_jscpd
 
     if command -v shellcheck >/dev/null 2>&1; then
         while IFS= read -r script; do
