@@ -18,155 +18,21 @@ repomix_context_tree_main() {
     }
     shift || true
 
-    ROOT_INPUT='.'
-    if (($# > 0)) && [[ "${1:-}" != --* ]]; then
-        ROOT_INPUT="$1"
-        shift || true
-    fi
+    _repomix_common_root_arg "$@"
+    shift "$_repomix_shift_count" || true
 
-    OUTPUT_DIR='.repomix-context'
-    DEPTH=2
-    TOP=0
-    MIN_CODE=25
-    MIN_FILES=1
-    MIN_SCORE=0
-    MIN_COMPLEXITY=0
-    CHANGED_SINCE=''
-    CHURN_COUNT=50
-    STYLE='xml'
-    SPLIT_SIZE=''
-    COMPRESS=0
-    INCLUDE_LOGS=0
-    INCLUDE_LOGS_COUNT=20
-    INCLUDE_DIFFS=0
-    INCLUDE_IGNORED="${INCLUDE_IGNORED:-0}"
-    # Full bypass of .repomixignore (and repomix default ignore layers). Off by
-    # default; opt in via env key or --no-ignore / --include-repomixignored.
-    INCLUDE_REPOMIXIGNORED="${INCLUDE_REPOMIXIGNORED:-0}"
+    _repomix_common_defaults
     CONTEXT_WINDOW=1000000
     RESERVED_OUTPUT=25000
     INSTRUCTION_OVERHEAD=30000
     SAFETY_FACTOR=0.8
 
     while (($# > 0)); do
+        if _repomix_try_common_opt "$@"; then
+            shift "$_repomix_shift_count"
+            continue
+        fi
         case "$1" in
-        --output-dir)
-            OUTPUT_DIR="$2"
-            shift 2
-            ;;
-        --output-dir=*)
-            OUTPUT_DIR="${1#*=}"
-            shift
-            ;;
-        --depth)
-            DEPTH="$2"
-            shift 2
-            ;;
-        --depth=*)
-            DEPTH="${1#*=}"
-            shift
-            ;;
-        --top)
-            TOP="$2"
-            shift 2
-            ;;
-        --top=*)
-            TOP="${1#*=}"
-            shift
-            ;;
-        --min-code)
-            MIN_CODE="$2"
-            shift 2
-            ;;
-        --min-code=*)
-            MIN_CODE="${1#*=}"
-            shift
-            ;;
-        --min-files)
-            MIN_FILES="$2"
-            shift 2
-            ;;
-        --min-files=*)
-            MIN_FILES="${1#*=}"
-            shift
-            ;;
-        --min-score)
-            MIN_SCORE="$2"
-            shift 2
-            ;;
-        --min-score=*)
-            MIN_SCORE="${1#*=}"
-            shift
-            ;;
-        --min-complexity)
-            MIN_COMPLEXITY="$2"
-            shift 2
-            ;;
-        --min-complexity=*)
-            MIN_COMPLEXITY="${1#*=}"
-            shift
-            ;;
-        --changed-since)
-            CHANGED_SINCE="$2"
-            shift 2
-            ;;
-        --changed-since=*)
-            CHANGED_SINCE="${1#*=}"
-            shift
-            ;;
-        --churn-count)
-            CHURN_COUNT="$2"
-            shift 2
-            ;;
-        --churn-count=*)
-            CHURN_COUNT="${1#*=}"
-            shift
-            ;;
-        --style)
-            STYLE="$2"
-            shift 2
-            ;;
-        --style=*)
-            STYLE="${1#*=}"
-            shift
-            ;;
-        --split-size)
-            SPLIT_SIZE="$2"
-            shift 2
-            ;;
-        --split-size=*)
-            SPLIT_SIZE="${1#*=}"
-            shift
-            ;;
-        --compress)
-            COMPRESS=1
-            shift
-            ;;
-        --include-logs)
-            INCLUDE_LOGS=1
-            shift
-            ;;
-        --include-logs-count)
-            INCLUDE_LOGS_COUNT="$2"
-            shift 2
-            ;;
-        --include-logs-count=*)
-            INCLUDE_LOGS_COUNT="${1#*=}"
-            shift
-            ;;
-        --include-diffs)
-            INCLUDE_DIFFS=1
-            shift
-            ;;
-        --include-ignored)
-            INCLUDE_IGNORED=1
-            shift
-            ;;
-        --include-repomixignored | --no-ignore)
-            INCLUDE_REPOMIXIGNORED=1
-            INCLUDE_IGNORED=1
-            shift
-            ;;
         --context-window)
             CONTEXT_WINDOW="$2"
             shift 2
