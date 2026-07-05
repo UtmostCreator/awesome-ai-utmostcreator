@@ -554,10 +554,18 @@ function aiInstallerAgentProfiles(): array
         'repository-reviewer' => 'readonly',
         'release-auditor' => 'readonly',
         'workflow-auditor' => 'readonly',
+        // Extended to all 15 shipped .opencode/agents/*.md per
+        // docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md,
+        // Slice 4. Keyed by filename stem, never frontmatter `id` (super-implementer
+        // ships `id: implementer` while its filename differs).
+        'architecture-plan-writer' => 'readonly',
         'config-maintainer' => 'verify',
+        'script-runner' => 'verify',
         'implementer' => 'impl',
         'super-implementer' => 'impl',
         'refactorer' => 'impl',
+        'post-install' => 'impl',
+        'bootstrapper' => 'impl',
     ];
 }
 

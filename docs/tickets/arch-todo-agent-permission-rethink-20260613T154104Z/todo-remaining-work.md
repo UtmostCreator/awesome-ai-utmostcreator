@@ -23,6 +23,10 @@ future changes stay scoped and reviewable.
 
 ## P2 — Permission drift hardening
 
+- [ ] Decision 5 (generate compact inline frontmatter at install time) was formally un-deferred by
+      `docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/` at user request on
+      2026-07-05. The phase-2 P2c registry ↔ permission drift test is absorbed into that ticket's
+      slice 6; keep future work cross-linked there instead of duplicating it here.
 - [ ] Add a registry ↔ OpenCode permission drift test after P2b, so `tool:list*`,
       `tool:describe*`, and `tool:run *` cannot silently disappear from template/rendered config.
 - [ ] Keep `bash "*"` at `ask` until a separate release-reviewed slice proves all agent flows have
