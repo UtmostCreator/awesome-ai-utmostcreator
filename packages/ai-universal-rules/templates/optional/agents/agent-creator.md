@@ -13,21 +13,24 @@ permission:
   edit: deny
   task: ask
   bash:
-    '*': deny
     'pwd': allow
     'ls *': allow
     'fd *': allow
     'rg *': allow
     'git grep *': allow
-    'git status*': allow
-    'git diff*': allow
-    'git log*': allow
     'sed -n *': allow
     'head *': allow
     'tail *': allow
     'jq *': allow
     'yq *': allow
-    # --- full AI script access (agent-creator pipeline); see docs/ai/agent-script-access.md ---
+    'ls -1 scripts/ai/*.sh | sort': allow
+    'git status*': allow
+    'git diff*': allow
+    'git log*': allow
+    'bash scripts/ai/pack-context.sh *': ask
+    'bash scripts/ai/run-repomix-context.sh *': ask
+    'bash scripts/ai/repomix-context-tree.sh *': ask
+    'bash scripts/ai/repomix-scc-router.sh *': ask
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
@@ -42,42 +45,12 @@ permission:
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/git-branch-origin.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
-    'bash scripts/ai/gh-pr-context.sh *': deny
     'bash scripts/ai/repo-stats.sh *': allow
     'bash scripts/ai/repo-tool-inventory.sh *': allow
-    'bash scripts/ai/ai-file-freshness.sh *': deny
-    'bash scripts/ai/ai-install-coverage.sh *': deny
     'bash scripts/ai/check-file-refs.sh *': allow
-    'bash scripts/ai/pack-context.sh *': ask
-    'bash scripts/ai/run-repomix-context.sh *': ask
-    'bash scripts/ai/repomix-context-tree.sh *': ask
-    'bash scripts/ai/repomix-scc-router.sh *': ask
-    'bash scripts/ai/repomix-freshness.sh *': allow
-    'bash scripts/ai/repomix-ensure-fresh.sh *': deny
-    'bash scripts/ai/ai-diff-context.sh *': deny
-    'bash scripts/ai/ai-doc-check.sh *': deny
-    'bash scripts/ai/ai-verify.sh *': deny
-    'bash scripts/ai/ai-test-select.sh *': deny
-    'bash scripts/ai/run-repo-tests.sh*': deny
     'bash scripts/ai/ai-structured.sh *': allow
-    'bash scripts/ai/ai-task.sh *': ask
-    'bash scripts/ai/ai-edit.sh *': deny
-    'bash scripts/ai/ai-rollback.sh *': deny
-    'bash scripts/ai/session-checkpoint.sh *': deny
-    'bash scripts/ai/pre-tool-use.sh *': deny
-    'bash scripts/ai/post-tool-use.sh *': deny
-    'bash scripts/ai/install-mandatory-tools.sh *': deny
-    'bash scripts/ai/prune-shipped-targets.sh *': deny
-    'bash scripts/ai/watch-loop.sh *': deny
-    'bash scripts/ai/common.sh*': deny
-    # --- safe compound read-only helpers; last-match wins ---
-    'ls -1 scripts/ai/*.sh | sort': allow
-    'git status --short; echo "---BRANCH---"; git branch --show-current': allow
-    'git status --short && git branch --show-current': allow
-    # --- hard stop for ad hoc mutation scripts; last-match wins ---
-    'python3 *': deny
-    'php -r *': deny
-    '* <<*': deny
+    'bash scripts/ai/repomix-freshness.sh *': allow
+    '*': deny
 agent_assessment:
   risk_level: high
   decision: approve_with_minor_fixes

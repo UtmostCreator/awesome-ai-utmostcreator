@@ -292,6 +292,171 @@ function aiPermissionPacks(): array
             'tail *' => 'ask',
             'sed -n *' => 'ask',
         ]),
+
+        // --- Optional-agent composition packs (docs/tickets/arch-todo-optional-agent-
+        // permission-composition-20260705T221434Z/plan.md, Slice A): discovered while
+        // ground-truth-diffing infra-auditor/bugfix/build-config/docs against the
+        // readonly/impl profile defaults. `core:safe-read` grants a much wider generic CLI
+        // toolkit than these 4 agents' shipped blocks show; this pack denies back exactly
+        // the subset none of the 4 want (each keeps a different, smaller live subset —
+        // rg/jq/wc/sed-n/head/tail vary per agent and stay agent-specific via the language/
+        // pack combination chosen per composition, not folded into this pack).
+        'core.safe_read.deny_extended_probe_tools' => aiPermissionEntries('bash', [
+            'command -v *' => 'deny',
+            'test -f *' => 'deny',
+            'test -x *' => 'deny',
+            'test -d *' => 'deny',
+            'stat *' => 'deny',
+            'date *' => 'deny',
+            'uuidgen' => 'deny',
+            'eza *' => 'deny',
+            'nl *' => 'deny',
+            'sort *' => 'deny',
+            'uniq *' => 'deny',
+            'file *' => 'deny',
+            'du -h *' => 'deny',
+            'scc *' => 'deny',
+            'tokei *' => 'deny',
+            'ast-grep *' => 'deny',
+            'bat *' => 'deny',
+            'fx *' => 'deny',
+            'glow *' => 'deny',
+            'difft *' => 'deny',
+            'delta *' => 'deny',
+        ]),
+
+        // 'git grep *' is not part of core:git-read at all (only bare 'grep *' is, and it
+        // defaults deny) — 4 optional agents (infra-auditor, bugfix, build-config, upgrade)
+        // grant it explicitly.
+        'git.grep_allow' => aiPermissionEntries('bash', [
+            'git grep *' => 'allow',
+        ]),
+
+        // Ground truth: bugfix/build-config/upgrade grant ONLY 'git add*'/'git commit*' as
+        // ask from core:git-mutating-ask's 14-pattern default set — deny back the other 13.
+        'git.mutating_add_commit_only_deny' => aiPermissionEntries('bash', [
+            'git restore *' => 'deny',
+            'git reset*' => 'deny',
+            'git stash push*' => 'deny',
+            'git stash pop*' => 'deny',
+            'git stash apply*' => 'deny',
+            'git stash drop*' => 'deny',
+            'git fetch*' => 'deny',
+            'git merge*' => 'deny',
+            'git pull*' => 'deny',
+            'git checkout*' => 'deny',
+            'git switch*' => 'deny',
+            'git tag*' => 'deny',
+            'git cherry-pick*' => 'deny',
+            'git revert*' => 'deny',
+        ]),
+
+        // Ground truth: bugfix/build-config/upgrade keep composer install/update/require +
+        // npm install/ci + pnpm install + yarn install as ask (core:package-manager-ask
+        // default) but deny the other 4 of that 11-pattern default set.
+        'package_manager.narrow_no_add_or_bun_deny' => aiPermissionEntries('bash', [
+            'pnpm add*' => 'deny',
+            'yarn add*' => 'deny',
+            'bun install*' => 'deny',
+            'bun add*' => 'deny',
+        ]),
+
+        // Ground truth: refactorer (already composed) and docs (this ticket) grant NO
+        // package-manager mutations at all — deny the full core:package-manager-ask
+        // 11-pattern default set. Extracted here (N-8) because refactorer previously carried
+        // these as 11 inline `exceptions`, which would have collided with docs needing the
+        // identical 11 patterns (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents).
+        'package_manager.deny_all_mutations' => aiPermissionEntries('bash', [
+            'composer install*' => 'deny',
+            'composer update*' => 'deny',
+            'composer require*' => 'deny',
+            'npm install*' => 'deny',
+            'npm ci*' => 'deny',
+            'pnpm install*' => 'deny',
+            'pnpm add*' => 'deny',
+            'yarn install*' => 'deny',
+            'yarn add*' => 'deny',
+            'bun install*' => 'deny',
+            'bun add*' => 'deny',
+        ]),
+
+        // --- Agent-creator-family readonly-profile packs (docs/tickets/arch-todo-optional-
+        // agent-permission-composition-20260705T221434Z/plan.md, Slice A continuation):
+        // discovered while composing agent-creator-static-validator/semantic-verifier/
+        // runtime-guardian. All 3 share this exact 6-script deny-back-from-default set
+        // (4 script-tiers:ai-context-ask scripts tightened from 'ask' to 'deny', plus
+        // ai-file-freshness/ai-doc-check tightened from the ai-read baseline's 'allow' to
+        // 'deny') — architecture-plan-writer denies the same 6 patterns too, but as part of
+        // a much larger, agent-unique 22-pattern exceptions list it does not otherwise
+        // share with these 3 agents, so it is left as-is (not refactored) rather than
+        // risking its already-verified byte-stable composition for a partial overlap.
+        'ai_scripts.deny_context_and_doc_scripts' => aiPermissionEntries('bash', [
+            'bash scripts/ai/pack-context.sh *' => 'deny',
+            'bash scripts/ai/run-repomix-context.sh *' => 'deny',
+            'bash scripts/ai/repomix-context-tree.sh *' => 'deny',
+            'bash scripts/ai/repomix-scc-router.sh *' => 'deny',
+            'bash scripts/ai/ai-file-freshness.sh *' => 'deny',
+            'bash scripts/ai/ai-doc-check.sh *' => 'deny',
+        ]),
+
+        // Shared by all 5 agent-creator-family members (only 3 composed this slice); the
+        // deterministic AgentSpec validator script every family member invokes directly.
+        'agent_creator.validate_spec_allow' => aiPermissionEntries('bash', [
+            'php tools/ai/validate-agent-spec.php *' => 'allow',
+        ]),
+
+        // core:git-read grants both by default; static-validator/semantic-verifier/
+        // runtime-guardian all deny them back (narrower git surface than every other
+        // composed agent). Kept atomic (not bundled with git.deny_blame/deny_rev_parse/
+        // branch_wildcard_deny) since those 3 already exist as their own single-pattern
+        // packs and are reused as-is alongside these 2 new ones.
+        'git.deny_show' => aiPermissionEntries('bash', [
+            'git show*' => 'deny',
+        ]),
+        'git.deny_ls_files' => aiPermissionEntries('bash', [
+            'git ls-files*' => 'deny',
+        ]),
+
+        // agent-creator-static-validator and `docs` both deny 'yq *' alone (jq stays
+        // allowed) — extracted here because leaving both as inline exceptions would
+        // duplicate a pattern across 2+ agents (testNoExceptionPatternDuplicatedAcross
+        // TwoOrMoreAgents). Distinct from the existing 'core.safe_read.deny_jq_yq' pack,
+        // which denies both jq and yq together for agents that want neither.
+        'core.safe_read.deny_yq' => aiPermissionEntries('bash', [
+            'yq *' => 'deny',
+        ]),
+
+        // ai-file-freshness/ai-doc-check (both ai-read baseline default: allow) denied back
+        // by `agent-creator` and `agent-creator-supervisor` WITHOUT also denying the
+        // context-packaging family (unlike 'ai_scripts.deny_context_and_doc_scripts' above,
+        // which bundles both for the 3 agents that deny all 6 together) — those 2 agents
+        // keep pack-context/run-repomix-context/repomix-context-tree/repomix-scc-router at
+        // their unconditional 'ask' default, so a smaller, separate pack is needed rather
+        // than reusing the 6-pattern bundle.
+        'agent_creator.deny_freshness_and_doc_check' => aiPermissionEntries('bash', [
+            'bash scripts/ai/ai-file-freshness.sh *' => 'deny',
+            'bash scripts/ai/ai-doc-check.sh *' => 'deny',
+        ]),
+
+        // ai-diff-context (ai-read baseline default: allow) denied back by exactly 2 of 5
+        // agent-creator-family members (`agent-creator`, `agent-creator-static-validator`);
+        // extracted here (rather than left as static-validator's prior inline exception)
+        // because `agent-creator` needs the identical pattern too.
+        'agent_creator.deny_ai_diff_context' => aiPermissionEntries('bash', [
+            'bash scripts/ai/ai-diff-context.sh *' => 'deny',
+        ]),
+
+        // session-checkpoint.sh (readonly-profile default: deny) ask-gated by exactly 2 of
+        // 5 agent-creator-family members (`agent-creator-runtime-guardian`,
+        // `agent-creator-supervisor`); extracted here (rather than left as
+        // runtime-guardian's prior inline exception) because `agent-creator-supervisor`
+        // needs the identical pattern too. pre-tool-use.sh/post-tool-use.sh are
+        // deliberately NOT included — both are on the TRUE immutable hard-deny floor and
+        // can never resolve to `ask` for any composed agent (same forced-tightening
+        // precedent as architecture-plan-writer/script-runner).
+        'agent_creator.ask_session_checkpoint' => aiPermissionEntries('bash', [
+            'bash scripts/ai/session-checkpoint.sh *' => 'ask',
+        ]),
     ];
 }
 

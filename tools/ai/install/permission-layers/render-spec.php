@@ -49,6 +49,20 @@ function aiPermissionRenderScriptRunner(): array
 }
 
 /**
+ * ui-builder's unique render shape (Slice D, docs/tickets/arch-todo-optional-agent-
+ * permission-composition-20260705T221434Z/plan.md) — no `task:` key at all (ground truth
+ * confirmed absent, same as implementer/refactorer), plus a `webfetch: deny` scalar no
+ * other composed agent carries. Kept as a dedicated one-off builder (same precedent as
+ * aiPermissionRenderScriptRunner()) since no other agent shares this combination.
+ *
+ * @return array{extra_scalars:array<string,string>,quote:string}
+ */
+function aiPermissionRenderUiBuilder(): array
+{
+    return ['extra_scalars' => ['webfetch' => 'deny'], 'quote' => 'single'];
+}
+
+/**
  * architecture-plan-writer's unique render shape (Slice C,
  * docs/tickets/arch-todo-complete-permission-composition-migration/plan.md) — the only
  * migrated agent needing `task:` BEFORE `edit:` and a nested `external_directory:` mapping

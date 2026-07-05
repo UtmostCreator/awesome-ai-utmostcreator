@@ -91,6 +91,20 @@ function aiPermissionEditSurfaces(): array
             'configs/karabiner/**' => 'allow',
             'packages/**' => 'deny',
         ], $denyTail)),
+        // ui-builder (docs/tickets/arch-todo-optional-agent-permission-composition-
+        // 20260705T221434Z/plan.md, Slice D): identical to 'code' except NO scripts/**/
+        // tools/** grant — ground truth shows ui-builder never edits kit tooling, only
+        // application/product surfaces. The only consumer of this surface (confirmed via
+        // grep before adding it, same "zero blast radius" precedent as the 'tickets'
+        // surface's own extension).
+        'ui' => aiPermissionEntries('edit', array_merge([
+            'src/**' => 'allow',
+            'app/**' => 'allow',
+            'packages/**' => 'allow',
+            'configs/**' => 'allow',
+            'tests/**' => 'allow',
+            'docs/**' => 'allow',
+        ], $denyTail)),
         'install' => aiPermissionEntries('edit', array_merge([
             'AGENTS.md' => 'allow',
             'README.md' => 'allow',

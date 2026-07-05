@@ -43,7 +43,19 @@ function aiPermissionLayersCore(): array
             'bash scripts/ai/post-tool-use.sh *' => 'deny',
             'bash scripts/ai/prune-shipped-targets.sh *' => 'deny',
             'bash scripts/ai/watch-loop.sh *' => 'deny',
-            'bash scripts/ai/common.sh*' => 'deny',
+            // Bug fix (docs/tickets/arch-todo-optional-agent-permission-composition-
+            // 20260705T221434Z/plan.md, Slice D): this was the one dangerous-script hard-
+            // deny entry written without the space-separated convention every other entry
+            // here uses (and that aiPermissionScriptCommandPatterns() also generates for
+            // the script-tiers:ai-deny-dangerous layer) — a pure typo, invisible until now
+            // because every previously-composed agent has starBaseline 'deny', so BOTH the
+            // glued and space-separated forms always matched the '*' floor's own effect and
+            // were silently omitted from rendering (see the renderer's no-op-omission
+            // logic). `ui-builder` is the first agent with a non-'deny' baseline ('ask'),
+            // which surfaced both as two literal, redundant rendered lines with identical
+            // 'deny' effect. Corrected to match every sibling entry; zero effect change for
+            // any agent (verified via --check byte-stability for all composed agents).
+            'bash scripts/ai/common.sh *' => 'deny',
         ]),
         'safe-read' => aiPermissionEntries('bash', [
             'command -v *' => 'allow',
