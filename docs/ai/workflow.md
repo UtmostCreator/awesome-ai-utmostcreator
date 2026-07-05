@@ -1,5 +1,7 @@
 # Workflow
 
+See `docs/ai/index.md` for a curated, annotated entry point into `docs/ai/**`.
+
 ## Default Task Flow
 
 For non-trivial work, follow `docs/ai/execution-protocol.md`.
