@@ -27,6 +27,7 @@ final class ProjectValuesSyncTest extends TestCase
             throw new \RuntimeException('Could not resolve repo root');
         }
         self::$repoRoot = $root;
+        require_once $root . '/tools/ai/ai_output_lib.php';
         require_once $root . '/tools/ai/install/markers.php';
         require_once $root . '/tools/ai/install/core.php';
         require_once $root . '/tools/ai/commands/project_values_sync.php';
@@ -186,5 +187,106 @@ final class ProjectValuesSyncTest extends TestCase
         // for every other project that installs this kit.
         $this->assertNotContains('packages', aiProjectValuesSyncScanRoots());
         $this->assertSame(['AGENTS.md', 'docs/ai', '.github', '.opencode'], aiProjectValuesSyncScanRoots());
+    }
+
+    /**
+     * Review finding (medium): a CRLF-terminated line was silently skipped in both
+     * check and apply mode (str_ends_with($line, '`') is false when a trailing "\r"
+     * remains after exploding on "\n" alone). Fixed by matching with the trailing
+     * "\r" stripped and re-appending it on write, preserving the original ending.
+     */
+    public function testCrlfTerminatedLinesAreDetectedAndFixedPreservingLineEnding(): void
+    {
+        $root = $this->makeTmpRoot('pvs_crlf_');
+        $this->writeProjectYml($root, ['primaryLanguage' => 'PHP']);
+        $this->writeFile($root, 'AGENTS.md', "# Repo\r\n\r\n- Primary language: `unknown`\r\n- Unrelated: `keep`\r\n");
+
+        $checked = aiProjectValuesSyncScan($root, false);
+        $this->assertCount(1, $checked['mismatches'], 'CRLF-terminated mismatch must be detected in check mode');
+        $this->assertSame('unknown', $checked['mismatches'][0]['current']);
+
+        $applied = aiProjectValuesSyncScan($root, true);
+        $this->assertSame(['AGENTS.md'], $applied['files_changed']);
+        $written = file_get_contents($root . '/AGENTS.md');
+        $this->assertStringContainsString("- Primary language: `PHP`\r\n", $written, 'fixed line must keep its original CRLF ending');
+        $this->assertStringContainsString("- Unrelated: `keep`\r\n", $written, 'unrelated CRLF lines must be preserved untouched');
+    }
+
+    /**
+     * Review finding (low): no test proved multiple mismatching fields in the same
+     * file are all synced (no early-exit / only-first-match bug).
+     */
+    public function testMultipleMismatchesInOneFileAreAllSynced(): void
+    {
+        $root = $this->makeTmpRoot('pvs_multi_');
+        $this->writeProjectYml($root, [
+            'primaryLanguage' => 'PHP',
+            'primaryRuntime' => 'PHP >=8.2',
+            'primaryVerifyCommand' => 'composer test',
+            'primaryBuildCommand' => 'none',
+            'primaryTestCommand' => 'composer test',
+            'packageManager' => 'composer',
+        ]);
+        $this->writeFile($root, 'AGENTS.md', implode("\n", [
+            '- Primary language: `unknown`',
+            '- Primary runtime: `unknown`',
+            '- Primary verification command: `unknown`',
+            '- Primary build command: `unknown`',
+            '- Primary test command: `unknown`',
+            '- Package manager: `unknown`',
+            '',
+        ]));
+
+        $result = aiProjectValuesSyncScan($root, true);
+
+        $this->assertCount(6, $result['mismatches'], 'all six mismatching fields in the same file must be reported');
+        $written = file_get_contents($root . '/AGENTS.md');
+        $this->assertStringContainsString('- Primary language: `PHP`', $written);
+        $this->assertStringContainsString('- Primary runtime: `PHP >=8.2`', $written);
+        $this->assertStringContainsString('- Primary verification command: `composer test`', $written);
+        $this->assertStringContainsString('- Primary build command: `none`', $written);
+        $this->assertStringContainsString('- Primary test command: `composer test`', $written);
+        $this->assertStringContainsString('- Package manager: `composer`', $written);
+    }
+
+    /**
+     * Review finding (low): the CLI-facing aiRunProjectValuesSync() --fail exit-code
+     * contract and artifact envelope were only verified by code inspection.
+     */
+    public function testRunProjectValuesSyncFailFlagReturnsExitOneOnMismatch(): void
+    {
+        $root = $this->makeTmpRoot('pvs_cli_fail_');
+        mkdir($root . '/docs/ai/generated', 0777, true);
+        $this->writeProjectYml($root, ['primaryLanguage' => 'PHP']);
+        $this->writeFile($root, 'AGENTS.md', "- Primary language: `unknown`\n");
+
+        $exit = aiRunProjectValuesSync($root, ['--fail']);
+
+        $this->assertSame(1, $exit, '--fail must exit non-zero when a mismatch exists and --apply was not passed');
+        $artifact = $root . '/docs/ai/generated/project-values-sync.json';
+        $this->assertFileExists($artifact);
+        $decoded = json_decode((string) file_get_contents($artifact), true);
+        $this->assertSame('failed', $decoded['status'] ?? null);
+        $this->assertSame('primaryLanguage', $decoded['data']['mismatches'][0]['field'] ?? null);
+    }
+
+    public function testRunProjectValuesSyncApplyReturnsExitZeroAndWritesArtifact(): void
+    {
+        $root = $this->makeTmpRoot('pvs_cli_apply_');
+        mkdir($root . '/docs/ai/generated', 0777, true);
+        $this->writeProjectYml($root, ['primaryLanguage' => 'PHP']);
+        $this->writeFile($root, 'AGENTS.md', "- Primary language: `unknown`\n");
+
+        $exit = aiRunProjectValuesSync($root, ['--apply']);
+
+        $this->assertSame(0, $exit, '--apply must exit zero after successfully applying changes');
+        $decoded = json_decode((string) file_get_contents($root . '/docs/ai/generated/project-values-sync.json'), true);
+        $this->assertSame('ok', $decoded['status'] ?? null);
+        $this->assertSame(['AGENTS.md'], $decoded['data']['files_changed'] ?? null);
+        $this->assertStringContainsString('- Primary language: `PHP`', (string) file_get_contents($root . '/AGENTS.md'));
+
+        // Idempotency at the CLI layer too: a second --fail run must now pass (exit 0).
+        $secondExit = aiRunProjectValuesSync($root, ['--fail']);
+        $this->assertSame(0, $secondExit, 'no remaining mismatches after apply, so --fail must exit zero');
     }
 }
