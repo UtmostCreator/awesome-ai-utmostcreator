@@ -90,10 +90,18 @@ class AgentPermissionPolicyTest extends TestCase
         '.opencode/agents/config-maintainer.md',
         '.opencode/agents/implementer.md',
         '.opencode/agents/refactorer.md',
+        '.opencode/agents/post-install.md',
         'packages/ai-universal-rules/templates/core/agents/bootstrapper.md',
         'packages/ai-universal-rules/templates/core/agents/config-maintainer.md',
         'packages/ai-universal-rules/templates/core/agents/implementer.md',
         'packages/ai-universal-rules/templates/core/agents/refactorer.md',
+        'packages/ai-universal-rules/templates/core/agents/post-install.md',
+        // super-implementer.md is intentionally NOT listed here: it is gitignored
+        // (.gitignore:32 — draft agent held back, `id: implementer` collides with
+        // implementer.md's own id) and does not exist in a fresh checkout, so a
+        // file-path-based test fixture referencing it would fail outside this working
+        // tree. Its composition spec is still valid in compositions.php; only the
+        // rendered file's shipping is blocked pending that id-collision fix.
     ];
 
     /** @var list<string> */

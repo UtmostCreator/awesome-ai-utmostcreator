@@ -8,34 +8,23 @@ capabilities:
   - project-context
 permission:
   todowrite: allow
+  edit: deny
   webfetch: allow
   websearch: allow
   external_directory: allow
   task: deny
   ask: allow
-  edit:
-    "*": allow
   bash:
-    "python3": allow
-    # Default-deny everything; only registered repo scripts and the gateway
-    # (plus minimal read-only git grounding) are re-enabled below.
-    "*": deny
-    # --- minimal read-only grounding (no mutation, no chaining) ---
+    "pwd": allow
+    "ls -1 scripts/ai/*.sh | sort": allow
     "git status*": allow
     "git diff*": allow
     "git log*": allow
-    "pwd": allow
-    "ls scripts/ai": allow
-    "ls scripts/ai/*": allow
-    "ls -1 scripts/ai/*.sh | sort": allow
-    # --- discovery gateway: list/describe/run registered scripts by id ---
-    # tool:run fails closed on mutating ids (status=blocked, approval_required).
-    "php tools/ai/ai.php tool:list": allow
-    "php tools/ai/ai.php tool:list*": allow
-    "php tools/ai/ai.php tool:describe*": allow
-    "php tools/ai/ai.php tool:run *": allow
-    "php tools/ai/ai.php tool:run * --apply*": ask
-    # --- read / research scripts (low risk) ---
+    "bash scripts/ai/gh-pr-context.sh *": ask
+    "bash scripts/ai/pack-context.sh *": ask
+    "bash scripts/ai/run-repomix-context.sh *": ask
+    "bash scripts/ai/repomix-context-tree.sh *": ask
+    "bash scripts/ai/repomix-scc-router.sh *": ask
     "bash scripts/ai/ai-search.sh *": allow
     "AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
     "env AI_OUTPUT=json bash scripts/ai/ai-search.sh *": allow
@@ -48,45 +37,39 @@ permission:
     "bash scripts/ai/rg-code.sh *": allow
     "bash scripts/ai/fd-files.sh *": allow
     "bash scripts/ai/query-usage.sh *": allow
-    "bash scripts/ai/sh-introspect.sh *": allow
-    # --- repo-aware read (low/medium risk) ---
     "bash scripts/ai/git-branch-origin.sh *": allow
     "bash scripts/ai/git-forensics.sh *": allow
-    "bash scripts/ai/gh-pr-context.sh *": ask
-    # --- stats, inventory, freshness (low/medium risk) ---
     "bash scripts/ai/repo-stats.sh *": allow
-    "bash scripts/ai/repo-tool-inventory.sh": allow
     "bash scripts/ai/repo-tool-inventory.sh *": allow
     "bash scripts/ai/ai-file-freshness.sh *": allow
-    "bash scripts/ai/ai-install-coverage.sh *": allow
     "bash scripts/ai/check-file-refs.sh *": allow
-    "bash scripts/ai/ship-audit.sh *": allow
-    # --- context packing (low/medium risk; cost-gated) ---
-    "bash scripts/ai/pack-context.sh *": ask
-    "bash scripts/ai/run-repomix-context.sh *": ask
-    "bash scripts/ai/run-repomix-file.sh *": ask
-    "bash scripts/ai/repomix-context-tree.sh *": ask
-    "bash scripts/ai/repomix-scc-router.sh *": ask
-    "bash scripts/ai/repomix-freshness.sh *": allow
-    "bash scripts/ai/repomix-ensure-fresh.sh *": ask
-    # --- diff and docs (low/medium risk) ---
     "bash scripts/ai/ai-diff-context.sh *": allow
     "bash scripts/ai/ai-doc-check.sh *": allow
-    # --- verify and test (medium/high risk) ---
-    "bash scripts/ai/ai-verify.sh *": ask
-    "bash scripts/ai/ai-test-select.sh *": allow
-    "bash scripts/ai/run-repo-tests.sh": ask
-    "bash scripts/ai/run-repo-tests.sh *": ask
-    "bash scripts/ai/run-test-focused.sh *": ask
-    # --- structured output and tasking (low/high risk) ---
     "bash scripts/ai/ai-structured.sh *": allow
-    "bash scripts/ai/ai-task.sh *": ask
-    # --- guarded mutation (high risk; always ask) ---
+    "bash scripts/ai/repomix-freshness.sh *": allow
+    "bash scripts/ai/repomix-ensure-fresh.sh *": ask
+    "bash scripts/ai/ai-install-coverage.sh *": allow
     "bash scripts/ai/ai-edit.sh *": ask
     "bash scripts/ai/ai-rollback.sh *": ask
     "bash scripts/ai/session-checkpoint.sh *": ask
-    # --- host / destructive (gated) ---
     "bash scripts/ai/install-mandatory-tools.sh *": ask
+    "python3": allow
+    "bash scripts/ai/ai-verify.sh *": ask
+    "bash scripts/ai/ai-test-select.sh *": allow
+    "php tools/ai/ai.php tool:list": allow
+    "php tools/ai/ai.php tool:list*": allow
+    "php tools/ai/ai.php tool:describe*": allow
+    "php tools/ai/ai.php tool:run *": allow
+    "php tools/ai/ai.php tool:run * --apply*": ask
+    "ls scripts/ai": allow
+    "ls scripts/ai/*": allow
+    "bash scripts/ai/sh-introspect.sh *": allow
+    "bash scripts/ai/repo-tool-inventory.sh": allow
+    "bash scripts/ai/ship-audit.sh *": allow
+    "bash scripts/ai/run-repomix-file.sh *": ask
+    "bash scripts/ai/run-repo-tests.sh": ask
+    "bash scripts/ai/run-repo-tests.sh *": ask
+    "bash scripts/ai/run-test-focused.sh *": ask
     "bash scripts/ai/prune-shipped-targets.sh --list": allow
     "bash scripts/ai/prune-shipped-targets.sh --list *": allow
     "bash scripts/ai/prune-shipped-targets.sh --dry-run": allow
@@ -95,30 +78,7 @@ permission:
     "bash scripts/ai/prune-shipped-targets.sh -h": allow
     "bash scripts/ai/prune-shipped-targets.sh --apply": ask
     "bash scripts/ai/prune-shipped-targets.sh --apply *": ask
-    # --- hooks, watch, and library: never direct-run by this agent ---
-    "bash scripts/ai/pre-tool-use.sh *": deny
-    "bash scripts/ai/post-tool-use.sh *": deny
-    "bash scripts/ai/watch-loop.sh *": deny
-    "bash scripts/ai/common.sh*": deny
-    # --- hard stop for ad hoc / chained / mutation commands; last-match wins ---
-    "python3 *": deny
-    "php -r *": deny
-    "rm *": deny
-    "mv *": deny
-    "cp *": deny
-    "chmod *": deny
-    "chown *": deny
-    "sudo *": deny
-    "git push*": deny
-    "git reset*": deny
-    "git clean*": deny
-    "* | *": deny
-    "* && *": deny
-    "* ; *": deny
-    "* > *": deny
-    "* >> *": deny
-    "* <<*": deny
-    "$(*": deny
+    "*": deny
 ---
 
 # Script Runner Agent

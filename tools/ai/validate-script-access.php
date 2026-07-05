@@ -7,8 +7,13 @@ declare(strict_types=1);
  * and agent-governance manifests (archived todo-agents-rework.md /
  * todo-agents-script-rework.md P10).
  *
- * Deterministic invariants enforced (no agent permission edits; inline
- * .opencode/agents permissions remain canonical per the adapter contract):
+ * Deterministic invariants enforced (no agent permission edits here — this validator
+ * checks the script-access manifest, not per-agent permission blocks; permissions for the
+ * 13 agents composed under tools/ai/install/permission-layers/ are generated from that
+ * layered system, not inline-canonical — see docs/tickets/
+ * arch-todo-permission-layer-composition-20260705T004618Z/plan.md; the two remaining
+ * excluded agents, release-auditor and architecture-plan-writer, are still inline-canonical
+ * per the adapter contract pending the v0.6-program coordination gate):
  *   1. Every root scripts/ai/<name>.sh (one per bin/<role>/ alias) is tiered
  *      exactly once in .github/ai-script-access.yaml.
  *   2. Dangerous scripts appear only in T5_mutation_recovery.

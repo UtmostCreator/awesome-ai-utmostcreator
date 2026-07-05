@@ -62,19 +62,18 @@ $execute = rtrim($execute, "\r\n") . "\n";
 // already carry execute/verify shell access get the execute block.
 // repository-researcher / repository-reviewer are ask-default and intentionally
 // excluded from the shared block.
+// 'researcher', 'architect', 'workflow-auditor', 'reviewer', 'config-maintainer',
+// 'implementer', 'refactorer', 'post-install', 'bootstrapper', 'script-runner', and
+// 'super-implementer' are intentionally NOT listed: each is fully managed by
+// tools/ai/generate-agent-permissions.php (layered permission composition, see
+// docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md,
+// Slices 3/4/10), which renders the whole permission: block, including the CLI-tool
+// entries this script used to sync via a delimited sub-block. Do not re-add an agent
+// here without also removing it from
+// tools/ai/install/permission-layers/compositions.php — the two generators must never
+// both claim ownership of the same agent's permission block.
 $kind = [
-    'architect' => 'readonly',
-    'researcher' => 'readonly',
     'release-auditor' => 'readonly',
-    'workflow-auditor' => 'readonly',
-    'reviewer' => 'execute',
-    'config-maintainer' => 'execute',
-    'implementer' => 'execute',
-    'refactorer' => 'execute',
-    'bootstrapper' => 'execute',
-    // post-install historically carries the read-only CLI tool block (shellcheck,
-    // no semgrep/packers); keep that exact posture to avoid policy drift.
-    'post-install' => 'readonly',
 ];
 
 $dirs = [
