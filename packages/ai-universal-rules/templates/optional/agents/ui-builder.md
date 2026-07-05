@@ -10,6 +10,7 @@ capabilities:
   - verify-change
   - review-diff
 permission:
+  todowrite: allow
   edit:
     'src/**': allow
     'app/**': allow
@@ -19,37 +20,43 @@ permission:
     'docs/**': allow
     'vendor/**': deny
     'node_modules/**': deny
+    '.git/**': deny
     'dist/**': deny
     'build/**': deny
-    '.git/**': deny
+    'coverage/**': deny
+    '.cache/**': deny
     'docs/ai/generated/**': deny
+    'docs/generated/**': deny
     '*.generated.*': deny
     '*.lock': deny
     'composer.lock': deny
     'package-lock.json': deny
     'pnpm-lock.yaml': deny
     'yarn.lock': deny
+    'bun.lockb': deny
     '*.pem': deny
     '*.key': deny
     '*.crt': deny
     '.env*': deny
     'secrets.*': deny
     'credentials.*': deny
+    'auth.json': deny
+  webfetch: deny
   bash:
-    "*": ask
-    "git status": allow
-    "git diff": allow
-    "git diff *": allow
-    "ls *": allow
-    "cat *": ask
-    "rg *": allow
-    # --- full AI script access (write tier); see docs/ai/agent-script-access.md ---
+    'ls *': allow
+    'grep *': deny
+    'git status*': allow
+    'git diff*': allow
+    'bash scripts/ai/ai-task.sh *': deny
+    'bash scripts/ai/gh-pr-context.sh *': deny
+    'bash scripts/ai/pre-tool-use.sh *': deny
+    'bash scripts/ai/post-tool-use.sh *': deny
+    'bash scripts/ai/prune-shipped-targets.sh *': deny
+    'bash scripts/ai/watch-loop.sh *': deny
+    'bash scripts/ai/common.sh *': deny
     'bash scripts/ai/ai-search.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/ai-search.sh *': allow
-    'bash scripts/ai/ai-search-multi.sh *': allow
-    'AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
-    'env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *': allow
     'bash scripts/ai/preview-file.sh *': allow
     'AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
     'env AI_OUTPUT=json bash scripts/ai/preview-file.sh *': allow
@@ -58,35 +65,33 @@ permission:
     'bash scripts/ai/query-usage.sh *': allow
     'bash scripts/ai/git-branch-origin.sh *': allow
     'bash scripts/ai/git-forensics.sh *': allow
-    'bash scripts/ai/gh-pr-context.sh *': deny
     'bash scripts/ai/repo-stats.sh *': allow
     'bash scripts/ai/repo-tool-inventory.sh *': allow
     'bash scripts/ai/ai-file-freshness.sh *': allow
-    'bash scripts/ai/ai-install-coverage.sh *': deny
     'bash scripts/ai/check-file-refs.sh *': allow
-    'bash scripts/ai/pack-context.sh *': ask
-    'bash scripts/ai/run-repomix-context.sh *': ask
-    'bash scripts/ai/repomix-context-tree.sh *': ask
-    'bash scripts/ai/repomix-scc-router.sh *': ask
-    'bash scripts/ai/repomix-freshness.sh *': allow
-    'bash scripts/ai/repomix-ensure-fresh.sh *': ask
     'bash scripts/ai/ai-diff-context.sh *': allow
     'bash scripts/ai/ai-doc-check.sh *': allow
-    'bash scripts/ai/ai-verify.sh *': ask
+    'bash scripts/ai/ai-structured.sh *': allow
+    'bash scripts/ai/repomix-freshness.sh *': allow
     'bash scripts/ai/ai-test-select.sh *': allow
     'bash scripts/ai/run-repo-tests.sh*': allow
-    'bash scripts/ai/ai-structured.sh *': allow
-    'bash scripts/ai/ai-task.sh *': deny
-    'bash scripts/ai/ai-edit.sh *': ask
-    'bash scripts/ai/ai-rollback.sh *': ask
-    'bash scripts/ai/session-checkpoint.sh *': ask
-    'bash scripts/ai/pre-tool-use.sh *': deny
-    'bash scripts/ai/post-tool-use.sh *': deny
-    'bash scripts/ai/install-mandatory-tools.sh *': ask
-    'bash scripts/ai/prune-shipped-targets.sh *': deny
-    'bash scripts/ai/watch-loop.sh *': deny
-    'bash scripts/ai/common.sh*': deny
-  webfetch: deny
+    'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
+    'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
+    'bash scripts/ai/ai-install-coverage.sh *': deny
+    '*': ask
+    'python3 *': deny
+    'php -r *': deny
+    '* <<*': deny
+    '* > *': deny
+    '* >> *': deny
+    'cat > *': deny
+    'cat >> *': deny
+    'rm -rf *': deny
+    'sudo *': deny
+    'ssh *': deny
+    'scp *': deny
+    'watch *': deny
+    'git push*': deny
 agent_assessment:
   risk_level: high
   decision: needs_refactor

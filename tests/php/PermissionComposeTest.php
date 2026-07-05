@@ -321,6 +321,16 @@ final class PermissionComposeTest extends TestCase
      * needing a temporary, documented exclusion has an obvious place to add one, and so this
      * test's intent (compositions.php key set tracks aiInstallerAgentProfiles() 1:1, modulo any
      * documented exclusion) stays self-explanatory.
+     *
+     * Scope note (docs/tickets/arch-todo-optional-agent-permission-composition-
+     * 20260705T221434Z/plan.md, Design Fork F1, LOCKED): the 11 optional agents under
+     * `packages/ai-universal-rules/templates/optional/agents/` are deliberately NOT added to
+     * `aiInstallerAgentProfiles()` (that map stays scoped to tool-gateway visibility for the
+     * 15 core agents only) even though `compositions.php` now also composes some of them.
+     * This test therefore excludes `aiPermissionOptionalAgentKeys()` before comparing, so it
+     * stays a pure 1:1 check against the 15-key core map — see
+     * `testEveryOptionalAgentKeyHasACompositionEntry()` below for the optional-agent coverage
+     * assertion (kept as a separate, additive invariant per the locked design fork).
      */
     public function testCompositionsKeySetMatchesAgentProfilesExceptDocumentedExclusions(): void
     {
@@ -328,19 +338,56 @@ final class PermissionComposeTest extends TestCase
 
         $intentionalExclusions = [];
 
-        $compositionKeys = array_keys(aiPermissionAgentCompositions());
+        $compositionKeys = array_diff(array_keys(aiPermissionAgentCompositions()), aiPermissionOptionalAgentKeys());
         $profileKeys = array_keys(aiInstallerAgentProfiles());
 
         $expectedCompositionKeys = array_values(array_diff($profileKeys, $intentionalExclusions));
+        $compositionKeys = array_values($compositionKeys);
         sort($expectedCompositionKeys);
         sort($compositionKeys);
 
         self::assertSame(
             $expectedCompositionKeys,
             $compositionKeys,
-            'compositions.php key set must match aiInstallerAgentProfiles() minus the documented exclusions'
+            'compositions.php core-agent key set (minus optional-agent keys) must match '
+                . 'aiInstallerAgentProfiles() minus the documented exclusions'
         );
     }
+
+    /**
+     * Design Fork F1 (docs/tickets/arch-todo-optional-agent-permission-composition-
+     * 20260705T221434Z/plan.md, LOCKED): the 11 optional agents are composed for
+     * `permission:` rendering only — they are never added to `aiInstallerAgentProfiles()`
+     * (Option F2, widening tool-gateway visibility, was explicitly rejected). This is the
+     * dedicated coverage assertion for that composition, kept separate from the 15-key
+     * equality test above per the locked decision. Not every optional-agent key needs a
+     * composition entry yet (this plan migrates them incrementally); this test only asserts
+     * that every key WHICH DOES have a composition entry is drawn from the known 11-name
+     * list — i.e. no optional-agent composition can silently exist under an unrecognized
+     * name outside this canonical list.
+     */
+    public function testEveryComposedOptionalAgentKeyIsAKnownOptionalAgent(): void
+    {
+        require_once __DIR__ . '/../../tools/ai/install/script-registry.php';
+
+        $coreProfileKeys = array_keys(aiInstallerAgentProfiles());
+        $optionalAgentKeys = aiPermissionOptionalAgentKeys();
+
+        foreach (array_keys(aiPermissionAgentCompositions()) as $agent) {
+            if (in_array($agent, $coreProfileKeys, true)) {
+                continue;
+            }
+            self::assertContains(
+                $agent,
+                $optionalAgentKeys,
+                "composed agent '{$agent}' is neither a core aiInstallerAgentProfiles() key nor a "
+                    . 'known optional-agent key (aiPermissionOptionalAgentKeys()) — add it to one of '
+                    . 'the two canonical lists instead of leaving it unrecognized'
+            );
+        }
+    }
+
+
 
     /**
      * N-8 (docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md): a

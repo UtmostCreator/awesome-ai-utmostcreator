@@ -41,6 +41,13 @@ if (!$check && !$write) {
 $dirs = [
     $root . '/packages/ai-universal-rules/templates/core/agents',
     $root . '/.opencode/agents',
+    // Optional-agent pair (docs/tickets/arch-todo-optional-agent-permission-composition-
+    // 20260705T221434Z/plan.md): mirrors the core-agent pair above. Additive-only for the
+    // 15 core agents (is_file() below skips paths with no matching file); only agents with
+    // a compositions.php entry get spliced here, so adding these dirs alone is a no-op
+    // until an optional agent is actually composed.
+    $root . '/packages/ai-universal-rules/templates/optional/agents',
+    $root . '/.opencode/agents-optional',
 ];
 
 $drift = [];
