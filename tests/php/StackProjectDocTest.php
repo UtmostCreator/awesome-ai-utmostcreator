@@ -96,21 +96,57 @@ final class StackProjectDocTest extends TestCase
         file_put_contents($target . '/docs/ai/project-stack.md', $legacyContent);
         file_put_contents($target . '/package.json', '{}');
 
+        $result = $this->runStackDetectCli($target, []);
+
+        self::assertSame(0, $result['exit']);
+        self::assertStringContainsString('Wrote docs/ai/project/stack.md', $result['stdout']);
+        self::assertFileExists($target . '/docs/ai/project/stack.md');
+        self::assertSame($legacyContent, (string) file_get_contents($target . '/docs/ai/project-stack.md'));
+    }
+
+    public function testStackDetectCliNoWriteSkipsFileButStillPrintsSummary(): void
+    {
+        $target = $this->makeTempRoot();
+        file_put_contents($target . '/composer.json', '{}');
+
+        $result = $this->runStackDetectCli($target, ['--no-write']);
+
+        self::assertSame(0, $result['exit']);
+        self::assertStringContainsString('Detected stacks:', $result['stdout']);
+        self::assertStringNotContainsString('Wrote docs/ai/project/stack.md', $result['stdout']);
+        self::assertDirectoryDoesNotExist($target . '/docs/ai/project');
+    }
+
+    public function testStackDetectCliStacksFlagOverridesSelectionButStillDetects(): void
+    {
+        $target = $this->makeTempRoot();
+        file_put_contents($target . '/composer.json', '{}');
+
+        $result = $this->runStackDetectCli($target, ['--stacks', 'js-ts']);
+
+        self::assertSame(0, $result['exit']);
+        self::assertStringContainsString('Detected stacks:', $result['stdout']);
+        self::assertStringContainsString('php', $result['stdout'], 'detection still runs and reports php even though it is not selected');
+        self::assertStringContainsString('Selected stacks: js-ts', $result['stdout']);
+        self::assertFileExists($target . '/docs/ai/project/stack.md');
+        self::assertStringContainsString('`js-ts`', (string) file_get_contents($target . '/docs/ai/project/stack.md'));
+    }
+
+    /** @param list<string> $extraArgs @return array{exit:int,stdout:string,stderr:string} */
+    private function runStackDetectCli(string $target, array $extraArgs): array
+    {
         $env = getenv();
         $env['AI_CLI_REPO_ROOT'] = $target;
-        $cmd = [PHP_BINARY, self::$repoRoot . '/tools/ai/ai.php', 'stack-detect'];
+        $cmd = array_merge([PHP_BINARY, self::$repoRoot . '/tools/ai/ai.php', 'stack-detect'], $extraArgs);
         $process = proc_open($cmd, [1 => ['pipe', 'w'], 2 => ['pipe', 'w']], $pipes, $target, $env);
         self::assertIsResource($process);
-        $stdout = stream_get_contents($pipes[1]);
-        stream_get_contents($pipes[2]);
+        $stdout = (string) stream_get_contents($pipes[1]);
+        $stderr = (string) stream_get_contents($pipes[2]);
         fclose($pipes[1]);
         fclose($pipes[2]);
         $exit = proc_close($process);
 
-        self::assertSame(0, $exit);
-        self::assertStringContainsString('Wrote docs/ai/project/stack.md', (string) $stdout);
-        self::assertFileExists($target . '/docs/ai/project/stack.md');
-        self::assertSame($legacyContent, (string) file_get_contents($target . '/docs/ai/project-stack.md'));
+        return ['exit' => $exit, 'stdout' => $stdout, 'stderr' => $stderr];
     }
 
     private function makeTempRoot(): string
