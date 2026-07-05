@@ -497,12 +497,11 @@ Contract:
   new Slice 8.
 - [x] AC-3: All three runtime projections render from the same composed model; Claude
   deny>ask>allow precedence handled semantically (partition, drop shadowed allows).
-  **DONE** — Copilot/Claude renderers resolve via `aiPermissionResolveAllowedBash()` for all 13
-  composed agents (Slice 8), and Slice 5 confirmed `.github/agents/**` is already in sync
-  (`adapter-plan --target .` reports zero create/modify). Caveat: this repo has never generated
-  any `.claude/agents/*.md` file at all (pre-existing, unrelated gap — the directory doesn't
-  exist), so the Claude per-agent-file half of this AC is unverified end-to-end in this repo,
-  though the renderer function itself is unit-tested (`ClaudeAgentRendererTest`).
+  **DONE, fully end-to-end** — Copilot/Claude renderers resolve via
+  `aiPermissionResolveAllowedBash()` for all 13 composed agents (Slice 8), Slice 5 confirmed
+  `.github/agents/**` is already in sync, and `.claude/agents/**` was generated for the first
+  time in this repo (continuation session #4, by explicit user direction) — 12 files, verified
+  against `ClaudeAgentRendererTest`/`ClaudeSettingsMergeTest` and `validate-adapter-drift.php`.
 - [x] AC-4: Researcher's `mkdir`/`printf>>`/`cat>>` shell-write patterns replaced by path-scoped
   edit permission on `.opencode/research-sessions/**` with shell redirects denied.
   **DONE** (`compositions.php:34-38`; both intentional changes — research-sessions and docs/tickets).
@@ -547,11 +546,9 @@ Contract:
   OpenCode, Copilot, and Claude; no renderer re-parses frontmatter `allowedBash`; adding a harness
   is one callable + one renderer + one round-trip test. The OpenCode adapter reproduces the current
   shipped researcher block byte-for-byte as its landing proof.
-  **DONE for OpenCode + Copilot** (`.github/agents/**` confirmed in sync via `adapter-plan`);
-  **not applicable to Claude in this repo** — `.claude/agents/**` has never been generated here
-  at all (pre-existing, separate gap), so the "no renderer re-parses" clause is proven only at
-  the unit-test level (`ClaudeAgentRendererTest`) for Claude, not end-to-end against a real
-  shipped file in this repo.
+  **DONE for all three runtimes, end-to-end** — `.github/agents/**` confirmed in sync via
+  `adapter-plan`; `.claude/agents/**` generated for the first time (continuation session #4)
+  and verified against real shipped files, not just unit tests.
 - [x] AC-14 (new): The owning permission validator enforces the seven dangerous-gap checks (Slice 9)
   against the composed model, each with a focused failing-fixture test, with no currently shipped
   agent silently flipped red (advisory-first if a shipped agent trips a check).

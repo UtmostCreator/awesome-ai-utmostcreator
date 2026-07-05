@@ -54,18 +54,18 @@ permission:
     'ls *': allow
     'fd *': allow
     'eza *': allow
-    'rg *': allow
+    'rg *': ask
     'git grep *': allow
-    'sed -n *': allow
-    'head *': allow
-    'tail *': allow
+    'sed -n *': ask
+    'head *': ask
+    'tail *': ask
     'nl *': allow
-    'jq *': allow
-    'yq *': allow
+    'jq *': ask
+    'yq *': ask
     'scc *': allow
     'tokei *': allow
     'ast-grep *': allow
-    'bat *': allow
+    'bat *': ask
     'fx *': allow
     'glow *': allow
     'difft *': allow

@@ -407,13 +407,15 @@ final class PermissionComposeTest extends TestCase
     // --- Slice 9: dangerous-gap validator checks (docs/tickets/
     // arch-todo-permission-layer-composition-20260613T154104Z/plan.md, "Slice 9 — Validator
     // Gaps"). Run against the composed model, not raw frontmatter, per that slice's own
-    // requirement. Checks 1/2/4/5/6/7 are enforced (verified clean against every currently
+    // requirement. All seven checks are enforced (verified clean against every currently
     // composed agent before landing, per the "advisory-first, never silently flip green to
-    // red" discipline); check 3 (raw read tools in write-profile agents) trips on every
-    // impl-profile agent today by design (core:safe-read's default grants) — tightening it
-    // would be a broad, cross-cutting policy change affecting 5 agents at once, out of scope
-    // for a validator-landing slice, so it is a ratchet (does-not-worsen) check instead of a
-    // hard zero-tolerance one; see testRawReadToolAllowInWriteProfileDoesNotGrow() below.
+    // red" discipline). Check 3 (raw read tools in write-profile agents) originally landed as
+    // a ratchet test — it trips on every impl-profile agent by design via core:safe-read's
+    // default grants — but a follow-up policy decision (continuation session) ask-gated
+    // rg/bat/jq/yq/head/tail/sed-n via the new 'core.safe_read.raw_read_ask_gate' pack for
+    // all 5 impl-profile agents (post-install keeps its already-stricter deny on
+    // head/tail/sed-n instead of loosening to ask), closing the exposure. Check 3 is now a
+    // hard zero-tolerance check like the other six.
 
     private const AI_PERMISSION_PINNED_STAR_ALLOW_AGENTS = ['super-implementer'];
 
@@ -619,39 +621,48 @@ final class PermissionComposeTest extends TestCase
     }
 
     /**
-     * Check 3 (ratchet, not zero-tolerance — see the class-level note above): raw read
-     * tools (`rg`, `bat`, `jq`, `yq`, `head`, `tail`, `sed -n`) are `allow` in every
-     * impl-profile agent today via core:safe-read's default grants — a real, pre-existing,
-     * cross-cutting exposure (the review's own suggested mitigation is the `preview-file.sh`/
-     * `rg-code.sh`/`fd-files.sh` wrappers or `ask`-gating), but fixing it is a broad policy
-     * change affecting 5 shipped agents at once, out of scope for landing a validator. This
-     * test pins today's known count so a *new* raw-tool allow in a write-profile agent is
-     * caught, without retroactively failing on the existing, already-shipped exposure.
+     * Check 3 (now hard zero-tolerance — see the class-level note above): raw read tools
+     * (`rg`, `bat`, `jq`, `yq`, `head`, `tail`, `sed -n`) must never be `allow` for any
+     * impl-profile agent. Prefer the `preview-file.sh`/`rg-code.sh`/`fd-files.sh` wrappers;
+     * `ask` (via `core.safe_read.raw_read_ask_gate`) is the approval fallback.
      */
-    public function testRawReadToolAllowInWriteProfileDoesNotGrow(): void
+    public function testRawReadToolsAreNeverAllowedInWriteProfileAgents(): void
     {
         $rawToolPatterns = ['rg *', 'bat *', 'jq *', 'yq *', 'head *', 'tail *', 'sed -n *'];
-        $count = 0;
         foreach (aiPermissionAgentCompositions() as $agent => $composition) {
             if ($composition['compose_spec']['profile'] !== 'impl') {
                 continue;
             }
             $model = aiPermissionCompose($agent)['model'];
             foreach ($rawToolPatterns as $pattern) {
-                if (($model[aiPermissionModelKey('bash', $pattern)]['effect'] ?? null) === 'allow') {
-                    $count++;
-                }
+                $effect = $model[aiPermissionModelKey('bash', $pattern)]['effect'] ?? null;
+                self::assertNotSame(
+                    'allow',
+                    $effect,
+                    "agent '{$agent}' must never allow raw read tool '{$pattern}' in a write profile"
+                );
             }
         }
+    }
 
-        // Known baseline at Slice-9-landing time: refactorer, implementer, bootstrapper,
-        // super-implementer, post-install each grant all 7 raw-tool patterns = 35.
-        self::assertLessThanOrEqual(
-            35,
-            $count,
-            'Raw read-tool allow-in-write-profile exposure grew beyond the known baseline; '
-                . 'if intentional, raise the constant here with a reviewed reason, do not '
-                . 'silently absorb new exposure'
-        );
+    /**
+     * Failing-fixture proof for check 3: composes an impl-profile spec that deliberately
+     * allows `sed -n *`, then runs the exact assertion
+     * `testRawReadToolsAreNeverAllowedInWriteProfileAgents()` uses against it.
+     */
+    public function testRawReadToolCheckCatchesAnAllowedRawTool(): void
+    {
+        $result = aiPermissionComposeFromSpec([
+            'profile' => 'impl',
+            'edit_surface' => 'none',
+            'verify_tier' => 'verify-none',
+            'exceptions' => [
+                aiPermissionBashAllow('sed -n *'),
+            ],
+        ]);
+        $effect = $result['model'][aiPermissionModelKey('bash', 'sed -n *')]['effect'];
+
+        $this->expectException(\PHPUnit\Framework\ExpectationFailedException::class);
+        self::assertNotSame('allow', $effect, 'this fixture must trip the real check assertion');
     }
 }

@@ -229,7 +229,7 @@ function aiPermissionAgentCompositions(): array
                 'doctor.scripts',
                 ...aiPermissionPackSetFullProof(),
             ],
-            askPacks: ['context.packaging'],
+            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate'],
             exceptions: [
                 // Ground truth: refactorer's git-mutating-ask grants are narrower than
                 // the 'impl' profile default (no reset/fetch/merge/pull/checkout/switch/
@@ -271,7 +271,7 @@ function aiPermissionAgentCompositions(): array
                 'impl.sg_allow',
                 'impl.composer_validate_allow',
             ],
-            askPacks: ['context.packaging'],
+            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate'],
             exceptions: [
                 aiPermissionBashAsk(aiPatternAiTool('install * --apply')),
                 aiPermissionBashAsk('php tools/ai/install-ai-kit.php *'),
@@ -309,6 +309,7 @@ function aiPermissionAgentCompositions(): array
                 'core.safe_read.deny_nl',
                 'core.safe_read.deny_file_probe',
             ],
+            askPacks: ['core.safe_read.raw_read_ask_gate'],
             exceptions: [
                 // Bootstrapper allows date/uuidgen/wc (from safe-read defaults) but,
                 // unlike the common-generics pack, tightens these beyond it.
@@ -433,6 +434,7 @@ function aiPermissionAgentCompositions(): array
             // agent" design (only the '*' catch-all is agent-tunable).
             starBaseline: 'allow',
             allowPacks: ['impl.sg_allow'],
+            askPacks: ['core.safe_read.raw_read_ask_gate'],
         ),
 
         'post-install' => aiPermissionAgentSpecImpl(
@@ -455,6 +457,11 @@ function aiPermissionAgentCompositions(): array
                 'doctor.scripts',
                 'install.docs_allow',
             ],
+            // Policy decision (continuation session): ask-gate rg/bat/jq/yq the same as the
+            // other 4 impl-profile agents. head/tail/sed-n are excluded below via exceptions
+            // (see note there) — post-install already denies them, stricter than ask, and
+            // must not be loosened by this pack.
+            askPacks: ['core.safe_read.raw_read_ask_gate'],
             exceptions: [
                 // Ground truth: shipped post-install's edit block has scripts/ai/** allow but
                 // NO tools/ai/** key, so it denies tools/ai/** edits. The 'install' edit
@@ -462,6 +469,11 @@ function aiPermissionAgentCompositions(): array
                 aiPermissionEditDeny('tools/ai/**'),
 
                 // Generic CLI tools this agent does not grant (beyond the shared deny packs).
+                // NOTE: 'sed -n *' is deny via the deny_sed_n pack above; re-deny it here too
+                // because 'core.safe_read.raw_read_ask_gate' (askPacks, applied after
+                // deny_packs) would otherwise loosen it to 'ask' — post-install's existing
+                // deny posture for sed-n must not regress.
+                aiPermissionBashDeny('sed -n *'),
                 aiPermissionBashDeny('head *'),
                 aiPermissionBashDeny('tail *'),
 
