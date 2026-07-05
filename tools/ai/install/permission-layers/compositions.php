@@ -181,6 +181,44 @@ function aiPermissionAgentCompositions(): array
             ],
         ),
 
+        // release-auditor (Slice A, docs/tickets/arch-todo-complete-permission-composition-
+        // migration/plan.md): closest analog is 'reviewer' (readonly profile, edit: deny,
+        // task: ask). Ground truth requires zero agent-unique exceptions — every shipped
+        // grant/deny beyond the readonly-profile default is covered by an existing pack:
+        //   - denyPacks (aiPermissionPackSetCommonReadDeny(), shared with architect/
+        //     refactorer): tightens date/uuidgen/wc/sort/uniq/du-h (common_generics) and
+        //     file (file_probe) to deny — release-auditor's shipped block omits all 7
+        //     entirely (falls through to the '*' floor deny), unlike core:safe-read's
+        //     default allow for them.
+        //   - git.pr_context_allow: shipped grants gh-pr-context.sh (script-tiers:
+        //     ai-deny-dangerous denies it by default for every agent).
+        //   - verify.install_coverage_allow: shipped grants ai-install-coverage.sh (not in
+        //     the readonly profile's ai-read baseline).
+        //   - proof.validate_script / proof.generate_check: shipped grants
+        //     validate-*.php/generate-*.php --check (not in core:shipped-cli-readonly).
+        //   - verify.manual_ask: shipped ask-gates ai-verify.sh (ai-verify tier only ships
+        //     with the verify/impl profiles, not readonly).
+        // Every other shipped deny (ai-edit/ai-rollback/session-checkpoint/
+        // install-mandatory-tools/ai-test-select/run-repo-tests/grep) and the two compound
+        // 'git status --short...' read lines are already no-ops under the readonly-profile
+        // default (either already denied by the '*' floor with no granting layer, or already
+        // covered by the 'git status*'/'git branch*' glob — see core.php's own removal note
+        // for that exact pair) — adding them as exceptions would be pure restatement and,
+        // for ai-edit/ai-rollback/session-checkpoint, would collide with post-install's
+        // existing exceptions (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents).
+        'release-auditor' => aiPermissionAgentSpecReadonly(
+            editSurface: 'none',
+            render: aiPermissionRenderTaskAsk(),
+            denyPacks: aiPermissionPackSetCommonReadDeny(),
+            allowPacks: [
+                'git.pr_context_allow',
+                'verify.install_coverage_allow',
+                'proof.validate_script',
+                'proof.generate_check',
+            ],
+            askPacks: ['verify.manual_ask'],
+        ),
+
         'config-maintainer' => aiPermissionAgentSpecVerify(
             editSurface: 'config',
             render: aiPermissionRenderTaskAsk(),

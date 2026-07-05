@@ -261,15 +261,17 @@ final class PermissionComposeTest extends TestCase
     /**
      * AC-8 (docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md): every
      * agent in the single agent->profile map (aiInstallerAgentProfiles(), script-registry.php) must
-     * have a permission composition, except the two documented, intentional v0.6-coordination-gate
-     * exclusions (release-auditor, architecture-plan-writer — both dirty from the concurrent v0.6
-     * program). This prevents the two maps from silently forking as new agents are added.
+     * have a permission composition, except the one remaining documented, intentional exclusion
+     * (architecture-plan-writer — pending Slice C of
+     * docs/tickets/arch-todo-complete-permission-composition-migration/plan.md; release-auditor
+     * was migrated in that plan's Slice A). This prevents the two maps from silently forking as
+     * new agents are added.
      */
     public function testCompositionsKeySetMatchesAgentProfilesExceptDocumentedExclusions(): void
     {
         require_once __DIR__ . '/../../tools/ai/install/script-registry.php';
 
-        $intentionalExclusions = ['release-auditor', 'architecture-plan-writer'];
+        $intentionalExclusions = ['architecture-plan-writer'];
 
         $compositionKeys = array_keys(aiPermissionAgentCompositions());
         $profileKeys = array_keys(aiInstallerAgentProfiles());
