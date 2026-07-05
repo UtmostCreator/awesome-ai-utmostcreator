@@ -41,6 +41,8 @@ When changing a function, method, config key, or any named symbol:
 
 ## Test-First Ordering
 
+For feature work, restate the request as a verifiable goal before coding — turn an imperative task into a testable outcome (for example, "add validation" becomes "write tests for the invalid inputs, then make them pass"), then let that goal drive the loop.
+
 For bug fixes:
 
 1. verify existing tests pass without your changes

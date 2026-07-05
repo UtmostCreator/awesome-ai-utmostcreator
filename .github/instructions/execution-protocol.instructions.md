@@ -34,6 +34,7 @@ When changing a function, method, config key, or any symbol used by other code:
 
 ## Test-First Ordering
 
+For feature work, restate the request as a verifiable goal before coding (for example, "add validation" becomes "write tests for the invalid inputs, then make them pass"), then let that goal drive the loop.
 For bug fixes: verify existing tests pass first, write a failing regression test, apply the fix, re-verify.
 For test additions alongside code changes: stash implementation, confirm existing tests pass, apply test changes, confirm expected state.
 Ask before changing implementation code if existing tests have not been confirmed passing.
