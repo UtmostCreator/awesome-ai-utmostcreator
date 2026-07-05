@@ -1,0 +1,46 @@
+---
+name: replace-placeholders
+description: Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values
+argument-hint: 'Optional: --files=<a,b,c> to limit scope, --set KEY=VALUE for ad-hoc overrides'
+---
+
+## What I Do
+
+I wrap the existing `php tools/ai/ai.php placeholders --apply` command — I do not
+reimplement placeholder substitution. It replaces registry-mapped bracketed
+placeholder markers (see `packages/ai-universal-rules/placeholders.json` for the
+full list) in installed files with the matching `.ai/project.yml` values.
+
+## When To Use Me
+
+- after install/upgrade when unresolved bracketed placeholder markers remain in
+  `AGENTS.md`, `docs/ai/**`, `.github/**`, or `.opencode/**`
+- after editing `.ai/project.yml` with new project facts
+- when a maintainer wants a narrow, explicit files scope instead of a full scan
+
+## Do Not Use Me For
+
+- writing a new shell or ad-hoc replacer — always shell out to the existing
+  `php tools/ai/ai.php placeholders --apply`, never re-implement substitution
+- touching `packages/**` template sources — the underlying command's scan roots
+  are fixed to `AGENTS.md`, `docs/ai`, `.github`, `.opencode` and structurally
+  cannot reach `packages/**`
+- resolving a token whose registry entry is `substitute: false` (a documentation
+  device or format slot) — those must stay literal, by design
+
+## Workflow
+
+1. run `php tools/ai/ai.php placeholders --fail` first to see what remains unresolved
+2. run `php tools/ai/ai.php placeholders --apply` (add `--files=<a,b,c>` to limit
+   scope, or `--set KEY=VALUE` for a one-off override not yet in `.ai/project.yml`)
+3. re-run `php tools/ai/ai.php placeholders --fail` to confirm required tokens are gone
+4. report which files changed; never hand-edit a rendered file to remove a token
+
+## Gotchas
+
+- a token only resolves when its `.ai/project.yml` value is set and not the
+  literal string `unknown` — leaving a value as `unknown` is expected, not a bug
+- `substitute: false` tokens (see `packages/ai-universal-rules/placeholders.json`)
+  are intentionally never touched by `--apply`
+- `docs/ai/generated/**` is intentionally skipped — it is regenerated, not
+  placeholder-filled

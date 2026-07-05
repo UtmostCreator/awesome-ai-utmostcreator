@@ -46,7 +46,7 @@
         "package:package-capability": 43,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
-        "package:workflow-template": 21,
+        "package:workflow-template": 22,
         "root:adapter-doc": 1,
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
@@ -58,11 +58,11 @@
         "root:generator": 1,
         "root:github-copilot-agent": 22,
         "root:github-copilot-instruction": 22,
-        "root:github-copilot-prompt": 21,
-        "root:github-copilot-skill": 22,
+        "root:github-copilot-prompt": 22,
+        "root:github-copilot-skill": 23,
         "root:opencode-agent": 14,
-        "root:opencode-command": 23,
-        "root:opencode-skill": 25,
+        "root:opencode-command": 24,
+        "root:opencode-skill": 26,
         "root:php-reference": 3,
         "root:root-doc": 19,
         "root:schema": 1,
@@ -1249,6 +1249,14 @@
         {
             "scope": "package",
             "type": "workflow-template",
+            "name": "replace-placeholders",
+            "path": "packages/ai-universal-rules/templates/workflows/replace-placeholders.md",
+            "runtime": "dual-runtime",
+            "description": "Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
             "name": "repo-investigation",
             "path": "packages/ai-universal-rules/templates/workflows/repo-investigation.md",
             "runtime": "dual-runtime",
@@ -2185,6 +2193,14 @@
         {
             "scope": "root",
             "type": "github-copilot-prompt",
+            "name": "replace-placeholders",
+            "path": ".github/prompts/replace-placeholders.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
             "name": "repo-investigation",
             "path": ".github/prompts/repo-investigation.prompt.md",
             "runtime": "github-copilot",
@@ -2357,6 +2373,14 @@
             "path": ".github/skills/release-safety/SKILL.md",
             "runtime": "github-copilot",
             "description": "Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "replace-placeholders",
+            "path": ".github/skills/replace-placeholders/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values"
         },
         {
             "scope": "root",
@@ -2641,6 +2665,14 @@
         {
             "scope": "root",
             "type": "opencode-command",
+            "name": "replace-placeholders",
+            "path": ".opencode/commands/replace-placeholders.md",
+            "runtime": "opencode",
+            "description": "Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-command",
             "name": "repo-investigation",
             "path": ".opencode/commands/repo-investigation.md",
             "runtime": "opencode",
@@ -2853,6 +2885,14 @@
             "path": ".opencode/skills/release-safety/SKILL.md",
             "runtime": "opencode",
             "description": "Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-skill",
+            "name": "replace-placeholders",
+            "path": ".opencode/skills/replace-placeholders/SKILL.md",
+            "runtime": "opencode",
+            "description": "Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values"
         },
         {
             "scope": "root",

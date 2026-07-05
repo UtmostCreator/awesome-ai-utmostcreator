@@ -222,4 +222,52 @@ class PlaceholderRegistryTest extends TestCase
             @rmdir($target);
         }
     }
+
+    /**
+     * P4.9 of docs/tickets/arch-todo-stack-permission-placeholder-skill-trio-20260705T151632Z/plan.md:
+     * confirms the `replace-placeholders` skill's underlying command (`placeholders --apply`,
+     * which the skill wraps unchanged, per the ticket's "no new shell replacer" contract)
+     * never touches a `packages/**` path, so package template sources always keep their
+     * `<TOKEN>` syntax for every other project that installs this kit.
+     */
+    public function testApplyNeverTouchesPackagesTemplateSources(): void
+    {
+        $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai-registry-packages-scope-' . bin2hex(random_bytes(4));
+        mkdir($target . '/.ai', 0777, true);
+        mkdir($target . '/docs/ai', 0777, true);
+        mkdir($target . '/packages/ai-universal-rules/templates/core', 0777, true);
+
+        try {
+            copy(
+                self::$repoRoot . '/packages/ai-universal-rules/placeholders.json',
+                $target . '/.ai/placeholders.json'
+            );
+            file_put_contents($target . '/.ai/project.yml', "projectName: \"acme-portal\"\n");
+            file_put_contents($target . '/docs/ai/sample.md', "<PROJECT_NAME>\n");
+            $templateContent = "<PROJECT_NAME>\n";
+            file_put_contents($target . '/packages/ai-universal-rules/templates/core/sample.template.md', $templateContent);
+
+            \aiPlaceholderApplyFromProjectValues($target, null);
+
+            self::assertStringContainsString('acme-portal', (string) file_get_contents($target . '/docs/ai/sample.md'));
+            self::assertSame(
+                $templateContent,
+                (string) file_get_contents($target . '/packages/ai-universal-rules/templates/core/sample.template.md'),
+                'packages/** template sources must keep <TOKEN> syntax untouched — they are not one of the fixed scan roots'
+            );
+        } finally {
+            @unlink($target . '/.ai/placeholders.json');
+            @unlink($target . '/.ai/project.yml');
+            @unlink($target . '/docs/ai/sample.md');
+            @unlink($target . '/packages/ai-universal-rules/templates/core/sample.template.md');
+            @rmdir($target . '/packages/ai-universal-rules/templates/core');
+            @rmdir($target . '/packages/ai-universal-rules/templates');
+            @rmdir($target . '/packages/ai-universal-rules');
+            @rmdir($target . '/packages');
+            @rmdir($target . '/docs/ai');
+            @rmdir($target . '/docs');
+            @rmdir($target . '/.ai');
+            @rmdir($target);
+        }
+    }
 }
