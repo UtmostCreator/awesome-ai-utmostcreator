@@ -33,6 +33,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `mktemp`
 - `node`
 - `npm`
+- `npx`
 - `pnpm`
 - `realpath`
 - `sed`
@@ -128,6 +129,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/internal/ai-verify/10-scope.sh`
 - `scripts/ai/internal/ai-verify/20-shipped-filters.sh`
 - `scripts/ai/internal/ai-verify/30-linecount.sh`
+- `scripts/ai/internal/ai-verify/35-jscpd.sh`
 - `scripts/ai/internal/ai-verify/40-step-runner.sh`
 - `scripts/ai/internal/ai-verify/90-run.sh`
 - `scripts/ai/internal/lib/00-env.sh`
