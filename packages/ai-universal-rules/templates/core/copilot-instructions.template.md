@@ -87,7 +87,7 @@ Follow the default task flow in `docs/ai/workflow.md`: load task context -> iden
 
 - Keep logic close to its existing owner and add focused tests when behavior changes.
 - Prioritize review around: `<REVIEW_PRIORITIES>`
-- Use `<PRIMARY_VERIFY_COMMAND>` as the main verification command, but start with the smallest relevant verification and escalate only when needed.
+- Main verification command: `<PRIMARY_VERIFY_COMMAND>`. Start with the smallest relevant verification and escalate only when needed.
 - Use the verification ladder: focused proof first -> affected layer tests second -> broader repository verification third -> build as a smoke check when relevant -> release-safety review only when risk warrants it.
 - For `medium` and `high` risk changes, define rollback or disable path and post-deploy confirmation signal.
 - For migrations that drop, rename, or restructure existing data, use expand-contract.

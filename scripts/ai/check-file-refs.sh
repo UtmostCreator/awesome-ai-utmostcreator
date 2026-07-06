@@ -95,7 +95,14 @@ is_implicit_entrypoint() {
 }
 
 # Collect candidate files (tracked, under scan_path, optionally ext-filtered).
-mapfile -t candidates < <(git ls-files -- "$scan_path")
+# graphify-out/** is excluded unconditionally (not gated by --all): it is a
+# third-party, machine-generated knowledge-graph cache tracked in git (see
+# docs/ai/adapter-contract.md "Out-Of-Band Local Additions"), not a doc or
+# asset this tool's orphan check is meant to evaluate. Its ~1k content-
+# addressed cache blobs (graphify-out/cache/ast/**) have random hash
+# basenames that are never referenced elsewhere by design, so including them
+# only produces noise and multiplies the rg-per-candidate scan cost.
+mapfile -t candidates < <(git ls-files -- "$scan_path" ':!graphify-out/**')
 
 orphans=()
 for path in "${candidates[@]+${candidates[@]}}"; do
@@ -122,7 +129,7 @@ for path in "${candidates[@]+${candidates[@]}}"; do
     # wrongly mark referenced files as orphans.
     hits="$(rg --no-messages --fixed-strings --files-with-matches -- "$base" . \
         -g '!vendor/**' -g '!node_modules/**' -g '!.git/**' \
-        -g '!.repomix-context/**' 2>/dev/null || true)"
+        -g '!.repomix-context/**' -g '!graphify-out/**' 2>/dev/null || true)"
 
     # Strip rg's leading ./ and the file's own path, then check for any
     # remaining reference.

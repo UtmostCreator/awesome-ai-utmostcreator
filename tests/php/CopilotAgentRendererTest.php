@@ -345,7 +345,7 @@ class CopilotAgentRendererTest extends TestCase
         $out = aiInstallerRenderCopilotAgent($this->$templateMethod(), $agentId, '/project/scripts/ai');
 
         $this->assertStringContainsString('handoffs:', $out);
-        $this->assertStringContainsString("agent: {$expectedTargetAgent}", $out);
+        $this->assertStringContainsString("agent: '{$expectedTargetAgent}'", $out);
 
         // Prose "Recommended next step" baseline must still be present (case-insensitive
         // heading match) alongside the new structured handoffs frontmatter.
@@ -360,7 +360,7 @@ class CopilotAgentRendererTest extends TestCase
             '/project/scripts/ai'
         );
         $this->assertStringContainsString('handoffs:', $out);
-        $this->assertStringContainsString('agent: implementer', $out);
+        $this->assertStringContainsString("agent: 'implementer'", $out);
         $this->assertMatchesRegularExpression('/recommended next step/i', $out);
     }
 
@@ -368,8 +368,8 @@ class CopilotAgentRendererTest extends TestCase
     {
         $out = aiInstallerRenderCopilotAgent($this->reviewerTemplate(), 'reviewer', '/project/scripts/ai');
         $this->assertStringContainsString('handoffs:', $out);
-        $this->assertStringContainsString('agent: implementer', $out);
-        $this->assertStringContainsString('agent: refactorer', $out);
+        $this->assertStringContainsString("agent: 'implementer'", $out);
+        $this->assertStringContainsString("agent: 'refactorer'", $out);
         $this->assertMatchesRegularExpression('/recommended next step/i', $out);
 
         // Both the Plan-3 clarification section and the Plan-4 pre-flight framing section
@@ -385,5 +385,36 @@ class CopilotAgentRendererTest extends TestCase
         // to prior behavior, i.e. no `handoffs:` key at all.
         $out = aiInstallerRenderCopilotAgent($this->researcherTemplate(), 'researcher', '/project/scripts/ai');
         $this->assertStringNotContainsString('handoffs:', $out);
+    }
+
+    public function testHandoffsBlockQuotesLabelAndAgentContainingYamlSignificantCharacters(): void
+    {
+        // Regression guard: label/agent must be single-quoted (with '' escaping) exactly
+        // like prompt already is, so a future label/agent containing a colon, quote, or
+        // other YAML-significant character cannot produce invalid frontmatter.
+        $block = aiCopilotRenderHandoffsBlock([
+            [
+                'label'  => "Fix: it's broken",
+                'agent'  => "weird'agent",
+                'prompt' => 'Do the thing.',
+                'send'   => true,
+                'model'  => null,
+            ],
+        ]);
+
+        $this->assertStringContainsString("label: 'Fix: it''s broken'", $block);
+        $this->assertStringContainsString("agent: 'weird''agent'", $block);
+
+        // Manual single-quoted-YAML-scalar round-trip (no yaml extension or symfony/yaml
+        // dependency available in this environment): a single-quoted YAML scalar unescapes
+        // by stripping the outer quotes and replacing '' with '. Proves the quoting actually
+        // round-trips to the original value, not just that the expected substring is present.
+        $this->assertMatchesRegularExpression("/^  - label: '.*'\$/m", $block);
+        if (preg_match("/^  - label: '(.*)'\$/m", $block, $m)) {
+            $this->assertSame("Fix: it's broken", str_replace("''", "'", $m[1]));
+        }
+        if (preg_match("/^    agent: '(.*)'\$/m", $block, $m)) {
+            $this->assertSame("weird'agent", str_replace("''", "'", $m[1]));
+        }
     }
 }
