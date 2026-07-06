@@ -654,6 +654,19 @@ final class PermissionComposeTest extends TestCase
         foreach (array_keys(aiPermissionAgentCompositions()) as $agent) {
             $model = aiPermissionCompose($agent)['model'];
             foreach (self::aiPermissionMutatingVcsAllowPatterns() as $pattern) {
+                // Sole intentional carve-out: super-implementer is the one pinned power
+                // agent permitted to commit without a prompt (compositions.php exception).
+                // Every other agent (and every other mutating VCS pattern for
+                // super-implementer itself) must still be ask/deny, never allow.
+                if ($agent === 'super-implementer' && $pattern === 'git commit*') {
+                    $effect = $model[aiPermissionModelKey('bash', $pattern)]['effect'] ?? null;
+                    self::assertSame(
+                        'allow',
+                        $effect,
+                        "super-implementer must be the one agent that allows 'git commit*'"
+                    );
+                    continue;
+                }
                 $effect = $model[aiPermissionModelKey('bash', $pattern)]['effect'] ?? null;
                 self::assertNotSame(
                     'allow',

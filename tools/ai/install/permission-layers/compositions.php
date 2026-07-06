@@ -589,6 +589,17 @@ function aiPermissionAgentCompositions(): array
             starBaseline: 'allow',
             allowPacks: ['impl.sg_allow'],
             askPacks: ['core.safe_read.raw_read_ask_gate'],
+            exceptions: [
+                // Sole intentional carve-out: super-implementer is the one power agent that
+                // may commit without a prompt. Every OTHER composed agent inherits
+                // 'git commit*': ask (impl profile via core:git-mutating-ask) or falls through
+                // to its '*' deny/ask floor, so no other agent can commit silently. The
+                // immutable hard-deny floor still blocks 'git push*' for this agent too, so
+                // silent commits stay local-only. PermissionComposeTest::
+                // testMutatingVcsCommandsAreNeverAllowed exempts super-implementer for exactly
+                // this pattern (and only this pattern).
+                aiPermissionBashAllow(aiPatternGit('commit*')),
+            ],
         ),
 
         'post-install' => aiPermissionAgentSpecImpl(
