@@ -29,25 +29,56 @@
 set -euo pipefail
 
 # ── Arguments ────────────────────────────────────────────────────────────────
-TARGET="${1:-}"
+TARGET=""
 PROJECT_NAME=""
 FORCE_FLAG=""
 ALLOW_PLACEHOLDERS_FLAG="--allow-placeholders"
+# Defaults preserve historical behavior (full dual-runtime governance install) when no
+# --profile/--runtime is passed, while the single-runtime wrapper scripts
+# (install-opencode-kit.sh / install-copilot-kit.sh / install-claude-kit.sh) can now
+# actually scope the install by forwarding these flags. See
+# docs/tickets/arch-todo-install-verification-fixes-20260706-011500.
+PROFILE="full-governance"
+RUNTIME="both"
 
-# Parse optional arguments after the target path
-for arg in "${@:2}"; do
-    case "$arg" in
-    --force) FORCE_FLAG="--force" ;;
-    --strict-placeholders) ALLOW_PLACEHOLDERS_FLAG="" ;;
-    --*) ;; # ignore unknown flags for forward-compatibility
-    *) PROJECT_NAME="$arg" ;;
+# Parse arguments. Supports both the positional form
+#   install-ai-kit.sh /path/to/project [project-name] [--force]
+# and the flag form used by the wrapper scripts
+#   install-ai-kit.sh --runtime opencode --profile opencode --target /path
+while (($# > 0)); do
+    case "$1" in
+    --force) FORCE_FLAG="--force"; shift ;;
+    --strict-placeholders) ALLOW_PLACEHOLDERS_FLAG=""; shift ;;
+    --target) TARGET="${2:-}"; shift 2 ;;
+    --target=*) TARGET="${1#*=}"; shift ;;
+    --profile) PROFILE="${2:-}"; shift 2 ;;
+    --profile=*) PROFILE="${1#*=}"; shift ;;
+    --runtime) RUNTIME="${2:-}"; shift 2 ;;
+    --runtime=*) RUNTIME="${1#*=}"; shift ;;
+    --project-name) PROJECT_NAME="${2:-}"; shift 2 ;;
+    --project-name=*) PROJECT_NAME="${1#*=}"; shift ;;
+    --*) shift ;; # ignore unknown flags for forward-compatibility
+    *)
+        # First bare positional is the target path; second is the project name.
+        if [[ -z "$TARGET" ]]; then
+            TARGET="$1"
+        else
+            PROJECT_NAME="$1"
+        fi
+        shift
+        ;;
     esac
 done
 
 if [[ -z "$TARGET" ]]; then
     echo "Usage: bash install-ai-kit.sh /path/to/project [project-name] [--force] [--strict-placeholders]"
+    echo "       bash install-ai-kit.sh --target /path/to/project [--profile <name>] [--runtime <name>]"
     echo ""
     echo "Options:"
+    echo "  --target <dir>   Target project root (positional first arg also accepted)."
+    echo "  --profile <name> Install profile (default: full-governance)."
+    echo "  --runtime <name> Runtime override: github-copilot|opencode|claude-code|both (default: both)."
+    echo "  --project-name <n> Override inferred project name."
     echo "  --force   Overwrite existing managed files in the target."
     echo "            Use on reinstalls to pick up updated templates."
     echo "  --strict-placeholders"
@@ -60,6 +91,7 @@ if [[ -z "$TARGET" ]]; then
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name --force"
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name project-name --force"
     echo "  bash install-ai-kit.sh /Users/you/Herd/project-name --strict-placeholders"
+    echo "  bash install-ai-kit.sh --target /Users/you/Herd/project-name --runtime opencode --profile opencode"
     exit 1
 fi
 
@@ -127,13 +159,13 @@ echo ""
 echo "==> Installing AI workflow kit"
 echo "    Target:  $TARGET"
 echo "    Project: $PROJECT_NAME"
-echo "    Profile: full-governance  |  Runtime: both (Copilot + OpenCode)"
+echo "    Profile: $PROFILE  |  Runtime: $RUNTIME"
 echo ""
 
 php tools/ai/install-ai-kit.php \
     --target "$TARGET" \
-    --profile full-governance \
-    --runtime both \
+    --profile "$PROFILE" \
+    --runtime "$RUNTIME" \
     --project-name "$PROJECT_NAME" \
     --backup \
     --verify-after \

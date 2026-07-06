@@ -1,0 +1,18 @@
+{
+  "name": "ai-kit-verify-config-example",
+  "private": true,
+  "description": "Copy-paste starting point for scripts/ai/ai-verify-{js,ts,vue,html}.sh — config only, not a real app.",
+  "type": "module",
+  "dependencies": {
+    "vue": "^3.5.39"
+  },
+  "devDependencies": {
+    "eslint": "^10.6.0",
+    "@biomejs/biome": "^2.5.2",
+    "typescript": "^6.0.3",
+    "vue-tsc": "^3.3.6",
+    "vitest": "^4.1.9",
+    "@playwright/test": "^1.61.1",
+    "htmlhint": "^1.9.2"
+  }
+}
