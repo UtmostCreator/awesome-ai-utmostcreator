@@ -29,6 +29,23 @@ and recommended next step. Keep claims evidence-backed.
 List commands that were actually run separately from commands that are only
 recommended. Include failures and skipped checks with reasons.
 
+## Audit-Grade Evidence
+
+These fields raise a handoff from narrative to auditable. Include each one when it
+applies; state `N/A` (with a one-line reason) instead of dropping it silently:
+
+- **Change type**: one of `refactor`, `feature`, `fix`, `docs`, `test`, `infra`, `migration`.
+- **Risk level**: `low`, `medium`, or `high` (drives reviewer attention and depth).
+- **Named failing checks**: name each failing test or check exactly (not "some failures").
+  For every failure, state whether it is pre-existing and why it is unrelated.
+- **Baseline honesty**: if a pre-change baseline was captured, cite it; if not, write
+  "no pre-change baseline captured — cannot prove these failures are pre-existing."
+  Never pair "zero regressions" with unnamed failures.
+- **Behavioural contract** (behaviour-preserving work): what must stay identical, plus
+  `old location -> new location` for moved code and which surface is public vs internal-only.
+- **Reviewer focus**: highest-risk areas in priority order, and the exact commands a
+  reviewer should run to reproduce the verification.
+
 ## Risks And Assumptions
 
 State assumptions that affected the implementation. Use `unknown` where the
