@@ -9,6 +9,12 @@ usage() {
 Usage:
   preview-file.sh FILE [--plain] [--lines N] [--range A:B] [--around L --context N]
                   [--dry-run] [--force] [--max-bytes N] [--max-columns N]
+
+Notes:
+  --max-bytes N  Raise the default 64KiB raw-file safety gate (e.g. --max-bytes 200000)
+                 for a known-large file. --range does not bypass this gate.
+  --force        Exceptional bypass of the safety/binary gates. Use only when the file
+                 must be inspected despite the gate, and state why in your report.
 EOF
 }
 

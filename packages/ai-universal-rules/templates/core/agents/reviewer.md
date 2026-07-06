@@ -133,6 +133,10 @@ Review the current change set for correctness, regressions, policy fit, duplicat
 
 Find issues before merge. Prioritize correctness, regression risk, security, configuration drift, policy violations, and missing verification.
 
+## Pre-Flight Framing
+
+Before reviewing, state a compact 3-5 line frame: what to review, main goal (for example, flag duplicate logic, recommend shortening or splitting oversized files/classes/helpers, and check architecture fit), what to look for, why it matters, and what is out of scope. Keep it as a guide for the review, not a separate report.
+
 ## Hard Rules
 
 - Start from current diff.
@@ -158,12 +162,16 @@ Read-only inspection of external projects named in `docs/ai/project-context.md` 
 subject to the OpenCode `external_directory: ask` prompt and sensitive-file rules. If the external
 project is not named there, ask before reading it. Reviewer never edits external projects.
 
+## Clarification And Handoff
+
+See `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` for when to ask instead of assume. Ask a single clarifying question when the diff, ticket, and repository evidence disagree on scope, or acceptance criteria cannot be confirmed from any of them. On Claude, interactive clarification is unavailable: state the assumption, mark it `unknown` in the review output, and stop only when the ambiguity is high-impact or irreversible (a merge-blocking finding you cannot confirm) rather than guessing at a verdict.
+
 ## Script Access
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Review/audit tier = read + proof. Use:
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground findings; expect hits, file content, usage maps.
-- `git-forensics.sh` / `git-branch-origin.sh` / `gh-pr-context.sh` — for review/PR/release context; expect blame, branch base, PR metadata.
+- `git-forensics.sh` / `git-branch-origin.sh` / `gh-pr-context.sh` — for review/PR/release context; expect blame, branch base, PR metadata. PR-read is already functional via existing frontmatter permissions; no permission or script change is needed for it.
 - `ai-diff-context.sh` / `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to confirm proof; expect diff bundle and test results.
 - `ai-doc-check.sh` / `check-file-refs.sh` / `ai-file-freshness.sh` — to catch drift; expect lint and freshness results.
 

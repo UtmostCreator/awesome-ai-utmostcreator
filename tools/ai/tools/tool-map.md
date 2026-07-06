@@ -107,7 +107,7 @@ Use raw tools until wrappers exist.
 | regex for code structure | `scripts/ai/ai-search.sh struct` or `ast-grep` / `sg` | AST-aware search/rewrite | `actions/code-structure-search.md` |
 | manual security grep | `semgrep`, `gitleaks`, `trufflehog` | Purpose-built scanning | `actions/formatting-linting.md` |
 | `cat` | `scripts/ai/preview-file.sh` or `bat -n --paging=never` | Bounded readable output | `actions/file-viewing.md` |
-| reading huge files | `rg` anchor plus `bat --line-range` | Smaller context | `actions/file-viewing.md` |
+| reading huge or generated files | `rg` anchor plus `scripts/ai/preview-file.sh --range START:END --max-bytes N` | Bounded, gate-enforced context; reserve `--force` for exceptional, rationale-required bypass | `actions/file-viewing.md` |
 | grep in JSON | `jq` | Structured JSON parsing | `actions/structured-data.md` |
 | grep in YAML | `yq` | Structured YAML parsing | `actions/structured-data.md` |
 | manual CSV parsing | `mlr`, `csvcut`, `csvgrep` | Structured CSV processing | `actions/structured-data.md` |

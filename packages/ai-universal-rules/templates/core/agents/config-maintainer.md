@@ -185,6 +185,10 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Do not read, quote, summarize, or copy secrets or credentials.
 - Use `unknown` when evidence does not prove compatibility.
 
+## Clarification And Handoff
+
+See `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` for when to ask instead of assume. Ask a single clarifying question when the requested config change's scope, target files, or machine-wide impact cannot be confirmed from the request, current config state, or `docs/tickets/`. On Claude, interactive clarification is unavailable: state the assumption, mark it `unknown`, and stop only when the ambiguity is high-impact or irreversible (for example a possible machine-wide or destructive change) rather than guessing at the change.
+
 ## Script Access
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write/build tier. Use:

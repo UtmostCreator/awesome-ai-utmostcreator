@@ -134,6 +134,16 @@ When asked to update an existing plan file instead of writing a new one, avoid d
 6. If the same update request repeats immediately after a "no changes needed" result, stop and report the loop instead of retrying the write again.
 7. Never create a second file for the same ticket/task to work around an update — edit the existing `plan-{n}-{short-desc}.md` in place with the `edit` tool.
 
+## Update/Expand Loop Guard
+
+Applies to Update Mode above and Expand mode below alike:
+
+- Read the current file first and identify the smallest heading-bounded section to change; prefer bounded replacement (swap content between one `## Heading` and the next `## `) over re-emitting or appending the full plan — only emit the full document when creating a brand-new plan file.
+- After each edit, re-read the file and verify the intended change actually landed.
+- One attempt = one write/edit operation against the same target plan file in the same run.
+- Stop after 3 failed, blocked, or non-landing attempts on the same target file and report the exact blocker; do not retry with rephrased approaches (mirrors `behavioral-baseline.snippet.md:17-18`).
+- Never re-append a second full copy of the plan to recover from a blocked/failed edit — this is the exact loop this guard exists to prevent.
+
 ## Two-Phase Mode (Parent Tasks First)
 
 Default (single-pass) mode is unchanged: an architect handoff or an already-scoped
@@ -226,6 +236,7 @@ Rules for archiving:
 - Only archive when the file proves completion: every `- [ ]` in both `## Todo Plan` and `## Acceptance Criteria` is now `- [x]`. If any item is still unchecked, do not archive; leave the plan in place.
 - The archive target stays inside `docs/tickets/**`, so it is within this agent's allowed write surface. Use the `write` tool to create `archive/DONE-plan-{n}-{short-desc}.md` with the full plan contents (use `mkdir -p docs/tickets/{branch-name}/archive` first; it is allowed under the `mkdir -p docs/tickets/*` rule).
 - This agent's `bash` permission denies `mv`, `cp`, and `rm`, so do NOT shell-move the file. Instead: (1) `write` the full plan to the new `archive/DONE-plan-{n}-{short-desc}.md` path with the `DONE-` prefix applied, then (2) replace the original `plan-{n}-{short-desc}.md` with a one-line tombstone pointing to the archived copy, e.g. `Archived: ./archive/DONE-plan-{n}-{short-desc}.md (all Todo items and Acceptance Criteria complete on {timestamp}).` Do not attempt to delete the original via shell.
+- Partial-state handling before writing (never guess or recreate blindly): archive exists, original not yet tombstoned -> tombstone the original only; archive missing, original still active -> write the archive copy, then tombstone the original; archive exists and original already tombstoned -> stop, already archived (no-op); archive missing but original already tombstoned -> stop and report inconsistent state.
 - If multiple plans on the same branch complete, archive each one under the same `archive/` folder, each keeping its own `DONE-plan-{n}-{short-desc}.md` name.
 - Record the archive action in your Final Output (archived path + completion evidence).
 
