@@ -15,6 +15,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': deny
     'pwd': allow
     'ls *': allow
     'fd *': allow
@@ -51,7 +52,6 @@ permission:
     'bash scripts/ai/repomix-freshness.sh *': allow
     'php tools/ai/validate-agent-spec.php *': allow
     'bash scripts/ai/ai-verify.sh *': ask
-    '*': deny
 agent_assessment:
   risk_level: medium
   decision: approve_with_minor_fixes

@@ -142,6 +142,75 @@ final class PermissionRenderAdaptersTest extends TestCase
     }
 
     /**
+     * Regression: OpenCode's permission engine resolves bash rules via `.findLast()` over
+     * the declared ruleset in file order (confirmed against opencode's own
+     * permission/index.ts `evaluate()` and docs.opencode.ai/docs/permissions -- "last
+     * matching rule winning... put the catch-all rule first, more specific rules after
+     * it"). The '*' bash entry must therefore always render as the FIRST entry immediately
+     * after `bash:`, regardless of where it falls in the composed $model array's own
+     * internal order -- otherwise it silently overrides every specific allow/ask rule
+     * declared before it, since '*' matches every possible command string. This was a real,
+     * repo-wide bug: every composed agent previously rendered '*' last.
+     */
+    public function testRenderOpenCodeBlockAlwaysEmitsStarBashEntryFirstRegardlessOfModelOrder(): void
+    {
+        // Deliberately construct $model with '*' LAST in insertion order (the exact shape
+        // that produced the bug) to prove the renderer does not simply preserve model order.
+        $model = [
+            aiPermissionModelKey('bash', 'bash scripts/ai/query-usage.sh *') => [
+                'permission' => 'bash', 'pattern' => 'bash scripts/ai/query-usage.sh *', 'effect' => 'allow', 'class' => 'layer', 'layer' => 'test',
+            ],
+            aiPermissionModelKey('bash', 'git status*') => [
+                'permission' => 'bash', 'pattern' => 'git status*', 'effect' => 'allow', 'class' => 'layer', 'layer' => 'test',
+            ],
+            aiPermissionModelKey('bash', '*') => [
+                'permission' => 'bash', 'pattern' => '*', 'effect' => 'deny', 'class' => 'floor', 'layer' => 'test',
+            ],
+        ];
+        $render = aiPermissionRenderTaskAsk();
+
+        $rendered = aiPermissionRenderOpenCodeBlock($model, $render);
+        $lines = explode("\n", $rendered);
+
+        $bashIdx = array_search('  bash:', $lines, true);
+        self::assertNotFalse($bashIdx, 'rendered output must contain a bash: block');
+        self::assertSame(
+            "    '*': deny",
+            $lines[$bashIdx + 1],
+            "'*' must be the first entry immediately after 'bash:', not wherever it fell in \$model's order"
+        );
+        self::assertStringContainsString("    'bash scripts/ai/query-usage.sh *': allow", $rendered);
+        self::assertStringContainsString("    'git status*': allow", $rendered);
+
+        // The specific allow entries must appear AFTER the star (this is what makes them
+        // correctly override it under findLast() semantics).
+        $starPos = strpos($rendered, "    '*': deny");
+        $queryUsagePos = strpos($rendered, "'bash scripts/ai/query-usage.sh *': allow");
+        self::assertLessThan($queryUsagePos, $starPos, 'the star entry must be positioned before the specific overrides');
+    }
+
+    /**
+     * Regression: confirms the fix holds for a real, live composed agent (not just a
+     * synthetic model), since a subtle change to aiPermissionComposeFromSpec's internal
+     * ordering could theoretically still produce '*' first in some but not all agents.
+     */
+    public function testResearcherComposedModelRendersStarBashEntryFirst(): void
+    {
+        $result = aiPermissionCompose('researcher');
+        $compositions = aiPermissionAgentCompositions();
+        $rendered = aiPermissionRenderOpenCodeBlock($result['model'], $compositions['researcher']['render']);
+        $lines = explode("\n", $rendered);
+
+        $bashIdx = array_search('  bash:', $lines, true);
+        self::assertNotFalse($bashIdx);
+        self::assertMatchesRegularExpression(
+            '/^\s+["\']\*["\']:\s*(allow|ask|deny)$/',
+            $lines[$bashIdx + 1],
+            "researcher's rendered bash: block must have '*' as its first entry"
+        );
+    }
+
+    /**
      * Slice B: proves the extended `tickets` edit surface produces all 8 path spellings
      * (plus the explicit '*': deny baseline) that architecture-plan-writer.md ships.
      */

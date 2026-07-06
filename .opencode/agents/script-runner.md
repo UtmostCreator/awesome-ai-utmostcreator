@@ -15,6 +15,7 @@ permission:
   task: deny
   ask: allow
   bash:
+    "*": deny
     "pwd": allow
     "ls -1 scripts/ai/*.sh | sort": allow
     "git status*": allow
@@ -78,7 +79,6 @@ permission:
     "bash scripts/ai/prune-shipped-targets.sh -h": allow
     "bash scripts/ai/prune-shipped-targets.sh --apply": ask
     "bash scripts/ai/prune-shipped-targets.sh --apply *": ask
-    "*": deny
 ---
 
 # Script Runner Agent

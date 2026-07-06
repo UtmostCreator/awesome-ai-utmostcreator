@@ -13,6 +13,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -d *': allow
@@ -84,7 +85,6 @@ permission:
     'bash scripts/ai/ai-install-coverage.sh *': allow
     'php tools/ai/validate-*.php *': allow
     'bash scripts/ai/ai-verify.sh *': ask
-    '*': deny
 agent_assessment:
   risk_level: medium
   decision: approve_with_minor_fixes

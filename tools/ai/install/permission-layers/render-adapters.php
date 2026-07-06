@@ -89,19 +89,31 @@ function aiPermissionRenderOpenCodeBlock(array $model, array $render): string
     }
 
     // Any bash entry whose effect exactly matches the '*' wildcard's effect is a no-op
-    // restatement (the runtime already falls through to '*' for that pattern) — omitting it
-    // shrinks the rendered file with zero behavior change. This mirrors what hand-authored
-    // agent files already did (they never explicitly restated every hard-deny entry either),
-    // and is required to keep composed agents under the shipped .opencode/agents/*.md line
-    // budget (docs/ai/ai-file-standards.md).
+    // restatement — omitting it shrinks the rendered file with zero behavior change. This
+    // mirrors what hand-authored agent files already did (they never explicitly restated
+    // every hard-deny entry either), and is required to keep composed agents under the
+    // shipped .opencode/agents/*.md line budget (docs/ai/ai-file-standards.md).
     $starEffect = $model[aiPermissionModelKey('bash', '*')]['effect'] ?? null;
 
+    // OpenCode's permission engine resolves bash rules by `.findLast()` over the declared
+    // ruleset in file order (confirmed against opencode's own permission/index.ts
+    // `evaluate()` and its docs: "Rules are evaluated by pattern match, with the last
+    // matching rule winning... put the catch-all rule first, more specific rules after
+    // it"). The '*' entry is therefore emitted FIRST, immediately after `bash:` — every
+    // more specific entry that follows it in the array (in unchanged relative order)
+    // correctly overrides it. Emitting '*' anywhere else (previously: wherever it fell in
+    // $model's composition order, which was last for every affected agent) would make it
+    // silently override every specific allow/ask rule declared before it instead of the
+    // other way around, since '*' matches every possible command string.
     $lines[] = '  bash:';
+    if ($starEffect !== null) {
+        $lines[] = '    ' . $quote . '*' . $quote . ': ' . $starEffect;
+    }
     foreach ($model as $entry) {
-        if ($entry['permission'] !== 'bash') {
+        if ($entry['permission'] !== 'bash' || $entry['pattern'] === '*') {
             continue;
         }
-        if ($entry['pattern'] !== '*' && $starEffect !== null && $entry['effect'] === $starEffect) {
+        if ($starEffect !== null && $entry['effect'] === $starEffect) {
             continue;
         }
         $lines[] = '    ' . $quote . $entry['pattern'] . $quote . ': ' . $entry['effect'];

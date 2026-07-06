@@ -54,6 +54,7 @@ permission:
     'credentials.*': deny
     'auth.json': deny
   bash:
+    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -x *': allow
@@ -208,7 +209,6 @@ permission:
     'code2prompt *': ask
     'php tools/ai/ai.php install * --apply': ask
     'php tools/ai/install-ai-kit.php *': ask
-    '*': deny
 agent_assessment:
   risk_level: high
   decision: approve_with_minor_fixes

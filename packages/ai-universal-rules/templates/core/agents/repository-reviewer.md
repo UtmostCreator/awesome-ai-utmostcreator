@@ -8,6 +8,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': ask
     'command -v *': deny
     'test -f *': deny
     'test -x *': deny
@@ -111,7 +112,6 @@ permission:
     'bash scripts/doctor.sh *': allow
     'php tools/ai/validate-*.php *': allow
     'php tools/ai/generate-*.php --check*': allow
-    '*': ask
     'python3 *': deny
     'php -r *': deny
     '* <<*': deny

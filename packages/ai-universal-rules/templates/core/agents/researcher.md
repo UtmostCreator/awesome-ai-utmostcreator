@@ -18,6 +18,7 @@ permission:
     "docs/tickets/**": allow
   task: ask
   bash:
+    "*": deny
     "command -v *": allow
     "test -f *": allow
     "test -x *": allow
@@ -110,7 +111,6 @@ permission:
     "gh issue view*": allow
     "gh repo view*": allow
     "scc --no-complexity --no-cocomo *": allow
-    "*": deny
 agent_assessment:
   risk_level: medium
   decision: approve_with_minor_fixes

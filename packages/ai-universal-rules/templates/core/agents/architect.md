@@ -17,6 +17,7 @@ permission:
   edit: deny
   task: allow
   bash:
+    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -x *': allow
@@ -91,7 +92,6 @@ permission:
     'shfmt -d *': allow
     'shellcheck *': allow
     'bash scripts/ai/repomix-ensure-fresh.sh *': ask
-    '*': deny
 agent_assessment:
   risk_level: high
   decision: approve

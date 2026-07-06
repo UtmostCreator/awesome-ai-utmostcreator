@@ -50,6 +50,7 @@ permission:
     'auth.json': deny
   task: ask
   bash:
+    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -x *': allow
@@ -152,7 +153,6 @@ permission:
     'git stash apply*': ask
     'git stash drop*': ask
     'git checkout*': ask
-    '*': deny
 agent_assessment:
   risk_level: high
   decision: approve_with_minor_fixes

@@ -8,6 +8,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': ask
     'command -v *': deny
     'test -f *': deny
     'test -x *': deny
@@ -91,7 +92,6 @@ permission:
     'actionlint*': deny
     'shfmt -d *': deny
     'shellcheck *': deny
-    '*': ask
     'python3 *': deny
     'php -r *': deny
     '* <<*': deny

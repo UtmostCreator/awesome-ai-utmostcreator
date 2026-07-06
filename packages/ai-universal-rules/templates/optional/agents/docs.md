@@ -37,6 +37,7 @@ permission:
     'credentials.*': deny
     'auth.json': deny
   bash:
+    '*': deny
     'pwd': allow
     'ls *': allow
     'fd *': allow
@@ -91,7 +92,6 @@ permission:
     'git add*': ask
     'git commit*': ask
     'markdownlint-cli2 *': allow
-    '*': deny
 agent_assessment:
   risk_level: low
   decision: needs_refactor
