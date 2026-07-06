@@ -889,6 +889,14 @@ function aiInstallerApplyPlaceholders(string $targetRoot, string $projectName, a
         '<GLOBAL_OR_SHARED_RULE_SOURCES>' => 'organization instructions, user-level instructions',
         '<OPTIONAL_VERIFY_COMMAND>' => 'unknown',
         '<SCRIPTS_ROOT>' => 'scripts/ai',
+        // arch-todo-copilot-claude-policy-enforcement-20260706-024750 P1-1/P1-2: these two
+        // Copilot `applyTo` globs had no placeholder-map entry at all, so they rendered as the
+        // literal (invalid) token string. No project.yml key exists for them (nor is one added
+        // here — see the ticket's plan for the smaller-blast-radius rationale), so ship a safe,
+        // broadly-applicable default glob. Still user-editable post-install like any other
+        // instruction file; this only prevents shipping a broken `applyTo` value by default.
+        '<TEST_PATH_GLOB>' => '**/*.test.*,**/*.spec.*,**/tests/**,**/test/**,**/__tests__/**',
+        '<FRONTEND_PATH_GLOB>' => '**/*.tsx,**/*.jsx,**/*.vue,**/*.svelte,**/frontend/**,**/client/**,**/web/**,**/ui/**',
         // Project-context extension defaults. Installed projects should overwrite
         // these with concrete values during the first audit.
         '<PRIMARY_STACK>' => 'unknown',
