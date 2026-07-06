@@ -23,6 +23,28 @@ $strict = in_array('--strict', $argv, true);
 $errors = [];
 $warnings = [];
 
+/**
+ * True when the target install manifest indicates a given pack was installed, either via the
+ * recorded packs list or via a managed file entry whose pack matches. Keeps the required-path
+ * contract aligned with what the target's profile actually shipped.
+ */
+function aiInstallSurfaceManifestHasPack(array $manifest, string $pack): bool
+{
+    $packs = $manifest['packs'] ?? null;
+    if (is_array($packs) && in_array($pack, array_map('strval', $packs), true)) {
+        return true;
+    }
+    $files = $manifest['files'] ?? null;
+    if (is_array($files)) {
+        foreach ($files as $meta) {
+            if (is_array($meta) && (string) ($meta['pack'] ?? '') === $pack) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 if ($targetArg !== null || (is_file($root . '/.ai-install-manifest.json') && !is_dir($root . '/packages/ai-universal-rules/templates'))) {
     $manifestPath = $root . '/.ai-install-manifest.json';
     $manifest = json_decode((string) @file_get_contents($manifestPath), true);
@@ -71,7 +93,16 @@ if ($targetArg !== null || (is_file($root . '/.ai-install-manifest.json') && !is
             }
         }
     }
-    foreach (['scripts/ai/ai-search.sh', 'scripts/ai/preview-file.sh', 'tools/ai/validate-install-surface.php', 'docs/ai/POST-INSTALL.md'] as $required) {
+    // Universal minimum: every install profile (single-runtime included) ships these.
+    $requiredTargetPaths = ['scripts/ai/ai-search.sh', 'scripts/ai/preview-file.sh', 'docs/ai/POST-INSTALL.md'];
+    // The installer tool surface (this validator included) only ships with target-tools-pack,
+    // which is full-governance/full only. Require it only when the target manifest says that
+    // pack was installed, so single-runtime targets are not falsely failed for a file their
+    // profile never ships. See docs/tickets/arch-todo-install-verification-fixes-20260706-011500.
+    if (aiInstallSurfaceManifestHasPack($manifest, 'target-tools-pack')) {
+        $requiredTargetPaths[] = 'tools/ai/validate-install-surface.php';
+    }
+    foreach ($requiredTargetPaths as $required) {
         if (!file_exists($root . '/' . $required)) {
             $errors[] = "required target install path missing: {$required}";
         }
