@@ -10,7 +10,11 @@
     "docs/ai/execution-protocol.md",
     "docs/ai/ai-file-standards.md",
     "docs/ai/approval-boundaries.md",
-    "docs/ai/adapter-contract.md"
+    "docs/ai/adapter-contract.md",
+    "docs/ai/tools/ai-search.md",
+    "docs/ai/tools/tool-map.md",
+    "docs/ai/tools/actions/search-evidence.md",
+    "docs/ai/tools/actions/preview-file.md"
   ],
   "watcher": {
     "ignore": [

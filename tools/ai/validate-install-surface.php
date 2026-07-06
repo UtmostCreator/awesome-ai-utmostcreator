@@ -394,7 +394,7 @@ foreach (aiFileLineLimitRules($root, $errors) as $rule) {
         }
         $lines = count(preg_split('/\R/', rtrim((string) file_get_contents($path), "\r\n")) ?: []);
         $relative = relativePath($root, $path);
-        if ($lines > (int) $rule['hard']) {
+        if ($lines > (int) $rule['hard'] && !isset($rule['fail_allowlist'][$relative])) {
             $errors[] = "{$relative} has {$lines} lines, above hard max {$rule['hard']} for {$rule['label']}";
         } elseif ($lines > (int) $rule['soft'] && !isset($rule['warn_allowlist'][$relative])) {
             $warnings[] = "{$relative} has {$lines} lines, above soft max {$rule['soft']} for {$rule['label']}";
@@ -519,7 +519,8 @@ function aiFileLineLimitRules(string $root, array &$errors): array
         $label = (string) ($rule['label'] ?? $rule['id'] ?? 'line-limit rule');
         $soft = (int) ($rule['warn_above'] ?? 0);
         $hard = (int) ($rule['fail_above'] ?? 0);
-        $warnAllowlist = aiFileLineLimitWarnAllowlist($rule);
+        $warnAllowlist = aiFileLineLimitAllowlist($rule, 'warn_allowlist');
+        $failAllowlist = aiFileLineLimitAllowlist($rule, 'fail_allowlist');
         foreach ($patterns as $pattern) {
             $pattern = (string) $pattern;
             if ($pattern === '') {
@@ -531,6 +532,7 @@ function aiFileLineLimitRules(string $root, array &$errors): array
                 'soft' => $soft,
                 'hard' => $hard,
                 'warn_allowlist' => $warnAllowlist,
+                'fail_allowlist' => $failAllowlist,
             ];
         }
     }
@@ -542,11 +544,22 @@ function aiFileLineLimitRules(string $root, array &$errors): array
     return $rules;
 }
 
-/** @return array<string,string> */
-function aiFileLineLimitWarnAllowlist(array $rule): array
+/**
+ * Shared reader for both `warn_allowlist` (soft-max) and `fail_allowlist` (hard-max) policy
+ * entries — same shape (`path` + `reason`), just a different policy key and a different
+ * severity the caller exempts. `fail_allowlist` exists in
+ * packages/ai-universal-rules/policies/ai-file-standards.json (e.g. the graphify skill's
+ * out-of-band SKILL.md, per docs/ai/adapter-contract.md) for third-party/out-of-band content
+ * this repo does not own and cannot trim, matching docs/ai/ai-file-standards.md's own
+ * "Hard max violations should fail validation unless the path is generated or explicitly
+ * allowlisted" rule — this was previously read by no code path at all.
+ *
+ * @return array<string,string>
+ */
+function aiFileLineLimitAllowlist(array $rule, string $key): array
 {
     $allowlist = [];
-    foreach (($rule['warn_allowlist'] ?? []) as $entry) {
+    foreach (($rule[$key] ?? []) as $entry) {
         if (!is_array($entry) || !is_string($entry['path'] ?? null)) {
             continue;
         }

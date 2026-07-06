@@ -33,11 +33,11 @@ Deterministic catalog generated from installer registries.
 - `capabilities-extended` (2 items)
 - `capabilities-governance` (2 items)
 - `policy-pack` (3 items)
-- `scripts-pack` (54 items)
+- `scripts-pack` (59 items)
 - `hooks-pack` (8 items)
 - `ci-pack` (2 items)
 - `evidence-pack` (2 items)
-- `docs-reference-pack` (9 items)
+- `docs-reference-pack` (10 items)
 - `delivery-pack` (2 items)
 - `optional-agents-opencode-pack` (1 items)
 - `optional-agents-copilot-pack` (1 items)
@@ -46,7 +46,7 @@ Deterministic catalog generated from installer registries.
 - `service-boundary-pack` (1 items)
 - `mcp-boundaries-pack` (1 items)
 - `advisor-pack` (4 items)
-- `target-tools-pack` (76 items)
+- `target-tools-pack` (86 items)
 - `shared-templates-pack` (4 items)
 - `package-source-pack` (8 items)
 - `kit-authoring-pack` (4 items)
@@ -68,6 +68,11 @@ Deterministic catalog generated from installer registries.
 - `ai-doc-check` -> `scripts/ai/ai-doc-check.sh`
 - `ai-diff-context` -> `scripts/ai/ai-diff-context.sh`
 - `ai-verify` -> `scripts/ai/ai-verify.sh`
+- `ai-verify-html` -> `scripts/ai/ai-verify-html.sh`
+- `ai-verify-js` -> `scripts/ai/ai-verify-js.sh`
+- `ai-verify-php` -> `scripts/ai/ai-verify-php.sh`
+- `ai-verify-ts` -> `scripts/ai/ai-verify-ts.sh`
+- `ai-verify-vue` -> `scripts/ai/ai-verify-vue.sh`
 - `ai-rollback` -> `scripts/ai/ai-rollback.sh`
 - `ai-edit` -> `scripts/ai/ai-edit.sh`
 - `pre-tool-use` -> `scripts/ai/pre-tool-use.sh`
