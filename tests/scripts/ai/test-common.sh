@@ -466,6 +466,66 @@ test_log_json_event_version() {
 }
 run_test "log_json writes event_version 2.0" test_log_json_event_version
 
+test_log_json_execution_status_success() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "doc-check.passed" '{}' "ai-doc-check"
+    local status
+    status="$(head -1 "$tmpd/events.jsonl" | jq -r '.execution.status')"
+    assert_eq "success" "$status"
+}
+run_test "log_json derives execution.status=success for .passed" test_log_json_execution_status_success
+
+test_log_json_execution_status_failure() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "verify.failed" '{"failures":7}' "ai-verify"
+    local status
+    status="$(head -1 "$tmpd/events.jsonl" | jq -r '.execution.status')"
+    # schema enum uses "error" (not "failure") for failed executions
+    assert_eq "error" "$status"
+}
+run_test "log_json derives execution.status=error for .failed" test_log_json_execution_status_failure
+
+test_log_json_tool_category_from_event() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "guard.start" '{}' "common"
+    local cat
+    cat="$(head -1 "$tmpd/events.jsonl" | jq -r '.tool.category')"
+    assert_eq "guard" "$cat"
+}
+run_test "log_json derives tool.category from event domain" test_log_json_tool_category_from_event
+
+test_log_json_tool_category_null_for_unknown() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "mystery.event" '{}' "caller"
+    local cat status
+    cat="$(head -1 "$tmpd/events.jsonl" | jq -r '.tool.category')"
+    status="$(head -1 "$tmpd/events.jsonl" | jq -r '.execution.status')"
+    assert_eq "null" "$cat"
+    assert_eq "unknown" "$status"
+}
+run_test "log_json category null and status unknown for unmapped event" test_log_json_tool_category_null_for_unknown
+
+test_log_json_details_valid_json() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "verify.failed" '{"failures":7}' "ai-verify"
+    # Regression guard for the historic malformed details.raw (trailing }}}) bug:
+    # the whole line and its details object must be valid, balanced JSON.
+    local failures
+    failures="$(head -1 "$tmpd/events.jsonl" | jq -r '.details.failures')"
+    assert_eq "7" "$failures"
+}
+run_test "log_json emits valid balanced details JSON (no }}} corruption)" test_log_json_details_valid_json
+
 # ── Section: classify_command ─────────────────────────────────────────────────
 
 printf '\nclassify_command\n'
