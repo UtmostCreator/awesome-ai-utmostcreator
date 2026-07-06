@@ -24,6 +24,11 @@ categories for later phases, not active paths in this slice.
 | `scripts/ai/ai-structured.sh` | context | read-only | public | Structured evidence/context helper. |
 | `scripts/ai/ai-task.sh` | context | read-only | public | Task/context helper. |
 | `scripts/ai/ai-test-select.sh` | verify | read-only | public | Test selection helper. |
+| `scripts/ai/ai-verify-html.sh` | verify | read-only | public | Thin `ai-verify.sh --language html` wrapper; no tool logic. |
+| `scripts/ai/ai-verify-js.sh` | verify | read-only | public | Thin `ai-verify.sh --language js` wrapper; no tool logic. |
+| `scripts/ai/ai-verify-php.sh` | verify | read-only | public | Thin `ai-verify.sh --language php` wrapper; no tool logic. |
+| `scripts/ai/ai-verify-ts.sh` | verify | read-only | public | Thin `ai-verify.sh --language ts` wrapper; no tool logic. |
+| `scripts/ai/ai-verify-vue.sh` | verify | read-only | public | Thin `ai-verify.sh --language vue` wrapper; no tool logic. |
 | `scripts/ai/ai-verify.sh` | verify | read-only | public | Verification wrapper. |
 | `scripts/ai/all_in_one.sh` | admin | mutating/unknown | public admin | Administrative all-in-one workflow; not registry-listed in current evidence. |
 | `scripts/ai/build-ai-help-bundle.sh` | admin | read-only/unknown | public admin | Help bundle build helper; not registry-listed in current evidence. |
@@ -165,6 +170,11 @@ for the approval-gated P3-P5 phases. No `scripts/ai/bin/**` or
 | `scripts/ai/ai-doc-check.sh` | verify | `scripts/ai/bin/verify/ai-doc-check.sh` |
 | `scripts/ai/ai-install-coverage.sh` | verify | `scripts/ai/bin/verify/ai-install-coverage.sh` |
 | `scripts/ai/ai-test-select.sh` | verify | `scripts/ai/bin/verify/ai-test-select.sh` |
+| `scripts/ai/ai-verify-html.sh` | verify | `scripts/ai/bin/verify/ai-verify-html.sh` |
+| `scripts/ai/ai-verify-js.sh` | verify | `scripts/ai/bin/verify/ai-verify-js.sh` |
+| `scripts/ai/ai-verify-php.sh` | verify | `scripts/ai/bin/verify/ai-verify-php.sh` |
+| `scripts/ai/ai-verify-ts.sh` | verify | `scripts/ai/bin/verify/ai-verify-ts.sh` |
+| `scripts/ai/ai-verify-vue.sh` | verify | `scripts/ai/bin/verify/ai-verify-vue.sh` |
 | `scripts/ai/ai-verify.sh` | verify | `scripts/ai/bin/verify/ai-verify.sh` |
 | `scripts/ai/check-file-refs.sh` | verify | `scripts/ai/bin/verify/check-file-refs.sh` |
 | `scripts/ai/run-repo-tests.sh` | verify | `scripts/ai/bin/verify/run-repo-tests.sh` |

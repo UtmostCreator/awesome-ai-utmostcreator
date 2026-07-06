@@ -350,6 +350,121 @@
             "writes_paths": [],
             "tier": "tier2"
         },
+        "ai-verify-html": {
+            "id": "ai-verify-html",
+            "source_path": "scripts/ai/ai-verify-html.sh",
+            "installed_path": "scripts/ai/ai-verify-html.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                ".ai-logs/"
+            ],
+            "tier": "tier2"
+        },
+        "ai-verify-js": {
+            "id": "ai-verify-js",
+            "source_path": "scripts/ai/ai-verify-js.sh",
+            "installed_path": "scripts/ai/ai-verify-js.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                ".ai-logs/"
+            ],
+            "tier": "tier2"
+        },
+        "ai-verify-php": {
+            "id": "ai-verify-php",
+            "source_path": "scripts/ai/ai-verify-php.sh",
+            "installed_path": "scripts/ai/ai-verify-php.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                ".ai-logs/"
+            ],
+            "tier": "tier2"
+        },
+        "ai-verify-ts": {
+            "id": "ai-verify-ts",
+            "source_path": "scripts/ai/ai-verify-ts.sh",
+            "installed_path": "scripts/ai/ai-verify-ts.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                ".ai-logs/"
+            ],
+            "tier": "tier2"
+        },
+        "ai-verify-vue": {
+            "id": "ai-verify-vue",
+            "source_path": "scripts/ai/ai-verify-vue.sh",
+            "installed_path": "scripts/ai/ai-verify-vue.sh",
+            "pack": "scripts-pack",
+            "risk": "read-only",
+            "autonomy_level": "act_with_approval",
+            "profiles": [
+                "impl"
+            ],
+            "mutates_state": false,
+            "requires_approval": true,
+            "supports_dry_run": false,
+            "required_tools": [
+                "bash",
+                "git"
+            ],
+            "optional_tools": [],
+            "writes_paths": [
+                ".ai-logs/"
+            ],
+            "tier": "tier2"
+        },
         "ai-rollback": {
             "id": "ai-rollback",
             "source_path": "scripts/ai/ai-rollback.sh",

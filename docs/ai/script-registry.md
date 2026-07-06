@@ -19,6 +19,22 @@ Mutating entries must not be lower than `act_with_approval`. See `docs/ai/capabi
 - `run-test-focused` (`scripts/ai/run-test-focused.sh`) — focused PHPUnit runner for a single `--filter <pattern>` or one test file, bounded by `TEST_TIMEOUT` (default 120s). Distinct from `run-repo-tests` (whole suite) and `ai-test-select` (selects only); use it to prove one class/method quickly.
 - `run-repomix-file` (`scripts/ai/run-repomix-file.sh`) — exact single-file Repomix wrapper. Runs from a repository root, passes one relative file through `repomix --stdin`, defaults to `--compress --style xml`, and writes to the generated single-file context output area unless `--output` is provided.
 
+## Manual-Only Per-Language Verification Wrappers
+
+`ai-verify-html`, `ai-verify-js`, `ai-verify-php`, `ai-verify-ts`, and `ai-verify-vue` are
+thin convenience wrappers around `ai-verify.sh --language <lang>`. They are **manual-only,
+non-autowired scripts**: nothing in any `.opencode/agents/*`, `.github/agents/*`,
+`tools/ai/install/permission-layers/*`, capability, command, skill, or hook references
+them — a human must type the command directly. Each is `risk: read-only`,
+`requires_approval: true`, and writes only bounded reports under a `verify` subdirectory of
+`.ai-logs/` (created at runtime).
+
+- `ai-verify-html` (`scripts/ai/ai-verify-html.sh`) — HTML-surface checks only.
+- `ai-verify-js` (`scripts/ai/ai-verify-js.sh`) — JS-surface checks only.
+- `ai-verify-php` (`scripts/ai/ai-verify-php.sh`) — PHP-surface checks only.
+- `ai-verify-ts` (`scripts/ai/ai-verify-ts.sh`) — TS-surface checks only.
+- `ai-verify-vue` (`scripts/ai/ai-verify-vue.sh`) — Vue-surface checks only.
+
 ## Notable Mutating Scripts
 
 - `prune-shipped-targets` (`scripts/ai/prune-shipped-targets.sh`) — removes the kit-author's local copies of files installed from `packages/ai-universal-rules/templates/**`. `--list` and `--dry-run` are read-only; `--apply` requires a clean worktree (unless `--force`) and snapshots every path to `.ai-backups/prune-shipped-<ts>/` before deletion. Restore with `bash install-ai-kit.sh .`. See `docs/ai/capabilities/evidence-first-execution/examples.md` for the workflow.

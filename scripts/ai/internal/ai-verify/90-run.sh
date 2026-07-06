@@ -60,6 +60,30 @@ scope_has_exact_changed_path() {
     return 1
 }
 
+# Advisory-only composer-unused check (docs/tickets/arch-todo-safe-language-verify-scripts-20260706-003959
+# §8-P6): reports packages that appear unused, but NEVER increments the global
+# $failures tally, mirroring the advisory-tiering pattern already used by
+# check_jscpd (35-jscpd.sh) for its default WARN-only tier. Full-gate only:
+# called exclusively from the PHP VERIFY_FULL branch below. write_verify_report_file
+# is defined in 54-reporting.sh, sourced BEFORE this module by scripts/ai/ai-verify.sh
+# (see that file's load-ordered `source` list), so it is resolvable here both at
+# source time and at this function's call time.
+check_composer_unused() {
+    [[ -x vendor/bin/composer-unused ]] || return 0
+
+    echo "==> vendor/bin/composer-unused (advisory)"
+
+    local output rc=0
+    output="$(vendor/bin/composer-unused 2>&1)" || rc=$?
+    write_verify_report_file composer-unused txt "$output" >/dev/null 2>&1 || true
+
+    if ((rc != 0)); then
+        log_warn "composer-unused reported findings (exit $rc); advisory only, does not fail verification. See ${AI_LOG_DIR:-.ai-logs}/verify/composer-unused.txt"
+    else
+        log_ok "composer-unused: no unused packages reported"
+    fi
+}
+
 ai_verify_run() {
     if [[ "${AI_VERIFY_TEST_MODE:-0}" == "1" ]]; then
         echo "==> repository"
@@ -71,6 +95,7 @@ ai_verify_run() {
         fi
         check_line_counts
         check_jscpd
+        check_plan_status
         echo "==> done"
         # Test mode stubs the heavy steps but still surfaces a real line-count
         # failure so the URGENT-refactor gate is exercisable without a full run.
@@ -83,6 +108,7 @@ ai_verify_run() {
 
     check_line_counts
     check_jscpd
+    check_plan_status
 
     if command -v shellcheck >/dev/null 2>&1; then
         while IFS= read -r script; do
@@ -250,6 +276,17 @@ ai_verify_run() {
             if [[ -x vendor/bin/pest ]]; then
                 run_step 'vendor/bin/pest' vendor/bin/pest
             fi
+
+            # Full-gate-only PHP architecture/dependency checks (§8-P6).
+            if [[ -x vendor/bin/deptrac ]]; then
+                run_step 'vendor/bin/deptrac analyse' vendor/bin/deptrac analyse
+            fi
+
+            if [[ -x vendor/bin/composer-require-checker ]]; then
+                run_step 'vendor/bin/composer-require-checker check composer.json' vendor/bin/composer-require-checker check composer.json
+            fi
+
+            check_composer_unused
         else
             log_warn "Skipping full PHP test suite. Use VERIFY_FULL=1 to run phpunit/pest."
         fi
@@ -285,7 +322,14 @@ ai_verify_run() {
                 run_step_js 'pnpm exec graphql-eslint .' pnpm exec graphql-eslint .
             fi
 
-            if has_package_dependency biome; then
+            # Broadened Biome detection (name-partial `has_package_dependency
+            # biome` alone misses the real npm package `@biomejs/biome` and a
+            # bare `biome.json`/`biome.jsonc` config with no lockfile entry).
+            # This mirrors the dispatch that 50-tool-policy.sh's `can_run_tool
+            # biome` will centralize once that module is wired into the root
+            # loader (a later slice); kept inline here so today's pipeline
+            # benefits without requiring that not-yet-sourced module.
+            if has_package_dependency '@biomejs/biome' || has_package_dependency biome || [[ -f biome.json || -f biome.jsonc ]]; then
                 run_step_js 'pnpm exec biome check .' pnpm exec biome check .
             fi
 
@@ -298,6 +342,19 @@ ai_verify_run() {
                     run_step_js 'pnpm test' pnpm test
                 else
                     log_warn "Skipping full JS test suite. Use VERIFY_FULL=1 to run pnpm test."
+                fi
+            fi
+
+            # Full-gate-only JS checks (§8-P6): dedicated Playwright/Vitest
+            # invocations, distinct from the generic `pnpm test` alias above, so a
+            # project without a `test` script alias still gets these covered.
+            if [[ "$VERIFY_FULL" == "1" ]]; then
+                if has_package_dependency '@playwright/test'; then
+                    run_step_js 'pnpm exec playwright test' pnpm exec playwright test
+                fi
+
+                if has_package_dependency vitest; then
+                    run_step_js 'pnpm exec vitest run' pnpm exec vitest run
                 fi
             fi
         elif command -v npm >/dev/null 2>&1; then
@@ -327,22 +384,27 @@ ai_verify_run() {
         log_warn "Skipping secret scan. Use VERIFY_SECRETS=1 to enable gitleaks."
     fi
 
-    if is_changed_or_branch_scope; then
-        log_warn "Skipping broad security scanners in $AI_VERIFY_SCOPE scope. Use AI_VERIFY_SCOPE=all to run trivy/semgrep/osv-scanner."
+    # Broad, repo-wide security scanners (trivy/semgrep/osv-scanner) stay off by
+    # default in changed/branch scope; they run only when explicitly requested
+    # via AI_VERIFY_SCOPE=all (existing behavior) or the VERIFY_SECURITY=1
+    # opt-in (new), so a per-language/changed-only run never silently pays the
+    # cost of a full-repo scan.
+    if is_changed_or_branch_scope && [[ "${VERIFY_SECURITY:-0}" != "1" ]]; then
+        log_warn "Skipping broad security scanners in $AI_VERIFY_SCOPE scope. Use AI_VERIFY_SCOPE=all or VERIFY_SECURITY=1 to run trivy/semgrep/osv-scanner."
     elif command -v trivy >/dev/null 2>&1; then
         run_step 'trivy fs --scanners vuln,misconfig,secret .' trivy fs --scanners vuln,misconfig,secret .
         if command -v semgrep >/dev/null 2>&1; then
             run_step 'semgrep scan --config auto .' semgrep scan --config auto .
         fi
         if command -v osv-scanner >/dev/null 2>&1; then
-            run_step 'osv-scanner scan --lockfile=.' osv-scanner scan --lockfile=.
+            run_step 'osv-scanner scan source -r .' osv-scanner scan source -r .
         fi
     else
         if command -v semgrep >/dev/null 2>&1; then
             run_step 'semgrep scan --config auto .' semgrep scan --config auto .
         fi
         if command -v osv-scanner >/dev/null 2>&1; then
-            run_step 'osv-scanner scan --lockfile=.' osv-scanner scan --lockfile=.
+            run_step 'osv-scanner scan source -r .' osv-scanner scan source -r .
         fi
     fi
 
