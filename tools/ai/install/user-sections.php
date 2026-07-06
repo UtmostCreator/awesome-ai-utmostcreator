@@ -20,17 +20,32 @@ function aiInstallerCaptureUserSections(string $targetRoot, array $plan): array
         if ($rel === '' || !str_ends_with(strtolower($rel), '.md')) {
             continue;
         }
-        $abs = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-        if (!is_file($abs)) {
+        $resolved = aiInstallerResolveAndReadManagedFile($targetRoot, $rel);
+        if ($resolved === null) {
             continue;
         }
-        $content = (string) file_get_contents($abs);
+        [, $content] = $resolved;
         if (preg_match($pattern, $content, $m) === 1) {
             $captured[$rel] = $m[0];
         }
     }
 
     return $captured;
+}
+
+/**
+ * Resolve a plan-relative target under $targetRoot and read its content when the file exists.
+ * Shared by aiInstallerCaptureUserSections and aiInstallerRestoreUserSections.
+ *
+ * @return array{0:string,1:string}|null [absolutePath, content], or null when the file is missing.
+ */
+function aiInstallerResolveAndReadManagedFile(string $targetRoot, string $rel): ?array
+{
+    $abs = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
+    if (!is_file($abs)) {
+        return null;
+    }
+    return [$abs, (string) file_get_contents($abs)];
 }
 
 /**
@@ -44,11 +59,11 @@ function aiInstallerRestoreUserSections(string $targetRoot, array $userSections)
 {
     $pattern = '/<!-- BEGIN ai-kit:user -->.*?<!-- END ai-kit:user -->/s';
     foreach ($userSections as $rel => $block) {
-        $abs = $targetRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-        if (!is_file($abs)) {
+        $resolved = aiInstallerResolveAndReadManagedFile($targetRoot, $rel);
+        if ($resolved === null) {
             continue;
         }
-        $content = (string) file_get_contents($abs);
+        [$abs, $content] = $resolved;
         if (preg_match($pattern, $content) === 1) {
             $updated = preg_replace($pattern, addcslashes($block, '\\$'), $content, 1);
             if (is_string($updated) && $updated !== $content) {

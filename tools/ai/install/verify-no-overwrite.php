@@ -2,22 +2,9 @@
 
 declare(strict_types=1);
 
-$manifestArg = null;
-foreach ($argv as $arg) {
-    if (str_starts_with($arg, '--manifest=')) {
-        $manifestArg = substr($arg, 11);
-    }
-}
+require_once __DIR__ . '/verify-manifest-args.php';
 
-if ($manifestArg === null) {
-    fwrite(STDERR, "Usage: php tools/ai/install/verify-no-overwrite.php --manifest=<path>\n");
-    exit(1);
-}
-
-if (!is_file($manifestArg)) {
-    fwrite(STDERR, "ERROR: manifest not found: {$manifestArg}\n");
-    exit(1);
-}
+$manifestArg = aiInstallerVerifyResolveManifestArg($argv, 'verify-no-overwrite.php');
 
 $decoded = json_decode((string) file_get_contents($manifestArg), true);
 if (!is_array($decoded) || !is_array($decoded['files'] ?? null)) {

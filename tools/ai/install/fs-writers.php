@@ -150,18 +150,7 @@ function aiInstallerCopyDir(string $src, string $dest, bool $cleanFirst = false)
         aiInstallerDeleteTree($dest);
     }
     aiInstallerMkdir($dest);
-    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
-    foreach ($it as $item) {
-        $target = $dest . DIRECTORY_SEPARATOR . $it->getSubPathName();
-        if ($item->isDir()) {
-            aiInstallerMkdir($target);
-            continue;
-        }
-        aiInstallerMkdir(dirname($target));
-        if (!copy($item->getPathname(), $target)) {
-            throw new RuntimeException('failed to copy file: ' . $item->getPathname());
-        }
-    }
+    aiInstallerCopyTreeInto($src, $dest, 'copy file');
 }
 
 function aiInstallerSnapshotPath(string $source, string $snapshot): void
@@ -179,16 +168,27 @@ function aiInstallerSnapshotPath(string $source, string $snapshot): void
     }
 
     aiInstallerMkdir($snapshot);
-    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
+    aiInstallerCopyTreeInto($source, $snapshot, 'back up file');
+}
+
+/**
+ * Recursively walk $src and copy every entry into the equivalent path under $dest, creating
+ * directories as needed. Shared tree-walk used by aiInstallerCopyDir (fresh install copy) and
+ * aiInstallerSnapshotPath (backup snapshot) — same traversal, only the failure-message verb
+ * differs ('copy file' vs 'back up file'), preserved via $failureVerb.
+ */
+function aiInstallerCopyTreeInto(string $src, string $dest, string $failureVerb): void
+{
+    $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($src, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST);
     foreach ($it as $item) {
-        $target = $snapshot . DIRECTORY_SEPARATOR . $it->getSubPathName();
+        $target = $dest . DIRECTORY_SEPARATOR . $it->getSubPathName();
         if ($item->isDir()) {
             aiInstallerMkdir($target);
             continue;
         }
         aiInstallerMkdir(dirname($target));
         if (!copy($item->getPathname(), $target)) {
-            throw new RuntimeException('failed to back up file: ' . $item->getPathname());
+            throw new RuntimeException('failed to ' . $failureVerb . ': ' . $item->getPathname());
         }
     }
 }

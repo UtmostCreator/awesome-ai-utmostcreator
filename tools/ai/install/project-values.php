@@ -87,18 +87,7 @@ function aiInstallerEnsureProjectValuesFile(string $targetRoot, string $projectN
     }
 
     aiInstallerMkdir(dirname($path));
-    $values = [
-        'schemaVersion' => '1',
-        'projectName' => $projectName,
-        'projectType' => aiInstallerDetectProjectType($targetRoot),
-        'projectSummary' => 'AI workflow starter for ' . $projectName,
-        'primaryLanguage' => 'unknown',
-        'primaryRuntime' => 'unknown',
-        'primaryEntrypoints' => 'README.md, docs/ai/project-context.md',
-        'primaryVerifyCommand' => 'unknown',
-        'primaryBuildCommand' => 'unknown',
-        'primaryTestCommand' => 'unknown',
-    ];
+    $values = array_merge(['schemaVersion' => '1'], aiInstallerCoreProjectValueDefaults($targetRoot, $projectName));
 
     $lines = [
         '# AI kit project values. Template/user-owned: edit values here, then rerun install/upgrade to re-render managed files.',
@@ -126,10 +115,16 @@ function aiInstallerEnsureProjectValuesFile(string $targetRoot, string $projectN
     file_put_contents($path, implode("\n", $lines) . "\n");
 }
 
-/** @return array<string,string> */
-function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): array
+/**
+ * The 9 core project-fact defaults shared between the initial project.yml template
+ * (aiInstallerEnsureProjectValuesFile) and the in-memory load defaults
+ * (aiInstallerLoadProjectValues). Single source of truth for these keys/values.
+ *
+ * @return array<string,string>
+ */
+function aiInstallerCoreProjectValueDefaults(string $targetRoot, string $projectName): array
 {
-    $defaults = [
+    return [
         'projectName' => $projectName,
         'projectType' => aiInstallerDetectProjectType($targetRoot),
         'projectSummary' => 'AI workflow starter for ' . $projectName,
@@ -139,6 +134,13 @@ function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): 
         'primaryVerifyCommand' => 'unknown',
         'primaryBuildCommand' => 'unknown',
         'primaryTestCommand' => 'unknown',
+    ];
+}
+
+/** @return array<string,string> */
+function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): array
+{
+    $defaults = array_merge(aiInstallerCoreProjectValueDefaults($targetRoot, $projectName), [
         // P4-a: customizable project-fact values consolidated into project.yml so they
         // survive every re-render. Unset keys stay 'unknown' (the placeholder default).
         'targetPlatforms' => 'unknown',
@@ -174,7 +176,7 @@ function aiInstallerLoadProjectValues(string $targetRoot, string $projectName): 
         'detectedStacks' => 'unknown',
         'stackToolVersions' => 'unknown',
         'recommendedVerificationCommands' => 'unknown',
-    ];
+    ]);
 
     $path = aiInstallerProjectValuesPath($targetRoot);
     if (!is_file($path)) {
