@@ -65,6 +65,7 @@ categories for later phases, not active paths in this slice.
 | `scripts/ai/internal/lib/10-json.sh` | internal-lib | private | Loaded through `scripts/ai/common.sh`. |
 | `scripts/ai/internal/lib/20-paths.sh` | internal-lib | private | Loaded through `scripts/ai/common.sh`. |
 | `scripts/ai/internal/lib/30-logging.sh` | internal-lib | private | Loaded through `scripts/ai/common.sh`. |
+| `scripts/ai/internal/lib/31-log-redaction.sh` | internal-lib | private | Loaded through `scripts/ai/common.sh`. |
 | `scripts/ai/internal/lib/40-session.sh` | internal-lib | private | Loaded through `scripts/ai/common.sh`. |
 | `scripts/ai/internal/lib/50-policy.sh` | internal-lib | private | Loaded through `scripts/ai/common.sh`. |
 | `scripts/ai/internal/lib/60-exec-guard.sh` | internal-lib | private | Loaded through `scripts/ai/common.sh`. |

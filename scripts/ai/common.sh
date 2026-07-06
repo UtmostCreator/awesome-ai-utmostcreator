@@ -12,6 +12,7 @@
 #   10-json.sh       JSON, redaction, envelope helpers
 #   20-paths.sh      path/repo validation, tool discovery
 #   30-logging.sh    structured event logging
+#   31-log-redaction.sh  logging redaction seam (wraps 10-json redaction)
 #   40-session.sh    agent session init
 #   50-policy.sh     command classification and approval policy
 #   60-exec-guard.sh timeout and hang/freeze guards
@@ -77,6 +78,8 @@ source "${_AI_COMMON_LIB_DIR}/10-json.sh"
 source "${_AI_COMMON_LIB_DIR}/20-paths.sh"
 # shellcheck source=scripts/ai/internal/lib/30-logging.sh
 source "${_AI_COMMON_LIB_DIR}/30-logging.sh"
+# shellcheck source=scripts/ai/internal/lib/31-log-redaction.sh
+source "${_AI_COMMON_LIB_DIR}/31-log-redaction.sh"
 # shellcheck source=scripts/ai/internal/lib/40-session.sh
 source "${_AI_COMMON_LIB_DIR}/40-session.sh"
 # shellcheck source=scripts/ai/internal/lib/50-policy.sh

@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://app-configs.local/schemas/evidence-event.schema.json",
-  "title": "Copilot Evidence Event",
+  "title": "AI Agent Evidence Event",
   "type": "object",
   "required": [
     "event_version",
@@ -23,6 +23,49 @@
     "event_type": {
       "type": "string",
       "minLength": 1
+    },
+    "ids": {
+      "type": "object",
+      "properties": {
+        "event_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "span_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "parent_span_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sequence": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "severity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "debug",
+        "info",
+        "warn",
+        "error",
+        null
+      ]
     },
     "trace_id": {
       "type": "string",
