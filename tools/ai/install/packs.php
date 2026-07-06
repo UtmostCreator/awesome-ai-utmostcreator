@@ -18,6 +18,14 @@ function aiInstallerPackRegistry(): array
         [
             'tools/ai/install/backup.php',
             'tools/ai/install/base.sh',
+            // canonical-agent-frontmatter + the claude renderers/registry + claude-settings-merge
+            // are part of core.php's require_once closure (via copilot/claude-agent-renderer.php).
+            // Without them, `php tools/ai/ai.php <cmd>` fatals in-target. See
+            // docs/tickets/arch-todo-install-verification-fixes-20260706-011500.
+            'tools/ai/install/canonical-agent-frontmatter.php',
+            'tools/ai/install/claude-agent-renderer.php',
+            'tools/ai/install/claude-agent-tool-registry.php',
+            'tools/ai/install/claude-settings-merge.php',
             'tools/ai/install/config.php',
             'tools/ai/install/copilot-agent-renderer.php',
             'tools/ai/install/copilot-agent-tool-registry.php',
@@ -36,11 +44,21 @@ function aiInstallerPackRegistry(): array
             'tools/ai/install/runtime-opencode.sh',
             'tools/ai/install/script-registry.php',
             'tools/ai/install/script-runner.php',
+            // selection-engine + stack-* are required by core.php's stack-selection path
+            // (commands/stack_selection.php -> stack-registry/stack-detection) and by the
+            // permission-layer stack overlays.
+            'tools/ai/install/selection-engine.php',
+            'tools/ai/install/stack-detection.php',
+            'tools/ai/install/stack-project-doc.php',
+            'tools/ai/install/stack-registry.php',
             'tools/ai/install/toolchain.php',
             'tools/ai/install/toolchain-registry.php',
             'tools/ai/install/verify-install-result.php',
             'tools/ai/install/verify-manifest.php',
             'tools/ai/install/verify-no-overwrite.php',
+            // compile-command-policy.php lives at tools/ai/ (not tools/ai/install/); core.php
+            // require_once's it (guarded by is_file) when recompiling the command policy.
+            'tools/ai/compile-command-policy.php',
         ]
     );
 
@@ -177,6 +195,14 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'scripts/ai/ai-search-multi.sh', 'target' => 'scripts/ai/ai-search-multi.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-diff-context.sh', 'target' => 'scripts/ai/ai-diff-context.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-verify.sh', 'target' => 'scripts/ai/ai-verify.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            // Manual-only per-language convenience wrappers around ai-verify.sh --language
+            // <lang>; not wired into any agent permission tier (see
+            // docs/tickets/arch-todo-safe-language-verify-scripts-20260706-003959/plan.md §8-P3).
+            ['type' => 'file', 'source' => 'scripts/ai/ai-verify-html.sh', 'target' => 'scripts/ai/ai-verify-html.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/ai-verify-js.sh', 'target' => 'scripts/ai/ai-verify-js.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/ai-verify-php.sh', 'target' => 'scripts/ai/ai-verify-php.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/ai-verify-ts.sh', 'target' => 'scripts/ai/ai-verify-ts.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'scripts/ai/ai-verify-vue.sh', 'target' => 'scripts/ai/ai-verify-vue.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-rollback.sh', 'target' => 'scripts/ai/ai-rollback.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'scripts/ai/ai-edit.sh', 'target' => 'scripts/ai/ai-edit.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => '.repomixignore', 'target' => '.repomixignore', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
@@ -260,6 +286,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/hooks.md', 'target' => 'docs/ai/hooks.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/scripts-reference.md', 'target' => 'docs/ai/scripts-reference.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'docs/ai/toolchain-requirements.md', 'target' => 'docs/ai/toolchain-requirements.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            ['type' => 'file', 'source' => 'docs/ai/recommended-optional-tools.md', 'target' => 'docs/ai/recommended-optional-tools.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'delivery-pack' => [
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/optional/delivery/README.md', 'target' => 'docs/ai/delivery/README.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
@@ -312,6 +339,10 @@ function aiInstallerPackRegistry(): array
             // excluded from installed targets; target verification uses
             // scripts/ai/ai-verify.sh instead.
             ...$targetToolInstallerFiles,
+            // Permission-layer composition modules are part of core.php's require_once closure
+            // (via the agent renderers -> permission-layers/render-adapters.php -> compose.php).
+            // Shipped as a whole dir so in-target ai.php commands do not fatal on a missing file.
+            ['type' => 'dir', 'source' => 'tools/ai/install/permission-layers', 'target' => 'tools/ai/install/permission-layers', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/commands', 'target' => 'tools/ai/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai.php', 'target' => 'tools/ai/ai.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai_catalog_lib.php', 'target' => 'tools/ai/ai_catalog_lib.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
