@@ -158,6 +158,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/internal/repomix-scc-router/10-helpers.sh`
 - `scripts/ai/internal/repomix-scc-router/40-analysis-pack.sh`
 - `scripts/ai/internal/repomix-scc-router/90-main.sh`
+- `scripts/ai/internal/repomix-shared/10-common-opts.sh`
 - `scripts/ai/internal/search/00-bootstrap.sh`
 - `scripts/ai/internal/search/10-contract.sh`
 - `scripts/ai/internal/search/20-state.sh`
