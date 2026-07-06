@@ -2,6 +2,28 @@
 
 declare(strict_types=1);
 
+/**
+ * True when the target install manifest indicates a given pack was installed, either via the
+ * recorded packs list or a managed file entry whose pack matches. Keeps the required-path
+ * contract aligned with what the target's profile actually shipped.
+ */
+function aiValidateConfigManifestHasPack(array $manifest, string $pack): bool
+{
+    $packs = $manifest['packs'] ?? null;
+    if (is_array($packs) && in_array($pack, array_map('strval', $packs), true)) {
+        return true;
+    }
+    $files = $manifest['files'] ?? null;
+    if (is_array($files)) {
+        foreach ($files as $meta) {
+            if (is_array($meta) && (string) ($meta['pack'] ?? '') === $pack) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 $targetArg = null;
 foreach ($argv as $arg) {
     if (str_starts_with($arg, '--target=')) {
@@ -19,12 +41,20 @@ if ($root === false) {
 $sourceRepoMode = is_dir($root . DIRECTORY_SEPARATOR . 'packages' . DIRECTORY_SEPARATOR . 'ai-universal-rules' . DIRECTORY_SEPARATOR . 'templates');
 if ($targetArg !== null || (!$sourceRepoMode && is_file($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'))) {
     $errors = [];
-    foreach (['AGENTS.md', 'docs/ai/project-context.md', 'docs/ai/POST-INSTALL.md', 'scripts/ai/ai-search.sh', 'tools/ai/validate-install-surface.php', '.ai-install-manifest.json'] as $required) {
+    $manifest = json_decode((string) @file_get_contents($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
+    // Universal minimum shipped by every install profile (single-runtime included).
+    $requiredTargetPaths = ['AGENTS.md', 'docs/ai/project-context.md', 'docs/ai/POST-INSTALL.md', 'scripts/ai/ai-search.sh', '.ai-install-manifest.json'];
+    // The installer tool surface only ships with target-tools-pack (full-governance/full).
+    // Require it only when the manifest confirms that pack, so single-runtime targets are not
+    // falsely failed. See docs/tickets/arch-todo-install-verification-fixes-20260706-011500.
+    if (is_array($manifest) && aiValidateConfigManifestHasPack($manifest, 'target-tools-pack')) {
+        $requiredTargetPaths[] = 'tools/ai/validate-install-surface.php';
+    }
+    foreach ($requiredTargetPaths as $required) {
         if (!file_exists($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $required))) {
             $errors[] = "missing required target AI config path: {$required}";
         }
     }
-    $manifest = json_decode((string) @file_get_contents($root . DIRECTORY_SEPARATOR . '.ai-install-manifest.json'), true);
     if (!is_array($manifest) || !isset($manifest['profile'], $manifest['packs'], $manifest['files'])) {
         $errors[] = 'target .ai-install-manifest.json is missing required fields';
     }
