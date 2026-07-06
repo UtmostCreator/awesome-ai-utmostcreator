@@ -276,8 +276,8 @@ function aiCopilotRenderHandoffsBlock(array $handoffs): string
 
     $lines = ['handoffs:'];
     foreach ($handoffs as $handoff) {
-        $lines[] = "  - label: {$handoff['label']}";
-        $lines[] = "    agent: {$handoff['agent']}";
+        $lines[] = "  - label: '" . str_replace("'", "''", (string) $handoff['label']) . "'";
+        $lines[] = "    agent: '" . str_replace("'", "''", (string) $handoff['agent']) . "'";
         $lines[] = "    prompt: '" . str_replace("'", "''", (string) $handoff['prompt']) . "'";
         $lines[] = '    send: ' . (($handoff['send'] ?? false) ? 'true' : 'false');
         $lines[] = '    model: ' . (($handoff['model'] ?? null) === null ? 'null' : (string) $handoff['model']);

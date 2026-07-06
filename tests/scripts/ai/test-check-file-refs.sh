@@ -82,6 +82,34 @@ test_json_contract() {
 }
 run_test "json output matches documented contract" test_json_contract
 
+# Regression: graphify-out/** must be excluded unconditionally (not gated by
+# --all). It is a third-party, machine-generated knowledge-graph cache tracked
+# in git; its content-addressed cache blobs have random hash basenames that
+# are never referenced elsewhere by design, so scanning them only produces
+# noise and multiplies the per-candidate rg cost (observed: ~1k blobs turned a
+# whole-repo scan into a 60s+ timeout dominated entirely by this noise).
+test_excludes_graphify_out() {
+    local out
+    (
+        cd "$TMP"
+        mkdir -p graphify-out/cache/ast
+        echo '{}' > graphify-out/cache/ast/deadbeefcafe0123456789.json
+        echo '{}' > graphify-out/GRAPH_REPORT.json
+        git add -A
+        git commit -qm "add graphify-out fixture"
+    )
+    out="$(cd "$TMP" && "$BASH_BIN" "$SCRIPT" .)"
+    [[ "$out" != *"graphify-out"* ]]
+}
+run_test "excludes graphify-out/** unconditionally" test_excludes_graphify_out
+
+test_excludes_graphify_out_even_with_all() {
+    local out
+    out="$(cd "$TMP" && "$BASH_BIN" "$SCRIPT" . --all)"
+    [[ "$out" != *"graphify-out"* ]]
+}
+run_test "excludes graphify-out/** even with --all" test_excludes_graphify_out_even_with_all
+
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
 if ((FAIL > 0)); then printf '\033[0;31mFAILED\033[0m\n'; exit 1; fi

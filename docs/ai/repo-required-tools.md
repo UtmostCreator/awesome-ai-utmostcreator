@@ -67,6 +67,11 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/ai-structured.sh`
 - `scripts/ai/ai-task.sh`
 - `scripts/ai/ai-test-select.sh`
+- `scripts/ai/ai-verify-html.sh`
+- `scripts/ai/ai-verify-js.sh`
+- `scripts/ai/ai-verify-php.sh`
+- `scripts/ai/ai-verify-ts.sh`
+- `scripts/ai/ai-verify-vue.sh`
 - `scripts/ai/ai-verify.sh`
 - `scripts/ai/all_in_one.sh`
 - `scripts/ai/bin/admin/all_in_one.sh`
@@ -130,7 +135,12 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/internal/ai-verify/20-shipped-filters.sh`
 - `scripts/ai/internal/ai-verify/30-linecount.sh`
 - `scripts/ai/internal/ai-verify/35-jscpd.sh`
+- `scripts/ai/internal/ai-verify/36-plan-status.sh`
 - `scripts/ai/internal/ai-verify/40-step-runner.sh`
+- `scripts/ai/internal/ai-verify/50-tool-policy.sh`
+- `scripts/ai/internal/ai-verify/51-language-files.sh`
+- `scripts/ai/internal/ai-verify/53-language-dispatch.sh`
+- `scripts/ai/internal/ai-verify/54-reporting.sh`
 - `scripts/ai/internal/ai-verify/90-run.sh`
 - `scripts/ai/internal/lib/00-env.sh`
 - `scripts/ai/internal/lib/05-core.sh`
