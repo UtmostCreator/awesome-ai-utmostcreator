@@ -91,6 +91,31 @@ Never sit idle waiting on a subprocess. Apply the following rules to every shell
 5. Run heavy verification with the fast variant first: `composer test:fast` or a `--filter ClassName`. Only fall back to the serial full run when triaging cross-test ordering bugs.
 6. After any unexpected timeout, capture: command, expected budget, elapsed wall time, last bytes of output (if any), and whether the same command works under a smaller scope. Include this in the verification report.
 
+## Subagent Dispatch Stall Discipline
+
+A stuck or aborted subagent (Task-tool) call is a distinct failure mode from a single
+command timing out: the whole delegated session can hang or abort with no diagnostic at
+all, and some harnesses do not expose the same tools (for example a bash/shell tool) to
+every subagent persona regardless of what that persona's own permission frontmatter
+declares — treat that gap as a harness-level limitation to report, not something the
+subagent itself can work around.
+
+1. If a subagent dispatch is aborted or produces no result, do not re-issue the same
+   prompt unchanged — that risks repeating the same stuck state. Either simplify the
+   prompt (fewer steps, one command at a time) or fall back to running the work directly
+   in the calling session, where per-command timeouts and tool availability are already
+   known.
+2. Keep subagent-dispatched shell commands simple and single-purpose. Avoid heredocs,
+   multi-line `awk`/`sed` scripts, and chained `&&`/`;`/pipe constructs inside a Task
+   prompt's suggested commands — these are both harder to bound with a timeout and more
+   likely to collide with permission patterns that deny redirect/heredoc shapes
+   (`* > *`, `* <<*`) even when the underlying intent is read-only.
+3. For investigation or verification work that genuinely needs real command execution,
+   prefer doing it directly in the calling session over delegating to a subagent whose
+   tool access you have not already confirmed, especially for read-only-style personas.
+4. Report a stalled/aborted subagent dispatch the same way as any other failure: name the
+   exact prompt and subagent type, what was expected, and what fallback was used instead.
+
 ## Verification Performance Aids
 
 - `PARATEST_PROCS=12 bash scripts/ai/run-repo-tests.sh` — all repo tests with parallel-first defaults
