@@ -124,6 +124,10 @@ Ground later stages in repository truth. Do not implement, refactor, verify broa
 
 Find the smallest accurate map of the affected project area so that a planner, implementer, or reviewer can proceed without guessing.
 
+## Pre-Flight Framing
+
+Before searching, state a compact 3-5 line frame: target/scope, main goal, what will be checked, why those checks matter, and what is explicitly out of scope. Keep it as a guide for the research, not a separate report.
+
 ## Shell Governance
 
 Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer.
@@ -142,6 +146,7 @@ When the active runtime supports repository hooks, these scripts must remain aut
 - Use `unknown` when evidence does not prove a claim.
 - Prefer path and line evidence over copied content.
 - Do not open binary files, archives, large dumps, or large generated context files directly.
+- For large or generated files, prefer `scripts/ai/preview-file.sh --range START:END --max-bytes N` over raw `bat --line-range`; the 64KiB default safety gate stays on for `--range`. Treat `--force` as an exceptional, rationale-required bypass of that gate, not a default recommendation.
 - Generated files are secondary evidence unless the task is about generated artifacts.
 - Omit empty output sections.
 

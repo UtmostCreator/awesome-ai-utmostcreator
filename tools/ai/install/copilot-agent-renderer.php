@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/copilot-agent-tool-registry.php';
+require_once __DIR__ . '/copilot-agent-handoff-registry.php';
 require_once __DIR__ . '/generated-header.php';
 require_once __DIR__ . '/canonical-agent-frontmatter.php';
 require_once __DIR__ . '/permission-layers/render-adapters.php';
@@ -45,6 +46,13 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
     // when present, preserving keys/values exactly. Absent in the template -> absent here.
     $assessmentBlock = $rawFm !== '' ? aiCopilotExtractAssessmentBlock($rawFm) : '';
 
+    // Optional handoffs: chain, sourced from the registry keyed by agent ID (see
+    // copilot-agent-handoff-registry.php). Additive on top of the prose "Recommended next
+    // step" sentence carried through unchanged in the body — never a replacement for it
+    // (docs/ai/integration-matrix.md "Handoff Mechanism Per Runtime"). Absent from the
+    // registry -> absent here, so unregistered agents render byte-identically to before.
+    $handoffsBlock = aiCopilotRenderHandoffsBlock(aiCopilotAgentHandoffsFor($id));
+
     // Format agent name: title-case from kebab-case
     $name = implode(' ', array_map('ucfirst', explode('-', $id)));
 
@@ -56,6 +64,7 @@ function aiInstallerRenderCopilotAgent(string $srcContent, string $agentId, stri
     $copilotFm .= "user-invocable: true\n";
     $copilotFm .= "disable-model-invocation: false\n";
     $copilotFm .= $assessmentBlock;
+    $copilotFm .= $handoffsBlock;
     $copilotFm .= "---\n";
 
     // --- Build enforcement boundary section ---
@@ -247,6 +256,34 @@ function aiCopilotExtractAssessmentBlock(string $rawFm): string
     }
 
     return "agent_assessment:\n" . implode("\n", $entries) . "\n";
+}
+
+/**
+ * Renders the registered Copilot `handoffs:` chain (see copilot-agent-handoff-registry.php)
+ * as a YAML block suitable for inclusion in the rebuilt Copilot frontmatter. Returns '' when
+ * the agent has no registered chain, so agents without one render byte-identically to prior
+ * behavior. Shape per entry (`label`/`agent`/`prompt`/`send`/`model`) matches VS Code's
+ * Custom Agents `handoffs:` schema (docs/ai/integration-matrix.md "Handoff Mechanism Per
+ * Runtime").
+ *
+ * @param list<array{label: string, agent: string, prompt: string, send: bool, model: null}> $handoffs
+ */
+function aiCopilotRenderHandoffsBlock(array $handoffs): string
+{
+    if ($handoffs === []) {
+        return '';
+    }
+
+    $lines = ['handoffs:'];
+    foreach ($handoffs as $handoff) {
+        $lines[] = "  - label: {$handoff['label']}";
+        $lines[] = "    agent: {$handoff['agent']}";
+        $lines[] = "    prompt: '" . str_replace("'", "''", (string) $handoff['prompt']) . "'";
+        $lines[] = '    send: ' . (($handoff['send'] ?? false) ? 'true' : 'false');
+        $lines[] = '    model: ' . (($handoff['model'] ?? null) === null ? 'null' : (string) $handoff['model']);
+    }
+
+    return implode("\n", $lines) . "\n";
 }
 
 /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 require_once dirname(__DIR__, 2) . '/tools/ai/install/copilot-agent-renderer.php';
@@ -47,6 +48,20 @@ class CopilotAgentRendererTest extends TestCase
     {
         $path = $this->repoRoot . '/packages/ai-universal-rules/templates/optional/agents/bugfix.md';
         $this->assertFileExists($path, 'bugfix template must exist');
+        return (string) file_get_contents($path);
+    }
+
+    private function architecturePlanWriterTemplate(): string
+    {
+        $path = $this->repoRoot . '/packages/ai-universal-rules/templates/core/agents/architecture-plan-writer.md';
+        $this->assertFileExists($path, 'architecture-plan-writer template must exist');
+        return (string) file_get_contents($path);
+    }
+
+    private function reviewerTemplate(): string
+    {
+        $path = $this->repoRoot . '/packages/ai-universal-rules/templates/core/agents/reviewer.md';
+        $this->assertFileExists($path, 'reviewer template must exist');
         return (string) file_get_contents($path);
     }
 
@@ -303,5 +318,72 @@ class CopilotAgentRendererTest extends TestCase
         $out = aiInstallerRenderCopilotAgent($this->architectTemplate(), 'architect', '/project/scripts/ai');
         $this->assertStringContainsString('agent_assessment:', $out);
         $this->assertStringContainsString('risk_level: high', $out);
+    }
+
+    // ----- Copilot native handoffs: frontmatter (copilot-agent-handoff-registry.php) -----
+
+    /**
+     * The four registered handoff chains must each render valid `handoffs:` frontmatter
+     * AND keep the prose "Recommended next step" baseline (docs/ai/adapter-contract.md,
+     * docs/ai/integration-matrix.md "Handoff Mechanism Per Runtime") — structured handoffs
+     * are strictly additive, never a replacement.
+     *
+     * @return iterable<string, array{0: string, 1: callable(): string, 2: string}>
+     */
+    public static function handoffChainProvider(): iterable
+    {
+        yield 'architect -> architecture-plan-writer' => ['architect', 'architectTemplate', 'architecture-plan-writer'];
+        yield 'implementer -> reviewer' => ['implementer', 'implementerTemplate', 'reviewer'];
+    }
+
+    #[DataProvider('handoffChainProvider')]
+    public function testHandoffsFrontmatterEmittedForRegisteredChainWithProsePreserved(
+        string $agentId,
+        string $templateMethod,
+        string $expectedTargetAgent
+    ): void {
+        $out = aiInstallerRenderCopilotAgent($this->$templateMethod(), $agentId, '/project/scripts/ai');
+
+        $this->assertStringContainsString('handoffs:', $out);
+        $this->assertStringContainsString("agent: {$expectedTargetAgent}", $out);
+
+        // Prose "Recommended next step" baseline must still be present (case-insensitive
+        // heading match) alongside the new structured handoffs frontmatter.
+        $this->assertMatchesRegularExpression('/recommended next step/i', $out);
+    }
+
+    public function testArchitecturePlanWriterHandoffTargetsImplementer(): void
+    {
+        $out = aiInstallerRenderCopilotAgent(
+            $this->architecturePlanWriterTemplate(),
+            'architecture-plan-writer',
+            '/project/scripts/ai'
+        );
+        $this->assertStringContainsString('handoffs:', $out);
+        $this->assertStringContainsString('agent: implementer', $out);
+        $this->assertMatchesRegularExpression('/recommended next step/i', $out);
+    }
+
+    public function testReviewerHandoffTargetsImplementerAndRefactorer(): void
+    {
+        $out = aiInstallerRenderCopilotAgent($this->reviewerTemplate(), 'reviewer', '/project/scripts/ai');
+        $this->assertStringContainsString('handoffs:', $out);
+        $this->assertStringContainsString('agent: implementer', $out);
+        $this->assertStringContainsString('agent: refactorer', $out);
+        $this->assertMatchesRegularExpression('/recommended next step/i', $out);
+
+        // Both the Plan-3 clarification section and the Plan-4 pre-flight framing section
+        // must survive the same render — regression guard against the dual-edit corrupting
+        // or duplicating either sibling section.
+        $this->assertStringContainsString('## Clarification And Handoff', $out);
+        $this->assertStringContainsString('## Pre-Flight Framing', $out);
+    }
+
+    public function testHandoffsBlockAbsentForUnregisteredAgent(): void
+    {
+        // researcher has no registered handoff chain; output must render byte-identically
+        // to prior behavior, i.e. no `handoffs:` key at all.
+        $out = aiInstallerRenderCopilotAgent($this->researcherTemplate(), 'researcher', '/project/scripts/ai');
+        $this->assertStringNotContainsString('handoffs:', $out);
     }
 }
