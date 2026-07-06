@@ -10,6 +10,34 @@
 [[ "${AI_LIB_LOGGING_LOADED:-0}" == "1" ]] && return 0
 AI_LIB_LOGGING_LOADED=1
 
+# event_execution_status — derive execution.status from an event_type.
+# Maps the event-type suffix to a downstream-parseable status so log
+# consumers can filter success/failure without inspecting details.raw.
+# Values are constrained to the evidence-event schema enum
+# (schemas/ai/evidence-event.schema.json): success | error | timeout | unknown.
+event_execution_status() {
+    local event="${1:-}"
+    case "$event" in
+    *.timeout) echo timeout ;;
+    *.passed | *.done | *.ok | *.success | *.created | *.apply | *.applied) echo success ;;
+    *.failed | *.killed | *.error | error | *.aborted) echo error ;;
+    *) echo unknown ;;
+    esac
+}
+
+# event_category — derive tool.category from an event_type domain (prefix).
+# This is the event taxonomy (verify/doc-check/guard/...), distinct from
+# classify_command()'s shell-command taxonomy. Returns the domain or "unknown".
+event_category() {
+    local event="${1:-}"
+    local domain="${event%%.*}"
+    case "$domain" in
+    verify | doc-check | guard | session | context | task | structured | test-select | \
+        edit | rollback | snapshot | checkpoint | error | gh-pr-context) echo "$domain" ;;
+    *) echo unknown ;;
+    esac
+}
+
 append_log_entry() {
     local entry="${1:?entry required}"
     local repo_root
@@ -33,7 +61,11 @@ append_log_entry() {
 
 log_json() {
     local event="${1:-event}"
-    local payload="${2:-{}}"
+    # Note: do NOT write ${2:-{}} — bash parses that as default "{}" plus a
+    # literal trailing "}", corrupting every valid-JSON payload (historic
+    # malformed details.raw "}}}" bug). Default the empty case explicitly.
+    local payload="${2:-}"
+    [[ -n "$payload" ]] || payload='{}'
     local caller="${3:-$(basename "${BASH_SOURCE[1]:-unknown}" .sh)}"
     local payload_json
     local entry
@@ -41,6 +73,10 @@ log_json() {
     if ! payload_json="$(jq -c . <<<"$payload" 2>/dev/null)"; then
         payload_json="$(jq -cn --arg raw "$payload" '{raw:$raw}')"
     fi
+
+    local exec_status event_cat
+    exec_status="$(event_execution_status "$event")"
+    event_cat="$(event_category "$event")"
 
     entry="$(jq -cn \
         --arg event_version "2.0" \
@@ -52,6 +88,8 @@ log_json() {
         --arg actor_id "${ACTOR_ID:-$caller}" \
         --arg delegated_by "${DELEGATED_BY:-}" \
         --arg tool_name "$caller" \
+        --arg exec_status "$exec_status" \
+        --arg event_cat "$event_cat" \
         --arg repo_root "$(git_root 2>/dev/null || pwd)" \
         --arg git_branch "$(git rev-parse --abbrev-ref HEAD 2>/dev/null || printf 'unknown')" \
         --arg git_commit "$(git rev-parse HEAD 2>/dev/null || printf 'unknown')" \
@@ -70,7 +108,7 @@ log_json() {
                     },
                     tool: {
                         name: $tool_name,
-                        category: null,
+                        category: (if $event_cat == "unknown" then null else $event_cat end),
                         args_hash: null,
                         mutates_state: false
                     },
@@ -82,7 +120,7 @@ log_json() {
                         reason: null
                     },
                     execution: {
-                        status: "unknown",
+                        status: $exec_status,
                         latency_ms: null,
                         retry_count: 0,
                         exit_code: null,
