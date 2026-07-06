@@ -27,18 +27,32 @@ function aiInstallerPackRegistry(): array
             'tools/ai/install/claude-agent-tool-registry.php',
             'tools/ai/install/claude-settings-merge.php',
             'tools/ai/install/config.php',
+            // arch-todo-installer-core-executor-extraction-20260706-170757: core.php's helper
+            // groups were extracted into these procedural modules, all part of core.php's
+            // require_once closure. Without them, `php tools/ai/ai.php <cmd>` fatals in-target.
+            'tools/ai/install/conflict-channels.php',
+            // Pre-existing gap found during verification of this ticket's fix: renderer requires
+            // this since 2f1a866 (Copilot handoffs) but it was never added to this list.
+            'tools/ai/install/copilot-agent-handoff-registry.php',
             'tools/ai/install/copilot-agent-renderer.php',
             'tools/ai/install/copilot-agent-tool-registry.php',
             'tools/ai/install/core.php',
             'tools/ai/install/docs.php',
+            'tools/ai/install/executor.php',
+            'tools/ai/install/fs-writers.php',
             'tools/ai/install/generated-header.php',
+            'tools/ai/install/gitignore.php',
+            'tools/ai/install/install-lock.php',
             'tools/ai/install/lib.sh',
             'tools/ai/install/manifest.php',
             'tools/ai/install/markers.php',
             'tools/ai/install/migrations.php',
             'tools/ai/install/packs.php',
+            'tools/ai/install/placeholders.php',
+            'tools/ai/install/plan-guards.php',
             'tools/ai/install/planner.php',
             'tools/ai/install/profiles.php',
+            'tools/ai/install/project-values.php',
             'tools/ai/install/project-yaml.php',
             'tools/ai/install/runtime-copilot.sh',
             'tools/ai/install/runtime-opencode.sh',
@@ -53,7 +67,11 @@ function aiInstallerPackRegistry(): array
             'tools/ai/install/stack-registry.php',
             'tools/ai/install/toolchain.php',
             'tools/ai/install/toolchain-registry.php',
+            'tools/ai/install/user-sections.php',
             'tools/ai/install/verify-install-result.php',
+            // verify-manifest-args.php is a shared helper required by both verify-manifest.php
+            // and verify-no-overwrite.php below (arch-todo-jscpd-duplication-fix-20260706).
+            'tools/ai/install/verify-manifest-args.php',
             'tools/ai/install/verify-manifest.php',
             'tools/ai/install/verify-no-overwrite.php',
             // compile-command-policy.php lives at tools/ai/ (not tools/ai/install/); core.php

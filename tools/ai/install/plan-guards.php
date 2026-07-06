@@ -91,6 +91,22 @@ function aiInstallerAssertAllowedTarget(array $config): void
 }
 
 /**
+ * Resolve and normalize a plan item's target for path-safety guards. Shared by
+ * aiInstallerAssertSafePlanTargets and aiInstallerAssertNoCaseCollisions.
+ *
+ * @return array{0:string,1:?string} [rawTarget, normalizedTarget]; normalizedTarget is null
+ *     when the item has no target to check (caller should skip it).
+ */
+function aiInstallerPlanItemTarget(array $item): array
+{
+    $target = (string) ($item['target'] ?? '');
+    if ($target === '') {
+        return [$target, null];
+    }
+    return [$target, str_replace('\\', '/', $target)];
+}
+
+/**
  * PathGuard: validate every plan target stays inside the target root. Rejects path traversal
  * (`..`), absolute targets, and any target whose existing parent chain escapes the root via a
  * symlink. Throws on the first violation so installs fail closed before writing.
@@ -104,11 +120,10 @@ function aiInstallerAssertSafePlanTargets(string $targetRoot, array $plan): void
     $rootReal = rtrim(str_replace('\\', '/', $rootReal), '/');
 
     foreach ($plan as $item) {
-        $target = (string) ($item['target'] ?? '');
-        if ($target === '') {
+        [$target, $normalized] = aiInstallerPlanItemTarget($item);
+        if ($normalized === null) {
             continue;
         }
-        $normalized = str_replace('\\', '/', $target);
         if (str_starts_with($normalized, '/') || preg_match('#^[A-Za-z]:#', $normalized) === 1) {
             throw new RuntimeException('PathGuard: absolute install target rejected: ' . $target);
         }
@@ -145,11 +160,10 @@ function aiInstallerAssertNoCaseCollisions(array $plan): void
 {
     $seen = [];
     foreach ($plan as $item) {
-        $target = (string) ($item['target'] ?? '');
-        if ($target === '') {
+        [, $normalized] = aiInstallerPlanItemTarget($item);
+        if ($normalized === null) {
             continue;
         }
-        $normalized = str_replace('\\', '/', $target);
         $key = strtolower($normalized);
         if (isset($seen[$key]) && $seen[$key] !== $normalized) {
             throw new RuntimeException(
