@@ -462,9 +462,9 @@ test_log_json_event_version() {
         log_json "ev" '{}' "caller"
     local ver
     ver="$(head -1 "$tmpd/events.jsonl" | jq -r '.event_version')"
-    assert_eq "2.0" "$ver"
+    assert_eq "3.0" "$ver"
 }
-run_test "log_json writes event_version 2.0" test_log_json_event_version
+run_test "log_json writes event_version 3.0" test_log_json_event_version
 
 test_log_json_execution_status_success() {
     local tmpd
@@ -525,6 +525,111 @@ test_log_json_details_valid_json() {
     assert_eq "7" "$failures"
 }
 run_test "log_json emits valid balanced details JSON (no }}} corruption)" test_log_json_details_valid_json
+
+test_log_json_event_id_present_and_unique() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "a.b" '{}' "c"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "a.b" '{}' "c"
+    local id1 id2
+    id1="$(sed -n 1p "$tmpd/events.jsonl" | jq -r '.ids.event_id')"
+    id2="$(sed -n 2p "$tmpd/events.jsonl" | jq -r '.ids.event_id')"
+    [[ -n "$id1" && "$id1" != "null" ]]
+    [[ "$id1" != "$id2" ]]
+}
+run_test "log_json emits a unique ids.event_id per event" test_log_json_event_id_present_and_unique
+
+test_log_json_sequence_monotonic() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    # Same process (subshell) so the process-scoped counter increments. Reset the
+    # counter locally since it is process-global across the whole test harness.
+    (
+        AI_EVENT_LOG="$tmpd/events.jsonl"
+        AI_LOG_DIR="$tmpd"
+        AI_LOG_SEQUENCE=0
+        log_json "a.b" '{}' "c"
+        log_json "a.b" '{}' "c"
+        log_json "a.b" '{}' "c"
+    )
+    local seqs
+    seqs="$(jq -r '.ids.sequence' "$tmpd/events.jsonl" | tr '\n' ' ')"
+    assert_eq "1 2 3 " "$seqs"
+}
+run_test "log_json ids.sequence increments monotonically per process" test_log_json_sequence_monotonic
+
+test_log_json_status_override() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    # Suffix would infer "unknown"; _status must override to "success".
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "guard.start" '{"_status":"success","note":"x"}' "common"
+    local status detail_status detail_note
+    status="$(head -1 "$tmpd/events.jsonl" | jq -r '.execution.status')"
+    detail_status="$(head -1 "$tmpd/events.jsonl" | jq -r '.details._status // "stripped"')"
+    detail_note="$(head -1 "$tmpd/events.jsonl" | jq -r '.details.note')"
+    assert_eq "success" "$status"
+    assert_eq "stripped" "$detail_status"
+    assert_eq "x" "$detail_note"
+}
+run_test "log_json _status overrides suffix inference and is stripped from details" test_log_json_status_override
+
+test_log_json_redaction_applied() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "x.y" '{"token":"abcd1234secret","ok":true}' "c"
+    local token ok
+    token="$(head -1 "$tmpd/events.jsonl" | jq -r '.details.token')"
+    ok="$(head -1 "$tmpd/events.jsonl" | jq -r '.details.ok')"
+    assert_eq "REDACTED" "$token"
+    assert_eq "true" "$ok"
+}
+run_test "log_json redacts sensitive keys in details" test_log_json_redaction_applied
+
+test_log_json_severity_derived() {
+    local tmpd
+    tmpd="$(test_tmpdir)"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "verify.failed" '{}' "ai-verify"
+    AI_LOG_DIR="$tmpd" AI_EVENT_LOG="$tmpd/events.jsonl" \
+        log_json "doc-check.passed" '{}' "ai-doc-check"
+    local sev_err sev_ok
+    sev_err="$(sed -n 1p "$tmpd/events.jsonl" | jq -r '.severity')"
+    sev_ok="$(sed -n 2p "$tmpd/events.jsonl" | jq -r '.severity')"
+    assert_eq "error" "$sev_err"
+    assert_eq "info" "$sev_ok"
+}
+run_test "log_json derives severity (error for failures, info otherwise)" test_log_json_severity_derived
+
+# ── Section: log redaction seam (31-log-redaction.sh) ─────────────────────────
+
+printf '\nlog_redact_payload\n'
+
+test_log_redact_payload_redacts() {
+    local out
+    out="$(log_redact_payload '{"password":"hunter2","keep":1}')"
+    assert_eq "REDACTED" "$(printf '%s' "$out" | jq -r '.password')"
+    assert_eq "1" "$(printf '%s' "$out" | jq -r '.keep')"
+}
+run_test "log_redact_payload redacts sensitive keys" test_log_redact_payload_redacts
+
+test_log_redact_payload_disabled() {
+    local out
+    out="$(AI_LOG_REDACT=0 log_redact_payload '{"token":"abc"}')"
+    assert_eq "abc" "$(printf '%s' "$out" | jq -r '.token')"
+}
+run_test "log_redact_payload passthrough when AI_LOG_REDACT=0" test_log_redact_payload_disabled
+
+test_log_redact_payload_failsafe_non_json() {
+    local out
+    out="$(log_redact_payload 'not-json')"
+    # Non-JSON input must be returned unchanged (never dropped/doubled).
+    assert_eq "not-json" "$out"
+}
+run_test "log_redact_payload returns non-JSON input unchanged" test_log_redact_payload_failsafe_non_json
 
 # ── Section: classify_command ─────────────────────────────────────────────────
 
