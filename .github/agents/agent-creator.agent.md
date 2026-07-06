@@ -28,7 +28,7 @@ You convert a supervisor brief into one strict AgentSpec JSON object for `awesom
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Use scripts only to ground the spec:
 
-- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to confirm real capabilities, tools, and patterns; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to confirm real capabilities, tools, and patterns; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-task.sh` (`ask`) — to record the spec-building task; expect a task record.
 - `ai-structured.sh` — to emit the AgentSpec JSON; expect structured JSON output.
 

@@ -178,7 +178,7 @@ Use this shipped helper after the AI kit has been installed into a target reposi
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Post-install scans, validates, and may run scoped verification. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to scan the installed repo; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to scan the installed repo; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-install-coverage.sh` / `repo-tool-inventory.sh` / `repo-stats.sh` / `check-file-refs.sh` / `ai-doc-check.sh` / `ai-file-freshness.sh` — to confirm install coverage and find drift.
 - `ai-verify.sh` (`ask`; scoped `AI_VERIFY_SCOPE=changed` variant `allow`), `ai-test-select.sh`, `run-repo-tests.sh` — to validate the install.
 - repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.

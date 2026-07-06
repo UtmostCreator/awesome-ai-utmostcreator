@@ -123,7 +123,7 @@ You are the upgrade agent for `<PROJECT_NAME>`.
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write tier. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the upgrade and find call sites; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the upgrade and find call sites; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` / `ai-install-coverage.sh` — to frame the change and check install coverage; expect a diff bundle and coverage findings.
 - `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to prove compatibility; expect pass/fail evidence.
 - `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when a native path-scoped `edit:` is insufficient; `session-checkpoint.sh` (`ask`) for continuity.

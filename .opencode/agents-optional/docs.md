@@ -101,7 +101,7 @@ You are the docs agent for `awesome-ai-utmostcreator`.
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write tier (docs only). Use:
 
-- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground doc updates against current code; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground doc updates against current code; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-doc-check.sh` / `check-file-refs.sh` — to catch doc drift and broken references; expect lint and drift results.
 - `ai-diff-context.sh` — to align docs with the implementation change; expect a diff bundle.
 - `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when a native path-scoped `edit:` is insufficient; `session-checkpoint.sh` (`ask`) for continuity.

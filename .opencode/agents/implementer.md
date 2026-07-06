@@ -253,7 +253,7 @@ If approval is missing, stop before external mutation and report the limitation.
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write/build tier. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the slice; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the slice; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect the current change; expect a diff bundle.
 - `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.
 - `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the path-scoped `edit:` permission is insufficient; expect a tracked, reversible edit.

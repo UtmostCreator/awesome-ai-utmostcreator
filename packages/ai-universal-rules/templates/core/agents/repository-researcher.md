@@ -120,7 +120,7 @@ Never emit ad-hoc Python or shell edit scripts, inline patches, or mutation comm
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. This role is read-only. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — script-first evidence; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — script-first evidence; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — history and current change; expect blame, branch base, diff bundle.
 - `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` — repo shape and doc drift.
 - repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.

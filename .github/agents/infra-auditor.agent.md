@@ -26,7 +26,7 @@ You are the infra auditor for `awesome-ai-utmostcreator`.
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Read-only audit tier. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the audit; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the audit; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` — for ownership and history; expect blame and branch base.
 - `ai-diff-context.sh` / `ai-doc-check.sh` / `ai-install-coverage.sh` — to assess current change, doc drift, and install coverage; expect a diff bundle, lint, and coverage findings.
 - `ai-verify.sh` (`ask`) / repomix / `pack-context.sh` (`ask`) — only when an audit needs a verification probe or large context pack.

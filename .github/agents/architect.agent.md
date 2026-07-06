@@ -58,7 +58,7 @@ the named external path and intended change.
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Design tier = read-only. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to ground scope; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to ground scope; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` — for ownership/history; expect blame and branch base.
 - `ai-diff-context.sh` / `ai-doc-check.sh` / `check-file-refs.sh` — to assess current change and doc drift; expect diff bundle and lint results.
 - repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.

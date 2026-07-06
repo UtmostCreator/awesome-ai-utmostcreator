@@ -65,7 +65,7 @@ You judge meaning, not syntax, for `<PROJECT_NAME>`. The Static Validator alread
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Stay read-only:
 
-- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to compare spec claims against real repo capabilities and usage; expect hits, content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to compare spec claims against real repo capabilities and usage; expect hits, content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect proposed change context; expect a diff bundle.
 - `ai-verify.sh` (`ask`) — only to sanity-check a claimed behavior; expect verification evidence.
 

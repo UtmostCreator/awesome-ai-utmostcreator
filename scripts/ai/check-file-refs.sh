@@ -13,6 +13,7 @@ usage() {
     cat <<'EOF'
 Usage:
   check-file-refs.sh [path] [--format json|plain] [--ext EXT[,EXT]] [--all]
+                      [--exclude PATTERN]...
 
 Find tracked files whose basename is not referenced by any other tracked file
 (orphaned docs and unused assets). Read-only.
@@ -23,7 +24,21 @@ Options:
   --ext EXT[,EXT]      Only consider files with these extensions (e.g. md,png)
   --all                Consider every tracked file (default skips common
                        entrypoints that are referenced implicitly)
+  --exclude PATTERN    Exclude a git-pathspec glob from both candidates and the
+                       reference search (repeatable, e.g. --exclude
+                       'database/migrations/**' --exclude 'public/build/**').
+                       Use this for project-specific noise: hashed/fingerprinted
+                       build output, migrations, or vendored-but-tracked assets
+                       all have basenames that are legitimately never referenced
+                       elsewhere by string match, so they otherwise flood the
+                       orphan list with false positives (built-in defaults only
+                       cover vendor/, node_modules/, .git/, .repomix-context/,
+                       and this kit's own graphify-out/ cache).
   --help, -h           Show this help
+
+If the scan returns many orphans (50+), a hint is printed to stderr suggesting
+--exclude for the noisiest-looking directories; it does not affect exit code
+or stdout, so scripted/JSON consumers are unaffected.
 
 Exit codes:
   0  scan completed (orphans may or may not exist; see output)
@@ -34,6 +49,7 @@ scan_path="."
 output_format="plain"
 exts=()
 include_all=0
+excludes=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -59,6 +75,14 @@ while [[ $# -gt 0 ]]; do
         ;;
     --all)
         include_all=1
+        shift
+        ;;
+    --exclude)
+        excludes+=("${2:-}")
+        shift 2
+        ;;
+    --exclude=*)
+        excludes+=("${1#*=}")
         shift
         ;;
     --*)
@@ -102,7 +126,15 @@ is_implicit_entrypoint() {
 # addressed cache blobs (graphify-out/cache/ast/**) have random hash
 # basenames that are never referenced elsewhere by design, so including them
 # only produces noise and multiplies the rg-per-candidate scan cost.
-mapfile -t candidates < <(git ls-files -- "$scan_path" ':!graphify-out/**')
+# User-supplied --exclude patterns are appended as additional git pathspec
+# exclusions for the same reason, scoped to whatever noise is specific to the
+# calling project (e.g. hashed build output, migrations, vendored-but-tracked
+# assets) rather than hardcoded here for every possible framework/convention.
+pathspec_excludes=(':!graphify-out/**')
+for pat in "${excludes[@]+${excludes[@]}}"; do
+    [[ -n "$pat" ]] && pathspec_excludes+=(":!$pat")
+done
+mapfile -t candidates < <(git ls-files -- "$scan_path" "${pathspec_excludes[@]}")
 
 orphans=()
 for path in "${candidates[@]+${candidates[@]}}"; do
@@ -127,9 +159,13 @@ for path in "${candidates[@]+${candidates[@]}}"; do
     # Capture into a variable first: piping rg into `grep -q` lets grep close
     # the pipe early, which makes rg exit non-zero and (under pipefail) would
     # wrongly mark referenced files as orphans.
+    rg_excludes=(-g '!vendor/**' -g '!node_modules/**' -g '!.git/**' \
+        -g '!.repomix-context/**' -g '!graphify-out/**')
+    for pat in "${excludes[@]+${excludes[@]}}"; do
+        [[ -n "$pat" ]] && rg_excludes+=(-g "!$pat")
+    done
     hits="$(rg --no-messages --fixed-strings --files-with-matches -- "$base" . \
-        -g '!vendor/**' -g '!node_modules/**' -g '!.git/**' \
-        -g '!.repomix-context/**' -g '!graphify-out/**' 2>/dev/null || true)"
+        "${rg_excludes[@]}" 2>/dev/null || true)"
 
     # Strip rg's leading ./ and the file's own path, then check for any
     # remaining reference.
@@ -141,6 +177,22 @@ for path in "${candidates[@]+${candidates[@]}}"; do
 
     orphans+=("$path")
 done
+
+# Noise heuristic: a large orphan count almost always means an untracked-noise
+# source slipped through (hashed build output, migrations, vendored-but-tracked
+# assets), not 50+ genuinely unused docs. Hint on stderr only — stdout/exit
+# code/JSON payload are unaffected, so scripted consumers see no behavior
+# change.
+if ((${#orphans[@]} >= 50)); then
+    {
+        echo "check-file-refs.sh: ${#orphans[@]} orphans found — this many usually means a" 
+        echo "noisy tracked directory (hashed build output, migrations, vendored-but-tracked" 
+        echo "assets) rather than genuinely unused files. Inspect the most common leading" 
+        echo "path segments below and re-run with --exclude 'PATTERN/**' for each:"
+        printf '%s\n' "${orphans[@]}" | awk -F/ 'NF>1 {print $1"/"$2} NF==1 {print $1}' |
+            sort | uniq -c | sort -rn | head -5 | awk '{printf "  %5d  %s\n", $1, $2}'
+    } >&2
+fi
 
 if [[ "$output_format" == "json" ]]; then
     require_bins jq
