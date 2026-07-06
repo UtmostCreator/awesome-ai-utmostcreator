@@ -116,7 +116,7 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Auditor is read-only. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to locate workflow files and references; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to locate workflow files and references; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `check-file-refs.sh` / `ai-doc-check.sh` / `ai-file-freshness.sh` — to detect broken refs, doc drift, and stale files.
 - `ai-install-coverage.sh` / `repo-tool-inventory.sh` / `repo-stats.sh` — to audit install coverage and adapter parity.
 - `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — history and current change; `ai-verify.sh` (`ask`) for spot verification.

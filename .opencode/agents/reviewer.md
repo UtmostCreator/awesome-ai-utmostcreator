@@ -160,7 +160,7 @@ project is not named there, ask before reading it. Reviewer never edits external
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Review/audit tier = read + proof. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground findings; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground findings; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `gh-pr-context.sh` — for review/PR/release context; expect blame, branch base, PR metadata.
 - `ai-diff-context.sh` / `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to confirm proof; expect diff bundle and test results.
 - `ai-doc-check.sh` / `check-file-refs.sh` / `ai-file-freshness.sh` — to catch drift; expect lint and freshness results.

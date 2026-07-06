@@ -123,7 +123,7 @@ Determine whether a medium/high risk change is safe to release and what must be 
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Review/audit tier = read + proof. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground rollout evidence; expect hits, file content, usage maps.
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground rollout evidence; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `gh-pr-context.sh` — for release/PR history; expect blame, branch base, PR metadata.
 - `ai-diff-context.sh` / `ai-verify.sh` (`ask`) — to confirm verification depth; expect diff bundle and test results already produced by prior implementer/reviewer runs.
 - `ai-doc-check.sh` / `check-file-refs.sh` / `ai-install-coverage.sh` — to catch drift and install gaps; expect lint and coverage results.

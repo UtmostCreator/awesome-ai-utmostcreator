@@ -110,6 +110,79 @@ test_excludes_graphify_out_even_with_all() {
 }
 run_test "excludes graphify-out/** even with --all" test_excludes_graphify_out_even_with_all
 
+# Regression: generalized --exclude flag for project-specific noise (hashed
+# build output, migrations, vendored-but-tracked assets) reported against a
+# real external project (headless-cms) where check-file-refs.sh's whole-repo
+# scan flooded on public/vendor/**, database/migrations/**, and public/assets/**
+# basenames that are legitimately never referenced elsewhere by string match.
+(
+    cd "$TMP"
+    mkdir -p build/assets database/migrations
+    echo "// hashed" > build/assets/app-a1b2c3d4.js
+    echo "<?php" > database/migrations/2024_01_01_create_users.php
+    git add -A
+    git commit -qm "add noisy-directory fixture"
+)
+
+test_exclude_flag_removes_noise() {
+    local out
+    out="$(cd "$TMP" && "$BASH_BIN" "$SCRIPT" . --exclude 'build/**' --exclude 'database/migrations/**')"
+    [[ "$out" != *"app-a1b2c3d4.js"* && "$out" != *"create_users.php"* ]]
+}
+run_test "--exclude removes matched noise from output" test_exclude_flag_removes_noise
+
+test_without_exclude_noise_present() {
+    local out
+    out="$(cd "$TMP" && "$BASH_BIN" "$SCRIPT" .)"
+    [[ "$out" == *"app-a1b2c3d4.js"* ]]
+}
+run_test "without --exclude the noise is still reported (baseline)" test_without_exclude_noise_present
+
+test_exclude_repeatable() {
+    local out
+    # Only excluding one of the two noisy dirs must still flag the other.
+    out="$(cd "$TMP" && "$BASH_BIN" "$SCRIPT" . --exclude 'build/**')"
+    [[ "$out" != *"app-a1b2c3d4.js"* && "$out" == *"create_users.php"* ]]
+}
+run_test "--exclude is repeatable and independently scoped" test_exclude_repeatable
+
+test_exclude_json_contract_unaffected() {
+    local out
+    out="$(cd "$TMP" && "$BASH_BIN" "$SCRIPT" . --exclude 'build/**' --exclude 'database/migrations/**' --ext md --format json)"
+    printf '%s' "$out" | jq -e '.schema == "1" and .tool == "check-file-refs"' >/dev/null
+}
+run_test "--exclude does not break the JSON contract" test_exclude_json_contract_unaffected
+
+# Regression: 50+ orphans triggers a stderr noise-heuristic hint (not stdout,
+# not exit code) suggesting --exclude for the noisiest leading path segment.
+test_noise_hint_fires_at_threshold() {
+    local tmp2 out err
+    tmp2="$(mktemp -d)"
+    (
+        cd "$tmp2"
+        git init -q
+        git config user.email t@t
+        git config user.name t
+        mkdir -p noisy
+        for i in $(seq 1 55); do echo "x" > "noisy/chunk-$i.js"; done
+        git add -A
+        git commit -qm init
+    )
+    out="$(cd "$tmp2" && "$BASH_BIN" "$SCRIPT" . 2>/tmp/cfr_hint_stderr.$$)"
+    err="$(cat "/tmp/cfr_hint_stderr.$$")"
+    rm -f "/tmp/cfr_hint_stderr.$$"
+    rm -rf "$tmp2"
+    [[ "$out" == *"noisy/chunk-1.js"* && "$err" == *"noisy"* && "$err" == *"--exclude"* ]]
+}
+run_test "50+ orphans prints a stderr --exclude hint naming the noisy dir" test_noise_hint_fires_at_threshold
+
+test_noise_hint_does_not_fire_below_threshold() {
+    local err
+    err="$(cd "$TMP" && "$BASH_BIN" "$SCRIPT" . --exclude 'build/**' --exclude 'database/migrations/**' --ext md 2>&1 >/dev/null)"
+    [[ "$err" != *"--exclude"* ]]
+}
+run_test "hint does not fire below the 50-orphan threshold" test_noise_hint_does_not_fire_below_threshold
+
 printf '\n=== Results ===\n'
 printf '  Passed: %d  Failed: %d  Skipped: %d\n' "$PASS" "$FAIL" "$SKIP"
 if ((FAIL > 0)); then printf '\033[0;31mFAILED\033[0m\n'; exit 1; fi
