@@ -163,6 +163,7 @@ Teams adopting AI coding tools, maintainers who want one consistent, safe AI set
 ## Documentation
 
 - [Installation guide](readme-install.md) — full install, options, runtime selection, backup, rollback
+- [How to ask agents](docs/ai/how-to-ask-agents.md) — what to specify, what to avoid, and how agents ask before acting
 - [Agent routing guide](docs/ai/agents.md) — when to use which agent and common handoffs
 - [Shipped agent inventory](docs/ai/AGENTS-MANIFEST.md) — exact agent names, runtime coverage, and surface differences
 - [Non-technical overview](docs/ai/non-technical-overview.md) — plain-English explanation

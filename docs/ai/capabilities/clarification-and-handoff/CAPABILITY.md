@@ -32,10 +32,32 @@ outcome.
 
 ## Maximum Question Count
 
-Ask at most one clarifying question per pause. Bundle only tightly related
-sub-questions into that single question. If more than one topic is unclear, ask
-the highest-impact question first and note the rest as unresolved questions in
-the handoff payload (see `docs/ai/handoff-contract.md`) rather than asking a batch.
+Prefer a single pause over a long back-and-forth. The structured question set
+below is the preferred shape for that pause: it may carry the few tightly related
+decisions that block the current step, each as its own selectable item. Reserve a
+free-text blocking question for the one highest-impact unknown when options cannot
+be enumerated. If more decisions remain after the pause, record them as unresolved
+questions in the handoff payload (see `docs/ai/handoff-contract.md`) rather than
+opening a second round.
+
+## Structured Question Set (Preferred)
+
+When a request is ambiguous, terse ("implement now", "is it correct?"), or bundles
+several decisions, do not act on a guess. Generate a small, structured question set
+and let the user choose before editing:
+
+- Ask 1-4 questions total, only for decisions that actually change files, contracts,
+  scope, or risk. Drop anything cheaply discoverable from the repo (run
+  `ai-search`/`preview-file` first).
+- Give each question 2-4 concrete, selectable options. Add a short "why it matters"
+  and mark the option you recommend with `(recommended)` and one line of reasoning.
+- Do not include catch-all options like "Other"; the harness adds a free-text path.
+- Wait for the selection before implementing. Restate the chosen answers in one line
+  as the confirmed scope, then proceed.
+
+On harnesses that render selectable choices (Copilot, OpenCode, Claude interactive),
+emit the set as a choice prompt. Where interactive selection is unavailable, fall
+back to the stop-or-assume branch below.
 
 ## Stop-Or-Assume Branch
 

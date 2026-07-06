@@ -26,6 +26,7 @@
 ## Working Style
 
 - Start narrow and keep changes bounded.
+- On an ambiguous or terse request ("implement now", "is it correct?", or several bundled decisions), pause and offer a structured question set with 2-4 selectable options per question before editing (see `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md`, "Structured Question Set"). Where interactive selection is unavailable, state the assumption, mark it `unknown`, and stop on high-impact ambiguity instead of guessing.
 - For non-trivial edits, use `project-context` first and then the smallest fitting capability.
 - Before adding non-trivial new logic, search for similar existing patterns; when overlap is
   roughly `>=75%`, flag reuse or replacement instead of duplicating logic.

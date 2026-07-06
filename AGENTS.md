@@ -47,6 +47,7 @@ Workflow rules:
 ## Behavioral Baseline
 
 - Ask instead of guessing when a repository fact, convention, or requirement is missing; do not invent new conventions.
+- On an ambiguous or terse request ("implement now", "is it correct?", or several decisions bundled into one message), pause and offer a structured question set with 2-4 selectable options per question before editing, then act on the chosen answers. See `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` ("Structured Question Set"). Where interactive selection is unavailable, state the assumption, mark it `unknown`, and stop on high-impact ambiguity.
 - Prefer simplicity over speculative abstraction; add structure only when the current task actually needs it.
 - Make surgical, task-scoped changes; avoid drive-by edits outside any task, including during bug fixes.
 - When trading speed for caution, bias toward caution, clarity, and evidence over speculative speed.
@@ -79,6 +80,18 @@ Agents with edit permission may modify only the current project by default. If a
 require editing an external project, stop and ask for separate explicit approval that names the
 external path and intended change. If approval is denied, continue with current-repo evidence only
 and mark the missing external context or edit as a limitation.
+
+## Web, Browser, and Outside-Repo Access On Request
+
+The secret-file and external-edit rules above do not block ordinary web or browser work. When the
+task calls for it, agents MAY:
+
+- request access to paths outside the repository (subject to the `external_directory: ask` prompt),
+- fetch and read web pages via the webfetch/websearch tools (subject to their `ask` prompt),
+- open, read, and debug browser pages the user points them at (for example a local dev URL).
+
+These stay allowed-on-request. Tightening the secret-file policy never implies removing web, search,
+browser, or outside-repo access — it only forbids harvesting secrets from credential files.
 
 ## Core Engineering Rules
 
