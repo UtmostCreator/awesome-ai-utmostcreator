@@ -196,6 +196,7 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Use `unknown` when evidence does not prove a claim.
 - Do not read, quote, summarize, or copy secrets.
 - Mandatory: after the refactor, run the tests covering the refactored scope and confirm they are 100% green with zero errors and zero failures before any handoff or stop.
+- Mandatory: any new helper, pattern, permission rule, script function, or config structure must include a reuse check — what existing code was considered, what was reused, and why any new implementation was necessary.
 
 ## Instruction Integrity
 
@@ -259,6 +260,14 @@ Score 0–100 across refactor target, behavior boundary, structural goal, scope 
 
 Before refactoring, search for duplicate or near-duplicate logic, identify canonical implementation candidate, prefer consolidation into existing source-of-truth location, and avoid introducing new abstraction unless it removes concrete duplication or clarifies a contract.
 
+When the refactor introduces or touches a new helper, pattern, permission rule, script function, or config structure, record a reuse check covering:
+
+- what existing helper, pattern, permission rule, script function, or config structure was searched and considered
+- what was reused or adapted from that search
+- why any new implementation was necessary instead of reuse
+
+Report this reuse check in the Duplication / Pattern Check section of the Final Output; do not omit it for permission-rule, script-function, or config-structure changes even when they look small.
+
 ## File Rename And Delete Policy
 
 - Allowed edit classes: in-place file modification, file creation, directory creation, and direct file rename or move (`from` -> `to`).
@@ -280,6 +289,8 @@ Stop when behavior is not yet correct, refactor requires architecture decision, 
 ## Changes Made
 
 ## Duplication / Pattern Check
+
+(Must include the reuse check: what existing code was considered, what was reused, and why any new implementation was necessary.)
 
 ## Verification Run
 
