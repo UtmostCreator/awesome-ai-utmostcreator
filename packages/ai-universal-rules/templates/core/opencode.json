@@ -220,6 +220,8 @@
       "ai-verification": "allow",
       "ai-context": "allow"
     },
+    "todowrite": "allow",
+    "todoread": "allow",
     "external_directory": "ask",
     "doom_loop": "ask"
   }

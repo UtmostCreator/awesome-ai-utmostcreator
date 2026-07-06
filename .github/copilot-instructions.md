@@ -62,6 +62,7 @@ Do not claim verification is complete without running at least one of these comm
 ## Behavioral Baseline
 
 - Ask instead of guessing when a repository fact, convention, or requirement is missing; do not invent new conventions.
+- On an ambiguous or terse request ("implement now", "is it correct?", or several bundled decisions), pause and offer a structured question set with 2-4 selectable options per question before editing, then act on the chosen answers. See `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` ("Structured Question Set").
 - Prefer simplicity over speculative abstraction; add structure only when the current task actually needs it.
 - Make surgical, task-scoped changes; avoid drive-by edits outside any task, including during bug fixes.
 - When trading speed for caution, bias toward caution, clarity, and evidence over speculative speed.
