@@ -40,6 +40,7 @@ permission:
     'credentials.*': deny
     'auth.json': deny
   bash:
+    '*': deny
     'pwd': allow
     'ls *': allow
     'fd *': allow
@@ -110,7 +111,6 @@ permission:
     'phpunit *': allow
     'composer validate*': allow
     'php tools/ai/validate-*.php *': allow
-    '*': deny
 agent_assessment:
   risk_level: medium
   decision: needs_refactor

@@ -45,6 +45,7 @@ permission:
     "credentials.*": deny
     "auth.json": deny
   bash:
+    "*": deny
     "command -v *": allow
     "test -f *": allow
     "test -x *": allow
@@ -186,7 +187,6 @@ permission:
     "php tools/ai/ai.php toolchain*": allow
     "php tools/ai/ai.php run-script *": allow
     "php tools/ai/ai.php hooks*": allow
-    "*": deny
 agent_assessment:
   risk_level: high
   decision: needs_refactor

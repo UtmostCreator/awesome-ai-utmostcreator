@@ -18,6 +18,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -x *': allow
@@ -119,7 +120,6 @@ permission:
     'repomix *': ask
     'files-to-prompt *': ask
     'code2prompt *': ask
-    '*': deny
 agent_assessment:
   risk_level: high
   decision: needs_refactor

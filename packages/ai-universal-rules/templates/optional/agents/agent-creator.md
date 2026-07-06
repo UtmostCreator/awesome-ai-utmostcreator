@@ -13,6 +13,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': deny
     'pwd': allow
     'ls *': allow
     'fd *': allow
@@ -50,7 +51,6 @@ permission:
     'bash scripts/ai/check-file-refs.sh *': allow
     'bash scripts/ai/ai-structured.sh *': allow
     'bash scripts/ai/repomix-freshness.sh *': allow
-    '*': deny
 agent_assessment:
   risk_level: high
   decision: approve_with_minor_fixes

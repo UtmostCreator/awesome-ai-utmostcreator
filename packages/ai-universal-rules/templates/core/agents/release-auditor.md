@@ -17,6 +17,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -x *': allow
@@ -96,7 +97,6 @@ permission:
     'php tools/ai/validate-*.php *': allow
     'php tools/ai/generate-*.php --check*': allow
     'bash scripts/ai/ai-verify.sh *': ask
-    '*': deny
 agent_assessment:
   risk_level: critical
   decision: approve

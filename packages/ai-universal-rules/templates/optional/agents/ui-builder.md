@@ -43,6 +43,7 @@ permission:
     'auth.json': deny
   webfetch: deny
   bash:
+    '*': ask
     'ls *': allow
     'grep *': deny
     'git status*': allow
@@ -78,7 +79,6 @@ permission:
     'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
     'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
     'bash scripts/ai/ai-install-coverage.sh *': deny
-    '*': ask
     'python3 *': deny
     'php -r *': deny
     '* <<*': deny

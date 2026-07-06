@@ -13,6 +13,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': deny
     'pwd': allow
     'ls *': allow
     'fd *': allow
@@ -63,7 +64,6 @@ permission:
     'bash scripts/ai/ai-install-coverage.sh *': allow
     'php tools/ai/validate-*.php *': allow
     'bash scripts/ai/ai-verify.sh *': ask
-    '*': deny
 agent_assessment:
   risk_level: high
   decision: approve

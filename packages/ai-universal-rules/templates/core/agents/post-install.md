@@ -52,6 +52,7 @@ permission:
     'auth.json': deny
   task: allow
   bash:
+    '*': deny
     'command -v *': allow
     'test -f *': allow
     'test -x *': allow
@@ -166,7 +167,6 @@ permission:
     'php tools/ai/ai.php advisor*': allow
     'rm *': ask
     'git clean*': ask
-    '*': deny
 agent_assessment:
   risk_level: high
   decision: needs_refactor

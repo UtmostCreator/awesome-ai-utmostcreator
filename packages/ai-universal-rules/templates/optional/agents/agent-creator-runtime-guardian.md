@@ -14,6 +14,7 @@ permission:
   edit: deny
   task: ask
   bash:
+    '*': deny
     'pwd': allow
     'ls *': allow
     'fd *': allow
@@ -52,7 +53,6 @@ permission:
     'bash scripts/ai/ai-verify.sh *': ask
     'bash scripts/ai/session-checkpoint.sh *': ask
     'bash scripts/ai/ai-rollback.sh *': ask
-    '*': deny
 agent_assessment:
   risk_level: critical
   decision: approve_with_minor_fixes
