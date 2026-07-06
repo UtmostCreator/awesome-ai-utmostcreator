@@ -67,6 +67,7 @@ enforced frontmatter.
 | `reviewer` | yes | yes | review | no | yes | high | Correctness, regression, policy, duplication, adapter-drift review. |
 | `release-auditor` | yes | yes | release | no | yes | critical | Ship/no-ship decision for medium/high-risk changes. |
 | `post-install` | yes | yes | post-install | no | yes | high | Placeholder cleanup, install/drift verification after kit install. |
+| `script-runner` | yes | no | execution | no | no | high | Runs only registered scripts/ai/*.sh wrappers with per-script risk gating; blocks ad hoc commands, chaining, and file edits (OpenCode-only). |
 | `bootstrapper` | yes | no | orchestration | yes | no | high | INTERNAL kit-install orchestration (OpenCode-only). |
 
 ## Surface coverage differences
@@ -74,7 +75,8 @@ enforced frontmatter.
 These agents exist on only one adapter surface. A complete inventory and any
 coverage check must treat the two surfaces as distinct sets, not assume parity.
 
-- OpenCode-only (`.opencode/agents/*.md`): `bootstrapper`, `super-implementer`.
+- OpenCode-only (`.opencode/agents/*.md`): `bootstrapper`, `script-runner`,
+  `super-implementer`.
 - GitHub-only (`.github/agents/*.agent.md`): `bugfix`, `build-config`, `docs`,
   `infra-auditor`, `upgrade`.
 
