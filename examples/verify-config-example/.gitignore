@@ -1,0 +1,17 @@
+# This example is isolated from the kit repo's root. Installed dependencies
+# and tool caches for THIS folder only — never the kit's own root vendor/
+# or node_modules/ (those are covered by the root .gitignore separately).
+/vendor/
+/node_modules/
+/.phpunit.cache/
+.phpunit.result.cache
+/coverage/
+/.rector/
+/.rectorcache/
+/.phpstan-cache/
+/psalm-baseline.xml
+/.deptrac.cache
+/dist/
+/playwright-report/
+/test-results/
+/.pnpm-store/

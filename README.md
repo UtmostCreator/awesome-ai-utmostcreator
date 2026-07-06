@@ -94,6 +94,33 @@ logic in `docs/ai/shared/project-interaction.md` (per-project defaults go in
   (`optional-agents-opencode-pack` / `optional-agents-copilot-pack`, removable with `--without ...`).
   See [docs/ai/agents.md](docs/ai/agents.md).
 
+## Per-Language Verification Wrappers
+
+Alongside the full `ai-verify.sh` gate, five thin, **manual-only** wrappers narrow verification to
+one language, running only tools already present in your project — never installing anything:
+
+```bash
+bash scripts/ai/ai-verify-php.sh .    # Pint --test, PHPStan, Psalm, Rector --dry-run, composer validate/audit
+bash scripts/ai/ai-verify-js.sh .     # ESLint, Biome, Vitest --changed, knip
+bash scripts/ai/ai-verify-ts.sh .     # tsc --noEmit, ESLint/Biome, Vitest --changed
+bash scripts/ai/ai-verify-vue.sh .    # vue-tsc, nuxi typecheck (when Nuxt files changed), ESLint/Biome
+bash scripts/ai/ai-verify-html.sh .   # Biome -> htmlhint -> clean skip
+```
+
+These are **not wired into any agent** — run them yourself, or point one at a project path:
+`bash scripts/ai/ai-verify-php.sh path/to/project`. Default scope is `changed` (dirty/staged/
+untracked files only); `AI_VERIFY_SCOPE=all` widens it. `AI_VERIFY_MODE=suggest` switches ESLint to
+a non-mutating `--fix-dry-run --format json` report. `VERIFY_OUTPUT_FORMAT=json` switches
+PHPStan/Psalm to machine-readable output, written under `.ai-logs/verify/`.
+`VERIFY_FULL=1 AI_VERIFY_SCOPE=all` additionally runs the full-project gate: phpunit/pest, full
+Vitest/Playwright, deptrac, composer-require-checker, composer-unused (advisory), trivy, semgrep,
+osv-scanner, jscpd, and lychee.
+
+A ready-to-copy example with a working config for every tool above (PHPStan, Psalm, Rector,
+deptrac, ESLint, Biome, Vitest, Playwright, and more) lives in
+[`examples/verify-config-example/`](examples/verify-config-example/README.md) — copy its config
+files into your project, install the listed tools yourself, then run the wrappers above.
+
 ## Safety and Scope
 
 The kit ships rules, checks, and safer defaults — not guaranteed safety — and agents work only
@@ -142,6 +169,8 @@ Teams adopting AI coding tools, maintainers who want one consistent, safe AI set
 - [Maintainer guide](docs/ai/maintainer-guide.md) — working on the kit itself
 - [AI guardrails](docs/ai/AI-GUARDRAILS.md) — safety rules
 - [Policies](policies/README.md) — command-level governance
+- [Script registry](docs/ai/script-registry.md) — every shipped `scripts/ai/*.sh` wrapper,
+  including the per-language `ai-verify-<lang>.sh` scripts, with risk/approval classification
 
 ## License
 

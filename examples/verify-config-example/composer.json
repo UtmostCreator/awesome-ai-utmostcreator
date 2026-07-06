@@ -1,0 +1,29 @@
+{
+    "name": "ai-kit/verify-config-example",
+    "description": "Copy-paste starting point for scripts/ai/ai-verify-php.sh — config only, not a real app.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": ">=8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "VerifyConfigExample\\": "src/"
+        }
+    },
+    "require-dev": {
+        "laravel/pint": "^1.0",
+        "phpstan/phpstan": "^2.0",
+        "vimeo/psalm": "^6.0",
+        "rector/rector": "^2.0",
+        "deptrac/deptrac": "^4.0",
+        "maglnet/composer-require-checker": "^4.0",
+        "icanhazstring/composer-unused": "^0.9"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": false
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

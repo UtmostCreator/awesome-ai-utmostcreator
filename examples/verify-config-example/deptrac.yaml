@@ -1,0 +1,12 @@
+deptrac:
+    paths:
+        - ./src
+    exclude_files:
+        - '#.*test.*#'
+    layers:
+        - name: Src
+          collectors:
+              - type: directory
+                regex: src/.*
+    ruleset:
+        Src: ~
