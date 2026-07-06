@@ -18,7 +18,32 @@ source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 # same file). Absolute resolution makes the path cwd-independent.
 _ai_verify_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-root="${1:-.}"
+# Parse positional args plus an optional `--language <lang>` flag. Both
+# argument orders are supported (`--language php .` and `. --language php`)
+# since this loop scans every argument instead of assuming a fixed position.
+# `--language` selects the new per-language dispatch path
+# (53-language-dispatch.sh, docs/tickets/arch-todo-safe-language-verify-scripts-20260706-003959
+# §8-P2); when absent, the existing full-pipeline behavior (ai_verify_run) is
+# unchanged.
+root=""
+AI_VERIFY_LANGUAGE=""
+_ai_verify_args=("$@")
+_ai_verify_idx=0
+while ((_ai_verify_idx < ${#_ai_verify_args[@]})); do
+    _ai_verify_arg="${_ai_verify_args[$_ai_verify_idx]}"
+    case "$_ai_verify_arg" in
+    --language)
+        _ai_verify_idx=$((_ai_verify_idx + 1))
+        AI_VERIFY_LANGUAGE="${_ai_verify_args[$_ai_verify_idx]:-}"
+        ;;
+    *)
+        [[ -z "$root" ]] && root="$_ai_verify_arg"
+        ;;
+    esac
+    _ai_verify_idx=$((_ai_verify_idx + 1))
+done
+root="${root:-.}"
+unset _ai_verify_args _ai_verify_idx _ai_verify_arg
 
 VERIFY_FULL="${VERIFY_FULL:-0}"
 VERIFY_TIMEOUT="${VERIFY_TIMEOUT:-180}"
@@ -55,6 +80,13 @@ JSCPD_WARN_PCT="${JSCPD_WARN_PCT:-5}"
 JSCPD_FAIL_PCT="${JSCPD_FAIL_PCT:-}"
 JSCPD_PATHS="${JSCPD_PATHS:-}"
 
+# Todo-plan checklist status guardrail (docs/tickets/**/plan*.md `- [ ]`/`- [x]`
+# items plus difficulty-notice language such as "impossible" or "not enough
+# context"). On by default (no external tool required, unlike jscpd/links): set
+# VERIFY_PLAN_STATUS=0 to disable. See
+# scripts/ai/internal/ai-verify/36-plan-status.sh for the check itself.
+VERIFY_PLAN_STATUS="${VERIFY_PLAN_STATUS:-1}"
+
 failures=0
 
 cd "$root"
@@ -70,9 +102,23 @@ source "$_ai_verify_dir/internal/ai-verify/10-scope.sh"
 source "$_ai_verify_dir/internal/ai-verify/30-linecount.sh"
 # shellcheck source=scripts/ai/internal/ai-verify/40-step-runner.sh
 source "$_ai_verify_dir/internal/ai-verify/40-step-runner.sh"
+# shellcheck source=scripts/ai/internal/ai-verify/50-tool-policy.sh
+source "$_ai_verify_dir/internal/ai-verify/50-tool-policy.sh"
 # shellcheck source=scripts/ai/internal/ai-verify/35-jscpd.sh
 source "$_ai_verify_dir/internal/ai-verify/35-jscpd.sh"
+# shellcheck source=scripts/ai/internal/ai-verify/36-plan-status.sh
+source "$_ai_verify_dir/internal/ai-verify/36-plan-status.sh"
+# shellcheck source=scripts/ai/internal/ai-verify/51-language-files.sh
+source "$_ai_verify_dir/internal/ai-verify/51-language-files.sh"
+# shellcheck source=scripts/ai/internal/ai-verify/54-reporting.sh
+source "$_ai_verify_dir/internal/ai-verify/54-reporting.sh"
 # shellcheck source=scripts/ai/internal/ai-verify/90-run.sh
 source "$_ai_verify_dir/internal/ai-verify/90-run.sh"
+# shellcheck source=scripts/ai/internal/ai-verify/53-language-dispatch.sh
+source "$_ai_verify_dir/internal/ai-verify/53-language-dispatch.sh"
 
-ai_verify_run
+if [[ -n "$AI_VERIFY_LANGUAGE" ]]; then
+    ai_verify_language "$AI_VERIFY_LANGUAGE"
+else
+    ai_verify_run
+fi

@@ -137,6 +137,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/internal/lib/10-json.sh`
 - `scripts/ai/internal/lib/20-paths.sh`
 - `scripts/ai/internal/lib/30-logging.sh`
+- `scripts/ai/internal/lib/31-log-redaction.sh`
 - `scripts/ai/internal/lib/40-session.sh`
 - `scripts/ai/internal/lib/50-policy.sh`
 - `scripts/ai/internal/lib/60-exec-guard.sh`
