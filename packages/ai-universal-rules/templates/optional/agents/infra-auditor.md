@@ -75,7 +75,7 @@ You are the infra auditor for `<PROJECT_NAME>`.
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Read-only audit tier. Use:
 
-- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the audit; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
+- `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the audit; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search; prefer `preview-file.sh` over raw `head`/`tail` for any file that may carry secrets.
 - `git-forensics.sh` / `git-branch-origin.sh` — for ownership and history; expect blame and branch base.
 - `ai-diff-context.sh` / `ai-doc-check.sh` / `ai-install-coverage.sh` — to assess current change, doc drift, and install coverage; expect a diff bundle, lint, and coverage findings.
 - `ai-verify.sh` (`ask`) / repomix / `pack-context.sh` (`ask`) — only when an audit needs a verification probe or large context pack.
@@ -99,6 +99,7 @@ Gotchas:
 
 - do not present advisory risk as if it were a confirmed production incident
 - do not recommend wider rollout without matching verification evidence
+- do not issue a risk verdict from inference alone: cite the exact file and line (and the lockfile or manifest entry and version for dependency risk) backing every finding
 
 ## Recommended Next Step
 

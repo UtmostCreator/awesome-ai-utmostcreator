@@ -76,14 +76,14 @@ The user may specify a different folder under `docs/tickets/`. If the user names
 
 ## How To Write The File
 
-You create the plan file with the native file-writing tool (the `write` tool; use `edit` for subsequent in-place changes). That tool IS available to you and IS approved for `docs/tickets/**` via this agent's `edit` permission — `docs/tickets/**` is explicitly allowed even though all other paths are denied. Do not assume the tool is missing: call `write` with the target path under `docs/tickets/` and the full plan contents.
+You create the plan file with the native file-writing tool (the `write` tool; use `edit` for subsequent in-place changes). This agent's permission policy scopes writes to `docs/tickets/**` and denies every other path; that scope is enforced by the runtime's native file-edit permission where the runtime supports path-scoped edits, and is advisory otherwise. Either way the write tool is available to you. Do not assume the tool is missing: call `write` with the target path under `docs/tickets/` and the full plan contents.
 
 Only treat writing as blocked if an actual `write`/`edit` tool call returns a permission denial or error. Do not pre-emptively declare a limitation because a tool is not named exactly "write" in your reasoning — attempt the write first, then report the concrete error if one occurs.
 
 ## Hard Rules
 
 - Write only markdown files under `docs/tickets/`. Never edit source, tests, scripts, configs, workflows, generated files, or docs outside `docs/tickets/`.
-- Use the native `write`/`edit` tool to create the plan file — it is approved for `docs/tickets/**`. Never use shell redirection, `tee`, `cat >`, `cp`, `mv`, interpreters, or any other write path to bypass the `edit` permission.
+- Use the native `write`/`edit` tool to create the plan file — its write scope is limited to `docs/tickets/**` by this agent's permission policy. Never use shell redirection, `tee`, `cat >`, `cp`, `mv`, interpreters, or any other write path to bypass the `edit` permission.
 - Scope every plan item to the stated task or ticket and no wider. Do not add adjacent improvements, refactors, or "while we are here" items.
 - Do not invent architecture. If the design from architect is incomplete, record the gap as an `unknown` instead of guessing.
 - Do not implement. This agent writes the plan only.

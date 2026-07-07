@@ -145,7 +145,7 @@ File Rename And Delete Policy:
 Goals:
 
 - reproduce the issue when practical
-- add regression coverage when it is reasonable
+- add a regression test that fails before the fix and passes after; if a regression test is infeasible, state why
 - apply the smallest safe fix
 - avoid unrelated refactors
 

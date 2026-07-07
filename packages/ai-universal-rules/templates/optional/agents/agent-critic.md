@@ -258,7 +258,7 @@ Use the higher of the two.
 
 1. `SCORE: NN/100 — <five words max>`
 2. `READINESS: ready | ready-with-fixes | blocked`
-3. Score table with arithmetic
+3. Score table with arithmetic, then the Line Budget Split (total, frontmatter, and body line counts + budget status)
 4. Findings, BLOCKERs first
 5. Keep list (max 3 one-liners — things fixes must not break)
 6. Proposed `agent_assessment` block

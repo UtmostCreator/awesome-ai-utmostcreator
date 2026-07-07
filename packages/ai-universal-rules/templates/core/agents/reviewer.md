@@ -279,4 +279,4 @@ PASS | PASS WITH NOTES | FAIL
 ## Recommended Next Step
 ```
 
-If fixes are needed, next step is implementer. If only structure is affected, next step is refactorer. If rollout risk remains, next step is release-auditor.
+If the verdict is PASS with no remaining fixes, structural concerns, or rollout risk, no further agent is required; the change is ready to merge. If fixes are needed, next step is implementer. If only structure is affected, next step is refactorer. If rollout risk remains, next step is release-auditor.

@@ -169,6 +169,6 @@ Zero findings is a valid, complete verdict — do not invent issues to justify t
 ## Output expectations
 
 - Verdict: pass, findings, or blocked.
-- Evidence with file/line references and commands run.
+- Each finding labeled with a severity (blocker, major, or minor) and backed by exact file/line references plus the command that surfaced it.
 - Regression, permission, adapter-drift, and verification gaps.
 - Recommended next step, naming a roster agent (typically `implementer` to fix findings, `architect` to redesign, or `workflow-auditor`).

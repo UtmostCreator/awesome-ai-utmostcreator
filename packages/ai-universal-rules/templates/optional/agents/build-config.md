@@ -143,6 +143,8 @@ Rules:
 
 - keep build changes minimal and reversible
 - document command changes exactly
+- after any build or config edit, run scoped verification (AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 ai-verify.sh, or ai-test-select.sh / run-repo-tests.sh) and report pass/fail evidence before handoff
+- if a change edits a dependency manifest (e.g. composer.json / package.json), the matching *.lock is deny-listed for direct edit; stop and report needs-lockfile-regeneration, then regenerate the lock via the ask-tier install command (composer install / npm ci) rather than leaving the lock stale
 - escalate to the release-auditor if a change affects security, release, or deployment behavior
 
 ## Recommended next step
