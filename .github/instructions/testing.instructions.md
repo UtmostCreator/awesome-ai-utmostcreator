@@ -1,5 +1,5 @@
 ---
-applyTo: "<TEST_PATH_GLOB>"
+applyTo: "**/*.test.*,**/*.spec.*,**/tests/**,**/test/**,**/__tests__/**"
 description: "Testing, verification ladder, regression coverage, and deterministic proof rules"
 ---
 
@@ -27,7 +27,7 @@ Use the smallest sufficient proof first, then widen only when risk requires it.
 
 ## Baseline Command
 
-- Use `unknown` as the baseline test command unless a narrower command is more appropriate.
+- Use `composer test (composer test:fast for parallel)` as the baseline test command unless a narrower command is more appropriate.
 - Prefer deterministic local commands over broad slow commands when proving a small change.
 - If no reliable command exists, state that clearly and provide the closest available proof.
 

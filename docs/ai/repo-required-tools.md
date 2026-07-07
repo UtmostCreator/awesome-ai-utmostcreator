@@ -141,6 +141,10 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/internal/ai-verify/51-language-files.sh`
 - `scripts/ai/internal/ai-verify/53-language-dispatch.sh`
 - `scripts/ai/internal/ai-verify/54-reporting.sh`
+- `scripts/ai/internal/ai-verify/60-kotlin-files.sh`
+- `scripts/ai/internal/ai-verify/61-gradle-policy.sh`
+- `scripts/ai/internal/ai-verify/62-android-guards.sh`
+- `scripts/ai/internal/ai-verify/63-kotlin-dispatch.sh`
 - `scripts/ai/internal/ai-verify/90-run.sh`
 - `scripts/ai/internal/lib/00-env.sh`
 - `scripts/ai/internal/lib/05-core.sh`
@@ -255,6 +259,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `tests/scripts/ai/test-validate-context-budgets.sh`
 - `tests/scripts/ai/test-watch-loop.sh`
 - `tools/ai/install-ai-kit.sh`
+- `tools/ai/install-claude-kit.sh`
 - `tools/ai/install-copilot-kit.sh`
 - `tools/ai/install-opencode-kit.sh`
 - `tools/ai/install/base.sh`

@@ -5,13 +5,13 @@ overwrites it. Keep entries concrete so the AI can follow and verify them.
 
 ## Code
 
-- Language/runtime: unknown / unknown
+- Language/runtime: PHP / PHP >=8.2
 - File placement: <where new code/tests/docs go>
 - Naming: <naming rules that matter here>
 
 ## Testing
 
-- Test command: unknown
+- Test command: composer test (composer test:fast for parallel)
 - Test location & style: <where tests live; unit vs. feature>
 - Fixture policy: <how fixtures/factories are used>
 

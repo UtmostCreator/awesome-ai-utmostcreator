@@ -27,10 +27,6 @@ case "$cmd" in
         printf 'deny:%s\n' 'denied by tiered command policy: git clean *'
         exit 1
         ;;
-    "bash scripts/ai/ai-verify.sh "*)
-        printf 'ask:%s\n' 'confirm required by tiered command policy: bash scripts/ai/ai-verify.sh *'
-        exit 0
-        ;;
     "bash scripts/ai/pack-context.sh "*)
         printf 'ask:%s\n' 'confirm required by tiered command policy: bash scripts/ai/pack-context.sh *'
         exit 0
@@ -63,11 +59,95 @@ case "$cmd" in
         printf 'allow\n'
         exit 0
         ;;
+    "bash scripts/ai/ai-search.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
     "bash scripts/ai/preview-file.sh "*)
         printf 'allow\n'
         exit 0
         ;;
+    "bash scripts/ai/preview-file.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
     "bash scripts/ai/query-usage.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/query-usage.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-verify.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-verify.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/run-repo-tests.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/run-repo-tests.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/run-test-focused.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/run-test-focused.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash tests/scripts/ai/run-all-tests.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash tests/scripts/ai/run-all-tests.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/git-branch-origin.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/git-branch-origin.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-task.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-task.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-structured.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-structured.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-test-select.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-test-select.sh")
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-doc-check.sh "*)
+        printf 'allow\n'
+        exit 0
+        ;;
+    "bash scripts/ai/ai-doc-check.sh")
         printf 'allow\n'
         exit 0
         ;;

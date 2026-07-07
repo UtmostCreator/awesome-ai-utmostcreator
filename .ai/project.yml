@@ -28,7 +28,7 @@ packageManager: "composer"
 # approvalRequiredChanges: unknown
 # inactivePaths: unknown
 # availableCapabilities: unknown
-# primaryStack: unknown
+primaryStack: "github-actions"
 # filePlacementRules: unknown
 # namingRules: unknown
 # goldenExamples: unknown
@@ -36,3 +36,7 @@ packageManager: "composer"
 # linterConfigFiles: unknown
 # editorconfigPath: unknown
 # ignoreFiles: unknown
+
+selectedStacks: "github-actions,markdown,php,shell"
+detectedStacks: "github-actions:95,markdown:80,php:95,shell:75"
+stackToolVersions: "actionlint=1.7.12, bash=GNU bash, version 5.3.9(1)-release (x86_64-pc-linux-gnu), composer=Composer version 2.10.1 2026-06-04 10:25:59, markdownlint-cli2=unavailable, php=PHP 8.4.22 (cli) (built: Jun  3 2026 01:12:32) (NTS), shellcheck=ShellCheck - shell script analysis tool"

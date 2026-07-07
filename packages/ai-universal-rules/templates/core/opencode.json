@@ -51,6 +51,7 @@
       "docs/tickets/**": "allow",
       "docs/tickets/arch-todo-*/**": "allow",
       ".opencode/**": "deny",
+      ".opencode/agents/script-runner.md": "allow",
       ".github/agents/**": "deny",
       ".github/instructions/**": "deny",
       ".github/prompts/**": "deny",

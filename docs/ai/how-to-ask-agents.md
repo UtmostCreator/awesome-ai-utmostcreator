@@ -19,7 +19,7 @@ than guess — but supplying them up front is faster.
 ## What To Specify — and Why
 
 | Specify | Why it matters |
-|---|---|
+| --- | --- |
 | One goal per message | Bundled asks ("fix this, also refactor that, and is X correct?") split the agent's attention and lead to partial work. One goal keeps the change bounded and reviewable. |
 | A concrete done-signal | "Is it correct?" has no finish line. "The `AccommodationValidationErrorDisplayTest` passes" does. The agent can then verify and prove it. |
 | The exact target repo/path | This kit is often used across sibling repos. Naming the path prevents edits landing in the wrong project and triggers the external-access prompt correctly. |

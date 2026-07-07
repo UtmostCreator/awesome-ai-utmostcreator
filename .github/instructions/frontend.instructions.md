@@ -1,5 +1,5 @@
 ---
-applyTo: '<FRONTEND_PATH_GLOB>'
+applyTo: '**/*.tsx,**/*.jsx,**/*.vue,**/*.svelte,**/frontend/**,**/client/**,**/web/**,**/ui/**'
 description: 'Frontend, UI, accessibility, state, interaction, and presentation guidance'
 ---
 

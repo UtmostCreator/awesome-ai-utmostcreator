@@ -12,38 +12,65 @@ declare(strict_types=1);
 // previously in full-install-validation.php has been removed). The caller must require both
 // config-loader.php and watchdog-runner.php before invoking these functions.
 
-function lintShellScripts(array &$report, string $root, array $files, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog): void
+/**
+ * Shared per-file lint runner: builds a command for each file via $commandBuilder, runs it
+ * through the watchdog, and accumulates failures under one stage. Extracted to remove the
+ * near-identical loop/failure-accumulation duplication previously repeated across
+ * lintShellScripts() and lintPhpFiles() (flagged by jscpd, tools/ai scope: 7 lines / 71 tokens).
+ * Behavior-preserving: same per-file command strings, same stage ids, same failure/message
+ * shapes as before this extraction.
+ */
+function lintFilesWithCommand(array &$report, string $root, array $files, callable $commandBuilder, string $watchdogLabel, string $stageId, string $failureMessage, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog): void
 {
     $failures = [];
     foreach ($files as $file) {
-        $lint = runCommandWatchdog($root, 'bash -n ' . escapeshellarg($file), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, 'bash-lint');
+        $lint = runCommandWatchdog($root, $commandBuilder($file), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, $watchdogLabel);
         if (($lint['exit'] ?? 1) !== 0) {
             $failures[] = ['file' => $file, 'stderr' => trim((string) ($lint['stderr'] ?? ''))];
         }
     }
     if ($failures !== []) {
-        markFailure($report, 'bash-lint-all', 'shell lint failures found', ['failures' => $failures]);
-        addStage($report, 'bash-lint-all', false, ['checked_files' => count($files)]);
+        markFailure($report, $stageId, $failureMessage, ['failures' => $failures]);
+        addStage($report, $stageId, false, ['checked_files' => count($files)]);
         return;
     }
-    addStage($report, 'bash-lint-all', true, ['checked_files' => count($files)]);
+    addStage($report, $stageId, true, ['checked_files' => count($files)]);
+}
+
+function lintShellScripts(array &$report, string $root, array $files, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog): void
+{
+    lintFilesWithCommand(
+        $report,
+        $root,
+        $files,
+        static fn (string $file): string => 'bash -n ' . escapeshellarg($file),
+        'bash-lint',
+        'bash-lint-all',
+        'shell lint failures found',
+        $timeoutSec,
+        $idleTimeoutSec,
+        $heartbeatSec,
+        $cancelFlag,
+        $liveLog
+    );
 }
 
 function lintPhpFiles(array &$report, string $root, array $files, string $phpBin, int $timeoutSec, int $idleTimeoutSec, int $heartbeatSec, string $cancelFlag, string $liveLog): void
 {
-    $failures = [];
-    foreach ($files as $file) {
-        $lint = runCommandWatchdog($root, escapeshellarg($phpBin) . ' -l ' . escapeshellarg($file), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, 'php-lint');
-        if (($lint['exit'] ?? 1) !== 0) {
-            $failures[] = ['file' => $file, 'stderr' => trim((string) ($lint['stderr'] ?? ''))];
-        }
-    }
-    if ($failures !== []) {
-        markFailure($report, 'php-lint-all', 'php lint failures found', ['failures' => $failures]);
-        addStage($report, 'php-lint-all', false, ['checked_files' => count($files)]);
-        return;
-    }
-    addStage($report, 'php-lint-all', true, ['checked_files' => count($files)]);
+    lintFilesWithCommand(
+        $report,
+        $root,
+        $files,
+        static fn (string $file): string => escapeshellarg($phpBin) . ' -l ' . escapeshellarg($file),
+        'php-lint',
+        'php-lint-all',
+        'php lint failures found',
+        $timeoutSec,
+        $idleTimeoutSec,
+        $heartbeatSec,
+        $cancelFlag,
+        $liveLog
+    );
 }
 
 function lintJsonFiles(array &$report, string $root, array $files): void
@@ -103,18 +130,18 @@ function lintYamlFiles(array &$report, string $root, array $files, int $timeoutS
         return;
     }
 
-    $failures = [];
-    foreach ($files as $file) {
-        $run = runCommandWatchdog($root, 'yq e . ' . escapeshellarg($file), $timeoutSec, $idleTimeoutSec, $heartbeatSec, $cancelFlag, $liveLog, 'yaml-parse');
-        if (($run['exit'] ?? 1) !== 0) {
-            $failures[] = ['file' => $file, 'stderr' => trim((string) ($run['stderr'] ?? ''))];
-        }
-    }
-
-    if ($failures !== []) {
-        markFailure($report, 'yaml-parse-all', 'yaml parse failures found', ['failures' => $failures]);
-        addStage($report, 'yaml-parse-all', false, ['checked_files' => count($files)]);
-        return;
-    }
-    addStage($report, 'yaml-parse-all', true, ['checked_files' => count($files)]);
+    lintFilesWithCommand(
+        $report,
+        $root,
+        $files,
+        static fn (string $file): string => 'yq e . ' . escapeshellarg($file),
+        'yaml-parse',
+        'yaml-parse-all',
+        'yaml parse failures found',
+        $timeoutSec,
+        $idleTimeoutSec,
+        $heartbeatSec,
+        $cancelFlag,
+        $liveLog
+    );
 }

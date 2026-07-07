@@ -34,7 +34,7 @@ Load the smallest relevant task context first when available. If none exists, st
 - Summary: `AI workflow starter for awesome-ai-utmostcreator`
 - Primary language: `PHP`
 - Primary runtime: `PHP >=8.2`
-- Active paths: `.ai-install-manifest.json,.ai-logs,.ai,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,LICENSE,PLACEHOLDERS.md,README.md,SECURITY.md,SUPPORT.md,composer.json,composer.lock,configs,docs,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools`
+- Active paths: `.ai-install-manifest.json,.ai-logs,.ai,.claude,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,LICENSE,PLACEHOLDERS.md,README.md,SECURITY.md,SUPPORT.md,bin,common-vocabulary,composer.json,composer.lock,configs,docs,examples,graphify-out,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools,v0.5-upgrade,v0.6-plan`
 - Inactive paths: `unknown`
 - Targets: `unknown`
 

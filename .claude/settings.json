@@ -1,4 +1,48 @@
 {
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git show*)",
+      "Bash(git ls-files*)",
+      "Bash(git blame*)",
+      "Bash(git branch)",
+      "Bash(git branch --show-current)",
+      "Bash(git branch --list)",
+      "Bash(git branch --list *)",
+      "Bash(git branch -vv)",
+      "Bash(git branch -vv *)",
+      "Bash(scripts/ai/ai-search.sh *)",
+      "Bash(scripts/ai/ai-search-multi.sh *)",
+      "Bash(scripts/ai/preview-file.sh *)",
+      "Bash(scripts/ai/query-usage.sh *)",
+      "Bash(scripts/ai/ai-diff-context.sh *)",
+      "Bash(scripts/ai/git-forensics.sh *)"
+    ],
+    "deny": [
+      "Bash(rm -rf *)",
+      "Bash(sudo *)",
+      "Bash(git push --force*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean -f*)",
+      "Bash(git branch -d *)",
+      "Bash(git branch -D *)",
+      "Bash(git branch --delete *)",
+      "Bash(git branch -m *)",
+      "Bash(git branch -M *)",
+      "Bash(git branch --move *)",
+      "Bash(curl *)",
+      "Bash(wget *)",
+      "Read(.env)",
+      "Read(.env.*)",
+      "Read(**/secrets/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/id_rsa*)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {
@@ -11,7 +55,7 @@
         ]
       },
       {
-        "matcher": "Read|Glob",
+        "matcher": "Read|Glob|Grep",
         "hooks": [
           {
             "type": "command",

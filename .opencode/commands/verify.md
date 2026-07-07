@@ -9,13 +9,13 @@ Prefer the `verify-change` skill when available. This command remains as a thin 
 Run the main verification commands in order and summarize failures separately.
 
 Step 1:
-!`unknown`
+!`composer test (composer test:fast for parallel)`
 
 Step 2:
-!`unknown`
+!`none (PHP tooling/docs kit; no compiled build step)`
 
 Step 3:
-!`unknown`
+!`composer test`
 
 Important:
 
