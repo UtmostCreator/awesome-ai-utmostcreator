@@ -77,7 +77,8 @@ function aiInstallerRenderClaudeAgent(
     if ($allowedBash !== []) {
         $bashPolicy  = "\n## Bash Command Policy\n\n";
         $bashPolicy .= "Claude Code frontmatter cannot express per-command bash allowlists — only the\n";
-        $bashPolicy .= "tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.\n\n";
+        $bashPolicy .= "tool-level `Bash` grant above. Treat the following list as required agent policy;\n";
+        $bashPolicy .= "hard enforcement depends on `.claude/settings.json` or runtime hooks.\n\n";
         $bashPolicy .= "Approved scripts (run from the repository root using `<SCRIPTS_ROOT>`):\n\n";
         foreach ($allowedBash as $cmd) {
             $displayCmd = preg_replace('/\bscripts\/ai\//', '<SCRIPTS_ROOT>/', $cmd);

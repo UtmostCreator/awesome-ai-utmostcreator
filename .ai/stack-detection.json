@@ -1,0 +1,98 @@
+{
+    "schemaVersion": 1,
+    "informational": true,
+    "not_a_write_allowlist": true,
+    "generatedAt": "2026-07-07T02:26:54+00:00",
+    "detected": {
+        "github-actions": {
+            "id": "github-actions",
+            "confidence": 95,
+            "signals": [
+                ".github/workflows/*.yml"
+            ]
+        },
+        "markdown": {
+            "id": "markdown",
+            "confidence": 80,
+            "signals": [
+                "README.md",
+                ".markdownlint-cli2.yaml",
+                "*.md",
+                "docs/**/*.md"
+            ]
+        },
+        "php": {
+            "id": "php",
+            "confidence": 95,
+            "signals": [
+                "composer.json",
+                "tests/**/*.php"
+            ]
+        },
+        "shell": {
+            "id": "shell",
+            "confidence": 75,
+            "signals": [
+                ".shellcheckrc",
+                "*.sh",
+                "scripts/**/*.sh"
+            ]
+        }
+    },
+    "selected": [
+        "github-actions",
+        "markdown",
+        "php",
+        "shell"
+    ],
+    "versionChecks": {
+        "actionlint": {
+            "id": "actionlint",
+            "tool": "actionlint",
+            "available": true,
+            "output": "1.7.12\ninstalled by building from source\nbuilt with go1.26.4 compiler for linux/amd64",
+            "error": "",
+            "required": false
+        },
+        "bash": {
+            "id": "bash",
+            "tool": "bash",
+            "available": true,
+            "output": "GNU bash, version 5.3.9(1)-release (x86_64-pc-linux-gnu)\nCopyright (C) 2025 Free Software Foundation, Inc.\nLicense GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>\n\nThis is free software; you are free to change and redistribute it.\nThere is NO WARRANTY, to the extent permitted by law.",
+            "error": "",
+            "required": false
+        },
+        "composer": {
+            "id": "composer",
+            "tool": "composer",
+            "available": true,
+            "output": "Composer version 2.10.1 2026-06-04 10:25:59",
+            "error": "PHP version 8.4.22 (/nix/store/wxiwm9g2rhz57m4v1ijf8cfh4r8pz0z1-php-with-extensions-8.4.22/bin/php)\nRun the \"diagnose\" command to get more detailed diagnostics output.",
+            "required": false
+        },
+        "markdownlint-cli2": {
+            "id": "markdownlint-cli2",
+            "tool": "markdownlint-cli2",
+            "available": false,
+            "output": "",
+            "error": "tool not found",
+            "required": false
+        },
+        "php": {
+            "id": "php",
+            "tool": "php",
+            "available": true,
+            "output": "PHP 8.4.22 (cli) (built: Jun  3 2026 01:12:32) (NTS)\nCopyright (c) The PHP Group\nZend Engine v4.4.22, Copyright (c) Zend Technologies\n    with Zend OPcache v8.4.22, Copyright (c), by Zend Technologies",
+            "error": "",
+            "required": false
+        },
+        "shellcheck": {
+            "id": "shellcheck",
+            "tool": "shellcheck",
+            "available": true,
+            "output": "ShellCheck - shell script analysis tool\nversion: 0.11.0\nlicense: GNU General Public License, version 3\nwebsite: https://www.shellcheck.net",
+            "error": "",
+            "required": false
+        }
+    }
+}

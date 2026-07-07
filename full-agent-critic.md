@@ -12,7 +12,7 @@ token economy). All defects target **template sources** under
 - Average score: **72.4** · Median: **78** · Min: **34** (docs) · Max: **92** (repository-reviewer)
 - Ready-with-fixes: **17** · Blocked: **7**
 - Blocked (initial audit): docs (34), build-config (35), upgrade (38), bugfix (41), agent-fleet-assessor (60), architecture-plan-writer (62), config-maintainer (65)
-- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, architect **94**, agent-fleet-assessor **93**, agent-critic **93**, implementer **92**, reviewer **92** — all `approve`/`ready` except `reviewer`, which still carries one deliberately-open MAJOR (`decision: needs_refactor`; see Re-Audit Updates). Remaining 18 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
+- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, architect **94**, agent-fleet-assessor **93**, agent-critic **93**, implementer **92**, reviewer **92**, refactorer **88** — all decisions ≥ `approve_with_minor_fixes` except `reviewer`, which still carries one deliberately-open MAJOR (`decision: needs_refactor`; see Re-Audit Updates). Remaining 17 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
 
 ## Re-Audit Updates (post-remediation)
 
@@ -26,6 +26,7 @@ token economy). All defects target **template sources** under
 | agent-critic.md | 91 (ready-with-fixes) | **93** | +2 | ready-with-fixes | approve_with_minor_fixes |
 | implementer.md | 84 (ready-with-fixes) | **92** | +8 | approve | **approve** |
 | reviewer.md | 91 (ready-with-fixes) | 86 → 65 → 94 → **92** | +1 (net, 4 rounds) | ready-with-fixes | needs_refactor (unchanged) |
+| refactorer.md | 73 (ready-with-fixes) | 35/blocked → **88** | +15 (net, re-baselined) | ready-with-fixes | approve_with_minor_fixes |
 
 `architecture-plan-writer` was the fleet's lowest non-trivial score and is now near the top (95); decision `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. `agent-critic` gained an ask-gated WebFetch (AI-provider-doc debugging) policy, verified safe and coherent by self-audit. `architect` re-audited on the **canonical source** at 92 (round 1), had three brevity/duplication MINORs applied, and re-scored **94** (round 2, no new findings, `approve`); the fixes were re-rendered to all three adapters (Claude/Copilot/OpenCode), which also cleared the copy-only drift the initial 88 audit saw (garbled handoff line, dead `risk-taxonomy.md` ref, missing non-interactive fallback — none of which were present in the canonical). Its 4th MINOR (removing raw `head`/`tail`/`bat`/`fx`/`glow` readers) is deferred as a generator-managed, fleet-wide permission decision owned by `workflow-auditor`. `agent-fleet-assessor` cleared its original BLOCKER (delegation was structurally unperformable on Claude/Copilot — the frontmatter granted no spawn tool) by moving canonical `permission.task: ask` → `allow`, granting the Claude copy the `Agent` tool, and adding a Copilot `Assess Agent` handoff to `agent-critic`; re-audited on the shipped Claude copy across four rounds (60 → 89 → 93 → 93 → sign-off), fixing each reported MINOR (runtime-relative stop conditions, a Sensitive Files guard, reconciling a missing-score Stop Condition with Reliable Aggregation, trimmed formula prose) until the critic reported "none — ready to sign off". The re-audit also surfaced and fixed a pre-existing `docs/ai/agent-scores.yaml` drift (`risk_level: low` vs. the manifest/frontmatter `medium`) that the frontmatter-drift validator had been failing on; the source, template, and manifest now agree across all 26 templates. Its one deferred item (the fleet-wide `sed -n *` reader, bound by the new Sensitive Files guard) is owned by `workflow-auditor`, same as architect's. `reviewer` is the fleet's most contested re-audit: round 1 (91→86 re-baselined against the canonical) found a real MAJOR (`sed -n`/`head`/`tail`/`nl`/`bat` unrestricted, unlike the same-archetype `repository-reviewer`, which already denies them) — fixed via the permission-composition system (new/reused `core.safe_read.deny_sed_n`/`deny_head_tail`/`deny_nl`/`deny_bat` packs, the last also deduplicating an identical inline exception on `architecture-plan-writer`). Round 2 (65, blocked) caught a BLOCKER the round-1 fix itself introduced: a false "preview-file.sh (secret-blocking)" claim in the new Sensitive File Rules section — verified false by grepping the script (no secret-detection logic) and fixed with accurate wording. Round 3 (94) confirmed that clean but surfaced a carried-over MAJOR: the secret-path check is prompt-enforced only, no permission-level backstop. Round 4 (92) added an honest disclosure sentence, but the critic correctly held that disclosure doesn't reclassify an `INSTRUCTION_ONLY` security rule as enforced — **decision stays `needs_refactor`, deliberately not force-closed**, because the only structural fix (path-scoped `deny` entries ahead of `preview-file.sh`'s broad `allow`) depends on OpenCode glob-precedence semantics that are undocumented anywhere in this repo and unverifiable from static analysis; shipping unverified deny entries and calling them a backstop would repeat the exact false-confidence mistake round 2 caught. Recommended next step: `workflow-auditor` verifies OpenCode's actual glob-precedence behavior before any agent's permission block relies on specific-over-broad deny ordering. All verified against the installed Claude copy; full PHP suite green (902/902).
 
@@ -63,7 +64,7 @@ Per-agent architected plans persisted at `docs/tickets/arch-todo-agent-fleet-imp
 | agent-creator-runtime-guardian.md | 78 | ready-with-fixes | Correct critical-risk auditor posture; enforceable Hard Rules; resolving handoffs | Script Access contradicts Bash policy; wrong header; broad readers; no self-stop | Reconcile Script Access vs Bash policy |
 | workflow-auditor.md | 78 | ready-with-fixes | Correct read-only posture; hookless fallback clause; testable verdict output | ai-verify mismatch; empty Recommended Next Step heading; broad readers | Fix ai-verify contradiction |
 | agent-creator-supervisor.md | 77 | ready-with-fixes | Coherent router posture; concrete testable pipeline gates; explicit failure routing | Claims frontmatter tier Claude lacks; ask-scripts absent from allowlist; no non-interactive gate | Fix Script Access permission-surface mismatch |
-| refactorer.md | 73 | ready-with-fixes | Mandatory test gate w/ counts; rename/delete stop tokens; roster-valid handoffs | Unenforceable path-scoped edit claim; overpowered; duplication | Reconcile write-scope claim vs Claude enforcement |
+| refactorer.md | 73 → 35/blocked → **88** ⬆ | ready-with-fixes | Mandatory test gate w/ counts; rename/delete stop tokens; roster-valid handoffs | _Re-audited (2 rounds): phantom path-scoped `edit:` claim removed; Script Access contradiction fixed; `.claude/settings.json` Edit/Write deny-floor resynced (10 pairs); rename/mv deadlock closed; AI-GUARDRAILS.md ref added; dangling Shell Boundary ref fixed (unconfirmed)_ | — (approve_with_minor_fixes) |
 | infra-auditor.md | 71 | ready-with-fixes | Clean read-only auditor; sharp anti-overreach gotchas; query-usage clarity | validate-*.php * wildcard permits mutation; no handoff/failure path; ask-scripts gap | Narrow validate-*.php * wildcard to read-only set |
 | config-maintainer.md | 65 | blocked → **remediated** _(not re-scored)_ | Layered secret/destructive guards; testable Final Output; correct non-interactive fallback | _Fixed: Script Access reconciled (renderer ask-tier note); path-scoped-edit prose made agnostic_ | ✓ addressed |
 | architecture-plan-writer.md | 62 → **95** ⬆ | blocked → **ready** | Bounded docs/tickets mission; strong failure/loop routing; testable output; clean multi-target handoff routing | _Re-audited twice (62→92→95): all findings resolved; only brevity nits remain_ | — (approve) |
@@ -141,6 +142,36 @@ Template: packages/ai-universal-rules/templates/core/agents/repository-reviewer.
 > Verification: `generate-agent-permissions --check` in sync; all 4 assessment/drift validators OK;
 > `validate-install-surface --strict` passes; full PHPUnit suite 902 passed / 5 skipped / 0 failed.
 > Commits `ca0e559` (fix) + `10c9244` (unrelated catalog catch-up surfaced by the same test run).
+
+`refactorer` was re-audited across two rounds (35 → 88). Round 1 **re-baselined** the file against a
+fresh, independent audit (not this doc's stale 73 snapshot) and found **35/blocked**, surfacing three
+BLOCKERs the original lighter pass had only scored as two MAJORs: (1) a phantom "path-scoped `edit:`
+permission" claim — OpenCode-only grammar leaked into the Claude/Copilot render (Cross-cutting issue
+#2); (2) a self-contradiction claiming "full per-script allow/ask/deny is in frontmatter," true only
+for OpenCode; (3) a **live** enforcement gap — the installed `.claude/settings.json` was missing 10
+Edit()/Write() deny pairs (`.env`, `**/secrets/**`, `*.pem`, `*.key`, `*.crt`, `*.lock`, generated
+paths) that its own template already defined, leaving refactorer's unscoped `Write`/`Edit` grant with
+zero enforced boundary on secret-adjacent paths. All three fixed at the template source
+(`packages/ai-universal-rules/templates/core/agents/refactorer.md`) with adapter-neutral wording, plus
+the pre-existing rename/mv Hard-Rule-vs-Bash-ban deadlock closed with an explicit approval/stop clause
+and a missing `docs/ai/AI-GUARDRAILS.md` Canonical Reference added. `.claude/settings.json` was
+resynced from its template via the real shipping merge function
+(`aiInstallerMergeClaudeSettingsFile`, a de-duplicated union merge) — closing the same gap for every
+other write-tier agent sharing that file, not just refactorer. All three rendered copies
+(`.claude/agents/refactorer.md`, `.github/agents/refactorer.agent.md`,
+`.opencode/agents/refactorer.md`) were regenerated from the fixed template via the real renderer
+functions, never hand-edited. Round 1 re-audit scored **88/ready-with-fixes**, independently confirming
+all three BLOCKERs resolved (`validate-agent-assessment`, `validate-adapter-drift`,
+`validate-agent-assessment-values` all exit 0), with one residual MINOR: a dangling "Shell Boundary"
+section reference on the Claude copy (that section name only exists in the Copilot render). That MINOR
+was then fixed with adapter-neutral phrasing ("this file's shell-command policy section above") and
+re-rendered to all three adapters — applied but **not yet independently re-scored**. Two items remain
+open, out of scope for this pass: body is 11 lines over the 240-line soft budget (pre-existing, under
+the 320 hard max, no forced action) and the Mandatory Test Gate's `ai-test-select.sh`/`run-repo-tests.sh`
+commands are absent from `.claude/settings.json`'s allow list (pre-existing, fleet-wide, flagged for a
+`workflow-auditor` sweep, not introduced by this remediation). The same two template bugs and stale
+rendered-copy pattern were confirmed present in dozens of other agent templates during this
+investigation and remain out of scope here — see Cross-cutting issues #2 and #3 above.
 
 Score table: Frontmatter 95, Role 95, Permission 85, Instruction 90, Handoff 95,
 Evidence 95, Brevity 85, Runtime 95. Total 91.25 → 91. No BLOCKER, no cap.
@@ -369,7 +400,38 @@ Strengths: deny-by-default router posture; concrete testable pipeline gates (lin
 Top fix: fix Script Access permission-surface mismatch (lines 70-74).
 Proposed: risk_level: high, decision: needs_refactor. Template: optional/agents/agent-creator-supervisor.md.
 
-## refactorer.md — 73 / ready-with-fixes
+## refactorer.md — 73 → 88 / ready-with-fixes (re-audited)
+
+> **Post-remediation (2026-07-07):** re-audited across two rounds. Round 1 re-baselined the file
+> against a **fresh, independent** audit (not this doc's stale 73 snapshot) and found **35/blocked**,
+> surfacing three BLOCKERs the original lighter pass had only scored as two MAJORs: (1) a phantom
+> "path-scoped `edit:` permission" claim — OpenCode-only grammar leaked into the Claude/Copilot render
+> (Cross-cutting issue #2); (2) a self-contradiction claiming "full per-script allow/ask/deny is in
+> frontmatter," true only for OpenCode; (3) a **live** enforcement gap — the installed
+> `.claude/settings.json` was missing 10 Edit()/Write() deny pairs (`.env`, `**/secrets/**`, `*.pem`,
+> `*.key`, `*.crt`, `*.lock`, generated paths) that its own template already defined, leaving
+> refactorer's unscoped `Write`/`Edit` grant with zero enforced boundary on secret-adjacent paths. All
+> three fixed at the template source (`packages/ai-universal-rules/templates/core/agents/refactorer.md`)
+> with adapter-neutral wording, plus the pre-existing rename/mv Hard-Rule-vs-Bash-ban deadlock closed
+> with an explicit approval/stop clause and a missing `docs/ai/AI-GUARDRAILS.md` Canonical Reference
+> added. `.claude/settings.json` was resynced from its template via the real shipping merge function
+> (`aiInstallerMergeClaudeSettingsFile`, a de-duplicated union merge) — closing the same gap for every
+> other write-tier agent sharing that file, not just refactorer. All three rendered copies
+> (`.claude/agents/refactorer.md`, `.github/agents/refactorer.agent.md`,
+> `.opencode/agents/refactorer.md`) were regenerated from the fixed template via the real renderer
+> functions, never hand-edited. Round 1 re-audit scored **88/ready-with-fixes**, independently
+> confirming all three BLOCKERs resolved (`validate-agent-assessment`, `validate-adapter-drift`,
+> `validate-agent-assessment-values` all exit 0), with one residual MINOR: a dangling "Shell Boundary"
+> section reference on the Claude copy (that section name only exists in the Copilot render). That
+> MINOR was then fixed with adapter-neutral phrasing ("this file's shell-command policy section
+> above") and re-rendered to all three adapters — applied but **not yet independently re-scored**. Two
+> items remain open, out of scope for this pass: body is 11 lines over the 240-line soft budget
+> (pre-existing, under the 320 hard max, no forced action) and the Mandatory Test Gate's
+> `ai-test-select.sh`/`run-repo-tests.sh` commands are absent from `.claude/settings.json`'s allow list
+> (pre-existing, fleet-wide, flagged for a `workflow-auditor` sweep, not introduced by this
+> remediation). The same two template bugs and stale rendered-copy pattern were confirmed present in
+> dozens of other agent templates during this investigation and remain out of scope here — see
+> Cross-cutting issues #2 and #3 above.
 
 Score table: Frontmatter 85, Role 80, Permission 55, Instruction 68, Handoff 92,
 Evidence 90, Brevity 65, Runtime 55. Total 73.4 → 73. validate-agent-assessment.php OK.

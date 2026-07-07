@@ -355,6 +355,10 @@ function aiInstallerPackRegistry(): array
         ],
         'advisor-pack' => [
             ['type' => 'dir', 'source' => 'tools/ai/advisor', 'target' => 'tools/ai/advisor', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+            // tools/ai/advisor/registry.php require_once's this one directory up; without it,
+            // `php tools/ai/ai.php advisor --all` fatals in-target (found via
+            // tools/ai/export-install-bundle.php end-to-end verification).
+            ['type' => 'file', 'source' => 'tools/ai/command-exists.php', 'target' => 'tools/ai/command-exists.php', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'schemas/ai/project-signals.schema.json', 'target' => 'schemas/ai/project-signals.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'schemas/ai/project-scorecard.schema.json', 'target' => 'schemas/ai/project-scorecard.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
             ['type' => 'file', 'source' => 'schemas/ai/advisor-recommendation.schema.json', 'target' => 'schemas/ai/advisor-recommendation.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
@@ -457,6 +461,7 @@ function aiInstallerPackRegistry(): array
         'kit-authoring-pack' => [
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates', 'target' => 'packages/ai-universal-rules/templates', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/export-ai-universal-rules.php', 'target' => 'tools/ai/export-ai-universal-rules.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'tools/ai/export-install-bundle.php', 'target' => 'tools/ai/export-install-bundle.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/github/workflows/test-external-install.yml', 'target' => '.github/workflows/test-external-install.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/github/workflows/export-ai-universal-rules-preview.yml', 'target' => '.github/workflows/export-ai-universal-rules-preview.yml', 'core' => false, 'merge_strategy' => 'replace', 'required' => false],
         ],

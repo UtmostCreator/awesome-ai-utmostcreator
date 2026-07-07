@@ -47,7 +47,7 @@ function aiPermissionCompose(string $agent): array
  * profile/verify/language/stack layers and a genuinely agent-unique `exceptions` entry. See
  * docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md, Slice 10.
  *
- * @param array{profile?:string,edit_surface?:string,verify_tier?:string,language_overlays?:list<string>,stack_overlays?:list<string>,stack_registry?:array<string,array<string,mixed>>,deny_packs?:list<string>,allow_packs?:list<string>,ask_packs?:list<string>,exceptions?:list<array{permission:string,pattern:string,effect:string}>,shipped_star_baseline?:string} $spec
+ * @param array{profile?:string,edit_surface?:string,verify_tier?:string,language_overlays?:list<string>,stack_overlays?:list<string>,stack_registry?:array<string,array<string,mixed>>,deny_packs?:list<string>,allow_packs?:list<string>,ask_packs?:list<string>,backstop_deny_packs?:list<string>,exceptions?:list<array{permission:string,pattern:string,effect:string}>,shipped_star_baseline?:string} $spec
  * @return array{model:array<string,array{permission:string,pattern:string,effect:string,class:string,layer:string}>,layers:list<string>}
  */
 function aiPermissionComposeFromSpec(array $spec): array
@@ -62,6 +62,7 @@ function aiPermissionComposeFromSpec(array $spec): array
     $denyPacks = $spec['deny_packs'] ?? [];
     $allowPacks = $spec['allow_packs'] ?? [];
     $askPacks = $spec['ask_packs'] ?? [];
+    $backstopDenyPacks = $spec['backstop_deny_packs'] ?? [];
     $exceptions = $spec['exceptions'] ?? [];
     $starBaseline = (string) ($spec['shipped_star_baseline'] ?? 'deny');
 
@@ -119,6 +120,17 @@ function aiPermissionComposeFromSpec(array $spec): array
     }
     if ($askPacks !== []) {
         aiPermissionApplyLayer($model, $layers, 'agent:ask-packs:' . implode('+', $askPacks), aiPermissionResolvePacks($askPacks), 'pack');
+    }
+
+    // Backstop deny lane: applied AFTER allow/ask packs (and after the reader allows those packs
+    // and the ai-read tier grant) so a secret-path deny inserts into the ordered $model AFTER the
+    // overlapping broad reader allow. Under OpenCode's `.findLast()` file-order resolution that
+    // ordering is what lets the deny win (BLOCKER B, plan-2-opencode-secret-deny-backstop).
+    // Entries carry the `backstop` class so render-adapters.php retains them through the
+    // same-as-floor-effect no-op filter on `'*': deny` agents (BLOCKER A). Guarded by a non-empty
+    // check (mirroring the deny/allow/ask packs above) so unaffected agents stay byte-identical.
+    if ($backstopDenyPacks !== []) {
+        aiPermissionApplyLayer($model, $layers, 'agent:backstop-deny-packs:' . implode('+', $backstopDenyPacks), aiPermissionResolvePacks($backstopDenyPacks), 'backstop');
     }
 
     aiPermissionApplyLayer($model, $layers, 'agent:exceptions', $exceptions, 'exception');

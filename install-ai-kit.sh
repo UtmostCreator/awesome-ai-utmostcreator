@@ -104,6 +104,12 @@ TARGET="$(cd "$TARGET" && pwd)"
 PROJECT_NAME="${PROJECT_NAME:-$(basename "$TARGET")}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+# Resolve all subsequent relative paths (tools/ai/*.php, scripts/ai/*.sh) against this
+# script's own directory, not the caller's cwd — this script is meant to be runnable from
+# any directory, including a standalone exported bundle (see
+# tools/ai/export-install-bundle.php) invoked via an absolute or relative path.
+cd "$SCRIPT_DIR"
+
 # ── Prerequisites check ───────────────────────────────────────────────────────
 echo ""
 echo "==> Checking prerequisites..."
@@ -128,7 +134,12 @@ echo "==> Validating source install surface before writing target..."
 php tools/ai/validate-install-surface.php --strict
 
 # ── Composer (if not already installed) ──────────────────────────────────────
-if [[ ! -d "$SCRIPT_DIR/vendor" ]]; then
+# The installer engine itself (tools/ai/install-ai-kit.php) has no Composer dependency
+# (no vendor/autoload.php require); composer.json only exists in the full development
+# repo for PHPUnit. A standalone exported bundle (tools/ai/export-install-bundle.php)
+# intentionally omits composer.json/phpunit, so skip this step gracefully when absent
+# instead of failing.
+if [[ -f "$SCRIPT_DIR/composer.json" && ! -d "$SCRIPT_DIR/vendor" ]]; then
     echo ""
     echo "==> Installing Composer dependencies..."
     cd "$SCRIPT_DIR"

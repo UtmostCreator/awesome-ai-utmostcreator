@@ -585,6 +585,42 @@ function aiCollectRootResources(string $root): array
         }
     }
 
+    // Claude adapter parity plan (docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000):
+    // mirrors the .opencode scan above for the shipped .claude/{agents,skills,commands} surfaces so
+    // the generated catalog is a complete cross-runtime inventory. aiFilterTrackedPaths keeps this
+    // honest: untracked (work-in-progress) Claude files are excluded until committed.
+    $claudeResourcePatterns = [
+        '.claude/agents/*.md' => ['claude-agent', 'claude'],
+        '.claude/commands/*.md' => ['claude-command', 'claude'],
+        '.claude/skills/*/SKILL.md' => ['claude-skill', 'claude'],
+    ];
+
+    foreach ($claudeResourcePatterns as $pattern => [$type, $runtime]) {
+        $paths = aiFilterTrackedPaths($root, glob(aiAbsolutePath($root, $pattern)) ?: []);
+        sort($paths);
+
+        foreach ($paths as $path) {
+            $relativePath = substr(aiNormalizePath($path), strlen(aiNormalizePath($root)) + 1);
+            $content = file_get_contents($path) ?: '';
+            $frontMatter = aiParseFrontMatter($content);
+
+            $name = $frontMatter['name'] ?? pathinfo($path, PATHINFO_FILENAME);
+
+            if ($type === 'claude-skill') {
+                $name = basename(dirname($path));
+            }
+
+            $resources[] = aiResource(
+                'root',
+                $type,
+                $name,
+                $relativePath,
+                $frontMatter['description'] ?? aiSummarizeMarkdown($content),
+                $runtime
+            );
+        }
+    }
+
     $toolMap = [
         'tools/ai/ai.php' => ['cli', 'ai', 'Main AI workflow CLI dispatcher.'],
         'tools/ai/validate-ai-config.php' => ['validator', 'validate-ai-config', 'Validates the root live AI workflow layer.'],
@@ -593,6 +629,7 @@ function aiCollectRootResources(string $root): array
         'tools/ai/validate-install-surface.php' => ['validator', 'validate-install-surface', 'Validates install pack, profile, script, and adapter template contracts.'],
         'tools/ai/generate-ai-catalog.php' => ['generator', 'generate-ai-catalog', 'Generates catalog docs, catalog JSON, and llms.txt.'],
         'tools/ai/export-ai-universal-rules.php' => ['exporter', 'export-ai-universal-rules', 'Builds starter-profile release bundles under dist/.'],
+        'tools/ai/export-install-bundle.php' => ['exporter', 'export-install-bundle', 'Vendors a standalone, offline-runnable copy of the installer into a specified path.'],
         'tools/ai/verify-full-install.php' => ['verifier', 'verify-full-install', 'Runs full install verification flow and writes durable evidence.'],
         'tools/ai/full-install-validation.php' => ['verifier', 'full-install-validation', 'Runs broad validation across install, catalog, generated artifacts, scripts, and inventory.'],
     ];
@@ -702,6 +739,7 @@ function aiRenderRootCatalogMarkdown(array $catalog): string
     $lines[] = '- `canonical` resources are shared across all AI runtimes.';
     $lines[] = '- `github-copilot` resources belong to the `.github/` adapter surface.';
     $lines[] = '- `opencode` resources belong to the `.opencode/` adapter surface.';
+    $lines[] = '- `claude` resources belong to the `.claude/` adapter surface.';
     $lines[] = '- `dual-runtime` examples intentionally show both adapter surfaces together.';
     $lines[] = '';
     $lines[] = '## Highlights';
@@ -758,6 +796,7 @@ function aiRenderBrowseMarkdown(array $catalog): string
     $lines[] = '- `canonical`: shared runtime-neutral docs, capabilities, scripts, and schemas.';
     $lines[] = '- `github-copilot`: GitHub Copilot adapter templates and `.github/` surfaces.';
     $lines[] = '- `opencode`: OpenCode adapter templates and `.opencode/` surfaces.';
+    $lines[] = '- `claude`: Claude adapter templates and `.claude/` surfaces.';
     $lines[] = '- `dual-runtime`: examples or profiles that intentionally include both adapter surfaces.';
     $lines[] = '';
     $lines[] = '## Package Outputs';

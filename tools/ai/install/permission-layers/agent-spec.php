@@ -30,7 +30,8 @@ function aiPermissionAgentSpecReadonly(
     array $exceptions = [],
     string $verifyTier = 'verify-none',
     string $cliTools = '',
-    array $languageOverlays = []
+    array $languageOverlays = [],
+    array $backstopDenyPacks = []
 ): array {
     $composeSpec = [
         'profile' => 'readonly',
@@ -47,6 +48,11 @@ function aiPermissionAgentSpecReadonly(
     }
     if ($languageOverlays !== []) {
         $composeSpec['language_overlays'] = $languageOverlays;
+    }
+    // Additive: only emit the key when a backstop is requested, so every agent that does not
+    // set one composes byte-identically to before (the compose lane is itself non-empty-guarded).
+    if ($backstopDenyPacks !== []) {
+        $composeSpec['backstop_deny_packs'] = $backstopDenyPacks;
     }
 
     return [
@@ -77,7 +83,8 @@ function aiPermissionAgentSpecVerify(
     array $askPacks = [],
     array $exceptions = [],
     string $verifyTier = 'verify-none',
-    array $languageOverlays = []
+    array $languageOverlays = [],
+    array $backstopDenyPacks = []
 ): array {
     $composeSpec = [
         'profile' => 'verify',
@@ -91,6 +98,9 @@ function aiPermissionAgentSpecVerify(
     ];
     if ($languageOverlays !== []) {
         $composeSpec['language_overlays'] = $languageOverlays;
+    }
+    if ($backstopDenyPacks !== []) {
+        $composeSpec['backstop_deny_packs'] = $backstopDenyPacks;
     }
 
     return [
@@ -117,7 +127,8 @@ function aiPermissionAgentSpecImpl(
     array $exceptions = [],
     string $verifyTier = 'verify-none',
     string $cliTools = '',
-    array $languageOverlays = []
+    array $languageOverlays = [],
+    array $backstopDenyPacks = []
 ): array {
     $composeSpec = [
         'profile' => 'impl',
@@ -134,6 +145,9 @@ function aiPermissionAgentSpecImpl(
     }
     if ($languageOverlays !== []) {
         $composeSpec['language_overlays'] = $languageOverlays;
+    }
+    if ($backstopDenyPacks !== []) {
+        $composeSpec['backstop_deny_packs'] = $backstopDenyPacks;
     }
 
     return [
