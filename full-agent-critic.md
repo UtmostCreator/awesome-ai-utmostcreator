@@ -12,7 +12,7 @@ token economy). All defects target **template sources** under
 - Average score: **72.4** · Median: **78** · Min: **34** (docs) · Max: **92** (repository-reviewer)
 - Ready-with-fixes: **17** · Blocked: **7**
 - Blocked (initial audit): docs (34), build-config (35), upgrade (38), bugfix (41), agent-fleet-assessor (60), architecture-plan-writer (62), config-maintainer (65)
-- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, architect **94**, agent-critic **93**, implementer **92** — all `approve`/`ready`. Remaining 20 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
+- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, architect **94**, agent-fleet-assessor **93**, agent-critic **93**, implementer **92** — all `approve`/`ready`. Remaining 19 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
 
 ## Re-Audit Updates (post-remediation)
 
@@ -21,11 +21,12 @@ token economy). All defects target **template sources** under
 | Agent | Original | Re-audit | Δ | New readiness | Decision |
 |---|---:|---:|---:|---|---|
 | architecture-plan-writer.md | 62 (blocked) | **95** | +33 | ready | **approve** |
+| agent-fleet-assessor.md | 60 (blocked) | **93** | +33 | ready-with-fixes | **approve** |
 | architect.md | 88 (ready-with-fixes) | **94** | +6 | ready | **approve** |
 | agent-critic.md | 91 (ready-with-fixes) | **93** | +2 | ready-with-fixes | approve_with_minor_fixes |
 | implementer.md | 84 (ready-with-fixes) | **92** | +8 | approve | **approve** |
 
-`architecture-plan-writer` was the fleet's lowest non-trivial score and is now near the top (95); decision `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. `agent-critic` gained an ask-gated WebFetch (AI-provider-doc debugging) policy, verified safe and coherent by self-audit. `architect` re-audited on the **canonical source** at 92 (round 1), had three brevity/duplication MINORs applied, and re-scored **94** (round 2, no new findings, `approve`); the fixes were re-rendered to all three adapters (Claude/Copilot/OpenCode), which also cleared the copy-only drift the initial 88 audit saw (garbled handoff line, dead `risk-taxonomy.md` ref, missing non-interactive fallback — none of which were present in the canonical). Its 4th MINOR (removing raw `head`/`tail`/`bat`/`fx`/`glow` readers) is deferred as a generator-managed, fleet-wide permission decision owned by `workflow-auditor`. All verified against the installed Claude copy; full PHP suite green (902/902).
+`architecture-plan-writer` was the fleet's lowest non-trivial score and is now near the top (95); decision `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. `agent-critic` gained an ask-gated WebFetch (AI-provider-doc debugging) policy, verified safe and coherent by self-audit. `architect` re-audited on the **canonical source** at 92 (round 1), had three brevity/duplication MINORs applied, and re-scored **94** (round 2, no new findings, `approve`); the fixes were re-rendered to all three adapters (Claude/Copilot/OpenCode), which also cleared the copy-only drift the initial 88 audit saw (garbled handoff line, dead `risk-taxonomy.md` ref, missing non-interactive fallback — none of which were present in the canonical). Its 4th MINOR (removing raw `head`/`tail`/`bat`/`fx`/`glow` readers) is deferred as a generator-managed, fleet-wide permission decision owned by `workflow-auditor`. `agent-fleet-assessor` cleared its original BLOCKER (delegation was structurally unperformable on Claude/Copilot — the frontmatter granted no spawn tool) by moving canonical `permission.task: ask` → `allow`, granting the Claude copy the `Agent` tool, and adding a Copilot `Assess Agent` handoff to `agent-critic`; re-audited on the shipped Claude copy across four rounds (60 → 89 → 93 → 93 → sign-off), fixing each reported MINOR (runtime-relative stop conditions, a Sensitive Files guard, reconciling a missing-score Stop Condition with Reliable Aggregation, trimmed formula prose) until the critic reported "none — ready to sign off". The re-audit also surfaced and fixed a pre-existing `docs/ai/agent-scores.yaml` drift (`risk_level: low` vs. the manifest/frontmatter `medium`) that the frontmatter-drift validator had been failing on; the source, template, and manifest now agree across all 26 templates. Its one deferred item (the fleet-wide `sed -n *` reader, bound by the new Sensitive Files guard) is owned by `workflow-auditor`, same as architect's. All verified against the installed Claude copy; full PHP suite green (902/902).
 
 ### Fleet-wide remediation (all 24 templates — fixed, not individually re-scored)
 
@@ -65,7 +66,7 @@ Per-agent architected plans persisted at `docs/tickets/arch-todo-agent-fleet-imp
 | infra-auditor.md | 71 | ready-with-fixes | Clean read-only auditor; sharp anti-overreach gotchas; query-usage clarity | validate-*.php * wildcard permits mutation; no handoff/failure path; ask-scripts gap | Narrow validate-*.php * wildcard to read-only set |
 | config-maintainer.md | 65 | blocked → **remediated** _(not re-scored)_ | Layered secret/destructive guards; testable Final Output; correct non-interactive fallback | _Fixed: Script Access reconciled (renderer ask-tier note); path-scoped-edit prose made agnostic_ | ✓ addressed |
 | architecture-plan-writer.md | 62 → **95** ⬆ | blocked → **ready** | Bounded docs/tickets mission; strong failure/loop routing; testable output; clean multi-target handoff routing | _Re-audited twice (62→92→95): all findings resolved; only brevity nits remain_ | — (approve) |
-| agent-fleet-assessor.md | 60 | blocked → **remediated** _(not re-scored)_ | Machine-readable aggregation; clean stop conditions; dynamic roster derivation | _Fixed: `mode: all` (primary orchestrator, never a nested subagent); runtime-relative callability probe_ | ✓ addressed |
+| agent-fleet-assessor.md | 60 → **93** ⬆ | blocked → **ready-with-fixes** | Machine-readable aggregation; clean stop conditions; dynamic roster derivation | _Re-audited across 4 rounds (60→89→93→93→sign-off): delegation BLOCKER resolved (task: allow + Claude Agent tool + Copilot handoff); all MINORs resolved; only the deferred fleet-wide sed -n reader remains_ | — (approve) |
 | bugfix.md | 41 | blocked → **remediated** _(not re-scored)_ | Strong evidence discipline; deny-by-default Bash; clear minimal-fix framing | _Fixed: write-capable on Claude (registry) + settings deny-floor; handoff added; agnostic edit prose_ | ✓ addressed |
 | upgrade.md | 38 | blocked → **remediated** _(not re-scored)_ | Deny-by-default allowlist; rename/delete stop-reports; correct critical risk | _Fixed: apply-capable on Claude (registry) + settings deny-floor; handoff added; agnostic edit prose; header tier_ | ✓ addressed |
 | build-config.md | 35 | blocked → **remediated** _(not re-scored)_ | Deny-by-default Bash w/ destructive denylist; secret-scoped verify; rename/delete gates | _Fixed: write-capable on Claude (registry) + settings deny-floor; handoff added; agnostic edit prose_ | ✓ addressed |
@@ -386,7 +387,27 @@ Strengths: bounded docs/tickets mission; strong failure/loop routing (3-attempt 
 Top fix: correct the false write-enforcement claim (line 73 + 61/79/80).
 Proposed: risk_level: high, decision: needs_refactor. Template: core/agents/architecture-plan-writer.md + .claude/settings.json.
 
-## agent-fleet-assessor.md — 60 / blocked
+## agent-fleet-assessor.md — 60 → 93 / ready-with-fixes (re-audited)
+
+> **Post-remediation (2026-07-07):** re-audited on the shipped Claude copy across four rounds:
+> **60 → 89 → 93 → 93**, ending "none — ready to sign off". The delegation BLOCKER (core mission is
+> to fan out to `agent-critic`, but the Claude/Copilot copies had no spawn tool) is resolved: canonical
+> `permission.task: ask` → `allow`; the Claude tool registry now grants this agent the `Agent`
+> (subagent-spawn) tool, mirroring `architect`/`post-install`; Copilot — which has no programmatic
+> fan-out tool at all — gained a structured `Assess Agent` handoff to `agent-critic` instead. Round 2
+> (89) resolved the MAJOR (OpenCode-only dependency probe → runtime-relative). Round 3 (93) resolved
+> three MINORs: a runtime-relative delegation-unavailable Stop Condition, a Sensitive Files guard on
+> the `sed -n` reader, and trimmed formula meta-commentary. Round 4 (93, sign-off) resolved a genuine
+> latent contradiction the critic surfaced between the missing-score Stop Condition (read as
+> halt-the-run) and the Reliable Aggregation rule (mark that one agent `unknown`, continue) — the Stop
+> Condition now fires only when *every* critic result is missing its score. The loop also caught and
+> fixed a pre-existing `docs/ai/agent-scores.yaml` drift (`risk_level: low` vs. the manifest/frontmatter
+> `medium`) that the frontmatter-drift validator was failing on; source, template, and manifest now
+> agree across all 26 templates, and `decision` was bumped to `approve` (score ≥90, no BLOCKER/MAJOR).
+> One item remains **deferred**, not architect-local: the fleet-wide `sed -n *` raw reader (now bound
+> by the new Sensitive Files guard), owned by `workflow-auditor`, same as architect's equivalent
+> deferral. Verification: frontmatter-drift + values validators OK; `generate-agent-permissions
+> --check` in sync; full PHPUnit suite 902 passed / 5 skipped / 0 failed. Commit `2da8017`.
 
 Score table: Frontmatter 80, Role 55, Permission 35, Instruction 60, Handoff 85,
 Evidence 88, Brevity 70, Runtime 75. Rubric 64.3; blocker cap (core mission unperformable) → final 60.
