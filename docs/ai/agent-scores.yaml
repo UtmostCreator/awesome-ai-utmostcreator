@@ -96,7 +96,7 @@ agents:
   implementer:
     agent_assessment:
       risk_level: high
-      decision: approve_with_minor_fixes
+      decision: approve
     rationale: "Write/execute capable; acceptable only with bounded scope and verification. Manifest risk: high."
   infra-auditor:
     agent_assessment:
