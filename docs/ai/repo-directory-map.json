@@ -101,6 +101,15 @@
       "notes": "Includes capabilities, generated artifacts, and architecture notes."
     },
     {
+      "path": "examples",
+      "purpose": "Copy-paste sample projects for the ai-verify scripts (config + tiny source).",
+      "designed_for": "Contributors validating scripts/ai/ai-verify-{php,js,ts,vue,html}.sh against a known-good fixture.",
+      "install_guide": "examples/verify-config-example/README.md",
+      "install_script": "none",
+      "ai_entrypoint": "examples/verify-config-example/README.md",
+      "notes": "Isolated from the kit root; has its own composer.json/package.json and gitignored vendor/node_modules. Not a real app."
+    },
+    {
       "path": "packages",
       "purpose": "Canonical ai-universal-rules package source and templates.",
       "designed_for": "Template generation and install surfaces.",

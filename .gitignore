@@ -39,7 +39,6 @@ docs/ai/package/
 .ai/conflicts/
 .ai/templates-new/
 .ai/local-manifest.json
-.ai/stack-detection.json
 .ai/install.lock
 .repomix-context/
 *.tmp

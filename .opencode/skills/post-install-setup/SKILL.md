@@ -27,7 +27,7 @@ I guide the first safe setup pass after install: fill required placeholders, poi
 
 1. open `docs/ai/POST-INSTALL.md` and use it as the setup checklist
 2. fill required values in `docs/ai/project-context.md`
-3. replace `<FRONTEND_PATH_GLOB>` and `<TEST_PATH_GLOB>` in the installed instruction files when those surfaces exist
+3. replace `**/*.tsx,**/*.jsx,**/*.vue,**/*.svelte,**/frontend/**,**/client/**,**/web/**,**/ui/**` and `**/*.test.*,**/*.spec.*,**/tests/**,**/test/**,**/__tests__/**` in the installed instruction files when those surfaces exist
 4. run `php tools/ai/ai.php placeholders --fail` to confirm required placeholders are resolved
 5. run the installed validators before broad repo verification:
    - `php tools/ai/validate-ai-config.php`

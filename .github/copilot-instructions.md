@@ -8,7 +8,7 @@ They should remain valid even if advanced agent features or prompt files are una
 - Project: `awesome-ai-utmostcreator`
 - Type: `php project`
 - Summary: `AI workflow starter for awesome-ai-utmostcreator`
-- Active paths: `.ai-install-manifest.json,.ai-logs,.ai,.claude,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,LICENSE,PLACEHOLDERS.md,README.md,SECURITY.md,SUPPORT.md,bin,common-vocabulary,composer.json,composer.lock,configs,docs,graphify-out,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools,v0.5-upgrade,v0.6-plan`
+- Active paths: `.ai-install-manifest.json,.ai-logs,.ai,.claude,.editorconfig,.gitattributes,.github,.gitignore,.gitleaks.toml,.gitleaksignore,.markdownlint-cli2.yaml,.opencode,.repomixignore,.shellcheckrc,.vscode,AGENTS.md,CLAUDE.md,LICENSE,PLACEHOLDERS.md,README.md,SECURITY.md,SUPPORT.md,bin,common-vocabulary,composer.json,composer.lock,configs,docs,examples,graphify-out,install-ai-kit.sh,justfile,llms.txt,opencode.jsonc,packages,phpunit.xml.dist,policies,readme-install.md,reference,schemas,scripts,tests,tools,v0.5-upgrade,v0.6-plan`
 - Avoid by default: `unknown`
 - Primary entrypoints: `README.md, docs/ai/project-context.md`
 - Project context file: `docs/ai/project-context.md`

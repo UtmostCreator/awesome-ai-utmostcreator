@@ -24,7 +24,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / github-copilot-instruction-template` - 22
 - `package / opencode-command-template` - 4
 - `package / operations-doc` - 6
-- `package / optional-template` - 13
+- `package / optional-template` - 15
 - `package / package-capability` - 43
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
@@ -366,6 +366,8 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`optional-template`|Agent Creator Static Validator|`packages/ai-universal-rules/templates/optional/agents/agent-creator-static-validator.md`|Use under the supervisor to run the deterministic AgentSpec static validator for <PROJECT_NAME> and report pass/fail with exact errors|
 |`optional-template`|Agent Creator Supervisor|`packages/ai-universal-rules/templates/optional/agents/agent-creator-supervisor.md`|Use to request a new agent in <PROJECT_NAME>; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
 |`optional-template`|Agent Creator|`packages/ai-universal-rules/templates/optional/agents/agent-creator.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for <PROJECT_NAME>; never emits free-text agents directly|
+|`optional-template`|Agent Critic|`packages/ai-universal-rules/templates/optional/agents/agent-critic.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
+|`optional-template`|Agent Fleet Assessor|`packages/ai-universal-rules/templates/optional/agents/agent-fleet-assessor.md`|Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`optional-template`|bugfix|`packages/ai-universal-rules/templates/optional/agents/bugfix.md`|Use when fixing a bug in <PROJECT_NAME>, reproducing it first when practical, and keeping the fix minimal|
 |`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in <PROJECT_NAME>|
 |`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in <PROJECT_NAME>|

@@ -64,6 +64,8 @@ enforced frontmatter.
 | `docs` | no | yes | execution / release | yes | no | low | Documentation alignment after verified behavior (GitHub-only). |
 | `workflow-auditor` | yes | yes | validation | no | yes | medium | AI workflow/instruction/repo-context drift checks. |
 | `infra-auditor` | no | yes | validation | no | yes | high | Dependency/build/release/compatibility risk audit (GitHub-only). |
+| `agent-critic` | yes | yes | review | no | yes | medium | Audits one agent instruction file for schema/role/permission fit, contradictions, handoffs, and token economy. |
+| `agent-fleet-assessor` | yes | yes | orchestration | no | yes | medium | Delegates each agent file to `agent-critic`, then ranks the fleet 0-100 with fix priorities. |
 | `reviewer` | yes | yes | review | no | yes | high | Correctness, regression, policy, duplication, adapter-drift review. |
 | `release-auditor` | yes | yes | release | no | yes | critical | Ship/no-ship decision for medium/high-risk changes. |
 | `post-install` | yes | yes | post-install | no | yes | high | Placeholder cleanup, install/drift verification after kit install. |
@@ -80,12 +82,13 @@ coverage check must treat the two surfaces as distinct sets, not assume parity.
 - GitHub-only (`.github/agents/*.agent.md`): `bugfix`, `build-config`, `docs`,
   `infra-auditor`, `upgrade`.
 
-The shared set present on BOTH surfaces (17 agents): `agent-creator`,
+The shared set present on BOTH surfaces (19 agents): `agent-creator`,
 `agent-creator-runtime-guardian`, `agent-creator-semantic-verifier`,
-`agent-creator-static-validator`, `agent-creator-supervisor`, `architect`,
-`architecture-plan-writer`, `config-maintainer`, `implementer`, `post-install`,
-`refactorer`, `release-auditor`, `repository-researcher`, `repository-reviewer`,
-`researcher`, `reviewer`, `workflow-auditor`.
+`agent-creator-static-validator`, `agent-creator-supervisor`, `agent-critic`,
+`agent-fleet-assessor`, `architect`, `architecture-plan-writer`,
+`config-maintainer`, `implementer`, `post-install`, `refactorer`,
+`release-auditor`, `repository-researcher`, `repository-reviewer`, `researcher`,
+`reviewer`, `workflow-auditor`.
 
 ## Notes
 

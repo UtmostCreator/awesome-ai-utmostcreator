@@ -70,6 +70,7 @@ tiers:
       - run-repo-tests.sh
       - ai-install-coverage.sh
       - ship-audit.sh
+      - list-todos.sh
 
   T4_planning:
     risk: medium

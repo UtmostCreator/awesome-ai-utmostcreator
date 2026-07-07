@@ -39,6 +39,7 @@ categories for later phases, not active paths in this slice.
 | `scripts/ai/git-branch-origin.sh` | read | read-only | public | Branch origin/merge-base inspection. |
 | `scripts/ai/git-forensics.sh` | read | read-only | public | Read-only git history tracing. |
 | `scripts/ai/install-mandatory-tools.sh` | admin | mutating | public admin | Tool installation helper; approval-gated by policy. |
+| `scripts/ai/list-todos.sh` | verify | read-only/mutating (guarded `--apply`) | public guarded | Lists `docs/tickets/**/plan*.md` files with incomplete Todo Plan / Acceptance Criteria items; `archive` mode moves fully-complete files to `archive/DONE-<name>` only with `--apply`. |
 | `scripts/ai/pack-context.sh` | context | read-only | public | Context packing. |
 | `scripts/ai/post-tool-use.sh` | hooks | read-only | public hook | Post-tool evidence/runtime hook. |
 | `scripts/ai/pre-tool-use.sh` | hooks | read-only | public hook | Pre-tool policy/runtime hook. |
@@ -177,6 +178,7 @@ for the approval-gated P3-P5 phases. No `scripts/ai/bin/**` or
 | `scripts/ai/ai-verify-vue.sh` | verify | `scripts/ai/bin/verify/ai-verify-vue.sh` |
 | `scripts/ai/ai-verify.sh` | verify | `scripts/ai/bin/verify/ai-verify.sh` |
 | `scripts/ai/check-file-refs.sh` | verify | `scripts/ai/bin/verify/check-file-refs.sh` |
+| `scripts/ai/list-todos.sh` | verify | `scripts/ai/bin/verify/list-todos.sh` |
 | `scripts/ai/run-repo-tests.sh` | verify | `scripts/ai/bin/verify/run-repo-tests.sh` |
 | `scripts/ai/run-test-focused.sh` | verify | `scripts/ai/bin/verify/run-test-focused.sh` |
 | `scripts/ai/ship-audit.sh` | verify | `scripts/ai/bin/verify/ship-audit.sh` |

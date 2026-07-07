@@ -18,7 +18,7 @@
 
 ## Build Or Smoke Check
 
-- command or check: `unknown`
+- command or check: `none (PHP tooling/docs kit; no compiled build step)`
 - result: `<PASS_FAIL_OR_OUTPUT>`
 - note: build success is a smoke check unless the project defines otherwise
 

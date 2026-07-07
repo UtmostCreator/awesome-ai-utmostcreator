@@ -328,7 +328,7 @@ PHP);
         $this->assertNotEmpty($manifest['files'], 'manifest should contain files');
 
         $validOwnership = ['owned', 'template', 'rendered'];
-        $validRuntimes = ['github-copilot', 'opencode', 'both'];
+        $validRuntimes = ['github-copilot', 'opencode', 'claude-code', 'both'];
         foreach ($manifest['files'] as $path => $meta) {
             $this->assertArrayHasKey('ownership', $meta, "missing ownership for {$path}");
             $this->assertContains($meta['ownership'], $validOwnership, "invalid ownership for {$path}");

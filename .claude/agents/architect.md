@@ -16,7 +16,7 @@ agent_assessment:
 Claude Code frontmatter cannot express per-command bash allowlists — only the
 tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
 
-Approved scripts (run from the repository root using `<SCRIPTS_ROOT>`):
+Approved scripts (run from the repository root using `scripts/ai`):
 
 - `command -v *`
 - `test -f *`
@@ -43,7 +43,7 @@ Approved scripts (run from the repository root using `<SCRIPTS_ROOT>`):
 - `glow *`
 - `difft *`
 - `delta *`
-- `ls -1 <SCRIPTS_ROOT>/*.sh | sort`
+- `ls -1 scripts/ai/*.sh | sort`
 - `git status*`
 - `git diff*`
 - `git log*`
@@ -52,28 +52,28 @@ Approved scripts (run from the repository root using `<SCRIPTS_ROOT>`):
 - `git blame*`
 - `git branch*`
 - `git rev-parse*`
-- `bash <SCRIPTS_ROOT>/ai-search.sh *`
-- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search.sh *`
-- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search.sh *`
-- `bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
-- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
-- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/ai-search-multi.sh *`
-- `bash <SCRIPTS_ROOT>/preview-file.sh *`
-- `AI_OUTPUT=json bash <SCRIPTS_ROOT>/preview-file.sh *`
-- `env AI_OUTPUT=json bash <SCRIPTS_ROOT>/preview-file.sh *`
-- `bash <SCRIPTS_ROOT>/rg-code.sh *`
-- `bash <SCRIPTS_ROOT>/fd-files.sh *`
-- `bash <SCRIPTS_ROOT>/query-usage.sh *`
-- `bash <SCRIPTS_ROOT>/git-branch-origin.sh *`
-- `bash <SCRIPTS_ROOT>/git-forensics.sh *`
-- `bash <SCRIPTS_ROOT>/repo-stats.sh *`
-- `bash <SCRIPTS_ROOT>/repo-tool-inventory.sh *`
-- `bash <SCRIPTS_ROOT>/ai-file-freshness.sh *`
-- `bash <SCRIPTS_ROOT>/check-file-refs.sh *`
-- `bash <SCRIPTS_ROOT>/ai-diff-context.sh *`
-- `bash <SCRIPTS_ROOT>/ai-doc-check.sh *`
-- `bash <SCRIPTS_ROOT>/ai-structured.sh *`
-- `bash <SCRIPTS_ROOT>/repomix-freshness.sh *`
+- `bash scripts/ai/ai-search.sh *`
+- `AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/ai-search.sh *`
+- `bash scripts/ai/ai-search-multi.sh *`
+- `AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/ai-search-multi.sh *`
+- `bash scripts/ai/preview-file.sh *`
+- `AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
+- `env AI_OUTPUT=json bash scripts/ai/preview-file.sh *`
+- `bash scripts/ai/rg-code.sh *`
+- `bash scripts/ai/fd-files.sh *`
+- `bash scripts/ai/query-usage.sh *`
+- `bash scripts/ai/git-branch-origin.sh *`
+- `bash scripts/ai/git-forensics.sh *`
+- `bash scripts/ai/repo-stats.sh *`
+- `bash scripts/ai/repo-tool-inventory.sh *`
+- `bash scripts/ai/ai-file-freshness.sh *`
+- `bash scripts/ai/check-file-refs.sh *`
+- `bash scripts/ai/ai-diff-context.sh *`
+- `bash scripts/ai/ai-doc-check.sh *`
+- `bash scripts/ai/ai-structured.sh *`
+- `bash scripts/ai/repomix-freshness.sh *`
 - `php tools/ai/ai.php placeholders*`
 - `php tools/ai/ai.php verify*`
 - `php tools/ai/ai.php preflight*`
@@ -187,25 +187,9 @@ Do not hand off to implementer unless every proposed implementation requirement 
 
 - Prefer additive changes over replacement.
 - Prefer one source of truth plus generation over hand-maintained duplicates.
-- Keep provider-specific differences in provider mappings/renderers, not duplicated instruction bodies.
-- If two providers differ only by folder names/frontmatter, design a renderer mapping.
-- If semantics differ by provider, model them as provider capabilities, not string replacements.
+- Keep provider-specific differences in provider mappings/renderers, not duplicated instruction bodies; see `docs/ai/adapter-contract.md` ("Provider-Agnostic Design Rule") for the canonical provider-neutral pipeline shape and renderer-vs-capability decision rule.
 - If a change affects install, catalog, generated artifacts, or permissions, require reviewer and likely release-auditor.
 - If docs and code disagree, identify the source-of-truth document or mark it `unknown`.
-
-## Provider-Agnostic Design Rule
-
-For multi-provider AI surfaces:
-
-```text
-canonical source
-→ provider registry
-→ provider renderer
-→ provider-specific output
-→ validation/drift check
-```
-
-Use this for agents, commands, skills, prompts, instructions, hooks, and generated catalog entries.
 
 ## Stop Conditions
 
