@@ -114,6 +114,7 @@ class CliToolsTest extends TestCase
         $target = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'ai_target_validator_' . uniqid('', true);
 
         mkdir($target . '/tools/ai', 0777, true);
+        mkdir($target . '/tools/ai/validation', 0777, true);
         mkdir($target . '/docs/ai', 0777, true);
         mkdir($target . '/scripts/ai', 0777, true);
         mkdir($target . '/tests/php', 0777, true);
@@ -121,6 +122,10 @@ class CliToolsTest extends TestCase
         copy(self::$repoRoot . '/tools/ai/validate-ai-config.php', $target . '/tools/ai/validate-ai-config.php');
         copy(self::$repoRoot . '/tools/ai/validate-ai-catalog.php', $target . '/tools/ai/validate-ai-catalog.php');
         copy(self::$repoRoot . '/tools/ai/ai_catalog_lib.php', $target . '/tools/ai/ai_catalog_lib.php');
+        // validate-ai-config.php's require_once closure (arch-todo-validate-ai-config-extraction).
+        copy(self::$repoRoot . '/tools/ai/validation/config-loader.php', $target . '/tools/ai/validation/config-loader.php');
+        copy(self::$repoRoot . '/tools/ai/validation/config-validator.php', $target . '/tools/ai/validation/config-validator.php');
+        copy(self::$repoRoot . '/tools/ai/validation/reporter.php', $target . '/tools/ai/validation/reporter.php');
 
         file_put_contents($target . '/AGENTS.md', "# Agent rules\n");
         file_put_contents($target . '/docs/ai/project-context.md', "# Project context\n");
