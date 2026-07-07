@@ -126,9 +126,9 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the upgrade and find call sites; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` / `ai-install-coverage.sh` — to frame the change and check install coverage; expect a diff bundle and coverage findings.
 - `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to prove compatibility; expect pass/fail evidence.
-- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when a native path-scoped `edit:` is insufficient; `session-checkpoint.sh` (`ask`) for continuity.
+- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the runtime's native file-edit permission is insufficient; `session-checkpoint.sh` (`ask`) for continuity.
 
-Edits normally use the native path-scoped `edit:` permission. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
+Edits normally use the runtime's native file-edit permission. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
 
 File Rename And Delete Policy:
 

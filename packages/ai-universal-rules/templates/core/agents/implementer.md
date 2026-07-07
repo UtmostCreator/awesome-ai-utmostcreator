@@ -258,10 +258,10 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the slice; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect the current change; expect a diff bundle.
 - `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.
-- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the path-scoped `edit:` permission is insufficient; expect a tracked, reversible edit.
+- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the runtime's native file-edit permission is insufficient; expect a tracked, reversible edit.
 - `session-checkpoint.sh` (`ask`) — for continuity across a long slice.
 
-Edits normally go through the native path-scoped `edit:` permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
+Edits normally go through the runtime's native file-edit permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
 
 ## Canonical References
 
@@ -304,4 +304,4 @@ Stop and hand off when: specificity is below 50/100, redesign is needed, owner o
 
 ## Final Output
 
-Report only evidenced sections: specificity, capabilities used, grounding, changes, reuse check, verification, assumptions, risks, handoff, and recommended next step. When recommending reviewer, write: `reviewer means reviewer agent handoff using OpenCode command: /review-diff`.
+Report only evidenced sections: specificity, capabilities used, grounding, changes, reuse check, verification, assumptions, risks, handoff, and recommended next step. When recommending reviewer, write: `reviewer means reviewer agent handoff`.

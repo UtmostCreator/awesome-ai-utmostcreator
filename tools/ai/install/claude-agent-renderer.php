@@ -28,10 +28,18 @@ require_once __DIR__ . '/copilot-agent-renderer.php';
  * @param string $srcContent   Full content of the OpenCode agent .md template
  * @param string $agentId      Agent ID (e.g. 'architect') — used for tool registry lookup
  * @param string $scriptsRoot  Repository-root scripts path placeholder target (e.g. 'scripts/ai')
+ * @param string $sourceLabel  Repo-relative template dir this agent was rendered from, recorded in
+ *                             the generated-file header (e.g. 'packages/ai-universal-rules/templates/
+ *                             optional/agents' for optional agents). Defaults to the core tier for
+ *                             back-compat with direct callers that do not know the source tier.
  * @return string              Rendered Claude sub-agent .md content
  */
-function aiInstallerRenderClaudeAgent(string $srcContent, string $agentId, string $scriptsRoot): string
-{
+function aiInstallerRenderClaudeAgent(
+    string $srcContent,
+    string $agentId,
+    string $scriptsRoot,
+    string $sourceLabel = 'packages/ai-universal-rules/templates/core/agents'
+): string {
     // --- Extract OpenCode frontmatter (shared parser; see canonical-agent-frontmatter.php) ---
     $parsed      = aiInstallerParseCanonicalAgentFrontmatter($srcContent);
     $rawFm       = $parsed['rawFm'];
@@ -76,6 +84,9 @@ function aiInstallerRenderClaudeAgent(string $srcContent, string $agentId, strin
             $bashPolicy .= "- `{$displayCmd}`\n";
         }
         $bashPolicy .= "\nDo not run arbitrary shell commands. Do not run commands not in this list.\n";
+        $bashPolicy .= "Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,\n";
+        $bashPolicy .= "`ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it\n";
+        $bashPolicy .= "also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.\n";
         $bashPolicy .= "Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.\n\n";
         $bashPolicy .= "Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`\n";
         $bashPolicy .= "`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`\n";
@@ -93,8 +104,25 @@ function aiInstallerRenderClaudeAgent(string $srcContent, string $agentId, strin
 
     return aiInstallerInsertGeneratedHeaderAfterFrontmatter(
         $rendered,
-        'ai-kit installer (Claude agent renderer) from packages/ai-universal-rules/templates/core/agents'
+        'ai-kit installer (Claude agent renderer) from ' . $sourceLabel
     );
+}
+
+/**
+ * Derives the repo-relative template-dir label (for the generated-file header) from an absolute
+ * or relative source agents directory. Returns the trailing
+ * `packages/ai-universal-rules/templates/<tier>/agents` portion when present so optional agents no
+ * longer claim a `core/agents` origin; falls back to the core tier for unrecognized paths.
+ */
+function aiInstallerClaudeAgentSourceLabel(string $src): string
+{
+    $normalized = str_replace('\\', '/', $src);
+    $anchor = 'packages/ai-universal-rules/templates/';
+    $pos = strpos($normalized, $anchor);
+    if ($pos !== false) {
+        return rtrim(substr($normalized, $pos), '/');
+    }
+    return 'packages/ai-universal-rules/templates/core/agents';
 }
 
 /**
@@ -151,6 +179,7 @@ function aiInstallerRenderClaudeAgentsInto(string $src, string $dest, string $sc
         return;
     }
     aiInstallerMkdir($dest);
+    $sourceLabel = aiInstallerClaudeAgentSourceLabel($src);
 
     foreach (glob($src . DIRECTORY_SEPARATOR . '*.md') ?: [] as $srcFile) {
         $agentId = pathinfo($srcFile, PATHINFO_FILENAME);
@@ -162,7 +191,7 @@ function aiInstallerRenderClaudeAgentsInto(string $src, string $dest, string $sc
         if ($skipExisting && file_exists($destFile)) {
             continue;
         }
-        $rendered = aiInstallerRenderClaudeAgent($content, $agentId, $scriptsRoot);
+        $rendered = aiInstallerRenderClaudeAgent($content, $agentId, $scriptsRoot, $sourceLabel);
         if (file_put_contents($destFile, $rendered) === false) {
             throw new RuntimeException('failed to write rendered agent: ' . $destFile);
         }
