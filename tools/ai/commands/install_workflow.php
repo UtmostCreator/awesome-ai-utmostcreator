@@ -10,47 +10,18 @@ require_once __DIR__ . '/../install/core.php';
 // selection-engine.php provides the tiered SelectionEngine (aiSelection*) used by
 // aiRunInstallWizard() for registry-sourced, backend-detected interactive prompts.
 require_once __DIR__ . '/../install/selection-engine.php';
-
-/**
- * Merge workflow-level install metadata onto the canonical manifest written by the
- * subprocess installer (install-ai-kit.php -> manifest.php).
- *
- * The subprocess is the single source of truth for the rich per-file `files{}` map
- * (which carries per-file ownership/merge metadata). The orchestrator must augment that
- * manifest with workflow-level fields (mode, runtime, toolchain, post_install_script,
- * package_lock_sha256, managed_paths) WITHOUT discarding `files{}`. Previously the
- * orchestrator overwrote the canonical manifest with a flat `managed_paths` shape, which
- * silently dropped the per-file map on the `ai.php install --apply` path.
- *
- * @param array<string,mixed> $canonical Canonical manifest read back from disk (may be empty).
- * @param array<string,mixed> $workflowFields Workflow-level fields to layer on top.
- * @param list<string>        $managedPaths Flat list of managed target paths (fallback only).
- * @return array<string,mixed> Merged manifest with `files{}` preserved.
- */
-function aiInstallerMergeWorkflowManifest(array $canonical, array $workflowFields, array $managedPaths): array
-{
-    // Preserve the authoritative per-file map. If the subprocess did not produce one
-    // (e.g. its shape changed), synthesise a minimal map so downstream ownership/upgrade
-    // logic still has a per-file structure to rely on.
-    if (!is_array($canonical['files'] ?? null)) {
-        $canonical['files'] = [];
-        foreach ($managedPaths as $managedPath) {
-            if (is_string($managedPath) && $managedPath !== '') {
-                $canonical['files'][$managedPath] = ['managed' => true, 'ownership' => 'owned'];
-            }
-        }
-    }
-
-    $merged = array_merge($canonical, $workflowFields);
-    // `files` must never be replaced by the workflow layer.
-    $merged['files'] = $canonical['files'];
-    $merged['managed_paths'] = array_values(array_filter(
-        $managedPaths,
-        static fn($p): bool => is_string($p) && $p !== ''
-    ));
-
-    return $merged;
-}
+// upgrade-file-actions.php provides the aiUpgrade* file-action/deprecation engine used by
+// aiRunUpgradeWorkflow(). See docs/tickets/arch-todo-installer-workflow-command-extraction-20260706-220032/plan.md.
+require_once __DIR__ . '/../install/upgrade-file-actions.php';
+// workflow-manifest.php provides the install-manifest workflow helpers used by
+// aiRunInstallWorkflow(). See docs/tickets/arch-todo-installer-workflow-command-extraction-20260706-220032/plan.md.
+require_once __DIR__ . '/../install/workflow-manifest.php';
+// uninstall-prune.php provides the empty-directory pruning helper used by
+// aiRunUninstallWorkflow(). See docs/tickets/arch-todo-installer-workflow-command-extraction-20260706-220032/plan.md.
+require_once __DIR__ . '/../install/uninstall-prune.php';
+// restore-audit.php provides the restore audit-log helper used by aiRunRestoreWorkflow().
+// See docs/tickets/arch-todo-installer-workflow-command-extraction-20260706-220032/plan.md.
+require_once __DIR__ . '/../install/restore-audit.php';
 
 function aiRunAdapterPlan(string $root, array $args): int
 {
@@ -371,43 +342,6 @@ function aiRunInstallWorkflow(string $root, array $args): int
     return $status === 'ok' ? 0 : 1;
 }
 
-/** @param array<string,mixed> $installConfig */
-function aiInstallerBuildSubprocessInstallCommand(string $runtime, string $profile, string $mode, array $installConfig): string
-{
-    $cmd = 'php tools/ai/install-ai-kit.php --target . --runtime ' . escapeshellarg($runtime) . ' --profile ' . escapeshellarg($profile);
-    if ($mode === 'sidecar-only') {
-        $cmd .= ' --no-base';
-    }
-    // A reinstall implies overwriting existing managed files, so force the subprocess
-    // installer; otherwise it skips them and the reinstall is a no-op for managed dirs.
-    if (!empty($installConfig['force']) || !empty($installConfig['reinstall'])) {
-        $cmd .= ' --force';
-    }
-    if (!empty($installConfig['allowCoreOverwrite'])) {
-        $cmd .= ' --allow-core-overwrite';
-    }
-    if (!empty($installConfig['adopt'])) {
-        $cmd .= ' --adopt';
-    }
-    if (!empty($installConfig['allowNonGit'])) {
-        $cmd .= ' --allow-non-git';
-    }
-    if (!empty($installConfig['allFeatures'])) {
-        $cmd .= ' --all-features';
-    }
-    if (!empty($installConfig['withPacks'])) {
-        $cmd .= ' --with ' . escapeshellarg(implode(',', $installConfig['withPacks']));
-    }
-    if (!empty($installConfig['withoutPacks'])) {
-        $cmd .= ' --without ' . escapeshellarg(implode(',', $installConfig['withoutPacks']));
-    }
-    if (!empty($installConfig['allowPlaceholders'])) {
-        $cmd .= ' --allow-placeholders';
-    }
-
-    return $cmd;
-}
-
 /**
  * @param list<string> $args install-workflow CLI args (used for CI/AI_AGENT/TTY
  *        runtime-mode detection). Optional so existing/legacy callers keep working;
@@ -642,229 +576,6 @@ function aiRunInstallWizard(string $root, array $args = []): int
     return 0;
 }
 
-/**
- * Copy user-modified owned files to .ai/conflicts/<timestamp>-upgrade/files/ before an upgrade reinstall
- * overwrites them, so the user's edits are recoverable. Returns the list of preserved files.
- *
- * @param list<array<string,mixed>> $fileActions
- * @return list<array{file:string,preserved_to:string}>
- */
-function aiUpgradePreserveOwnedConflicts(string $root, array $fileActions): array
-{
-    $conflicts = [];
-    foreach ($fileActions as $fa) {
-        if (($fa['action'] ?? '') === 'conflict-preserve-user') {
-            $conflicts[] = (string) ($fa['file'] ?? '');
-        }
-    }
-    $conflicts = array_values(array_filter($conflicts, static fn($f): bool => $f !== ''));
-    if ($conflicts === []) {
-        return [];
-    }
-
-    $stamp = gmdate('Ymd\THis\Z');
-    $conflictRoot = aiInstallerPrivateConflictDir($root, 'upgrade', 'files', $stamp);
-
-    $preserved = [];
-    foreach ($conflicts as $rel) {
-        $srcAbs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-        if (!is_file($srcAbs)) {
-            continue;
-        }
-        $destAbs = $conflictRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-        $destDir = dirname($destAbs);
-        if (!is_dir($destDir)) {
-            mkdir($destDir, aiInstallerPrivateDirMode(), true);
-        }
-        if (copy($srcAbs, $destAbs)) {
-            $preserved[] = ['file' => $rel, 'preserved_to' => aiInstallerPrivateConflictRel('upgrade', 'files', $stamp) . '/' . $rel];
-        }
-    }
-
-    return $preserved;
-}
-
-/**
- * Flatten every target path the current pack registry ships, across all packs.
- * Used to compute the `deprecated` class (manifest files no longer in this set).
- *
- * @return list<string>
- */
-function aiUpgradeCurrentRegistryTargets(): array
-{
-    $targets = [];
-    foreach (aiInstallerPackRegistry() as $items) {
-        foreach ($items as $item) {
-            $target = (string) ($item['target'] ?? '');
-            if ($target !== '') {
-                $targets[$target] = true;
-            }
-        }
-    }
-
-    return array_keys($targets);
-}
-
-/**
- * Resolve the upgrade status/action for a single installed file by ownership class.
- *
- * Per-class routing (deprecated is computed separately by aiUpgradeComputeDeprecated):
- *  - missing target      -> restore or remove from manifest
- *  - template            -> preserve (never overwritten; --reset-templates handles refresh)
- *  - rendered            -> regenerate from project.yml (user marker sections preserved)
- *  - patch-managed       -> update-managed-block (only the marker block; user content kept)
- *  - owned + user-modified + --force-owned -> force-overwrite (after preserving user bytes)
- *  - owned + user-modified                 -> conflict-preserve-user
- *  - owned + source-updated (clean)        -> auto-update
- *  - otherwise                             -> skip (unchanged)
- *
- * @return array{status:string,action:string}
- */
-function aiUpgradeResolveFileAction(
-    string $ownership,
-    bool $userModified,
-    bool $sourceUpdated,
-    bool $targetMissing,
-    bool $forceOwned
-): array {
-    if ($targetMissing) {
-        return ['status' => 'missing', 'action' => 'restore or remove from manifest'];
-    }
-    if ($ownership === 'template') {
-        return [
-            'status' => $userModified ? 'template-user-owned' : 'template-unchanged',
-            'action' => 'preserve',
-        ];
-    }
-    if ($ownership === 'rendered') {
-        return ['status' => 'rendered', 'action' => 'regenerate'];
-    }
-    if ($ownership === 'patch-managed') {
-        return ['status' => 'patch-managed', 'action' => 'update-managed-block'];
-    }
-    if ($ownership === 'owned' && $userModified) {
-        if ($forceOwned) {
-            return ['status' => 'owned-force-overwrite', 'action' => 'force-overwrite'];
-        }
-        return [
-            'status' => $sourceUpdated ? 'owned-both-changed' : 'owned-user-modified',
-            'action' => 'conflict-preserve-user',
-        ];
-    }
-    if ($sourceUpdated && !$userModified) {
-        return ['status' => 'source-updated', 'action' => 'auto-update'];
-    }
-
-    return ['status' => 'unchanged', 'action' => 'skip'];
-}
-
-/**
- * Apply-path removal of computed `deprecated` files (see aiUpgradeComputeDeprecated).
- *
- * Only operates on the deprecated entries it is given (each derived from the install
- * manifest), so the write-allowlist invariant holds — foreign files are never touched.
- *  - action `delete`          -> remove the file (a byte-identical copy is already in backup)
- *  - action `route-to-removed` -> copy user bytes to .ai/conflicts/<ts>-upgrade/removed/ then remove
- *
- * Files already absent from disk are skipped. Returns the list of files actually acted on.
- *
- * @param list<array{file:string,action:string}> $deprecated
- * @return list<array{file:string,action:string,routed_to?:string}>
- */
-function aiUpgradeRemoveDeprecated(string $root, array $deprecated): array
-{
-    if ($deprecated === []) {
-        return [];
-    }
-
-    $stamp = gmdate('Ymd\THis\Z');
-    $removedRoot = aiInstallerPrivateConflictDir($root, 'upgrade', 'removed', $stamp);
-
-    $acted = [];
-    foreach ($deprecated as $entry) {
-        $rel = (string) ($entry['file'] ?? '');
-        $action = (string) ($entry['action'] ?? '');
-        if ($rel === '') {
-            continue;
-        }
-        $abs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-        if (!is_file($abs)) {
-            // Already gone from disk: nothing to remove or route.
-            continue;
-        }
-
-        if ($action === 'route-to-removed') {
-            $destAbs = $removedRoot . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $rel);
-            $destDir = dirname($destAbs);
-            if (!is_dir($destDir)) {
-                mkdir($destDir, aiInstallerPrivateDirMode(), true);
-            }
-            if (!copy($abs, $destAbs)) {
-                // Never delete user bytes we failed to preserve.
-                continue;
-            }
-            unlink($abs);
-            $acted[] = [
-                'file' => $rel,
-                'action' => $action,
-                'routed_to' => aiInstallerPrivateConflictRel('upgrade', 'removed', $stamp) . '/' . $rel,
-            ];
-            continue;
-        }
-
-        // Default: delete (deprecated-unchanged; already backed up).
-        unlink($abs);
-        $acted[] = ['file' => $rel, 'action' => 'delete'];
-    }
-
-    return $acted;
-}
-
-/**
- * Compute the `deprecated` ownership class at plan time (never stored).
- *
- * A deprecated file is one recorded in the installed manifest but no longer shipped by the
- * current pack registry (e.g. a stale hook or policy the kit dropped). Upgrade routes each:
- *  - deprecated-unchanged     -> delete           (the byte-identical copy is already in backup)
- *  - deprecated-user-modified -> route-to-removed (user edits go to conflicts/<ts>-upgrade/removed/)
- *
- * Files already absent from disk produce no action. Invariant 1 (write-allowlist) holds:
- * only manifest-recorded paths are ever considered, never foreign files.
- *
- * @param array<string,mixed> $manifestFiles  Canonical files{} map from the install manifest.
- * @param list<string>        $registryTargets Target paths the current kit still ships.
- * @return list<array{file:string,ownership:string,status:string,action:string}>
- */
-function aiUpgradeComputeDeprecated(array $manifestFiles, array $registryTargets, string $root): array
-{
-    $shipped = array_fill_keys(array_map('strval', $registryTargets), true);
-    $deprecated = [];
-
-    foreach ($manifestFiles as $target => $meta) {
-        $target = (string) $target;
-        if (isset($shipped[$target])) {
-            continue;
-        }
-        $targetAbs = $root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $target);
-        $currentHash = aiHashPath($targetAbs);
-        if ($currentHash === 'missing') {
-            // Already gone from disk: nothing to delete or route.
-            continue;
-        }
-        $installedHash = is_array($meta) ? (string) ($meta['installed_hash'] ?? 'unknown') : 'unknown';
-        $userModified = $currentHash !== $installedHash;
-
-        $deprecated[] = [
-            'file' => $target,
-            'ownership' => 'deprecated',
-            'status' => $userModified ? 'deprecated-user-modified' : 'deprecated-unchanged',
-            'action' => $userModified ? 'route-to-removed' : 'delete',
-        ];
-    }
-
-    return $deprecated;
-}
-
 function aiRunUpgradeWorkflow(string $root, array $args): int
 {
     aiInstallerAssertLockCompatible($root);
@@ -1024,23 +735,6 @@ function aiRunUpgradeWorkflow(string $root, array $args): int
     return $exit;
 }
 
-/** @param list<string> $args @return list<string> */
-function aiUpgradeBuildApplyInstallArgs(string $mode, string $backupId, array $args): array
-{
-    // Force the reinstall so owned/auto-update files are actually rewritten with the new kit
-    // version. Without --force the planner marks differing files SKIP_EXISTING_UNMANAGED and the
-    // upgrade becomes a no-op. User edits to owned files are already preserved above.
-    $installArgs = ['--apply', '--reinstall', '--force', '--mode', $mode, '--backup', $backupId, '--no-interaction'];
-    if (in_array('--agent', $args, true)) {
-        $installArgs[] = '--agent';
-    }
-    if (in_array('--ci', $args, true)) {
-        $installArgs[] = '--ci';
-    }
-
-    return $installArgs;
-}
-
 function aiRunAdapterValidate(string $root): int
 {
     $lock = aiLoadArtifactData($root, 'package-verify.json');
@@ -1182,46 +876,6 @@ function aiRunUninstallWorkflow(string $root, array $args): int
 }
 
 /**
- * Remove empty directories upward from $dir until reaching (but not removing) $root.
- *
- * P3-e: a directory is only pruned when it is empty AND the kit recorded it in the lock's
- * createdDirs allowlist. A pre-existing user directory that merely became empty is preserved,
- * and a non-empty directory is never touched. This is a single-level rmdir walk, never a
- * recursive delete.
- *
- * @param list<string> $createdDirs Repo-relative directory paths the kit created (lock createdDirs).
- */
-function aiUninstallPruneEmptyParents(string $dir, string $root, array $createdDirs = []): void
-{
-    $root = rtrim($root, '/\\');
-    $dir = rtrim($dir, '/\\');
-    $allowed = array_fill_keys(array_map(
-        static fn(string $d): string => trim(str_replace('\\', '/', $d), '/'),
-        $createdDirs
-    ), true);
-
-    while ($dir !== '' && $dir !== $root && str_starts_with($dir, $root) && is_dir($dir)) {
-        $rel = trim(str_replace('\\', '/', substr($dir, strlen($root))), '/');
-        if (!isset($allowed[$rel])) {
-            // Not a kit-created directory: never remove it, even if empty.
-            return;
-        }
-        $entries = @scandir($dir);
-        if ($entries === false) {
-            return;
-        }
-        $entries = array_diff($entries, ['.', '..']);
-        if ($entries !== []) {
-            return;
-        }
-        if (!@rmdir($dir)) {
-            return;
-        }
-        $dir = rtrim(dirname($dir), '/\\');
-    }
-}
-
-/**
  * P4-b: restore --from <ts> [--path <p>] — checksum-gated copy-back from a backup snapshot.
  *
  * Thin wrapper over the canonical (checksum-gated) backup rollback machinery: --from selects
@@ -1261,31 +915,6 @@ function aiRunRestoreWorkflow(string $root, array $args): int
     fwrite(STDOUT, 'OK: ' . aiCliArtifactSummary($written) . PHP_EOL);
 
     return $artifactStatus === 'blocked' ? 1 : 0;
-}
-
-/**
- * Append an append-only restore audit entry under .ai/logs/restore-<ts>.json.
- *
- * @param array<string,mixed> $data
- */
-function aiRestoreAppendAuditLog(string $root, array $data): void
-{
-    $logsDir = $root . DIRECTORY_SEPARATOR . '.ai' . DIRECTORY_SEPARATOR . 'logs';
-    if (!is_dir($logsDir)) {
-        mkdir($logsDir, AI_DIR_MODE, true);
-    }
-    $stamp = gmdate('Ymd\THis\Z');
-    $entry = [
-        'op' => 'restore',
-        'at' => gmdate('c'),
-        'from' => (string) ($data['from'] ?? ''),
-        'path' => $data['path'] ?? null,
-        'status' => (string) ($data['status'] ?? 'ok'),
-        'restored_targets' => array_values($data['restored_targets'] ?? []),
-        'deleted_targets' => array_values($data['deleted_targets'] ?? []),
-    ];
-    $file = $logsDir . DIRECTORY_SEPARATOR . 'restore-' . $stamp . '.json';
-    file_put_contents($file, json_encode($entry, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES) . PHP_EOL);
 }
 
 function aiRunRollbackWorkflow(string $root, array $args): int
