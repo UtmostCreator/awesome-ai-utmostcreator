@@ -56,7 +56,7 @@
         "root:cli": 1,
         "root:exporter": 1,
         "root:generator": 1,
-        "root:github-copilot-agent": 22,
+        "root:github-copilot-agent": 23,
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 22,
         "root:github-copilot-skill": 23,
@@ -1781,6 +1781,14 @@
             "path": ".github/agents/agent-creator.agent.md",
             "runtime": "github-copilot",
             "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-agent",
+            "name": "Agent Fleet Assessor",
+            "path": ".github/agents/agent-fleet-assessor.agent.md",
+            "runtime": "github-copilot",
+            "description": "Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
         },
         {
             "scope": "root",
