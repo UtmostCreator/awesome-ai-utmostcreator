@@ -102,12 +102,18 @@ function aiPermissionAgentCompositions(): array
                 // TwoOrMoreAgents). Verified zero rendered-output change for researcher via
                 // `--check`.
             ],
+            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
+            // pack + rationale as reviewer; renders after this agent's reader allows.
+            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
         'architect' => aiPermissionAgentSpecReadonly(
             editSurface: 'none',
             render: aiPermissionRenderTaskAllow(),
             denyPacks: aiPermissionPackSetCommonReadDeny(),
+            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
+            // pack + rationale as reviewer; renders after this agent's reader allows.
+            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
         'repository-researcher' => aiPermissionAgentSpecReadonly(
@@ -122,6 +128,10 @@ function aiPermissionAgentCompositions(): array
             // packs — no leftover agent-specific exceptions.
             denyPacks: ['core.safe_read.deny_script_first_generics'],
             askPacks: ['raw_tools.ask_gated'],
+            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
+            // pack as reviewer. This agent's floor is `'*': ask`, so the deny is not even
+            // subject to the same-as-floor-effect filter; it renders and denies regardless.
+            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
         'reviewer' => aiPermissionAgentSpecReadonly(
@@ -161,6 +171,12 @@ function aiPermissionAgentCompositions(): array
             // Byte-stable: ground truth shows no composer-validate/paratest grant to reviewer.
             languageOverlays: ['php-lint', 'php-phpunit'],
             askPacks: ['verify.manual_ask', 'context.packaging'],
+            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): closes
+            // reviewer's open MAJOR — its reader wrappers (preview-file/ai-search/rg-code/
+            // fd-files/query-usage/git-forensics) were broad-`allow` and could open secret
+            // files despite the prose Sensitive File Rule. Rendered AFTER those allows so
+            // OpenCode's `.findLast()` resolves a secret path to deny. OpenCode-scoped.
+            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
         'repository-reviewer' => aiPermissionAgentSpecReadonly(
@@ -186,6 +202,9 @@ function aiPermissionAgentCompositions(): array
                 'proof.generate_check',
             ],
             askPacks: ['raw_tools.ask_gated', 'verify.manual_ask'],
+            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
+            // pack as reviewer. Floor is `'*': ask`, so the deny renders regardless of filter.
+            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
         'workflow-auditor' => aiPermissionAgentSpecReadonly(
@@ -197,15 +216,15 @@ function aiPermissionAgentCompositions(): array
                 'core.safe_read.deny_nl',
                 'core.safe_read.deny_file_probe',
                 'core.safe_read.deny_test_x',
+                'git.branch_wildcard_deny',
                 'git.deny_blame',
                 'git.deny_rev_parse',
             ],
             allowPacks: ['verify.install_coverage_allow', 'proof.validate_script'],
             askPacks: ['verify.manual_ask'],
-            exceptions: [
-                // Agent-specific narrowing beyond the shared deny packs.
-                aiPermissionBashDeny(aiPatternGit('branch*')),
-            ],
+            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
+            // pack + rationale as reviewer; renders after this agent's reader allows.
+            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
         // release-auditor (Slice A, docs/tickets/arch-todo-complete-permission-composition-
@@ -244,6 +263,9 @@ function aiPermissionAgentCompositions(): array
                 'proof.generate_check',
             ],
             askPacks: ['verify.manual_ask'],
+            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
+            // pack + rationale as reviewer; renders after this agent's reader allows.
+            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
         // architecture-plan-writer (Slice C, docs/tickets/arch-todo-complete-permission-
@@ -394,11 +416,17 @@ function aiPermissionAgentCompositions(): array
                 // (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents). Zero behavior
                 // change for refactorer (verified via --check byte-stability).
                 'package_manager.deny_all_mutations',
+                'git.branch_wildcard_deny',
             ],
             allowPacks: [
                 'git.stash_read',
                 'doctor.scripts',
-                ...aiPermissionPackSetFullProof(),
+                // Refactorer needs generated/markdown/security proof tooling, but not the
+                // broad `validate-*.php` wildcard from aiPermissionPackSetFullProof(); keep
+                // validator grants exact in the agent-specific exceptions below.
+                'proof.generate_check',
+                'proof.markdown',
+                'proof.security',
             ],
             // Slice D: php-lint/phpunit-direct/js-core now sourced via language overlays
             // instead of the (reconciled) aiPermissionPackSetFullProof() bundle's former
@@ -408,6 +436,28 @@ function aiPermissionAgentCompositions(): array
             languageOverlays: ['php-lint', 'php-phpunit', 'js-core'],
             askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate'],
             exceptions: [
+                // Refactorer only needs branch inspection; broad branch wildcard is blocked
+                // by the shared git.branch_wildcard_deny pack, so reopen safe forms only.
+                aiPermissionBashAllow(aiPatternGit('branch')),
+                aiPermissionBashAllow(aiPatternGit('branch --list*')),
+                // Keep validator access exact so future mutation-capable validators are not
+                // automatically allowed by a wildcard.
+                aiPermissionBashAllow('php tools/ai/validate-agent-assessment.php *'),
+                aiPermissionBashAllow('php tools/ai/validate-agent-assessment-values.php'),
+                aiPermissionBashAllow('php tools/ai/validate-adapter-drift.php *'),
+                aiPermissionBashAllow('php tools/ai/validate-ai-config.php'),
+                // Refactorer should not drive kit-level AI CLI workflows; use explicit
+                // validation scripts instead.
+                aiPermissionBashDeny('php tools/ai/ai.php placeholders*'),
+                aiPermissionBashDeny('php tools/ai/ai.php verify*'),
+                aiPermissionBashDeny('php tools/ai/ai.php preflight*'),
+                aiPermissionBashDeny('php tools/ai/ai.php list'),
+                aiPermissionBashDeny('php tools/ai/ai.php next*'),
+                aiPermissionBashDeny('php tools/ai/ai.php freshness*'),
+                aiPermissionBashDeny('php tools/ai/ai.php packs*'),
+                aiPermissionBashDeny('php tools/ai/ai.php env-check*'),
+                aiPermissionBashDeny('php tools/ai/ai.php install-docs --check'),
+                aiPermissionBashDeny('bash scripts/ai/install-mandatory-tools.sh *'),
                 // Ground truth: refactorer's git-mutating-ask grants are narrower than
                 // the 'impl' profile default (no reset/fetch/merge/pull/checkout/switch/
                 // tag/cherry-pick/revert).
@@ -420,6 +470,50 @@ function aiPermissionAgentCompositions(): array
                 aiPermissionBashDeny(aiPatternGit('tag*')),
                 aiPermissionBashDeny(aiPatternGit('cherry-pick*')),
                 aiPermissionBashDeny(aiPatternGit('revert*')),
+                // agent-critic (2026-07-07): the 'js-core' language overlay grants npm/pnpm
+                // test/lint/typecheck as 'allow', but each of these executes an arbitrary
+                // project-defined package.json script body, not a fixed binary — broader
+                // trust than the fixed-binary commands (phpunit, shellcheck) sharing the
+                // same allow tier. 'js-core' is currently referenced only by refactorer (no
+                // other composition uses this overlay key), so downgrading here is a
+                // refactorer-specific override of the overlay's allow, not a narrowing of a
+                // tier shared with other agents; implementer's broader 'js-ts' overlay is
+                // untouched. Covers plain 'npm test*'/'pnpm test*' too: both are shorthand
+                // for running the same user-defined "test" package.json script, so they
+                // carry the identical arbitrary-script-execution risk.
+                aiPermissionBashAsk('npm test*'),
+                aiPermissionBashAsk('npm run test*'),
+                aiPermissionBashAsk('npm run lint*'),
+                aiPermissionBashAsk('npm run typecheck*'),
+                aiPermissionBashAsk('pnpm test*'),
+                aiPermissionBashAsk('pnpm run test*'),
+                aiPermissionBashAsk('pnpm run lint*'),
+                aiPermissionBashAsk('pnpm run typecheck*'),
+                // agent-critic (2026-07-07): defense-in-depth generated-file deny patterns
+                // beyond this repo's own docs/ai/generated/**+docs/generated/**+*.generated.*
+                // convention (edit-surfaces.php $denyTail), given refactorer's broad
+                // src/**+app/**+packages/** edit access. Refactorer-specific (not added to
+                // the shared $denyTail, which every edit surface/agent inherits) because no
+                // evidence was found that other agents need this narrowing; confirmed via
+                // `git ls-files` that no tracked path in this repo currently matches these
+                // globs, so this is additive with zero blast radius here.
+                aiPermissionEditDeny('**/generated/**'),
+                aiPermissionEditDeny('**/__generated__/**'),
+                aiPermissionEditDeny('**/*.gen.*'),
+                // agent-critic (2026-07-07): 'proof.generate_check' grants the wildcard
+                // 'php tools/ai/generate-*.php --check*' (trailing wildcard on the flag).
+                // Every generate-*.php script gates check-mode with a strict
+                // `in_array('--check', $argv, true)` (confirmed: generate-agent-permissions,
+                // generate-agent-snippets, generate-ai-catalog, generate-ai-file-standards,
+                // generate-repo-structure, generate-stack-registry) — none recognize a
+                // `--check`-prefixed flag as check mode, so the wildcard previously let a
+                // command like `... --check-and-repair` match this "read-only check" grant
+                // while actually running the script's untested default/mutating path.
+                // Narrowed here for refactorer only (deny the wildcard, reopen the exact bare
+                // token) rather than in the shared 'proof.generate_check' pack itself, which
+                // is also consumed by other agents' compositions outside this fix's scope.
+                aiPermissionBashDeny('php tools/ai/generate-*.php --check*'),
+                aiPermissionBashAllow('php tools/ai/generate-*.php --check'),
             ],
         ),
 

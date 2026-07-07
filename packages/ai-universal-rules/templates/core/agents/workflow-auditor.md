@@ -8,6 +8,7 @@ capabilities:
   - adapter-drift
   - project-context
   - agent-observability-and-evidence
+  - authorization-and-tool-governance
 permission:
   todowrite: allow
   edit: deny
@@ -85,6 +86,30 @@ permission:
     'bash scripts/ai/ai-install-coverage.sh *': allow
     'php tools/ai/validate-*.php *': allow
     'bash scripts/ai/ai-verify.sh *': ask
+    '*scripts/ai/preview-file.sh *.env*': deny
+    '*scripts/ai/preview-file.sh *.pem': deny
+    '*scripts/ai/preview-file.sh *.key': deny
+    '*scripts/ai/preview-file.sh *.crt': deny
+    '*scripts/ai/preview-file.sh *id_rsa*': deny
+    '*scripts/ai/preview-file.sh *secrets.*': deny
+    '*scripts/ai/preview-file.sh *credentials.*': deny
+    '*scripts/ai/preview-file.sh *auth.json*': deny
+    '*scripts/ai/ai-search.sh *.env*': deny
+    '*scripts/ai/ai-search.sh *.pem': deny
+    '*scripts/ai/ai-search.sh *.key': deny
+    '*scripts/ai/ai-search.sh *.crt': deny
+    '*scripts/ai/ai-search.sh *id_rsa*': deny
+    '*scripts/ai/ai-search.sh *secrets.*': deny
+    '*scripts/ai/ai-search.sh *credentials.*': deny
+    '*scripts/ai/ai-search.sh *auth.json*': deny
+    '*scripts/ai/rg-code.sh *.env*': deny
+    '*scripts/ai/rg-code.sh *.pem': deny
+    '*scripts/ai/rg-code.sh *.key': deny
+    '*scripts/ai/rg-code.sh *.crt': deny
+    '*scripts/ai/rg-code.sh *id_rsa*': deny
+    '*scripts/ai/rg-code.sh *secrets.*': deny
+    '*scripts/ai/rg-code.sh *credentials.*': deny
+    '*scripts/ai/rg-code.sh *auth.json*': deny
 agent_assessment:
   risk_level: medium
   decision: approve_with_minor_fixes
@@ -112,6 +137,7 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Do not duplicate canonical rules in adapter files.
 - When reporting a placeholder or secret leak, name its file path and the required owner action, never the literal secret value.
 - Use `unknown` when evidence does not prove a claim.
+- Where interactive clarification is unavailable, state the assumption, mark it `unknown`, and stop only on high-impact ambiguity instead of guessing at a verdict.
 
 ## Script Access
 

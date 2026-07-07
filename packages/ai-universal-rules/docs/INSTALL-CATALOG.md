@@ -46,11 +46,11 @@ Deterministic catalog generated from installer registries.
 - `evaluation-pack` (1 items)
 - `service-boundary-pack` (1 items)
 - `mcp-boundaries-pack` (1 items)
-- `advisor-pack` (4 items)
+- `advisor-pack` (5 items)
 - `target-tools-pack` (102 items)
 - `shared-templates-pack` (4 items)
 - `package-source-pack` (8 items)
-- `kit-authoring-pack` (4 items)
+- `kit-authoring-pack` (5 items)
 
 ## Script IDs
 

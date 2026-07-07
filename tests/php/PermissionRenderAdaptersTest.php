@@ -237,4 +237,61 @@ final class PermissionRenderAdaptersTest extends TestCase
             self::assertSame($expected, $entry['effect'], "pattern '{$entry['pattern']}' has unexpected effect");
         }
     }
+
+    /**
+     * plan-2-opencode-secret-deny-backstop (BLOCKER A / AC-05): on a `'*': deny` agent, a
+     * `layer`-class deny whose effect equals the floor is stripped as a no-op restatement, but
+     * a `backstop`-class deny is RETAINED — under `.findLast()` it overrides an earlier allow
+     * and is therefore load-bearing, not redundant. Retention is keyed on model `class` only.
+     */
+    public function testBackstopClassDenySurvivesNoOpFilterWhileLayerClassDenyIsStripped(): void
+    {
+        $model = [
+            aiPermissionModelKey('bash', '*') => [
+                'permission' => 'bash', 'pattern' => '*', 'effect' => 'deny', 'class' => 'floor', 'layer' => 'test',
+            ],
+            // A broad reader allow the backstop must override.
+            aiPermissionModelKey('bash', 'bash scripts/ai/preview-file.sh *') => [
+                'permission' => 'bash', 'pattern' => 'bash scripts/ai/preview-file.sh *', 'effect' => 'allow', 'class' => 'layer', 'layer' => 'test',
+            ],
+            // layer-class redundant deny (same as floor) — must be stripped.
+            aiPermissionModelKey('bash', 'git branch*') => [
+                'permission' => 'bash', 'pattern' => 'git branch*', 'effect' => 'deny', 'class' => 'layer', 'layer' => 'test',
+            ],
+            // backstop-class deny (same effect as floor) — must survive.
+            aiPermissionModelKey('bash', '*scripts/ai/preview-file.sh *.env*') => [
+                'permission' => 'bash', 'pattern' => '*scripts/ai/preview-file.sh *.env*', 'effect' => 'deny', 'class' => 'backstop', 'layer' => 'test',
+            ],
+        ];
+
+        $rendered = aiPermissionRenderOpenCodeBlock($model, aiPermissionRenderTaskAsk());
+
+        self::assertStringContainsString("    '*scripts/ai/preview-file.sh *.env*': deny", $rendered);
+        self::assertStringNotContainsString("    'git branch*': deny", $rendered);
+
+        // And the surviving backstop must render AFTER the broad allow (findLast ordering).
+        $allowPos = strpos($rendered, "'bash scripts/ai/preview-file.sh *': allow");
+        $denyPos = strpos($rendered, "'*scripts/ai/preview-file.sh *.env*': deny");
+        self::assertNotFalse($allowPos);
+        self::assertNotFalse($denyPos);
+        self::assertGreaterThan($allowPos, $denyPos, 'backstop deny must render after the broad allow');
+    }
+
+    /**
+     * plan-2 AC-06 / N3: the Copilot/Claude `allowedBash` projection filters to allow-effect
+     * entries only, so the OpenCode secret-deny backstop entries are inertly skipped — those
+     * runtimes gain no false OpenCode-enforcement claim and keep the prompt-level rule.
+     */
+    public function testAllowedBashProjectionExcludesSecretDenyBackstopEntries(): void
+    {
+        $result = aiPermissionCompose('reviewer');
+        $allowed = aiPermissionAllowedBashFromModel($result['model']);
+
+        foreach ($allowed as $pattern) {
+            self::assertStringNotContainsString('*.env*', $pattern);
+            self::assertStringNotContainsString('*.pem', $pattern);
+        }
+        // Sanity: the broad reader allow is still projected (it is an allow).
+        self::assertContains('bash scripts/ai/preview-file.sh *', $allowed);
+    }
 }

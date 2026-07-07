@@ -93,6 +93,30 @@ permission:
     'shfmt -d *': allow
     'shellcheck *': allow
     'bash scripts/ai/repomix-ensure-fresh.sh *': ask
+    '*scripts/ai/preview-file.sh *.env*': deny
+    '*scripts/ai/preview-file.sh *.pem': deny
+    '*scripts/ai/preview-file.sh *.key': deny
+    '*scripts/ai/preview-file.sh *.crt': deny
+    '*scripts/ai/preview-file.sh *id_rsa*': deny
+    '*scripts/ai/preview-file.sh *secrets.*': deny
+    '*scripts/ai/preview-file.sh *credentials.*': deny
+    '*scripts/ai/preview-file.sh *auth.json*': deny
+    '*scripts/ai/ai-search.sh *.env*': deny
+    '*scripts/ai/ai-search.sh *.pem': deny
+    '*scripts/ai/ai-search.sh *.key': deny
+    '*scripts/ai/ai-search.sh *.crt': deny
+    '*scripts/ai/ai-search.sh *id_rsa*': deny
+    '*scripts/ai/ai-search.sh *secrets.*': deny
+    '*scripts/ai/ai-search.sh *credentials.*': deny
+    '*scripts/ai/ai-search.sh *auth.json*': deny
+    '*scripts/ai/rg-code.sh *.env*': deny
+    '*scripts/ai/rg-code.sh *.pem': deny
+    '*scripts/ai/rg-code.sh *.key': deny
+    '*scripts/ai/rg-code.sh *.crt': deny
+    '*scripts/ai/rg-code.sh *id_rsa*': deny
+    '*scripts/ai/rg-code.sh *secrets.*': deny
+    '*scripts/ai/rg-code.sh *credentials.*': deny
+    '*scripts/ai/rg-code.sh *auth.json*': deny
 agent_assessment:
   risk_level: high
   decision: approve

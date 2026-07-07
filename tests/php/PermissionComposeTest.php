@@ -303,6 +303,72 @@ final class PermissionComposeTest extends TestCase
         self::assertSame('agent:exceptions', $result['model'][aiPermissionModelKey('bash', 'semgrep *')]['layer']);
     }
 
+    public function testBackstopDenyPackLayerAppliesAfterAllowPacksAndBeforeExceptions(): void
+    {
+        // plan-2-opencode-secret-deny-backstop: the backstop_deny_packs lane must sit AFTER
+        // allow/ask packs (so a secret deny inserts into $model after the reader allow it
+        // overrides under `.findLast()`) and immediately BEFORE agent:exceptions.
+        $result = aiPermissionComposeFromSpec([
+            'profile' => 'readonly',
+            'edit_surface' => 'none',
+            'verify_tier' => 'verify-none',
+            'allow_packs' => ['proof.security'],
+            'ask_packs' => ['context.packaging'],
+            'backstop_deny_packs' => ['core.safe_read.deny_secret_reads'],
+        ]);
+
+        $layers = $result['layers'];
+        $allowIdx = array_search('agent:allow-packs:proof.security', $layers, true);
+        $askIdx = array_search('agent:ask-packs:context.packaging', $layers, true);
+        $backstopIdx = array_search('agent:backstop-deny-packs:core.safe_read.deny_secret_reads', $layers, true);
+        $exceptionsIdx = array_search('agent:exceptions', $layers, true);
+
+        self::assertNotFalse($backstopIdx, 'backstop-deny-packs lane must appear in provenance');
+        self::assertGreaterThan($allowIdx, $backstopIdx, 'backstop lane must apply after allow packs');
+        self::assertGreaterThan($askIdx, $backstopIdx, 'backstop lane must apply after ask packs');
+        self::assertLessThan($exceptionsIdx, $backstopIdx, 'backstop lane must apply before agent:exceptions');
+    }
+
+    public function testBackstopDenyPackIsOmittedFromProvenanceWhenUnused(): void
+    {
+        // Byte-stability guard: an agent that sets no backstop_deny_packs composes exactly as
+        // before — the lane must not appear in provenance at all (non-empty-guarded).
+        $result = aiPermissionComposeFromSpec([
+            'profile' => 'readonly',
+            'edit_surface' => 'none',
+            'verify_tier' => 'verify-none',
+        ]);
+
+        foreach ($result['layers'] as $layer) {
+            self::assertStringNotContainsString('backstop-deny-packs', $layer);
+        }
+    }
+
+    public function testBackstopSecretDenyOverridesReaderAllowUnderFindLastOrdering(): void
+    {
+        // plan-2 AC-03 at the model level: for a deny-floor agent granting a reader wrapper,
+        // the secret-path deny key must exist, carry the `backstop` class, and be positioned
+        // AFTER the broad reader allow key in the ordered $model (findLast picks the deny).
+        $result = aiPermissionCompose('reviewer');
+        $model = $result['model'];
+
+        $allowKey = aiPermissionModelKey('bash', 'bash scripts/ai/preview-file.sh *');
+        $denyKey = aiPermissionModelKey('bash', '*scripts/ai/preview-file.sh *.env*');
+
+        self::assertArrayHasKey($allowKey, $model, 'reviewer still grants the broad reader allow');
+        self::assertArrayHasKey($denyKey, $model, 'reviewer gains a secret-path deny backstop');
+        self::assertSame('allow', $model[$allowKey]['effect']);
+        self::assertSame('deny', $model[$denyKey]['effect']);
+        self::assertSame('backstop', $model[$denyKey]['class']);
+
+        $keys = array_keys($model);
+        self::assertGreaterThan(
+            array_search($allowKey, $keys, true),
+            array_search($denyKey, $keys, true),
+            'the secret deny must be positioned after the broad reader allow (findLast semantics)'
+        );
+    }
+
     public function testPacksAreEachEffectHomogeneous(): void
     {
         foreach (aiPermissionPacks() as $packName => $entries) {

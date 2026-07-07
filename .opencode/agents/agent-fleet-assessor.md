@@ -25,6 +25,8 @@ permission:
     'rg *': allow
     'git grep *': allow
     'git status*': allow
+    'git diff*': allow
+    'git log*': allow
     'git ls-files*': allow
     'wc *': allow
     'sed -n *': allow

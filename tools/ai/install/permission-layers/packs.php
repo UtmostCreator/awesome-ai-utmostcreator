@@ -254,6 +254,25 @@ function aiPermissionPacks(): array
             'head *' => 'deny',
             'tail *' => 'deny',
         ]),
+        // Secret-path deny backstop for reader wrappers on OpenCode `'*': deny`-floor agents
+        // (plan-2-opencode-secret-deny-backstop). The reader wrappers below are granted broad
+        // `<reader> *: allow`, which reopens EVERY path for that wrapper — including secret files
+        // — despite the agent's prose Sensitive File Rule. Under OpenCode's `.findLast()`
+        // file-order resolution (render-adapters.php:98-107), a deny placed AFTER that allow flips
+        // a secret-path invocation back to deny, making the guard a real permission-level backstop
+        // instead of prompt-only. Two structural requirements make this work and are handled
+        // outside this pack: (1) it is wired via the `backstop_deny_packs` compose lane so it
+        // renders AFTER the `allow_packs`/reader allows (BLOCKER B), and (2) render-adapters.php
+        // retains `backstop`-class denies through the same-as-floor-effect no-op filter (BLOCKER
+        // A). OpenCode-scoped only: Copilot/Claude project allow-effect entries solely, so these
+        // denies are inertly skipped there and those runtimes keep the prompt-level rule as an
+        // honest, documented fallback. Bounded to path-argument reader wrappers; raw git
+        // show/log/diff/blame revspec access is intentionally NOT covered here (a revspec is not a
+        // filesystem path, so a `*.env*` glob would be both leaky and over-broad) and stays
+        // prompt-only. Glob shape `<reader> *<secret>*` is standard `*`-any-chars matching,
+        // verified not to false-positive on ordinary paths.
+        'core.safe_read.deny_secret_reads' => aiPermissionEntries('bash', aiPermissionSecretReadDenyMap()),
+
         // Not a "safe read" tool (chown is a mutation), but grouped here for the same reason
         // as the other atomic single-pattern packs: script-runner and post-install both
         // explicitly tighten it beyond the '*' floor's default posture for their profile.
@@ -471,6 +490,78 @@ function aiPermissionPacks(): array
             'bash scripts/ai/session-checkpoint.sh *' => 'ask',
         ]),
     ];
+}
+
+/**
+ * Builds the `core.safe_read.deny_secret_reads` pattern map: for each content-exposing reader
+ * wrapper and each secret-file glob, emit one `deny`.
+ *
+ * Pattern shape is `*<reader> *<secret>*`. The LEADING `*` deliberately absorbs any command
+ * prefix (bare, `AI_OUTPUT=json `, `env AI_OUTPUT=json `) that agent frontmatter grants for the
+ * JSON-capable readers, so one pattern covers all invocation variants instead of three — this
+ * keeps the generated `permission.bash` block within each agent's line budget
+ * (docs/ai/ai-file-standards.md). Because these are `deny` entries a slightly broad match fails
+ * safe: the worst case is denying an unrelated command that literally contains the reader name
+ * followed by a secret token, which is acceptable for a defense-in-depth backstop. The trailing
+ * `*<secret>*` matches a secret token anywhere in the path argument (trailing `.env`, mid-path
+ * `config/.env.local`) without false-positiving on ordinary source paths — verified by
+ * shell-glob probe during implementation.
+ *
+ * Scope is the readers that print file CONTENT (the real secret-value exposure vector):
+ * `preview-file.sh` (file contents), `ai-search.sh`/`ai-search-multi.sh`/`rg-code.sh` (matching
+ * lines, which may include secret values), and `git-forensics.sh` (blame prints file lines).
+ * `fd-files.sh` (filenames only) and `query-usage.sh` (token/byte counts only) do not print
+ * secret content and are intentionally omitted. The secret globs match the existing edit-surface
+ * secret vocabulary (edit-surfaces.php) plus the extra key/ssh shapes named in the agents' prose
+ * Sensitive File Rule, so the two surfaces do not diverge.
+ *
+ * @return array<string,string> ordered pattern => 'deny' map
+ */
+function aiPermissionSecretReadDenyMap(): array
+{
+    // Content-exposing readers only. Leading `*` (added below) absorbs the AI_OUTPUT=json / env
+    // invocation prefixes, so each reader needs one entry per glob, not one per prefix per glob.
+    // Bounded to the three highest-value content printers to keep the generated block within
+    // every affected agent's line budget: preview-file.sh (raw file contents) and
+    // ai-search.sh/rg-code.sh (matching lines, which can echo secret values). `ai-search-multi`
+    // funnels through the same safe MODEs as `ai-search`, and `git-forensics` blame is a lower
+    // exposure surface; both stay covered by the prompt-level Sensitive File Rule.
+    $readers = [
+        'preview-file.sh',
+        'ai-search.sh',
+        'rg-code.sh',
+    ];
+
+    // Secret-file globs (trailing `*` where the extension may be followed by more path/args).
+    // The eight highest-value secret shapes; drawn from edit-surfaces.php's deny vocabulary plus
+    // the ssh key names in the agents' Sensitive File Rule. `.npmrc`/`id_ed25519` are lower-value
+    // and left to the prompt-level rule to keep the pattern count within budget.
+    $secretGlobs = [
+        '*.env*',
+        '*.pem',
+        '*.key',
+        '*.crt',
+        '*id_rsa*',
+        '*secrets.*',
+        '*credentials.*',
+        '*auth.json*',
+    ];
+
+    $commands = [];
+    foreach ($readers as $reader) {
+        // `*scripts/ai/<reader>` — leading star absorbs `bash `, `AI_OUTPUT=json bash `, and
+        // `env AI_OUTPUT=json bash ` prefixes with a single pattern.
+        $commands[] = '*scripts/ai/' . $reader;
+    }
+
+    $map = [];
+    foreach ($commands as $command) {
+        foreach ($secretGlobs as $glob) {
+            $map[$command . ' ' . $glob] = 'deny';
+        }
+    }
+
+    return $map;
 }
 
 /**

@@ -218,4 +218,58 @@ class AiCatalogLibIoTest extends TestCase
         $this->assertTrue($result);
         $this->assertStringContainsString('up to date', $messages[0]);
     }
+
+    // ---- aiCollectCatalog: Claude adapter coverage ----
+    //
+    // Guards the Claude adapter parity plan
+    // (docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000): the catalog
+    // generator must index the shipped .claude/** adapter surface, not just .github/**
+    // and .opencode/**. Without this, generate-ai-catalog.php --check silently passes
+    // while omitting an entire committed runtime from the "live inventory".
+
+    public function testCollectCatalogIndexesTrackedClaudeAgents(): void
+    {
+        $root = aiRepoRoot();
+
+        if (aiFilterTrackedPaths($root, glob($root . '/.claude/agents/*.md') ?: []) === []) {
+            $this->markTestSkipped('no tracked .claude/agents/*.md in this checkout');
+        }
+
+        $catalog = aiCollectCatalog($root);
+        $claudeAgents = array_filter(
+            $catalog['resources'],
+            static fn(array $r): bool => ($r['type'] ?? null) === 'claude-agent'
+        );
+
+        $this->assertNotEmpty(
+            $claudeAgents,
+            'aiCollectCatalog must index tracked .claude/agents as claude-agent resources'
+        );
+
+        foreach ($claudeAgents as $resource) {
+            $this->assertSame('claude', $resource['runtime']);
+            $this->assertStringStartsWith('.claude/agents/', $resource['path']);
+        }
+    }
+
+    public function testCollectCatalogExcludesUntrackedClaudeSurfaces(): void
+    {
+        $root = aiRepoRoot();
+        $catalog = aiCollectCatalog($root);
+
+        // aiFilterTrackedPaths keeps the catalog honest: work-in-progress (untracked)
+        // Claude skills/commands must not appear until committed. Assert every catalogued
+        // claude-* resource path is git-tracked.
+        foreach ($catalog['resources'] as $resource) {
+            if (!str_starts_with((string) ($resource['type'] ?? ''), 'claude-')) {
+                continue;
+            }
+
+            $abs = $root . '/' . $resource['path'];
+            $this->assertNotEmpty(
+                aiFilterTrackedPaths($root, [$abs]),
+                'catalogued claude resource must be git-tracked: ' . $resource['path']
+            );
+        }
+    }
 }

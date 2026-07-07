@@ -15,6 +15,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `canonical` resources are shared across all AI runtimes.
 - `github-copilot` resources belong to the `.github/` adapter surface.
 - `opencode` resources belong to the `.opencode/` adapter surface.
+- `claude` resources belong to the `.claude/` adapter surface.
 - `dual-runtime` examples intentionally show both adapter surfaces together.
 
 ## Highlights
@@ -22,25 +23,26 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `package / core-template` - 29
 - `package / foundation-doc` - 6
 - `package / github-copilot-instruction-template` - 22
-- `package / opencode-command-template` - 4
+- `package / opencode-command-template` - 5
 - `package / operations-doc` - 6
 - `package / optional-template` - 15
 - `package / package-capability` - 43
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
-- `package / workflow-template` - 22
+- `package / workflow-template` - 23
 - `root / adapter-doc` - 1
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
 - `root / adapter-policy` - 1
 - `root / ai-script` - 27
 - `root / capability` - 17
+- `root / claude-agent` - 14
 - `root / cli` - 1
-- `root / exporter` - 1
+- `root / exporter` - 2
 - `root / generator` - 1
 - `root / github-copilot-agent` - 23
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 22
+- `root / github-copilot-prompt` - 23
 - `root / github-copilot-skill` - 23
 - `root / opencode-agent` - 14
 - `root / opencode-command` - 24
@@ -104,8 +106,23 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`capability`|review-diff|`docs/ai/capabilities/review-diff/CAPABILITY.md`|Review a change set from the diff first, then expand only as needed to assess correctness, regression risk, policy fit, and missing verification.|
 |`capability`|service-boundary-patterns|`docs/ai/capabilities/service-boundary-patterns/CAPABILITY.md`|Use this capability when a change crosses repository, package, API, adapter, data, or internal tooling boundaries.|
 |`capability`|verify-change|`docs/ai/capabilities/verify-change/CAPABILITY.md`|Choose and run the smallest relevant verification flow for a change, then report evidence clearly.|
+|`claude-agent`|agent-critic|`.claude/agents/agent-critic.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
+|`claude-agent`|agent-fleet-assessor|`.claude/agents/agent-fleet-assessor.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
+|`claude-agent`|architect|`.claude/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
+|`claude-agent`|architecture-plan-writer|`.claude/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
+|`claude-agent`|config-maintainer|`.claude/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
+|`claude-agent`|implementer|`.claude/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
+|`claude-agent`|post-install|`.claude/agents/post-install.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
+|`claude-agent`|refactorer|`.claude/agents/refactorer.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
+|`claude-agent`|release-auditor|`.claude/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
+|`claude-agent`|repository-researcher|`.claude/agents/repository-researcher.md`|Strict script-first repository researcher using ai-search before raw search|
+|`claude-agent`|repository-reviewer|`.claude/agents/repository-reviewer.md`|Strict script-first diff reviewer using ai-search and validator evidence|
+|`claude-agent`|researcher|`.claude/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
+|`claude-agent`|reviewer|`.claude/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
+|`claude-agent`|workflow-auditor|`.claude/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`cli`|ai|`tools/ai/ai.php`|Main AI workflow CLI dispatcher.|
 |`exporter`|export-ai-universal-rules|`tools/ai/export-ai-universal-rules.php`|Builds starter-profile release bundles under dist/.|
+|`exporter`|export-install-bundle|`tools/ai/export-install-bundle.php`|Vendors a standalone, offline-runnable copy of the installer into a specified path.|
 |`generator`|generate-ai-catalog|`tools/ai/generate-ai-catalog.php`|Generates catalog docs, catalog JSON, and llms.txt.|
 |`github-copilot-agent`|Agent Creator Runtime Guardian|`.github/agents/agent-creator-runtime-guardian.agent.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator|
 |`github-copilot-agent`|Agent Creator Semantic Verifier|`.github/agents/agent-creator-semantic-verifier.agent.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator|
@@ -158,6 +175,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|docs-sync|`.github/prompts/docs-sync.prompt.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`github-copilot-prompt`|evidence-first-execution|`.github/prompts/evidence-first-execution.prompt.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
 |`github-copilot-prompt`|generate-permissions|`.github/prompts/generate-permissions.prompt.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
+|`github-copilot-prompt`|install|`.github/prompts/install.prompt.md`|Use to install (or reinstall/refresh) the AI workflow kit into a target project, asking for missing parameters (target path, profile, runtime, project name) before writing anything|
 |`github-copilot-prompt`|mentor-mode|`.github/prompts/mentor-mode.prompt.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-prompt`|new-feature|`.github/prompts/new-feature.prompt.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-prompt`|plan-slice|`.github/prompts/plan-slice.prompt.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -352,6 +370,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-instruction-template`|Target Rules|`packages/ai-universal-rules/templates/instructions/targets.instructions.md`|Target, runtime, platform, adapter, and deployment-surface adaptation guidance|
 |`github-copilot-instruction-template`|Testing Rules|`packages/ai-universal-rules/templates/instructions/testing.instructions.md`|Testing, verification ladder, regression coverage, and deterministic proof rules|
 |`github-copilot-instruction-template`|Tool Selection Rules|`packages/ai-universal-rules/templates/instructions/tools.instructions.md`|Tool selection and script enforcement — use rg/fd/approved scripts; never use bare grep/find|
+|`opencode-command-template`|install|`packages/ai-universal-rules/templates/commands/install.md`|Guided install of the AI workflow kit into a target project, asking for missing parameters|
 |`opencode-command-template`|post-install-setup|`packages/ai-universal-rules/templates/commands/post-install-setup.md`|Guided post-install setup for installed projects|
 |`opencode-command-template`|search-evidence|`packages/ai-universal-rules/templates/commands/search-evidence.md`|Collect script-first repository evidence using ai-search|
 |`opencode-command-template`|verify-ai-wiring|`packages/ai-universal-rules/templates/commands/verify-ai-wiring.md`|Verify OpenCode script-first AI wiring|
@@ -436,6 +455,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-template`|docs-sync|`packages/ai-universal-rules/templates/workflows/docs-sync.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`workflow-template`|evidence-first-execution|`packages/ai-universal-rules/templates/workflows/evidence-first-execution.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
 |`workflow-template`|generate-permissions|`packages/ai-universal-rules/templates/workflows/generate-permissions.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
+|`workflow-template`|install|`packages/ai-universal-rules/templates/workflows/install.md`|Use to install (or reinstall/refresh) the AI workflow kit into a target project, asking for missing parameters (target path, profile, runtime, project name) before writing anything|
 |`workflow-template`|mentor-mode|`packages/ai-universal-rules/templates/workflows/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`workflow-template`|new-feature|`packages/ai-universal-rules/templates/workflows/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`workflow-template`|plan-slice|`packages/ai-universal-rules/templates/workflows/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|

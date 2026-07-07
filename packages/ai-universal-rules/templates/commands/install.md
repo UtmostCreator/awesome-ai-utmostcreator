@@ -1,0 +1,61 @@
+---
+description: Guided install of the AI workflow kit into a target project, asking for missing parameters
+argument-hint: "[target path] [--profile <name>] [--runtime copilot|opencode|claude|both] [--project-name <name>]"
+---
+
+Use this command to install (or reinstall/refresh) the AI workflow kit into a project, from
+this source repo. Read `readme-install.md` and `docs/ai/available-packs.md` first if either
+is unfamiliar.
+
+Resolve four parameters before running anything. Take each from the command arguments above
+if given; otherwise ask the user with a short structured question (2-4 options plus a free-text
+choice) — do not guess a target path or silently pick a profile the user did not ask for:
+
+1. **Target path** — absolute or relative path to the project being installed into. Confirm it
+   exists (or ask whether to create it) before proceeding.
+2. **Profile** — one of `minimal`, `copilot`, `opencode`, `claude`, `dual`, `guarded`,
+   `accelerated`, `full-governance`, `docs-reference`, or the editions `basic`, `standard`,
+   `creator`, `full`, `agents-only`. Default recommendation: `full-governance` for a new
+   project that wants full governance, `dual` for a lighter footprint.
+3. **Runtime** — `github-copilot`, `opencode`, `claude-code`, or `both`. Default: `both`.
+4. **Project name** — defaults to the target directory's basename; ask only if that default
+   looks wrong (e.g. a generic folder name like `repo` or `project`).
+
+Once all four are resolved, run the canonical sequence in order and report each step's result
+honestly before moving to the next:
+
+Step 1 — preflight:
+!`php tools/ai/ai.php preflight`
+
+Step 2 — verify source templates against the checksum lock:
+!`php tools/ai/ai.php package-verify`
+
+Step 3 — dry-run plan (no files written):
+!`php tools/ai/install-ai-kit.php --dry-run --target <TARGET> --profile <PROFILE> --runtime <RUNTIME> --project-name "<PROJECT_NAME>"`
+
+Step 4 — show the dry-run plan to the user and ask for explicit confirmation before writing
+anything. If the target already has a managed install (existing `.ai-install-manifest.json` or
+kit-owned files), tell the user a backup will be created automatically before `--apply`; do not
+skip the backup and do not pass `--force`/`--allow-core-overwrite` unless the user explicitly
+asks for a reinstall that overwrites existing files.
+
+Step 5 — apply (only after confirmation):
+!`php tools/ai/install-ai-kit.php --target <TARGET> --profile <PROFILE> --runtime <RUNTIME> --project-name "<PROJECT_NAME>"`
+
+Step 6 — verify the installed target:
+!`(cd <TARGET> && php tools/ai/validate-install-surface.php --strict)`
+
+Important:
+
+- If Step 2 reports checksum mismatches, stop and tell the user the source templates may be
+  stale relative to `packages/ai-universal-rules/package-lock.ai.json` — do not silently
+  proceed with a drifted source tree.
+- If package.json/vendor prerequisites are missing (php, git, jq), report the exact missing
+  tool and point to `docs/ai/mandatory-tools-install.md` instead of guessing a workaround.
+- Never run `--force`/`--allow-core-overwrite` without the user explicitly asking for it in
+  this conversation.
+- To export a standalone, offline-runnable copy of this installer (for vendoring into another
+  location without the rest of this development repo), use
+  `php tools/ai/export-install-bundle.php --target <path> --apply` instead of this command.
+- Report the exact commands run and their pass/fail status; never claim an install succeeded
+  without the Step 6 verification passing.

@@ -40,25 +40,26 @@
         "package:core-template": 29,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
-        "package:opencode-command-template": 4,
+        "package:opencode-command-template": 5,
         "package:operations-doc": 6,
         "package:optional-template": 15,
         "package:package-capability": 43,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
-        "package:workflow-template": 22,
+        "package:workflow-template": 23,
         "root:adapter-doc": 1,
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
         "root:adapter-policy": 1,
         "root:ai-script": 27,
         "root:capability": 17,
+        "root:claude-agent": 14,
         "root:cli": 1,
-        "root:exporter": 1,
+        "root:exporter": 2,
         "root:generator": 1,
         "root:github-copilot-agent": 23,
         "root:github-copilot-instruction": 22,
-        "root:github-copilot-prompt": 22,
+        "root:github-copilot-prompt": 23,
         "root:github-copilot-skill": 23,
         "root:opencode-agent": 14,
         "root:opencode-command": 24,
@@ -525,6 +526,14 @@
             "path": "packages/ai-universal-rules/templates/instructions/tools.instructions.md",
             "runtime": "github-copilot",
             "description": "Tool selection and script enforcement \u2014 use rg/fd/approved scripts; never use bare grep/find"
+        },
+        {
+            "scope": "package",
+            "type": "opencode-command-template",
+            "name": "install",
+            "path": "packages/ai-universal-rules/templates/commands/install.md",
+            "runtime": "opencode",
+            "description": "Guided install of the AI workflow kit into a target project, asking for missing parameters"
         },
         {
             "scope": "package",
@@ -1201,6 +1210,14 @@
         {
             "scope": "package",
             "type": "workflow-template",
+            "name": "install",
+            "path": "packages/ai-universal-rules/templates/workflows/install.md",
+            "runtime": "dual-runtime",
+            "description": "Use to install (or reinstall/refresh) the AI workflow kit into a target project, asking for missing parameters (target path, profile, runtime, project name) before writing anything"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
             "name": "mentor-mode",
             "path": "packages/ai-universal-rules/templates/workflows/mentor-mode.md",
             "runtime": "dual-runtime",
@@ -1720,6 +1737,118 @@
         },
         {
             "scope": "root",
+            "type": "claude-agent",
+            "name": "agent-critic",
+            "path": ".claude/agents/agent-critic.md",
+            "runtime": "claude",
+            "description": "Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet."
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "agent-fleet-assessor",
+            "path": ".claude/agents/agent-fleet-assessor.md",
+            "runtime": "claude",
+            "description": "Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "architect",
+            "path": ".claude/agents/architect.md",
+            "runtime": "claude",
+            "description": "Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "architecture-plan-writer",
+            "path": ".claude/agents/architecture-plan-writer.md",
+            "runtime": "claude",
+            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "config-maintainer",
+            "path": ".claude/agents/config-maintainer.md",
+            "runtime": "claude",
+            "description": "Use when changing editor, shell, runtime, or tool configuration while preserving current behavior"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "implementer",
+            "path": ".claude/agents/implementer.md",
+            "runtime": "claude",
+            "description": "Use when a bounded implementation slice is clear and focused verification should happen in this repository"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "post-install",
+            "path": ".claude/agents/post-install.md",
+            "runtime": "claude",
+            "description": "Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "refactorer",
+            "path": ".claude/agents/refactorer.md",
+            "runtime": "claude",
+            "description": "Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "release-auditor",
+            "path": ".claude/agents/release-auditor.md",
+            "runtime": "claude",
+            "description": "Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "repository-researcher",
+            "path": ".claude/agents/repository-researcher.md",
+            "runtime": "claude",
+            "description": "Strict script-first repository researcher using ai-search before raw search"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "repository-reviewer",
+            "path": ".claude/agents/repository-reviewer.md",
+            "runtime": "claude",
+            "description": "Strict script-first diff reviewer using ai-search and validator evidence"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "researcher",
+            "path": ".claude/agents/researcher.md",
+            "runtime": "claude",
+            "description": "Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "reviewer",
+            "path": ".claude/agents/reviewer.md",
+            "runtime": "claude",
+            "description": "Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "workflow-auditor",
+            "path": ".claude/agents/workflow-auditor.md",
+            "runtime": "claude",
+            "description": "Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims"
+        },
+        {
+            "scope": "root",
             "type": "cli",
             "name": "ai",
             "path": "tools/ai/ai.php",
@@ -1733,6 +1862,14 @@
             "path": "tools/ai/export-ai-universal-rules.php",
             "runtime": "php",
             "description": "Builds starter-profile release bundles under dist/."
+        },
+        {
+            "scope": "root",
+            "type": "exporter",
+            "name": "export-install-bundle",
+            "path": "tools/ai/export-install-bundle.php",
+            "runtime": "php",
+            "description": "Vendors a standalone, offline-runnable copy of the installer into a specified path."
         },
         {
             "scope": "root",
@@ -2149,6 +2286,14 @@
             "path": ".github/prompts/generate-permissions.prompt.md",
             "runtime": "github-copilot",
             "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "install",
+            "path": ".github/prompts/install.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to install (or reinstall/refresh) the AI workflow kit into a target project, asking for missing parameters (target path, profile, runtime, project name) before writing anything"
         },
         {
             "scope": "root",

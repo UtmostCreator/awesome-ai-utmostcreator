@@ -113,7 +113,16 @@ function aiPermissionRenderOpenCodeBlock(array $model, array $render): string
         if ($entry['permission'] !== 'bash' || $entry['pattern'] === '*') {
             continue;
         }
-        if ($starEffect !== null && $entry['effect'] === $starEffect) {
+        // A bash entry whose effect equals the '*' floor is normally a no-op restatement and is
+        // dropped (line-budget optimization above). The one exception is a `backstop`-class entry:
+        // under OpenCode's `.findLast()` file-order resolution, a deny placed AFTER an overlapping
+        // broad allow (e.g. a secret-path deny after `preview-file.sh *: allow`) is load-bearing —
+        // it flips the match result from allow to deny — even when its effect equals the floor's
+        // deny. Retaining it is what makes the secret-read backstop a real permission-level guard
+        // rather than a stripped no-op. Retention is keyed on the model `class` only, never on pack
+        // name, preserving this renderer's pure-function-of-the-model contract (see file header).
+        $isLoadBearingBackstop = $entry['class'] === 'backstop';
+        if ($starEffect !== null && $entry['effect'] === $starEffect && !$isLoadBearingBackstop) {
             continue;
         }
         $lines[] = '    ' . $quote . $entry['pattern'] . $quote . ': ' . $entry['effect'];
