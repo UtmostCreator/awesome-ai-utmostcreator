@@ -100,6 +100,12 @@ function aiInstallerRenderClaudeAgent(
 
     // --- Combine: Claude frontmatter + bash policy + original body ---
     $body = ltrim($body);
+    // Claude Code has no `external_directory` permission field; neutralize the OpenCode-specific
+    // `external_directory: ask` prose leaked from the shared body so the installed Claude copy does
+    // not imply an enforcement Claude never provides. The OpenCode-format templates and `.opencode/`
+    // copies keep the literal (required by their boundary policy and the AgentPermissionPolicy test).
+    $body = preg_replace('/\s*\(OpenCode `external_directory: ask`\)/', '', $body);
+    $body = preg_replace('/(?:the )?OpenCode `external_directory: ask` prompt/', "the runtime's external-directory approval prompt", $body);
     $rendered = $claudeFm . $bashPolicy . "\n" . $body;
 
     return aiInstallerInsertGeneratedHeaderAfterFrontmatter(
