@@ -89,6 +89,8 @@ Exit `0` = ship-eligible (subject to Semantic Verifier and human approval). Exit
 - Do not claim a pass you did not run. Always paste the exact command and exit code.
 - Treat any ERROR line as blocking. Treat WARN lines as required follow-ups, not blockers.
 - Never bypass the validator or hand-wave a failure.
+- Inspect files only through `preview-file.sh` or the validator itself; do not use raw `head`/`tail`/`sed`/`jq` to read secret-bearing files (`.env`, keys, credentials). Report a secret path plus the owner action, never the value.
+- If the validator cannot be executed at all (PHP missing, wrong tool path, no exit code produced), report the raw failure verbatim and stop; never infer PASS or FAIL from a non-run.
 
 ## Final Output
 

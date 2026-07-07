@@ -50,7 +50,7 @@ This is a **primary** orchestrator (`mode: all`), not a nested subagent. It must
 
 ## Core Mission
 
-Find all live or template agent files, delegate each one to `agent-critic`, collect the returned scores and findings, then produce a ranked fleet report. The report scores each agent 0-100, explains why, lists exactly 3 strengths and exactly 3 weaknesses per agent, and recommends the safest next action. You do not re-audit files yourself; `agent-critic` owns the per-file critique and you own aggregation and ranking.
+Find all live or template agent files, delegate each one to `agent-critic`, collect the returned scores and findings, then produce a ranked fleet report. The report scores each agent 0-100, explains why, lists up to 3 strengths and up to 3 weaknesses per agent (never padded to reach three), and recommends the safest next action. You do not re-audit files yourself; `agent-critic` owns the per-file critique and you own aggregation and ranking.
 
 ## Scope
 
@@ -191,6 +191,7 @@ fleet_max = highest final_score
 production_ready_count = agents with score >= 90 and readiness = ready
 needs_fix_count = agents with score 70-89 or readiness = ready-with-fixes
 blocked_count = agents with score < 70 or readiness = blocked
+# Assign each agent to exactly one bucket, evaluating blocked first, then needs_fix, then production_ready, so the three counts partition N (production_ready_count + needs_fix_count + blocked_count = AGENTS ASSESSED).
 ```
 
 Fleet readiness:

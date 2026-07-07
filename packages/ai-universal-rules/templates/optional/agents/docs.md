@@ -125,6 +125,7 @@ Rules:
 - prefer exact commands over vague guidance
 - call out verification or setup changes clearly
 - distinguish current implementation from planned or hypothetical systems
+- when the implementation cannot be confirmed from repository evidence, or when existing docs conflict with the change, mark the affected claim `unknown` and stop instead of guessing; do not silently overwrite conflicting documentation
 
 ## Recommended Next Step
 

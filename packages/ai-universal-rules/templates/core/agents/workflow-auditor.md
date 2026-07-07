@@ -141,7 +141,7 @@ Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/workflow.md`,
 
 1. Instruction files reference correct existing paths.
 2. No placeholder leaks remain in live workflow files.
-3. Adapter files (Copilot/OpenCode) match shared canonical source.
+3. Adapter files (Copilot/OpenCode) match shared canonical source; legitimate renderer-produced provider differences are not drift — only unexplained divergence from the canonical source is.
 4. No unsupported workflow claims (features, tools, hooks not present).
 5. No contradictions between AGENTS.md, copilot-instructions.md, and docs/ai/agents.md.
 6. docs/ai/agents.md references all live agent files.
@@ -155,8 +155,8 @@ CLEAN | DRIFT FOUND | ERRORS FOUND
 
 ## Findings
 
-| Severity | File | Issue | Fix Direction |
-| -------- | ---- | ----- | ------------- |
+| Severity | File | Issue | Evidence | Fix Direction |
+| -------- | ---- | ----- | -------- | ------------- |
 
 ## Drift Summary
 

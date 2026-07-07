@@ -373,7 +373,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in <PROJECT_NAME>|
 |`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>|
 |`optional-template`|ui-builder|`packages/ai-universal-rules/templates/optional/agents/ui-builder.md`|UI builder for <PROJECT_NAME>. Builds UI changes that follow existing product patterns and accessibility expectations.|
-|`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades carefully in <PROJECT_NAME>|
+|`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in <PROJECT_NAME>|
 |`optional-template`|Optional Delivery Pack|`packages/ai-universal-rules/templates/optional/delivery/README.md`|Use this pack when you want a lightweight slice card for non-trivial work.|
 |`optional-template`|Slice Card|`packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md`|- User outcome:|
 |`package-capability`|Capability Templates|`packages/ai-universal-rules/templates/capabilities/README.md`|These folders are the canonical reusable workflow units in this kit.|

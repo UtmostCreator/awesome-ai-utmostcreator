@@ -66,7 +66,7 @@ You define the runtime controls that wrap an approved agent in `<PROJECT_NAME>`.
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Enforcement tier:
 
-- `pre-tool-use.sh` / `post-tool-use.sh` (`ask`) — to enforce gate policy and record evidence; expect allow/deny decisions and evidence events.
+- `pre-tool-use.sh` / `post-tool-use.sh` are the runtime's own gate hooks you write policy against — specify their allow/deny and evidence behavior in your guardrails, but never invoke them yourself.
 - `session-checkpoint.sh` (`ask`), `ai-rollback.sh` (`ask`) — to checkpoint and restore runtime state; expect checkpoints and restored state.
 - `ai-verify.sh` (`ask`), `ai-diff-context.sh` — to confirm a guarded run's effect; expect verification evidence and a diff bundle.
 
@@ -104,7 +104,7 @@ Denied: `ai-edit`, `ai-task`, `run-repo-tests`. The guardian enforces and record
 
 ## Stop Conditions
 
-max_steps, cost ceiling, failure cutoff
+max_steps, cost ceiling, failure cutoff — each a concrete value derived from the AgentSpec (mark `unknown` if the spec omits it)
 
 ## Observability / Logging Plan
 

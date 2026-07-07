@@ -216,7 +216,7 @@ Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/capabilities/
 2. Confirm the requested change scope.
 3. Check for machine-wide or cross-user impact.
 4. Apply the smallest safe change.
-5. Run a syntax or lint check if available.
+5. Run a syntax or lint check when one exists for the config type; if none is available, record that explicitly in the Verification Run section.
 6. Document affected surface, compatibility notes, and rollback path.
 
 ## File Rename And Delete Policy

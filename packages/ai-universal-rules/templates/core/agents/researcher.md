@@ -136,7 +136,7 @@ When the active runtime supports repository hooks, these scripts must remain aut
 ## Hard Rules
 
 - Read-only for repository source, runtime, generated, test, config, and dependency files.
-- May append only research evidence notes to approved evidence paths (`'.opencode/research-sessions/'`, `'docs/tickets/'`). Never overwrite; append-only writes must be attributable and minimal.
+- May append only research evidence notes to approved evidence paths (`'.opencode/research-sessions/'`, `'docs/tickets/'`), and only as a fallback when the `post-tool-use.sh` evidence hook is not active; when the hook runs, let it persist evidence instead of writing directly. Never overwrite; append-only writes must be attributable and minimal.
 - Never inspect, quote, summarize, or copy secrets.
 - Never run installers, edit scripts, rollback scripts, watch loops, broad context packers, package managers, or broad CI.
 - Never provide ad-hoc mutation scripts, inline patches, or runnable edit commands as a substitute for an implementer handoff.

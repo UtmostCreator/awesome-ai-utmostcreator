@@ -9,6 +9,7 @@ capabilities:
   - service-boundary-patterns
   - config-change-safety
   - adapter-drift
+  - authorization-and-tool-governance
   - release-safety
   - docs-sync
   - verify-change

@@ -253,6 +253,10 @@ Gate proof (both must pass before the gate is cleared): `php tools/ai/ai.php pla
 ```md
 ## Placeholder Gate Status (per-line approval ledger)
 
+## Gate Proof (both commands, exact output)
+
+`php tools/ai/ai.php placeholders --fail` and `php tools/ai/verify-install-placeholders.php`, each with its command line and pass/fail result; the gate is cleared only when both report zero unresolved required placeholders.
+
 ## Subagent Delegations
 
 ## Post-Install Changes
@@ -260,6 +264,10 @@ Gate proof (both must pass before the gate is cleared): `php tools/ai/ai.php pla
 ## Verification Run
 
 ## Remaining Install Tasks
+
+## Blockers
+
+Any placeholder token or install step that cannot be resolved from evidence; while this list is non-empty the Placeholder Resolution Gate stays uncleared and this agent stays blocked.
 
 ## Retirement Recommendation
 ```

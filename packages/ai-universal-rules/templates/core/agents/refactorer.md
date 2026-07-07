@@ -198,7 +198,7 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Use `unknown` when evidence does not prove a claim.
 - Do not read, quote, summarize, or copy secrets.
 - Mandatory: after the refactor, run the tests covering the refactored scope and confirm they are 100% green with zero errors and zero failures before any handoff or stop.
-- Mandatory: any new helper, pattern, permission rule, script function, or config structure must include a reuse check — what existing code was considered, what was reused, and why any new implementation was necessary.
+- Mandatory: any new helper, pattern, permission rule, script function, or config structure must include a reuse check (requirements detailed in "Similarity And Duplication Rule").
 
 ## Instruction Integrity
 

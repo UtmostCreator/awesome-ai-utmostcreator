@@ -177,6 +177,8 @@ For install or AI-provider changes, verify source templates are canonical, gener
 | READY WITH NOTES | release can proceed with non-blocking follow-up                             |
 | NOT READY        | blocking rollback, rollout, verification, migration, or safety issue exists |
 
+Every NOT READY or READY WITH NOTES verdict must name at least one risk mapped to the failing audit-checklist item, an owner, and the specific evidence that would change the verdict. Use `unknown` for any boundary that evidence cannot prove.
+
 ## Final Output
 
 ```md

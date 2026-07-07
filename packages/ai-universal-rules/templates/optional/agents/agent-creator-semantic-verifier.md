@@ -69,7 +69,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-diff-context.sh` — to inspect proposed change context; expect a diff bundle.
 - `ai-verify.sh` (`ask`) — only to sanity-check a claimed behavior; expect verification evidence.
 
-Denied: `ai-edit`, `ai-task`, all hook scripts. The verifier judges MATCHES/MISMATCH; it never edits or tasks.
+Denied: `ai-edit`, `ai-task`, all write and hook scripts. The verifier issues a verdict (MATCHES / MATCHES WITH NOTES / MISMATCH); it never edits the spec or delegates tasks.
 
 ## What You Check
 
@@ -88,6 +88,7 @@ Denied: `ai-edit`, `ai-task`, all hook scripts. The verifier judges MATCHES/MISM
 - Confirm the Static Validator already returned exit 0 before you judge; if not, send it back.
 - Reduce, never expand, the granted surface in your recommendations.
 - Use `unknown` when the request does not prove a needed detail.
+- If the original user request is missing and only the AgentSpec was provided, do not infer intent — stop and request the original request before issuing a verdict.
 
 ## Verdict Rules
 

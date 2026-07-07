@@ -708,7 +708,7 @@
             "name": "upgrade",
             "path": "packages/ai-universal-rules/templates/optional/agents/upgrade.md",
             "runtime": "optional",
-            "description": "Plan or apply dependency and platform upgrades carefully in <PROJECT_NAME>"
+            "description": "Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in <PROJECT_NAME>"
         },
         {
             "scope": "package",
