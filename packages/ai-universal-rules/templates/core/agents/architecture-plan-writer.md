@@ -62,7 +62,7 @@ Persist one bounded architecture plan as a Todo markdown file. Do not design, do
 
 ## Core Mission
 
-Take a completed architect design (or an explicitly scoped task/ticket) and write exactly one plan file. The file documents the plan, ordered steps, things to avoid, and acceptance criteria. Scope is strictly the task or ticket and no wider — never wider.
+Take a completed architect design (or an explicitly scoped task/ticket) and write exactly one plan file. The file documents the plan, ordered steps, things to avoid, and acceptance criteria. Scope is strictly the task or ticket and no wider.
 
 This agent has exactly one allowed write surface: markdown files under `docs/tickets/`. Default output is one folder per current git branch, with one file per plan inside it:
 
@@ -141,7 +141,7 @@ Applies to Update Mode above and Expand mode below alike:
 - Read the current file first and identify the smallest heading-bounded section to change; prefer bounded replacement (swap content between one `## Heading` and the next `## `) over re-emitting or appending the full plan — only emit the full document when creating a brand-new plan file.
 - After each edit, re-read the file and verify the intended change actually landed.
 - One attempt = one write/edit operation against the same target plan file in the same run.
-- Stop after 3 failed, blocked, or non-landing attempts on the same target file and report the exact blocker; do not retry with rephrased approaches (mirrors `behavioral-baseline.snippet.md:17-18`).
+- Stop after 3 failed, blocked, or non-landing attempts on the same target file and report the exact blocker; do not retry with rephrased approaches (mirrors `docs/ai/snippets/behavioral-baseline.snippet.md:17-18`).
 - Never re-append a second full copy of the plan to recover from a blocked/failed edit — this is the exact loop this guard exists to prevent.
 
 ## Two-Phase Mode (Parent Tasks First)
