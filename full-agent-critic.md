@@ -12,7 +12,7 @@ token economy). All defects target **template sources** under
 - Average score: **72.4** · Median: **78** · Min: **34** (docs) · Max: **92** (repository-reviewer)
 - Ready-with-fixes: **17** · Blocked: **7**
 - Blocked (initial audit): docs (34), build-config (35), upgrade (38), bugfix (41), agent-fleet-assessor (60), architecture-plan-writer (62), config-maintainer (65)
-- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, architect **94**, agent-fleet-assessor **93**, agent-critic **93**, implementer **92** — all `approve`/`ready`. Remaining 19 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
+- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, architect **94**, agent-fleet-assessor **93**, agent-critic **93**, implementer **92**, reviewer **92** — all `approve`/`ready` except `reviewer`, which still carries one deliberately-open MAJOR (`decision: needs_refactor`; see Re-Audit Updates). Remaining 18 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
 
 ## Re-Audit Updates (post-remediation)
 
@@ -25,8 +25,9 @@ token economy). All defects target **template sources** under
 | architect.md | 88 (ready-with-fixes) | **94** | +6 | ready | **approve** |
 | agent-critic.md | 91 (ready-with-fixes) | **93** | +2 | ready-with-fixes | approve_with_minor_fixes |
 | implementer.md | 84 (ready-with-fixes) | **92** | +8 | approve | **approve** |
+| reviewer.md | 91 (ready-with-fixes) | 86 → 65 → 94 → **92** | +1 (net, 4 rounds) | ready-with-fixes | needs_refactor (unchanged) |
 
-`architecture-plan-writer` was the fleet's lowest non-trivial score and is now near the top (95); decision `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. `agent-critic` gained an ask-gated WebFetch (AI-provider-doc debugging) policy, verified safe and coherent by self-audit. `architect` re-audited on the **canonical source** at 92 (round 1), had three brevity/duplication MINORs applied, and re-scored **94** (round 2, no new findings, `approve`); the fixes were re-rendered to all three adapters (Claude/Copilot/OpenCode), which also cleared the copy-only drift the initial 88 audit saw (garbled handoff line, dead `risk-taxonomy.md` ref, missing non-interactive fallback — none of which were present in the canonical). Its 4th MINOR (removing raw `head`/`tail`/`bat`/`fx`/`glow` readers) is deferred as a generator-managed, fleet-wide permission decision owned by `workflow-auditor`. `agent-fleet-assessor` cleared its original BLOCKER (delegation was structurally unperformable on Claude/Copilot — the frontmatter granted no spawn tool) by moving canonical `permission.task: ask` → `allow`, granting the Claude copy the `Agent` tool, and adding a Copilot `Assess Agent` handoff to `agent-critic`; re-audited on the shipped Claude copy across four rounds (60 → 89 → 93 → 93 → sign-off), fixing each reported MINOR (runtime-relative stop conditions, a Sensitive Files guard, reconciling a missing-score Stop Condition with Reliable Aggregation, trimmed formula prose) until the critic reported "none — ready to sign off". The re-audit also surfaced and fixed a pre-existing `docs/ai/agent-scores.yaml` drift (`risk_level: low` vs. the manifest/frontmatter `medium`) that the frontmatter-drift validator had been failing on; the source, template, and manifest now agree across all 26 templates. Its one deferred item (the fleet-wide `sed -n *` reader, bound by the new Sensitive Files guard) is owned by `workflow-auditor`, same as architect's. All verified against the installed Claude copy; full PHP suite green (902/902).
+`architecture-plan-writer` was the fleet's lowest non-trivial score and is now near the top (95); decision `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. `agent-critic` gained an ask-gated WebFetch (AI-provider-doc debugging) policy, verified safe and coherent by self-audit. `architect` re-audited on the **canonical source** at 92 (round 1), had three brevity/duplication MINORs applied, and re-scored **94** (round 2, no new findings, `approve`); the fixes were re-rendered to all three adapters (Claude/Copilot/OpenCode), which also cleared the copy-only drift the initial 88 audit saw (garbled handoff line, dead `risk-taxonomy.md` ref, missing non-interactive fallback — none of which were present in the canonical). Its 4th MINOR (removing raw `head`/`tail`/`bat`/`fx`/`glow` readers) is deferred as a generator-managed, fleet-wide permission decision owned by `workflow-auditor`. `agent-fleet-assessor` cleared its original BLOCKER (delegation was structurally unperformable on Claude/Copilot — the frontmatter granted no spawn tool) by moving canonical `permission.task: ask` → `allow`, granting the Claude copy the `Agent` tool, and adding a Copilot `Assess Agent` handoff to `agent-critic`; re-audited on the shipped Claude copy across four rounds (60 → 89 → 93 → 93 → sign-off), fixing each reported MINOR (runtime-relative stop conditions, a Sensitive Files guard, reconciling a missing-score Stop Condition with Reliable Aggregation, trimmed formula prose) until the critic reported "none — ready to sign off". The re-audit also surfaced and fixed a pre-existing `docs/ai/agent-scores.yaml` drift (`risk_level: low` vs. the manifest/frontmatter `medium`) that the frontmatter-drift validator had been failing on; the source, template, and manifest now agree across all 26 templates. Its one deferred item (the fleet-wide `sed -n *` reader, bound by the new Sensitive Files guard) is owned by `workflow-auditor`, same as architect's. `reviewer` is the fleet's most contested re-audit: round 1 (91→86 re-baselined against the canonical) found a real MAJOR (`sed -n`/`head`/`tail`/`nl`/`bat` unrestricted, unlike the same-archetype `repository-reviewer`, which already denies them) — fixed via the permission-composition system (new/reused `core.safe_read.deny_sed_n`/`deny_head_tail`/`deny_nl`/`deny_bat` packs, the last also deduplicating an identical inline exception on `architecture-plan-writer`). Round 2 (65, blocked) caught a BLOCKER the round-1 fix itself introduced: a false "preview-file.sh (secret-blocking)" claim in the new Sensitive File Rules section — verified false by grepping the script (no secret-detection logic) and fixed with accurate wording. Round 3 (94) confirmed that clean but surfaced a carried-over MAJOR: the secret-path check is prompt-enforced only, no permission-level backstop. Round 4 (92) added an honest disclosure sentence, but the critic correctly held that disclosure doesn't reclassify an `INSTRUCTION_ONLY` security rule as enforced — **decision stays `needs_refactor`, deliberately not force-closed**, because the only structural fix (path-scoped `deny` entries ahead of `preview-file.sh`'s broad `allow`) depends on OpenCode glob-precedence semantics that are undocumented anywhere in this repo and unverifiable from static analysis; shipping unverified deny entries and calling them a backstop would repeat the exact false-confidence mistake round 2 caught. Recommended next step: `workflow-auditor` verifies OpenCode's actual glob-precedence behavior before any agent's permission block relies on specific-over-broad deny ordering. All verified against the installed Claude copy; full PHP suite green (902/902).
 
 ### Fleet-wide remediation (all 24 templates — fixed, not individually re-scored)
 
@@ -48,7 +49,7 @@ Per-agent architected plans persisted at `docs/tickets/arch-todo-agent-fleet-imp
 | Agent | Score | Readiness | Key Strengths | Key Weaknesses | Top Fix Priority |
 |---|---:|---|---|---|---|
 | repository-reviewer.md | 92 | ready-with-fixes | Clean read-only posture; ai-verify ask/scoped split matches allowlist; full guardrail set | Duplicated query-usage caveat; "next step" names no roster agent | Remove duplicated caveat (line 113) |
-| reviewer.md | 91 | ready-with-fixes | Enforced read-only; duplicate-screening + unknown discipline; valid handoffs | ai-verify absent from allowlist; stale needs_refactor decision; 3 registries cited | Fix stale agent_assessment.decision → approve |
+| reviewer.md | 91 → 86 → 65 → 94 → **92** | ready-with-fixes | Enforced read-only; duplicate-screening + unknown discipline; valid handoffs | _Re-audited 4 rounds: raw-reader secret-exposure MAJOR fixed (permission composition); a false preview-file.sh "secret-blocking" claim (BLOCKER, introduced by the round-1 fix) corrected; one MAJOR deliberately left open — prompt-enforced-only secret-path check has no verified permission backstop_ | workflow-auditor: verify OpenCode glob precedence before any deny-over-allow fix |
 | agent-critic.md | 91 → **93** ⬆ | ready-with-fixes | Correct reviewer archetype; all 8 handoff targets exist; validator allowlist parity; ask-gated WebFetch (provider-doc debugging) policy | _Re-audited: WebFetch policy verified safe + coherent; only a tool-policy.md doc-sync MINOR remains_ | Fleet doc-sync (workflow-auditor) |
 | repository-researcher.md | 89 | ready-with-fixes | Enforced read-only; all 17 scripts exist; conditioned single-target handoffs | pack-context.sh prose vs allowlist gap; no stop/ask condition; duplicated caveat | Reconcile pack-context.sh prose vs allowlist |
 | architect.md | 88 → **94** ⬆ | ready-with-fixes → **ready** | Clean deny-by-default; mandatory plan-writer handoff; strong AC discipline | _Re-audited (88→92→94): garbled handoff, dead doc ref, and non-interactive fallback resolved by re-render; three brevity/duplication MINORs applied; only deferred fleet-wide raw-reader removal remains_ | — (approve) |
@@ -93,7 +94,53 @@ Top fix: remove duplicated query-usage.sh caveat (line 113).
 Proposed: risk_level: high, decision: approve (upgrades from current needs_refactor).
 Template: packages/ai-universal-rules/templates/core/agents/repository-reviewer.md.
 
-## reviewer.md — 91 / ready-with-fixes
+## reviewer.md — 91 / ready-with-fixes (re-audited: 86 → 65/blocked → 94 → 92, needs_refactor)
+
+> **Post-remediation (2026-07-07):** re-audited across 4 rounds against the canonical, ending at
+> **92/ready-with-fixes** with `decision: needs_refactor` deliberately unchanged — this is the one
+> fleet-critic agent whose re-audit did **not** land on `approve`.
+>
+> Round 1 (re-baselined 91→86 against the canonical, not this stale-91 snapshot): confirmed MAJOR —
+> `sed -n`/`head`/`tail`/`nl`/`bat` were unrestricted raw readers that could print secret files,
+> guarded only by generic prose, while the same-archetype `repository-reviewer.md` already denies
+> exactly these five. Fixed via the permission-composition system, not hand-edited YAML: reused
+> `core.safe_read.deny_sed_n`/`deny_head_tail`/`deny_nl`, and extracted a new
+> `core.safe_read.deny_bat` atomic pack (also applied to `architecture-plan-writer`, deduplicating an
+> identical inline exception the test suite's `testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents`
+> caught). Regenerated via `generate-agent-permissions.php --write`; all 5 commands now fall through
+> to the `'*': deny` floor. Added a body "## Sensitive File Rules" section. Also fixed the stale
+> `needs_refactor` decision's underlying MINORs (documented the previously-unexplained `task: ask`
+> grant, trimmed a dead sentence) — the ai-verify-allowlist MINOR was already resolved before this
+> round.
+>
+> Round 2 (65, blocked): the new Sensitive File Rules text itself claimed `preview-file.sh` is
+> "secret-blocking" — verified **false** by grepping the script (zero secret-detection logic, only
+> `.git/` internals + binary + byte-size gates). Fixed by rewriting the claim accurately. Adding the
+> new section had also pushed the rendered Copilot copy to 303/300 lines, failing 3
+> `ShipReferenceIntegrityTest` cases; fixed by pure text compression (merged paragraphs, collapsed a
+> pre-existing word-wrapped paragraph) with zero content loss — Copilot render holds at 296/300.
+>
+> Round 3 (94): confirmed the BLOCKER fix clean, no new issues, but surfaced a **carried-over MAJOR**:
+> the secret-path check is prompt-enforced only, with no permission-level backstop (`preview-file.sh`
+> is still an unconditional `allow`).
+>
+> Round 4 (92): added an honest disclosure sentence for the open MAJOR plus fixed two vague-word
+> MINORs ("relevant" → concrete triggers). The critic held that disclosure does not reclassify an
+> `INSTRUCTION_ONLY` security rule as enforced, so **the MAJOR stays open and `decision` stays
+> `needs_refactor`** — deliberately not force-closed. The only structural fix (path-scoped `deny`
+> entries ahead of `preview-file.sh`'s broad `allow`) depends on OpenCode glob-precedence semantics
+> that are undocumented anywhere in this repo (confirmed: no `docs/ai/*.md` documents it, and the only
+> related enforcement engine found — `tools/ai/compile-command-policy.php` — is a separate tiered
+> command-policy compiler, not this per-agent `permission.bash` map) and unverifiable from static
+> analysis alone. Shipping unverified deny entries and calling them a backstop would repeat the exact
+> false-confidence mistake round 2 caught. `docs/ai/agent-scores.yaml`'s rationale was refreshed to
+> record this as the current basis (was stale, referencing pre-fix reasoning).
+>
+> Recommended next step (not actioned): `workflow-auditor` verifies OpenCode's actual glob-precedence
+> behavior before any agent's permission block relies on specific-over-broad deny ordering.
+> Verification: `generate-agent-permissions --check` in sync; all 4 assessment/drift validators OK;
+> `validate-install-surface --strict` passes; full PHPUnit suite 902 passed / 5 skipped / 0 failed.
+> Commits `ca0e559` (fix) + `10c9244` (unrelated catalog catch-up surfaced by the same test run).
 
 Score table: Frontmatter 95, Role 95, Permission 85, Instruction 90, Handoff 95,
 Evidence 95, Brevity 85, Runtime 95. Total 91.25 → 91. No BLOCKER, no cap.
