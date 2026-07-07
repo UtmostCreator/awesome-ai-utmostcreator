@@ -61,7 +61,7 @@ Runtime limitation notes (no false parity):
   `docs/ai/execution-protocol.md` / `.github/instructions/execution-protocol.instructions.md`
   and `docs/ai/workflow.md` respectively, since their content was a verbatim restatement
   of those `**`-scoped surfaces. No bullet cited by this matrix as a Copilot coverage
-  owner (Behavioral Baseline, Hard Stops, Limits, the `<APPROVAL_REQUIRED_CHANGES>`
+  owner (Behavioral Baseline, Hard Stops, Limits, the `secrets, destructive changes, auth or billing changes`
   placeholder) was touched. The rendered `.github/copilot-instructions.md` was hand-edited
   to match, same approved approach as Phase 0-2 and Phase 3.1 (installer render cannot
   regenerate it without an unrelated blast radius on other pending working-tree files);
@@ -90,7 +90,7 @@ Runtime limitation notes (no false parity):
 | Runtime | Structured handoff metadata | Prose fallback (always present) |
 |---|---|---|
 | Copilot (VS Code custom agents, `.github/agents/*.agent.md`) | `handoffs:` frontmatter array (`label`, `agent`, `prompt`, `send`, `model`) — verified against VS Code's Custom Agents documentation (fetched 2026-07-04); renders a clickable handoff button after a chat response | `docs/ai/handoff-contract.md` "Recommended next step" sentence |
-| OpenCode (`.opencode/agents/*.md`, `.opencode/commands/*.md`) | none found in this repo's rendered agent/command frontmatter or in OpenCode's own schema; not shipped | same prose sentence, for example `implementer means implementer agent handoff using OpenCode command: /implement` |
+| OpenCode (`.opencode/agents/*.md`, `.opencode/commands/*.md`) | none found in this repo's rendered agent/command frontmatter or in OpenCode's own schema; not shipped | same prose sentence, for example `implementer means implementer agent handoff` |
 | Claude (`CLAUDE.md`, `.claude/agents/*.md` — rendered by the Claude adapter parity plan, `docs/tickets/arch-todo-claude-code-adapter-parity-20260704-120000`) | none — Claude Code's own sub-agent documentation (fetched 2026-07-04 from docs.anthropic.com) lists frontmatter fields `name`/`description`/`tools`/`disallowedTools`/`model`/`permissionMode`/`hooks`/`skills`, no handoffs field | same prose sentence, routed through `CLAUDE.md` and preserved verbatim in each rendered agent's body (carried through unchanged from the canonical source by `tools/ai/install/claude-agent-renderer.php`) |
 
 Fallback rule (Chunk 5 / C-5): the prose "Recommended next step" sentence in

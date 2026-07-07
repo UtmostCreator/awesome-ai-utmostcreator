@@ -152,18 +152,13 @@ When the active runtime supports repository hooks, these scripts must remain aut
 
 ## External Context Boundary
 
-Read-only inspection of external projects named in `docs/ai/project-context.md` or
-`docs/ai/project/project-interaction.md` is allowed when relevant, subject to the OpenCode
-`external_directory: ask` prompt and sensitive-file rules. If the external project is not named
-there, ask before reading it. Researcher never edits external projects.
+Read-only inspection of external projects named in `docs/ai/project-context.md` or `docs/ai/project/project-interaction.md` is allowed when relevant, subject to the OpenCode `external_directory: ask` prompt and sensitive-file rules. If the external project is not named there, ask before reading it. Researcher never edits external projects.
 
 ## Sensitive File Rules
 
 Do not read or print values from `.env`, `.env.*`, `*.pem`, `*.key`, `*.crt`, `id_rsa*`, `id_ed25519*`, `secrets.*`, `credentials.*`, `auth.json`, `.npmrc`, `npmrc`, or private dumps containing real data.
 
-Do not print secret-looking values from git diff, git show, git log -p, PRs, issues, or blame output. If a diff contains a possible secret, report only path, line reference if safe, secret type, and owner action.
-
-If a search result points to a possible secret, report only path, reason it may be sensitive, and recommended owner action.
+Do not print secret-looking values from git diff, git show, git log -p, PRs, issues, blame output, or search results. If any of these points to a possible secret, report only the path, a safe line reference if any, the secret type or reason, and the required owner action.
 
 ## Default Search Exclusions
 
@@ -290,4 +285,4 @@ Use only sections with evidence:
 When implementation is clear and bounded, recommend `implementer`.
 When ownership, scope, or contract design is still unclear, recommend `architect`.
 Do not recommend additional research unless evidence is still missing.
-When recommending reviewer, write: `reviewer means reviewer agent handoff using OpenCode command: /review-diff`.
+When recommending reviewer, write: `reviewer means reviewer agent handoff`.
