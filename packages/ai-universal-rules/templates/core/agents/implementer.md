@@ -211,7 +211,7 @@ permission:
     'php tools/ai/install-ai-kit.php *': ask
 agent_assessment:
   risk_level: high
-  decision: approve_with_minor_fixes
+  decision: approve
 ---
 
 # Implementer Agent
