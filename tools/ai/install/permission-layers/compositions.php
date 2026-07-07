@@ -130,7 +130,21 @@ function aiPermissionAgentCompositions(): array
             // AgentPermissionPolicyTest::testReviewerAgentsAllowReadOnlyReviewGitWithoutBroadBranchMutation
             // forbids broad 'git branch*' for reviewer-class agents (destructive branch
             // deletion risk); tighten via a pack pair, then reopen the narrow sub-patterns.
-            denyPacks: ['core.safe_read.deny_common_generics', 'git.branch_wildcard_deny'],
+            // Agent-critic MAJOR (2026-07-07): sed -n/head/tail/nl/bat are unrestricted raw
+            // readers with no enumerated-secret guard, while preview-file.sh (secret-blocking)
+            // is already granted; repository-reviewer — the same review archetype — already
+            // denies exactly these five. Reuse its atomic packs (deny_sed_n/deny_head_tail/
+            // deny_nl/deny_bat) rather than the much broader deny_script_first_generics bundle
+            // repository-reviewer uses, which would also strip reviewer's wc/sort/jq/yq/
+            // git-branch-narrow-read/ai.php/lychee/actionlint/shellcheck grants it still needs.
+            denyPacks: [
+                'core.safe_read.deny_common_generics',
+                'git.branch_wildcard_deny',
+                'core.safe_read.deny_sed_n',
+                'core.safe_read.deny_head_tail',
+                'core.safe_read.deny_nl',
+                'core.safe_read.deny_bat',
+            ],
             allowPacks: [
                 'verify.test_probes',
                 'verify.install_coverage_allow',
@@ -264,6 +278,8 @@ function aiPermissionAgentCompositions(): array
                 'core.safe_read.deny_jq_yq',
                 // Shared with post-install (head/tail); same no-askPacks reasoning.
                 'core.safe_read.deny_head_tail',
+                // Shared with reviewer (bat) — extracted from a duplicated inline exception.
+                'core.safe_read.deny_bat',
                 // Combo pack also denies date* (this agent wants date* allowed) — reopened
                 // via an exception below (exceptions apply after deny_packs, later wins).
                 'core.safe_read.deny_common_generics',
@@ -281,7 +297,6 @@ function aiPermissionAgentCompositions(): array
                 aiPermissionBashDeny('scc *'),
                 aiPermissionBashDeny('tokei *'),
                 aiPermissionBashDeny('ast-grep *'),
-                aiPermissionBashDeny('bat *'),
                 aiPermissionBashDeny('fx *'),
                 aiPermissionBashDeny('glow *'),
                 aiPermissionBashDeny('difft *'),

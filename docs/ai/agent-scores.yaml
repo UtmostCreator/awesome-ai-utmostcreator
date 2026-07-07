@@ -137,7 +137,7 @@ agents:
     agent_assessment:
       risk_level: high
       decision: needs_refactor
-    rationale: "Requires git/script review flow; rendered surface posture must match. Manifest risk: high."
+    rationale: "Requires git/script review flow; rendered surface posture must match. Manifest risk: high. Re-audited 2026-07-07 (86->65/blocked->94->92): raw-reader secret-exposure MAJOR fixed via permission composition (sed-n/head/tail/nl/bat denied), a false preview-file.sh secret-blocking claim (BLOCKER) fixed with an honest disclosure. One MAJOR remains open: the Sensitive File Rules secret-path check is prompt-enforced only, with no verified permission-level backstop — closing it needs OpenCode glob-precedence semantics verified first (workflow-auditor), not a speculative frontmatter change."
   ui-builder:
     agent_assessment:
       risk_level: high
