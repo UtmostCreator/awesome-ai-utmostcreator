@@ -12,7 +12,7 @@ token economy). All defects target **template sources** under
 - Average score: **72.4** · Median: **78** · Min: **34** (docs) · Max: **92** (repository-reviewer)
 - Ready-with-fixes: **17** · Blocked: **7**
 - Blocked (initial audit): docs (34), build-config (35), upgrade (38), bugfix (41), agent-fleet-assessor (60), architecture-plan-writer (62), config-maintainer (65)
-- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, agent-critic **93**, implementer **92** — all `approve`/`ready`. Remaining 21 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
+- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, architect **94**, agent-critic **93**, implementer **92** — all `approve`/`ready`. Remaining 20 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
 
 ## Re-Audit Updates (post-remediation)
 
@@ -21,10 +21,11 @@ token economy). All defects target **template sources** under
 | Agent | Original | Re-audit | Δ | New readiness | Decision |
 |---|---:|---:|---:|---|---|
 | architecture-plan-writer.md | 62 (blocked) | **95** | +33 | ready | **approve** |
+| architect.md | 88 (ready-with-fixes) | **94** | +6 | ready | **approve** |
 | agent-critic.md | 91 (ready-with-fixes) | **93** | +2 | ready-with-fixes | approve_with_minor_fixes |
 | implementer.md | 84 (ready-with-fixes) | **92** | +8 | approve | **approve** |
 
-`architecture-plan-writer` was the fleet's lowest non-trivial score and is now near the top (95); decision `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. `agent-critic` gained an ask-gated WebFetch (AI-provider-doc debugging) policy, verified safe and coherent by self-audit. All verified against the installed Claude copy; full PHP suite green (902/902).
+`architecture-plan-writer` was the fleet's lowest non-trivial score and is now near the top (95); decision `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. `agent-critic` gained an ask-gated WebFetch (AI-provider-doc debugging) policy, verified safe and coherent by self-audit. `architect` re-audited on the **canonical source** at 92 (round 1), had three brevity/duplication MINORs applied, and re-scored **94** (round 2, no new findings, `approve`); the fixes were re-rendered to all three adapters (Claude/Copilot/OpenCode), which also cleared the copy-only drift the initial 88 audit saw (garbled handoff line, dead `risk-taxonomy.md` ref, missing non-interactive fallback — none of which were present in the canonical). Its 4th MINOR (removing raw `head`/`tail`/`bat`/`fx`/`glow` readers) is deferred as a generator-managed, fleet-wide permission decision owned by `workflow-auditor`. All verified against the installed Claude copy; full PHP suite green (902/902).
 
 ### Fleet-wide remediation (all 24 templates — fixed, not individually re-scored)
 
@@ -49,7 +50,7 @@ Per-agent architected plans persisted at `docs/tickets/arch-todo-agent-fleet-imp
 | reviewer.md | 91 | ready-with-fixes | Enforced read-only; duplicate-screening + unknown discipline; valid handoffs | ai-verify absent from allowlist; stale needs_refactor decision; 3 registries cited | Fix stale agent_assessment.decision → approve |
 | agent-critic.md | 91 → **93** ⬆ | ready-with-fixes | Correct reviewer archetype; all 8 handoff targets exist; validator allowlist parity; ask-gated WebFetch (provider-doc debugging) policy | _Re-audited: WebFetch policy verified safe + coherent; only a tool-policy.md doc-sync MINOR remains_ | Fleet doc-sync (workflow-auditor) |
 | repository-researcher.md | 89 | ready-with-fixes | Enforced read-only; all 17 scripts exist; conditioned single-target handoffs | pack-context.sh prose vs allowlist gap; no stop/ask condition; duplicated caveat | Reconcile pack-context.sh prose vs allowlist |
-| architect.md | 88 | ready-with-fixes | Clean deny-by-default; mandatory plan-writer handoff; strong AC discipline | Garbled routing sentence; dead risk-taxonomy.md ref; no non-interactive fallback | Fix garbled routing sentence + broken doc ref |
+| architect.md | 88 → **94** ⬆ | ready-with-fixes → **ready** | Clean deny-by-default; mandatory plan-writer handoff; strong AC discipline | _Re-audited (88→92→94): garbled handoff, dead doc ref, and non-interactive fallback resolved by re-render; three brevity/duplication MINORs applied; only deferred fleet-wide raw-reader removal remains_ | — (approve) |
 | agent-creator-static-validator.md | 86 | ready-with-fixes | Deterministic gate discipline; clean validator posture; exit-code semantics | No route for exit-2 / non-tool agent; broad raw readers; wrong template-tier header | Add exit-2 + non-tool-agent handoff branches |
 | implementer.md | 84 → **92** ⬆ | ready-with-fixes → **approve** | Strong evidence discipline; complete handoff routing; full safety guards | _Re-audited: all findings resolved (Script Access reconciliation, agnostic prose, external_directory neutralized)_ | — (approve) |
 | release-auditor.md | 84 | ready-with-fixes | Coherent read-only posture; valid handoffs; strong unknown discipline | ai-verify allowlist gap; broad head/tail/bat readers; prose-only secret guard | Fix ai-verify prose/allowlist mismatch |
@@ -137,7 +138,20 @@ all 17 body-referenced scripts exist; all three handoff targets exist (implement
 Top fix: reconcile pack-context.sh prose-vs-approved-list mismatch.
 Proposed: risk_level: low, decision: approve_with_minor_fixes. Template: core/agents/repository-researcher.md.
 
-## architect.md — 88 / ready-with-fixes
+## architect.md — 88 → 94 / ready (re-audited)
+
+> **Post-remediation (2026-07-07):** re-audited on the canonical source and re-rendered to all
+> three adapters. Round 1 (canonical) **92**; three brevity/duplication MINORs applied; round 2
+> **94**, no new findings, `approve`. The three initial-audit findings below were **copy-only
+> drift** — the canonical source never carried them; re-rendering the shipped adapters cleared
+> them: garbled routing sentence → clean prose, `risk-taxonomy.md` → `command-risk-taxonomy.md`,
+> non-interactive fallback sentence restored. Applied brevity MINORs: "what is relevant" → "what
+> the current design touches"; Required Flow step 6 collapsed to reference Acceptance Criteria
+> Discipline; step 8 restated clarification clause → "stop per Instruction Specificity (…)". The
+> 4th MINOR (remove raw `head`/`tail`/`bat`/`fx`/`glow` readers) is **deferred** — a
+> generator-managed, fleet-wide permission decision owned by `workflow-auditor`, not
+> architect-local. Verification: `generate-agent-permissions.php --check` in sync; full PHPUnit
+> suite 902 passed / 5 skipped / 0 failed. Commit `bd935e9`.
 
 Score table: Frontmatter 92, Role 95, Permission 88, Instruction 85, Handoff 90,
 Evidence 90, Brevity 82, Runtime 82. Total 88.7 → 88. validate-agent-assessment.php PASSED.
