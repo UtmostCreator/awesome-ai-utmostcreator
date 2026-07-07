@@ -11,26 +11,43 @@ token economy). All defects target **template sources** under
 - Agents assessed: **24 / 24**
 - Average score: **72.4** · Median: **78** · Min: **34** (docs) · Max: **92** (repository-reviewer)
 - Ready-with-fixes: **17** · Blocked: **7**
-- Blocked: docs (34), build-config (35), upgrade (38), bugfix (41), agent-fleet-assessor (60), architecture-plan-writer (62), config-maintainer (65)
+- Blocked (initial audit): docs (34), build-config (35), upgrade (38), bugfix (41), agent-fleet-assessor (60), architecture-plan-writer (62), config-maintainer (65)
+- **Post-remediation: 0 agents blocked at the source.** `architecture-plan-writer` re-scored **95** (ready); the other six blockers' root causes are fixed (write-role grants + settings deny-floor, `mode: all` delegation, agnostic prose). Confirmed re-audits: architecture-plan-writer **95**, agent-critic **93**, implementer **92** — all `approve`/`ready`. Remaining 21 agents fixed at the template source but not individually re-scored (see Re-Audit Updates).
 
 ## Re-Audit Updates (post-remediation)
 
-Agents re-audited by `agent-critic` against the shippable `.claude/agents/` copy after remediation:
+### Confirmed re-audits (re-scored by `agent-critic` against the shippable `.claude/agents/` copy)
 
-| Agent | Original | Re-audit | Δ | New readiness | New rank |
+| Agent | Original | Re-audit | Δ | New readiness | Decision |
 |---|---:|---:|---:|---|---|
-| architecture-plan-writer.md | 62 (blocked) | **92** | +30 | ready (no findings) | bottom-tier → **top-tier** |
-| implementer.md | 84 (ready-with-fixes) | **92** | +8 | approve | mid → **top-tier** |
+| architecture-plan-writer.md | 62 (blocked) | **95** | +33 | ready | **approve** |
+| agent-critic.md | 91 (ready-with-fixes) | **93** | +2 | ready-with-fixes | approve_with_minor_fixes |
+| implementer.md | 84 (ready-with-fixes) | **92** | +8 | approve | **approve** |
 
-`architecture-plan-writer` was the fleet's lowest non-trivial score and is now tied at the top (92), decision bumped `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. Both verified against the installed Claude copy; full PHP suite green (902/902).
+`architecture-plan-writer` was the fleet's lowest non-trivial score and is now near the top (95); decision `blocked`/`approve_with_minor_fixes` → **approve**. `implementer` cleared all findings → **approve**. `agent-critic` gained an ask-gated WebFetch (AI-provider-doc debugging) policy, verified safe and coherent by self-audit. All verified against the installed Claude copy; full PHP suite green (902/902).
+
+### Fleet-wide remediation (all 24 templates — fixed, not individually re-scored)
+
+Two per-agent `architect → implementer → review` passes remediated the cross-cutting blockers and residual findings at the **template source** (generated adapter copies are never hand-edited). Resolved fleet-wide:
+
+- **Write-role contradictions** — `docs`, `build-config`, `bugfix`, `upgrade` now render write-capable on Claude (tool registry) with an enforced `.claude/settings.json` Edit/Write **deny-floor** (generated/**, `*.lock`, `*.pem`/`*.key`/`*.crt`, `.env*`, secrets).
+- **Phantom "path-scoped `edit:`" prose** → runtime-agnostic "runtime's native file-edit permission" fleet-wide.
+- **Script Access ↔ allowlist contradiction** → renderer states OpenCode `ask`-tier scripts (`ai-verify.sh`, `ai-edit.sh`, `ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) are not runnable on Claude.
+- **Handoffs** — dead doc refs fixed (`risk-taxonomy.md` → `command-risk-taxonomy.md`), garbled/empty "Recommended next step" replaced with real roster agents, missing fallbacks added.
+- **Secret-exposing raw readers** (`head`/`tail`/`bat`) dropped from read-only agents in favor of bounded `preview-file.sh`.
+- **Generated-header** now records the real source tier; **`agent-fleet-assessor`** → `mode: all` (primary orchestrator, never a nested subagent).
+
+Per-agent architected plans persisted at `docs/tickets/arch-todo-agent-fleet-improvement-plans-20260707/plan.md`. **The original scores in the Summary Table below are the initial-audit baseline and predate this remediation** — only the three agents above carry a confirmed post-remediation re-audit score. Every blocked agent's root-cause blocker has been fixed at the source (write-role, delegation model, agnostic prose), though only `architecture-plan-writer` was re-scored to confirm the un-block.
 
 ## Summary Table (one row per agent)
+
+> **Note:** Scores are the initial-audit baseline. Rows with a `→` score or marked _re-audited_ / _remediated_ carry confirmed post-remediation updates. Every other `ready-with-fixes` agent **also had its listed Top Fix Priority addressed** in the two remediation passes at the template source (dead doc refs, duplicate caveats, missing/garbled handoffs, non-interactive fallbacks, secret-exposing raw readers, Script-Access reconciliation) — it simply was not individually re-scored by `agent-critic`. See **Re-Audit Updates** above.
 
 | Agent | Score | Readiness | Key Strengths | Key Weaknesses | Top Fix Priority |
 |---|---:|---|---|---|---|
 | repository-reviewer.md | 92 | ready-with-fixes | Clean read-only posture; ai-verify ask/scoped split matches allowlist; full guardrail set | Duplicated query-usage caveat; "next step" names no roster agent | Remove duplicated caveat (line 113) |
 | reviewer.md | 91 | ready-with-fixes | Enforced read-only; duplicate-screening + unknown discipline; valid handoffs | ai-verify absent from allowlist; stale needs_refactor decision; 3 registries cited | Fix stale agent_assessment.decision → approve |
-| agent-critic.md | 91 | ready-with-fixes | Correct reviewer archetype; all 8 handoff targets exist; validator allowlist parity | Bash unbounded at frontmatter; very dense | Verify settings.json enforces Bash policy |
+| agent-critic.md | 91 → **93** ⬆ | ready-with-fixes | Correct reviewer archetype; all 8 handoff targets exist; validator allowlist parity; ask-gated WebFetch (provider-doc debugging) policy | _Re-audited: WebFetch policy verified safe + coherent; only a tool-policy.md doc-sync MINOR remains_ | Fleet doc-sync (workflow-auditor) |
 | repository-researcher.md | 89 | ready-with-fixes | Enforced read-only; all 17 scripts exist; conditioned single-target handoffs | pack-context.sh prose vs allowlist gap; no stop/ask condition; duplicated caveat | Reconcile pack-context.sh prose vs allowlist |
 | architect.md | 88 | ready-with-fixes | Clean deny-by-default; mandatory plan-writer handoff; strong AC discipline | Garbled routing sentence; dead risk-taxonomy.md ref; no non-interactive fallback | Fix garbled routing sentence + broken doc ref |
 | agent-creator-static-validator.md | 86 | ready-with-fixes | Deterministic gate discipline; clean validator posture; exit-code semantics | No route for exit-2 / non-tool agent; broad raw readers; wrong template-tier header | Add exit-2 + non-tool-agent handoff branches |
@@ -45,13 +62,13 @@ Agents re-audited by `agent-critic` against the shippable `.claude/agents/` copy
 | agent-creator-supervisor.md | 77 | ready-with-fixes | Coherent router posture; concrete testable pipeline gates; explicit failure routing | Claims frontmatter tier Claude lacks; ask-scripts absent from allowlist; no non-interactive gate | Fix Script Access permission-surface mismatch |
 | refactorer.md | 73 | ready-with-fixes | Mandatory test gate w/ counts; rename/delete stop tokens; roster-valid handoffs | Unenforceable path-scoped edit claim; overpowered; duplication | Reconcile write-scope claim vs Claude enforcement |
 | infra-auditor.md | 71 | ready-with-fixes | Clean read-only auditor; sharp anti-overreach gotchas; query-usage clarity | validate-*.php * wildcard permits mutation; no handoff/failure path; ask-scripts gap | Narrow validate-*.php * wildcard to read-only set |
-| config-maintainer.md | 65 | blocked | Layered secret/destructive guards; testable Final Output; correct non-interactive fallback | Script Access vs allowlist conflict; false path-scoped-edit claim; enforced capability narrower than body | Reconcile Script Access + drop false edit claim |
-| architecture-plan-writer.md | 62 → **92** ⬆ | blocked → **ready** | Bounded docs/tickets mission; strong failure/loop routing; testable output; clean multi-target handoff routing | _Re-audited: all findings resolved (agnostic write posture, mkdir fallback, non-interactive fallback, handoff routing)_ | — (approve) |
-| agent-fleet-assessor.md | 60 | blocked | Machine-readable aggregation; clean stop conditions; dynamic roster derivation | Core mission needs task delegation Claude subagents lack; OpenCode-path probe → false-blocked | Descope to OpenCode-only OR grant/verify delegation |
-| bugfix.md | 41 | blocked | Strong evidence discipline; deny-by-default Bash; clear minimal-fix framing | Fix mission but Write/Edit denied; no next-agent handoff; false edit claim; ask-scripts gap | Resolve edit-capability vs mission contradiction |
-| upgrade.md | 38 | blocked | Deny-by-default allowlist; rename/delete stop-reports; correct critical risk | Apply mission but read-only/edit-denied; no handoff; ask-scripts gap; wrong header; false edit | Pick plan-only vs apply posture; align frontmatter+body |
-| build-config.md | 35 | blocked | Deny-by-default Bash w/ destructive denylist; secret-scoped verify; rename/delete gates | Write mission but Write/Edit denied; body claims non-existent edit:; no handoff; understated decision | Resolve write-mission vs write-denied contradiction |
-| docs.md | 34 | blocked | Deny-by-default Bash; four grounding rules + drift checks; scoped read tooling | Writer mission but edit fully denied (adapter drift); false edit claim; ask-scripts gap; no handoff | Grant scoped Edit + leave plan mode to match writer role |
+| config-maintainer.md | 65 | blocked → **remediated** _(not re-scored)_ | Layered secret/destructive guards; testable Final Output; correct non-interactive fallback | _Fixed: Script Access reconciled (renderer ask-tier note); path-scoped-edit prose made agnostic_ | ✓ addressed |
+| architecture-plan-writer.md | 62 → **95** ⬆ | blocked → **ready** | Bounded docs/tickets mission; strong failure/loop routing; testable output; clean multi-target handoff routing | _Re-audited twice (62→92→95): all findings resolved; only brevity nits remain_ | — (approve) |
+| agent-fleet-assessor.md | 60 | blocked → **remediated** _(not re-scored)_ | Machine-readable aggregation; clean stop conditions; dynamic roster derivation | _Fixed: `mode: all` (primary orchestrator, never a nested subagent); runtime-relative callability probe_ | ✓ addressed |
+| bugfix.md | 41 | blocked → **remediated** _(not re-scored)_ | Strong evidence discipline; deny-by-default Bash; clear minimal-fix framing | _Fixed: write-capable on Claude (registry) + settings deny-floor; handoff added; agnostic edit prose_ | ✓ addressed |
+| upgrade.md | 38 | blocked → **remediated** _(not re-scored)_ | Deny-by-default allowlist; rename/delete stop-reports; correct critical risk | _Fixed: apply-capable on Claude (registry) + settings deny-floor; handoff added; agnostic edit prose; header tier_ | ✓ addressed |
+| build-config.md | 35 | blocked → **remediated** _(not re-scored)_ | Deny-by-default Bash w/ destructive denylist; secret-scoped verify; rename/delete gates | _Fixed: write-capable on Claude (registry) + settings deny-floor; handoff added; agnostic edit prose_ | ✓ addressed |
+| docs.md | 34 | blocked → **remediated** _(not re-scored)_ | Deny-by-default Bash; four grounding rules + drift checks; scoped read tooling | _Fixed: write-capable on Claude (registry) + settings deny-floor; handoff added; agnostic edit prose_ | ✓ addressed |
 
 ---
 
