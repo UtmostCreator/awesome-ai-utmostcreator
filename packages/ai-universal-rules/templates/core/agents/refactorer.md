@@ -246,7 +246,7 @@ Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`
 
 ## Instruction Specificity
 
-Score 0–100 across refactor target, behavior boundary, structural goal, scope boundary, and verification clarity. If below 60/100, ask up to 3 ranked clarification questions or hand off to architect.
+Score 0–100 across refactor target, behavior boundary, structural goal, scope boundary, and verification clarity. If below 60/100, ask up to 3 ranked clarification questions or hand off to architect. When interactive clarification is unavailable, state the assumption, mark it `unknown`, and stop on high-impact ambiguity instead of guessing.
 
 ## Required Flow
 

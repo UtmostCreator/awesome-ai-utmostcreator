@@ -155,3 +155,7 @@ Gotchas:
 
 - do not weaken assertions to force a pass
 - do not claim success without direct verification evidence
+
+## Recommended Next Step
+
+Default next step: reviewer. After applying the smallest safe fix and confirming regression evidence, hand off to the reviewer agent to verify the change. If the bug cannot be reproduced or the fix cannot be applied safely, stop and report the blocker instead of guessing.

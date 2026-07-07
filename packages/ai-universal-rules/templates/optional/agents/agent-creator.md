@@ -102,4 +102,4 @@ Return the AgentSpec JSON, then a one-line note of which fields were inferred vs
 
 ## Recommended Next Step
 
-Hand the spec to the supervisor for Static Validator review. If a required detail is missing, next step is user.
+Hand the spec to the supervisor for Static Validator review. If the Static Validator rejects the spec, revise and re-emit exactly one corrected AgentSpec JSON. If a required detail is missing, next step is user.

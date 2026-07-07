@@ -76,14 +76,19 @@ On Claude, interactive `ask` is unavailable: state the assumption "batch delegat
 
 ## agent-critic Dependency
 
-This orchestrator cannot score anything itself; it depends on `agent-critic`. Before building the roster, confirm `agent-critic` is callable, not merely present as a template:
+This orchestrator cannot score anything itself; it depends on `agent-critic`. Before building the roster, confirm `agent-critic` is callable on the current runtime, not merely present as a template. Probe the runtime's callable-agent directory, and — where the runtime keeps a separate optional/not-yet-promoted pool — its optional directory. The exact paths are runtime-relative, for example:
 
 ```text
+# OpenCode: callable roster + optional pool
 ls .opencode/agents/
 ls .opencode/agents-optional/
+# Claude: callable roster
+ls .claude/agents/
+# Copilot: callable roster
+ls .github/agents/
 ```
 
-`agent-critic` ships as an optional agent. A file under `.opencode/agents-optional/agent-critic.md` is installed but NOT runtime-callable until promoted into `.opencode/agents/`. If `agent-critic` is absent from the callable roster, stop with `blocked: agent-critic unavailable` and name the promotion step (`move .opencode/agents-optional/agent-critic.md into .opencode/agents/`). Do not attempt to critique files yourself as a fallback.
+`agent-critic` ships as an optional agent. On runtimes that use a promotion model, a file that sits only in the optional pool (for example `.opencode/agents-optional/agent-critic.md`) is installed but NOT runtime-callable until promoted into the callable directory (for example `.opencode/agents/`); runtimes without an optional pool make it callable as soon as it is installed in their agent directory. If `agent-critic` is absent from the current runtime's callable roster, stop with `blocked: agent-critic unavailable` and name the runtime-appropriate promotion or install step (for OpenCode, `move .opencode/agents-optional/agent-critic.md into .opencode/agents/`). Do not attempt to critique files yourself as a fallback.
 
 ## Required Inputs
 

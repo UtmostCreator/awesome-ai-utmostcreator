@@ -116,4 +116,4 @@ PASS (static) | FAIL (static)
 ## Recommended Next Step
 ```
 
-On FAIL, next step is agent-creator. On PASS with a tool-using agent, next step is agent-creator-semantic-verifier.
+On FAIL (exit 1), next step is agent-creator to fix the violations. On exit 2 (usage/IO error), next step is agent-creator to correct the spec path or malformed JSON. On PASS (exit 0) for a tool-using agent, next step is agent-creator-semantic-verifier; on PASS for a non-tool agent, next step is agent-creator-supervisor.

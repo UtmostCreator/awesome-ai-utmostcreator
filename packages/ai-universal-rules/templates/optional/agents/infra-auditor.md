@@ -99,3 +99,7 @@ Gotchas:
 
 - do not present advisory risk as if it were a confirmed production incident
 - do not recommend wider rollout without matching verification evidence
+
+## Recommended Next Step
+
+This role is advisory: it reports risk, it does not apply fixes. If rollout, rollback, migration, or release-safety posture must be gated, next step is `release-auditor`. If the audit surfaced a required change, next step is the matching write agent (`upgrade` for dependency or version changes, `build-config` for build or release configuration, otherwise `implementer`). If evidence is insufficient or a requested verification probe cannot complete, do not issue a pass: stop and report `blocked`, naming the exact missing evidence or failing check rather than asserting a clean result.
