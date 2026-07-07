@@ -100,15 +100,47 @@ function aiInstallerRenderClaudeAgent(string $srcContent, string $agentId, strin
 /**
  * Copies the source agents directory to dest, rendering each .md file as a Claude sub-agent.
  *
- * Single-writer variant only (identity filenames, no merge-into-existing path). This program
- * defers an optional-agents-claude-pack (the dual-writer case Copilot handles via
- * aiInstallerMergeDirAsCopilotAgents) — see the Claude adapter parity plan's Non-Goals.
+ * Base-writer variant (identity filenames, refresh-in-place for the core adapter-claude pack).
+ * The dual-writer case (optional-agents-claude-pack merging into the same dir) routes through
+ * aiInstallerMergeDirAsClaudeAgents instead — mirroring the Copilot pair
+ * aiInstallerCopyDirAsCopilotAgents / aiInstallerMergeDirAsCopilotAgents.
  *
  * @param string $src         Absolute path to source agents dir (OpenCode templates)
  * @param string $dest        Absolute path to destination dir (.claude/agents)
  * @param string $scriptsRoot Absolute path to scripts/ai/ in the target repo
  */
 function aiInstallerCopyDirAsClaudeAgents(string $src, string $dest, string $scriptsRoot): void
+{
+    aiInstallerRenderClaudeAgentsInto($src, $dest, $scriptsRoot, false);
+}
+
+/**
+ * Merge variant: renders each source agent into an existing .claude/agents directory WITHOUT
+ * deleting the tree, so optional Claude agents coexist with the base adapter-claude agents
+ * (no filename overlap between core/agents and optional/agents). Honors skip-if-exists
+ * semantics: a destination agent the user already authored is preserved, never overwritten.
+ *
+ * @param string $src          Absolute path to source agents dir (OpenCode templates)
+ * @param string $dest         Absolute path to destination dir (.claude/agents)
+ * @param string $scriptsRoot  Absolute path to scripts/ai/ in the target repo
+ * @param bool   $skipExisting When true, a pre-existing destination agent file is preserved.
+ */
+function aiInstallerMergeDirAsClaudeAgents(string $src, string $dest, string $scriptsRoot, bool $skipExisting = true): void
+{
+    aiInstallerRenderClaudeAgentsInto($src, $dest, $scriptsRoot, $skipExisting);
+}
+
+/**
+ * Shared render loop for both claude-agents writer variants. Renders every non-hidden source
+ * agent template into $dest as <id>.md via the Claude renderer. Never deletes the destination
+ * tree; existing files are overwritten in place unless $skipExisting is true.
+ *
+ * @param string $src          Absolute path to source agents dir (OpenCode templates)
+ * @param string $dest         Absolute path to destination dir (.claude/agents)
+ * @param string $scriptsRoot  Absolute path to scripts/ai/ in the target repo
+ * @param bool   $skipExisting When true, an existing destination .md is preserved.
+ */
+function aiInstallerRenderClaudeAgentsInto(string $src, string $dest, string $scriptsRoot, bool $skipExisting): void
 {
     if (!is_dir($src)) {
         throw new RuntimeException('missing source directory: ' . $src);
@@ -127,6 +159,9 @@ function aiInstallerCopyDirAsClaudeAgents(string $src, string $dest, string $scr
             continue;
         }
         $destFile = $dest . DIRECTORY_SEPARATOR . $agentId . '.md';
+        if ($skipExisting && file_exists($destFile)) {
+            continue;
+        }
         $rendered = aiInstallerRenderClaudeAgent($content, $agentId, $scriptsRoot);
         if (file_put_contents($destFile, $rendered) === false) {
             throw new RuntimeException('failed to write rendered agent: ' . $destFile);

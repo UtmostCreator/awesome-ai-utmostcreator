@@ -16,7 +16,18 @@ $packageDocsBase = aiResolvePackageDocsBase($root);
 
 $sourceRepoMode = is_file($root . DIRECTORY_SEPARATOR . 'tests' . DIRECTORY_SEPARATOR . 'php' . DIRECTORY_SEPARATOR . 'CliToolsTest.php');
 $existenceOnly = in_array('--existence-only', $argv, true) || !$sourceRepoMode;
-$write = in_array('--write', $argv, true) || in_array('--fix', $argv, true);
+$writeRequested = in_array('--write', $argv, true) || in_array('--fix', $argv, true);
+// Guard the only mutation path (regenerating committed artifacts) behind an explicit
+// opt-in env var. Several read-only agents (reviewer, workflow-auditor, release-auditor,
+// repository-reviewer) allowlist `php tools/ai/validate-*.php *` via the proof.validate_script
+// permission pack; without this gate a bare `--write`/`--fix` from such an agent would
+// regenerate tracked files behind `edit: deny`. Maintainers and CI opt in with
+// AI_ALLOW_ARTIFACT_WRITE=1; a requested-but-ungated write is refused loudly, not silently.
+$writeOptIn = getenv('AI_ALLOW_ARTIFACT_WRITE') === '1';
+$write = $writeRequested && $writeOptIn;
+if ($writeRequested && !$writeOptIn) {
+    fwrite(STDERR, "REFUSED: --write/--fix requires AI_ALLOW_ARTIFACT_WRITE=1 (artifact regeneration is not permitted for read-only agents); running check-only instead\n");
+}
 
 $required = [
     'docs/ai/catalog.md' => 'php tools/ai/generate-ai-catalog.php --check',

@@ -36,6 +36,9 @@ function aiClaudeAgentToolRegistry(): array
         'repository-reviewer'      => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
         'release-auditor'          => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
         'workflow-auditor'         => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
+        // Optional read-only auditor (templates/optional/agents; edit: deny, task: deny).
+        // Matches the unknown-id fallback, listed explicitly so the grant is deterministic.
+        'agent-critic'             => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
 
         // --- write-capable agents (canonical permission.edit not denied) ---
         'implementer'              => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],

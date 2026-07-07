@@ -90,7 +90,7 @@ class AgentAssessmentFrontmatterWriterTest extends TestCase
         $this->assertArrayHasKey('architect', $map);
         $this->assertSame(['risk_level' => 'high', 'decision' => 'approve'], $map['architect']);
         $this->assertCount(2, $map['architect']);
-        $this->assertCount(24, $map, 'expected exactly 24 live agent template entries');
+        $this->assertCount(26, $map, 'expected exactly 26 live agent template entries');
     }
 
     public function testTemplatePathResolvesCoreThenOptional(): void

@@ -322,6 +322,7 @@ function aiInstallerResolveRuntimes(string $pack): array
         'optional-agents-copilot-pack' => ['github-copilot'],
         'adapter-opencode' => ['opencode'],
         'optional-agents-opencode-pack' => ['opencode'],
+        'optional-agents-claude-pack' => ['claude-code'],
     ];
 
     if (isset($runtimeByPack[$pack])) {

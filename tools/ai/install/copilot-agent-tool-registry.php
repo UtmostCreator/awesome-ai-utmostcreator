@@ -37,6 +37,7 @@ function aiCopilotAgentToolRegistry(): array
     ]);
 
     return [
+        'agent-critic'      => $executeToolsWithQuestions,
         'architect'         => $readOnlyToolsWithQuestions,
         'architecture-plan-writer' => $editExecuteTools,
         'reviewer'          => $executeToolsWithQuestions,

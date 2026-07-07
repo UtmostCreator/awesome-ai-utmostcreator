@@ -48,6 +48,16 @@ agents:
       risk_level: high
       decision: approve_with_minor_fixes
     rationale: "Coordinator role is coherent, but subagent routing semantics must match provider reality. Manifest risk: high."
+  agent-critic:
+    agent_assessment:
+      risk_level: medium
+      decision: approve_with_minor_fixes
+    rationale: "Read-only agent-file auditor (edit and task denied, deny-by-default bash allowlist); no mutation surface, but audits permission/governance agent files, so domain-influence risk lifts it above low. Self-audit found minor findings outstanding (soft-max length), so decision mirrors the file's own scoring rules. Manifest risk: medium (mirrors workflow-auditor)."
+  agent-fleet-assessor:
+    agent_assessment:
+      risk_level: low
+      decision: approve_with_minor_fixes
+    rationale: "Read-only fleet orchestrator; edit denied, task: ask to delegate per-file critique to agent-critic. No mutation surface. Matches the agent's authored frontmatter block. Manifest risk: low."
   architect:
     agent_assessment:
       risk_level: high

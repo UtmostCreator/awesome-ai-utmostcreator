@@ -42,7 +42,7 @@
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 4,
         "package:operations-doc": 6,
-        "package:optional-template": 13,
+        "package:optional-template": 15,
         "package:package-capability": 43,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
@@ -645,6 +645,22 @@
             "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator.md",
             "runtime": "optional",
             "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for <PROJECT_NAME>; never emits free-text agents directly"
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
+            "name": "Agent Critic",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-critic.md",
+            "runtime": "optional",
+            "description": "Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet."
+        },
+        {
+            "scope": "package",
+            "type": "optional-template",
+            "name": "Agent Fleet Assessor",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-fleet-assessor.md",
+            "runtime": "optional",
+            "description": "Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
         },
         {
             "scope": "package",
