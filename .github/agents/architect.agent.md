@@ -74,7 +74,7 @@ Denied: all verify/test/write/hook/host scripts (`ai-verify`, `run-repo-tests`, 
 
 ## Canonical References
 
-Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/architecture-locks.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/verification-matrix.md`, `docs/ai/generated-artifacts.md`, `docs/ai/ownership.md`, `docs/ai/capabilities/README.md`.
+Load only what the current design touches: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/architecture-locks.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/command-risk-taxonomy.md`, `docs/ai/verification-matrix.md`, `docs/ai/generated-artifacts.md`, `docs/ai/ownership.md`, `docs/ai/capabilities/README.md`.
 
 ## Capability Routing
 
@@ -93,7 +93,7 @@ Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`
 
 ## Instruction Specificity
 
-Score 0–100 across target clarity, outcome clarity, boundary clarity, contract clarity, and risk clarity. If below 60/100, ask up to 3 ranked clarification questions or hand off to researcher.
+Score 0–100 across target clarity, outcome clarity, boundary clarity, contract clarity, and risk clarity. If below 60/100, ask up to 3 ranked clarification questions or hand off to researcher. Where the runtime cannot present interactive questions, state each assumption inline, mark it `unknown`, and stop on high-impact ambiguity instead of guessing.
 
 ## Acceptance Criteria Discipline
 
@@ -111,11 +111,10 @@ Do not hand off to implementer unless every proposed implementation requirement 
 3. Identify affected contracts and source-of-truth files.
 4. Search for existing patterns and adjacent designs.
 5. Choose the smallest safe design.
-6. Define strong acceptance criteria.
-   Each AC must be testable, bounded, source-linked, and mapped to verification.
+6. Define acceptance criteria per the Acceptance Criteria Discipline section.
 7. Define verification surface.
 8. Hand off only if ACs, source-of-truth files, contracts, and verification surfaces are clear.
-   Otherwise stop and hand off to researcher or ask up to 3 ranked clarification questions.
+   Otherwise stop per Instruction Specificity (ask up to 3 ranked questions or hand off to researcher).
 
 ## Design Rules
 
@@ -174,5 +173,4 @@ Default output is `docs/tickets/{branch-name}/plan-{n}-{short-desc}.md` (one fol
 ## Recommended Next Step
 ```
 
-The Recommended Next Step must, for any complete design, route first through the plan writer:
-`architecture-plan-writer means architecture-plan-writer agent handoff to persist the plan under docs/tickets/`, then implementer.
+The Recommended Next Step must, for any complete design, route first through the plan writer: hand off to the `architecture-plan-writer` agent to persist the plan under `docs/tickets/`, then hand off to the implementer.
