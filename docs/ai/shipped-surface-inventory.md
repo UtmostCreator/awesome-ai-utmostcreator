@@ -100,17 +100,23 @@ than restating them), `project-context`, `regression-test`, `release-safety`,
 `ai-search/SKILL.md`, `ai-scripts/SKILL.md`. Role: `deterministic-load`, direct
 file-level pack entries into `.opencode/skills/<name>/SKILL.md` (`adapter-opencode` pack).
 
-## optional/agents/** — opt-in staged-agent roles (11 files)
+## optional/agents/** — opt-in staged-agent roles (12 files)
 
 Whole-dir copy through the runtime-specific agent renderer into `.opencode/agents-optional`
-(`optional-agents-opencode-pack`) and merged into `.github/agents` (`optional-agents-copilot-pack`).
+(`optional-agents-opencode-pack`), merged into `.github/agents` (`optional-agents-copilot-pack`),
+and merged into `.claude/agents` (`optional-agents-claude-pack`).
 Role: `deterministic-load` when the optional pack is selected and the agent is not marked
 `hidden: true` in its own frontmatter (hidden agents, e.g. `ui-builder.md`, are intentionally
 excluded from shipped output by the renderer — that is a deliberate suppression, not
 dead-file drift). Files: `agent-creator.md`, `agent-creator-runtime-guardian.md`,
 `agent-creator-semantic-verifier.md`, `agent-creator-static-validator.md`,
-`agent-creator-supervisor.md`, `bugfix.md`, `build-config.md`, `docs.md`,
+`agent-creator-supervisor.md`, `agent-critic.md`, `bugfix.md`, `build-config.md`, `docs.md`,
 `infra-auditor.md`, `ui-builder.md`, `upgrade.md`.
+
+OpenCode activation note: OpenCode loads agents only from `.opencode/agents/`, so files
+installed to `.opencode/agents-optional` are inert until promoted — copy the agent into
+`.opencode/agents/` (e.g. `cp .opencode/agents-optional/agent-critic.md .opencode/agents/`)
+to make it callable. Copilot and Claude optional agents land directly in their live dirs.
 
 ## optional/delivery/** — opt-in delivery templates (2 files)
 

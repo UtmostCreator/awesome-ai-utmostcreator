@@ -13,12 +13,12 @@ Deterministic catalog generated from installer registries.
 - `dual`: `minimal, adapter-copilot, adapter-opencode, capabilities-extended, scripts-pack, policy-pack, hooks-pack`
 - `guarded`: `dual, policy-pack, hooks-pack, evidence-pack`
 - `accelerated`: `dual, scripts-pack, policy-pack, evidence-pack`
-- `full-governance`: `accelerated, adapter-claude, capabilities-governance, hooks-pack, ci-pack, docs-reference-pack, delivery-pack, optional-agents-opencode-pack, optional-agents-copilot-pack, preview-environments-pack, evaluation-pack, service-boundary-pack, mcp-boundaries-pack, advisor-pack, target-tools-pack, shared-templates-pack`
+- `full-governance`: `accelerated, adapter-claude, capabilities-governance, hooks-pack, ci-pack, docs-reference-pack, delivery-pack, optional-agents-opencode-pack, optional-agents-copilot-pack, optional-agents-claude-pack, preview-environments-pack, evaluation-pack, service-boundary-pack, mcp-boundaries-pack, advisor-pack, target-tools-pack, shared-templates-pack`
 - `docs-reference`: `docs-reference-pack`
 - `custom`: ``
 - `basic`: `minimal`
 - `standard`: `dual`
-- `creator`: `standard, adapter-claude, optional-agents-opencode-pack, optional-agents-copilot-pack`
+- `creator`: `standard, adapter-claude, optional-agents-opencode-pack, optional-agents-copilot-pack, optional-agents-claude-pack`
 - `full`: `full-governance`
 - `agents-only`: `adapter-copilot, adapter-opencode, adapter-claude, scripts-pack, capabilities-core`
 
@@ -41,12 +41,13 @@ Deterministic catalog generated from installer registries.
 - `delivery-pack` (2 items)
 - `optional-agents-opencode-pack` (1 items)
 - `optional-agents-copilot-pack` (1 items)
+- `optional-agents-claude-pack` (1 items)
 - `preview-environments-pack` (1 items)
 - `evaluation-pack` (1 items)
 - `service-boundary-pack` (1 items)
 - `mcp-boundaries-pack` (1 items)
 - `advisor-pack` (4 items)
-- `target-tools-pack` (97 items)
+- `target-tools-pack` (102 items)
 - `shared-templates-pack` (4 items)
 - `package-source-pack` (8 items)
 - `kit-authoring-pack` (4 items)

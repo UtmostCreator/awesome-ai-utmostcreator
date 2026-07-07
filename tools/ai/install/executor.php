@@ -129,7 +129,16 @@ function aiInstallerExecutePlan(array $config, array $plan): array
             aiInstallerCopyDirAsOpenCodeAgents($src, $dest);
         } elseif (($item['install_type'] ?? '') === 'claude-agents') {
             $scriptsRoot = $config['targetRoot'] . DIRECTORY_SEPARATOR . 'scripts' . DIRECTORY_SEPARATOR . 'ai';
-            aiInstallerCopyDirAsClaudeAgents($src, $dest, $scriptsRoot);
+            // Two packs target .claude/agents: the base adapter-claude pack (refresh in place)
+            // and the optional-agents-claude-pack (merge_into_existing + skip-if-exists). The
+            // merge path never deletes the tree and honors skip-if-exists, mirroring the
+            // copilot-agents branch above.
+            if (($item['merge_into_existing'] ?? false) === true) {
+                $skipExisting = ($item['merge_strategy'] ?? '') === 'skip-if-exists';
+                aiInstallerMergeDirAsClaudeAgents($src, $dest, $scriptsRoot, $skipExisting);
+            } else {
+                aiInstallerCopyDirAsClaudeAgents($src, $dest, $scriptsRoot);
+            }
         } elseif (($item['install_type'] ?? '') === 'skill-dirs') {
             aiInstallerCopyDirAsSkillDirs($src, $dest);
         } elseif (($item['install_type'] ?? '') === 'opencode-commands') {

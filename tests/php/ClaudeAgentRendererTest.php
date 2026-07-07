@@ -185,6 +185,51 @@ class ClaudeAgentRendererTest extends TestCase
         }
     }
 
+    public function testClaudeAgentMergeHonorsSkipIfExistsAndPreservesTree(): void
+    {
+        $tmp = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'claude_agent_merge_' . uniqid('', true);
+        $src = $tmp . DIRECTORY_SEPARATOR . 'src';
+        $dest = $tmp . DIRECTORY_SEPARATOR . 'dest';
+
+        mkdir($src, 0777, true);
+        mkdir($dest, 0777, true);
+        file_put_contents($src . DIRECTORY_SEPARATOR . 'implementer.md', $this->implementerTemplate());
+        file_put_contents($src . DIRECTORY_SEPARATOR . 'researcher.md', $this->researcherTemplate());
+        // Pre-existing destination file sharing a source name: must be preserved verbatim.
+        $userAuthored = "---\nname: implementer\n---\nuser-authored body\n";
+        file_put_contents($dest . DIRECTORY_SEPARATOR . 'implementer.md', $userAuthored);
+        // Pre-existing core agent with no source counterpart: must survive untouched.
+        file_put_contents($dest . DIRECTORY_SEPARATOR . 'core-agent.md', "---\nname: core-agent\n---\n");
+
+        try {
+            aiInstallerMergeDirAsClaudeAgents($src, $dest, '/project/scripts/ai', true);
+
+            $this->assertSame(
+                $userAuthored,
+                (string) file_get_contents($dest . DIRECTORY_SEPARATOR . 'implementer.md'),
+                'skip-if-exists merge must preserve a pre-existing destination agent verbatim'
+            );
+            $this->assertFileExists(
+                $dest . DIRECTORY_SEPARATOR . 'researcher.md',
+                'merge must add source agents that have no destination counterpart'
+            );
+            $this->assertFileExists(
+                $dest . DIRECTORY_SEPARATOR . 'core-agent.md',
+                'merge must never delete sibling core agents'
+            );
+
+            aiInstallerMergeDirAsClaudeAgents($src, $dest, '/project/scripts/ai', false);
+
+            $this->assertNotSame(
+                $userAuthored,
+                (string) file_get_contents($dest . DIRECTORY_SEPARATOR . 'implementer.md'),
+                'non-skip merge refreshes rendered files in place'
+            );
+        } finally {
+            $this->removeTree($tmp);
+        }
+    }
+
     // ----- Researcher (read-only, task: ask -> no Agent tool) -----
 
     public function testResearcherOutputHasNoAgentTool(): void

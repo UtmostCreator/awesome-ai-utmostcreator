@@ -333,6 +333,14 @@ function aiInstallerPackRegistry(): array
             // agents via delete-tree. merge_into_existing selects the non-clobbering copy path.
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.github/agents', 'install_type' => 'copilot-agents', 'merge_into_existing' => true, 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
+        'optional-agents-claude-pack' => [
+            // Render optional agents through the Claude renderer (claude-agents) and MERGE them into
+            // .claude/agents alongside the base adapter-claude agents. merge_into_existing routes the
+            // executor to aiInstallerMergeDirAsClaudeAgents (no delete-tree, skip-if-exists honored,
+            // hidden internal-only agents skipped), so this second pack adds the optional agents
+            // without clobbering the core agents — mirroring the Copilot optional pack.
+            ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/optional/agents', 'target' => '.claude/agents', 'install_type' => 'claude-agents', 'merge_into_existing' => true, 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
+        ],
         'preview-environments-pack' => [
             ['type' => 'dir', 'source' => 'docs/ai/capabilities/preview-environments', 'target' => 'docs/ai/capabilities/preview-environments', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
@@ -600,7 +608,7 @@ function aiInstallerExpandProfilePacks(array $items, array $profileDefs, array $
 function aiInstallerAgentDependencyWarnings(array $selectedPacks): array
 {
     $warnings = [];
-    $agentPacks = ['adapter-copilot', 'adapter-opencode', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack'];
+    $agentPacks = ['adapter-copilot', 'adapter-opencode', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'optional-agents-claude-pack'];
     if (array_intersect($agentPacks, $selectedPacks) !== [] && !in_array('scripts-pack', $selectedPacks, true)) {
         $warnings[] = 'Agents were installed without scripts-pack: agent permission allowlists reference scripts/ai/*.sh that are not present. Re-run with --with scripts-pack or use an edition that includes it (standard, creator, full, agents-only).';
     }

@@ -179,6 +179,12 @@ function aiPermissionPacks(): array
         // overlays instead (language-overlays.php), so a non-PHP/non-JS consumer install no
         // longer inherits these grants as a universal pack. Confirmed via grep before removal:
         // no composition referenced these 3 pack names by string at retirement time.
+        // Grants the wildcard `validate-*.php *` (read-only auditors mix-and-match this with
+        // generate_check). One validator, validate-generated-artifacts.php, accepts --write/--fix
+        // and regenerates committed artifacts; that mutation path is gated at the script itself
+        // behind AI_ALLOW_ARTIFACT_WRITE=1 (see tools/ai/validate-generated-artifacts.php), so a
+        // bare --write from a read-only agent is refused rather than mutating tracked files. The
+        // grant can stay wildcard because the script, not the permission grammar, enforces safety.
         'proof.validate_script' => aiPermissionEntries('bash', [
             'php tools/ai/validate-*.php *' => 'allow',
         ]),

@@ -17,7 +17,7 @@ function aiInstallerProfileDefinitions(): array
         // adapter-claude is baked directly into full-governance (Chosen approach (b) from the
         // Claude adapter parity plan: bake the adapter into the profile/edition definition itself
         // rather than relying solely on the --runtime re-add branch in packs.php).
-        'full-governance' => ['accelerated', 'adapter-claude', 'capabilities-governance', 'hooks-pack', 'ci-pack', 'docs-reference-pack', 'delivery-pack', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'preview-environments-pack', 'evaluation-pack', 'service-boundary-pack', 'mcp-boundaries-pack', 'advisor-pack', 'target-tools-pack', 'shared-templates-pack'],
+        'full-governance' => ['accelerated', 'adapter-claude', 'capabilities-governance', 'hooks-pack', 'ci-pack', 'docs-reference-pack', 'delivery-pack', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'optional-agents-claude-pack', 'preview-environments-pack', 'evaluation-pack', 'service-boundary-pack', 'mcp-boundaries-pack', 'advisor-pack', 'target-tools-pack', 'shared-templates-pack'],
         'docs-reference' => ['docs-reference-pack'],
         'custom' => [],
         // --- Editions: user-facing aliases over the profile/pack system. ---
@@ -26,7 +26,7 @@ function aiInstallerProfileDefinitions(): array
         // without future drift. `base` is force-added by installBase regardless.
         'basic' => ['minimal'],
         'standard' => ['dual'],
-        'creator' => ['standard', 'adapter-claude', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack'],
+        'creator' => ['standard', 'adapter-claude', 'optional-agents-opencode-pack', 'optional-agents-copilot-pack', 'optional-agents-claude-pack'],
         'full' => ['full-governance'],
         // agents-only: ship the agents PLUS their hard dependencies. Agents reference
         // scripts/ai/*.sh in their permission allowlists and load capability docs, so
@@ -56,6 +56,7 @@ function aiInstallerAllFeaturePacks(): array
         'delivery-pack',
         'optional-agents-opencode-pack',
         'optional-agents-copilot-pack',
+        'optional-agents-claude-pack',
         'preview-environments-pack',
         'evaluation-pack',
         'service-boundary-pack',
