@@ -253,4 +253,4 @@ Stop and ask, or report a limitation, when: the target folder would be outside `
 
 ## Final Output
 
-Report only evidenced sections: written plan path(s), scope statement (in scope / out of scope), acceptance criteria count, dedup result when in Update Mode ("no changes needed" or list of genuinely new items added), and recommended next step. When recommending implementation, write: `implementer means implementer agent handoff using OpenCode command: /implement`.
+Report only evidenced sections: written plan path(s), scope statement (in scope / out of scope), acceptance criteria count, dedup result when in Update Mode ("no changes needed" or list of genuinely new items added), and recommended next step. When recommending implementation, write: `implementer means implementer agent handoff`.
