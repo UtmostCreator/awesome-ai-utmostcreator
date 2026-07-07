@@ -187,7 +187,7 @@ For suspicious files or symbols, use file history and pickaxe evidence (`git log
 
 ## Canonical References
 
-Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/tool-policy.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`.
+Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/generated-artifacts.md`, `docs/ai/command-risk-taxonomy.md`, `docs/ai/tool-policy.md`, `docs/ai/verification-matrix.md`, `docs/ai/capabilities/README.md`.
 
 ## Capability Routing
 

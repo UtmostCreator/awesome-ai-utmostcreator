@@ -110,6 +110,7 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 - Do not invent new policy.
 - Do not expand scope into implementation work.
 - Do not duplicate canonical rules in adapter files.
+- When reporting a placeholder or secret leak, name its file path and the required owner action, never the literal secret value.
 - Use `unknown` when evidence does not prove a claim.
 
 ## Script Access
@@ -161,3 +162,5 @@ CLEAN | DRIFT FOUND | ERRORS FOUND
 
 ## Recommended Next Step
 ```
+
+When the issue is documentation or adapter drift rather than code logic, recommend `implementer`. When ownership, scope, or contract design is still unclear, recommend `architect`. If a required audit surface is blocked, denied, or missing evidence, stop and report the blocked surface as `unknown` instead of guessing.

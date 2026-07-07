@@ -117,4 +117,4 @@ MATCHES | MATCHES WITH NOTES | MISMATCH
 ## Recommended Next Step
 ```
 
-On MISMATCH, next step is agent-creator. On MATCHES, next step is the supervisor for human approval and runtime guardrails.
+If the Static Validator has not returned exit 0, next step is agent-creator-static-validator (send it back before judging). On MISMATCH, next step is agent-creator. On MATCHES or MATCHES WITH NOTES, next step is agent-creator-supervisor for human approval and runtime guardrails.

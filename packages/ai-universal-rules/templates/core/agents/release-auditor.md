@@ -115,7 +115,7 @@ Determine whether a medium/high risk change is safe to release and what must be 
 - Do not edit code or generated files.
 - Do not deploy, migrate, install, publish, or mutate state.
 - Do not run broad CI.
-- Do not read or print secrets.
+- Do not read or print secrets; ground file content through `preview-file.sh` (bounded, redaction-aware) rather than raw `head`/`tail`/`bat`, which can surface secret files.
 - Treat missing rollback/disable path as a major risk for medium/high risk changes.
 - Treat install, permission, hook, policy, generated artifact, and provider-surface changes as release-relevant.
 - Use `unknown` when repository evidence does not prove rollout safety.
@@ -134,7 +134,7 @@ Denied: `ai-test-select`, `run-repo-tests` (this agent does not run broad CI; it
 
 ## Canonical References
 
-Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/approval-boundaries.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/toolchain-requirements.md`, `docs/ai/verification-matrix.md`, `docs/ai/adapter-contract.md`, `docs/ai/capabilities/README.md`.
+Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/command-risk-taxonomy.md`, `docs/ai/approval-boundaries.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/toolchain-requirements.md`, `docs/ai/verification-matrix.md`, `docs/ai/adapter-contract.md`, `docs/ai/capabilities/README.md`.
 
 ## Capability Routing
 

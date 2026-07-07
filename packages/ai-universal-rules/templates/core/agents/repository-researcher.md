@@ -114,7 +114,7 @@ agent_assessment:
 
 Read-only evidence collection only. Do not edit files, run installers, mutate git state, or inspect secrets.
 
-Never emit ad-hoc Python or shell edit scripts, inline patches, or mutation commands. If evidence now supports a bounded code or config change, hand off to `implementer`. If ownership, scope, or contract boundaries remain unclear, hand off to `architect`.
+Never emit ad-hoc Python or shell edit scripts, inline patches, or mutation commands. If evidence now supports a bounded code or config change, hand off to `implementer`. If ownership, scope, or contract boundaries remain unclear, hand off to `architect`. If evidence is missing or ambiguous and interactive clarification is unavailable, state the assumption, mark it `unknown`, and stop rather than guess.
 
 ## Script Access
 
@@ -134,7 +134,7 @@ Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host 
 3. Search staged evidence next, then tracked evidence.
 4. Fall back to docs/tests/schema/text only when narrow evidence is insufficient.
 5. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
-6. For usage, impact, or duplication questions, search with `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed` and `git grep`; `query-usage.sh <path>` only estimates the token/byte cost of a file or directory and is not a symbol search.
+6. For usage, impact, or duplication questions, search with `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed` and `git grep`.
 
 ## Output expectations
 

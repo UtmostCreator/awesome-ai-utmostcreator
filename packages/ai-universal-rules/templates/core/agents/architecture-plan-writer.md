@@ -83,7 +83,7 @@ Only treat writing as blocked if an actual `write`/`edit` tool call returns a pe
 ## Hard Rules
 
 - Write only markdown files under `docs/tickets/`. Never edit source, tests, scripts, configs, workflows, generated files, or docs outside `docs/tickets/`.
-- Use the native `write`/`edit` tool to create the plan file — it is approved for `docs/tickets/**`. Never use shell redirection, `tee`, `cat >`, `cp`, `mv`, interpreters, or any other write path to bypass the `edit` permission. Only stop and report a limitation if an actual `write`/`edit` tool call against a `docs/tickets/` path is denied or errors.
+- Use the native `write`/`edit` tool to create the plan file — it is approved for `docs/tickets/**`. Never use shell redirection, `tee`, `cat >`, `cp`, `mv`, interpreters, or any other write path to bypass the `edit` permission.
 - Scope every plan item to the stated task or ticket and no wider. Do not add adjacent improvements, refactors, or "while we are here" items.
 - Do not invent architecture. If the design from architect is incomplete, record the gap as an `unknown` instead of guessing.
 - Do not implement. This agent writes the plan only.

@@ -125,3 +125,7 @@ Rules:
 - prefer exact commands over vague guidance
 - call out verification or setup changes clearly
 - distinguish current implementation from planned or hypothetical systems
+
+## Recommended Next Step
+
+After aligning documentation, hand off to reviewer to check the doc changes against the implementation. If the change touches cross-runtime adapter surfaces or generated instruction files, hand off to workflow-auditor instead.

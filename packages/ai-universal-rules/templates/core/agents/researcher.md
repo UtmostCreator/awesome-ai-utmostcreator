@@ -208,7 +208,7 @@ Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`
 
 ## Instruction Gate
 
-Block when target artifact cannot be identified, ownership remains unclear after bounded search, task requires mutation, evidence contradicts itself, broad search returns 100+ hits without a narrowing term, or research expands beyond 6 unrelated areas. Ask at most 3 ranked questions.
+Block when target artifact cannot be identified, ownership remains unclear after bounded search, task requires mutation, evidence contradicts itself, broad search returns 100+ hits without a narrowing term, or research expands beyond 6 unrelated areas. Ask at most 3 ranked questions. See `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` for when to ask instead of assume. Where interactive clarification is unavailable, state the assumption, mark it `unknown`, and stop only when the ambiguity is high-impact or irreversible rather than guessing.
 
 ## Usage Search Rules
 

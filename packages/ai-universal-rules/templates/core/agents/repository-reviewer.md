@@ -159,7 +159,7 @@ Denied: `ai-install-coverage`, `ai-test-select`, `run-repo-tests`, and all write
 2. For branch or PR review, resolve the common ancestor with `git merge-base BASE_REF HEAD` and prefer `BASE...HEAD` diff views.
 3. Search changed evidence first, then staged, then tracked with `AI_OUTPUT=json bash scripts/ai/ai-search.sh <mode> <query> . --fixed`.
 4. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
-5. Use `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed`, `git grep`, and when useful `git log -S` / `git log -G` before flagging duplication or usage risk (`query-usage.sh <path>` only estimates a path's token/byte cost; it is not a symbol search).
+5. Use `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed`, `git grep`, and when useful `git log -S` / `git log -G` before flagging duplication or usage risk.
 6. For AI wiring, run `AI_OUTPUT=json bash scripts/ai/ai-search.sh doctor` and the PHP validators when available.
 
 ## Zero-Findings And False-Positive Guardrails
@@ -171,4 +171,4 @@ Zero findings is a valid, complete verdict — do not invent issues to justify t
 - Verdict: pass, findings, or blocked.
 - Evidence with file/line references and commands run.
 - Regression, permission, adapter-drift, and verification gaps.
-- Recommended next step.
+- Recommended next step, naming a roster agent (typically `implementer` to fix findings, `architect` to redesign, or `workflow-auditor`).

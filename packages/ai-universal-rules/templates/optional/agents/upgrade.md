@@ -146,3 +146,5 @@ Rules:
 - call out rollback and verification needs
 - change the minimum required surface
 - summarize compatibility risks and follow-up work
+
+Recommended next step: hand off to `reviewer` to review the upgrade diff; add `release-auditor` when the upgrade affects rollout, rollback, migration, or deployment behavior.

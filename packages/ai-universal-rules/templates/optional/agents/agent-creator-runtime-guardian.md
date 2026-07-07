@@ -89,6 +89,7 @@ Denied: `ai-edit`, `ai-task`, `run-repo-tests`. The guardian enforces and record
 - Treat missing stop conditions or missing logging as a blocking gap.
 - Do not approve runtime for an agent that lacks human approval.
 - Do not read or print secrets while designing guardrails.
+- Stop and hand off to the agent-creator-supervisor agent on an ambiguous or incomplete AgentSpec, missing evidence, or scope growth beyond the approved spec; state the assumption, mark it `unknown`, and do not guess (no interactive prompt is guaranteed at runtime).
 
 ## Final Output
 
@@ -114,4 +115,4 @@ ready | blocked
 ## Recommended Next Step
 ```
 
-If runtime readiness is blocked, next step is the supervisor. If ready and approved, next step is implement.
+If runtime readiness is blocked, the recommended next step is the agent-creator-supervisor agent. If ready and approved, the recommended next step is the implementer agent to execute the guarded run.

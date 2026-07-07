@@ -143,4 +143,8 @@ Rules:
 
 - keep build changes minimal and reversible
 - document command changes exactly
-- escalate if a change affects security, release, or deployment behavior
+- escalate to the release-auditor if a change affects security, release, or deployment behavior
+
+## Recommended next step
+
+Default next step: hand off to the reviewer to verify the build or config change; if the change affects security, release, or deployment behavior, hand off to the release-auditor instead.
