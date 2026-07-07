@@ -47,6 +47,17 @@ function aiClaudeAgentToolRegistry(): array
         'config-maintainer'        => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
         'refactorer'               => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
         'post-install'             => ['tools' => array_merge($writeTools, ['Agent']), 'disallowedTools' => [], 'permissionMode' => 'default'],
+
+        // Optional write-capable agents (templates/optional/agents; canonical permission.edit is a
+        // scoped allow/deny map, not `deny`). Rendered as writers so their apply/update missions are
+        // coherent on Claude. Claude frontmatter cannot express per-path edit scoping, so the
+        // canonical edit-deny globs (generated/**, *.lock, *.pem/*.key/*.crt, .env*, secrets) are
+        // enforced by the `.claude/settings.json` Edit/Write deny floor (see the Claude settings
+        // template) rather than per-agent frontmatter.
+        'docs'                     => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
+        'build-config'             => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
+        'bugfix'                   => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
+        'upgrade'                  => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
     ];
 }
 
