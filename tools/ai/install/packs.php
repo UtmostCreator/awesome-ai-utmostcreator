@@ -67,6 +67,15 @@ function aiInstallerPackRegistry(): array
             'tools/ai/install/stack-registry.php',
             'tools/ai/install/toolchain.php',
             'tools/ai/install/toolchain-registry.php',
+            // arch-todo-installer-workflow-command-extraction-20260706-220032: install_workflow.php's
+            // helper groups were extracted into these procedural modules, part of
+            // install_workflow.php's require_once closure. Without them, `php tools/ai/ai.php
+            // install/upgrade/uninstall/restore` fatals in-target. Pre-existing gap found and
+            // fixed during the validate-ai-config.php extraction ticket's review.
+            'tools/ai/install/upgrade-file-actions.php',
+            'tools/ai/install/workflow-manifest.php',
+            'tools/ai/install/uninstall-prune.php',
+            'tools/ai/install/restore-audit.php',
             'tools/ai/install/user-sections.php',
             'tools/ai/install/verify-install-result.php',
             // verify-manifest-args.php is a shared helper required by both verify-manifest.php
@@ -361,6 +370,11 @@ function aiInstallerPackRegistry(): array
             // (via the agent renderers -> permission-layers/render-adapters.php -> compose.php).
             // Shipped as a whole dir so in-target ai.php commands do not fatal on a missing file.
             ['type' => 'dir', 'source' => 'tools/ai/install/permission-layers', 'target' => 'tools/ai/install/permission-layers', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            // validate-ai-config.php's require_once closure (validation/config-loader.php,
+            // config-validator.php, reporter.php). Shipped as a whole dir so in-target
+            // validate-ai-config.php does not fatal on a missing file. See
+            // docs/tickets/arch-todo-validate-ai-config-extraction-20260706-223128.
+            ['type' => 'dir', 'source' => 'tools/ai/validation', 'target' => 'tools/ai/validation', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'tools/ai/commands', 'target' => 'tools/ai/commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai.php', 'target' => 'tools/ai/ai.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'tools/ai/ai_catalog_lib.php', 'target' => 'tools/ai/ai_catalog_lib.php', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
