@@ -39,6 +39,11 @@ function aiClaudeAgentToolRegistry(): array
         // Optional read-only auditor (templates/optional/agents; edit: deny, task: deny).
         // Matches the unknown-id fallback, listed explicitly so the grant is deterministic.
         'agent-critic'             => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
+        // Optional read-only orchestrator (templates/optional/agents; edit: deny, task: allow).
+        // Grants the Agent tool so it can spawn agent-critic per file and aggregate — its core
+        // mission. Like architect/post-install, this is a task: allow agent, so the registry's
+        // "task: allow -> Agent" rule applies; it is a primary orchestrator, never a nested subagent.
+        'agent-fleet-assessor'     => ['tools' => array_merge($readOnlyTools, ['Agent']), 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
 
         // --- write-capable agents (canonical permission.edit not denied) ---
         'implementer'              => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],

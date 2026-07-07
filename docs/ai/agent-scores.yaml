@@ -55,9 +55,9 @@ agents:
     rationale: "Read-only agent-file auditor (edit and task denied, deny-by-default bash allowlist); no mutation surface, but audits permission/governance agent files, so domain-influence risk lifts it above low. Self-audit found minor findings outstanding (soft-max length), so decision mirrors the file's own scoring rules. Manifest risk: medium (mirrors workflow-auditor)."
   agent-fleet-assessor:
     agent_assessment:
-      risk_level: low
-      decision: approve_with_minor_fixes
-    rationale: "Read-only fleet orchestrator; edit denied, task: ask to delegate per-file critique to agent-critic. No mutation surface. Matches the agent's authored frontmatter block. Manifest risk: low."
+      risk_level: medium
+      decision: approve
+    rationale: "Read-only fleet orchestrator (edit denied); task: allow to delegate per-file critique to agent-critic, granted the Agent subagent-spawn tool on Claude. No mutation surface, but the spawn/delegation capability and fleet-governance influence put domain risk at medium, matching the AGENTS-MANIFEST Risk column and the authored frontmatter block. Re-audited 60->93 after the delegation blocker fix; no BLOCKER/MAJOR, score >=90 -> approve."
   architect:
     agent_assessment:
       risk_level: high

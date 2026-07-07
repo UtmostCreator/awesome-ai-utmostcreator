@@ -27,6 +27,15 @@ require_once __DIR__ . '/copilot-agent-tool-registry.php';
 function aiCopilotAgentHandoffRegistry(): array
 {
     return [
+        'agent-fleet-assessor' => [
+            [
+                'label'  => 'Assess Agent',
+                'agent'  => 'agent-critic',
+                'prompt' => 'Assess this one agent file and return your standard output plus the fenced json summary block (score, readiness, decision, blockers, majors, minors, next_handoff, handoff_executable). Copilot has no programmatic fan-out, so this is one agent at a time; the fleet assessor aggregates each returned critic result into the ranking.',
+                'send'   => true,
+                'model'  => null,
+            ],
+        ],
         'architect' => [
             [
                 'label'  => 'Write Architecture Plan',

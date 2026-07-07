@@ -13,7 +13,7 @@ capabilities:
 permission:
   todowrite: allow
   edit: deny
-  task: ask
+  task: allow
   bash:
     '*': deny
     'command -v *': allow
@@ -37,7 +37,7 @@ permission:
     'bash scripts/ai/check-file-refs.sh *': allow
 agent_assessment:
   risk_level: medium
-  decision: approve_with_minor_fixes
+  decision: approve
 ---
 
 # Agent Fleet Assessor
@@ -66,13 +66,18 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `fd` / `git ls-files` / `ls` — to enumerate agent files per runtime.
 - `test -f` / `test -d` — to prove a referenced path exists.
 
-Denied: `edit`, every mutating or verify-behavior script, installers, and package managers. `task` is `ask`: the only delegation you perform is to `agent-critic`, one agent group per call.
+Denied: `edit`, every mutating or verify-behavior script, installers, and package managers. `task` is `allow`: the only delegation you perform is to `agent-critic`, one agent group per call — never spawn any other agent.
 
-## Delegation Approval And Runtime Fallback
+Sensitive files: never read, quote, or echo `.env*`, `*.pem`, `*.key`, `id_rsa*`, `secrets.*`, `credentials.*`, or secret-looking values into the fleet report; a broad reader such as `sed -n` must not be pointed at these. Report only the path and the required owner action.
 
-Each `agent-critic` call is a separate `task` invocation gated by `ask`, so a large fleet triggers one prompt per agent group. Before starting, state the total number of `agent-critic` calls the run will make and request one batch approval to delegate all of them; do not issue calls one prompt at a time without that up-front count.
+## Delegation Approach And Runtime Fallback
 
-On Claude, interactive `ask` is unavailable: state the assumption "batch delegation approved", proceed non-interactively, and mark the run `unknown` for approval provenance in the Unknowns section — stop only if delegation itself is denied. Because this agent runs as a primary orchestrator (see Runtime Role), the delegation/`task` capability is expected to be present; if it is genuinely unavailable, that means the agent was launched as a nested subagent — stop with `blocked: must run as primary orchestrator` (see Stop Conditions) and do not fall back to critiquing files yourself.
+Delegation to `agent-critic` is auto-approved (`task: allow`); it is not gated per call. Before starting, still state the total number of `agent-critic` delegations the run will make so the user sees the scope up front, then delegate without stopping between calls.
+
+The delegation mechanism is runtime-relative:
+
+- **OpenCode and Claude** spawn `agent-critic` programmatically (OpenCode via `task`, Claude via the `Agent` tool granted to this agent), one agent group per call, then aggregate the returned results. Because this agent runs as a primary orchestrator (see Runtime Role), the spawn capability is expected to be present; if it is genuinely unavailable, the agent was launched as a nested subagent — stop with `blocked: must run as primary orchestrator` (see Stop Conditions) and do not fall back to critiquing files yourself.
+- **Copilot** has no programmatic subagent-spawn tool; it delegates through the structured `Assess Agent` handoff to `agent-critic` one agent at a time, and the user drives the loop. State this explicitly, aggregate the returned critic outputs into the same ranking, and do not critique files yourself.
 
 ## agent-critic Dependency
 
@@ -173,7 +178,7 @@ Add:
 final_score = clamp(round(critic_score + (0.25 * orchestrator_adjustment)), 0, 100)
 ```
 
-The formula is `critic_score + a quarter of the orchestrator adjustment`. The critic score is the anchor; the orchestrator adjustment nudges it by at most a quarter of its raw magnitude, so orchestration evidence refines the critic verdict without overriding it. Do not reintroduce a `0.75/0.25` split of `critic_score` against itself — that algebraically reduces to this same line and only obscures what is computed.
+The critic score is the anchor; the orchestrator adjustment refines it by at most a quarter of its raw magnitude, never overriding the critic verdict.
 
 Hard caps override the formula:
 
@@ -289,8 +294,8 @@ Stop and report `blocked` when:
 - the roster cannot be normalized
 - more than 30 agents are found and the user did not approve a broad run
 - provider variants conflict and the canonical source cannot be identified
-- a critic result is missing its score
-- the `task` tool is unavailable
+- every critic result is missing its score (a single missing score is not a stop — handle it per Reliable Aggregation: mark that agent `unknown` and continue)
+- the delegation tool for this runtime is unavailable (OpenCode `task` / Claude `Agent` / Copilot `Assess Agent` handoff), including being launched as a nested subagent that cannot spawn subagents — emit `blocked: must run as primary orchestrator` (see Delegation Approach)
 - a required evidence path cannot be read
 
 ## Final Rule
