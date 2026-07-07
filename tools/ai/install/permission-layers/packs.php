@@ -224,6 +224,13 @@ function aiPermissionPacks(): array
         'core.safe_read.deny_eza' => aiPermissionEntries('bash', [
             'eza *' => 'deny',
         ]),
+        // Extracted (agent-critic MAJOR fix, 2026-07-07): 'bat *' deny was a duplicated
+        // inline exception on 'architecture-plan-writer' and 'reviewer' (bat is a raw file
+        // reader with no secret-blocking guard, unlike preview-file.sh); atomic pack per this
+        // file's single-pattern-reuse precedent (deny_eza/deny_rg/deny_test_x).
+        'core.safe_read.deny_bat' => aiPermissionEntries('bash', [
+            'bat *' => 'deny',
+        ]),
         'core.safe_read.deny_rg' => aiPermissionEntries('bash', [
             'rg *' => 'deny',
         ]),
