@@ -38,7 +38,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / cli` - 1
 - `root / exporter` - 1
 - `root / generator` - 1
-- `root / github-copilot-agent` - 22
+- `root / github-copilot-agent` - 23
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 22
 - `root / github-copilot-skill` - 23
@@ -112,6 +112,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-agent`|Agent Creator Static Validator|`.github/agents/agent-creator-static-validator.agent.md`|Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors|
 |`github-copilot-agent`|Agent Creator Supervisor|`.github/agents/agent-creator-supervisor.agent.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
 |`github-copilot-agent`|Agent Creator|`.github/agents/agent-creator.agent.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
+|`github-copilot-agent`|Agent Fleet Assessor|`.github/agents/agent-fleet-assessor.agent.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`github-copilot-agent`|Architect|`.github/agents/architect.agent.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`github-copilot-agent`|Architecture Plan Writer|`.github/agents/architecture-plan-writer.agent.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`github-copilot-agent`|Bugfix|`.github/agents/bugfix.agent.md`|Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal|
