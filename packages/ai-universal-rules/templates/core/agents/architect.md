@@ -167,7 +167,7 @@ Denied: all verify/test/write/hook/host scripts (`ai-verify`, `run-repo-tests`, 
 
 ## Canonical References
 
-Load only what the current design touches: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/architecture-locks.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/command-risk-taxonomy.md`, `docs/ai/verification-matrix.md`, `docs/ai/generated-artifacts.md`, `docs/ai/ownership.md`, `docs/ai/capabilities/README.md`.
+Load only files directly connected to the affected paths and contracts — do not load the full list by default. Maximum initial reference load: 3 files unless evidence requires more. Candidates: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/architecture-locks.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/command-risk-taxonomy.md`, `docs/ai/verification-matrix.md`, `docs/ai/generated-artifacts.md`, `docs/ai/ownership.md`, `docs/ai/capabilities/README.md`.
 
 ## Capability Routing
 
@@ -234,12 +234,7 @@ Stop and hand off to researcher or user when repository evidence is insufficient
 
 When a design is complete (ACs, source-of-truth files, contracts, and verification surfaces are clear), always hand off to the `architecture-plan-writer` agent to persist the plan as a Todo markdown file before any implementation. The architect never writes the plan file itself (`edit: deny`).
 
-The handoff to `architecture-plan-writer` must carry, unchanged and no wider than the task or ticket:
-
-- proposed design and non-goals (things to avoid)
-- ordered implementation steps
-- acceptance criteria (explicit, inferred, negative)
-- contracts, affected paths, verification plan, risks/rollback
+The handoff to `architecture-plan-writer` must carry the strict `Plan Writer Handoff Envelope` (see Final Output), unchanged and no wider than the task or ticket. Every field is required; use `unknown` when evidence does not prove one. Do not hand off directly to the implementer — the plan writer always comes first.
 
 Default output is `docs/tickets/{branch-name}/plan-{n}-{short-desc}.md` (one folder per current git branch, one numbered file per plan — never a hardcoded `plan-1-...` when multiple tickets are in scope); the user may override the folder only within `docs/tickets/`. If the design is incomplete, do not hand off to the plan writer — resolve the stop condition first.
 
@@ -273,6 +268,33 @@ Default output is `docs/tickets/{branch-name}/plan-{n}-{short-desc}.md` (one fol
 ## Risks Or Unknowns
 
 ## Handoff Notes For Implementer
+
+## Plan Writer Handoff Envelope
+
+<!-- Strict machine-readable handoff to architecture-plan-writer. Every field required; use `unknown` when unproven. -->
+
+- Handoff version: 1
+- Source agent: architect
+- Target agent: architecture-plan-writer
+- Scope ID: {short stable id}
+- Ticket: {id or none}
+- Branch hint: {branch or unknown}
+- Title: {plan title}
+- Write target: docs/tickets/{branch-name}/plan-{n}-{short-desc}.md
+- Scope status: complete | blocked
+- Scope lock: {one sentence naming the exact allowed scope}
+- In scope: {list}
+- Out of scope: (see Non-Goals above)
+- Affected paths: {list}
+- Source-of-truth files: {list}
+- Contracts: (see Contracts And Boundaries above)
+- Ordered implementation steps: {list}
+- Acceptance criteria: {AC-01 [explicit|inferred|evidence-backed|negative]: ...}
+- Verification mapping: {AC-01 -> command/inspection: ...} (see Verification Plan above)
+- Risks/Rollback: (see Risks Or Unknowns above)
+- Diagram: included | not required
+- Immediate next agent: architecture-plan-writer
+- Then: implementer
 
 ## Recommended Next Step
 ```

@@ -110,7 +110,9 @@ Only treat writing as blocked if an actual `write`/`edit` tool call returns a pe
 
 Prefer this intake order: architect design handoff, user-stated task/ticket, ticket file under `docs/tickets/`, active repository evidence.
 
-If the architect handoff and the ticket disagree on scope, use the narrower scope and record the conflict under Risks Or Unknowns.
+If the architect handoff and the ticket disagree on scope, use the narrower scope and record the conflict under Risks And Rollback.
+
+Treat a supplied `Plan Writer Handoff Envelope` as the primary source of truth. Limit inspection to `git status`/branch, existing plan files in the target folder, and (in Update Mode) the existing plan file. Do not run broad repository search unless a required envelope field is missing or contradictory.
 
 ## Required Flow
 
@@ -213,10 +215,16 @@ Use unchecked Markdown tasks only, grouped by priority:
 
 ## Acceptance Criteria
 
-Each AC must be observable and testable:
+Each AC must be observable and testable, and must map to what it proves and how it is verified:
 
 - [ ] AC-01: ...
+  - Type: explicit | inferred | evidence-backed | negative
+  - Proves: {P0-01, ...}
+  - Verification: {command or inspection}
 - [ ] AC-02: ...
+  - Type: ...
+  - Proves: ...
+  - Verification: ...
 
 ## Verification Plan
 
