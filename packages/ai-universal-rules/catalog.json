@@ -53,20 +53,22 @@
         "root:adapter-policy": 1,
         "root:ai-script": 27,
         "root:capability": 17,
-        "root:claude-agent": 14,
+        "root:claude-agent": 24,
+        "root:claude-command": 5,
+        "root:claude-skill": 22,
         "root:cli": 1,
         "root:exporter": 2,
         "root:generator": 1,
-        "root:github-copilot-agent": 23,
+        "root:github-copilot-agent": 24,
         "root:github-copilot-instruction": 22,
         "root:github-copilot-prompt": 23,
-        "root:github-copilot-skill": 23,
-        "root:opencode-agent": 14,
-        "root:opencode-command": 24,
+        "root:github-copilot-skill": 25,
+        "root:opencode-agent": 16,
+        "root:opencode-command": 25,
         "root:opencode-skill": 26,
         "root:php-reference": 3,
         "root:root-doc": 19,
-        "root:schema": 1,
+        "root:schema": 2,
         "root:validator": 4,
         "root:verifier": 2
     },
@@ -1738,6 +1740,46 @@
         {
             "scope": "root",
             "type": "claude-agent",
+            "name": "agent-creator-runtime-guardian",
+            "path": ".claude/agents/agent-creator-runtime-guardian.md",
+            "runtime": "claude",
+            "description": "Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "agent-creator-semantic-verifier",
+            "path": ".claude/agents/agent-creator-semantic-verifier.md",
+            "runtime": "claude",
+            "description": "Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "agent-creator-static-validator",
+            "path": ".claude/agents/agent-creator-static-validator.md",
+            "runtime": "claude",
+            "description": "Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "agent-creator-supervisor",
+            "path": ".claude/agents/agent-creator-supervisor.md",
+            "runtime": "claude",
+            "description": "Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "agent-creator",
+            "path": ".claude/agents/agent-creator.md",
+            "runtime": "claude",
+            "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
             "name": "agent-critic",
             "path": ".claude/agents/agent-critic.md",
             "runtime": "claude",
@@ -1770,6 +1812,22 @@
         {
             "scope": "root",
             "type": "claude-agent",
+            "name": "bugfix",
+            "path": ".claude/agents/bugfix.md",
+            "runtime": "claude",
+            "description": "Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "build-config",
+            "path": ".claude/agents/build-config.md",
+            "runtime": "claude",
+            "description": "Update build, packaging, or verification configuration in awesome-ai-utmostcreator"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
             "name": "config-maintainer",
             "path": ".claude/agents/config-maintainer.md",
             "runtime": "claude",
@@ -1778,10 +1836,26 @@
         {
             "scope": "root",
             "type": "claude-agent",
+            "name": "docs",
+            "path": ".claude/agents/docs.md",
+            "runtime": "claude",
+            "description": "Update or align documentation after implementation changes in awesome-ai-utmostcreator"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
             "name": "implementer",
             "path": ".claude/agents/implementer.md",
             "runtime": "claude",
             "description": "Use when a bounded implementation slice is clear and focused verification should happen in this repository"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
+            "name": "infra-auditor",
+            "path": ".claude/agents/infra-auditor.md",
+            "runtime": "claude",
+            "description": "Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator"
         },
         {
             "scope": "root",
@@ -1842,10 +1916,234 @@
         {
             "scope": "root",
             "type": "claude-agent",
+            "name": "upgrade",
+            "path": ".claude/agents/upgrade.md",
+            "runtime": "claude",
+            "description": "Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in awesome-ai-utmostcreator"
+        },
+        {
+            "scope": "root",
+            "type": "claude-agent",
             "name": "workflow-auditor",
             "path": ".claude/agents/workflow-auditor.md",
             "runtime": "claude",
             "description": "Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims"
+        },
+        {
+            "scope": "root",
+            "type": "claude-command",
+            "name": "install",
+            "path": ".claude/commands/install.md",
+            "runtime": "claude",
+            "description": "Guided install of the AI workflow kit into a target project, asking for missing parameters"
+        },
+        {
+            "scope": "root",
+            "type": "claude-command",
+            "name": "post-install-setup",
+            "path": ".claude/commands/post-install-setup.md",
+            "runtime": "claude",
+            "description": "Guided post-install setup for installed projects"
+        },
+        {
+            "scope": "root",
+            "type": "claude-command",
+            "name": "search-evidence",
+            "path": ".claude/commands/search-evidence.md",
+            "runtime": "claude",
+            "description": "Collect script-first repository evidence using ai-search"
+        },
+        {
+            "scope": "root",
+            "type": "claude-command",
+            "name": "verify-ai-wiring",
+            "path": ".claude/commands/verify-ai-wiring.md",
+            "runtime": "claude",
+            "description": "Verify OpenCode script-first AI wiring"
+        },
+        {
+            "scope": "root",
+            "type": "claude-command",
+            "name": "verify",
+            "path": ".claude/commands/verify.md",
+            "runtime": "claude",
+            "description": "Compatibility command that runs the verification workflow; prefer the verify-change skill for reusable guidance"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "architecture-plan",
+            "path": ".claude/skills/architecture-plan/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when producing a focused implementation plan for a medium or large change before implementation begins"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "bug-regression",
+            "path": ".claude/skills/bug-regression/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "dependency-upgrade",
+            "path": ".claude/skills/dependency-upgrade/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "docs-sync",
+            "path": ".claude/skills/docs-sync/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when changed behavior or workflow needs matching documentation updates without broad implementation planning"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "evidence-first-execution",
+            "path": ".claude/skills/evidence-first-execution/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output."
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "generate-permissions",
+            "path": ".claude/skills/generate-permissions/SKILL.md",
+            "runtime": "claude",
+            "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "mentor-mode",
+            "path": ".claude/skills/mentor-mode/SKILL.md",
+            "runtime": "claude",
+            "description": "Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "new-feature",
+            "path": ".claude/skills/new-feature/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when implementing a bounded feature with existing repository patterns and focused verification"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "plan-slice",
+            "path": ".claude/skills/plan-slice/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "post-install-setup",
+            "path": ".claude/skills/post-install-setup/SKILL.md",
+            "runtime": "claude",
+            "description": "Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "prd-and-tasks",
+            "path": ".claude/skills/prd-and-tasks/SKILL.md",
+            "runtime": "claude",
+            "description": "Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "project-context",
+            "path": ".claude/skills/project-context/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "regression-test",
+            "path": ".claude/skills/regression-test/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when the main task is to create a failing or proving regression test for a reported bug or edge case"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "release-safety",
+            "path": ".claude/skills/release-safety/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "replace-placeholders",
+            "path": ".claude/skills/replace-placeholders/SKILL.md",
+            "runtime": "claude",
+            "description": "Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "repo-investigation",
+            "path": ".claude/skills/repo-investigation/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence."
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "review-diff",
+            "path": ".claude/skills/review-diff/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "review-search-tool",
+            "path": ".claude/skills/review-search-tool/SKILL.md",
+            "runtime": "claude",
+            "description": "Review ai-search implementation and contract safety"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "scan-stack",
+            "path": ".claude/skills/scan-stack/SKILL.md",
+            "runtime": "claude",
+            "description": "Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "script-inventory",
+            "path": ".claude/skills/script-inventory/SKILL.md",
+            "runtime": "claude",
+            "description": "Build AI script inventory with risk and parity checks"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "search-evidence",
+            "path": ".claude/skills/search-evidence/SKILL.md",
+            "runtime": "claude",
+            "description": "Collect repository evidence using ai-search"
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "verify-change",
+            "path": ".claude/skills/verify-change/SKILL.md",
+            "runtime": "claude",
+            "description": "Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly"
         },
         {
             "scope": "root",
@@ -1918,6 +2216,14 @@
             "path": ".github/agents/agent-creator.agent.md",
             "runtime": "github-copilot",
             "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-agent",
+            "name": "Agent Critic",
+            "path": ".github/agents/agent-critic.agent.md",
+            "runtime": "github-copilot",
+            "description": "Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet."
         },
         {
             "scope": "root",
@@ -2053,7 +2359,7 @@
             "name": "Upgrade",
             "path": ".github/agents/upgrade.agent.md",
             "runtime": "github-copilot",
-            "description": "Plan or apply dependency and platform upgrades carefully in awesome-ai-utmostcreator"
+            "description": "Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in awesome-ai-utmostcreator"
         },
         {
             "scope": "root",
@@ -2426,6 +2732,22 @@
         {
             "scope": "root",
             "type": "github-copilot-skill",
+            "name": "ai-scripts",
+            "path": ".github/skills/ai-scripts/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use registered scripts with risk-based approvals and evidence."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "ai-search",
+            "path": ".github/skills/ai-search/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use ai-search to collect bounded repository evidence."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
             "name": "architecture-plan-writer",
             "path": ".github/skills/architecture-plan-writer/SKILL.md",
             "runtime": "github-copilot",
@@ -2610,6 +2932,22 @@
         {
             "scope": "root",
             "type": "opencode-agent",
+            "name": "agent-critic",
+            "path": ".opencode/agents/agent-critic.md",
+            "runtime": "opencode",
+            "description": "Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet."
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "agent-fleet-assessor",
+            "path": ".opencode/agents/agent-fleet-assessor.md",
+            "runtime": "opencode",
+            "description": "Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
             "name": "architect",
             "path": ".opencode/agents/architect.md",
             "runtime": "opencode",
@@ -2766,6 +3104,14 @@
             "path": ".opencode/commands/generate-permissions.md",
             "runtime": "opencode",
             "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-command",
+            "name": "install",
+            "path": ".opencode/commands/install.md",
+            "runtime": "opencode",
+            "description": "Guided install of the AI workflow kit into a target project, asking for missing parameters"
         },
         {
             "scope": "root",
@@ -3294,6 +3640,14 @@
             "path": "docs/ai/workflow.md",
             "runtime": "canonical",
             "description": "Default live workflow for risk, verification, context, and docs sync."
+        },
+        {
+            "scope": "root",
+            "type": "schema",
+            "name": "ai-run-ledger.schema.json",
+            "path": "schemas/ai/ai-run-ledger.schema.json",
+            "runtime": "canonical",
+            "description": "JSON schema for the per-run rollup ledger folded from evidence-event.schema.json entries by session_id/trace_id."
         },
         {
             "scope": "root",

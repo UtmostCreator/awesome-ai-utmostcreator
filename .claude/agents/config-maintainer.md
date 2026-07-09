@@ -13,7 +13,8 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
@@ -100,7 +101,10 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `semgrep *`
 
 Do not run arbitrary shell commands. Do not run commands not in this list.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
+`ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
+also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other repository-wide commands not part of this agent's approved list (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) remain prose-discouraged and interactively gated repo-wide per `.claude/settings.json`, but are outside this agent's own bash surface regardless.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -122,15 +126,13 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 
 ## Hard Rules
 
+- Write scope is limited to `configs/**` and the named config dotfiles (`.editorconfig`, `.eslintrc.json`, `.prettierrc.json`, `.stylelintrc.json`, `.markdownlint-cli2.yaml`, `.shellcheckrc`) per this agent's frontmatter `permission.edit` table. Never write to `packages/**`, `vendor/**`, `node_modules/**`, `.git/**`, `dist/**`, `build/**`, `coverage/**`, `.cache/**`, generated output paths (`docs/ai/generated/**`, `docs/generated/**`, `*.generated.*`), lockfiles (`*.lock`, `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`), or secrets/credentials (`*.pem`, `*.key`, `*.crt`, `.env*`, `secrets.*`, `credentials.*`, `auth.json`). On OpenCode this scope is enforced directly by the frontmatter `permission.edit` table. Claude and Copilot cannot express path-scoped edit grants, so on those runtimes this is a behavioral rule, backstopped only partially by `.claude/settings.json`'s narrower global deny-floor — treat it as binding regardless of enforcement gaps. If a change appears to require touching a denied path, stop and report `needs-scope-approval` naming the exact path instead of editing it. Self-verify before finishing: run `git status --short` and confirm every changed path matches this scope; if any path falls outside it, revert the change or stop and report `needs-scope-approval`.
 - Preserve current behavior unless a change is explicitly requested.
 - Do not clean up unrelated config.
 - Do not make machine-wide changes without explicit approval.
 - Do not retry broad mutating commands after failure.
-- File rename is allowed only as a direct rename or move operation.
-- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
-- Do not delete files unless the user explicitly requests deletion in the current conversation.
-- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
 - Do not read, quote, summarize, or copy secrets or credentials.
+- Do not write secrets or credentials either — the guard above covers both directions.
 - Use `unknown` when evidence does not prove compatibility.
 
 ## Clarification And Handoff
@@ -139,15 +141,15 @@ See `docs/ai/capabilities/clarification-and-handoff/CAPABILITY.md` for when to a
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write/build tier. Use:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. Write/build tier. Use:
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the config change; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect the current change; expect a diff bundle.
 - `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.
-- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the path-scoped `edit:` permission is insufficient; expect a tracked, reversible edit.
+- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the runtime's native file-edit permission is insufficient; expect a tracked, reversible edit.
 - `session-checkpoint.sh` (`ask`) — for continuity across a multi-file config pass.
 
-Edits normally go through the native path-scoped `edit:` permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
+Edits normally go through the runtime's native file-edit permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
 
 ## Canonical References
 
@@ -168,7 +170,7 @@ Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/capabilities/
 2. Confirm the requested change scope.
 3. Check for machine-wide or cross-user impact.
 4. Apply the smallest safe change.
-5. Run a syntax or lint check if available.
+5. Run a syntax or lint check when one exists for the config type; if none is available, record that explicitly in the Verification Run section.
 6. Document affected surface, compatibility notes, and rollback path.
 
 ## File Rename And Delete Policy
@@ -193,3 +195,5 @@ Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/capabilities/
 
 ## Recommended Next Step
 ```
+
+Default next step: reviewer.

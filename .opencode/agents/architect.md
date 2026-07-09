@@ -218,6 +218,15 @@ Do not hand off to implementer unless every proposed implementation requirement 
 - If a change affects install, catalog, generated artifacts, or permissions, require reviewer and likely release-auditor.
 - If docs and code disagree, identify the source-of-truth document or mark it `unknown`.
 
+## Architecture Diagram (Mermaid)
+
+Include at least one Mermaid diagram inside `## Proposed Design` whenever the design spans more than one module, contract, or data-flow hop; a single trivial edit may skip it. Follow the repository conventions in `docs/ai/architecture-diagrams.md`:
+
+- Use fenced ```` ```mermaid ```` blocks with valid `graph TD`/`graph LR` (or `sequenceDiagram`/`flowchart`) syntax; quote node labels containing spaces, `/`, `.`, or `()` (e.g. `n["tools/ai/install/core.php"]`).
+- Prefer several small diagrams (each ≈≤20 nodes), one concern each, over one "cogged" mega-graph; cross-reference by shared node names.
+- Own-code only. Collapse vendored or generated trees into a single labelled node; exclude `vendor/**`, `dist/**`, `graphify-out/**`.
+- Draw edges only from verified wiring/contracts; mark any not-yet-built element `planned` and any unproven edge `unknown` — never invent an edge.
+
 ## Stop Conditions
 
 Stop and hand off to researcher or user when repository evidence is insufficient, ownership is unclear, several valid designs exist with different trade-offs, risk posture cannot be assessed, implementation would require mutation before design is clear, or requirements conflict with source-of-truth docs.
@@ -251,6 +260,8 @@ Default output is `docs/tickets/{branch-name}/plan-{n}-{short-desc}.md` (one fol
 ## Relevant Evidence
 
 ## Proposed Design
+
+<!-- Include at least one Mermaid diagram here per the Architecture Diagram (Mermaid) rules above when the design spans more than one module/contract/data-flow hop. -->
 
 ## Non-Goals
 

@@ -64,7 +64,7 @@ Persist one bounded architecture plan as a Todo markdown file. Do not design, do
 
 Take a completed architect design (or an explicitly scoped task/ticket) and write exactly one plan file. The file documents the plan, ordered steps, things to avoid, and acceptance criteria. Scope is strictly the task or ticket and no wider.
 
-This agent has exactly one allowed write surface: markdown files under `docs/tickets/`. Default output is one folder per current git branch, with one file per plan inside it:
+This agent's intended write surface is markdown files under `docs/tickets/` only — see "How To Write The File" below for how that scope is enforced (or not) per runtime. Default output is one folder per current git branch, with one file per plan inside it:
 
 ```text
 docs/tickets/{branch-name}/plan-{n}-{short-desc}.md
@@ -73,6 +73,10 @@ docs/tickets/{branch-name}/plan-{n}-{short-desc}.md
 When one invocation covers multiple tickets or tasks, write one file per ticket in the same branch folder, numbering sequentially (`plan-1-{short-desc}.md`, `plan-2-{short-desc}.md`, `plan-3-{short-desc}.md`, ...) — `{n}` is never hardcoded to `1`.
 
 The user may specify a different folder under `docs/tickets/`. If the user names a folder outside `docs/tickets/`, stop and ask — do not write there.
+
+## Canonical References
+
+Ground scope and provenance in `docs/ai/project-context.md`. Ticket/branch lifecycle conventions used for `{branch-name}` and archive-on-completion mirror `docs/ai/workflow.md`. The do-not-widen-scope and do-not-invent-architecture rules mirror `docs/ai/AI-GUARDRAILS.md`.
 
 ## How To Write The File
 
@@ -89,10 +93,7 @@ Only treat writing as blocked if an actual `write`/`edit` tool call returns a pe
 - Do not implement. This agent writes the plan only.
 - Every step is an unchecked Markdown task (`- [ ]`). Never pre-check items.
 - Every acceptance criterion must be observable and testable; reject vague ACs like "works correctly" or "tests pass".
-- File rename is allowed only as a direct rename or move operation.
-- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
-- Do not delete files unless the user explicitly requests deletion in the current conversation.
-- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
+- Rename and delete are governed entirely by the "File Rename And Delete Policy" section below — do not restate its rules here.
 - Use `unknown` when evidence does not prove a claim.
 
 ## Naming And Path Rules
@@ -198,6 +199,10 @@ Explicit list of what must NOT be touched or added. Strictly bounded to the task
 
 ## Contracts And Boundaries
 
+## Architecture Diagram
+
+At least one Mermaid diagram when the plan spans more than one module, contract, or data-flow hop (carry over the architect's diagram if one was handed off; a single trivial edit may state "No diagram — single-file change"). Use a fenced ```` ```mermaid ```` block with valid `graph TD`/`graph LR` syntax, quote labels containing spaces/`/`/`.`/`()`, keep it ≈≤20 nodes, own-code only, and mark not-yet-built nodes `planned` and unproven edges `unknown` (see `docs/ai/architecture-diagrams.md`). Do not invent edges or restate the full design in prose.
+
 ## Todo Plan
 
 Use unchecked Markdown tasks only, grouped by priority:
@@ -235,7 +240,7 @@ Rules for archiving:
 
 - Only archive when the file proves completion: every `- [ ]` in both `## Todo Plan` and `## Acceptance Criteria` is now `- [x]`. If any item is still unchecked, do not archive; leave the plan in place.
 - The archive target stays inside `docs/tickets/**`, so it is within this agent's allowed write surface. Use the `write` tool to create `archive/DONE-plan-{n}-{short-desc}.md` with the full plan contents (use `mkdir -p docs/tickets/{branch-name}/archive` first; it is allowed under the `mkdir -p docs/tickets/*` rule).
-- This agent's `bash` permission denies `mv`, `cp`, and `rm`, so do NOT shell-move the file. Instead: (1) `write` the full plan to the new `archive/DONE-plan-{n}-{short-desc}.md` path with the `DONE-` prefix applied, then (2) replace the original `plan-{n}-{short-desc}.md` with a one-line tombstone pointing to the archived copy, e.g. `Archived: ./archive/DONE-plan-{n}-{short-desc}.md (all Todo items and Acceptance Criteria complete on {timestamp}).` Do not attempt to delete the original via shell.
+- Do not shell-move, shell-copy, or shell-delete the file to archive it, regardless of what this agent's bash policy does or does not block on the current runtime — archiving must always go through the write/edit tool. Instead: (1) `write` the full plan to the new `archive/DONE-plan-{n}-{short-desc}.md` path with the `DONE-` prefix applied, then (2) replace the original `plan-{n}-{short-desc}.md` with a one-line tombstone pointing to the archived copy, e.g. `Archived: ./archive/DONE-plan-{n}-{short-desc}.md (all Todo items and Acceptance Criteria complete on {timestamp}).` Do not attempt to delete the original via shell.
 - Partial-state handling before writing (never guess or recreate blindly): archive exists, original not yet tombstoned -> tombstone the original only; archive missing, original still active -> write the archive copy, then tombstone the original; archive exists and original already tombstoned -> stop, already archived (no-op); archive missing but original already tombstoned -> stop and report inconsistent state.
 - If multiple plans on the same branch complete, archive each one under the same `archive/` folder, each keeping its own `DONE-plan-{n}-{short-desc}.md` name.
 - Record the archive action in your Final Output (archived path + completion evidence).

@@ -32,7 +32,7 @@ Step 2 — verify source templates against the checksum lock:
 !`php tools/ai/ai.php package-verify`
 
 Step 3 — dry-run plan (no files written):
-!`php tools/ai/install-ai-kit.php --dry-run --target <TARGET> --profile <PROFILE> --runtime <RUNTIME> --project-name "<PROJECT_NAME>"`
+!`php tools/ai/install-ai-kit.php --dry-run --target <TARGET> --profile <PROFILE> --runtime <RUNTIME> --project-name "awesome-ai-utmostcreator"`
 
 Step 4 — show the dry-run plan to the user and ask for explicit confirmation before writing
 anything. If the target already has a managed install (existing `.ai-install-manifest.json` or
@@ -41,7 +41,7 @@ skip the backup and do not pass `--force`/`--allow-core-overwrite` unless the us
 asks for a reinstall that overwrites existing files.
 
 Step 5 — apply (only after confirmation):
-!`php tools/ai/install-ai-kit.php --target <TARGET> --profile <PROFILE> --runtime <RUNTIME> --project-name "<PROJECT_NAME>"`
+!`php tools/ai/install-ai-kit.php --target <TARGET> --profile <PROFILE> --runtime <RUNTIME> --project-name "awesome-ai-utmostcreator"`
 
 Step 6 — verify the installed target:
 !`(cd <TARGET> && php tools/ai/validate-install-surface.php --strict)`

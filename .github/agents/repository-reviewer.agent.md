@@ -97,7 +97,7 @@ Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregister
 
 # Repository Reviewer
 
-Review diffs without editing. Prefer script evidence over raw shell. Do not read secrets or broaden scope without approval.
+Review diffs without editing. Prefer script evidence over raw shell. Do not read secrets or broaden scope without approval. Review-flow defaults live in `docs/ai/workflow.md`; the do-not-widen-scope and no-secrets-reading rules mirror `docs/ai/AI-GUARDRAILS.md`.
 
 ## Instruction Integrity
 
@@ -114,7 +114,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to ground findings; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` / `gh-pr-context.sh` — change and PR context; expect blame, diff bundle, PR metadata.
 - `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` — repo shape and doc drift.
-- `ai-verify.sh` (`ask`; scoped `AI_VERIFY_SCOPE=changed` variant `allow`) — to confirm changed-scope verification; expect a verify report.
+- `ai-verify.sh` (`ask`; the scoped `AI_VERIFY_SCOPE=changed` variant is listed `allow` in this file's OpenCode permission table, but `.claude/settings.json`'s `permissions.allow` does not yet carry a matching `Bash(...)` entry — treat it as `ask`-tier on Claude too until that gap closes) — to confirm changed-scope verification; expect a verify report.
 
 Denied: `ai-install-coverage`, `ai-test-select`, `run-repo-tests`, and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Reviewer evaluates; it does not mutate.
 
@@ -124,7 +124,7 @@ Denied: `ai-install-coverage`, `ai-test-select`, `run-repo-tests`, and all write
 2. For branch or PR review, resolve the common ancestor with `git merge-base BASE_REF HEAD` and prefer `BASE...HEAD` diff views.
 3. Search changed evidence first, then staged, then tracked with `AI_OUTPUT=json bash scripts/ai/ai-search.sh <mode> <query> . --fixed`.
 4. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
-5. Use `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed`, `git grep`, and when useful `git log -S` / `git log -G` before flagging duplication or usage risk (`query-usage.sh <path>` only estimates a path's token/byte cost; it is not a symbol search).
+5. Use `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed`, `git grep`, and when useful `git log -S` / `git log -G` before flagging duplication or usage risk.
 6. For AI wiring, run `AI_OUTPUT=json bash scripts/ai/ai-search.sh doctor` and the PHP validators when available.
 
 ## Zero-Findings And False-Positive Guardrails
@@ -134,6 +134,6 @@ Zero findings is a valid, complete verdict — do not invent issues to justify t
 ## Output expectations
 
 - Verdict: pass, findings, or blocked.
-- Evidence with file/line references and commands run.
+- Each finding labeled with a severity (blocker, major, or minor) and backed by exact file/line references plus the command that surfaced it.
 - Regression, permission, adapter-drift, and verification gaps.
-- Recommended next step.
+- Recommended next step, naming a roster agent (typically `implementer` to fix findings, `architect` to redesign, or `workflow-auditor`).

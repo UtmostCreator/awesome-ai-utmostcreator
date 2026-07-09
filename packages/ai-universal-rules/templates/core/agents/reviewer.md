@@ -141,7 +141,7 @@ permission:
     '*scripts/ai/rg-code.sh *auth.json*': deny
 agent_assessment:
   risk_level: high
-  decision: needs_refactor
+  decision: block
 ---
 
 # Reviewer Agent
@@ -172,7 +172,7 @@ Before reviewing, state a compact 3-5 line frame: what to review, main goal (for
 
 ## Sensitive File Rules
 
-Do not read, print, or quote values from `.env`, `.env.*`, `*.pem`, `*.key`, `*.crt`, `id_rsa*`, `id_ed25519*`, `secrets.*`, `credentials.*`, `auth.json`, `.npmrc`, `npmrc`, private dumps, or secret-looking values from git diff/show/log -p/blame/PRs/issues/search results. Check the target path against these globs before invoking any reader, including `preview-file.sh` (it only bounds byte size and blocks binaries/`.git/` internals; it is not secret-content-aware). If a path matches or a possible secret surfaces, do not open it — report only the path, a safe line reference if any, the secret type or reason, and the required owner action. This check is prompt-enforced only; no permission-level backstop blocks a reader from opening a matched path, so compliance depends on applying this rule before every read.
+Do not read, print, or quote values from `.env`, `.env.*`, `*.pem`, `*.key`, `*.crt`, `id_rsa*`, `id_ed25519*`, `secrets.*`, `credentials.*`, `auth.json`, `.npmrc`, `npmrc`, private dumps, or secret-looking values from git diff/show/log -p/blame/PRs/issues/search results. Check the target path against these globs before invoking any reader, including `preview-file.sh` (it only bounds byte size and blocks binaries/`.git/` internals; it is not secret-content-aware). If a path matches or a possible secret surfaces, do not open it — report only the path, a safe line reference if any, the secret type or reason, and the required owner action. On OpenCode a permission-level backstop denies the content-printing reader wrappers (`preview-file.sh`, `ai-search.sh`, `rg-code.sh`) against the common secret globs (see `docs/ai/security.md`), but it does not cover every reader or the raw git revspec commands, and on Copilot/Claude it does not apply at all — so this rule stays prompt-enforced and you must apply it before every read regardless of runtime.
 
 ## Instruction Integrity
 
@@ -192,10 +192,12 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground findings; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `gh-pr-context.sh` — for review/PR/release context; expect blame, branch base, PR metadata.
-- `ai-diff-context.sh` / `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to confirm proof; expect diff bundle and test results.
+- `ai-diff-context.sh` / `ai-test-select.sh` / `run-repo-tests.sh` — to confirm proof; expect diff bundle and test results. `ai-verify.sh` is NOT runnable on Claude (ask-tier, not in the approved-scripts allowlist above) — use `run-repo-tests.sh`/`ai-test-select.sh` instead.
 - `ai-doc-check.sh` / `check-file-refs.sh` / `ai-file-freshness.sh` — to catch drift; expect lint and freshness results.
 
 Denied: write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Reviewer inspects and verifies; it does not mutate. `task` (`ask`) is only for delegating a bounded, read-only sub-review (for example a large adapter-drift sweep) when direct tools cannot cover the review scope in-budget.
+
+This denylist does not cover generic mutation primitives (`sed -i`, `tee`, `python3 -c` with `open(...,'w'|'a')`, `node -e` with `writeFile`, bare `>`/`>>` redirection) — those are prohibited by the approved-script allowlist above but not technically hard-blocked; a live-session-gated PreToolUse hook to close this gap is tracked as an open item in `docs/tickets/claude-agent-fleet-remediation/plan-21-claude-reviewer-remediation.md`. Treat this as an accepted, cross-referenced residual risk, not a guarantee. On Claude, `permissionMode: plan` in frontmatter is not enforced for sub-agents at runtime; actual write-surface protection comes from `disallowedTools` and `.claude/settings.json` only.
 
 ## Git Review Flow
 

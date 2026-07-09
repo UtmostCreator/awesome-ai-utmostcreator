@@ -218,3 +218,11 @@ Rules:
 - If graphify-out/wiki/index.md exists, use it for broad navigation instead of raw source browsing.
 - Read graphify-out/GRAPH_REPORT.md only for broad architecture review or when query/path/explain do not surface enough context.
 - After modifying code, run `graphify update .` to keep the graph current (AST-only, no API cost).
+
+<!-- BEGIN ai-kit -->
+AI kit instructions are installed for this repository. Keep your project-specific guidance outside this managed block.
+
+- Canonical project context: `docs/ai/project-context.md`
+- Workflow defaults: `docs/ai/workflow.md`
+- Execution protocol: `docs/ai/execution-protocol.md`
+<!-- END ai-kit -->

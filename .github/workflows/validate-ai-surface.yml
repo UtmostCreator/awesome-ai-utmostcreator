@@ -34,6 +34,12 @@ jobs:
       - name: Validate install surface references
         run: php tools/ai/validate-install-surface.php --strict
 
+      - name: Check rendered agent byte-parity (.claude/.github vs templates)
+        run: php tools/ai/render-adapters.php --check
+
+      - name: Check generated Claude settings floor (permissions.allow/deny)
+        run: php tools/ai/generate-claude-settings.php --check
+
       - name: Validate adapter drift on changed files
         env:
           GITHUB_BASE_REF: ${{ github.base_ref }}

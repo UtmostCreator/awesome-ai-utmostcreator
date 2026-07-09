@@ -660,7 +660,10 @@ class InstallerSafetyTest extends TestCase
 
             $this->assertCount(count($sourceAgents), $installedAgents, 'Copilot install should expose every non-hidden canonical agent as a visible .agent.md file');
             $this->assertCount(count($sourceWorkflows), $installedPrompts, 'Copilot install should expose every workflow as a visible prompt');
-            $this->assertCount(count($sourceWorkflows), $installedSkills, 'Copilot install should expose every workflow as a visible skill');
+            // >= not ==: Copilot also ships the runtime-agnostic ai-search/ai-scripts skills
+            // (packs.php adapter-copilot) in addition to one skill per workflow, mirroring
+            // the same skill-count relationship already asserted for OpenCode below.
+            $this->assertGreaterThanOrEqual(count($sourceWorkflows), count($installedSkills), 'Copilot install should expose every workflow as a visible skill');
 
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'copilot-instructions.md');
             $this->assertFileExists($target . DIRECTORY_SEPARATOR . 'docs' . DIRECTORY_SEPARATOR . 'ai' . DIRECTORY_SEPARATOR . 'generated-artifacts.md');
@@ -777,7 +780,10 @@ class InstallerSafetyTest extends TestCase
             $installedCommands = $this->targetGlob($target, '.claude/commands/*.md');
 
             $this->assertCount(count($sourceAgents), $installedAgents, 'Claude install should expose every non-hidden canonical agent as a .claude/agents/*.md file');
-            $this->assertCount(count($sourceWorkflows), $installedSkills, 'Claude install should expose every workflow as a .claude/skills/*/SKILL.md file');
+            // >= not ==: Claude also ships the runtime-agnostic ai-search/ai-scripts skills
+            // (packs.php adapter-claude) in addition to one skill per workflow, mirroring
+            // the same skill-count relationship already asserted for OpenCode above.
+            $this->assertGreaterThanOrEqual(count($sourceWorkflows), count($installedSkills), 'Claude install should expose every workflow as a .claude/skills/*/SKILL.md file');
             // Unlike OpenCode, Claude does NOT dual-ship workflows to .claude/commands/ too
             // (Claude's own docs: skills and commands register the same slash command, and
             // skills are recommended) - only templates/commands/*.md land in .claude/commands/.

@@ -39,6 +39,24 @@ Raw shell equivalents (`grep *`, `rg *`, `cat *`, `sed *`, …) remain `ask` und
 and all execution/mutation surfaces are unchanged. The validator enforces `allow` for these three
 native keys so the posture cannot be silently downgraded.
 
+## Reader secret-path deny backstop (OpenCode only)
+
+Read-only agents grant broad `allow` to content-printing reader wrappers (`preview-file.sh`,
+`ai-search.sh`, `rg-code.sh`). On OpenCode — where the native `permission.bash` map is the real
+enforcement surface (see the matrix above) — that broad `allow` is backed by a secret-path `deny`
+backstop: the `core.safe_read.deny_secret_reads` pack (composed via the `backstop_deny_packs` lane
+in `tools/ai/install/permission-layers/`) denies those readers against secret-file globs (`.env`,
+`*.pem`, `*.key`, `*.crt`, `id_rsa*`, `secrets.*`, `credentials.*`, `auth.json`). OpenCode resolves
+`permission.bash` by last-matching-rule-in-file-order (`.findLast()`), and the generator renders the
+deny **after** the reader `allow`, so a secret-path invocation resolves to `deny`.
+
+Honest scope: this backstop is **OpenCode-only**. Copilot and Claude project only allow-effect
+entries into their `allowedBash` surface, so these deny entries are inertly skipped there; on those
+runtimes the reader secret guard remains the **prompt-level Sensitive File Rule** in each agent
+body, not a permission-level block. Coverage is also bounded to the three content-printing reader
+wrappers and the enumerated secret globs; raw `git show/log/diff/blame` revspec access and any other
+reader stay prompt-enforced. Do not describe the Copilot/Claude reader guard as permission-enforced.
+
 ## Guardian deny coverage
 
 The guardians (`tool-guardian.sh` / `.ps1`, kept at enforced rule parity) block:

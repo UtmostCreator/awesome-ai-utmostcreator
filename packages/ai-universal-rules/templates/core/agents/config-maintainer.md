@@ -174,11 +174,13 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 
 ## Hard Rules
 
+- Write scope is limited to `configs/**` and the named config dotfiles (`.editorconfig`, `.eslintrc.json`, `.prettierrc.json`, `.stylelintrc.json`, `.markdownlint-cli2.yaml`, `.shellcheckrc`) per this agent's frontmatter `permission.edit` table. Never write to `packages/**`, `vendor/**`, `node_modules/**`, `.git/**`, `dist/**`, `build/**`, `coverage/**`, `.cache/**`, generated output paths (`docs/ai/generated/**`, `docs/generated/**`, `*.generated.*`), lockfiles (`*.lock`, `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`), or secrets/credentials (`*.pem`, `*.key`, `*.crt`, `.env*`, `secrets.*`, `credentials.*`, `auth.json`). On OpenCode this scope is enforced directly by the frontmatter `permission.edit` table. Claude and Copilot cannot express path-scoped edit grants, so on those runtimes this is a behavioral rule, backstopped only partially by `.claude/settings.json`'s narrower global deny-floor — treat it as binding regardless of enforcement gaps. If a change appears to require touching a denied path, stop and report `needs-scope-approval` naming the exact path instead of editing it. Self-verify before finishing: run `git status --short` and confirm every changed path matches this scope; if any path falls outside it, revert the change or stop and report `needs-scope-approval`.
 - Preserve current behavior unless a change is explicitly requested.
 - Do not clean up unrelated config.
 - Do not make machine-wide changes without explicit approval.
 - Do not retry broad mutating commands after failure.
 - Do not read, quote, summarize, or copy secrets or credentials.
+- Do not write secrets or credentials either — the guard above covers both directions.
 - Use `unknown` when evidence does not prove compatibility.
 
 ## Clarification And Handoff

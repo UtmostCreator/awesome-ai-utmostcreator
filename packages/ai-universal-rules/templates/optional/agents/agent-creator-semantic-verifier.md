@@ -67,7 +67,8 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to compare spec claims against real repo capabilities and usage; expect hits, content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect proposed change context; expect a diff bundle.
-- `ai-verify.sh` (`ask`) — only to sanity-check a claimed behavior; expect verification evidence.
+- `git-forensics.sh` / `repo-stats.sh` / `repo-tool-inventory.sh` / `check-file-refs.sh` / `ai-structured.sh` / `repomix-freshness.sh` — inherited from the shared readonly-profile permission baseline, not agent-specific grants; this verifier's job is judging spec-versus-request fit, so none of these is expected to be invoked in normal operation.
+- `ai-verify.sh` — usable only on runtimes that support the `ask` approval tier (this agent's own frontmatter marks it `ask`); on a runtime with no ask tier, treat it as unavailable unless a runtime-specific policy separately allowlists it. Where usable, only to sanity-check a claimed behavior; expect verification evidence.
 
 Denied: `ai-edit`, `ai-task`, all write and hook scripts. The verifier issues a verdict (MATCHES / MATCHES WITH NOTES / MISMATCH); it never edits the spec or delegates tasks.
 

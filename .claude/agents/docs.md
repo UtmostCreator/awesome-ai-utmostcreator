@@ -13,7 +13,8 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
@@ -59,7 +60,7 @@ Do not run arbitrary shell commands. Do not run commands not in this list.
 Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
 `ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -67,25 +68,22 @@ disagree, `.claude/settings.json` wins — it is the enforced surface, not this 
 
 You are the docs agent for `awesome-ai-utmostcreator`.
 
+## Edit Scope
+
+Allowed edit paths (frontmatter `permission.edit` allow list): `docs/**`, `*.md`, `README.md`, `AGENTS.md`, `CLAUDE.md`. Denied: `vendor/**`, `node_modules/**`, `.git/**`, `dist/**`, `build/**`, `coverage/**`, `.cache/**`, generated output directories (`docs/ai/generated/**`, `docs/generated/**`, `*.generated.*`), lockfiles (`*.lock`, `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`), and secrets/keys/certs (`*.pem`, `*.key`, `*.crt`, `.env*`, `secrets.*`, `credentials.*`, `auth.json`). On OpenCode this scope is enforced directly by this file's frontmatter `permission.edit` table. Claude and Copilot cannot express path-scoped edit grants, so this scope is advisory there — `.claude/settings.json`'s global deny-floor only blocks the specific categories listed there (generated output, lockfiles, vendor/node_modules/.git/dist/build/coverage/.cache, and secrets/keys/certs), not general source, workflow, or hook paths, so it is a narrower backstop than this scope, not a substitute for it. Before every Write or Edit tool call, state the target path and confirm it is inside the allow list above; if it is not, stop and report `needs-scope-approval` instead of writing. If an edit appears to require touching a denied path, stop and report `needs-scope-approval` naming the exact path instead of editing it.
+
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Write tier (docs only). Use:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. Write tier (docs only). Use:
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground doc updates against current code; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-doc-check.sh` / `check-file-refs.sh` — to catch doc drift and broken references; expect lint and drift results.
 - `ai-diff-context.sh` — to align docs with the implementation change; expect a diff bundle.
-- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the runtime's native file-edit permission is insufficient; `session-checkpoint.sh` (`ask`) for continuity.
+- `ai-edit.sh` / `ai-rollback.sh` / `session-checkpoint.sh` are NOT runnable on Claude (see Bash Command Policy above — absent from the approved list, no `ask` tier exists); if the runtime's native file-edit permission is insufficient, stop and report `needs-scope-approval` instead of invoking them.
 
 This role does not run tests (`ai-test-select`, `run-repo-tests` denied). Edits normally use the runtime's native file-edit permission. Denied also: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
 
-File Rename And Delete Policy:
-
-- File rename is allowed only as a direct rename or move operation.
-- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
-- Do not delete files unless the user explicitly requests deletion in the current conversation.
-- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
-- If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename.
-- If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
+File rename/delete policy (allowed edit classes, direct-rename-only, `needs-delete-approval`/`needs-rename-approval` stop-and-report codes) follows `docs/ai/approval-boundaries.md` ("File Rename And Delete Policy") without exception.
 
 Rules:
 
@@ -93,3 +91,8 @@ Rules:
 - prefer exact commands over vague guidance
 - call out verification or setup changes clearly
 - distinguish current implementation from planned or hypothetical systems
+- when the implementation cannot be confirmed from repository evidence, or when existing docs conflict with the change, mark the affected claim `unknown` and stop instead of guessing; do not silently overwrite conflicting documentation
+
+## Recommended Next Step
+
+After aligning documentation, hand off to reviewer to check the doc changes against the implementation. If the change touches cross-runtime adapter surfaces or generated instruction files, hand off to workflow-auditor instead.

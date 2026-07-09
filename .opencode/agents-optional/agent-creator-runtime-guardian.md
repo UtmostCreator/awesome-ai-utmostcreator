@@ -18,13 +18,14 @@ permission:
     'pwd': allow
     'ls *': allow
     'fd *': allow
-    'rg *': allow
+    'rg *': ask
     'git grep *': allow
-    'sed -n *': allow
-    'head *': allow
-    'tail *': allow
-    'jq *': allow
-    'yq *': allow
+    'sed -n *': ask
+    'head *': ask
+    'tail *': ask
+    'jq *': ask
+    'yq *': ask
+    'bat *': ask
     'ls -1 scripts/ai/*.sh | sort': allow
     'git status*': allow
     'git diff*': allow

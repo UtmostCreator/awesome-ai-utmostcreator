@@ -147,9 +147,15 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 - `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — script-first evidence; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — history and current change; expect blame, branch base, diff bundle.
 - `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` / `repomix-freshness.sh` — repo shape, doc drift, and context-bundle freshness.
+- `ai-search-multi.sh` — batch several `ai-search.sh` queries in one call instead of an ad-hoc shell-chained command; expect `---`-separated results or a JSON array of `ai-search` envelopes.
+- `ai-structured.sh` — normalize structured evidence output (e.g. CSV) for downstream consumption; expect structured text/JSON-like output.
 - `pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
 
 Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host scripts (`ai-verify`, `ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Collect evidence only; do not verify or mutate.
+
+## Canonical References
+
+Load only what is relevant: `AGENTS.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/agent-script-access.md`.
 
 ## Mandatory sequence
 

@@ -2,8 +2,8 @@
 
 # Post Install
 
-- Profile: `full-governance`
-- Packs: `adapter-claude, capabilities-governance, hooks-pack, ci-pack, docs-reference-pack, delivery-pack, optional-agents-opencode-pack, optional-agents-copilot-pack, optional-agents-claude-pack, preview-environments-pack, evaluation-pack, service-boundary-pack, mcp-boundaries-pack, advisor-pack, target-tools-pack, shared-templates-pack, scripts-pack, policy-pack, evidence-pack, adapter-copilot, adapter-opencode, capabilities-extended, base, setup-docs, capabilities-core`
+- Profile: `agents-only`
+- Packs: `adapter-copilot, adapter-opencode, adapter-claude, scripts-pack, capabilities-core, base`
 
 ## How To Use Installed Assets
 

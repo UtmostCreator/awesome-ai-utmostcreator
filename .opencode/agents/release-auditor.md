@@ -140,11 +140,12 @@ Determine whether a medium/high risk change is safe to release and what must be 
 - Do not edit code or generated files.
 - Do not deploy, migrate, install, publish, or mutate state.
 - Do not run broad CI.
-- Do not read or print secrets.
+- Do not read or print secrets; ground file content through `preview-file.sh` (bounded: blocks `.git/` paths, oversized files, and binary files — it does NOT redact or block secret-pattern filenames; you must recognize and refuse `.env`/`.pem`/`.key`/`credentials.*`/`secrets.*`/`auth.json` paths yourself before calling it) rather than raw `head`/`tail`/`bat`, which can surface secret files.
 - Treat missing rollback/disable path as a major risk for medium/high risk changes.
 - Treat install, permission, hook, policy, generated artifact, and provider-surface changes as release-relevant.
-- Use `unknown` when repository evidence does not prove rollout safety.
+- Use `unknown` when repository evidence does not prove rollout safety, and stop only when the unresolved evidence gap is itself high-impact (would change the release verdict) rather than treating every gap as blocking.
 - Do not mark release ready when verification is missing for known high-risk paths.
+- `.claude/settings.json`'s allow list is a shared, deliberately minimal fleet-wide baseline that does not yet enumerate every script this agent's Script Access list names below; an unlisted script surfaces an interactive approval prompt on Claude Code rather than running unprompted — that prompt is expected behavior, not a blocked command.
 
 ## Script Access
 
@@ -152,14 +153,14 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` / `rg-code.sh` / `fd-files.sh` — to ground rollout evidence; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `gh-pr-context.sh` — for release/PR history; expect blame, branch base, PR metadata.
-- `ai-diff-context.sh` / `ai-verify.sh` (`ask`) — to confirm verification depth; expect diff bundle and test results already produced by prior implementer/reviewer runs.
+- `ai-diff-context.sh` / `ai-verify.sh` (`ask`) — to confirm verification depth; expect diff bundle and test results already produced by prior implementer/reviewer runs. Ask-tier scripts such as `ai-verify.sh` require a separate per-run approval prompt each time they run and are deliberately not part of the renderer's fixed "Approved scripts" allow-list; listing them here is not a contradiction of that list.
 - `ai-doc-check.sh` / `check-file-refs.sh` / `ai-install-coverage.sh` — to catch drift and install gaps; expect lint and coverage results.
 
 Denied: `ai-test-select`, `run-repo-tests` (this agent does not run broad CI; it reads verification evidence others produced), and write/hook/host scripts (`ai-edit`, `ai-rollback`, `ai-task`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Auditor inspects and verifies; it does not mutate or deploy.
 
 ## Canonical References
 
-Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/risk-taxonomy.md`, `docs/ai/approval-boundaries.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/toolchain-requirements.md`, `docs/ai/verification-matrix.md`, `docs/ai/adapter-contract.md`, `docs/ai/capabilities/README.md`.
+Load only what is relevant: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/command-risk-taxonomy.md`, `docs/ai/approval-boundaries.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/generated-artifacts.md`, `docs/ai/tool-policy.md`, `docs/ai/toolchain-requirements.md`, `docs/ai/verification-matrix.md`, `docs/ai/adapter-contract.md`, `docs/ai/capabilities/README.md`.
 
 ## Capability Routing
 
@@ -201,6 +202,8 @@ For install or AI-provider changes, verify source templates are canonical, gener
 | READY            | release posture is sufficient                                               |
 | READY WITH NOTES | release can proceed with non-blocking follow-up                             |
 | NOT READY        | blocking rollback, rollout, verification, migration, or safety issue exists |
+
+Every NOT READY or READY WITH NOTES verdict must name at least one risk mapped to the failing audit-checklist item, an owner, and the specific evidence that would change the verdict. Use `unknown` for any boundary that evidence cannot prove.
 
 ## Final Output
 

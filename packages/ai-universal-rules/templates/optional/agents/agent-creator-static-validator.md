@@ -61,6 +61,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 
 - `ai-search.sh` / `preview-file.sh` / `check-file-refs.sh` / `ai-structured.sh` — to locate the spec, confirm referenced files exist, and structure findings; expect hits, content, ref results.
 - `php tools/ai/validate-agent-spec.php` — the authoritative deterministic gate; expect a pass/fail exit code (0/1/2).
+- `ai-search-multi.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` / `git-branch-origin.sh` / `git-forensics.sh` / `repo-stats.sh` / `repo-tool-inventory.sh` / `repomix-freshness.sh` — inherited from the shared readonly-profile permission baseline, not agent-specific grants; this validator's job is deterministic (locate the spec, run `validate-agent-spec.php`), so none of these is expected to be invoked in normal operation.
 
 Denied: `ai-edit`, `ai-task`, `ai-verify`, `run-repo-tests`, all hook and pack scripts. The validator checks and reports; it never edits, tasks, or verifies behavior.
 

@@ -14,20 +14,15 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
 - `pwd`
 - `ls *`
 - `fd *`
-- `rg *`
 - `git grep *`
-- `sed -n *`
-- `head *`
-- `tail *`
-- `jq *`
-- `yq *`
 - `ls -1 scripts/ai/*.sh | sort`
 - `git status*`
 - `git diff*`
@@ -58,7 +53,7 @@ Do not run arbitrary shell commands. Do not run commands not in this list.
 Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
 `ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. These commands are absent from this agent's approved list above and MUST NOT be run by this agent regardless of `.claude/settings.json`'s ask-tier default for other agents.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -70,11 +65,12 @@ You define the runtime controls that wrap an approved agent in `awesome-ai-utmos
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Enforcement tier:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. Enforcement tier:
 
-- `pre-tool-use.sh` / `post-tool-use.sh` (`ask`) — to enforce gate policy and record evidence; expect allow/deny decisions and evidence events.
-- `session-checkpoint.sh` (`ask`), `ai-rollback.sh` (`ask`) — to checkpoint and restore runtime state; expect checkpoints and restored state.
-- `ai-verify.sh` (`ask`), `ai-diff-context.sh` — to confirm a guarded run's effect; expect verification evidence and a diff bundle.
+- `php tools/ai/validate-agent-spec.php <path>` — run once against the approved AgentSpec before deriving guardrails; treat a non-zero exit as `blocked` and hand off to `agent-creator-supervisor`.
+- `pre-tool-use.sh` / `post-tool-use.sh` are the runtime's own gate hooks you write policy against — specify their allow/deny and evidence behavior in your guardrails, but never invoke them yourself.
+- `session-checkpoint.sh`, `ai-rollback.sh` — ask-tier, approval-gated capabilities, not scripts you freely run: where the runtime supports gated command approval, use them to checkpoint and restore runtime state; expect checkpoints and restored state. On a runtime with no ask-tier bash gate (for example Claude Code, where neither script appears in the Bash Command Policy approved list), these calls are unavailable; record checkpoint/restore state in this agent's own Final Output instead.
+- `ai-verify.sh` — the same ask-tier, approval-gated pattern: where available, use it to confirm a guarded run's effect; otherwise rely on `ai-diff-context.sh` (unconditionally approved) for the diff bundle and mark verification status `unknown` in Final Output.
 
 Denied: `ai-edit`, `ai-task`, `run-repo-tests`. The guardian enforces and records; it never edits or tasks.
 
@@ -95,6 +91,7 @@ Denied: `ai-edit`, `ai-task`, `run-repo-tests`. The guardian enforces and record
 - Treat missing stop conditions or missing logging as a blocking gap.
 - Do not approve runtime for an agent that lacks human approval.
 - Do not read or print secrets while designing guardrails.
+- Stop and hand off to the agent-creator-supervisor agent on an ambiguous or incomplete AgentSpec, missing evidence, or scope growth beyond the approved spec; state the assumption, mark it `unknown`, and do not guess (no interactive prompt is guaranteed at runtime).
 
 ## Final Output
 
@@ -109,9 +106,11 @@ Denied: `ai-edit`, `ai-task`, `run-repo-tests`. The guardian enforces and record
 
 ## Stop Conditions
 
-max_steps, cost ceiling, failure cutoff
+max_steps, cost ceiling, failure cutoff — each a concrete value derived from the AgentSpec (mark `unknown` if the spec omits it)
 
 ## Observability / Logging Plan
+
+checkpoint/restore state (mark `unavailable` on Claude Code)
 
 ## Runtime Readiness
 
@@ -120,4 +119,4 @@ ready | blocked
 ## Recommended Next Step
 ```
 
-If runtime readiness is blocked, next step is the supervisor. If ready and approved, next step is implement.
+If runtime readiness is blocked, the recommended next step is the agent-creator-supervisor agent. If ready and approved, the recommended next step is the implementer agent to execute the guarded run.
