@@ -91,6 +91,17 @@ permission:
     'bash scripts/ai/install-mandatory-tools.sh *': ask
     'git add*': ask
     'git commit*': ask
+    'composer install*': ask
+    'composer update*': ask
+    'composer require*': ask
+    'npm install*': ask
+    'npm ci*': ask
+    'pnpm install*': ask
+    'pnpm add*': ask
+    'yarn install*': ask
+    'yarn add*': ask
+    'bun install*': ask
+    'bun add*': ask
     'markdownlint-cli2 *': allow
 agent_assessment:
   risk_level: low
@@ -98,6 +109,10 @@ agent_assessment:
 ---
 
 You are the docs agent for `<PROJECT_NAME>`.
+
+## Edit Scope
+
+Allowed edit paths (frontmatter `permission.edit` allow list): `docs/**`, `*.md`, `README.md`, `AGENTS.md`, `CLAUDE.md`. Denied: `vendor/**`, `node_modules/**`, `.git/**`, `dist/**`, `build/**`, `coverage/**`, `.cache/**`, generated output directories (`docs/ai/generated/**`, `docs/generated/**`, `*.generated.*`), lockfiles (`*.lock`, `composer.lock`, `package-lock.json`, `pnpm-lock.yaml`, `yarn.lock`, `bun.lockb`), and secrets/keys/certs (`*.pem`, `*.key`, `*.crt`, `.env*`, `secrets.*`, `credentials.*`, `auth.json`). On OpenCode this scope is enforced directly by this file's frontmatter `permission.edit` table. Claude and Copilot cannot express path-scoped edit grants, so this scope is advisory there — `.claude/settings.json`'s global deny-floor only blocks the specific categories listed there (generated output, lockfiles, vendor/node_modules/.git/dist/build/coverage/.cache, and secrets/keys/certs), not general source, workflow, or hook paths, so it is a narrower backstop than this scope, not a substitute for it. Before every Write or Edit tool call, state the target path and confirm it is inside the allow list above; if it is not, stop and report `needs-scope-approval` instead of writing. If an edit appears to require touching a denied path, stop and report `needs-scope-approval` naming the exact path instead of editing it.
 
 ## Script Access
 
@@ -110,14 +125,7 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 
 This role does not run tests (`ai-test-select`, `run-repo-tests` denied). Edits normally use the runtime's native file-edit permission. Denied also: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`. See `docs/ai/agent-script-access.md`.
 
-File Rename And Delete Policy:
-
-- File rename is allowed only as a direct rename or move operation.
-- Do not use create+delete to simulate rename unless the user explicitly approves destructive fallback.
-- Do not delete files unless the user explicitly requests deletion in the current conversation.
-- Delete-only edits, bulk deletes, and silent cleanup deletions are not allowed without explicit approval.
-- If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename.
-- If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
+File rename/delete policy (allowed edit classes, direct-rename-only, `needs-delete-approval`/`needs-rename-approval` stop-and-report codes) follows `docs/ai/approval-boundaries.md` ("File Rename And Delete Policy") without exception.
 
 Rules:
 

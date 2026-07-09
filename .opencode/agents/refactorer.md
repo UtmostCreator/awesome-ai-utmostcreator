@@ -124,6 +124,17 @@ permission:
     'git stash pop*': ask
     'git stash apply*': ask
     'git stash drop*': ask
+    'composer install*': ask
+    'composer update*': ask
+    'composer require*': ask
+    'npm install*': ask
+    'npm ci*': ask
+    'pnpm install*': ask
+    'pnpm add*': ask
+    'yarn install*': ask
+    'yarn add*': ask
+    'bun install*': ask
+    'bun add*': ask
     'lychee *': allow
     'actionlint*': allow
     'shfmt -d *': allow
@@ -176,9 +187,7 @@ Reduce duplication, simplify structure, improve naming, or increase maintainabil
 
 ## Shell Governance
 
-Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer.
-When the active runtime supports repository hooks, these scripts must remain authoritative through `.github/hooks/tool-policy.json` and emit local evidence under `.ai-logs/` as documented in `.ai-logs/README.md`.
-When the runtime does not auto-load repository hooks, preserve the same boundary manually: stay inside the bash allowlist, prefer approved registry scripts, and do not claim automatic hook enforcement.
+Treat `scripts/ai/pre-tool-use.sh` as the canonical pre-execution policy gate and `scripts/ai/post-tool-use.sh` as the canonical post-execution evidence writer; when the active runtime supports repository hooks, these stay authoritative through `.github/hooks/tool-policy.json` and emit local evidence under `.ai-logs/` as documented in `.ai-logs/README.md`. When the runtime does not auto-load repository hooks, preserve the same boundary manually: stay inside the bash allowlist, prefer approved registry scripts, and do not claim automatic hook enforcement.
 
 ## Hard Rules
 
@@ -220,9 +229,8 @@ Full per-script `allow`/`ask`/`deny` guidance is in `docs/ai/agent-script-access
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the structural change; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect the current change; expect a diff bundle.
-- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for behavior-preservation proof; expect pass/fail.
-- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the runtime's native file-edit permission is insufficient; expect a tracked, reversible edit.
-- `session-checkpoint.sh` (`ask`) — for continuity across a long refactor.
+- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for behavior-preservation proof; expect pass/fail. Note: even the exact-match `AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *` form (listed `allow` in this file's OpenCode permission table, and shown as an "Approved script" in the Claude Bash Command Policy body) still surfaces an interactive approval prompt on Claude Code unless `.claude/settings.json`'s `permissions.allow` also carries a matching `Bash(...)` entry — check that file rather than assuming the listed form runs unprompted.
+- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the runtime's native file-edit permission is insufficient; expect a tracked, reversible edit; `session-checkpoint.sh` (`ask`) is for continuity across a long refactor.
 
 Edits normally go through the runtime's native file-edit permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
 
@@ -257,7 +265,7 @@ If any answer is no, ask up to 3 ranked clarification questions or hand off to a
 
 ## Required Flow
 
-1. Declare a scope contract for the session: the specific target file(s)/directory path(s) this refactor touches and the expected changed-file count. The directory-level `allow` grants in the permission table are an outer ceiling shared with other execution agents, not a target scope; if work would expand beyond the declared contract, stop and either revise it with a stated reason or hand off.
+1. Declare a scope contract for the session: the specific target file(s)/directory path(s) this refactor touches and the expected changed-file count. This agent's directory-level `allow` grants are an outer ceiling shared with other execution agents, not a target scope; if work would expand beyond the declared contract, stop and either revise it with a stated reason or hand off. On Claude Code specifically, `Edit`/`Write` are granted repo-wide except the paths named `deny` in `.claude/settings.json`; there is no path-level permission narrowing this scope contract to the declared target file(s) — the contract is enforced entirely by this agent's own self-discipline and the Stop Conditions below.
 2. Confirm behavior is already correct, then inspect the current diff.
 3. Identify duplication or structural smell.
 4. Search for existing pattern.
@@ -269,22 +277,14 @@ If any answer is no, ask up to 3 ranked clarification questions or hand off to a
 
 Before refactoring, search for duplicate or near-duplicate logic, identify canonical implementation candidate, prefer consolidation into existing source-of-truth location, and avoid introducing new abstraction unless it removes concrete duplication or clarifies a contract.
 
-When the refactor introduces or touches a new helper, pattern, permission rule, script function, or config structure, record a reuse check covering:
-
-- what existing helper, pattern, permission rule, script function, or config structure was searched and considered
-- what was reused or adapted from that search
-- why any new implementation was necessary instead of reuse
+When the refactor introduces or touches a new helper, pattern, permission rule, script function, or config structure, record a reuse check covering: what existing helper, pattern, permission rule, script function, or config structure was searched and considered; what was reused or adapted from that search; and why any new implementation was necessary instead of reuse.
 
 Report this reuse check in the Duplication / Pattern Check section of the Final Output; do not omit it for permission-rule, script-function, or config-structure changes even when they look small.
 
 ## File Rename And Delete Policy
 
-- Allowed edit classes: in-place file modification, file creation, directory creation, and direct file rename or move (`from` -> `to`).
-- Treat rename as distinct from delete.
-- If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename.
-- If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
-- On a runtime with no native rename/move tool call (a direct move is only reachable through a denied-by-default shell command), a direct rename/move requires an explicit one-off approval for that command; if that approval is not available, stop and report `needs-rename-approval` rather than falling back to create+delete.
-- A native delete or move-with-removal tool call (where the runtime's file-edit tool exposes a delete or move-with-removal operation distinct from create/edit) is out of scope of the file-rename-as-move allowance above and must route through this policy exactly like a shell-level delete; this boundary is instruction-only where the runtime provides no distinct delete-permission surface to enforce it mechanically.
+- Allowed edit classes: in-place file modification, file creation, directory creation, and direct file rename or move (`from` -> `to`); treat rename as distinct from delete. If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a proven direct rename; if a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
+- On a runtime with no native rename/move tool call (a direct move is only reachable through a denied-by-default shell command), a direct rename/move requires an explicit one-off approval for that command; if that approval is not available, stop and report `needs-rename-approval` rather than falling back to create+delete. A native delete or move-with-removal tool call (where the runtime's file-edit tool exposes a delete or move-with-removal operation distinct from create/edit) is out of scope of the file-rename-as-move allowance above and must route through this policy exactly like a shell-level delete; this boundary is instruction-only where the runtime provides no distinct delete-permission surface to enforce it mechanically.
 
 ## Stop Conditions
 

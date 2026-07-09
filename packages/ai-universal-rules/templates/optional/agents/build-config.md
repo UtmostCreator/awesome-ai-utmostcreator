@@ -53,7 +53,6 @@ permission:
     'jq *': ask
     'yq *': ask
     'bat *': ask
-    'ls -1 scripts/ai/*.sh | sort': allow
     'git status*': allow
     'git diff*': allow
     'git log*': allow
@@ -104,7 +103,11 @@ permission:
     'npm install*': ask
     'npm ci*': ask
     'pnpm install*': ask
+    'pnpm add*': ask
     'yarn install*': ask
+    'yarn add*': ask
+    'bun install*': ask
+    'bun add*': ask
     'php -l *': allow
     'vendor/bin/phpunit *': allow
     './vendor/bin/phpunit *': allow
@@ -112,9 +115,10 @@ permission:
     'composer validate*': allow
     'php tools/ai/validate-*.php *': allow
     'bash scripts/ai/ai-install-coverage.sh *': allow
+    'ls scripts/ai/*.sh': allow
 agent_assessment:
   risk_level: high
-  decision: needs_refactor
+  decision: approve_with_minor_fixes
 ---
 
 You are the build-config agent for `<PROJECT_NAME>`.
@@ -145,7 +149,7 @@ Rules:
 - document command changes exactly
 - after any build or config edit, run scoped verification (AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 ai-verify.sh, or ai-test-select.sh / run-repo-tests.sh) and report pass/fail evidence before handoff
 - if a change edits a dependency manifest (e.g. composer.json / package.json), the matching *.lock is deny-listed for direct edit; stop and report needs-lockfile-regeneration, then regenerate the lock via the ask-tier install command (composer install / npm ci) rather than leaving the lock stale
-- escalate to the release-auditor if a change affects security, release, or deployment behavior
+- see "Recommended next step" below for the release-auditor escalation condition
 
 ## Recommended next step
 

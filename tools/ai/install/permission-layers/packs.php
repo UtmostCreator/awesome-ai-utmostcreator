@@ -279,6 +279,17 @@ function aiPermissionPacks(): array
         'hard_stop.deny_chown' => aiPermissionEntries('bash', [
             'chown *' => 'deny',
         ]),
+        // Governance remediation (docs/tickets/ai-run-ledger-rollup-slice-a/arch-todo-
+        // permission-budget-and-delete-posture-20260709.md, P1 sub-item B): plain 'rm *'
+        // (distinct from the immutable-floor 'rm -rf *') must route to ASK, not a silent
+        // allow or a hard deny, for every agent that legitimately might need to remove a
+        // file it created and no longer needs. Extracted into a named pack because
+        // implementer, super-implementer, and post-install all need the identical entry
+        // (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents forbids repeating the same
+        // exception pattern inline across 2+ agents).
+        'hard_stop.ask_rm' => aiPermissionEntries('bash', [
+            'rm *' => 'ask',
+        ]),
         'core.safe_read.deny_git_grep' => aiPermissionEntries('bash', [
             'git grep *' => 'deny',
         ]),
@@ -357,6 +368,20 @@ function aiPermissionPacks(): array
             'delta *' => 'deny',
         ]),
 
+        // core:safe-read's shared 'ls -1 scripts/ai/*.sh | sort' bullet is a piped compound
+        // command that contradicts docs/ai/agent-script-access.md's "never compose shell
+        // pipes" guidance and matches no settings.json Bash(...) pattern (a fresh agent-critic
+        // audit finding scoped to build-config, not a wider sweep — see
+        // docs/tickets/claude-agent-fleet-remediation/plan-13-build-config-render-drift.md).
+        // Single-agent use today (build-config only); kept as a named pack rather than an
+        // inline exception because architecture-plan-writer/ui-builder already have their own
+        // pre-existing exceptions for the same pattern at a different effect (deny/ask), and
+        // reusing their exact (pattern, effect) tuple here would trip
+        // testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents.
+        'core.safe_read.deny_ls_pipe_sort' => aiPermissionEntries('bash', [
+            'ls -1 scripts/ai/*.sh | sort' => 'deny',
+        ]),
+
         // 'git grep *' is not part of core:git-read at all (only bare 'grep *' is, and it
         // defaults deny) — 4 optional agents (infra-auditor, bugfix, build-config, upgrade)
         // grant it explicitly.
@@ -385,31 +410,45 @@ function aiPermissionPacks(): array
 
         // Ground truth: bugfix/build-config/upgrade keep composer install/update/require +
         // npm install/ci + pnpm install + yarn install as ask (core:package-manager-ask
-        // default) but deny the other 4 of that 11-pattern default set.
+        // default). The other 4 of that 11-pattern default set (pnpm add/yarn add/bun
+        // install/bun add) were previously hard-denied here; governance remediation
+        // (docs/tickets/ai-run-ledger-rollup-slice-a/arch-todo-permission-budget-and-delete-
+        // posture-20260709.md, P1 sub-item E) requires installs to warn-then-ASK rather than
+        // hard-deny, so these now match the rest of the set at 'ask'. Pack id/denyPacks
+        // reference kept unchanged (list membership does not affect the composed effect —
+        // see compose.php aiPermissionApplyLayer, which uses each entry's own `effect`
+        // field) to keep this a minimal, single-file diff.
         'package_manager.narrow_no_add_or_bun_deny' => aiPermissionEntries('bash', [
-            'pnpm add*' => 'deny',
-            'yarn add*' => 'deny',
-            'bun install*' => 'deny',
-            'bun add*' => 'deny',
+            'pnpm add*' => 'ask',
+            'yarn add*' => 'ask',
+            'bun install*' => 'ask',
+            'bun add*' => 'ask',
         ]),
 
-        // Ground truth: refactorer (already composed) and docs (this ticket) grant NO
-        // package-manager mutations at all — deny the full core:package-manager-ask
-        // 11-pattern default set. Extracted here (N-8) because refactorer previously carried
-        // these as 11 inline `exceptions`, which would have collided with docs needing the
-        // identical 11 patterns (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents).
+        // Ground truth: refactorer (already composed) and docs (this ticket) previously
+        // granted NO package-manager mutations at all — the full core:package-manager-ask
+        // 11-pattern default set was hard-denied. Governance remediation (docs/tickets/
+        // ai-run-ledger-rollup-slice-a/arch-todo-permission-budget-and-delete-posture-
+        // 20260709.md, P1 sub-item E) requires installs to warn-then-ASK rather than
+        // hard-deny — flipped to 'ask' here, which now matches the 'impl' profile's
+        // core:package-manager-ask default (a harmless same-effect restatement, not a
+        // behavior regression: FORBIDDEN_ALLOW_PATTERNS in AgentPermissionPolicyTest.php only
+        // forbids 'allow' for these patterns, never requires 'deny'). Extracted here (N-8)
+        // because refactorer previously carried these as 11 inline `exceptions`, which would
+        // have collided with docs needing the identical 11 patterns
+        // (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents).
         'package_manager.deny_all_mutations' => aiPermissionEntries('bash', [
-            'composer install*' => 'deny',
-            'composer update*' => 'deny',
-            'composer require*' => 'deny',
-            'npm install*' => 'deny',
-            'npm ci*' => 'deny',
-            'pnpm install*' => 'deny',
-            'pnpm add*' => 'deny',
-            'yarn install*' => 'deny',
-            'yarn add*' => 'deny',
-            'bun install*' => 'deny',
-            'bun add*' => 'deny',
+            'composer install*' => 'ask',
+            'composer update*' => 'ask',
+            'composer require*' => 'ask',
+            'npm install*' => 'ask',
+            'npm ci*' => 'ask',
+            'pnpm install*' => 'ask',
+            'pnpm add*' => 'ask',
+            'yarn install*' => 'ask',
+            'yarn add*' => 'ask',
+            'bun install*' => 'ask',
+            'bun add*' => 'ask',
         ]),
 
         // --- Agent-creator-family readonly-profile packs (docs/tickets/arch-todo-optional-

@@ -536,13 +536,22 @@ function aiPermissionAgentCompositions(): array
             // replace the 3 inline yarn/bun exceptions below) — so it uses the existing
             // coarse keys directly, not the 4 new atomic ones.
             languageOverlays: ['php', 'js-ts'],
-            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate'],
+            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm'],
             exceptions: [
                 aiPermissionBashAsk(aiPatternAiTool('install * --apply')),
                 aiPermissionBashAsk('php tools/ai/install-ai-kit.php *'),
                 // paratest (3x) and yarn/bun (3x) exceptions removed here (Slice D): fully
                 // redundant with the 'php'/'js-ts' language overlays above, which already
                 // grant the exact same 6 patterns.
+                // Governance remediation (docs/tickets/ai-run-ledger-rollup-slice-a/arch-todo-
+                // permission-budget-and-delete-posture-20260709.md, P1 sub-item B): without the
+                // 'hard_stop.ask_rm' askPack above, plain 'rm *' fell through to the 'deny'
+                // shipped_star_baseline (implementer never overrides it), hard-blocking a
+                // legitimate need — removing a file this agent itself created that is no longer
+                // needed. Routed to 'ask' (with a required reason per AGENTS.md approval-
+                // boundary policy) instead of a hard deny; the recursive/force form 'rm -rf *'
+                // remains blocked by the TRUE immutable hard-deny floor (core.php), which this
+                // pack does not and cannot touch.
             ],
         ),
 
@@ -697,7 +706,14 @@ function aiPermissionAgentCompositions(): array
             // agent" design (only the '*' catch-all is agent-tunable).
             starBaseline: 'allow',
             allowPacks: ['impl.sg_allow'],
-            askPacks: ['core.safe_read.raw_read_ask_gate'],
+            // Governance remediation (docs/tickets/ai-run-ledger-rollup-slice-a/arch-todo-
+            // permission-budget-and-delete-posture-20260709.md, P1 sub-item B): without the
+            // 'hard_stop.ask_rm' pack, plain 'rm *' silently fell through to this agent's
+            // 'allow' starBaseline (no confirmation at all) — the opposite of the intended
+            // posture. Routed to 'ask' (with a required reason) so deletion always needs
+            // human confirmation, matching implementer and post-install. 'rm -rf *' remains
+            // blocked by the TRUE immutable hard-deny floor (core.php) regardless of this pack.
+            askPacks: ['core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm'],
             exceptions: [
                 // Sole intentional carve-out: super-implementer is the one power agent that
                 // may commit without a prompt. Every OTHER composed agent inherits
@@ -729,13 +745,17 @@ function aiPermissionAgentCompositions(): array
                 'verify.install_coverage_allow',
                 'proof.validate_script',
                 'doctor.scripts',
-                'install.docs_allow',
             ],
             // Policy decision (continuation session): ask-gate rg/bat/jq/yq the same as the
             // other 4 impl-profile agents. head/tail/sed-n are excluded below via exceptions
             // (see note there) — post-install already denies them, stricter than ask, and
-            // must not be loosened by this pack.
-            askPacks: ['core.safe_read.raw_read_ask_gate'],
+            // must not be loosened by this pack. 'hard_stop.ask_rm' (governance remediation,
+            // docs/tickets/ai-run-ledger-rollup-slice-a/arch-todo-permission-budget-and-
+            // delete-posture-20260709.md P1 sub-item B) replaces the former inline 'rm *': ask
+            // exception below — extracted to a shared pack because implementer and
+            // super-implementer now need the identical entry
+            // (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents).
+            askPacks: ['core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm'],
             exceptions: [
                 // Ground truth: shipped post-install's edit block has scripts/ai/** allow but
                 // NO tools/ai/** key, so it denies tools/ai/** edits. The 'install' edit
@@ -756,9 +776,8 @@ function aiPermissionAgentCompositions(): array
                 aiPermissionBashAllow(aiPatternAiTool('advisor*')),
 
                 // Post-install-specific destructive-command gating. ('chown *': deny is
-                // already covered by the 'hard_stop.deny_chown' pack above — not restated
-                // here, review-pass cleanup.)
-                aiPermissionBashAsk('rm *'),
+                // already covered by the 'hard_stop.deny_chown' pack above, and 'rm *': ask
+                // by the 'hard_stop.ask_rm' pack above — neither restated here.)
                 aiPermissionBashAsk(aiPatternGit('clean*')),
 
                 // Ground truth: post-install denies these write scripts (impl profile's
@@ -850,6 +869,9 @@ function aiPermissionAgentCompositions(): array
                 'git.branch_wildcard_deny',
                 'git.mutating_add_commit_only_deny',
                 'package_manager.narrow_no_add_or_bun_deny',
+                // Fresh agent-critic audit finding (plan-13): the piped 'ls -1 scripts/ai/*.sh
+                // | sort' form is denied back; the unpiped equivalent is granted below.
+                'core.safe_read.deny_ls_pipe_sort',
             ],
             allowPacks: [
                 'git.grep_allow',
@@ -860,6 +882,9 @@ function aiPermissionAgentCompositions(): array
             // Same intentional raw-read-tool tightening as bugfix above (required by
             // testRawReadToolsAreNeverAllowedInWriteProfileAgents).
             askPacks: ['core.safe_read.raw_read_ask_gate'],
+            exceptions: [
+                aiPermissionBashAllow('ls scripts/ai/*.sh'),
+            ],
         ),
 
         // upgrade: verified via `diff` against `build-config`'s original shipped ground
@@ -1017,7 +1042,15 @@ function aiPermissionAgentCompositions(): array
             // Extracted 'session-checkpoint.sh': ask to a pack (docs/tickets/arch-todo-
             // optional-agent-permission-composition-20260705T221434Z/plan.md, Slice C
             // continuation): `agent-creator-supervisor` needs the identical pattern too.
-            askPacks: ['verify.manual_ask', 'agent_creator.ask_session_checkpoint'],
+            // 'core.safe_read.raw_read_ask_gate' added per plan-25 (agent-critic BLOCKER):
+            // narrows sed -n/head/tail/jq/yq/rg/bat from allow to ask, same precedented pack
+            // reused verbatim by ~8 other readonly-profile agents above (reviewer,
+            // infra-auditor, architect, etc.).
+            askPacks: [
+                'verify.manual_ask',
+                'agent_creator.ask_session_checkpoint',
+                'core.safe_read.raw_read_ask_gate',
+            ],
             exceptions: [
                 // Ground truth: only this family member ask-gates ai-rollback.sh (the
                 // other 4 deny it outright, matching the readonly profile's default).

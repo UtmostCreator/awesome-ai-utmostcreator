@@ -104,7 +104,11 @@ permission:
     'npm install*': ask
     'npm ci*': ask
     'pnpm install*': ask
+    'pnpm add*': ask
     'yarn install*': ask
+    'yarn add*': ask
+    'bun install*': ask
+    'bun add*': ask
     'php -l *': allow
     'vendor/bin/phpunit *': allow
     './vendor/bin/phpunit *': allow
