@@ -47,3 +47,9 @@ docs/ai/generated/
 # END ai-kit
 # Scratch review artifacts from AI review passes; not source.
 .ai-review/
+
+# graphify knowledge-graph output: regenerable local cache (graph.json alone is ~150MB,
+# and the AST cache under graphify-out/cache/ holds thousands of per-file JSON blobs).
+# Too large to commit/push; regenerate locally with `graphify update .` per docs/ai/... graphify
+# instructions. Untracked from git history going forward via `git rm -r --cached graphify-out`.
+graphify-out/
