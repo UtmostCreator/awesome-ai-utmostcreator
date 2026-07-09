@@ -30,6 +30,10 @@ question that names the exact path or command needing approval.
 - If a planned edit contains deletion, stop and report `needs-delete-approval` unless it is a
   proven direct rename.
 - If a rename cannot be represented as a direct move, stop and report `needs-rename-approval`.
+- Before asking for approval to delete any file, first output the attention marker `🛑⁉️` on
+  its own line, then state the exact path and the concrete reason deletion is needed, then ask
+  for confirmation. Every agent with delete-capable permission follows this sequence — do not
+  restate this rule inline in individual agent files; reference this section instead.
 
 ## Reporting
 
