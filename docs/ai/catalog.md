@@ -36,20 +36,22 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / adapter-policy` - 1
 - `root / ai-script` - 27
 - `root / capability` - 17
-- `root / claude-agent` - 14
+- `root / claude-agent` - 24
+- `root / claude-command` - 5
+- `root / claude-skill` - 22
 - `root / cli` - 1
 - `root / exporter` - 2
 - `root / generator` - 1
-- `root / github-copilot-agent` - 23
+- `root / github-copilot-agent` - 24
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 23
-- `root / github-copilot-skill` - 23
-- `root / opencode-agent` - 14
-- `root / opencode-command` - 24
+- `root / github-copilot-skill` - 25
+- `root / opencode-agent` - 16
+- `root / opencode-command` - 25
 - `root / opencode-skill` - 26
 - `root / php-reference` - 3
 - `root / root-doc` - 19
-- `root / schema` - 1
+- `root / schema` - 2
 - `root / validator` - 4
 - `root / verifier` - 2
 
@@ -106,12 +108,21 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`capability`|review-diff|`docs/ai/capabilities/review-diff/CAPABILITY.md`|Review a change set from the diff first, then expand only as needed to assess correctness, regression risk, policy fit, and missing verification.|
 |`capability`|service-boundary-patterns|`docs/ai/capabilities/service-boundary-patterns/CAPABILITY.md`|Use this capability when a change crosses repository, package, API, adapter, data, or internal tooling boundaries.|
 |`capability`|verify-change|`docs/ai/capabilities/verify-change/CAPABILITY.md`|Choose and run the smallest relevant verification flow for a change, then report evidence clearly.|
+|`claude-agent`|agent-creator-runtime-guardian|`.claude/agents/agent-creator-runtime-guardian.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator|
+|`claude-agent`|agent-creator-semantic-verifier|`.claude/agents/agent-creator-semantic-verifier.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator|
+|`claude-agent`|agent-creator-static-validator|`.claude/agents/agent-creator-static-validator.md`|Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors|
+|`claude-agent`|agent-creator-supervisor|`.claude/agents/agent-creator-supervisor.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
+|`claude-agent`|agent-creator|`.claude/agents/agent-creator.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
 |`claude-agent`|agent-critic|`.claude/agents/agent-critic.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
 |`claude-agent`|agent-fleet-assessor|`.claude/agents/agent-fleet-assessor.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`claude-agent`|architect|`.claude/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`claude-agent`|architecture-plan-writer|`.claude/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
+|`claude-agent`|bugfix|`.claude/agents/bugfix.md`|Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal|
+|`claude-agent`|build-config|`.claude/agents/build-config.md`|Update build, packaging, or verification configuration in awesome-ai-utmostcreator|
 |`claude-agent`|config-maintainer|`.claude/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
+|`claude-agent`|docs|`.claude/agents/docs.md`|Update or align documentation after implementation changes in awesome-ai-utmostcreator|
 |`claude-agent`|implementer|`.claude/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
+|`claude-agent`|infra-auditor|`.claude/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator|
 |`claude-agent`|post-install|`.claude/agents/post-install.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
 |`claude-agent`|refactorer|`.claude/agents/refactorer.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
 |`claude-agent`|release-auditor|`.claude/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
@@ -119,7 +130,35 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`claude-agent`|repository-reviewer|`.claude/agents/repository-reviewer.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`claude-agent`|researcher|`.claude/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`claude-agent`|reviewer|`.claude/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
+|`claude-agent`|upgrade|`.claude/agents/upgrade.md`|Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in awesome-ai-utmostcreator|
 |`claude-agent`|workflow-auditor|`.claude/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
+|`claude-command`|install|`.claude/commands/install.md`|Guided install of the AI workflow kit into a target project, asking for missing parameters|
+|`claude-command`|post-install-setup|`.claude/commands/post-install-setup.md`|Guided post-install setup for installed projects|
+|`claude-command`|search-evidence|`.claude/commands/search-evidence.md`|Collect script-first repository evidence using ai-search|
+|`claude-command`|verify-ai-wiring|`.claude/commands/verify-ai-wiring.md`|Verify OpenCode script-first AI wiring|
+|`claude-command`|verify|`.claude/commands/verify.md`|Compatibility command that runs the verification workflow; prefer the verify-change skill for reusable guidance|
+|`claude-skill`|architecture-plan|`.claude/skills/architecture-plan/SKILL.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
+|`claude-skill`|bug-regression|`.claude/skills/bug-regression/SKILL.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
+|`claude-skill`|dependency-upgrade|`.claude/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
+|`claude-skill`|docs-sync|`.claude/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
+|`claude-skill`|evidence-first-execution|`.claude/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`claude-skill`|generate-permissions|`.claude/skills/generate-permissions/SKILL.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
+|`claude-skill`|mentor-mode|`.claude/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
+|`claude-skill`|new-feature|`.claude/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
+|`claude-skill`|plan-slice|`.claude/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
+|`claude-skill`|post-install-setup|`.claude/skills/post-install-setup/SKILL.md`|Use immediately after installation to finish project setup, resolve placeholders, and run the safest setup checks first|
+|`claude-skill`|prd-and-tasks|`.claude/skills/prd-and-tasks/SKILL.md`|Use to turn a raw or ambiguous feature idea into a confirmed PRD-style brief and a staged, parent-tasks-first implementation plan|
+|`claude-skill`|project-context|`.claude/skills/project-context/SKILL.md`|Use when planning or reviewing work in an unfamiliar area, choosing verification depth, or checking approval boundaries before editing|
+|`claude-skill`|regression-test|`.claude/skills/regression-test/SKILL.md`|Use when the main task is to create a failing or proving regression test for a reported bug or edge case|
+|`claude-skill`|release-safety|`.claude/skills/release-safety/SKILL.md`|Use when a change has rollout, rollback, migration, or compatibility risk that needs release-specific safeguards|
+|`claude-skill`|replace-placeholders|`.claude/skills/replace-placeholders/SKILL.md`|Use to resolve remaining bracketed placeholder markers in installed AI workflow files from .ai/project.yml values|
+|`claude-skill`|repo-investigation|`.claude/skills/repo-investigation/SKILL.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
+|`claude-skill`|review-diff|`.claude/skills/review-diff/SKILL.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
+|`claude-skill`|review-search-tool|`.claude/skills/review-search-tool/SKILL.md`|Review ai-search implementation and contract safety|
+|`claude-skill`|scan-stack|`.claude/skills/scan-stack/SKILL.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
+|`claude-skill`|script-inventory|`.claude/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
+|`claude-skill`|search-evidence|`.claude/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
+|`claude-skill`|verify-change|`.claude/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
 |`cli`|ai|`tools/ai/ai.php`|Main AI workflow CLI dispatcher.|
 |`exporter`|export-ai-universal-rules|`tools/ai/export-ai-universal-rules.php`|Builds starter-profile release bundles under dist/.|
 |`exporter`|export-install-bundle|`tools/ai/export-install-bundle.php`|Vendors a standalone, offline-runnable copy of the installer into a specified path.|
@@ -129,6 +168,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-agent`|Agent Creator Static Validator|`.github/agents/agent-creator-static-validator.agent.md`|Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors|
 |`github-copilot-agent`|Agent Creator Supervisor|`.github/agents/agent-creator-supervisor.agent.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
 |`github-copilot-agent`|Agent Creator|`.github/agents/agent-creator.agent.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
+|`github-copilot-agent`|Agent Critic|`.github/agents/agent-critic.agent.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
 |`github-copilot-agent`|Agent Fleet Assessor|`.github/agents/agent-fleet-assessor.agent.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`github-copilot-agent`|Architect|`.github/agents/architect.agent.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`github-copilot-agent`|Architecture Plan Writer|`.github/agents/architecture-plan-writer.agent.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
@@ -145,7 +185,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-agent`|Repository Reviewer|`.github/agents/repository-reviewer.agent.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`github-copilot-agent`|Researcher|`.github/agents/researcher.agent.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`github-copilot-agent`|Reviewer|`.github/agents/reviewer.agent.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
-|`github-copilot-agent`|Upgrade|`.github/agents/upgrade.agent.md`|Plan or apply dependency and platform upgrades carefully in awesome-ai-utmostcreator|
+|`github-copilot-agent`|Upgrade|`.github/agents/upgrade.agent.md`|Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in awesome-ai-utmostcreator|
 |`github-copilot-agent`|Workflow Auditor|`.github/agents/workflow-auditor.agent.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`github-copilot-instruction`|ai-file-standards|`.github/instructions/ai-file-standards.instructions.md`|AI workflow file roles, line budgets, duplication rules, and adapter boundaries|
 |`github-copilot-instruction`|ai-scripts|`.github/instructions/ai-scripts.instructions.md`|AI script registry consistency and risk-based execution rules|
@@ -192,6 +232,8 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|script-inventory|`.github/prompts/script-inventory.prompt.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-prompt`|search-evidence|`.github/prompts/search-evidence.prompt.md`|Collect repository evidence using ai-search|
 |`github-copilot-prompt`|verify-change|`.github/prompts/verify-change.prompt.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
+|`github-copilot-skill`|ai-scripts|`.github/skills/ai-scripts/SKILL.md`|Use registered scripts with risk-based approvals and evidence.|
+|`github-copilot-skill`|ai-search|`.github/skills/ai-search/SKILL.md`|Use ai-search to collect bounded repository evidence.|
 |`github-copilot-skill`|architecture-plan-writer|`.github/skills/architecture-plan-writer/SKILL.md`|Use when an architect design or a bounded task/ticket must be persisted as a Todo architecture plan markdown file under docs/tickets, strictly scoped to the task with steps, things-to-avoid, and acceptance criteria|
 |`github-copilot-skill`|architecture-plan|`.github/skills/architecture-plan/SKILL.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`github-copilot-skill`|bug-regression|`.github/skills/bug-regression/SKILL.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
@@ -215,6 +257,8 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|script-inventory|`.github/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-skill`|search-evidence|`.github/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`github-copilot-skill`|verify-change|`.github/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
+|`opencode-agent`|agent-critic|`.opencode/agents/agent-critic.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
+|`opencode-agent`|agent-fleet-assessor|`.opencode/agents/agent-fleet-assessor.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`opencode-agent`|architect|`.opencode/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`opencode-agent`|architecture-plan-writer|`.opencode/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`opencode-agent`|bootstrapper|`.opencode/agents/bootstrapper.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|
@@ -235,6 +279,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|docs-sync|`.opencode/commands/docs-sync.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-command`|evidence-first-execution|`.opencode/commands/evidence-first-execution.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
 |`opencode-command`|generate-permissions|`.opencode/commands/generate-permissions.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
+|`opencode-command`|install|`.opencode/commands/install.md`|Guided install of the AI workflow kit into a target project, asking for missing parameters|
 |`opencode-command`|mentor-mode|`.opencode/commands/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-command`|new-feature|`.opencode/commands/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-command`|plan-slice|`.opencode/commands/plan-slice.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -301,6 +346,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`root-doc`|integration-matrix|`docs/ai/integration-matrix.md`|Coverage map that tracks which AI workflow concepts are covered, partial, or missing.|
 |`root-doc`|project-context-doc|`docs/ai/project-context.md`|Durable repository context for instructions, capabilities, and runtime adapters.|
 |`root-doc`|workflow|`docs/ai/workflow.md`|Default live workflow for risk, verification, context, and docs sync.|
+|`schema`|ai-run-ledger.schema.json|`schemas/ai/ai-run-ledger.schema.json`|JSON schema for the per-run rollup ledger folded from evidence-event.schema.json entries by session_id/trace_id.|
 |`schema`|evidence-event.schema.json|`schemas/ai/evidence-event.schema.json`|JSON schema for durable agent evidence events emitted by supported runtime surfaces.|
 |`validator`|validate-ai-catalog|`tools/ai/validate-ai-catalog.php`|Validates manifest, catalog, and starter profile metadata.|
 |`validator`|validate-ai-config|`tools/ai/validate-ai-config.php`|Validates the root live AI workflow layer.|

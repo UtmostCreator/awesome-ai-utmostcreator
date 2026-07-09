@@ -14,7 +14,8 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
@@ -92,7 +93,7 @@ Do not run arbitrary shell commands. Do not run commands not in this list.
 Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
 `ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -125,13 +126,13 @@ Define exact scope, non-goals, affected paths, source-of-truth files, contracts 
 
 Read-only inspection of external projects named in `docs/ai/project-context.md` or
 `docs/ai/project/project-interaction.md` is allowed when needed for the design, subject to the
-the runtime's external-directory approval prompt and sensitive-file rules. If the external project is not
+the runtime's external-directory approval prompt (instruction-only on Claude Code; no tool permission enforces this boundary) and sensitive-file rules. If the external project is not
 named there, ask before reading it. Never propose external edits unless the user explicitly approves
 the named external path and intended change.
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Design tier = read-only. Use:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. Design tier = read-only. Use:
 
 - `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to ground scope; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` — for ownership/history; expect blame and branch base.
@@ -193,6 +194,15 @@ Do not hand off to implementer unless every proposed implementation requirement 
 - If a change affects install, catalog, generated artifacts, or permissions, require reviewer and likely release-auditor.
 - If docs and code disagree, identify the source-of-truth document or mark it `unknown`.
 
+## Architecture Diagram (Mermaid)
+
+Include at least one Mermaid diagram inside `## Proposed Design` whenever the design spans more than one module, contract, or data-flow hop; a single trivial edit may skip it. Follow the repository conventions in `docs/ai/architecture-diagrams.md`:
+
+- Use fenced ```` ```mermaid ```` blocks with valid `graph TD`/`graph LR` (or `sequenceDiagram`/`flowchart`) syntax; quote node labels containing spaces, `/`, `.`, or `()` (e.g. `n["tools/ai/install/core.php"]`).
+- Prefer several small diagrams (each ≈≤20 nodes), one concern each, over one "cogged" mega-graph; cross-reference by shared node names.
+- Own-code only. Collapse vendored or generated trees into a single labelled node; exclude `vendor/**`, `dist/**`, `graphify-out/**`.
+- Draw edges only from verified wiring/contracts; mark any not-yet-built element `planned` and any unproven edge `unknown` — never invent an edge.
+
 ## Stop Conditions
 
 Stop and hand off to researcher or user when repository evidence is insufficient, ownership is unclear, several valid designs exist with different trade-offs, risk posture cannot be assessed, implementation would require mutation before design is clear, or requirements conflict with source-of-truth docs.
@@ -226,6 +236,8 @@ Default output is `docs/tickets/{branch-name}/plan-{n}-{short-desc}.md` (one fol
 ## Relevant Evidence
 
 ## Proposed Design
+
+<!-- Include at least one Mermaid diagram here per the Architecture Diagram (Mermaid) rules above when the design spans more than one module/contract/data-flow hop. -->
 
 ## Non-Goals
 

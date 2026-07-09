@@ -181,3 +181,53 @@ function aiPermissionResolveAllowedBash(string $agentId, array $legacyAllowedBas
 
     return aiPermissionAllowedBashFromModel($composed['model']);
 }
+
+/**
+ * Projects a set of per-agent composed permission models into the Claude Code
+ * `.claude/settings.json` `permissions.allow`/`permissions.deny` shape (plan-28 Phase 2 —
+ * docs/tickets/claude-agent-fleet-remediation/plan-28-permission-sot-and-render-parity-sync.md).
+ *
+ * `allow` is the union, across every supplied agent model, of that agent's allowed bash
+ * patterns via `aiPermissionAllowedBashFromModel()` — the SAME per-agent projection each
+ * agent's own rendered Bash Command Policy body already uses (aiPermissionResolveAllowedBash()
+ * above). Because every agent's rendered allowedBash list is built from exactly this
+ * function, unioning it here makes every agent's rendered list a subset of this floor by
+ * construction (Contracts And Boundaries: "Enforced-vs-advisory").
+ *
+ * `deny` is the immutable `core:hard-deny` bash-deny floor (aiPermissionLayersCore()),
+ * excluding the universal `*` catch-all entry — a literal `Bash(*)` deny would contradict
+ * the allow list entirely, and Claude's schema has no floor-wildcard concept the way
+ * OpenCode's `bash: '*': deny` does.
+ *
+ * Pure function of its input models: never re-parses rendered text, never re-reads
+ * frontmatter itself (callers resolve that, exactly as the Claude/Copilot renderers already
+ * do). Output arrays are sorted for deterministic, byte-stable generation.
+ *
+ * @param array<string,array<string,array{permission:string,pattern:string,effect:string,class:string,layer:string}>> $perAgentModels
+ * @return array{allow:list<string>,deny:list<string>}
+ */
+function aiPermissionClaudeSettingsFromModels(array $perAgentModels): array
+{
+    $allowSet = [];
+    foreach ($perAgentModels as $model) {
+        foreach (aiPermissionAllowedBashFromModel($model) as $pattern) {
+            $allowSet[$pattern] = true;
+        }
+    }
+
+    $denySet = [];
+    foreach (aiPermissionLayersCore()['hard-deny'] as $entry) {
+        if ($entry['permission'] !== 'bash' || $entry['effect'] !== 'deny' || $entry['pattern'] === '*') {
+            continue;
+        }
+        $denySet[$entry['pattern']] = true;
+    }
+
+    $wrapBash = static fn (string $pattern): string => 'Bash(' . $pattern . ')';
+    $allow = array_map($wrapBash, array_keys($allowSet));
+    $deny = array_map($wrapBash, array_keys($denySet));
+    sort($allow, SORT_STRING);
+    sort($deny, SORT_STRING);
+
+    return ['allow' => $allow, 'deny' => $deny];
+}

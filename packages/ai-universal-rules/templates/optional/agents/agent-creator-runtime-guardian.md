@@ -18,13 +18,14 @@ permission:
     'pwd': allow
     'ls *': allow
     'fd *': allow
-    'rg *': allow
+    'rg *': ask
     'git grep *': allow
-    'sed -n *': allow
-    'head *': allow
-    'tail *': allow
-    'jq *': allow
-    'yq *': allow
+    'sed -n *': ask
+    'head *': ask
+    'tail *': ask
+    'jq *': ask
+    'yq *': ask
+    'bat *': ask
     'ls -1 scripts/ai/*.sh | sort': allow
     'git status*': allow
     'git diff*': allow
@@ -66,9 +67,10 @@ You define the runtime controls that wrap an approved agent in `<PROJECT_NAME>`.
 
 Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Enforcement tier:
 
+- `php tools/ai/validate-agent-spec.php <path>` — run once against the approved AgentSpec before deriving guardrails; treat a non-zero exit as `blocked` and hand off to `agent-creator-supervisor`.
 - `pre-tool-use.sh` / `post-tool-use.sh` are the runtime's own gate hooks you write policy against — specify their allow/deny and evidence behavior in your guardrails, but never invoke them yourself.
-- `session-checkpoint.sh` (`ask`), `ai-rollback.sh` (`ask`) — to checkpoint and restore runtime state; expect checkpoints and restored state.
-- `ai-verify.sh` (`ask`), `ai-diff-context.sh` — to confirm a guarded run's effect; expect verification evidence and a diff bundle.
+- `session-checkpoint.sh`, `ai-rollback.sh` — ask-tier, approval-gated capabilities, not scripts you freely run: where the runtime supports gated command approval, use them to checkpoint and restore runtime state; expect checkpoints and restored state. On a runtime with no ask-tier bash gate (for example Claude Code, where neither script appears in the Bash Command Policy approved list), these calls are unavailable; record checkpoint/restore state in this agent's own Final Output instead.
+- `ai-verify.sh` — the same ask-tier, approval-gated pattern: where available, use it to confirm a guarded run's effect; otherwise rely on `ai-diff-context.sh` (unconditionally approved) for the diff bundle and mark verification status `unknown` in Final Output.
 
 Denied: `ai-edit`, `ai-task`, `run-repo-tests`. The guardian enforces and records; it never edits or tasks.
 
@@ -107,6 +109,8 @@ Denied: `ai-edit`, `ai-task`, `run-repo-tests`. The guardian enforces and record
 max_steps, cost ceiling, failure cutoff — each a concrete value derived from the AgentSpec (mark `unknown` if the spec omits it)
 
 ## Observability / Logging Plan
+
+checkpoint/restore state (mark `unavailable` on Claude Code)
 
 ## Runtime Readiness
 

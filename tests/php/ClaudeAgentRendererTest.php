@@ -43,6 +43,13 @@ class ClaudeAgentRendererTest extends TestCase
         return (string) file_get_contents($path);
     }
 
+    private function reviewerTemplate(): string
+    {
+        $path = $this->repoRoot . '/packages/ai-universal-rules/templates/core/agents/reviewer.md';
+        $this->assertFileExists($path, 'reviewer template must exist');
+        return (string) file_get_contents($path);
+    }
+
     private function removeTree(string $path): void
     {
         if (!file_exists($path)) {
@@ -240,6 +247,92 @@ class ClaudeAgentRendererTest extends TestCase
         } else {
             $this->fail('tools: line not found in output');
         }
+    }
+
+    // Regression: docs/tickets/claude-agent-fleet-remediation/plan-5-researcher-claude-render-fixes.md
+    // BLOCKER — the canonical template claims researcher may append evidence notes, which is
+    // structurally false on Claude (disallowedTools: Write, Edit, no write-capable Bash entry).
+    public function testResearcherOutputDoesNotClaimAppendWriteCapability(): void
+    {
+        $out = aiInstallerRenderClaudeAgent($this->researcherTemplate(), 'researcher', '/project/scripts/ai');
+        $this->assertStringNotContainsString(
+            'May append only research evidence notes',
+            $out,
+            'rendered researcher.md must not claim a Write/Edit-dependent capability the frontmatter denies'
+        );
+        $this->assertStringContainsString(
+            'Cannot append evidence notes directly on Claude Code',
+            $out,
+            'rendered researcher.md must substitute a Claude-accurate Final Output handoff instruction'
+        );
+    }
+
+    // Regression: docs/tickets/claude-agent-fleet-remediation/plan-5-researcher-claude-render-fixes.md
+    // MAJOR — Script Access framed pack-context.sh as an `ask`-tier option, contradicting the
+    // Bash Command Policy that names it non-runnable on Claude (no `ask` tier exists there).
+    public function testResearcherScriptAccessDoesNotFramePackContextAsRunnable(): void
+    {
+        $out = aiInstallerRenderClaudeAgent($this->researcherTemplate(), 'researcher', '/project/scripts/ai');
+        $this->assertStringNotContainsString(
+            '`pack-context.sh` (`ask`) — only for large context packing',
+            $out,
+            'rendered researcher.md must not frame pack-context.sh as an ask-tier option Claude cannot honor'
+        );
+        $this->assertStringContainsString(
+            '`pack-context.sh` — not runnable on Claude Code',
+            $out,
+            'rendered researcher.md must state pack-context.sh is not runnable on Claude'
+        );
+    }
+
+    // ----- Reviewer (read-only, task: ask -> no Agent tool) -----
+
+    // Regression: docs/tickets/claude-agent-fleet-remediation/plan-21-claude-reviewer-remediation.md
+    // MAJOR — Script Access described a `task` (`ask`) delegation capability the frontmatter never
+    // grants (no Agent tool for this role), an unreachable instruction carried over from the
+    // OpenCode-oriented canonical template without runtime adaptation.
+    public function testReviewerScriptAccessDoesNotDescribeUnreachableTaskDelegation(): void
+    {
+        $out = aiInstallerRenderClaudeAgent($this->reviewerTemplate(), 'reviewer', '/project/scripts/ai');
+        $this->assertStringNotContainsString(
+            '`task` (`ask`) is only for delegating a bounded, read-only sub-review',
+            $out,
+            'rendered reviewer.md must not describe a task-delegation capability the frontmatter never grants'
+        );
+        $this->assertStringContainsString(
+            'is an OpenCode-only capability; it is unavailable on Claude for this role',
+            $out,
+            'rendered reviewer.md must state task delegation is OpenCode-only and unreachable here'
+        );
+    }
+
+    public function testReviewerOutputHasNoAgentTool(): void
+    {
+        $out = aiInstallerRenderClaudeAgent($this->reviewerTemplate(), 'reviewer', '/project/scripts/ai');
+        if (preg_match('/^tools:\s*(.+)$/m', $out, $m)) {
+            $this->assertStringNotContainsString('Agent', $m[1]);
+        } else {
+            $this->fail('tools: line not found in output');
+        }
+    }
+
+    // Fixture-testable pass-through: an agent whose registry entry DOES grant the Agent tool
+    // (architect) must not have any task-delegation sentence rewritten, since the capability is
+    // reachable there. architect's canonical template has no such sentence to begin with, so this
+    // proves the fix is scoped to Agent-omitting roles rather than a blanket rewrite.
+    public function testArchitectOutputKeepsAgentToolAndIsUnaffectedByTaskRewrite(): void
+    {
+        $out = aiInstallerRenderClaudeAgent($this->architectTemplate(), 'architect', '/project/scripts/ai');
+        if (preg_match('/^tools:\s*(.+)$/m', $out, $m)) {
+            $this->assertStringContainsString('Agent', $m[1]);
+        } else {
+            $this->fail('tools: line not found in output');
+        }
+        $this->assertStringNotContainsString(
+            'is an OpenCode-only capability; it is unavailable on Claude for this role',
+            $out,
+            'architect grants Agent, so the task-delegation rewrite must not fire for it'
+        );
     }
 
     // ----- SCRIPTS_ROOT placeholder -----

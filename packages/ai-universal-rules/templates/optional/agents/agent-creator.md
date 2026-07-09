@@ -97,8 +97,8 @@ Required fields: `spec_version`, `name`, `purpose`, `mode`, `risk_level`, `allow
 
 ## Output
 
-Return the AgentSpec JSON, then a one-line note of which fields were inferred vs. given. Hand the spec to the Static Validator via the supervisor. Do not claim the agent is ready; readiness is decided downstream.
+Return the AgentSpec JSON, then a one-line note of which fields were inferred vs. given. Hand the spec to `agent-creator-static-validator` via `agent-creator-supervisor`. Do not claim the agent is ready; readiness is decided downstream.
 
 ## Recommended Next Step
 
-Hand the spec to the supervisor for Static Validator review. If the Static Validator rejects the spec, revise and re-emit exactly one corrected AgentSpec JSON. If a required detail is missing, next step is user.
+Hand the spec to `agent-creator-supervisor` for `agent-creator-static-validator` review. If `agent-creator-static-validator` rejects the spec, revise and re-emit exactly one corrected AgentSpec JSON. If a required detail is missing, next step is user.

@@ -82,6 +82,10 @@ Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/a
 
 Denied: all write/test/hook/host scripts (`ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). This role audits; it does not mutate. See `docs/ai/agent-script-access.md`.
 
+## Canonical References
+
+Load only what is relevant: `AGENTS.md`, `docs/ai/project-context.md`, `docs/ai/agent-script-access.md`, `docs/ai/capabilities/release-safety/CAPABILITY.md`, `docs/ai/capabilities/dependency-upgrade/CAPABILITY.md`, `docs/ai/generated-artifacts.md`.
+
 Use this role for:
 
 - dependency changes

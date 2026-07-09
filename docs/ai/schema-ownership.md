@@ -23,6 +23,7 @@ Integrity of this directory is enforced by `tools/ai/validate-schemas.php` (wire
 | `ai-file-standards.schema.json` | `generate-ai-file-standards.php` | `packages/ai-universal-rules/policies/ai-file-standards.json` (`$schema`) | `validate-schemas.php` | active-generated-contract |
 | `ai-universal-rules-manifest.schema.json` | export pipeline | `packages/ai-universal-rules/manifest.json` (`$schema`) | `validate-schemas.php` | active-generated-contract |
 | `evidence-event.schema.json` | evidence/observability writers | `validate-ai-config.php`, `validate-ai-catalog.php`, `ai_catalog_lib.php` | `validate-ai-config.php`, `validate-schemas.php` | active-runtime-contract |
+| `ai-run-ledger.schema.json` | per-run rollup renderer (planned; folds `evidence-event.schema.json` entries by `session_id`/`trace_id` — see `docs/tickets/arch-todo-ai-run-ledger-rollup-20260708-000000/plan.md`) | `ai_catalog_lib.php` (catalog registration); future `tools/ai/run-ledger.php` (Slice B, not yet built) | `validate-schemas.php` | public-doc-contract |
 | `agent-spec.schema.json` | agent authoring | `validate-agent-spec.php` (hardcoded rules), agent-creator prompt | `validate-schemas.php` | public-doc-contract |
 | `ai-install-manifest.schema.json` | installer manifest writer | `tests/php/OwnershipClassesTest.php` (structural read) | `validate-schemas.php` | active-runtime-contract |
 | `ai-manifest-lock.schema.json` | installer lock writer | `tests/php/OwnershipClassesTest.php` (structural read) | `validate-schemas.php` | active-runtime-contract |

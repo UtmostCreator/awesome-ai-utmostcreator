@@ -163,6 +163,11 @@ function aiInstallerPackRegistry(): array
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/core/agents', 'target' => '.github/agents', 'install_type' => 'copilot-agents', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/workflows', 'target' => '.github/prompts', 'rename_ext' => '.prompt.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/workflows', 'target' => '.github/skills', 'install_type' => 'skill-dirs', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            // Skill parity fix: ai-search/ai-scripts were previously OpenCode-only (see
+            // adapter-opencode below); both SKILL.md sources are pure runtime-agnostic
+            // markdown (no OpenCode-specific dispatch mechanics), so ship them to Copilot too.
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-search/SKILL.md', 'target' => '.github/skills/ai-search/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md', 'target' => '.github/skills/ai-scripts/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/instructions/tools.instructions.md', 'target' => '.github/instructions/tools.instructions.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/instructions/execution-protocol.instructions.md', 'target' => '.github/instructions/execution-protocol.instructions.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
@@ -194,6 +199,11 @@ function aiInstallerPackRegistry(): array
             // register the same `/name` slash command and "skills are recommended", so
             // dual-shipping would just register duplicate commands for no benefit.
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/workflows', 'target' => '.claude/skills', 'install_type' => 'skill-dirs', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            // Skill parity fix: ai-search/ai-scripts were previously OpenCode-only (see
+            // adapter-opencode below); both SKILL.md sources are pure runtime-agnostic
+            // markdown (no OpenCode-specific dispatch mechanics), so ship them to Claude too.
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-search/SKILL.md', 'target' => '.claude/skills/ai-search/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
+            ['type' => 'file', 'source' => 'packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md', 'target' => '.claude/skills/ai-scripts/SKILL.md', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
             ['type' => 'dir', 'source' => 'packages/ai-universal-rules/templates/commands', 'target' => '.claude/commands', 'install_type' => 'opencode-commands', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],
         ],
         'capabilities-extended' => [
@@ -208,6 +218,7 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/command-risk-taxonomy.md', 'target' => 'docs/ai/command-risk-taxonomy.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/failure-handling.md', 'target' => 'docs/ai/failure-handling.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
             ['type' => 'file', 'source' => 'schemas/ai/evidence-event.schema.json', 'target' => 'schemas/ai/evidence-event.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
+            ['type' => 'file', 'source' => 'schemas/ai/ai-run-ledger.schema.json', 'target' => 'schemas/ai/ai-run-ledger.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'scripts-pack' => [
             ['type' => 'file', 'source' => 'scripts/ai/common.sh', 'target' => 'scripts/ai/common.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],

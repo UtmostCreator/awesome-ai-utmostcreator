@@ -111,7 +111,7 @@ permission:
     '*scripts/ai/rg-code.sh *credentials.*': deny
     '*scripts/ai/rg-code.sh *auth.json*': deny
 agent_assessment:
-  risk_level: medium
+  risk_level: high
   decision: approve_with_minor_fixes
 ---
 
@@ -141,12 +141,12 @@ When the runtime does not auto-load repository hooks, preserve the same boundary
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Auditor is read-only. Use:
+Full per-script `allow`/`ask`/`deny` guidance is in `docs/ai/agent-script-access.md`. On OpenCode this is also expressed directly in this file's frontmatter `permission.bash` table; on Claude the enforced surface is this agent's Bash Command Policy section (when rendered) plus `.claude/settings.json` — Claude has no `ask` approval tier. Auditor is read-only. Use:
 
 - `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to locate workflow files and references; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `check-file-refs.sh` / `ai-doc-check.sh` / `ai-file-freshness.sh` — to detect broken refs, doc drift, and stale files.
 - `ai-install-coverage.sh` / `repo-tool-inventory.sh` / `repo-stats.sh` — to audit install coverage and adapter parity.
-- `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — history and current change; `ai-verify.sh` (`ask`) for spot verification.
+- `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — history and current change; where the runtime's approval tier and this agent's own approved command list both permit it, `ai-verify.sh` for spot verification (OpenCode marks it `ask`-tier; on Claude it is absent from the Bash Command Policy approved list above, so it is not runnable for this agent).
 
 Denied: `gh-pr-context`, `ai-test-select`, `run-repo-tests`, and all write/hook/host scripts (`ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Auditor flags drift; it does not mutate.
 
@@ -157,7 +157,7 @@ Load only what is relevant: `docs/ai/project-context.md`, `docs/ai/workflow.md`,
 ## Capability Routing
 
 | Capability                         | Load when audit involves                        |
-| ---------------------------------- | ----------------------------------------------- |
+| ----------------------------------- | ----------------------------------------------- |
 | `adapter-drift`                    | Copilot/OpenCode parity, adapter template drift |
 | `project-context`                  | repo context file correctness                   |
 | `agent-observability-and-evidence` | evidence logs, session notes                    |

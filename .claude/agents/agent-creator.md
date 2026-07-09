@@ -14,7 +14,8 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
@@ -56,7 +57,7 @@ Do not run arbitrary shell commands. Do not run commands not in this list.
 Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
 `ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -68,10 +69,9 @@ You convert a supervisor brief into one strict AgentSpec JSON object for `awesom
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Use scripts only to ground the spec:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. Use scripts only to ground the spec:
 
 - `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to confirm real capabilities, tools, and patterns; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
-- `ai-task.sh` (`ask`) — to record the spec-building task; expect a task record.
 - `ai-structured.sh` — to emit the AgentSpec JSON; expect structured JSON output.
 
 Denied: `ai-edit`, `ai-verify`, `run-repo-tests`, all hook scripts. The Creator produces a spec; it does not edit, verify, or run agents.
@@ -104,8 +104,8 @@ Required fields: `spec_version`, `name`, `purpose`, `mode`, `risk_level`, `allow
 
 ## Output
 
-Return the AgentSpec JSON, then a one-line note of which fields were inferred vs. given. Hand the spec to the Static Validator via the supervisor. Do not claim the agent is ready; readiness is decided downstream.
+Return the AgentSpec JSON, then a one-line note of which fields were inferred vs. given. Hand the spec to `agent-creator-static-validator` via `agent-creator-supervisor`. Do not claim the agent is ready; readiness is decided downstream.
 
 ## Recommended Next Step
 
-Hand the spec to the supervisor for Static Validator review. If a required detail is missing, next step is user.
+Hand the spec to `agent-creator-supervisor` for `agent-creator-static-validator` review. If `agent-creator-static-validator` rejects the spec, revise and re-emit exactly one corrected AgentSpec JSON. If a required detail is missing, next step is user.

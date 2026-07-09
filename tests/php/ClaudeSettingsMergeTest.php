@@ -36,6 +36,32 @@ class ClaudeSettingsMergeTest extends TestCase
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
+    // Regression: docs/tickets/claude-agent-fleet-remediation/plan-21-claude-reviewer-remediation.md
+    // MAJOR — reviewer's own "mandatory" review steps (`git grep` for duplicate screening,
+    // `git merge-base` for branch/PR review) were absent from the canonical Claude settings
+    // template's allow list, so the enforced surface disagreed with the agent's own Bash Command
+    // Policy / Git Review Flow sections.
+    public function testCanonicalSettingsTemplateAllowsGitGrepAndMergeBase(): void
+    {
+        $root = realpath(dirname(__DIR__, 2));
+        $this->assertNotFalse($root, 'Could not resolve repo root');
+        $path = $root . '/packages/ai-universal-rules/templates/claude/settings.json';
+        $this->assertFileExists($path, 'canonical Claude settings template must exist');
+        $decoded = json_decode((string) file_get_contents($path), true);
+        $this->assertIsArray($decoded, 'canonical Claude settings template must be valid JSON');
+        $allow = $decoded['permissions']['allow'] ?? [];
+        $this->assertContains(
+            'Bash(git grep *)',
+            $allow,
+            'reviewer\'s Git Review Flow requires git grep for duplicate-logic screening before PASS'
+        );
+        $this->assertContains(
+            'Bash(git merge-base*)',
+            $allow,
+            'reviewer\'s Git Review Flow requires git merge-base to resolve the branch/PR common ancestor'
+        );
+    }
+
     public function testNoExistingFileReturnsIncomingContent(): void
     {
         $merged = aiInstallerMergeClaudeSettingsJson($this->incomingTemplate(), '');

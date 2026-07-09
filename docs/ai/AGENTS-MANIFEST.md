@@ -62,7 +62,7 @@ enforced frontmatter.
 | `build-config` | no | yes | execution | yes | no | high | Build/packaging/verification config edits (GitHub-only). |
 | `upgrade` | no | yes | execution | yes | no | critical | Dependency/platform upgrades; strongest gates (GitHub-only). |
 | `docs` | no | yes | execution / release | yes | no | low | Documentation alignment after verified behavior (GitHub-only). |
-| `workflow-auditor` | yes | yes | validation | no | yes | medium | AI workflow/instruction/repo-context drift checks. |
+| `workflow-auditor` | yes | yes | validation | no | yes | high | AI workflow/instruction/repo-context drift checks. |
 | `infra-auditor` | no | yes | validation | no | yes | high | Dependency/build/release/compatibility risk audit (GitHub-only). |
 | `agent-critic` | yes | yes | review | no | yes | medium | Audits one agent instruction file for schema/role/permission fit, contradictions, handoffs, and token economy. |
 | `agent-fleet-assessor` | yes | yes | orchestration | no | yes | medium | Delegates each agent file to `agent-critic`, then ranks the fleet 0-100 with fix priorities. |

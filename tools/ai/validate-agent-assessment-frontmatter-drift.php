@@ -17,6 +17,16 @@ declare(strict_types=1);
  *      differences" and docs/tickets/arch-todo-agent-score-frontmatter-20260614-104816/
  *      D3-plan.md; a missing manifest row is reported as informational, not an error).
  *
+ * Additionally, for each template key, compares the TEMPLATE's agent_assessment
+ * risk_level/decision against each rendered adapter copy that exists on disk:
+ *   - .opencode/agents/{key}.md
+ *   - .github/agents/{key}.agent.md
+ *   - .claude/agents/{key}.md
+ * An adapter copy is skipped (not an error) when the file does not exist — some
+ * optional-tier agents do not ship a Copilot/Claude copy. This closes the blind
+ * spot where a template gets fixed but a rendered adapter copy is never
+ * re-rendered (see docs/tickets/arch-todo-implementer-critique-reconciliation-20260707-183438/).
+ *
  * Reuses the existing restricted-subset parsers rather than re-implementing them:
  *   - aiAavParse()/aiAavTemplateKeys() from validate-agent-assessment-values.php
  *   - aiAgentExtractFrontmatter()/aiAgentParseAssessment() from validate-agent-assessment.php
@@ -96,6 +106,7 @@ function aiAafdMain(array $argv): int
     $errors = [];
     $infoSkips = [];
     $checked = 0;
+    $adapterChecked = 0;
 
     foreach ($templateKeys as $key) {
         if (!isset($source['agents'][$key])) {
@@ -146,11 +157,43 @@ function aiAafdMain(array $argv): int
             $infoSkips[] = $key;
         }
 
+        // Rendered adapter copies: compare each existing copy's agent_assessment
+        // against the TEMPLATE's (already validated against source above), not
+        // directly against source, since the template is the copies' render input.
+        $adapterCandidates = [
+            'opencode' => "{$root}/.opencode/agents/{$key}.md",
+            'github'   => "{$root}/.github/agents/{$key}.agent.md",
+            'claude'   => "{$root}/.claude/agents/{$key}.md",
+        ];
+        foreach ($adapterCandidates as $adapterKind => $adapterPath) {
+            if (!is_file($adapterPath)) {
+                continue;
+            }
+            $adapterRel = ltrim(str_replace($root, '', $adapterPath), '/\\');
+            $adapterContent = (string) file_get_contents($adapterPath);
+            $adapterFm = aiAgentExtractFrontmatter($adapterContent);
+            $adapterAssessment = $adapterFm !== null ? aiAgentParseAssessment($adapterFm) : null;
+
+            if ($adapterAssessment === null) {
+                $errors[] = "{$key}: no agent_assessment: block in {$adapterKind} adapter frontmatter ({$adapterRel})";
+                $adapterChecked++;
+                continue;
+            }
+
+            if (($adapterAssessment['risk_level'] ?? null) !== ($tmplAssessment['risk_level'] ?? null)) {
+                $errors[] = "{$key}: risk_level drift — template ({$rel})='" . ($tmplAssessment['risk_level'] ?? '?') . "' {$adapterKind} ({$adapterRel})='" . ($adapterAssessment['risk_level'] ?? '?') . "'";
+            }
+            if (($adapterAssessment['decision'] ?? null) !== ($tmplAssessment['decision'] ?? null)) {
+                $errors[] = "{$key}: decision drift — template ({$rel})='" . ($tmplAssessment['decision'] ?? '?') . "' {$adapterKind} ({$adapterRel})='" . ($adapterAssessment['decision'] ?? '?') . "'";
+            }
+            $adapterChecked++;
+        }
+
         $checked++;
     }
 
     if ($errors !== []) {
-        fwrite(STDERR, "ERROR: agent_assessment drift found (source <=> template <=> manifest):\n");
+        fwrite(STDERR, "ERROR: agent_assessment drift found (source <=> template <=> manifest <=> adapters):\n");
         foreach ($errors as $message) {
             fwrite(STDERR, ' - ' . $message . "\n");
         }
@@ -158,7 +201,7 @@ function aiAafdMain(array $argv): int
     }
 
     $skipNote = $infoSkips === [] ? '' : ' (no manifest row, skipped identity check: ' . implode(', ', $infoSkips) . ')';
-    fwrite(STDOUT, "OK: no agent_assessment drift across {$checked} agent template(s): source <=> template <=> manifest agree{$skipNote}\n");
+    fwrite(STDOUT, "OK: no agent_assessment drift across {$checked} agent template(s) and {$adapterChecked} rendered adapter copy(ies): source <=> template <=> manifest <=> .opencode/.github/.claude adapters agree{$skipNote}\n");
 
     return 0;
 }

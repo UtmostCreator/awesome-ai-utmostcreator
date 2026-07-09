@@ -137,7 +137,7 @@ permission:
     "scc --no-complexity --no-cocomo *": allow
 agent_assessment:
   risk_level: medium
-  decision: approve_with_minor_fixes
+  decision: needs_refactor
 ---
 
 # Researcher Agent

@@ -3,36 +3,17 @@
 # AI Setup
 
 - Installed at: `2026-06-01T01:23:06+00:00`
-- Profile: `full-governance`
+- Profile: `agents-only`
 - Package: `ai-universal-rules`
 
 ## Installed Packs
 
-- `adapter-claude`
-- `capabilities-governance`
-- `hooks-pack`
-- `ci-pack`
-- `docs-reference-pack`
-- `delivery-pack`
-- `optional-agents-opencode-pack`
-- `optional-agents-copilot-pack`
-- `optional-agents-claude-pack`
-- `preview-environments-pack`
-- `evaluation-pack`
-- `service-boundary-pack`
-- `mcp-boundaries-pack`
-- `advisor-pack`
-- `target-tools-pack`
-- `shared-templates-pack`
-- `scripts-pack`
-- `policy-pack`
-- `evidence-pack`
 - `adapter-copilot`
 - `adapter-opencode`
-- `capabilities-extended`
-- `base`
-- `setup-docs`
+- `adapter-claude`
+- `scripts-pack`
 - `capabilities-core`
+- `base`
 
 ## Next Steps
 

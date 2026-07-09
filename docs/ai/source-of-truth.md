@@ -43,8 +43,15 @@ Kit-managed files are re-rendered on every upgrade; user-owned files are install
 | `.ai/project.yml` | generated `AGENTS.md` body (edit the template or `.ai/project.yml`) |
 | `docs/ai/project/**` | kit-managed `.opencode/agents/*`, `.github/agents/*` |
 | `docs/ai/project-stack.md`, `docs/ai/project/conventions.md` | `.github/hooks/scripts/command-policy.compiled.sh` |
-| pre-existing non-kit files | `docs/ai/catalog.md`, `llms.txt`, `BROWSE.md` (generated) |
-| marked user sections in rendered files | `.ai/*.lock`, install manifest |
+| `architecture-diagrams.md` under `docs/ai/` (local, hand-authored, must-sync) | `docs/ai/catalog.md`, `llms.txt`, `BROWSE.md` (generated) |
+| pre-existing non-kit files | `.ai/*.lock`, install manifest |
+| marked user sections in rendered files | |
+
+The local `architecture-diagrams.md` under `docs/ai/` is a project-specific,
+hand-authored doc (no `GENERATED` header, not shipped by any kit pack). It must be
+updated in the same change as any render or permission-pipeline change it depicts;
+it mirrors the architecture as of a named baseline commit and is covered by a
+forward file-existence test (`tests/php/ArchitectureDiagramReferencesTest.php`).
 
 | Classification (`merge_strategy`) | User can edit? | Upgrade behaviour |
 | --- | --- | --- |
@@ -54,6 +61,16 @@ Kit-managed files are re-rendered on every upgrade; user-owned files are install
 | foreign (pre-existing at kit path) | Yes | Untouched unless `--adopt` |
 
 Files that say `GENERATED — DO NOT EDIT` or `Managed by ai-kit` are kit-managed.
+
+`.claude/agents/*.md` and `.github/agents/*.agent.md` bodies are generated from
+`packages/ai-universal-rules/templates/{core,optional}/agents/*.md` — edit the template, never the
+rendered copy. Byte-parity between template and rendered copy is enforced by
+`php tools/ai/render-adapters.php --check` (CI-gated in `validate-ai-surface.yml`); reconcile
+drift with `php tools/ai/render-adapters.php --write` (see the source-repo-only
+maintainer guide's "Regenerating This Repo's Own `.claude/agents` And `.github/agents`"
+section). See
+`docs/tickets/claude-agent-fleet-remediation/plan-28-permission-sot-and-render-parity-sync.md`
+Phase 1.
 
 The `permission:` block inside 13 of the 15 shipped `.opencode/agents/*.md` files (and their
 `packages/ai-universal-rules/templates/core/agents/*.md` sources) is itself generated from

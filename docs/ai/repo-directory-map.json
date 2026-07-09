@@ -170,10 +170,6 @@
       "reason": "Contains only bin/local.sh, a stray shell-test fixture artifact (created by an earlier bats test's negative-case check for is_shipped_ai_kit_shell_file) that appears to have been committed unintentionally; not a designed, installed directory."
     },
     {
-      "path": "graphify-out",
-      "reason": "Generated cache/output of the third-party graphify knowledge-graph tool (see AGENTS.md 'graphify' section and docs/ai/adapter-contract.md 'Out-Of-Band Local Additions'); owned by that tool's own installer, not this kit."
-    },
-    {
       "path": "v0.5-upgrade",
       "reason": "Historical planning artifacts from before docs/tickets/ became the canonical planning location; not referenced by any current canonical doc and not installed by any pack."
     },

@@ -64,7 +64,27 @@ After:
    - Change: Forward-looking: the Final Output defines only `reviewer means reviewer agent handoff`, but Stop Conditions route back to researcher and architect without a canonical outgoing phrase. Add parallel phrasing (e.g. `researcher means researcher agent handoff`, `architect means architect agent handoff`) so every stop-condition exit names its target consistently with docs/ai/handoff-contract.md.
    - Rationale: Deferred because it should be verified against docs/ai/handoff-contract.md and aligned fleet-wide (architect/reviewer templates use the same outgoing-phrase convention) rather than diverging in one template. Improves testability of the handoff output field without altering behavior.
 
-## post-install  ·  _maintenance-only_
+## post-install  ·  _superseded — see correction note_
+
+> **Correction (2026-07-08):** This section's "maintenance-only" status is stale. A fresh
+> agent-critic pass against the then-shipped `.claude/agents/post-install.md` scored
+> 65/blocked (risk_level high), finding: BLOCKER — no `tools/ai/**` Claude-side write/edit
+> restriction (this agent could silently rewrite the validators gating its own Placeholder
+> Resolution Gate); MAJOR — remaining Hard Boundary paths (vendor, cache/build/dist/coverage,
+> lockfiles, secret/key/env/auth files) were prose-only on Claude with no `.claude/settings.json`
+> deny backstop; MAJOR — `docs/ai/AI-GUARDRAILS.md` missing from Read First; MAJOR — the
+> installed Final Output template (Gate Proof/Blockers sections, added below as "APPLIED") had
+> drifted from canonical on all three rendered copies (Claude/OpenCode/Copilot) because they had
+> not been re-rendered since; MINOR — body said "via the Task tool" while the frontmatter grant
+> is named Agent. All five findings were remediated in
+> `docs/tickets/claude-agent-fleet-remediation/plan-26-post-install-remediation.md` (template
+> Read-First + wording fix, `.claude/settings.json` /
+> `packages/ai-universal-rules/templates/claude/settings.json` deny-floor extension for
+> `tools/ai/**`, and a scoped re-render of all three copies). The "Improvements (2)" list below
+> (Gate Proof / Blockers Final Output sections) remains historically accurate — those two changes
+> were genuinely applied to the canonical template by this plan; plan-26 only closed the
+> render-drift gap that kept them out of the shipped `.claude`/`.opencode`/`.github` copies, plus
+> the four findings unrelated to Final Output completeness.
 
 **Current assessment:** The template is in good shape. Its standout strength is the strict Placeholder Resolution Gate backed by two objective proof commands (`php tools/ai/ai.php placeholders --fail` and `php tools/ai/verify-install-placeholders.php`, both allow-listed) plus evidence-required research delegation that rejects any value lacking a file path or command output. The critic's two MAJORs are already resolved fleet-wide: the settings.json Edit/Write deny-floor is the cross-cutting fix, and the "Script Access ... in frontmatter" line is correct source phrasing that the renderer already specializes per runtime (rewriting it to "settings.json wins" would violate the runtime-agnostic guardrail, so it stays). The two MINORs are also already accurate in the current text (line 185 states both the `ask` and scoped-`allow` ai-verify variants; the body no longer bans install commands). The only genuinely uncovered gap is output-field completeness: the gate's proof commands and its "stay blocked" blocker concept have no dedicated section in the Final Output block.
 
@@ -151,6 +171,18 @@ Every NOT READY or READY WITH NOTES verdict must name at least one risk mapped t
    - Change: Forward-looking: add a `## Checklist Status` field to the Final Output block that requires each of the 12 audit-checklist items to be reported as pass / fail / unknown, so the audit trail is complete and machine-checkable. Not applied now to avoid lengthening the output template and to first confirm downstream consumers (reviewer/implementer handoff) expect a per-item grid rather than the current narrative sections.
    - Rationale: The 12-item Audit Checklist drives the audit but only a subset surfaces in the Final Output today, leaving traceability gaps. A per-item status grid would make coverage explicit, but it changes output shape and could bloat the template, so it warrants a deliberate design pass rather than an inline edit.
 
+**Stale-for-Claude-render flag (added by plan-16, not a rewrite of the assessment above):**
+this section's "Current assessment" describes the canonical source template only. A separate
+fresh agent-critic pass against the rendered `.claude/agents/release-auditor.md` scored it
+72/ready-with-fixes (needs_refactor, no BLOCKER) — that render had drifted from the current
+renderer + template (stale `docs/ai/risk-taxonomy.md` doc ref, a missing verdict-accountability
+sentence, and a weaker secret-exposure guard than the template already carried), plus two genuine
+template-level gaps (ai-verify.sh self-contradiction with the Claude approved-command list;
+`.claude/settings.json` coverage undisclosed). See
+`docs/tickets/claude-agent-fleet-remediation/archive/DONE-plan-16-release-auditor-agent-critic-fixes.md`
+for the fix and re-render; this section's own text is left as-is per plan-16's Out Of Scope
+("flag only").
+
 ## repository-researcher  ·  _residual-fixes_
 
 **Current assessment:** The template is largely healthy. Deny-by-default read-only posture is enforced (edit: deny, plus a comprehensive per-command bash allowlist), the role boundary is explicit, and every body-referenced script has a frontmatter entry. Two of the critic's three MINOR findings are already resolved by earlier passes: the missing stop/handoff condition now exists (line 117: "state the assumption, mark it `unknown`, and stop rather than guess") and the query-usage.sh caveat appears exactly once (line 123). One genuine residual remains: repomix-freshness.sh is granted `allow` (frontmatter line 81) yet is not listed in the "Use" section, while line 126 conflates it with the ask-tier pack-context.sh under a stray "repomix/" prefix.
@@ -225,6 +257,23 @@ Every NOT READY or READY WITH NOTES verdict must name at least one risk mapped t
    - Change: Change checklist item 3 `3. Adapter files (Copilot/OpenCode) match shared canonical source.` -> `3. Adapter files (Copilot/OpenCode) match shared canonical source; legitimate renderer-produced provider differences are not drift — only unexplained divergence from the canonical source is.`
    - Rationale: The adapter-contract policy places provider-specific differences in renderers, not in duplicated bodies. Without this qualifier the auditor can report renderer-generated provider variation as drift, producing false positives that mislead exactly the agents this audit protects. The added clause sharpens item 3 into a precise, false-positive-resistant test. Runtime-agnostic and in-scope.
 
+**Stale-for-Claude-render flag (added by plan-17, not a rewrite of the assessment above):**
+this section's "Current assessment" describes the canonical source template only. A separate
+fresh agent-critic pass against the rendered `.claude/agents/workflow-auditor.md` scored it
+39/blocked — that render carried two BLOCKERs the canonical-template-only assessment above never
+surfaced: a self-contradiction (one sentence says Claude frontmatter cannot express per-command
+bash allowlists, another says "full per-script allow/ask/deny is in frontmatter," true on
+OpenCode only) and a reliance on `ai-verify.sh` as an "ask"-gated tool when Claude has no true
+ask-tier and the script is absent from both the approved-command list and `.claude/settings.json`
+— plus two MAJORs (missing secret-handling Hard Rule, missing non-interactive clarification
+fallback) that had already been closed on this render by unrelated in-progress work before this
+plan started. See
+`docs/tickets/claude-agent-fleet-remediation/archive/DONE-plan-17-workflow-auditor-render-fix.md`
+for the fix and re-render; this section's own text is left as-is per plan-17's Out Of Scope
+("flag only, don't rewrite plan.md directly"). `.opencode/agents/workflow-auditor.md` carries the
+same identical staleness and is confirmed but deliberately not fixed in plan-17's slice — a
+separate follow-up.
+
 ## agent-creator  ·  _residual-fixes_
 
 **Current assessment:** The template is strong: deny-by-default write posture (edit: deny), anti-fabrication guards (requires_human_approval: true, self_modification/may_create_agents false), a Contract required-field list that matches the schema, and a handoff that already routes Static Validator rejections back to a corrected re-emit (line 105, which resolves the critic's handoff finding). One genuine residual body defect remains that earlier passes missed: the Script Access prose (line 68) advertises `ai-task.sh (ask)` as a groundable script, but no `ai-task.sh` grant exists anywhere in the permission bash block, so the prose over-promises a capability the agent does not have. The critic's other two MAJOR items (raw readers, adding ai-task to policy) live inside the generator-managed bash block and are out of my edit scope.
@@ -285,6 +334,8 @@ This makes the required output observable and testable rather than a bare label 
 3. _future_ — **Make the success_criteria check testable in the output (forward-looking)**
    - Change: Design note (not applied): the 'What You Check' item "Are `success_criteria` specific and measurable?" is currently a yes/no. A future revision could require the 'Tool / Autonomy Proportionality' or a dedicated output line to record, per success criterion, whether it is observable/bounded (mirroring the architect's AC discipline), so a MATCHES verdict cannot be issued over vague criteria like 'works correctly'.
    - Rationale: Strengthens the verifier's leverage over weak specs, but expands the Final Output contract and should be coordinated across the agent-creator chain (static-validator, supervisor) rather than added unilaterally to one renderer template.
+
+**Addendum (2026-07-08, plan-7):** This "maintenance-only" verdict evaluated only the canonical source template — the generated `.claude/agents/agent-creator-semantic-verifier.md` render had drifted from it (missing the named send-back target, the missing-user-request Hard Rule, and the exact `agent-creator-supervisor`/`agent-creator-static-validator` routing ids above) until it was regenerated in `docs/tickets/claude-agent-fleet-remediation/plan-7-agent-creator-semantic-verifier-render-sync.md`. Plan-7 also closed a template-level gap this assessment did not cover: six allowlisted scripts (`git-forensics.sh`, `repo-stats.sh`, `repo-tool-inventory.sh`, `check-file-refs.sh`, `ai-structured.sh`, `repomix-freshness.sh`) had no Script Access bullet, and the `ai-verify.sh` bullet asserted direct usability in a way that contradicted the Claude render's own Bash Command Policy section (which has no `ask` tier); both are now fixed in the source template. The Copilot render (`.github/agents/agent-creator-semantic-verifier.agent.md`) still carries the pre-plan-7 drift as of this addendum and was left untouched — it is outside plan-7's Affected Paths.
 
 ## agent-creator-static-validator  ·  _maintenance-only_
 
@@ -427,6 +478,9 @@ After:
 2. _future_ — **Sharpen vague 'call out ... clearly' rule and add a completion summary field**
    - Change: Forward-looking (do not apply yet): replace the vague `- call out verification or setup changes clearly` with a concrete form such as `- when a change alters verification or setup, state the exact command and its expected result in a dedicated section`, and add a short completion output naming the docs changed plus their drift-check status (ai-doc-check.sh / check-file-refs.sh result). Left as applyNow=false because it expands the output contract and should be aligned with the shared writer-agent output shape across the fleet rather than diverging in one template.
    - Rationale: 'clearly' is exactly the kind of unobservable qualifier the critic flags elsewhere; making verification callouts command-specific and adding a testable completion summary would let a reviewer confirm which docs moved and whether drift checks passed. Deferred so the output-field shape stays consistent with other write-tier agents instead of being introduced ad hoc here.
+3. _future_ — **Fleet-level: reconcile 'GitHub-only' roster marking with rendered copies (routed by plan-18, not resolved here)**
+   - Change: Forward-looking only: `docs/ai/AGENTS-MANIFEST.md` (lines 64, 82) and `docs/ai/agents.md` both classify `docs` as GitHub-only, yet `.claude/agents/docs.md` and `.opencode/agents-optional/docs.md` both exist and are shipped/rendered today. Route to workflow-auditor to decide whether the roster marking is stale (docs is really cross-runtime) or the extra Claude/OpenCode adapter copies should be pruned. Do not edit the manifest, `docs/ai/agents.md`, or the shipped adapter copies to resolve this here — same precedent and same disposition as `upgrade`'s identical item 4 above.
+   - Rationale: This is the same fleet-level roster/adapter-parity question already flagged for `upgrade` above, discovered independently for `docs` during `docs/tickets/claude-agent-fleet-remediation/plan-18-docs-agent-claude-render-fix.md` (agent-critic score 39/blocked on `.claude/agents/docs.md`). Recording it here keeps the routing note next to the relevant template's own assessment rather than only in the plan-18 ticket file, matching this file's own established pattern for this exact defect class.
 
 ## upgrade  ·  _residual-fixes_
 

@@ -134,6 +134,29 @@ every file that the installer copies into target projects:
 Adapters are thin layers over canonical docs. See [adapter-contract.md](adapter-contract.md) for
 the rules adapters must follow.
 
+### Regenerating This Repo's Own `.claude/agents` And `.github/agents`
+
+`.claude/agents/*.md` and `.github/agents/*.agent.md` are rendered from
+`packages/ai-universal-rules/templates/{core,optional}/agents/*.md` using the same renderer
+functions the installer uses. Because this repo self-installs (`SKIP_EXISTING_UNMANAGED` on those
+two dirs), a template fix does not automatically reach the shipped copies — check and reconcile
+explicitly:
+
+```bash
+# Byte-parity check (CI-gated in validate-ai-surface.yml): fails if any shipped .claude/agents or
+# .github/agents file no longer matches what its template renders.
+php tools/ai/render-adapters.php --check
+
+# Reconcile: re-render both trees in place from the current templates. Never touches AGENTS.md,
+# CLAUDE.md, .opencode/**, or any other installed surface — only .claude/agents/*.md and
+# .github/agents/*.agent.md.
+php tools/ai/render-adapters.php --write
+```
+
+See `docs/tickets/claude-agent-fleet-remediation/plan-28-permission-sot-and-render-parity-sync.md`
+(Phase 1) for the design rationale and `docs/ai/source-of-truth.md` for the generated-vs-hand-authored
+boundary this closes.
+
 ## Running Tests
 
 From a fresh clone, install PHP dependencies before running any PHPUnit, ParaTest, or repo-wide

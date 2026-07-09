@@ -113,6 +113,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/bin/verify/ai-test-select.sh`
 - `scripts/ai/bin/verify/ai-verify.sh`
 - `scripts/ai/bin/verify/check-file-refs.sh`
+- `scripts/ai/bin/verify/list-todos.sh`
 - `scripts/ai/bin/verify/run-repo-tests.sh`
 - `scripts/ai/bin/verify/run-test-focused.sh`
 - `scripts/ai/bin/verify/ship-audit.sh`
@@ -192,6 +193,7 @@ This file lists baseline and referenced CLI tools used by the repository AI work
 - `scripts/ai/internal/search/85-backend-ast.sh`
 - `scripts/ai/internal/search/90-doctor.sh`
 - `scripts/ai/internal/search/95-dispatch.sh`
+- `scripts/ai/list-todos.sh`
 - `scripts/ai/pack-context.sh`
 - `scripts/ai/post-tool-use.sh`
 - `scripts/ai/pre-tool-use.sh`

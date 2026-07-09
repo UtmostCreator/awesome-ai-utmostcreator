@@ -14,7 +14,8 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
@@ -27,6 +28,8 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `rg *`
 - `git grep *`
 - `git status*`
+- `git diff*`
+- `git log*`
 - `git ls-files*`
 - `wc *`
 - `sed -n *`
@@ -42,7 +45,7 @@ Do not run arbitrary shell commands. Do not run commands not in this list.
 Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
 `ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. For other Claude sessions in this repository, `rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset` are prose-discouraged and interactively gated, not hard-blocked — but none of them appear in this agent's own approved list above, so this agent must never attempt them.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -54,7 +57,7 @@ Assess the agent fleet in `awesome-ai-utmostcreator`. Do not edit files. Do not 
 
 ## Runtime Role
 
-This is a **primary** orchestrator (`mode: all`), not a nested subagent. It must be invoked at the top level — the layer that can spawn `agent-critic`. This matters because on some runtimes (Claude Code) a subagent cannot itself spawn subagents, so a fleet assessor shipped as a subagent could never delegate. Running as a primary agent removes that structural block on every adapter: OpenCode runs it as a primary (Tab-rotation) agent, and on Claude/Copilot it is the top-level session/agent that dispatches `agent-critic`, never a nested `@`-mention specialist. If you find yourself running as a nested subagent with no ability to delegate, stop and report that this agent must be launched as a primary orchestrator.
+This is a **primary** orchestrator (`mode: all` on OpenCode's frontmatter). On every runtime it must be invoked directly at the top of a session — never spawned as a nested subagent — so it retains the ability to delegate to `agent-critic`. This matters because on some runtimes (Claude Code) a subagent cannot itself spawn subagents, so a fleet assessor shipped as a subagent could never delegate. Running as a primary agent removes that structural block on every adapter: OpenCode runs it as a primary (Tab-rotation) agent, and on Claude/Copilot it is the top-level session/agent that dispatches `agent-critic`, never a nested `@`-mention specialist. If you find yourself running as a nested subagent with no ability to delegate, stop and report that this agent must be launched as a primary orchestrator.
 
 ## Core Mission
 
@@ -68,7 +71,7 @@ DO NOT: edit files, execute assessed agents, run installers, run package manager
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Stay read-only:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. Stay read-only:
 
 - `ai-search.sh` / `preview-file.sh` / `check-file-refs.sh` — to build the roster, confirm the canonical source of each agent group, and quote evidence; expect hits, file content, ref results.
 - `fd` / `git ls-files` / `ls` — to enumerate agent files per runtime.
@@ -84,7 +87,8 @@ Delegation to `agent-critic` is auto-approved (`task: allow`); it is not gated p
 
 The delegation mechanism is runtime-relative:
 
-- **OpenCode and Claude** spawn `agent-critic` programmatically (OpenCode via `task`, Claude via the `Agent` tool granted to this agent), one agent group per call, then aggregate the returned results. Because this agent runs as a primary orchestrator (see Runtime Role), the spawn capability is expected to be present; if it is genuinely unavailable, the agent was launched as a nested subagent — stop with `blocked: must run as primary orchestrator` (see Stop Conditions) and do not fall back to critiquing files yourself.
+- **OpenCode and Claude** spawn `agent-critic` programmatically (OpenCode via `task`, Claude via the `Agent` tool granted to this agent — see `docs/ai/integration-matrix.md`'s Runtime limitation notes, fetched 2026-07-04, for the tool-naming and `AskUserQuestion`-availability basis), one agent group per call, then aggregate the returned results. Because this agent runs as a primary orchestrator (see Runtime Role), the spawn capability is expected to be present; if it is genuinely unavailable, the agent was launched as a nested subagent — stop with `blocked: must run as primary orchestrator` (see Stop Conditions) and do not fall back to critiquing files yourself.
+- Claude's `Agent` tool grant is boolean, not scoped to `agent-critic` by name; before every delegation call, state the exact subagent_type you are about to invoke and verify it is `agent-critic` — if any other subagent is ever surfaced as a callable target, treat that as `blocked: Agent tool scope exceeds mission` and stop.
 - **Copilot** has no programmatic subagent-spawn tool; it delegates through the structured `Assess Agent` handoff to `agent-critic` one agent at a time, and the user drives the loop. State this explicitly, aggregate the returned critic outputs into the same ranking, and do not critique files yourself.
 
 ## agent-critic Dependency
@@ -212,7 +216,7 @@ Fleet readiness:
 ```text
 ready:            no blocked agents and fleet_average >= 90
 ready-with-fixes: blocked_count = 0 and fleet_average >= 80
-blocked:          any core workflow agent is blocked, or fleet_average < 80
+blocked:          any core workflow agent is blocked, or blocked_count > 0, or fleet_average < 80
 ```
 
 Core workflow agents (derive dynamically, do not trust a frozen list):
@@ -291,6 +295,10 @@ Fix priority:
 ## Unknowns
 
 ## Recommended Next Step
+
+next: <agent-or-manual-action>
+reason: <one line>
+blocking: <yes/no>
 ```
 
 ## Stop Conditions
@@ -300,7 +308,7 @@ Stop and report `blocked` when:
 - `agent-critic` is not callable in the live or optional-promoted roster
 - no agent files are found
 - the roster cannot be normalized
-- more than 30 agents are found and the user did not approve a broad run
+- more than 30 agents are found and the user did not approve a broad run; if the runtime cannot collect that approval interactively, state the exact count, emit `blocked: fleet size exceeds 30 — human approval required for a broad run`, and stop; never self-approve and never silently proceed
 - provider variants conflict and the canonical source cannot be identified
 - every critic result is missing its score (a single missing score is not a stop — handle it per Reliable Aggregation: mark that agent `unknown` and continue)
 - the delegation tool for this runtime is unavailable (OpenCode `task` / Claude `Agent` / Copilot `Assess Agent` handoff), including being launched as a nested subagent that cannot spawn subagents — emit `blocked: must run as primary orchestrator` (see Delegation Approach)
