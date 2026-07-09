@@ -91,6 +91,17 @@ permission:
     'bash scripts/ai/install-mandatory-tools.sh *': ask
     'git add*': ask
     'git commit*': ask
+    'composer install*': ask
+    'composer update*': ask
+    'composer require*': ask
+    'npm install*': ask
+    'npm ci*': ask
+    'pnpm install*': ask
+    'pnpm add*': ask
+    'yarn install*': ask
+    'yarn add*': ask
+    'bun install*': ask
+    'bun add*': ask
     'markdownlint-cli2 *': allow
 agent_assessment:
   risk_level: low

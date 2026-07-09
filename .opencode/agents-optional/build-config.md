@@ -53,7 +53,6 @@ permission:
     'jq *': ask
     'yq *': ask
     'bat *': ask
-    'ls -1 scripts/ai/*.sh | sort': allow
     'git status*': allow
     'git diff*': allow
     'git log*': allow
@@ -104,7 +103,11 @@ permission:
     'npm install*': ask
     'npm ci*': ask
     'pnpm install*': ask
+    'pnpm add*': ask
     'yarn install*': ask
+    'yarn add*': ask
+    'bun install*': ask
+    'bun add*': ask
     'php -l *': allow
     'vendor/bin/phpunit *': allow
     './vendor/bin/phpunit *': allow
@@ -112,6 +115,7 @@ permission:
     'composer validate*': allow
     'php tools/ai/validate-*.php *': allow
     'bash scripts/ai/ai-install-coverage.sh *': allow
+    'ls scripts/ai/*.sh': allow
 agent_assessment:
   risk_level: high
   decision: needs_refactor
