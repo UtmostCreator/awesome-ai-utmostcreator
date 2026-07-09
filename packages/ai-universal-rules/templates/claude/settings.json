@@ -189,6 +189,7 @@
             "Bash(bash scripts/ai/watch-loop.sh *)",
             "Bash(cat > *)",
             "Bash(cat >> *)",
+            "Bash(tee *)",
             "Bash(curl *)",
             "Bash(git branch --delete *)",
             "Bash(git branch --move *)",
