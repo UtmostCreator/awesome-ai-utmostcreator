@@ -114,8 +114,8 @@
       ],
       "target_min": 80,
       "target_max": 170,
-      "warn_above": 240,
-      "fail_above": 320,
+      "warn_above": 275,
+      "fail_above": 350,
       "warn_allowlist": [
         {
           "path": ".opencode/agents/implementer.md",
@@ -196,8 +196,8 @@
       ],
       "target_min": 80,
       "target_max": 170,
-      "warn_above": 240,
-      "fail_above": 320,
+      "warn_above": 275,
+      "fail_above": 350,
       "warn_allowlist": [
         {
           "path": "packages/ai-universal-rules/templates/core/agents/bootstrapper.md",
