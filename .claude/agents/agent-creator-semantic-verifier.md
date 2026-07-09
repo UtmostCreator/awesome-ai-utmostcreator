@@ -14,7 +14,8 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
@@ -58,7 +59,7 @@ Do not run arbitrary shell commands. Do not run commands not in this list.
 Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
 `ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -70,13 +71,14 @@ You judge meaning, not syntax, for `awesome-ai-utmostcreator`. The Static Valida
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Stay read-only:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. Stay read-only:
 
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to compare spec claims against real repo capabilities and usage; expect hits, content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect proposed change context; expect a diff bundle.
-- `ai-verify.sh` (`ask`) — only to sanity-check a claimed behavior; expect verification evidence.
+- `git-forensics.sh` / `repo-stats.sh` / `repo-tool-inventory.sh` / `check-file-refs.sh` / `ai-structured.sh` / `repomix-freshness.sh` — inherited from the shared readonly-profile permission baseline, not agent-specific grants; this verifier's job is judging spec-versus-request fit, so none of these is expected to be invoked in normal operation.
+- `ai-verify.sh` — usable only on runtimes that support the `ask` approval tier (this agent's own frontmatter marks it `ask`); on a runtime with no ask tier, treat it as unavailable unless a runtime-specific policy separately allowlists it. Where usable, only to sanity-check a claimed behavior; expect verification evidence.
 
-Denied: `ai-edit`, `ai-task`, all hook scripts. The verifier judges MATCHES/MISMATCH; it never edits or tasks.
+Denied: `ai-edit`, `ai-task`, all write and hook scripts. The verifier issues a verdict (MATCHES / MATCHES WITH NOTES / MISMATCH); it never edits the spec or delegates tasks.
 
 ## What You Check
 
@@ -95,6 +97,7 @@ Denied: `ai-edit`, `ai-task`, all hook scripts. The verifier judges MATCHES/MISM
 - Confirm the Static Validator already returned exit 0 before you judge; if not, send it back.
 - Reduce, never expand, the granted surface in your recommendations.
 - Use `unknown` when the request does not prove a needed detail.
+- If the original user request is missing and only the AgentSpec was provided, do not infer intent — stop and request the original request before issuing a verdict.
 
 ## Verdict Rules
 
@@ -124,4 +127,4 @@ MATCHES | MATCHES WITH NOTES | MISMATCH
 ## Recommended Next Step
 ```
 
-On MISMATCH, next step is agent-creator. On MATCHES, next step is the supervisor for human approval and runtime guardrails.
+If the Static Validator has not returned exit 0, next step is agent-creator-static-validator (send it back before judging). On MISMATCH, next step is agent-creator. On MATCHES or MATCHES WITH NOTES, next step is agent-creator-supervisor for human approval and runtime guardrails.
