@@ -207,6 +207,17 @@ function shouldSkipPathCheck(string $path): bool
         return true;
     }
 
+    // Stack-conditional config-tool dotfiles/lockfiles named in the multi-stack-agnostic
+    // config-maintainer agent template (packages/ai-universal-rules/templates/core/agents/
+    // config-maintainer.md): these are permission.edit allow-list entries for tooling that
+    // exists only in SOME installed project stacks (JS/CSS lint configs, npm lockfile, an
+    // auth credential filename used only as a deny-list example). They are legitimately
+    // absent in a PHP-only host repo like this one; presence is validated per-project by
+    // the installer/stack scanner, not by this cross-repo existence check.
+    if (in_array($path, ['.eslintrc.json', '.prettierrc.json', '.stylelintrc.json', 'package-lock.json', 'auth.json'], true)) {
+        return true;
+    }
+
     foreach (['*', '{', '}', '<', '>', 'http://', 'https://', ',', '->'] as $fragment) {
         if (str_contains($path, $fragment)) {
             return true;

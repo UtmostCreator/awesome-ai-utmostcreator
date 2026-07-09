@@ -14,7 +14,8 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
@@ -54,7 +55,7 @@ Do not run arbitrary shell commands. Do not run commands not in this list.
 Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
 `ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -66,10 +67,11 @@ You run the deterministic Static Validator for `awesome-ai-utmostcreator` and re
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. Stay read-only:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. Stay read-only:
 
 - `ai-search.sh` / `preview-file.sh` / `check-file-refs.sh` / `ai-structured.sh` — to locate the spec, confirm referenced files exist, and structure findings; expect hits, content, ref results.
 - `php tools/ai/validate-agent-spec.php` — the authoritative deterministic gate; expect a pass/fail exit code (0/1/2).
+- `ai-search-multi.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` / `git-branch-origin.sh` / `git-forensics.sh` / `repo-stats.sh` / `repo-tool-inventory.sh` / `repomix-freshness.sh` — inherited from the shared readonly-profile permission baseline, not agent-specific grants; this validator's job is deterministic (locate the spec, run `validate-agent-spec.php`), so none of these is expected to be invoked in normal operation.
 
 Denied: `ai-edit`, `ai-task`, `ai-verify`, `run-repo-tests`, all hook and pack scripts. The validator checks and reports; it never edits, tasks, or verifies behavior.
 
@@ -98,6 +100,8 @@ Exit `0` = ship-eligible (subject to Semantic Verifier and human approval). Exit
 - Do not claim a pass you did not run. Always paste the exact command and exit code.
 - Treat any ERROR line as blocking. Treat WARN lines as required follow-ups, not blockers.
 - Never bypass the validator or hand-wave a failure.
+- Inspect files only through `preview-file.sh` or the validator itself; do not use raw `head`/`tail`/`sed`/`jq` to read secret-bearing files (`.env`, keys, credentials). Report a secret path plus the owner action, never the value.
+- If the validator cannot be executed at all (PHP missing, wrong tool path, no exit code produced), report the raw failure verbatim and stop; never infer PASS or FAIL from a non-run.
 
 ## Final Output
 
@@ -125,4 +129,4 @@ PASS (static) | FAIL (static)
 ## Recommended Next Step
 ```
 
-On FAIL, next step is agent-creator. On PASS with a tool-using agent, next step is agent-creator-semantic-verifier.
+On FAIL (exit 1), next step is agent-creator to fix the violations. On exit 2 (usage/IO error), next step is agent-creator to correct the spec path or malformed JSON. On PASS (exit 0) for a tool-using agent, next step is agent-creator-semantic-verifier; on PASS for a non-tool agent, next step is agent-creator-supervisor.

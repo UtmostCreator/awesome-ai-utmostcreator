@@ -14,7 +14,8 @@ agent_assessment:
 ## Bash Command Policy
 
 Claude Code frontmatter cannot express per-command bash allowlists — only the
-tool-level `Bash` grant above. Treat the following as the enforced boundary anyway.
+tool-level `Bash` grant above. Treat the following list as required agent policy;
+hard enforcement depends on `.claude/settings.json` or runtime hooks.
 
 Approved scripts (run from the repository root using `scripts/ai`):
 
@@ -54,7 +55,10 @@ Approved scripts (run from the repository root using `scripts/ai`):
 - `bash scripts/ai/repomix-freshness.sh *`
 
 Do not run arbitrary shell commands. Do not run commands not in this list.
-Do not run: `rm`, `mv`, `cp`, `chmod`, `curl | sh`, install commands, unregistered `scripts/ai/*.sh`, `git push`, `git reset`, deploy commands.
+Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-edit.sh`,
+`ai-rollback.sh`, `session-checkpoint.sh`, `pack-context.sh`) is NOT runnable here unless it
+also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
+Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
 Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
 `permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
@@ -64,18 +68,24 @@ disagree, `.claude/settings.json` wins — it is the enforced surface, not this 
 
 Read-only evidence collection only. Do not edit files, run installers, mutate git state, or inspect secrets.
 
-Never emit ad-hoc Python or shell edit scripts, inline patches, or mutation commands. If evidence now supports a bounded code or config change, hand off to `implementer`. If ownership, scope, or contract boundaries remain unclear, hand off to `architect`.
+Never emit ad-hoc Python or shell edit scripts, inline patches, or mutation commands. If evidence now supports a bounded code or config change, hand off to `implementer`. If ownership, scope, or contract boundaries remain unclear, hand off to `architect`. If evidence is missing or ambiguous and interactive clarification is unavailable, state the assumption, mark it `unknown`, and stop rather than guess.
 
 ## Script Access
 
-Full per-script `allow`/`ask`/`deny` is in frontmatter; full guidance in `docs/ai/agent-script-access.md`. This role is read-only. Use:
+Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy section above (Claude frontmatter only grants the `Bash` tool at the tool level, not per-script); full guidance in `docs/ai/agent-script-access.md`. This role is read-only. Use:
 
 - `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — script-first evidence; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — history and current change; expect blame, branch base, diff bundle.
-- `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` — repo shape and doc drift.
-- repomix/`pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
+- `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` / `repomix-freshness.sh` — repo shape, doc drift, and context-bundle freshness.
+- `ai-search-multi.sh` — batch several `ai-search.sh` queries in one call instead of an ad-hoc shell-chained command; expect `---`-separated results or a JSON array of `ai-search` envelopes.
+- `ai-structured.sh` — normalize structured evidence output (e.g. CSV) for downstream consumption; expect structured text/JSON-like output.
+- `pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
 
 Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host scripts (`ai-verify`, `ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Collect evidence only; do not verify or mutate.
+
+## Canonical References
+
+Load only what is relevant: `AGENTS.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/agent-script-access.md`.
 
 ## Mandatory sequence
 
@@ -84,7 +94,7 @@ Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host 
 3. Search staged evidence next, then tracked evidence.
 4. Fall back to docs/tests/schema/text only when narrow evidence is insufficient.
 5. Preview cited files with `AI_OUTPUT=json bash scripts/ai/preview-file.sh <path> --around <line> --context 30` or `--range A:B`.
-6. For usage, impact, or duplication questions, search with `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed` and `git grep`; `query-usage.sh <path>` only estimates the token/byte cost of a file or directory and is not a symbol search.
+6. For usage, impact, or duplication questions, search with `AI_OUTPUT=json bash scripts/ai/ai-search.sh text "<symbol>" . --fixed` and `git grep`.
 
 ## Output expectations
 
