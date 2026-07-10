@@ -688,14 +688,19 @@ function validateAdapterScriptReferences(string $root, array $scripts, array &$e
         listMarkdownFilesUnder($root . '/packages/ai-universal-rules/templates/instructions'),
         listMarkdownFilesUnder($root . '/packages/ai-universal-rules/templates/workflows'),
         listMarkdownFilesUnder($root . '/.github'),
-        listMarkdownFilesUnder($root . '/.opencode')
+        listMarkdownFilesUnder($root . '/.opencode'),
+        // .claude/agents/*.md are rendered agent bodies that can reference scripts/ai/* too.
+        listMarkdownFilesUnder($root . '/.claude/agents')
     );
 
     $targets = array_values(array_unique($targets));
 
     foreach ($targets as $path) {
         $content = (string) file_get_contents($path);
-        if (preg_match_all('#(?:<SCRIPTS_ROOT>|scripts/ai)/([A-Za-z0-9._-]+\.sh)#', $content, $matches) !== 1) {
+        // `< 1` (not `!== 1`) so files with 2+ script references are still scanned;
+        // the `(?<![\w/])` lookbehind stops the `scripts/ai/` substring inside
+        // `tests/scripts/ai/<name>.sh` (a legitimate test script) being false-flagged.
+        if (preg_match_all('#(?:<SCRIPTS_ROOT>|(?<![\w/])scripts/ai)/([A-Za-z0-9._-]+\.sh)#', $content, $matches) < 1) {
             continue;
         }
         foreach ($matches[1] as $scriptFile) {
