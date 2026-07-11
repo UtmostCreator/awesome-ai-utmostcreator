@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests;
 
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 class AdvisorTokenBudgetTest extends TestCase
@@ -35,6 +36,7 @@ class AdvisorTokenBudgetTest extends TestCase
         @rmdir($path);
     }
 
+    #[Group('slow')]
     public function testAdvisorTokenBudgetArtifactExistsAfterAll(): void
     {
         $root = realpath(dirname(__DIR__, 2));
@@ -46,7 +48,12 @@ class AdvisorTokenBudgetTest extends TestCase
         $descriptors = [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']];
         $env = $_ENV;
         $env['AI_ADVISOR_GENERATED_DIR'] = $generated;
-        $process = proc_open($php . ' tools/ai/ai.php advisor --all', $descriptors, $pipes, (string) $root, $env);
+        // Run only the secret-scan -> pack -> token-budget slice that produces
+        // advisor-token-budget.json. This skips the --prompt stage, which would
+        // trigger a second full-history gitleaks scan, roughly halving runtime
+        // versus `advisor --all` while producing the identical artifact this test
+        // asserts (tokens_estimate + mode keys). See advisor_command.php.
+        $process = proc_open($php . ' tools/ai/ai.php advisor --secret-scan --pack --token-budget', $descriptors, $pipes, (string) $root, $env);
         $this->assertIsResource($process);
         fclose($pipes[0]);
         stream_get_contents($pipes[1]);

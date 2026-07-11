@@ -31,7 +31,11 @@ declare(strict_types=1);
  * Union-with-existing, never full replacement (safety-critical): the composed model only
  * covers OpenCode-shaped `bash`/`edit` permission entries. It has no equivalent at all for
  * Claude's separate `Read(...)`/`Edit(...)`/`Write(...)` path-glob deny syntax (secret files,
- * generated files, lockfiles, `packages/**`, `tools/ai/**`, ...), and several hand-curated
+ * generated files, lockfiles, `tools/ai/**`, ...; NOTE: `packages/**` is deliberately NOT in
+ * this deny list — this repo develops the AI kit whose source lives under `packages/`, and the
+ * editor agents (implementer/refactorer/bootstrapper, editSurface:'code') must be able to edit
+ * it on every provider, so no `Edit(packages/**)`/`Write(packages/**)` guard is curated here),
+ * and several hand-curated
  * bash entries (`curl *`, `wget *`, `git branch -d/-D/--delete/-m/-M/--move *`,
  * `git push --force*`, `git reset --hard*`, `git clean -f*`, various `npm`/`pnpm`/`yarn`/`bun`
  * test invocations, alternate script-invocation spellings, ...) predate the composed model and

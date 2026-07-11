@@ -290,6 +290,19 @@ function aiPermissionPacks(): array
         'hard_stop.ask_rm' => aiPermissionEntries('bash', [
             'rm *' => 'ask',
         ]),
+        // Grant (2026-07-10): 'python3 *' was relocated out of the immutable hard-deny floor
+        // to a NON-immutable 'deny' default in core:safe-read (see core.php's two NOTE blocks).
+        // Read-only agents fall through to that deny; the write/edit-capable impl-tier agents
+        // (implementer, refactorer, bootstrapper, post-install, super-implementer) route it to
+        // 'ask' via this shared pack — never a silent 'allow', matching the AGENTS.md approval-
+        // boundary posture for interpreter execution. Extracted into a named pack because 5
+        // agents need the identical entry (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents
+        // forbids repeating the same exception pattern inline across 2+ agents). To make this
+        // super-implementer-specific instead, remove this pack from the other agents' askPacks
+        // and keep it only on super-implementer's askPacks list in compositions.php.
+        'impl.ask_python3' => aiPermissionEntries('bash', [
+            'python3 *' => 'ask',
+        ]),
         'core.safe_read.deny_git_grep' => aiPermissionEntries('bash', [
             'git grep *' => 'deny',
         ]),

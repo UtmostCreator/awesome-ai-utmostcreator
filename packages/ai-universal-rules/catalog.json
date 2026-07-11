@@ -55,7 +55,7 @@
         "root:capability": 17,
         "root:claude-agent": 24,
         "root:claude-command": 5,
-        "root:claude-skill": 22,
+        "root:claude-skill": 24,
         "root:cli": 1,
         "root:exporter": 2,
         "root:generator": 1,
@@ -1972,6 +1972,22 @@
         {
             "scope": "root",
             "type": "claude-skill",
+            "name": "ai-scripts",
+            "path": ".claude/skills/ai-scripts/SKILL.md",
+            "runtime": "claude",
+            "description": "Use registered scripts with risk-based approvals and evidence."
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
+            "name": "ai-search",
+            "path": ".claude/skills/ai-search/SKILL.md",
+            "runtime": "claude",
+            "description": "Use ai-search to collect bounded repository evidence."
+        },
+        {
+            "scope": "root",
+            "type": "claude-skill",
             "name": "architecture-plan",
             "path": ".claude/skills/architecture-plan/SKILL.md",
             "runtime": "claude",
@@ -2943,7 +2959,7 @@
             "name": "agent-fleet-assessor",
             "path": ".opencode/agents/agent-fleet-assessor.md",
             "runtime": "opencode",
-            "description": "Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
+            "description": "Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
         },
         {
             "scope": "root",

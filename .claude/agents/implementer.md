@@ -127,9 +127,11 @@ Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-e
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
 Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
-Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
-`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
-disagree, `.claude/settings.json` wins — it is the enforced surface, not this body text.
+This approved-scripts list is a SUBSET of `.claude/settings.json`'s `permissions.allow`
+floor by construction (both are generated from the same composed per-agent permission
+model; see `tools/ai/generate-claude-settings.php`). Hard enforcement (beyond this
+advisory body policy) lives in `.claude/settings.json` `permissions.allow`/`permissions.deny`
+rules, not this body text.
 
 # Implementer Agent
 
@@ -179,8 +181,8 @@ Full per-script `allow`/`ask`/`deny` guidance is in `docs/ai/agent-script-access
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the slice; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect the current change; expect a diff bundle.
 - `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.
-- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the runtime's native file-edit permission is insufficient; expect a tracked, reversible edit.
-- `session-checkpoint.sh` (`ask`) — for continuity across a long slice.
+- `ai-edit.sh` / `ai-rollback.sh` — not runnable on Claude Code (no `ask` approval tier; absent from the Bash Command Policy approved list above). If this capability is needed, note the gap in this agent's Final Output instead of attempting it here.
+- `session-checkpoint.sh` — not runnable on Claude Code (no `ask` approval tier; absent from the Bash Command Policy approved list above). If this capability is needed, note the gap in this agent's Final Output instead of attempting it here.
 
 Edits normally go through the runtime's native file-edit permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
 

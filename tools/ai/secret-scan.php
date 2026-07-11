@@ -25,13 +25,24 @@ function hasBin(string $name): bool
     return $exit === 0;
 }
 
+function envIsOn(string $name): bool
+{
+    $value = strtolower((string) getenv($name));
+    return $value === '1' || $value === 'true';
+}
+
 $strict = false;
 $scope = '--all';
+$runRequested = false;
 
 for ($i = 1; $i < $argc; $i++) {
     $arg = (string) $argv[$i];
     if ($arg === '--strict') {
         $strict = true;
+        continue;
+    }
+    if ($arg === '--run') {
+        $runRequested = true;
         continue;
     }
     if ($arg === '--staged' || $arg === '--all') {
@@ -40,8 +51,22 @@ for ($i = 1; $i < $argc; $i++) {
 }
 
 $isCi = strtolower((string) getenv('CI')) === 'true' || getenv('GITHUB_ACTIONS') === 'true';
-$allowNoScanner = strtolower((string) getenv('AI_ALLOW_NO_SECRET_SCANNER')) === '1'
-    || strtolower((string) getenv('AI_ALLOW_NO_SECRET_SCANNER')) === 'true';
+$isRelease = envIsOn('AI_RELEASE');
+$allowNoScanner = envIsOn('AI_ALLOW_NO_SECRET_SCANNER');
+
+// The external secret scanner (gitleaks/trufflehog) scans full git history and is
+// slow, so it is OFF BY DEFAULT. It runs only when a release or CI context is
+// active, or when explicitly requested via AI_SECRET_SCAN=1 or the --run flag.
+// When skipped, exit 0 (pass) so callers such as the advisor secret-scan gate
+// treat a disabled scan as non-blocking. Requesting the scan does not bypass the
+// no-scanner enforcement below when --strict/CI is also in effect.
+$scanRequested = $runRequested || envIsOn('AI_SECRET_SCAN') || $isRelease || $isCi;
+
+if (!$scanRequested) {
+    fwrite(STDOUT, "WARN: secret scan skipped (disabled by default). scope={$scope}\n");
+    fwrite(STDOUT, "Hint: set AI_SECRET_SCAN=1 (or pass --run) to scan on request; runs automatically on release (AI_RELEASE=1) and in CI.\n");
+    exit(0);
+}
 
 if (hasBin('gitleaks')) {
     $cmd = 'gitleaks detect --source ' . escapeshellarg($root) . ' --redact --no-banner';

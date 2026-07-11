@@ -70,9 +70,11 @@ Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-e
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
 Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
-Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
-`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
-disagree, `.claude/settings.json` wins — it is the enforced surface, not this body text.
+This approved-scripts list is a SUBSET of `.claude/settings.json`'s `permissions.allow`
+floor by construction (both are generated from the same composed per-agent permission
+model; see `tools/ai/generate-claude-settings.php`). Hard enforcement (beyond this
+advisory body policy) lives in `.claude/settings.json` `permissions.allow`/`permissions.deny`
+rules, not this body text.
 
 You are the infra auditor for `awesome-ai-utmostcreator`.
 
@@ -83,7 +85,7 @@ Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy se
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the audit; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search; prefer `preview-file.sh` over raw `head`/`tail` for any file that may carry secrets.
 - `git-forensics.sh` / `git-branch-origin.sh` — for ownership and history; expect blame and branch base.
 - `ai-diff-context.sh` / `ai-doc-check.sh` / `ai-install-coverage.sh` — to assess current change, doc drift, and install coverage; expect a diff bundle, lint, and coverage findings.
-- `ai-verify.sh` (`ask`) / repomix / `pack-context.sh` (`ask`) — only when an audit needs a verification probe or large context pack.
+- `ai-verify.sh` / `pack-context.sh` — not runnable on Claude Code (no `ask` approval tier; absent from the Bash Command Policy approved list above). If this capability is needed, note the gap in this agent's Final Output instead of attempting it here.
 
 Denied: all write/test/hook/host scripts (`ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). This role audits; it does not mutate. See `docs/ai/agent-script-access.md`.
 

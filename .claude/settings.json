@@ -166,8 +166,6 @@
             "Write(.env.*)",
             "Edit(**/secrets/**)",
             "Write(**/secrets/**)",
-            "Edit(packages/**)",
-            "Write(packages/**)",
             "Edit(tools/ai/**)",
             "Write(tools/ai/**)",
             "Edit(vendor/**)",

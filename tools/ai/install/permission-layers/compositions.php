@@ -387,7 +387,7 @@ function aiPermissionAgentCompositions(): array
             // install no longer inherits this grant). Byte-stable: this agent's only PHP
             // exposure was ever 'php -l *' (verified: no phpunit/composer-validate grants).
             languageOverlays: ['php-lint'],
-            askPacks: ['context.packaging', 'script.ai_write_ask'],
+            askPacks: ['context.packaging', 'script.ai_write_ask', 'impl.ask_python3'],
             exceptions: [
                 // Ground truth grants these despite the 'verify' profile not including
                 // them by default (git-mutating-ask and git stash list/show are impl-tier
@@ -434,7 +434,7 @@ function aiPermissionAgentCompositions(): array
             // Byte-stable: js-core is an exact copy of proof.js_test_lint_typecheck (no
             // yarn/bun — refactorer never granted those, unlike implementer).
             languageOverlays: ['php-lint', 'php-phpunit', 'js-core'],
-            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate'],
+            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate', 'impl.ask_python3'],
             exceptions: [
                 // Refactorer only needs branch inspection; broad branch wildcard is blocked
                 // by the shared git.branch_wildcard_deny pack, so reopen safe forms only.
@@ -536,7 +536,7 @@ function aiPermissionAgentCompositions(): array
             // replace the 3 inline yarn/bun exceptions below) — so it uses the existing
             // coarse keys directly, not the 4 new atomic ones.
             languageOverlays: ['php', 'js-ts'],
-            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm'],
+            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm', 'impl.ask_python3'],
             exceptions: [
                 aiPermissionBashAsk(aiPatternAiTool('install * --apply')),
                 aiPermissionBashAsk('php tools/ai/install-ai-kit.php *'),
@@ -581,7 +581,7 @@ function aiPermissionAgentCompositions(): array
                 'core.safe_read.deny_nl',
                 'core.safe_read.deny_file_probe',
             ],
-            askPacks: ['core.safe_read.raw_read_ask_gate'],
+            askPacks: ['core.safe_read.raw_read_ask_gate', 'impl.ask_python3'],
             exceptions: [
                 // Bootstrapper allows date/uuidgen/wc (from safe-read defaults) but,
                 // unlike the common-generics pack, tightens these beyond it.
@@ -713,7 +713,7 @@ function aiPermissionAgentCompositions(): array
             // posture. Routed to 'ask' (with a required reason) so deletion always needs
             // human confirmation, matching implementer and post-install. 'rm -rf *' remains
             // blocked by the TRUE immutable hard-deny floor (core.php) regardless of this pack.
-            askPacks: ['core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm'],
+            askPacks: ['core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm', 'impl.ask_python3'],
             exceptions: [
                 // Sole intentional carve-out: super-implementer is the one power agent that
                 // may commit without a prompt. Every OTHER composed agent inherits
@@ -755,7 +755,7 @@ function aiPermissionAgentCompositions(): array
             // exception below — extracted to a shared pack because implementer and
             // super-implementer now need the identical entry
             // (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents).
-            askPacks: ['core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm'],
+            askPacks: ['core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm', 'impl.ask_python3'],
             exceptions: [
                 // Ground truth: shipped post-install's edit block has scripts/ai/** allow but
                 // NO tools/ai/** key, so it denies tools/ai/** edits. The 'install' edit

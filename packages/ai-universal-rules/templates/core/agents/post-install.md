@@ -62,6 +62,7 @@ permission:
     'ls *': allow
     'fd *': allow
     'rg *': ask
+    'python3 *': ask
     'jq *': ask
     'yq *': ask
     'scc *': allow
