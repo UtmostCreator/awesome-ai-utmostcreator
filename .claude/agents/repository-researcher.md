@@ -60,9 +60,11 @@ Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-e
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
 Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
-Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
-`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
-disagree, `.claude/settings.json` wins — it is the enforced surface, not this body text.
+This approved-scripts list is a SUBSET of `.claude/settings.json`'s `permissions.allow`
+floor by construction (both are generated from the same composed per-agent permission
+model; see `tools/ai/generate-claude-settings.php`). Hard enforcement (beyond this
+advisory body policy) lives in `.claude/settings.json` `permissions.allow`/`permissions.deny`
+rules, not this body text.
 
 # Repository Researcher
 
@@ -79,7 +81,7 @@ Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy se
 - `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` / `repomix-freshness.sh` — repo shape, doc drift, and context-bundle freshness.
 - `ai-search-multi.sh` — batch several `ai-search.sh` queries in one call instead of an ad-hoc shell-chained command; expect `---`-separated results or a JSON array of `ai-search` envelopes.
 - `ai-structured.sh` — normalize structured evidence output (e.g. CSV) for downstream consumption; expect structured text/JSON-like output.
-- `pack-context.sh` (`ask`) — only for large context packing; expect a context bundle.
+- `pack-context.sh` — not runnable on Claude Code (no `ask` approval tier; absent from the Bash Command Policy approved list above). If this capability is needed, note the gap in this agent's Final Output instead of attempting it here.
 
 Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host scripts (`ai-verify`, `ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Collect evidence only; do not verify or mutate.
 

@@ -38,7 +38,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / capability` - 17
 - `root / claude-agent` - 24
 - `root / claude-command` - 5
-- `root / claude-skill` - 22
+- `root / claude-skill` - 24
 - `root / cli` - 1
 - `root / exporter` - 2
 - `root / generator` - 1
@@ -137,6 +137,8 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`claude-command`|search-evidence|`.claude/commands/search-evidence.md`|Collect script-first repository evidence using ai-search|
 |`claude-command`|verify-ai-wiring|`.claude/commands/verify-ai-wiring.md`|Verify OpenCode script-first AI wiring|
 |`claude-command`|verify|`.claude/commands/verify.md`|Compatibility command that runs the verification workflow; prefer the verify-change skill for reusable guidance|
+|`claude-skill`|ai-scripts|`.claude/skills/ai-scripts/SKILL.md`|Use registered scripts with risk-based approvals and evidence.|
+|`claude-skill`|ai-search|`.claude/skills/ai-search/SKILL.md`|Use ai-search to collect bounded repository evidence.|
 |`claude-skill`|architecture-plan|`.claude/skills/architecture-plan/SKILL.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`claude-skill`|bug-regression|`.claude/skills/bug-regression/SKILL.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
 |`claude-skill`|dependency-upgrade|`.claude/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
@@ -258,7 +260,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|search-evidence|`.github/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`github-copilot-skill`|verify-change|`.github/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
 |`opencode-agent`|agent-critic|`.opencode/agents/agent-critic.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
-|`opencode-agent`|agent-fleet-assessor|`.opencode/agents/agent-fleet-assessor.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
+|`opencode-agent`|agent-fleet-assessor|`.opencode/agents/agent-fleet-assessor.md`|Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`opencode-agent`|architect|`.opencode/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
 |`opencode-agent`|architecture-plan-writer|`.opencode/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`opencode-agent`|bootstrapper|`.opencode/agents/bootstrapper.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|

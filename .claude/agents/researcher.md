@@ -113,9 +113,11 @@ Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-e
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
 Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
-Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
-`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
-disagree, `.claude/settings.json` wins — it is the enforced surface, not this body text.
+This approved-scripts list is a SUBSET of `.claude/settings.json`'s `permissions.allow`
+floor by construction (both are generated from the same composed per-agent permission
+model; see `tools/ai/generate-claude-settings.php`). Hard enforcement (beyond this
+advisory body policy) lives in `.claude/settings.json` `permissions.allow`/`permissions.deny`
+rules, not this body text.
 
 # Researcher Agent
 
@@ -172,7 +174,7 @@ Full per-script `allow`/`ask`/`deny` is documented in the Bash Command Policy se
 - `ai-search.sh` / `preview-file.sh` / `rg-code.sh` / `fd-files.sh` / `query-usage.sh` — to map the affected area; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `git-forensics.sh` / `git-branch-origin.sh` / `ai-diff-context.sh` — for history and current change; expect blame, branch base, diff bundle.
 - `repo-stats.sh` / `repo-tool-inventory.sh` / `ai-file-freshness.sh` / `check-file-refs.sh` / `ai-doc-check.sh` — to gauge repo shape and doc drift.
-- repomix/`pack-context.sh` — not runnable on Claude Code (no `ask` approval tier; not in the Claude allowlist). If large-context packing is needed, hand that off rather than attempting it here.
+- `pack-context.sh` — not runnable on Claude Code (no `ask` approval tier; absent from the Bash Command Policy approved list above). If this capability is needed, note the gap in this agent's Final Output instead of attempting it here.
 
 Denied: `gh-pr-context`, `ai-install-coverage`, all verify/test/write/hook/host scripts (`ai-verify`, `ai-test-select`, `run-repo-tests`, `ai-edit`, `ai-rollback`, `pre-tool-use`, `post-tool-use`, `install-mandatory-tools`, `prune-shipped-targets`, `watch-loop`, `common.sh`). Researcher grounds; it does not verify or mutate.
 

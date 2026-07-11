@@ -62,6 +62,7 @@ permission:
     'eza *': allow
     'rg *': allow
     'git grep *': allow
+    'python3 *': ask
     'head *': allow
     'tail *': allow
     'jq *': allow

@@ -46,6 +46,7 @@ permission:
     '*': ask
     'ls *': allow
     'grep *': deny
+    'python3 *': deny
     'git status*': allow
     'git diff*': allow
     'bash scripts/ai/ai-task.sh *': deny
@@ -79,7 +80,6 @@ permission:
     'AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
     'env AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *': allow
     'bash scripts/ai/ai-install-coverage.sh *': deny
-    'python3 *': deny
     'php -r *': deny
     '* <<*': deny
     '* > *': deny

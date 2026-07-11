@@ -20,13 +20,15 @@
   },
   "scripts": {
     "test": "phpunit --configuration phpunit.xml.dist",
-    "test:fast": "paratest --configuration phpunit.xml.dist --processes=12 --runner=WrapperRunner",
+    "test:fast": "paratest --configuration phpunit.xml.dist --processes=16 --runner=WrapperRunner --exclude-group slow",
+    "test:slow-suite": "paratest --configuration phpunit.xml.dist --processes=16 --runner=WrapperRunner",
     "test:profile": "phpunit --configuration phpunit.xml.dist --log-junit=../../docs/ai/generated/phpunit-junit.xml",
     "test:slow": "php tests/Support/list-slow-tests.php"
   },
   "scripts-descriptions": {
     "test": "Run the full PHPUnit suite serially (~60s).",
-    "test:fast": "Run the suite in parallel via paratest (12 procs by default, ~19s).",
+    "test:fast": "Run the suite in parallel via paratest (16 procs), excluding the `slow` group (heavy subprocess tests). Fastest feedback lane.",
+    "test:slow-suite": "Run the full suite in parallel via paratest (16 procs) including the `slow` group (heavy subprocess tests) for complete coverage.",
     "test:profile": "Run PHPUnit and emit JUnit XML at docs/ai/generated/phpunit-junit.xml for slow-test ranking.",
     "test:slow": "Print per-test timing for the last junit profile (run `composer test:profile` first)."
   }

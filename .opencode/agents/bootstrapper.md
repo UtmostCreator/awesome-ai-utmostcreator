@@ -58,6 +58,7 @@ permission:
     "fd *": allow
     "rg *": ask
     "git grep *": allow
+    "python3 *": ask
     "sed -n *": ask
     "head *": ask
     "tail *": ask

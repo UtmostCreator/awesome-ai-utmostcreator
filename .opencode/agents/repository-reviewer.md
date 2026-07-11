@@ -22,6 +22,7 @@ permission:
     'eza *': deny
     'rg *': allow
     'git grep *': allow
+    'python3 *': deny
     'sed -n *': deny
     'head *': deny
     'tail *': deny
@@ -136,7 +137,6 @@ permission:
     '*scripts/ai/rg-code.sh *secrets.*': deny
     '*scripts/ai/rg-code.sh *credentials.*': deny
     '*scripts/ai/rg-code.sh *auth.json*': deny
-    'python3 *': deny
     'php -r *': deny
     '* <<*': deny
     '* > *': deny

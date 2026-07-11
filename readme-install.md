@@ -919,7 +919,7 @@ Available subcommands: `install`, `upgrade`, `rollback`, `verify`, `preflight`, 
 
 | File                           | What It Does                                    |
 | ------------------------------ | ----------------------------------------------- |
-| `secret-scan.php`              | Scans for accidentally committed secrets        |
+| `secret-scan.php`              | Scans for committed secrets. Off by default (slow full-history scan); runs on release (`AI_RELEASE=1`), in CI, or on request via `AI_SECRET_SCAN=1` / `--run` (see `just secret-scan`) |
 | `suggest-verification.php`     | Suggests which verification to run for a change |
 | `maintenance-mode.php`         | Toggle maintenance mode for AI workflows        |
 | `render-agent-permissions.php` | Renders agent tool permissions                  |

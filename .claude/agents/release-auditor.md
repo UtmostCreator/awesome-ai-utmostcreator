@@ -99,9 +99,11 @@ Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-e
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
 Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. This agent's own Approved-scripts list above never includes `rm`, `mv`, `cp`, `chmod`, `git push`, or `git reset` in any form; if `.claude/settings.json`'s shared fleet-wide gate would otherwise interactively prompt for one of them, treat that prompt as out of scope for this read-only auditor and decline it.
 
-Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
-`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
-disagree, `.claude/settings.json` wins — it is the enforced surface, not this body text.
+This approved-scripts list is a SUBSET of `.claude/settings.json`'s `permissions.allow`
+floor by construction (both are generated from the same composed per-agent permission
+model; see `tools/ai/generate-claude-settings.php`). Hard enforcement (beyond this
+advisory body policy) lives in `.claude/settings.json` `permissions.allow`/`permissions.deny`
+rules, not this body text.
 
 # Release Auditor Agent
 
