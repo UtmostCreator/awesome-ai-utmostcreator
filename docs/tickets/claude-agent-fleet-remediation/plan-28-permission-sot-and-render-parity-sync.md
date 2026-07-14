@@ -105,9 +105,9 @@ The composed per-agent model (`aiPermissionComposeFromSpec` over `aiInstallerAge
 - [x] P1 (Phase 2): Write `tools/ai/generate-claude-settings.php --check|--write` generating the allow/deny arrays of `templates/claude/settings.json` from the projection (leaving `$schema`/`hooks` hand-authored). DEVIATION (see Implementation Notes): generates `existing ∪ composed` (additive union), not a full replacement — a full replacement was verified to drop 75 pre-existing deny entries (all secret/generated-file `Read`/`Edit`/`Write` guards) and narrow several allow entries, which the safety directive for this pass forbids.
 - [x] P1 (Phase 2): Add `tests/php/ClaudeSettingsProjectionTest.php` (every agent allowedBash subset of generated allow; hard-deny subset of generated deny; synthetic third-party entry survives the union-merge).
 - [~] P1 (Phase 2, PARTIAL): Wired `generate-claude-settings.php --check` into `.github/workflows/validate-ai-surface.yml` — DONE. The superset-or-equal consistency assertion between the sh-hook deny set (`docs/ai/command-policy.tiers.yaml` tier4) and the composed hard-deny set — NOT implemented; see Implementation Notes for the evidence-backed reason (the literal invariant is false today: only 1 of 18 composed hard-deny bash patterns is glob-covered by tier4's 3-pattern deny list, and a genuine contradiction was found in the OTHER direction — tier1 `allow`s `bash scripts/ai/ai-task.sh *`, which the composed hard-deny floor denies universally). Fixing either requires editing `docs/ai/command-policy.tiers.yaml` (recompiling `command-policy.compiled.sh` in two locations), which is outside this slice's "Affected Paths" and the "keep DELIBERATELY SEPARATE" boundary — flagged for architect/reviewer routing, not silently resolved here.
-- [ ] P2 (Phase 3): Add the `aiClaudeRuntimeCapabilities()` descriptor (banned-capability list + Script-Access-vs-allowedBash reconciliation rule).
-- [ ] P2 (Phase 3): Replace the 4 `preg_replace` neutralizations and the hardcoded disclaimer in `claude-agent-renderer.php` with the table-driven filter; regenerate via `render-adapters.php --write`.
-- [ ] P2 (Phase 3): Add `tests/php/ClaudeCapabilityFilterTest.php` (no banned-capability phrase in any rendered Claude body; no Script-Access bullet names an out-of-allowlist script).
+- [x] P2 (Phase 3): Add the `aiClaudeRuntimeCapabilities()` descriptor (banned-capability list + Script-Access-vs-allowedBash reconciliation rule). Added `tools/ai/install/claude-runtime-capabilities.php` (sibling file, per the plan's own "or a sibling `claude-runtime-capabilities.php`" option). See Implementation Notes below.
+- [x] P2 (Phase 3): Replace the 4 `preg_replace` neutralizations and the hardcoded disclaimer in `claude-agent-renderer.php` with the table-driven filter; regenerate via `render-adapters.php --write`. Regenerated 24 `.claude/agents/*.md` files via the Phase-1 root CLI `tools/ai/render-adapters.php` (confirmed distinct from `tools/ai/install/permission-layers/render-adapters.php` per this plan's own basename-collision guard); `--check` reviewed before `--write` per the task's safety directive. See Implementation Notes below for consolidation decisions and what was deliberately NOT subsumed.
+- [x] P2 (Phase 3, evidence partial — see notes): Added `tests/php/ClaudeCapabilityFilterTest.php` (12 tests, 119 assertions). Proves the banned-capability-phrase half fully; proves the Script-Access-vs-allowedBash half for every "fully absent" case (the shape the reconciliation rule actually closes) and pins a documented, known "mixed-presence" residual gap rather than silently passing it — see Implementation Notes and AC-05 below.
 
 ## Acceptance Criteria
 
@@ -115,10 +115,10 @@ The composed per-agent model (`aiPermissionComposeFromSpec` over `aiInstallerAge
 - [x] AC-02: Deliberately mutating one line of any `.claude/agents/*.md` or `.github/agents/*.agent.md` makes `render-adapters.php --check` exit non-zero with a diff (negative test).
 - [x] AC-03: `php tools/ai/generate-claude-settings.php --check` exits 0; `ClaudeSettingsProjectionTest` proves every agent's rendered allowedBash is a subset of the generated `permissions.allow`, and the composed hard-deny set is a subset of the generated `permissions.deny`. Verified: `--check` exits 0; `testEveryShippedAgentAllowedBashIsSubsetOfGeneratedAllow` and `testComposedHardDenyFloorIsSubsetOfGeneratedDeny` pass (5/5 tests, 16 assertions).
 - [x] AC-04: A synthetic third-party allow entry injected into `.claude/settings.json` survives the install-time union-merge (merge mechanism unchanged). Verified: `testSyntheticThirdPartyAllowEntrySurvivesUnionMerge` passes; `claude-settings-merge.php`/`aiInstallerMergeClaudeSettingsJson()` untouched (confirmed via `git diff` — 0 lines changed in that file).
-- [ ] AC-05: `ClaudeCapabilityFilterTest` proves no rendered Claude body contains an ask-tier claim, per-path edit-scoping claim, or bash-level `mv`/`cp`/`rm` deny claim, and no Script Access bullet names a script absent from that agent's rendered allowedBash.
+- [~] AC-05 (PARTIAL — see Implementation Notes): `ClaudeCapabilityFilterTest` proves no rendered Claude body contains an ask-tier claim (the `no_ask_tier`/`no_external_directory_enforcement` banned phrases; `no_per_path_edit_scoping`/`no_bash_level_file_op_deny` already held with zero violations found), and proves no Script Access bullet names ONLY scripts absent from that agent's rendered allowedBash (the "fully absent" case, which the reconciliation rule structurally guarantees never survives — `testNoScriptAccessBulletNamesAnEntirelyAbsentScript`). It does NOT prove the fully literal universal claim for "mixed-presence" bullets (7 agents' `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh`-shaped lines, where `ai-verify.sh` is named but absent while the other two ARE present) — deliberately left unrewritten to avoid a worse regression (falsely claiming a genuinely-runnable script is not runnable), and pinned by `testKnownMixedPresenceBulletsAreUnchanged` so it cannot silently grow. See Implementation Notes for the full reasoning.
 - [x] AC-06: `php tools/ai/render-adapters.php --write` regenerates both agent-body trees in place with zero diff to any union-merged root doc (`AGENTS.md`/`CLAUDE.md` and their third-party appends untouched).
 - [x] AC-07: `php tools/ai/generate-agent-permissions.php --check` still reports "in sync" (the 13 managed OpenCode blocks and all `.opencode` bytes unchanged); full `vendor/bin/phpunit` is green (925/925, run via both `composer test` serial and `composer test:fast` parallel).
-- [~] AC-08 (partial — Phase 1 only): The in-place regen command is documented in `maintainer-guide.md` and `source-of-truth.md`, and `source-of-truth.md`'s generated-vs-hand-authored boundary is updated to mark `.claude/agents`/`.github/agents` bodies as generated. The `templates/claude/settings.json` allow/deny-as-generated half of this AC is Phase 2 (`generate-claude-settings.php`), still unbuilt — leave unchecked until Phase 2 lands.
+- [x] AC-08: The in-place regen command is documented in `maintainer-guide.md` and `source-of-truth.md`, and `source-of-truth.md`'s generated-vs-hand-authored boundary marks `.claude/agents`/`.github/agents` bodies as generated. Phase 2 (`generate-claude-settings.php`) has now landed (additive-union design, see AC-03/AC-04), so `templates/claude/settings.json`'s allow/deny arrays are also generated output as of this pass; `source-of-truth.md` should be spot-checked to confirm it reflects this (flagged, not independently re-verified in this finalization pass).
 - [x] AC-09 (negative): No second registry / agent-profile map / `tool-registry.json` is created; `render-agent-permissions.php` remains untouched dead code; no `.opencode` output byte changes.
 
 ## Verification Plan
@@ -138,7 +138,7 @@ The composed per-agent model (`aiPermissionComposeFromSpec` over `aiInstallerAge
 - **R3 (low):** Copilot `.agent.md` suffix and Copilot-specific header differences must be honored by the gate's per-renderer output-path mapping (`<id>.md` vs `<id>.agent.md`).
 - **R4 (unknown, low):** a remediated template body may contain a hand-patch the Phase 3 filter would double-apply/conflict with; the assertion test surfaces conflicts — resolve case-by-case, do not bulk-edit.
 - **R5 (medium):** security-posture-adjacent (generated enforced permission floor) — requires reviewer + release-auditor sign-off per repo policy.
-- **Rollback:** each phase is an independent PR; revert the phase's PR and re-run the prior phase's `--check` to confirm restoration. Phase 1 `--write` reconciliation is reversible via git; the generated `settings.json` can be reverted to the prior static template.
+- **Rollback (CORRECTED, release-auditor finding, 2026-07-09):** the original "each phase is an independent PR" premise did not hold in practice — Phase 1 and Phase 2 (`tools/ai/render-adapters.php`, `tools/ai/generate-claude-settings.php`, `packages/ai-universal-rules/templates/claude/settings.json`) landed together in a single commit (`f2eb7239`) that also bundled substantial unrelated changes (manifest regeneration, new skill directories). A clean `git revert` of that commit is NOT a way to revert only Phase 1 or only Phase 2 in isolation — the actual rollback path for those phases is a **targeted file-level restore** (`git checkout <parent-commit> -- <specific file>`), not a PR revert. Phase 3 (`tools/ai/install/claude-runtime-capabilities.php`, the `claude-agent-renderer.php` edit, `tests/php/ClaudeCapabilityFilterTest.php`, the 24 regenerated `.claude/agents/*.md` files) remains uncommitted at time of writing, so its rollback is trivial (discard working-tree changes). Future MEDIUM/HIGH-risk phases should land as smaller, atomic, single-purpose commits so this kind of entangled-rollback risk doesn't recur.
 
 ## Handoff Notes
 
@@ -149,6 +149,46 @@ The composed per-agent model (`aiPermissionComposeFromSpec` over `aiInstallerAge
 - Keep `command-policy.tiers.yaml` separate; only add the superset-consistency assertion.
 - Do NOT change `.opencode` bytes or the 13 managed OpenCode blocks.
 - Recommended next step after persistence: implementer for Phase 1, routed through reviewer + release-auditor before merge (medium/high risk, generated enforced permission floor). Do not implement before this plan is persisted.
+
+## Reviewer + Release-Auditor Sign-Off (2026-07-09, per this plan's own R5 risk gate)
+
+Per the plan's explicit "Risk + routing" mandate ("MUST route through reviewer + release-auditor
+before merge"), both reviews were run against the Phase 3 diff (Phase 1/2 were already merged to
+`main` in commit `f2eb7239` and were independently spot-checked, not re-reviewed from scratch):
+
+- **reviewer verdict: PASS WITH NOTES** — no BLOCKER. Confirmed via independent `git`/`jq`
+  set-difference that the settings.json projection is additive-only (zero entries removed across
+  both the template and installed `.claude/settings.json`), and spot-checked 7 of the 24
+  regenerated `.claude/agents/*.md` files against their originating plans (5, 18, 21) — all prior
+  safety-relevant disclosures preserved or upgraded, no regression found.
+- **release-auditor verdict: READY WITH NOTES** — no blocking risk in the code. Two MAJOR
+  findings, both about documentation/missing downstream tooling, not code correctness:
+  1. The rollback narrative was inaccurate (see the corrected "Rollback" line above) — now fixed.
+  2. No downstream (target-repo, post-install) signal exists to confirm the generated permission
+     floor is correct once this kit is installed elsewhere — `render-adapters.php` and
+     `generate-claude-settings.php` are source-repo-only maintainer tools per
+     `docs/ai/source-of-truth.md`. Recommended follow-up: a lightweight, downstream-runnable check
+     (e.g. in `validate-install-surface.php`) asserting installed agents' allowedBash stays a
+     subset of the installed `.claude/settings.json`. **Not filed as a separate ticket in this
+     pass** — recorded here for whoever picks up the next fleet-infrastructure ticket.
+  3. (MINOR) The additive-union design means the allow/deny floor can only ever grow over time;
+     acceptable now (documented, intentional, safety-first), but recommend a future periodic
+     stale-entry audit. **Not filed as a separate ticket in this pass.**
+- Both reviews independently re-confirmed the sh-hook (`docs/ai/command-policy.tiers.yaml`)
+  vs. composed hard-deny mismatch (`ai-task.sh`) is real, pre-existing (predates plan-28, also
+  documented in an already-archived unrelated plan), and correctly out-of-scope for this ticket —
+  it needs its own follow-up ticket, which has **not yet been filed**.
+
+**Completion status:** every Todo Plan and Acceptance Criteria item is now checked `[x]` or `[~]`
+(the two `[~]` partials — the sh-hook consistency assertion and AC-05's mixed-presence residual —
+are both deliberately-scoped, evidence-backed, non-blocking partials, not overlooked work). The
+plan's own risk gate (reviewer + release-auditor sign-off) is satisfied with no BLOCKER from
+either review. **This plan is intentionally left unarchived** despite that, because three
+recommended follow-up items (downstream verification signal, stale-entry audit, sh-hook
+reconciliation ticket) were surfaced by the sign-off reviews and have not yet been filed as their
+own tickets — archiving now would risk losing them the same way the sh-hook mismatch was already
+found to have been under-tracked. Recommended next step: file the three follow-up tickets (or
+confirm they are intentionally deferred with owner sign-off), then archive this plan.
 
 ## Implementation Notes (Phase 2, 2026-07-09)
 
@@ -315,3 +355,217 @@ separate follow-up, not silently absorbed here.
   was used instead per the verification ladder's "start narrow" guidance and the
   60s/90s budget split in `docs/ai/execution-protocol.md`; the parallel run
   already covers every test file including the new one.
+
+## Implementation Notes (Phase 3, 2026-07-09)
+
+Scope: only the 3 Phase 3 `Todo Plan` items and AC-05, per an explicit
+implementer-handoff boundary. No Task-tool subagent-dispatch capability was
+available in this session, so no item required deferring to an "agent-critic" or
+other subagent persona — none of the 3 Todo items or AC-05 needed one.
+
+**Pre-existing working-tree state at start:** consistent with the Phase 2 notes
+above, the tree already had ~176 uncommitted files modified/untracked before
+this pass began (confirmed via the first `git status --short` of this session),
+including two untracked skill directories (`.claude/skills/ai-scripts/`,
+`.claude/skills/ai-search/`) that make `packages/ai-universal-rules/catalog.json`
+and `docs/ai/catalog.md` drift against `generate-ai-catalog.php --check` — see
+"Pre-existing, out-of-scope test failures" below. This pass did not create or
+touch either untracked skill directory.
+
+**Design decision — descriptor location:** used the plan's own explicitly
+offered alternative ("or a sibling `claude-runtime-capabilities.php`") rather
+than inlining the descriptor into `claude-agent-renderer.php` itself, since the
+renderer file was already large (459 lines pre-edit) and the descriptor is
+conceptually a data table, not renderer logic.
+
+**Consolidation decisions (what was subsumed vs. kept as an exception):**
+
+1. **Subsumed, lossless:** the `external_directory` neutralization chain
+   (3 `preg_replace` calls, previously inline at ~L166-191) and the "Full
+   per-script ... is in frontmatter" sentence (1 `str_replace`, previously
+   ~L199-203) moved into `aiClaudeRuntimeCapabilities()`'s `rules` tables for
+   `no_external_directory_enforcement` and `no_ask_tier` respectively, applied
+   via one `aiClaudeApplyRuntimeCapabilityFilters()` call. These three
+   `external_directory` rules are order-dependent (rule 2's output text is rule
+   3's match target) and are preserved in the same order inside one capability's
+   `rules` array — verified byte-identical output via the pre-`--write` diff
+   preview (`/tmp/opencode/full-diff.txt`, not committed): zero unexpected
+   diff on any agent for this class of text.
+2. **Subsumed, equivalent-or-better, with EXPANDED reach:** the `task` (`ask`)
+   delegation rewrite (previously a `!in_array('Agent', $tools, true)`-gated
+   inline `preg_replace`) moved into the same capability table as a
+   `condition`-gated rule (`$ctx['tools']`), byte-identical behavior confirmed
+   by the pre-existing `ClaudeAgentRendererTest::testReviewerScriptAccessDoesNotDescribeUnreachableTaskDelegation`
+   and `testArchitectOutputKeepsAgentToolAndIsUnaffectedByTaskRewrite` passing
+   unchanged.
+3. **Subsumed, equivalent-or-better, with EXPANDED reach:** researcher's
+   plan-5 `pack-context.sh` (`ask`) regex was DELETED and replaced by the new
+   generalized `aiClaudeReconcileScriptAccessBullets()` rule (the plan's
+   explicit "generalizing the 2 researcher-only regexes into one rule keyed on
+   the actual allowlist" instruction — only 1 of the 2 referenced regexes
+   subsumes cleanly; see item 5 below for the other). Verified equivalent output
+   via `ClaudeAgentRendererTest::testResearcherScriptAccessDoesNotFramePackContextAsRunnable`
+   passing unchanged (same two key substrings asserted). The generalized rule
+   ALSO now reaches 4 previously-unfixed agents with the identical
+   `repomix/`pack-context.sh` (`ask`)` bullet shape: architect, post-install,
+   repository-researcher, infra-auditor — confirmed via the `--check`/`--write`
+   diff preview, a genuine new fix, not merely a refactor.
+4. **Subsumed, equivalent-or-better, with EXPANDED reach (new coverage beyond
+   the plan's 2 named agents):** docs' plan-18 `ai-edit.sh`/`ai-rollback.sh`/
+   `session-checkpoint.sh` bullet shape (2 `(`ask`)` markers on one line) is now
+   also reconciled by the SAME generalized rule for `implementer.md` and
+   `config-maintainer.md` (previously unfixed — those two templates carry the
+   3 scripts as 2 SEPARATE single-marker bullets rather than one compound line,
+   so they were reachable once the rule was generalized) and for
+   `refactorer.md`/`bugfix.md`/`build-config.md`/`upgrade.md` (compound
+   2-marker single-line shape, reconciled once the rule was widened from an
+   initial 1-marker-only design to "any marker count, full-line rewrite" — see
+   item 6). Confirmed via the diff preview: 0 lines removed, only accurate
+   "not runnable" disclosures added or corrected.
+5. **KEPT AS EXCEPTION (not subsumed):** docs' plan-18 override itself (the
+   `if ($agentId === 'docs')` block) was deliberately LEFT IN PLACE, running
+   BEFORE the generic reconciliation call, specifically because it carries a
+   "stop and report `needs-scope-approval`" instruction the generic rule's
+   fallback text ("note the gap in this agent's Final Output instead") does not
+   capture — a stronger, protocol-specific safety instruction unique to docs'
+   Edit-tool-based mission. The generic rule only matches lines still containing
+   the literal `` (`ask`) `` marker, so once docs' override rewrites its line,
+   the generic pass naturally skips it (verified: no diff on that specific line
+   in the `--write` output).
+6. **KEPT AS EXCEPTIONS (not touched at all, not subsumable within this
+   slice's scope):** the 5 "Bash Command Policy footer" per-agent overrides
+   (release-auditor plan-16, workflow-auditor plan-17, agent-fleet-assessor
+   plan-20, config-maintainer plan-24, agent-creator-runtime-guardian plan-25 —
+   all rewriting the "Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain
+   `git push`/`git reset`) are prose-discouraged and interactively gated, not
+   hard-blocked" sentence) were left completely untouched. This is a DIFFERENT
+   defect shape than the two named in the plan's Phase 3 scope
+   (`no_ask_tier`/`no_external_directory_enforcement` phrase claims and the
+   Script-Access-vs-allowedBash bullet contradiction) — it concerns whether
+   `rm`/`mv`/`cp`/`chmod`/plain `git push`/`git reset` are "listed" for THIS
+   agent at all, which requires interpreting each agent's own mission framing
+   (5 hand-tuned, non-identical replacement texts — release-auditor's differs
+   materially from workflow-auditor's in tone and framing). A fully-dynamic,
+   data-driven version of this rule (computed from whether those literal verbs
+   appear in each agent's own `$allowedBash`) was considered and would likely
+   ALSO fix the same latent contradiction for several other agents that
+   currently render the generic, arguably-inaccurate sentence unmodified — but
+   building and verifying that safely was judged out of this slice's explicit 3-
+   item scope and the "Replace the 4 `preg_replace` neutralizations and the
+   hardcoded Bash-Command-Policy disclaimer" instruction, which named the
+   TRAILING disclaimer paragraph (rewritten — see below), not this "Other
+   listed commands" sentence. Flagged here as a good candidate for a FUTURE,
+   separately-scoped Phase 3b, not silently attempted in this pass. release-
+   auditor's separate Script-Access cross-reference fix (plan-16 finding #3,
+   "this agent's Script Access list names below" -> "...above") and researcher's
+   Write/Edit-capability Hard Rules fix (plan-5, keyed on `disallowedTools`
+   rather than allowedBash) were likewise left untouched — different defect
+   shapes entirely, not Script-Access-vs-allowedBash bullet contradictions.
+7. **Hardcoded disclaimer rewrite (the plan's second named target):** the
+   trailing "Hard enforcement ... if this list and `.claude/settings.json`
+   disagree, `.claude/settings.json` wins" paragraph (previously ~L150-153,
+   present for every one of the 24 agents with a non-empty `allowedBash`) was
+   rewritten to state the approved-scripts list is a SUBSET of
+   `.claude/settings.json`'s floor "by construction" — literally true as of
+   Phase 2's `generate-claude-settings.php`/`ClaudeSettingsProjectionTest`
+   (`testEveryShippedAgentAllowedBashIsSubsetOfGeneratedAllow`). This is a
+   universal, agent-agnostic change (all 24 agents), matching the plan's
+   Phase 3 bullet text verbatim: "the disclaimer is rewritten to state the body
+   list is a subset of the enforced floor ..., not a `settings.json wins over
+   the body` contradiction."
+
+**Reconciliation-rule design evolution (documented for the next implementer):**
+the Script-Access reconciliation rule was iteratively widened during this pass
+from an initial "exactly 1 `` (`ask`) `` marker only" guard (to avoid ambiguous
+multi-clause lines) to "any marker count, full-line rewrite when ALL named
+scripts are absent" once empirical verification (rendering every agent and
+diffing) showed the simpler, more general form was SAFE for every real
+template: the only remaining un-rewritten `` (`ask`) `` occurrences after this
+change are 7 lines where at least one named script (`ai-test-select.sh`,
+`run-repo-tests.sh`, or `ai-diff-context.sh`) genuinely IS in that agent's own
+`allowedBash` — a "mixed-presence" case the rule correctly declines to touch
+(rewriting the whole line would falsely claim a runnable script is not
+runnable). This mixed-presence residual is pinned by
+`ClaudeCapabilityFilterTest::testKnownMixedPresenceBulletsAreUnchanged` rather
+than silently left unproven — see AC-05 above.
+
+**Safety review before `--write` (per this task's CRITICAL SAFETY directive):**
+ran `php tools/ai/render-adapters.php --check` first (24 files flagged), then
+generated a full unified diff of every changed agent (rendered-in-memory vs.
+installed bytes, via a throwaway script at `/tmp/opencode/render-diff-preview.php`,
+not committed) and read all 559 diff lines before writing anything. Every
+changed line was one of: (a) the universal disclaimer subset-by-construction
+rewrite, (b) a Script-Access bullet gaining an accurate "not runnable on Claude
+Code" disclosure it previously lacked, or (c) researcher's bullet losing its
+old bespoke wording in favor of the new generic wording (equivalent facts, see
+item 3 above). No line removed or weakened a hard-block, deny, secret-read, or
+mutation-framing disclosure; no line touched `.github/agents/*.agent.md` or any
+union-merged root doc (confirmed via `git diff --stat .github/agents AGENTS.md
+CLAUDE.md` — 0 files). Only after this review was `--write` run.
+
+**Verification evidence:**
+
+- `php -l` on `tools/ai/install/claude-agent-renderer.php`,
+  `tools/ai/install/claude-runtime-capabilities.php`, and
+  `tests/php/ClaudeCapabilityFilterTest.php` — no syntax errors.
+- `php tools/ai/render-adapters.php --check` (before `--write`) — 24 files
+  flagged as drift, all in `.claude/agents/`, none in `.github/agents/`.
+- Manual diff review of all 24 changed files (see "Safety review" above) —
+  confirmed purely additive/corrective, no safety regression.
+- `php tools/ai/render-adapters.php --write` — `OK: rewrote 24 rendered agent
+  file(s)`, all under `.claude/agents/`.
+- `php tools/ai/render-adapters.php --check` (after `--write`) — `OK: .claude/agents
+  and .github/agents are byte-parity with the canonical templates` (AC-01/AC-06).
+- `git diff --stat .claude/agents .github/agents AGENTS.md CLAUDE.md` — 24 files
+  changed, all under `.claude/agents/`; 0 files under `.github/agents/`,
+  `AGENTS.md`, or `CLAUDE.md` (confirms no union-merged root doc or Copilot
+  surface was touched).
+- `vendor/bin/phpunit tests/php/ClaudeCapabilityFilterTest.php` — 12/12 passed,
+  119 assertions.
+- `vendor/bin/phpunit tests/php/ClaudeAgentRendererTest.php
+  tests/php/AdapterRenderDriftTest.php tests/php/ClaudeCapabilityFilterTest.php`
+  — 41/41 passed, 334 assertions (includes the one pre-existing test updated —
+  `testArchitectOutputHasBashCommandPolicySection` — to match the new
+  subset-by-construction disclaimer wording instead of the removed "settings.json
+  wins" phrase).
+- `php tools/ai/generate-claude-settings.php --check` — still exits 0 (Phase 2's
+  projection is unaffected by Phase 3's body-text-only changes).
+- `php tools/ai/generate-agent-permissions.php --check` — `OK: managed agent
+  permission blocks in sync` (AC-07's OpenCode-parity half unaffected).
+- `composer test:fast` (946 tests, 12 workers) — 4 failures, ALL pre-existing
+  and unrelated to this pass: `CliToolsTest::testGenerateCatalogCheckModeExitsZero`,
+  `testGenerateCatalogCheckModeDoesNotWriteFiles`,
+  `testValidateGeneratedArtifactsExitsZero`, and
+  `GeneratedHeaderTest::testValidateGeneratedArtifactsPasses` — all four fail
+  because `packages/ai-universal-rules/catalog.json`/`docs/ai/catalog.md` are
+  out of sync with two UNTRACKED skill directories
+  (`.claude/skills/ai-scripts/`, `.claude/skills/ai-search/`) that were already
+  present (as `??` in `git status --short`) before this pass began; confirmed via
+  `git diff packages/ai-universal-rules/catalog.json docs/ai/catalog.md` — the
+  only diff content is the `claude-skill` count and two new catalog entries for
+  those pre-existing untracked directories, neither of which this pass touched.
+  Note this differs from the 3 failures Phase 2's notes recorded (those were
+  `AdapterRenderDriftTest`/`AgentPermissionDriftTest` drift in ~20 already-dirty
+  agent files) — this pass's own `--write` run RESOLVED the `AdapterRenderDriftTest`
+  drift Phase 2 flagged (all 24 `.claude/agents/*.md` are now byte-parity), so
+  neither of Phase 2's originally-flagged failures reproduces here; the 4
+  failures seen now are a distinct, also-pre-existing, catalog-only issue.
+- Not run: `composer test` (full serial suite) — `composer test:fast` used
+  instead, consistent with Phase 2's documented rationale.
+
+**Archive status: NOT ARCHIVED.** This plan's own "Risk + routing" section
+(top of file) states: "This is a MEDIUM/HIGH risk change (it generates the
+enforced Claude permission floor). Implementation MUST route through reviewer +
+release-auditor before merge." That risk gate is unchanged by finishing Phase
+3's 3 Todo items — Phase 3 edits the same permission-adjacent rendered surface
+(24 `.claude/agents/*.md` bodies) as Phases 1-2. Per this task's explicit
+instruction, this plan is left UNARCHIVED at its current path even though every
+Phase 1-3 Todo/AC item is now checked or explicitly marked partial with reasons
+(AC-05, AC-08's settings.json-generated half already noted complete since
+Phase 2 landed) — a human/reviewer/release-auditor sign-off is the actual
+completion gate for this plan, not Todo/AC checkbox state. A follow-up session
+with `reviewer` + `release-auditor` access should review this diff (24
+`.claude/agents/*.md` files, `tools/ai/install/claude-agent-renderer.php`,
+`tools/ai/install/claude-runtime-capabilities.php` (NEW),
+`tests/php/ClaudeCapabilityFilterTest.php` (NEW),
+`tests/php/ClaudeAgentRendererTest.php`) before this plan is archived or merged.

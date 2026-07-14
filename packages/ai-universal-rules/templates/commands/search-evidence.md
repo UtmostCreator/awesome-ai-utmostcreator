@@ -1,6 +1,6 @@
 ---
 description: Collect script-first repository evidence using ai-search
-agent: repository-researcher
+agent: researcher
 ---
 
 Use this command to answer the user's evidence request without broad raw search.

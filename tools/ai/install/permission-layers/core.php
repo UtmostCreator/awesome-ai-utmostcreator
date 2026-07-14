@@ -20,7 +20,16 @@ function aiPermissionLayersCore(): array
             // repository-reviewer) already grant it 'ask' — proving it was never meant to be
             // un-overridable. Moved to the (non-immutable) safe-read default below, same
             // pattern as the 'sg *' and gh-pr-context precedents in this file.
-            'python3 *' => 'deny',
+            // NOTE (grant, 2026-07-10): 'python3 *' was previously listed here as an immutable
+            // floor entry. A legitimate power agent (super-implementer) and the other
+            // write/edit-capable impl-tier agents need to run 'python3 *' (ask-gated), which
+            // the immutable floor makes impossible (aiPermissionAssertNoHardDenyWeakening
+            // throws on any override, and the floor is re-applied last regardless). Following
+            // the exact 'grep *' precedent above, it is relocated to a NON-immutable 'deny'
+            // default in safe-read below, so read-only agents stay denied by falling through
+            // to it while write-capable agents can override it to 'ask' via the
+            // 'impl.ask_python3' pack. Narrower python3 grants already exist as precedent:
+            // language-overlays.php grants 'python3 -m pytest*'/'python3 -m mypy*' as allow.
             'php -r *' => 'deny',
             '* <<*' => 'deny',
             '* > *' => 'deny',
@@ -74,6 +83,13 @@ function aiPermissionLayersCore(): array
             // Default deny (not immutable — see the hard-deny NOTE above); repository-researcher
             // and repository-reviewer except this to 'ask' via their compositions.
             'grep *' => 'deny',
+            // Default deny (not immutable — see the hard-deny 'python3 *' NOTE above).
+            // Read-only agents fall through to this deny; write/edit-capable impl-tier agents
+            // override it to 'ask' via the 'impl.ask_python3' pack (see packs.php). The
+            // narrower 'python3 -m pytest*'/'python3 -m mypy*' allow grants live in the
+            // python language overlay and win over this broad default when that overlay is
+            // composed (later-layer-wins), so this is a safe generalization, not a tightening.
+            'python3 *' => 'deny',
             // NOTE: 'sg *' (ast-grep alias) is intentionally NOT here. Ground truth shows it
             // granted only to impl-profile agents (implementer.md, bootstrapper.md), not
             // universally; add it per-agent (exception or overlay) when those agents migrate.

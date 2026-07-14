@@ -1,0 +1,53 @@
+flowchart LR
+  classDef gate fill:#fff3e0,stroke:#ef6c00,color:#e65100,stroke-width:2px
+  classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+  classDef research fill:#e0f7fa,stroke:#00838f,color:#004d40
+  classDef design fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c
+  classDef write fill:#e8eaf6,stroke:#3949ab,color:#1a237e
+  classDef review fill:#fff8e1,stroke:#f9a825,color:#6d4c00
+  classDef factory fill:#ede7f6,stroke:#5e35b1,color:#311b92
+  classDef audit fill:#eceff1,stroke:#455a64,color:#263238
+  classDef skill fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+  classDef removed fill:#ffebee,stroke:#c62828,color:#b71c1c
+  classDef kept fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+
+  orchestrator{"orchestrator · any-entry supervisor"}:::gate
+  done(["done"]):::terminal
+  researcher["Researcher"]:::research
+  architect["Architect"]:::design
+  plan_writer["Plan Writer"]:::write
+  implementer["Implementer"]:::write
+  configuration_maintainer["Configuration Maintainer"]:::write
+  reviewer["Reviewer"]:::review
+  release_auditor["Release Auditor"]:::gate
+
+  %% free entry: supervisor may dispatch to any participant
+  orchestrator -.->|dispatch| researcher
+  orchestrator -.->|dispatch| architect
+  orchestrator -.->|dispatch| plan_writer
+  orchestrator -.->|dispatch| implementer
+  orchestrator -.->|dispatch| configuration_maintainer
+  orchestrator -.->|dispatch| reviewer
+  orchestrator -.->|dispatch| release_auditor
+
+  %% runtime transfers: each agent routes within allowed_next
+  researcher -->|handoff goto| architect
+  researcher -->|handoff goto| implementer
+  architect -->|handoff goto| plan_writer
+  architect -->|handoff goto| implementer
+  plan_writer -->|handoff goto| implementer
+  implementer -->|handoff goto| reviewer
+  configuration_maintainer -->|handoff goto| reviewer
+  reviewer -->|handoff goto| implementer
+  reviewer -->|handoff goto| release_auditor
+
+  %% exits and escape hatch
+  reviewer -->|complete| done
+  release_auditor -->|complete| done
+  researcher -.->|blocked| orchestrator
+  architect -.->|blocked| orchestrator
+  plan_writer -.->|blocked| orchestrator
+  implementer -.->|blocked| orchestrator
+  configuration_maintainer -.->|blocked| orchestrator
+  reviewer -.->|blocked| orchestrator
+  release_auditor -.->|blocked| orchestrator

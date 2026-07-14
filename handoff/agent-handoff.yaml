@@ -1,0 +1,1162 @@
+meta:
+  name: agent-handoff-governance
+  version: 2.0.0
+  schema_version: 2
+  owners: [utmostcreator]
+  source_repository: UtmostCreator/awesome-ai-utmostcreator
+  purpose: >-
+    Single source of truth for the reduced agent fleet, the cross-agent handoff
+    contract (provide / produce / avoid and the safety fields around them), the
+    four independent workflow blocks, the two bridges between them, and how the
+    same contract is projected onto Claude Code, GitHub Copilot, and OpenCode.
+  design_principle: >-
+    Agents own a permission or accountability boundary. Skills own reusable
+    methods. Deterministic checks stay scripts or validators. Workflows compose
+    them. The handoff contract is data, rendered per provider, and carried at
+    runtime as a HandoffPayload that also serves a human summary.
+  regenerate: python handoff/gen_handoff.py handoff/agent-handoff.yaml --out handoff/generated
+
+# ---------------------------------------------------------------------------
+# PROVIDER INTEGRATION — the research answer, encoded as data.
+#
+# Finding: none of the three providers enforces a typed, declarative
+# agent-to-agent handoff *contract*. All three can invoke a subagent, but the
+# contract (provide / produce / avoid / acceptance / evidence) is not native.
+# Therefore the contract lives here as data, is rendered into each provider's
+# agent instruction body plus `allowed_next`, and is carried at runtime as a
+# serialized HandoffPayload artifact that also includes a human_summary.
+# ---------------------------------------------------------------------------
+provider_integration:
+  summary: >-
+    Contract is provider-neutral data. Only the transport differs: Claude and
+    OpenCode primary loops route on allowed_next (OpenCode can auto-invoke via
+    Task); Copilot often needs a human or prompt file to select the next agent.
+  canonical_source: packages/ai-universal-rules/templates/core/agents
+  render_targets:
+    claude: .claude/agents/<id>.md
+    copilot: .github/agents/<id>.agent.md
+    opencode: .opencode/agents/<id>.md
+  providers:
+    - id: claude
+      label: Claude Code
+      agent_file: .claude/agents/<id>.md
+      frontmatter_keys: [name, description, tools, disallowedTools, model, permissionMode]
+      native_subagent_invocation: via_task_tool_only
+      native_handoff_contract: false
+      approval_tiers: [allow, ask, deny]
+      routing: primary_loop_routes_on_allowed_next
+      carrier: final_output_markdown_plus_handoff_payload_block
+      human_summary: required_in_final_output
+      fallback: recommend_next_agent_in_prose
+      notes: >-
+        allow / ask / deny live in .claude/settings.json permissions, not in
+        agent frontmatter. Frontmatter grants tools at the tool level only and
+        cannot express per-command bash allowlists or a typed handoff, so an
+        agent body that needs an `ask` tier must rely on settings.json rules.
+    - id: copilot
+      label: GitHub Copilot (VS Code custom agents)
+      agent_file: .github/agents/<id>.agent.md
+      frontmatter_keys: [name, description, tools, agents, user-invocable, disable-model-invocation, handoffs]
+      native_subagent_invocation: surface_dependent
+      native_handoff_contract: partial_human_click
+      approval_tiers: [allow, ask, deny]
+      routing: human_or_prompt_file_selects_next
+      carrier: instruction_body_plus_native_handoffs_button
+      human_summary: required
+      fallback: user_invokes_next_agent_manually
+      notes: >-
+        Copilot is the one provider with a native `handoffs:` frontmatter field
+        (label / agent / prompt / send / model) — but it renders a HUMAN-CLICK
+        button, not autonomous routing, so encode the human_summary + next
+        contract into each handoff's `prompt`. Subagent delegation uses the
+        `agent` / `runSubagent` tool gated by the `agents:` allowlist; subagents
+        cannot re-delegate by default. Tools are namespaced (search/*, read/*,
+        execute/*). Copilot CLI is effectively single-agent; do not assume
+        handoff parity across VS Code, CLI, and GitHub.com.
+    - id: opencode
+      label: OpenCode
+      agent_file: .opencode/agents/<id>.md
+      frontmatter_keys: [description, mode, permission, model, temperature, hidden]
+      native_subagent_invocation: via_task_tool
+      native_handoff_contract: false
+      approval_tiers: [allow, ask, deny]
+      routing: primary_agent_invokes_subagent_via_task
+      carrier: task_prompt_payload_plus_returned_artifact
+      human_summary: required_in_returned_artifact
+      fallback: primary_agent_sequences_subagents
+      notes: >-
+        Permission is evaluated LAST-MATCH-WINS by pattern order (NOT a fixed
+        deny>ask>allow hierarchy): put "*" first and tighten with later, more
+        specific rules; only `--auto` still force-enforces explicit deny. `tools:`
+        is deprecated (v1.1.1) — express tool access through the `permission`
+        block (per-command bash allowlists supported). Subagents are exposed via
+        the `task` tool (gated by `permission.task`); the primary agent owns
+        orchestration (`mode: primary` + a `permission.task` allowlist) and passes
+        the HandoffPayload inside the task prompt — there is no native goto.
+  integration_strategy:
+    - Single canonical template per role is the only human edit surface.
+    - A deterministic renderer projects each role into all three adapter files.
+    - The handoff contract is identical across providers; only transport differs.
+    - Every completion emits a HandoffPayload:v1 (machine fields + human_summary).
+    - The HandoffPayload rides in the agent markdown BODY / task prompt on every
+      provider; none exposes a native serialized agent-to-agent payload field
+      (Copilot's `handoffs:` is a human-click button, not autonomous transport).
+    - allowed_next in the contract bounds routing on every provider.
+    - Where a provider cannot auto-route, the human uses human_summary plus
+      required_next_action to invoke the next agent by hand.
+
+authority:
+  precedence:
+    - user_request
+    - current_git_diff_and_worktree
+    - source_code
+    - tests
+    - schemas_contracts_and_public_interfaces
+    - runtime_configuration
+    - canonical_docs
+    - generated_runtime_adapters
+  generated_surfaces_do_not_edit:
+    - .claude/agents
+    - .github/agents
+    - .opencode/agents
+
+principles:
+  - id: agent_boundary
+    rule: Keep an agent only when it has a distinct permission, accountability, isolation, or approval boundary.
+  - id: skill_method
+    rule: Put repeatable domain workflows and checklists in skills.
+  - id: script_determinism
+    rule: Put schema, syntax, parity, rendering, and contract checks in deterministic scripts.
+  - id: one_owner
+    rule: Every artifact and decision has exactly one current owner.
+  - id: no_blind_chain
+    rule: Handoffs are conditional; do not force every task through every agent.
+  - id: evidence_first
+    rule: Every completion claim carries executed evidence or an explicit not-run reason.
+  - id: context_minimization
+    rule: Send references, decisions, and deltas; never resend whole histories or large files.
+  - id: no_self_approval
+    rule: The producing agent cannot give the final independent approval for its own high-risk output.
+  - id: human_readable_handoff
+    rule: Every handoff carries a short human_summary a reviewer can read to own the merge.
+
+# ---------------------------------------------------------------------------
+# HANDOFF CONTRACT — provide / produce / avoid are necessary but insufficient.
+# Every handoff also carries the safety fields below, and serializes into a
+# HandoffPayload that the next agent consumes and a human can read.
+# ---------------------------------------------------------------------------
+handoff_contract_schema:
+  required_fields:
+    - id
+    - from
+    - to
+    - trigger
+    - provide
+    - produce
+    - avoid
+    - acceptance
+    - evidence
+    - stop_conditions
+    - failure_route
+    - authority
+    - security
+    - budget
+  field_meanings:
+    provide: Inputs and context the receiver may rely on.
+    produce: Exact artifacts, decisions, or evidence the receiver must return.
+    avoid: Explicit non-goals and prohibited changes.
+    acceptance: Observable receiver-side checks required before accepting the handoff.
+    evidence: Commands, file references, test output, or trace identifiers.
+    stop_conditions: Conditions requiring halt rather than guessing or widening scope.
+    failure_route: Owning role for correction, clarification, redesign, or approval.
+    authority: Source-of-truth ordering and conflict handling.
+    security: Sensitive-data and permission restrictions.
+    budget: Context, file, step, retry, and cost limits.
+  optional_fields:
+    - assumptions
+    - risks
+    - rollback
+    - correlation
+    - idempotency
+    - status
+    - provenance
+
+handoff_payload_schema:
+  type: HandoffPayload
+  version: 1
+  purpose: >-
+    Runtime serialization of one handoff. Machine-readable for the next agent;
+    the human_summary makes it readable for a human approver.
+  required_fields:
+    - contract_version
+    - run_id
+    - from_agent
+    - to_agent
+    - goto
+    - contract_id
+    - produced_artifact
+    - source_artifacts
+    - scope
+    - provide
+    - produce_expected
+    - avoid
+    - acceptance
+    - evidence
+    - unresolved_unknowns
+    - stop_conditions
+    - failure_route
+    - required_next_action
+    - human_summary
+  human_summary:
+    purpose: One short block a human reviewer can read to own the merge.
+    max_lines: 6
+    must_state:
+      - what_changed_or_was_found
+      - why
+      - what_is_verified
+      - what_is_still_open
+      - who_is_next
+
+permission_profiles:
+  readonly_evidence:
+    allow_categories: [read, git_read, inventory, diff, docs_check]
+    ask_categories: [context_pack]
+    deny_categories: [write, mutation, broad_test, hooks, host_change, destructive]
+  design:
+    allow_categories: [read, git_read, inventory, diff, docs_check, structured_output]
+    ask_categories: [context_pack]
+    deny_categories: [write, mutation, broad_test, hooks, host_change, destructive]
+  plan_write_only:
+    allow_paths: [docs/tickets/**]
+    allow_categories: [read, git_read, plan_write]
+    deny_categories: [source_write, test_write, config_write, generated_write, destructive]
+  bounded_write:
+    allow_categories: [read, git_read, diff, focused_test, bounded_write]
+    ask_categories: [broad_test, guarded_mutation, package_manager]
+    deny_categories: [hooks, host_change, destructive]
+  review_and_proof:
+    allow_categories: [read, git_read, diff, docs_check, focused_test, validators]
+    ask_categories: [changed_scope_verify]
+    deny_categories: [write, mutation, hooks, host_change, destructive]
+  release_gate:
+    allow_categories: [read, git_read, diff, docs_check, validators, evidence_read]
+    ask_categories: [changed_scope_verify]
+    deny_categories: [write, migration, deployment, package_manager, destructive]
+  factory:
+    allow_categories: [read, inventory, structured_output, validators]
+    ask_categories: [semantic_review, guardrail_review]
+    deny_categories: [source_write, runtime_execution, self_approval, destructive]
+
+roles:
+  - id: researcher
+    label: Researcher
+    class: research
+    status: keep_merged
+    permission_profile: readonly_evidence
+    owns:
+      - bounded_repository_evidence
+      - usage_and_ownership_map
+      - unknowns
+    loads_skills: [repo-investigation, search-evidence, project-context]
+    never:
+      - edit repository files
+      - execute target agents
+      - claim verification from inspection alone
+    merged_from: [researcher, repository-researcher]
+
+  - id: architect
+    label: Architect
+    class: design
+    status: keep
+    permission_profile: design
+    owns:
+      - solution_boundary
+      - contracts_and_non_goals
+      - acceptance_criteria
+      - verification_design
+      - risk_and_rollback_posture
+    loads_skills: [architecture-plan, plan-slice, config-change-safety]
+    never:
+      - implement
+      - write source files
+      - invent unverified edges
+
+  - id: plan-writer
+    label: Plan Writer
+    class: write
+    status: keep_thin_conditional
+    permission_profile: plan_write_only
+    owns:
+      - durable_plan_file_under_docs_tickets
+    loads_skills: [architecture-plan, handoff-contract]
+    keep_only_if: Runtime can enforce an independent docs/tickets-only write boundary.
+    rename_from: architecture-plan-writer
+    never:
+      - design new architecture
+      - edit source
+      - widen architect scope
+
+  - id: implementer
+    label: Implementer
+    class: write
+    status: keep
+    permission_profile: bounded_write
+    owns:
+      - one_bounded_change_slice
+      - focused_verification
+      - review_ready_diff
+    loads_skills:
+      - bug-regression
+      - safe-refactor
+      - docs-sync
+      - dependency-upgrade
+      - config-change-safety
+      - verify-change
+    never:
+      - redesign the system
+      - self-approve
+      - edit generated outputs instead of their source
+
+  - id: configuration-maintainer
+    label: Configuration Maintainer
+    class: write
+    status: conditional
+    permission_profile: bounded_write
+    owns:
+      - explicitly_scoped_configuration_changes
+    loads_skills: [config-change-safety, build-configuration]
+    keep_only_if: Its path-scoped config permissions are materially narrower than implementer and runtime-enforced.
+    merged_from: [build-config, config-maintainer]
+    fallback: implementer
+
+  - id: reviewer
+    label: Reviewer
+    class: review
+    status: keep_merged
+    permission_profile: review_and_proof
+    owns:
+      - independent_diff_verdict
+      - correctness_and_regression_findings
+      - policy_and_adapter_drift_findings
+      - verification_gap_findings
+    loads_skills:
+      - review-diff
+      - bug-regression
+      - workflow-drift-audit
+      - infra-risk-audit
+      - docs-sync
+    never:
+      - edit reviewed files
+      - invent findings
+      - approve without enough evidence
+    merged_from: [reviewer, repository-reviewer, infra-auditor, workflow-auditor]
+
+  - id: release-auditor
+    label: Release Auditor
+    class: gate
+    status: keep
+    permission_profile: release_gate
+    owns:
+      - release_readiness
+      - rollout_and_rollback_posture
+      - migration_and_install_safety
+      - observability_and_failure_signals
+    loads_skills: [release-safety]
+    never:
+      - implement
+      - deploy
+      - migrate
+      - publish
+
+  - id: agent-factory
+    label: Agent Factory
+    class: factory
+    status: merge_and_rename
+    permission_profile: factory
+    owns:
+      - reuse_or_create_decision
+      - agent_spec
+      - static_validation_orchestration
+      - semantic_fit_verdict
+      - runtime_guardrail_plan
+      - human_approval_state
+    loads_skills: [agent-semantic-verification, runtime-guardrail-design]
+    internal_stages:
+      - reuse_gate
+      - spec_generation
+      - static_validation
+      - semantic_verification
+      - runtime_guardrail_design
+      - human_approval
+    merged_from:
+      - agent-creator
+      - agent-creator-supervisor
+      - agent-creator-semantic-verifier
+      - agent-creator-runtime-guardian
+    never:
+      - run the created agent before approval
+      - approve its own high-risk spec
+      - replace deterministic validation with model judgement
+
+  - id: fleet-assessor
+    label: Fleet Assessor
+    class: audit
+    status: keep_rename
+    permission_profile: readonly_evidence
+    owns:
+      - fleet_roster
+      - per_agent_score_aggregation
+      - duplication_and_handoff_map
+      - remediation_priority
+    loads_skills: [fleet-assessment]
+    rename_from: agent-fleet-assessor
+    delegates_to: agent-definition-reviewer
+    never:
+      - edit agents
+      - execute assessed agents
+      - fabricate missing critic output
+
+  - id: agent-definition-reviewer
+    label: Agent Definition Reviewer
+    class: audit
+    status: keep_rename
+    permission_profile: readonly_evidence
+    owns:
+      - one_agent_definition_review
+      - role_permission_fit_score
+      - handoff_executability_score
+      - token_economy_score
+    loads_skills: [agent-definition-review]
+    rename_from: agent-critic
+    never:
+      - review the whole fleet in one run
+      - edit the target
+      - execute the target agent
+
+  # Extra (non-delivery) fleet agents registered into the dispatch graph so their
+  # Handoff Contract sections are dispatcher-valid. They are not delivery
+  # `participants`; they carry their own terminal/bounded allowed_next below.
+  - id: bootstrapper
+    label: Bootstrapper
+    class: write
+    status: keep
+    permission_profile: bounded_write
+    owns:
+      - install_scaffold_and_verification_surface
+    never:
+      - run apply without a backup when the target is not empty
+      - weaken validators or line-budget checks to force green output
+      - delete files without explicit approval
+
+  - id: ui-builder
+    label: UI Builder
+    class: write
+    status: keep
+    permission_profile: bounded_write
+    owns:
+      - one_bounded_ui_change_slice
+    never:
+      - move business logic into the presentation layer
+      - redesign without an explicit request
+      - touch unrelated modified files
+
+skills:
+  existing_keep:
+    - id: bug-regression
+      replaces_agents: [bugfix]
+    - id: architecture-plan
+      shared_by: [architect, plan-writer]
+    - id: plan-slice
+      shared_by: [architect]
+    - id: docs-sync
+      replaces_agents: [docs]
+    - id: dependency-upgrade
+      replaces_agents: [upgrade]
+    - id: post-install-setup
+      replaces_agents: [post-install]
+    - id: repo-investigation
+      shared_by: [researcher]
+    - id: search-evidence
+      shared_by: [researcher]
+    - id: project-context
+      shared_by: [researcher]
+    - id: review-diff
+      shared_by: [reviewer]
+    - id: verify-change
+      shared_by: [implementer]
+    - id: release-safety
+      shared_by: [release-auditor]
+    - id: config-change-safety
+      shared_by: [architect, implementer, configuration-maintainer]
+  create:
+    - id: handoff-contract
+      purpose: Validate provide/produce/avoid plus authority, evidence, budget, stop, security, failure routing, and human_summary.
+      shared_by: [plan-writer]
+    - id: safe-refactor
+      purpose: Preserve behavior with before/after baseline tests and duplication checks.
+      replaces_agents: [refactorer]
+    - id: build-configuration
+      purpose: Build, packaging, and verification configuration workflow.
+      replaces_agents: [build-config]
+    - id: workflow-drift-audit
+      purpose: Workflow, instruction, adapter, and documentation drift review mode.
+      replaces_agents: [workflow-auditor]
+    - id: infra-risk-audit
+      purpose: Dependency, compatibility, build, and infrastructure risk review mode.
+      replaces_agents: [infra-auditor]
+    - id: agent-semantic-verification
+      purpose: AgentSpec request-fit, least-privilege, and autonomy proportionality review.
+      replaces_agents: [agent-creator-semantic-verifier]
+    - id: runtime-guardrail-design
+      purpose: Map AgentSpec tools, limits, stop conditions, and observability into runtime policy.
+      replaces_agents: [agent-creator-runtime-guardian]
+    - id: fleet-assessment
+      purpose: Enumerate the canonical fleet and aggregate per-agent scores into a ranked report.
+      shared_by: [fleet-assessor]
+    - id: agent-definition-review
+      purpose: Score one agent definition for role/permission fit, handoff executability, and token economy.
+      shared_by: [agent-definition-reviewer]
+
+deterministic_tools:
+  - id: agent-spec-validator
+    command: php tools/ai/validate-agent-spec.php
+    replaces_agents: [agent-creator-static-validator]
+    rule: A deterministic validator is not a callable agent.
+  - id: handoff-model-validator
+    command: python handoff/gen_handoff.py handoff/agent-handoff.yaml --check
+    rule: Structural and semantic validation of this model runs as a script, not an agent.
+  - id: adapter-render-check
+    command: php tools/ai/render-adapters.php --check
+  - id: permission-generation-check
+    command: php tools/ai/generate-agent-permissions.php --check
+  - id: adapter-drift-check
+    command: php tools/ai/validate-adapter-drift.php
+
+artifacts:
+  - id: evidence-map
+    owner: researcher
+  - id: architecture-decision
+    owner: architect
+  - id: durable-plan
+    owner: plan-writer
+  - id: implementation-diff
+    owner: implementer
+  - id: review-verdict
+    owner: reviewer
+  - id: release-verdict
+    owner: release-auditor
+  - id: agent-spec
+    owner: agent-factory
+  - id: guardrail-plan
+    owner: agent-factory
+  - id: fleet-report
+    owner: fleet-assessor
+  - id: agent-definition-score
+    owner: agent-definition-reviewer
+
+handoffs:
+  - id: research_to_architecture
+    from: researcher
+    to: architect
+    trigger: Ownership, contracts, scope, or design choice remains non-trivial after evidence collection.
+    provide:
+      - task statement and explicit acceptance criteria
+      - relevant paths and line references
+      - usage, ownership, tests, schemas, and current-diff map
+      - verified facts separated from assumptions and unknowns
+    produce:
+      - bounded design
+      - explicit non-goals
+      - contracts and affected source-of-truth files
+      - testable acceptance criteria
+      - verification and rollback plan
+    avoid:
+      - implementation details unsupported by evidence
+      - broad repository summaries
+      - copied file bodies when references suffice
+    acceptance:
+      - every major claim has a repository reference
+      - unknowns that affect design are explicit
+      - scope is narrow enough to design
+    evidence:
+      - commands or tools used
+      - exact file references
+      - current branch and diff state
+    stop_conditions:
+      - ownership cannot be determined
+      - evidence conflicts materially
+      - task requires a user product choice
+    failure_route: researcher
+    authority: Follow authority.precedence; current repository evidence overrides planning notes.
+    security: Never include secrets or sensitive file contents.
+    budget:
+      max_context_tokens: 12000
+      max_unrelated_areas: 6
+      max_retries: 1
+
+  - id: architecture_to_plan
+    from: architect
+    to: plan-writer
+    trigger: A durable plan is required and design, contracts, acceptance criteria, and verification are complete.
+    provide:
+      - proposed design
+      - ordered implementation slices
+      - in-scope and out-of-scope paths
+      - acceptance criteria
+      - risks, rollback, and verification
+    produce:
+      - one bounded docs/tickets plan per task
+      - traceable task-to-acceptance-to-verification mapping
+    avoid:
+      - new design decisions
+      - source edits
+      - unrelated follow-up work
+    acceptance:
+      - target path is under docs/tickets
+      - no scope widening from architect handoff
+      - every todo is observable and checkable
+    evidence:
+      - written plan path
+      - re-read confirmation
+    stop_conditions:
+      - architect handoff is incomplete
+      - target path is outside docs/tickets
+      - plan would duplicate an existing ticket
+    failure_route: architect
+    authority: Use the narrower of ticket and architect scope.
+    security: Do not copy secrets, credentials, or private dumps into plans.
+    budget:
+      max_plan_files: 3
+      max_edit_attempts_per_file: 3
+      max_retries: 0
+
+  - id: architecture_to_implementation
+    from: architect
+    to: implementer
+    trigger: The change is bounded and either no durable plan is required or an accepted plan exists.
+    provide:
+      - selected design and rejected alternatives
+      - exact paths and contracts
+      - explicit and negative acceptance criteria
+      - allowed and prohibited edits
+      - verification commands and risk level
+    produce:
+      - smallest safe patch
+      - focused verification evidence
+      - changed-path list
+      - reviewer-ready summary
+    avoid:
+      - redesign
+      - adjacent refactors
+      - generated-file patching when a source exists
+      - unapproved deletion or migration
+    acceptance:
+      - scope clarity is high or assumptions are explicitly approved
+      - each implementation step maps to an acceptance criterion
+      - verification is executable
+    evidence:
+      - source references
+      - plan path when present
+      - expected test commands
+    stop_conditions:
+      - redesign becomes necessary
+      - diff exceeds the declared slice
+      - required deletion, upgrade, migration, or deployment lacks approval
+    failure_route: architect
+    authority: Active source and tests override stale plan details; report conflicts.
+    security: No secret inspection or propagation.
+    budget:
+      max_changed_files_default: 6
+      max_retries_per_failed_operation: 1
+      max_context_tokens: 16000
+
+  - id: implementation_to_review
+    from: implementer
+    to: reviewer
+    trigger: A bounded diff and focused evidence are ready.
+    provide:
+      - task and acceptance criteria
+      - changed paths and diff scope
+      - implementation summary and reuse check
+      - tests and validators run with exact results
+      - known risks, assumptions, and not-run checks
+    produce:
+      - pass, findings, or blocked verdict
+      - severity-ranked evidence-backed findings
+      - verification-gap assessment
+      - exact correction owner
+    avoid:
+      - editing the diff
+      - restating the diff as review
+      - style-only blockers
+    acceptance:
+      - changed scope is identifiable
+      - evidence distinguishes executed from recommended checks
+      - no hidden unresolved blocker is labelled complete
+    evidence:
+      - diff references
+      - command output summaries
+      - test and validator exit status
+    stop_conditions:
+      - task scope cannot be reconstructed
+      - secrets appear in review input
+      - acceptance criteria are absent for a high-risk change
+    failure_route: implementer
+    authority: Current diff, tests, schemas, and contracts outrank prose summaries.
+    security: Redact values; report only sensitive paths and required owner action.
+    budget:
+      max_review_rounds: 3
+      max_context_tokens: 18000
+      max_duplicate_findings_per_root_cause: 1
+
+  - id: review_to_implementation
+    from: reviewer
+    to: implementer
+    trigger: Review returns blocker, major, or accepted minor findings requiring code changes.
+    provide:
+      - finding id and severity
+      - exact path and evidence
+      - violated contract or acceptance criterion
+      - minimal fix direction
+    produce:
+      - corrected diff
+      - finding-by-finding disposition
+      - re-run verification
+    avoid:
+      - unrelated cleanup
+      - suppressing or weakening tests
+      - silently rejecting findings
+    acceptance:
+      - each finding is reproducible or explicitly disputed with evidence
+      - fix remains inside original scope or is re-approved
+    evidence:
+      - before and after result
+      - changed lines and commands
+    stop_conditions:
+      - finding requires redesign
+      - reviewer evidence is contradictory
+      - fix expands scope beyond approval
+    failure_route: architect
+    authority: A finding must be grounded in active repository evidence.
+    security: Preserve the original security boundary.
+    budget:
+      max_review_fix_loops: 3
+      max_retries_per_finding: 1
+
+  - id: review_to_release
+    from: reviewer
+    to: release-auditor
+    trigger: Change is medium/high risk or affects install, permissions, migration, rollout, public contracts, generated adapters, or deployment.
+    provide:
+      - clean or conditionally clean correctness verdict
+      - risk classification
+      - full verification evidence
+      - migration, install, adapter, and permission impacts
+    produce:
+      - READY, READY WITH NOTES, or NOT READY
+      - rollout and rollback requirements
+      - success and failure signals
+      - named owners for remaining risks
+    avoid:
+      - reimplementing
+      - running broad CI
+      - approving unknown high-impact rollout conditions
+    acceptance:
+      - correctness review is complete enough for release analysis
+      - rollback or disable path is identifiable
+      - failure signals are observable
+    evidence:
+      - review verdict
+      - verification artifacts
+      - relevant manifests, workflows, and contracts
+    stop_conditions:
+      - rollback path is missing
+      - high-risk verification is missing
+      - migration ownership is unknown
+    failure_route: architect
+    authority: Release evidence must be current and tied to the exact diff.
+    security: No deployment credentials or secret values in the handoff.
+    budget:
+      max_context_tokens: 16000
+      max_release_review_rounds: 2
+
+  - id: factory_to_definition_review
+    from: agent-factory
+    to: agent-definition-reviewer
+    trigger: A new or materially changed agent definition is statically valid.
+    provide:
+      - original user request
+      - AgentSpec or canonical agent template
+      - static validator result
+      - proposed permissions and handoffs
+    produce:
+      - one-agent score
+      - semantic fit and power-fit verdict
+      - exact fixes
+      - executable next handoff
+    avoid:
+      - fleet-wide conclusions
+      - editing the spec
+      - running the proposed agent
+    acceptance:
+      - deterministic validation has passed
+      - original request is present
+      - target is one agent definition
+    evidence:
+      - validator command and exit code
+      - target path or spec digest
+    stop_conditions:
+      - static validation failed
+      - request intent is missing
+      - target is not an agent definition
+    failure_route: agent-factory
+    authority: Schema validator owns syntax; reviewer owns semantic fit.
+    security: Least privilege; no secret-bearing inputs.
+    budget:
+      max_context_tokens: 10000
+      max_revision_loops: 3
+
+  - id: assessor_to_definition_review
+    from: fleet-assessor
+    to: agent-definition-reviewer
+    trigger: Each canonical fleet member requires an independent one-file assessment.
+    provide:
+      - canonical target path
+      - provider variants
+      - source-of-truth path
+      - required machine-readable response shape
+    produce:
+      - score and readiness
+      - blocker, major, and minor counts
+      - next handoff and executability
+    avoid:
+      - editing
+      - target execution
+      - cross-agent conclusions
+    acceptance:
+      - target identity is normalized
+      - provider variants are grouped
+      - target exists
+    evidence:
+      - roster enumeration
+      - source-of-truth resolution
+    stop_conditions:
+      - reviewer is unavailable
+      - canonical source cannot be resolved
+    failure_route: fleet-assessor
+    authority: Canonical templates outrank rendered copies.
+    security: Do not read or reproduce secret files.
+    budget:
+      max_parallel_reviews: 4
+      max_retries_per_agent: 1
+
+  - id: definition_review_to_assessor
+    from: agent-definition-reviewer
+    to: fleet-assessor
+    trigger: One agent assessment is complete.
+    provide:
+      - machine-readable score result
+      - readiness and decision
+      - finding counts
+      - handoff executability
+    produce:
+      - updated fleet ranking and remediation queue
+    avoid:
+      - altering reviewer findings
+      - averaging away blockers
+      - treating unknown as pass
+    acceptance:
+      - score, readiness, decision, and finding counts are present
+      - response matches the agreed schema
+    evidence:
+      - target path and digest
+      - score calculation
+    stop_conditions:
+      - required fields are absent
+      - assessment result is internally inconsistent
+    failure_route: agent-definition-reviewer
+    authority: Per-agent reviewer result is the score anchor; fleet assessor only applies documented adjustments.
+    security: Aggregate metadata, not sensitive file content.
+    budget:
+      max_retries_per_unusable_result: 1
+
+workflows:
+  - id: delivery
+    title: Change Delivery
+    block: delivery
+    allow_cycles: true
+    cycle_policy:
+      reason: Reviewer-to-implementer correction loop.
+      maximum_rounds: 3
+      exit_on: [review_pass, scope_redesign_required, retry_limit_reached]
+    steps:
+      - {id: intake, type: gate, label: Task classification}
+      - {id: research, type: role, ref: researcher, label: Research when evidence is insufficient}
+      - {id: design, type: role, ref: architect, label: Design when contracts or risk are non-trivial}
+      - {id: persist_plan, type: role, ref: plan-writer, label: Persist durable plan when required}
+      - {id: implement, type: role, ref: implementer, label: Implement bounded slice}
+      - {id: review, type: role, ref: reviewer, label: Independent review}
+      - {id: release, type: role, ref: release-auditor, label: Conditional release gate}
+      - {id: done, type: terminal, label: Accepted evidence}
+    edges:
+      - {from: intake, to: research, when: evidence_missing}
+      - {from: intake, to: design, when: design_needed}
+      - {from: intake, to: implement, when: bounded_low_risk}
+      - {from: research, to: design, when: design_needed, contract: research_to_architecture}
+      - {from: research, to: implement, when: bounded_after_research}
+      - {from: design, to: persist_plan, when: durable_plan_required, contract: architecture_to_plan}
+      - {from: design, to: implement, when: plan_not_required, contract: architecture_to_implementation}
+      - {from: persist_plan, to: implement, when: plan_accepted}
+      - {from: implement, to: review, when: diff_ready, contract: implementation_to_review}
+      - {from: review, to: implement, when: findings_require_fix, contract: review_to_implementation}
+      - {from: review, to: release, when: release_relevant, contract: review_to_release}
+      - {from: review, to: done, when: low_risk_pass}
+      - {from: release, to: done, when: ready}
+
+  - id: agent_creation
+    title: Agent Creation
+    block: agent_creation
+    allow_cycles: false
+    steps:
+      - {id: request, type: gate, label: Reuse-or-create request}
+      - {id: factory, type: role, ref: agent-factory, label: Agent factory pipeline}
+      - {id: definition_review, type: role, ref: agent-definition-reviewer, label: Independent definition review}
+      - {id: human_gate, type: gate, label: Human approval}
+      - {id: approved, type: terminal, label: Approved AgentSpec and guardrails}
+    edges:
+      - {from: request, to: factory, when: request_clear}
+      - {from: factory, to: definition_review, when: static_validation_passed, contract: factory_to_definition_review}
+      - {from: definition_review, to: human_gate, when: semantic_match}
+      - {from: human_gate, to: approved, when: explicitly_approved}
+
+  - id: fleet_assurance
+    title: Fleet Assurance
+    block: fleet_assurance
+    allow_cycles: true
+    steps:
+      - {id: enumerate, type: gate, label: Enumerate canonical fleet}
+      - {id: assessor, type: role, ref: fleet-assessor, label: Aggregate fleet}
+      - {id: critic, type: role, ref: agent-definition-reviewer, label: Review one definition}
+      - {id: report, type: terminal, label: Fleet score and remediation queue}
+    edges:
+      - {from: enumerate, to: assessor, when: roster_ready}
+      - {from: assessor, to: critic, when: next_agent, contract: assessor_to_definition_review}
+      - {from: critic, to: assessor, when: result_ready, contract: definition_review_to_assessor}
+      - {from: assessor, to: report, when: all_agents_assessed}
+
+  - id: post_install
+    title: Temporary Post-Install
+    block: post_install
+    allow_cycles: false
+    lifecycle: temporary
+    steps:
+      - {id: install_gate, type: gate, label: Installation completed}
+      - {id: setup_skill, type: skill, ref: post-install-setup, label: Placeholder and setup workflow}
+      - {id: evidence, type: role, ref: researcher, label: Resolve project facts}
+      - {id: apply, type: role, ref: implementer, label: Apply bounded setup values}
+      - {id: verify, type: role, ref: reviewer, label: Verify install and placeholder gate}
+      - {id: retire, type: terminal, label: Retire temporary workflow}
+    edges:
+      - {from: install_gate, to: setup_skill, when: installed}
+      - {from: setup_skill, to: evidence, when: facts_needed}
+      - {from: evidence, to: apply, when: values_verified}
+      - {from: apply, to: verify, when: setup_complete}
+      - {from: verify, to: retire, when: all_gates_green}
+
+isolation:
+  rule: Workflows do not hand off directly to one another unless listed in bridges.
+  bridges:
+    - id: approved_agent_to_fleet_assurance
+      from_workflow: agent_creation
+      to_workflow: fleet_assurance
+      trigger: A newly approved agent is installed and must be included in the next fleet assessment.
+      payload: [canonical_agent_path, provider_variants, spec_digest, approval_record]
+    - id: delivery_change_to_fleet_assurance
+      from_workflow: delivery
+      to_workflow: fleet_assurance
+      trigger: Delivery changes agent templates, skills, handoffs, permissions, or renderers.
+      payload: [changed_paths, diff_digest, validator_results]
+
+# ---------------------------------------------------------------------------
+# DYNAMIC ROUTING (edgeless) — the "handoff command" alternative to fixed edges.
+#
+# The `workflows` above are STATIC graphs (declared edges, like LangGraph
+# add_conditional_edges). This block is the EDGELESS equivalent: there are no
+# predefined edges. A supervisor may dispatch to any participant (free entry),
+# and each agent then decides its own next hop at runtime via the `handoff`
+# command, constrained to its allowed_next set (the Literal[...] constraint).
+# Routing lives in the agents. Loop and failure control — which pure edgeless
+# graphs lack — is supplied by stop_conditions, failure_route, and budgets.
+# ---------------------------------------------------------------------------
+dynamic_routing:
+  enabled: true
+  supervisor: orchestrator
+  description: >-
+    Edgeless orchestration for the delivery agents. Equivalent to returning a
+    Command(goto=..., update=HandoffPayload) instead of following declared
+    edges. Same agents, same contracts; the transfer target is chosen at
+    runtime within allowed_next rather than wired ahead of time.
+  command:
+    name: handoff
+    signature: handoff(goto, payload)
+    goto: a role id in the acting agent's allowed_next, or "orchestrator", or "done"
+    payload: HandoffPayload   # the state carried on transfer (see handoff_payload_schema)
+    analogous_to: LangGraph Command(goto=..., update=state)
+    rule: A transfer whose goto is not in allowed_next is rejected before execution.
+    # Provider-agnostic mechanics: none of the three runtimes has a native typed
+    # handoff, so the command is (1) a portable block an agent emits and (2) a
+    # shared dispatcher that enforces the allowed_next constraint identically on
+    # every surface. Only the thin command-file frontmatter differs per provider.
+    emit:
+      format: fenced_block
+      language: handoff
+      fields: [from, goto, status, contract_id, payload_ref, human_summary]
+    enforcement:
+      dispatcher: python handoff/dispatch.py --from <FROM> --goto <GOTO>
+      data: handoff/generated/allowed_next.json
+      rule: exit 0 = ROUTE (goto allowed); exit 1 = REJECT (transfer blocked to supervisor)
+    provider_commands:
+      claude: .claude/skills/handoff/SKILL.md
+      copilot: .github/prompts/handoff.prompt.md
+      opencode: .opencode/commands/handoff.md
+    protocol_doc: handoff/generated/HANDOFF-PROTOCOL.md
+  participants:
+    - researcher
+    - architect
+    - plan-writer
+    - implementer
+    - configuration-maintainer
+    - reviewer
+    - release-auditor
+  # allowed_next covers every agent so the dispatcher is authoritative for the
+  # whole fleet; `participants` scopes only the delivery edgeless diagram.
+  allowed_next:
+    researcher: [architect, implementer]
+    architect: [plan-writer, implementer]
+    plan-writer: [implementer]
+    implementer: [reviewer]
+    configuration-maintainer: [reviewer]
+    reviewer: [implementer, release-auditor]
+    release-auditor: []
+    agent-factory: [agent-definition-reviewer]
+    fleet-assessor: [agent-definition-reviewer]
+    agent-definition-reviewer: [fleet-assessor]
+    bootstrapper: []
+    ui-builder: [reviewer]
+  exits: [reviewer, release-auditor]
+  loop_and_failure_controls:
+    - budget.max_review_fix_loops bounds the reviewer to implementer cycle
+    - a stop_condition halts an agent instead of transferring on ambiguity
+    - failure_route names the role that receives a failed handoff
+    - any agent may transfer back to the supervisor with status blocked
+  # Inject the handoff include into existing (generated) agent files so it works
+  # now. Idempotent, marker-delimited. These files are re-rendered by the ai-kit
+  # installer, which drops this block — upstream the same include into the
+  # canonical agent template (handoff/AGENT-INCLUDE.md) for the durable fix.
+  wire_agents:
+    marker: HANDOFF-INCLUDE
+    targets:
+      - .claude/agents/researcher.md
+      - .claude/agents/architect.md
+      - .claude/agents/architecture-plan-writer.md
+      - .claude/agents/implementer.md
+      - .claude/agents/config-maintainer.md
+      - .claude/agents/reviewer.md
+      - .claude/agents/release-auditor.md
+      - .github/agents/researcher.agent.md
+      - .github/agents/architect.agent.md
+      - .github/agents/architecture-plan-writer.agent.md
+      - .github/agents/implementer.agent.md
+      - .github/agents/config-maintainer.agent.md
+      - .github/agents/reviewer.agent.md
+      - .github/agents/release-auditor.agent.md
+
+migration:
+  expected_current_agents:
+    - agent-creator-runtime-guardian
+    - agent-creator-semantic-verifier
+    - agent-creator-static-validator
+    - agent-creator-supervisor
+    - agent-creator
+    - agent-critic
+    - agent-fleet-assessor
+    - architect
+    - architecture-plan-writer
+    - bugfix
+    - build-config
+    - config-maintainer
+    - docs
+    - implementer
+    - infra-auditor
+    - post-install
+    - refactorer
+    - release-auditor
+    - repository-researcher
+    - repository-reviewer
+    - researcher
+    - reviewer
+    - upgrade
+    - workflow-auditor
+  actions:
+    - {current: agent-creator-runtime-guardian, action: convert_to_skill, target: runtime-guardrail-design}
+    - {current: agent-creator-semantic-verifier, action: convert_to_skill, target: agent-semantic-verification}
+    - {current: agent-creator-static-validator, action: convert_to_deterministic_tool, target: agent-spec-validator}
+    - {current: agent-creator-supervisor, action: merge, target: agent-factory}
+    - {current: agent-creator, action: merge, target: agent-factory}
+    - {current: agent-critic, action: rename, target: agent-definition-reviewer}
+    - {current: agent-fleet-assessor, action: rename, target: fleet-assessor}
+    - {current: architect, action: keep, target: architect}
+    - {current: architecture-plan-writer, action: thin_and_rename, target: plan-writer}
+    - {current: bugfix, action: remove_agent_use_skill, target: implementer+bug-regression}
+    - {current: build-config, action: merge_conditional, target: configuration-maintainer}
+    - {current: config-maintainer, action: merge_conditional, target: configuration-maintainer}
+    - {current: docs, action: remove_agent_use_skill, target: implementer+docs-sync}
+    - {current: implementer, action: keep, target: implementer}
+    - {current: infra-auditor, action: convert_to_reviewer_skill, target: reviewer+infra-risk-audit}
+    - {current: post-install, action: convert_to_temporary_workflow, target: post-install-setup}
+    - {current: refactorer, action: remove_agent_use_skill, target: implementer+safe-refactor}
+    - {current: release-auditor, action: keep, target: release-auditor}
+    - {current: repository-researcher, action: merge, target: researcher}
+    - {current: repository-reviewer, action: merge, target: reviewer}
+    - {current: researcher, action: merge, target: researcher}
+    - {current: reviewer, action: merge, target: reviewer}
+    - {current: upgrade, action: remove_agent_use_skill, target: implementer+dependency-upgrade}
+    - {current: workflow-auditor, action: convert_to_reviewer_skill, target: reviewer+workflow-drift-audit}
+  compatibility:
+    alias_window_releases: 1
+    emit_deprecation_warning: true
+    remove_aliases_after:
+      - catalogs_updated
+      - docs_updated
+      - provider_adapters_rendered
+      - no_live_handoff_references
+      - two_clean_fleet_assessments
+
+validation:
+  structural:
+    - unique role, skill, artifact, handoff, workflow, and migration ids
+    - skill ids are unique across existing_keep and create combined
+    - every role references an existing permission profile
+    - every role loads only declared skills
+    - every artifact owner is an existing role
+    - every workflow role or skill reference exists
+    - every workflow has at least one step and at least one terminal step
+    - every edge endpoint exists in its workflow, with no duplicate edges
+    - every referenced handoff contract exists
+    - every handoff contains all required contract fields with non-empty core lists
+    - every handoff from, to, and failure_route is an existing role
+    - every current agent appears exactly once in migration actions
+    - every migration target resolves to a known role, skill, or tool
+    - every provider carries its required integration fields
+    - the handoff payload schema requires human_summary
+    - workflow cycles are rejected unless allow_cycles is true
+    - cross-workflow communication is permitted only through isolation.bridges
+    - declared-but-unreferenced skills and orphan roles are reported as warnings
+  semantic:
+    - agents are retained only for permission, accountability, isolation, or approval boundaries
+    - reusable procedures are skills
+    - deterministic checks are not agents
+    - writers cannot self-review
+    - release gate remains independent
+    - generated adapter files are never canonical edit targets
+    - every handoff serializes into a HandoffPayload with a human_summary

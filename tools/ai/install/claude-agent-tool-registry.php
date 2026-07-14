@@ -31,38 +31,31 @@ function aiClaudeAgentToolRegistry(): array
         // --- read-only / design / review agents (canonical permission.edit: deny) ---
         'architect'                => ['tools' => array_merge($readOnlyTools, ['Agent']), 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
         'researcher'               => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
-        'repository-researcher'    => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
         'reviewer'                 => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
-        'repository-reviewer'      => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
         'release-auditor'          => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
-        'workflow-auditor'         => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
         // Optional read-only auditor (templates/optional/agents; edit: deny, task: deny).
         // Matches the unknown-id fallback, listed explicitly so the grant is deterministic.
-        'agent-critic'             => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
+        'agent-definition-reviewer' => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
         // Optional read-only orchestrator (templates/optional/agents; edit: deny, task: allow).
-        // Grants the Agent tool so it can spawn agent-critic per file and aggregate — its core
-        // mission. Like architect/post-install, this is a task: allow agent, so the registry's
+        // Grants the Agent tool so it can spawn agent-definition-reviewer per file and aggregate — its core
+        // mission. Like architect, this is a task: allow agent, so the registry's
         // "task: allow -> Agent" rule applies; it is a primary orchestrator, never a nested subagent.
-        'agent-fleet-assessor'     => ['tools' => array_merge($readOnlyTools, ['Agent']), 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
+        'fleet-assessor'           => ['tools' => array_merge($readOnlyTools, ['Agent']), 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
+        // orchestrator: supervisor/coordinator that routes tasks to delivery agents via the
+        // handoff contract. task: allow -> Agent (delegation); read-only otherwise (edit: deny).
+        'orchestrator'             => ['tools' => array_merge($readOnlyTools, ['Agent']), 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
+        // agent-factory: read-only agent-creation pipeline (edit: deny, task: deny). It routes to
+        // agent-definition-reviewer via the handoff contract + dispatcher (body/command), NOT by
+        // spawning a subagent, so it does NOT get the Agent tool — least privilege. Merges the retired
+        // agent-creator + agent-creator-supervisor; the static-validator became the
+        // `validate-agent-spec.php` tool and the verifier/guardian became skills.
+        'agent-factory'            => ['tools' => $readOnlyTools, 'disallowedTools' => $readOnlyDisallowed, 'permissionMode' => 'plan'],
 
         // --- write-capable agents (canonical permission.edit not denied) ---
         'implementer'              => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
-        'architecture-plan-writer' => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
+        'plan-writer' => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
         'bootstrapper'             => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
-        'config-maintainer'        => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
-        'refactorer'               => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
-        'post-install'             => ['tools' => array_merge($writeTools, ['Agent']), 'disallowedTools' => [], 'permissionMode' => 'default'],
-
-        // Optional write-capable agents (templates/optional/agents; canonical permission.edit is a
-        // scoped allow/deny map, not `deny`). Rendered as writers so their apply/update missions are
-        // coherent on Claude. Claude frontmatter cannot express per-path edit scoping, so the
-        // canonical edit-deny globs (generated/**, *.lock, *.pem/*.key/*.crt, .env*, secrets) are
-        // enforced by the `.claude/settings.json` Edit/Write deny floor (see the Claude settings
-        // template) rather than per-agent frontmatter.
-        'docs'                     => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
-        'build-config'             => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
-        'bugfix'                   => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
-        'upgrade'                  => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
+        'configuration-maintainer' => ['tools' => $writeTools, 'disallowedTools' => [], 'permissionMode' => 'default'],
     ];
 }
 

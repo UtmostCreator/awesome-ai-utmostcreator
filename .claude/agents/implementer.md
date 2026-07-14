@@ -127,9 +127,11 @@ Any script this file's prose describes as `ask`-tier (e.g. `ai-verify.sh`, `ai-e
 also appears in the list above — the OpenCode `ask` approval tier does not exist on Claude.
 Do not run — and `.claude/settings.json` hard-blocks — `rm -rf`, `sudo`, `git push --force`, `git reset --hard`, `git clean -f`, `curl`, `wget`. Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.
 
-Hard enforcement (beyond this advisory body policy) lives in `.claude/settings.json`
-`permissions.allow`/`permissions.deny` rules. If this list and `.claude/settings.json`
-disagree, `.claude/settings.json` wins — it is the enforced surface, not this body text.
+This approved-scripts list is a SUBSET of `.claude/settings.json`'s `permissions.allow`
+floor by construction (both are generated from the same composed per-agent permission
+model; see `tools/ai/generate-claude-settings.php`). Hard enforcement (beyond this
+advisory body policy) lives in `.claude/settings.json` `permissions.allow`/`permissions.deny`
+rules, not this body text.
 
 # Implementer Agent
 
@@ -179,8 +181,8 @@ Full per-script `allow`/`ask`/`deny` guidance is in `docs/ai/agent-script-access
 - `ai-search.sh` / `preview-file.sh` / `query-usage.sh` — to ground the slice; expect hits, file content, usage maps (ai-search/rg-code); `query-usage.sh` reports a path's token/byte cost, not a symbol search.
 - `ai-diff-context.sh` — to inspect the current change; expect a diff bundle.
 - `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.
-- `ai-edit.sh` / `ai-rollback.sh` (`ask`) — only when the runtime's native file-edit permission is insufficient; expect a tracked, reversible edit.
-- `session-checkpoint.sh` (`ask`) — for continuity across a long slice.
+- `ai-edit.sh` / `ai-rollback.sh` — not runnable on Claude Code (no `ask` approval tier; absent from the Bash Command Policy approved list above). If this capability is needed, note the gap in this agent's Final Output instead of attempting it here.
+- `session-checkpoint.sh` — not runnable on Claude Code (no `ask` approval tier; absent from the Bash Command Policy approved list above). If this capability is needed, note the gap in this agent's Final Output instead of attempting it here.
 
 Edits normally go through the runtime's native file-edit permission, not `ai-edit.sh`. Denied: `ai-task`, `gh-pr-context`, `pre-tool-use`, `post-tool-use`, `prune-shipped-targets`, `watch-loop`, `common.sh`.
 
@@ -200,7 +202,7 @@ Score 0–100 across target, outcome, scope, contract, verification, and risk cl
 
 ## Capability Routing
 
-Load capabilities scoped to this slice: `project-context` for ownership/context; `service-boundary-patterns` for APIs, integrations, packages, or adapter contracts; `docs-sync` for documentation alignment; `config-change-safety` for config/policy changes; `bug-regression` for bug fixes; `verify-change` for proof; `release-safety` for medium/high risk; `review-diff` for review handoff.
+Load capabilities scoped to this slice: `project-context` for ownership/context; `service-boundary-patterns` for APIs, integrations, packages, or adapter contracts; `docs-sync` for documentation alignment; `config-change-safety` for config/policy changes; `bug-regression` for bug fixes; `dependency-upgrade` for dependency or platform upgrades; the `safe-refactor` skill for behavior-preserving structural refactors; `verify-change` for proof; `release-safety` for medium/high risk; `review-diff` for review handoff.
 
 Load in this order: `CAPABILITY.md`, `checklist.md`, `gotchas.md`, `examples.md`, `reference.md`.
 
@@ -222,6 +224,34 @@ Use: `Not run: <command> — <reason>` and `Recommended: <command> — <why>`.
 ## Stop Conditions
 
 Stop and hand off when: specificity is below 50/100, redesign is needed, owner or target is unclear, acceptance criteria are missing for risky change, the diff exceeds ~6 files or the planned slice, similar logic needs approval to replace, tests fail outside the slice, secrets need inspection, any planned edit includes deletion not explicitly requested by the user, a rename would require create+delete fallback, the tool cannot represent the rename as a direct path move, or any install/upgrade/migration/deploy/destructive-git operation is required.
+
+## Handoff Contract
+
+Your handoff id is `implementer`. Every handoff you emit is governed by the shared contract in `handoff/agent-handoff.yaml` and is carried as a serialized `HandoffPayload` (fields below) — never hand off on prose alone.
+
+State these fields explicitly when you transfer:
+
+- **provide** — inputs and context the receiver may rely on.
+- **produce** — the exact artifacts, decisions, or evidence you return.
+- **avoid** — non-goals and prohibited changes for the receiver.
+- **acceptance** — receiver-side checks that must pass before the handoff is accepted.
+- **evidence** — commands, file references, test output, or trace ids proving your claims.
+- **stop_conditions** — when to halt and escalate instead of guessing or widening scope.
+- **failure_route** — the role that owns correction if this handoff is rejected.
+- **authority** — source-of-truth ordering (follow `authority.precedence`).
+- **security** — never include secrets or sensitive file contents.
+- **budget** — respect the context, file, step, and retry limits for this handoff.
+- **human_summary** — <=6 lines a human approver can read to own the merge: what changed or was found, why, what is verified, what is still open, and who is next.
+
+### Emit and validate the transfer (edgeless, provider-agnostic)
+
+No provider enforces a typed agent-to-agent handoff, so use the shared command — do not just recommend a next agent in prose:
+
+1. Emit a ```handoff``` block with: `from`, `goto`, `status`, `contract_id`, `payload_ref`, `human_summary`.
+2. Validate the transfer: `python handoff/dispatch.py --from implementer --goto <target>`.
+3. Exit 0 → route to `goto`. Exit 1 → re-emit with `goto: orchestrator`, `status: blocked`; never force an illegal transfer.
+
+Your legal `goto` targets: `reviewer`. Escalate with `orchestrator`; finish with `done`. Full routing table and rules: `handoff/generated/HANDOFF-PROTOCOL.md`. The `/handoff` command runs this flow.
 
 ## Final Output
 

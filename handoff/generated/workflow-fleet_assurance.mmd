@@ -1,0 +1,24 @@
+flowchart LR
+  classDef gate fill:#fff3e0,stroke:#ef6c00,color:#e65100,stroke-width:2px
+  classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+  classDef research fill:#e0f7fa,stroke:#00838f,color:#004d40
+  classDef design fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c
+  classDef write fill:#e8eaf6,stroke:#3949ab,color:#1a237e
+  classDef review fill:#fff8e1,stroke:#f9a825,color:#6d4c00
+  classDef factory fill:#ede7f6,stroke:#5e35b1,color:#311b92
+  classDef audit fill:#eceff1,stroke:#455a64,color:#263238
+  classDef skill fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+  classDef removed fill:#ffebee,stroke:#c62828,color:#b71c1c
+  classDef kept fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+
+  subgraph fleet_assurance["Fleet Assurance"]
+    direction LR
+  fleet_assurance__enumerate{"Enumerate canonical fleet"}:::gate
+  fleet_assurance__assessor["Aggregate fleet"]:::audit
+  fleet_assurance__critic["Review one definition"]:::audit
+  fleet_assurance__report(["Fleet score and remediation queue"]):::terminal
+    fleet_assurance__enumerate -->|roster_ready| fleet_assurance__assessor
+    fleet_assurance__assessor -->|next_agent| fleet_assurance__critic
+    fleet_assurance__critic -->|result_ready| fleet_assurance__assessor
+    fleet_assurance__assessor -->|all_agents_assessed| fleet_assurance__report
+  end

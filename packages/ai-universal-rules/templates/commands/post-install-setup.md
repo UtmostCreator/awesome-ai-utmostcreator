@@ -1,6 +1,6 @@
 ---
 description: Guided post-install setup for installed projects
-agent: config-maintainer
+agent: configuration-maintainer
 ---
 
 Use this command immediately after installation or re-installation.

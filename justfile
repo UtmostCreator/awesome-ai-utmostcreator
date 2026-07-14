@@ -199,6 +199,11 @@ hook-run-precommit:
 hook-run-commitmsg msg:
   @bash scripts/hooks/commit-msg.sh {{msg}}
 
+# Run the repo secret scanner on request. Gitleaks is OFF BY DEFAULT elsewhere
+# (fast local/test runs); this recipe and release contexts (AI_RELEASE=1) opt in.
+secret-scan:
+  @php tools/ai/secret-scan.php --run
+
 secret-scan-gitleaks:
   @gitleaks protect --staged --redact --verbose
 

@@ -23,47 +23,27 @@ schema: ai.agent_assessment.values/v1
 approved: true # approved by user 2026-07-05, including bootstrapper/ui-builder REVIEW NEEDED entries
 
 agents:
-  agent-creator:
-    agent_assessment:
-      risk_level: high
-      decision: approve_with_minor_fixes
-    rationale: "Produces AgentSpec JSON; no mutation, but output influences future agents. Manifest risk: high."
-  agent-creator-static-validator:
+  agent-factory:
     agent_assessment:
       risk_level: medium
-      decision: needs_refactor
-    rationale: "Mission requires running validator, but the rendered surface has no execute tool; reconcile capability vs mission."
-  agent-creator-semantic-verifier:
-    agent_assessment:
-      risk_level: medium
-      decision: approve_with_minor_fixes
-    rationale: "Read-only semantic review role; acceptable if validator execution claims are clear."
-  agent-creator-runtime-guardian:
-    agent_assessment:
-      risk_level: critical
-      decision: approve_with_minor_fixes
-    rationale: "Read-only guardrail design role; wording should not imply unsupported execution. Manifest risk: critical (runtime-safety gate)."
-  agent-creator-supervisor:
-    agent_assessment:
-      risk_level: high
-      decision: approve_with_minor_fixes
-    rationale: "Coordinator role is coherent, but subagent routing semantics must match provider reality. Manifest risk: high."
-  agent-critic:
+      decision: approve
+    rationale: "Read-only agent-creation pipeline (edit denied); task: allow to orchestrate reuse->spec->static-validation->semantic-fit->guardrails->human-approval and hand to agent-definition-reviewer, granted the Agent subagent-spawn tool on Claude. No mutation surface, but produces agent definitions and holds a human-approval gate, so domain-influence risk is medium, matching the AGENTS-MANIFEST Risk column and the authored frontmatter block. Merges the retired agent-creator + agent-creator-supervisor; static-validator became the validate-agent-spec.php tool, verifier/guardian became skills."
+  agent-definition-reviewer:
     agent_assessment:
       risk_level: medium
       decision: approve_with_minor_fixes
     rationale: "Read-only agent-file auditor (edit and task denied, deny-by-default bash allowlist); no mutation surface, but audits permission/governance agent files, so domain-influence risk lifts it above low. Self-audit found minor findings outstanding (soft-max length), so decision mirrors the file's own scoring rules. Manifest risk: medium (mirrors workflow-auditor)."
-  agent-fleet-assessor:
+  fleet-assessor:
     agent_assessment:
       risk_level: medium
       decision: approve
-    rationale: "Read-only fleet orchestrator (edit denied); task: allow to delegate per-file critique to agent-critic, granted the Agent subagent-spawn tool on Claude. No mutation surface, but the spawn/delegation capability and fleet-governance influence put domain risk at medium, matching the AGENTS-MANIFEST Risk column and the authored frontmatter block. Re-audited 60->93 after the delegation blocker fix; no BLOCKER/MAJOR, score >=90 -> approve."
+    rationale: "Read-only fleet orchestrator (edit denied); task: allow to delegate per-file critique to agent-definition-reviewer, granted the Agent subagent-spawn tool on Claude. No mutation surface, but the spawn/delegation capability and fleet-governance influence put domain risk at medium, matching the AGENTS-MANIFEST Risk column and the authored frontmatter block. Re-audited 60->93 after the delegation blocker fix; no BLOCKER/MAJOR, score >=90 -> approve."
   architect:
     agent_assessment:
       risk_level: high
       decision: approve
     rationale: "Read-only planning role with strong boundaries, ACs, source-of-truth, and handoff discipline. Manifest risk: high (planning gate)."
-  architecture-plan-writer:
+  plan-writer:
     agent_assessment:
       risk_level: medium
       decision: approve
@@ -73,83 +53,38 @@ agents:
       risk_level: high
       decision: needs_refactor
     rationale: "REVIEW NEEDED (not in original draft table): INTERNAL kit-install orchestration, mutating, OpenCode-only. Manifest risk: high. Human must confirm decision."
-  bugfix:
-    agent_assessment:
-      risk_level: medium
-      decision: needs_refactor
-    rationale: "Mission says fix/apply changes; rendered surface posture must match. Manifest risk: medium."
-  build-config:
-    agent_assessment:
-      risk_level: high
-      decision: needs_refactor
-    rationale: "Mission says update config; rendered surface posture must match. Manifest risk: high."
-  config-maintainer:
+  configuration-maintainer:
     agent_assessment:
       risk_level: high
       decision: approve_with_minor_fixes
-    rationale: "Write/execute capable; coherent but high-risk. Manifest risk: high."
-  docs:
-    agent_assessment:
-      risk_level: low
-      decision: needs_refactor
-    rationale: "Mission says update docs; rendered surface posture must match. Manifest risk: low."
+    rationale: "Write/execute capable; coherent but high-risk. Merge target for the retired build-config (build/toolchain config via the build-configuration skill). Manifest risk: high."
   implementer:
     agent_assessment:
       risk_level: high
       decision: approve
     rationale: "Write/execute capable; acceptable only with bounded scope and verification. Manifest risk: high."
-  infra-auditor:
+  orchestrator:
     agent_assessment:
-      risk_level: high
+      risk_level: medium
       decision: approve
-    rationale: "Read-only audit role. Manifest risk: high (dependency/build/release audit)."
-  post-install:
-    agent_assessment:
-      risk_level: high
-      decision: needs_refactor
-    rationale: "Broad mutation/post-install role; delegation and provider semantics need tightening. Manifest risk: high."
-  refactorer:
-    agent_assessment:
-      risk_level: high
-      decision: approve_with_minor_fixes
-    rationale: "Write/execute capable; safe only with behavior-preservation proof. Manifest risk: high."
+    rationale: "Read-only supervisor/coordinator (edit denied); task: allow to dispatch delivery agents (researcher/architect/implementer/reviewer/...) and drive the handoff loop, granted the Agent subagent-spawn tool on Claude. No mutation surface, but the delegation capability and cross-fleet routing authority put domain risk at medium, matching fleet-assessor's classification and the authored frontmatter block. Routes only within allowed_next via the dispatcher; never edits, designs, or reviews."
   release-auditor:
     agent_assessment:
       risk_level: critical
       decision: approve
     rationale: "Read-only release-safety audit role. Manifest risk: critical (ship/no-ship gate)."
-  repository-researcher:
-    agent_assessment:
-      risk_level: low
-      decision: approve_with_minor_fixes
-    rationale: "Read-only research with constrained execution; acceptable if mutation remains denied. Manifest risk: low."
-  repository-reviewer:
-    agent_assessment:
-      risk_level: medium
-      decision: needs_refactor
-    rationale: "Requires script/git execution; rendered surface posture must match. Manifest risk: medium."
   researcher:
     agent_assessment:
       risk_level: medium
       decision: needs_refactor
-    rationale: "Research role with constrained execution. Re-audited 2026-07-08: append-write BLOCKER resolved via a Claude-only renderer substitution; pack-context.sh Script-Access/Bash-Policy contradiction neutralized; `.claude/settings.json` allowlist expanded to cover the read-only command set the body calls Approved (only the single piped `ls -1 ... | sort` compound is unrepresentable in Claude's prefix-based Bash matcher). No BLOCKERs remain. decision is needs_refactor pending a final agent-critic re-read to confirm closure and catch any residual body/enforcement drift. Manifest risk: medium."
+    rationale: "Research role with constrained execution. Re-audited 2026-07-08: append-write BLOCKER resolved via a Claude-only renderer substitution; pack-context.sh Script-Access/Bash-Policy contradiction neutralized; `.claude/settings.json` allowlist expanded to cover the read-only command set the body calls Approved (only the single piped `ls -1 ... | sort` compound is unrepresentable in Claude's prefix-based Bash matcher). No BLOCKERs remain. decision is needs_refactor pending a final agent-definition-reviewer re-read to confirm closure and catch any residual body/enforcement drift. Manifest risk: medium."
   reviewer:
     agent_assessment:
       risk_level: high
-      decision: block
-    rationale: "Requires git/script review flow; rendered surface posture must match. Manifest risk: high. Re-audited 2026-07-07 (86->65/blocked->94->92): raw-reader secret-exposure MAJOR fixed via permission composition (sed-n/head/tail/nl/bat denied), a false preview-file.sh secret-blocking claim (BLOCKER) fixed with an honest disclosure. On OpenCode, the Sensitive File Rules secret-path check now has a real permission-level backstop (plan-2-opencode-secret-deny-backstop, archived): a `deny` pack blocks reader wrappers (preview-file.sh/ai-search.sh/rg-code.sh) from opening secret-shaped paths, ordered to win over the wrapper's own allow entry. On Claude and Copilot this MAJOR remains an accepted, cross-referenced residual risk, not silently open: plan-2 explicitly scoped that backstop to OpenCode only and out of scope for Claude/Copilot (no equivalent path-scoped deny surface exists in either runtime's frontmatter), and plan-21-claude-reviewer-remediation confirmed this boundary and intentionally did not build a Claude-side technical backstop, keeping the Sensitive File Rules prose as the only enforcement there. Also fixed by plan-21: the dangling `task` (`ask`) delegation sentence in Script Access (unreachable on Claude, which never grants the `Agent` tool to this role) now states plainly that delegation is OpenCode-only. A BLOCKER remains genuinely open and unresolved pending a live Claude Code session: whether a PreToolUse hook payload exposes calling-subagent identity, which gates an agent-scoped Bash-mutation-deny hook that would otherwise make the `Do not edit` mission enforceable beyond disallowedTools (which the unrestricted Bash tool can still route around); this could not be verified in a non-interactive implementer session and is recorded as an open, honestly-documented residual risk rather than guessed at. Re-audited again 2026-07-08 (fresh agent-critic score 69/blocked): the BLOCKER now carries an in-body honest disclosure (Script Access) naming the uncovered generic mutation primitives (`sed -i`, `tee`, `python3 -c`/`node -e` writes, bare `>`/`>>`) as an accepted, cross-referenced residual risk pointing at this same plan; the ai-verify.sh Script-Access/Bash-Command-Policy contradiction (MAJOR) is fixed; `permissionMode: plan`'s non-enforcement for sub-agents is now disclosed in-body. `decision` moved to `block` to reflect the forced BLOCKER mapping (per agent-critic's own decision rubric: any BLOCKER forces `block` regardless of remaining score) until the P0 live-session hook-payload verification gate is confirmed or permanently recorded — see the same plan's Acceptance Criteria AC-01/AC-02, deferred as unrunnable in any non-interactive session."
+      decision: approve_with_minor_fixes
+    rationale: "Requires git/script review flow; rendered surface posture must match. Manifest risk: high. Re-audited 2026-07-07 (86->65/blocked->94->92): raw-reader secret-exposure MAJOR fixed via permission composition (sed-n/head/tail/nl/bat denied), a false preview-file.sh secret-blocking claim (BLOCKER) fixed with an honest disclosure. On OpenCode, the Sensitive File Rules secret-path check now has a real permission-level backstop (plan-2-opencode-secret-deny-backstop, archived): a `deny` pack blocks reader wrappers (preview-file.sh/ai-search.sh/rg-code.sh) from opening secret-shaped paths, ordered to win over the wrapper's own allow entry. On Claude and Copilot this MAJOR remains an accepted, cross-referenced residual risk, not silently open: plan-2 explicitly scoped that backstop to OpenCode only and out of scope for Claude/Copilot (no equivalent path-scoped deny surface exists in either runtime's frontmatter), and plan-21-claude-reviewer-remediation confirmed this boundary and intentionally did not build a Claude-side technical backstop, keeping the Sensitive File Rules prose as the only enforcement there. Also fixed by plan-21: the dangling `task` (`ask`) delegation sentence in Script Access (unreachable on Claude, which never grants the `Agent` tool to this role) now states plainly that delegation is OpenCode-only. A BLOCKER remains genuinely open and unresolved pending a live Claude Code session: whether a PreToolUse hook payload exposes calling-subagent identity, which gates an agent-scoped Bash-mutation-deny hook that would otherwise make the `Do not edit` mission enforceable beyond disallowedTools (which the unrestricted Bash tool can still route around); this could not be verified in a non-interactive implementer session and is recorded as an open, honestly-documented residual risk rather than guessed at. Re-audited again 2026-07-08 (fresh agent-definition-reviewer score 69/blocked): the BLOCKER now carries an in-body honest disclosure (Script Access) naming the uncovered generic mutation primitives (`sed -i`, `tee`, `python3 -c`/`node -e` writes, bare `>`/`>>`) as an accepted, cross-referenced residual risk pointing at this same plan; the ai-verify.sh Script-Access/Bash-Command-Policy contradiction (MAJOR) is fixed; `permissionMode: plan`'s non-enforcement for sub-agents is now disclosed in-body. `decision` moved to `block` to reflect the forced BLOCKER mapping (per agent-definition-reviewer's own decision rubric: any BLOCKER forces `block` regardless of remaining score) until the P0 live-session hook-payload verification gate is confirmed or permanently recorded — see the same plan's Acceptance Criteria AC-01/AC-02, deferred as unrunnable in any non-interactive session. SUPERSEDED 2026-07-14 (Phase 7r-1): the 2026-07-14 fleet re-assessment recorded 0 blockers for reviewer, so the forced-BLOCKER->block mapping no longer holds and decision moves to approve_with_minor_fixes; the hook-payload enforceability gap remains an honestly-disclosed, non-blocking residual risk tracked for a live-session verification."
   ui-builder:
     agent_assessment:
       risk_level: high
       decision: needs_refactor
     rationale: "REVIEW NEEDED (not in original draft table; not risk-classified in AGENTS-MANIFEST). Treated as execution/mutating pending human classification; conservative high + needs_refactor."
-  upgrade:
-    agent_assessment:
-      risk_level: critical
-      decision: needs_refactor
-    rationale: "Says plan/apply upgrades; strongest gates. Manifest risk: critical."
-  workflow-auditor:
-    agent_assessment:
-      risk_level: high
-      decision: approve_with_minor_fixes
-    rationale: "Read-only audit role; execution wording must match provider surface. Re-audited 2026-07-08 (agent-critic score 84/needs_refactor): risk_level raised from medium to high — this is a workflow-governance auditor whose domain-influence matches reviewer's high classification, not merely a generic read-only helper. Manifest risk column (docs/ai/AGENTS-MANIFEST.md) still shows medium and is now stale pending a follow-up sync."

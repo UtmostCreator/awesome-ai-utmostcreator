@@ -173,7 +173,7 @@ class InstallerSafetyTest extends TestCase
         // through real directories. Symlinks would (correctly) trip PathGuard's symlink-escape
         // protection, since they resolve outside the target root. These roots cover every pack
         // source surface (tools/packages/scripts/docs/schemas + a few root files).
-        foreach (['tools', 'packages', 'scripts', 'docs', 'schemas'] as $dir) {
+        foreach (['tools', 'packages', 'scripts', 'docs', 'schemas', 'handoff'] as $dir) {
             $this->copyTreeForIntegration(self::$repoRoot . DIRECTORY_SEPARATOR . $dir, $target . DIRECTORY_SEPARATOR . $dir);
         }
         foreach (['.repomixignore', 'PLACEHOLDERS.md', 'llms.txt'] as $file) {
@@ -2557,8 +2557,8 @@ class InstallerSafetyTest extends TestCase
             // Optional Copilot agents must coexist (the actual regression). Use non-hidden
             // optional agents; hidden internal-only templates (e.g. ui-builder) are intentionally
             // not rendered for Copilot.
-            $this->assertContains('.github/agents/bugfix.agent.md', $agents, 'optional Copilot agents must be merged into .github/agents');
-            $this->assertContains('.github/agents/upgrade.agent.md', $agents);
+            $this->assertContains('.github/agents/agent-factory.agent.md', $agents, 'optional Copilot agents must be merged into .github/agents');
+            $this->assertContains('.github/agents/fleet-assessor.agent.md', $agents);
 
             // The architecture-plan optional agent was removed in favor of the core
             // architect agent; it must no longer render into the Copilot surface.
@@ -2573,10 +2573,10 @@ class InstallerSafetyTest extends TestCase
             $this->assertNotContains('.github/agents/ui-builder.agent.md', $agents, 'hidden optional agents must stay internal-only');
 
             // Optional OpenCode agents land in their own namespace, never clobbered.
-            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents-optional' . DIRECTORY_SEPARATOR . 'bugfix.md');
+            $this->assertFileExists($target . DIRECTORY_SEPARATOR . '.opencode' . DIRECTORY_SEPARATOR . 'agents-optional' . DIRECTORY_SEPARATOR . 'agent-factory.md');
 
             // Optional Copilot agents must be VS Code-native rendered, not raw OpenCode frontmatter.
-            $optional = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents' . DIRECTORY_SEPARATOR . 'bugfix.agent.md');
+            $optional = (string) file_get_contents($target . DIRECTORY_SEPARATOR . '.github' . DIRECTORY_SEPARATOR . 'agents' . DIRECTORY_SEPARATOR . 'agent-factory.agent.md');
             $this->assertMatchesRegularExpression('/^---\R[\s\S]*?^name:\s+\S/m', $optional, 'optional Copilot agent must have VS Code-native name: frontmatter');
             $this->assertMatchesRegularExpression('/^tools:\s*\[/m', $optional, 'optional Copilot agent must have a Copilot tools list');
             $this->assertDoesNotMatchRegularExpression('/^id:\s+\S/m', $optional, 'optional Copilot agent must not ship OpenCode id: frontmatter');
@@ -2606,7 +2606,7 @@ class InstallerSafetyTest extends TestCase
             $this->assertSame(0, $forceResult['exit'], $forceResult['stdout'] . $forceResult['stderr']);
 
             $agentsAfterForce = $this->targetGlob($target, '.github/agents/*.agent.md');
-            $this->assertContains('.github/agents/bugfix.agent.md', $agentsAfterForce, 'optional Copilot agents must survive a --force reinstall');
+            $this->assertContains('.github/agents/agent-factory.agent.md', $agentsAfterForce, 'optional Copilot agents must survive a --force reinstall');
             $this->assertContains('.github/agents/architect.agent.md', $agentsAfterForce);
             $this->assertSame($agents, $agentsAfterForce, '--force reinstall must keep the Copilot agent set stable');
         } finally {

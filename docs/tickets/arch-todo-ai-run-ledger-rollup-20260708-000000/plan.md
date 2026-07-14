@@ -1,3 +1,14 @@
+> **⛔ SUPERSEDED 2026-07-12 — READ FIRST.** Only Slice A (the schema
+> `schemas/ai/ai-run-ledger.schema.json`) was ever built; Slices B–E (the rollup renderer
+> and beyond) were never started. The `ai-run-ledger.v2` effort was cancelled: the
+> telemetry model (`___ARCHITECTURE_2.0/telemetry/model/telemetry.yaml`) removed the
+> run_ledger machine on 2026-07-11 (cross-runtime ledger depends on an inferred run-close,
+> unreliable on Copilot/OpenCode), and the approval-gated removal of the built Slice A
+> artifact is tracked in
+> `docs/tickets/arch-todo-telemetry-evidence-pipeline-20260711-132347/plan-10-telemetry-hardening-and-producer-slice.md`
+> Phase 6. Do not action this file directly — use plan-10 Phase 6, which carries the
+> current verified state and the `🛑⁉️` delete-approval gate.
+
 # Architecture Plan — AI Run Ledger (ai-run-ledger.v2): per-run rollup over the v3.0 per-event log
 
 - Ticket: none (self-directed; new dedicated ticket)
