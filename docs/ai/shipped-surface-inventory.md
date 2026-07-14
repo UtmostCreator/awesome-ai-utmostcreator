@@ -4,7 +4,7 @@ Per-file companion to the subtree-level "Shipped Surface Role Classification" ta
 `docs/ai/integration-matrix.md`. Every file under `packages/ai-universal-rules/templates/**`
 is listed here with its role and load path, so a dead-file review can name a specific file
 rather than only a subtree. Snapshot taken by direct enumeration (`fd -t f . packages/ai-universal-rules/templates`)
-cross-checked against `tools/ai/install/packs.php`; refresh this file whenever the template
+cross-checked against `tools/ai/install/registry.php`; refresh this file whenever the template
 tree gains or loses a top-level file.
 
 Roles: `always-on-critical` / `deterministic-load` / `optional-support` / `generated-or-install-only`

@@ -1,0 +1,162 @@
+{
+    "scripts-pack": [
+        "scripts/ai/common.sh",
+        {
+            "source": "scripts/ai/internal",
+            "type": "dir"
+        },
+        {
+            "source": "scripts/ai/bin",
+            "type": "dir"
+        },
+        "scripts/ai/ai-search.sh",
+        "scripts/ai/ai-search-multi.sh",
+        "scripts/ai/ai-diff-context.sh",
+        "scripts/ai/ai-verify.sh",
+        "scripts/ai/ai-verify-html.sh",
+        "scripts/ai/ai-verify-js.sh",
+        "scripts/ai/ai-verify-php.sh",
+        "scripts/ai/ai-verify-ts.sh",
+        "scripts/ai/ai-verify-vue.sh",
+        "scripts/ai/ai-rollback.sh",
+        "scripts/ai/ai-edit.sh",
+        {
+            "source": ".repomixignore",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        "scripts/ai/pack-context.sh",
+        "scripts/ai/pre-tool-use.sh",
+        "scripts/ai/post-tool-use.sh",
+        "scripts/ai/run-repomix-context.sh",
+        "scripts/ai/run-repomix-file.sh",
+        "scripts/ai/repomix-context-tree.sh",
+        "scripts/ai/repomix-scc-router.sh",
+        "scripts/ai/repomix-freshness.sh",
+        "scripts/ai/repomix-ensure-fresh.sh",
+        "scripts/ai/git-forensics.sh",
+        "scripts/ai/git-branch-origin.sh",
+        "scripts/ai/gh-pr-context.sh",
+        "scripts/ai/preview-file.sh",
+        {
+            "source": "packages/ai-universal-rules/templates/docs/ai/tools/actions/preview-file.md",
+            "target": "docs/ai/tools/actions/preview-file.md"
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/docs/ai/tools/ai-search.md",
+            "target": "docs/ai/tools/ai-search.md"
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/docs/ai/tools/tool-map.md",
+            "target": "docs/ai/tools/tool-map.md"
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/docs/ai/tools/actions/search-evidence.md",
+            "target": "docs/ai/tools/actions/search-evidence.md"
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/docs/ai/tools/actions/use-ai-script.md",
+            "target": "docs/ai/tools/actions/use-ai-script.md"
+        },
+        "scripts/ai/query-usage.sh",
+        "scripts/ai/fd-files.sh",
+        "scripts/ai/rg-code.sh",
+        "scripts/ai/ai-structured.sh",
+        "scripts/ai/ai-task.sh",
+        "scripts/ai/ai-test-select.sh",
+        {
+            "source": "scripts/ai/run-repo-tests.sh",
+            "required": false
+        },
+        {
+            "source": "scripts/ai/run-test-focused.sh",
+            "required": false
+        },
+        "scripts/ai/session-checkpoint.sh",
+        {
+            "source": "scripts/ai/ai-doc-check.sh",
+            "required": false
+        },
+        {
+            "source": "scripts/ai/ai-file-freshness.sh",
+            "required": false
+        },
+        {
+            "source": "scripts/ai/ai-install-coverage.sh",
+            "required": false
+        },
+        {
+            "source": "scripts/ai/check-file-refs.sh",
+            "required": false
+        },
+        {
+            "source": "scripts/ai/repo-stats.sh",
+            "required": false
+        },
+        {
+            "source": "scripts/ai/ship-audit.sh",
+            "required": false
+        },
+        "scripts/ai/watch-loop.sh",
+        {
+            "source": "scripts/ai/repo-tool-inventory.sh",
+            "required": false
+        },
+        {
+            "source": "tools/ai/repo-tool-inventory.php",
+            "required": false
+        },
+        {
+            "source": "scripts/ai/sh-introspect.sh",
+            "required": false
+        },
+        {
+            "source": "tools/ai/sh-introspect.php",
+            "required": false
+        },
+        {
+            "source": "tools/ai/sh-introspect",
+            "type": "dir",
+            "required": false
+        },
+        {
+            "source": "docs/ai/repo-required-tools.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/mandatory-tools-install.md",
+            "required": false
+        },
+        "docs/ai/script-registry.md",
+        "docs/ai/script-registry.json",
+        "docs/ai/script-registry.schema.json"
+    ],
+    "advisor-pack": [
+        {
+            "source": "tools/ai/advisor",
+            "type": "dir",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "tools/ai/command-exists.php",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "schemas/ai/project-signals.schema.json",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "schemas/ai/project-scorecard.schema.json",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "schemas/ai/advisor-recommendation.schema.json",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        }
+    ]
+}

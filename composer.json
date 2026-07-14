@@ -9,7 +9,8 @@
   "require-dev": {
     "brianium/paratest": "^7.4",
     "laravel/prompts": "^0.3",
-    "phpunit/phpunit": "^11.0"
+    "phpunit/phpunit": "^11.0",
+    "symfony/yaml": "^8.1"
   },
   "suggest": {
     "laravel/prompts": "Enables a richer interactive backend for `php tools/ai/ai.php install --wizard`; the installer degrades gracefully to plain stdin prompts without it."
@@ -38,5 +39,3 @@
     "test:profile": "Run PHPUnit and emit a JUnit XML report at docs/ai/generated/phpunit-junit.xml for slow-test ranking."
   }
 }
-
-

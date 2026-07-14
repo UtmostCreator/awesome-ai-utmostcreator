@@ -30,7 +30,7 @@ declare(strict_types=1);
  * actually copy files. Never deletes or overwrites files outside the given --target path.
  */
 
-require_once __DIR__ . '/install/packs.php';
+require_once __DIR__ . '/install/registry.php';
 require_once __DIR__ . '/install/profiles.php';
 
 /**

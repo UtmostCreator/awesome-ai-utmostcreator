@@ -29,7 +29,7 @@ final class PackRegistryRefactorParityTest extends TestCase
         if ($root === false) {
             throw new \RuntimeException('Could not resolve repo root');
         }
-        require_once $root . '/tools/ai/install/packs.php';
+        require_once $root . '/tools/ai/install/registry.php';
     }
 
     public function testShorthandUsesSourceAsDefaultTarget(): void

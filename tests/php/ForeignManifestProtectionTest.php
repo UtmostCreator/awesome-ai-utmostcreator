@@ -31,7 +31,7 @@ final class ForeignManifestProtectionTest extends TestCase
         }
         self::$repoRoot = $root;
         require_once $root . '/tools/ai/install/planner.php';
-        require_once $root . '/tools/ai/install/packs.php';
+        require_once $root . '/tools/ai/install/registry.php';
     }
 
     protected function tearDown(): void

@@ -1,0 +1,99 @@
+{
+    "setup-docs": [
+        {
+            "source": "packages/ai-universal-rules/PLACEHOLDERS.md",
+            "target": "PLACEHOLDERS.md"
+        },
+        {
+            "source": "packages/ai-universal-rules/placeholders.json",
+            "target": ".ai/placeholders.json",
+            "required": false
+        },
+        "docs/ai/agents.md",
+        "docs/ai/agent-script-access.md",
+        "docs/ai/adapter-contract.md",
+        "docs/ai/approval-boundaries.md",
+        "docs/ai/architecture-locks.md",
+        "docs/ai/handoff-contract.md",
+        "docs/ai/integration-matrix.md",
+        {
+            "source": "docs/ai/shipped-surface-inventory.md",
+            "required": false
+        },
+        "docs/ai/session-reentry.md",
+        "docs/ai/source-of-truth.md",
+        {
+            "source": "docs/ai/schema-ownership.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/context-economy.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/opencode-models.md",
+            "required": false
+        },
+        "docs/ai/tool-policy.md",
+        "docs/ai/verification-matrix.md",
+        {
+            "source": "docs/ai/ownership.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/copilot-getting-started.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/copilot-tooling.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/copilot-cli-repo-integration.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/external-repo-install.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/maintenance-mode.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/available-packs.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/command-policy.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/command-policy.tiers.yaml",
+            "required": false
+        },
+        {
+            "source": "docs/ai/security.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/catalog.md",
+            "required": false
+        },
+        "docs/ai/index.md",
+        {
+            "source": "llms.txt",
+            "required": false
+        },
+        "tools/ai/verify-install-placeholders.php",
+        {
+            "source": "docs/ai/repo-documentation-generation.md",
+            "required": false
+        },
+        {
+            "source": "docs/ai/capabilities/README.md",
+            "required": false
+        }
+    ]
+}

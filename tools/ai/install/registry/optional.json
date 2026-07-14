@@ -1,0 +1,79 @@
+{
+    "delivery-pack": [
+        {
+            "source": "packages/ai-universal-rules/templates/optional/delivery/README.md",
+            "target": "docs/ai/delivery/README.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md",
+            "target": "docs/ai/delivery/slice-card.template.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        }
+    ],
+    "optional-agents-opencode-pack": [
+        {
+            "source": "packages/ai-universal-rules/templates/optional/agents",
+            "target": ".opencode/agents-optional",
+            "type": "dir",
+            "required": false,
+            "install_type": "opencode-agents"
+        }
+    ],
+    "optional-agents-copilot-pack": [
+        {
+            "source": "packages/ai-universal-rules/templates/optional/agents",
+            "target": ".github/agents",
+            "type": "dir",
+            "merge_strategy": "skip-if-exists",
+            "required": false,
+            "install_type": "copilot-agents",
+            "merge_into_existing": true
+        }
+    ],
+    "optional-agents-claude-pack": [
+        {
+            "source": "packages/ai-universal-rules/templates/optional/agents",
+            "target": ".claude/agents",
+            "type": "dir",
+            "merge_strategy": "skip-if-exists",
+            "required": false,
+            "install_type": "claude-agents",
+            "merge_into_existing": true
+        }
+    ],
+    "preview-environments-pack": [
+        {
+            "source": "docs/ai/capabilities/preview-environments",
+            "type": "dir",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        }
+    ],
+    "evaluation-pack": [
+        {
+            "source": "docs/ai/capabilities/evaluation-and-regression",
+            "type": "dir",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        }
+    ],
+    "service-boundary-pack": [
+        {
+            "source": "docs/ai/capabilities/service-boundary-patterns",
+            "type": "dir",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        }
+    ],
+    "mcp-boundaries-pack": [
+        {
+            "source": "packages/ai-universal-rules/docs/operations/MCP-BOUNDARIES.md",
+            "target": "docs/ai/MCP-BOUNDARIES.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        }
+    ]
+}

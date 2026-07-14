@@ -5,7 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/markers.php';
 require_once __DIR__ . '/project-yaml.php';
 require_once __DIR__ . '/config.php';
-require_once __DIR__ . '/packs.php';
+require_once __DIR__ . '/registry.php';
 require_once __DIR__ . '/fs-writers.php';
 require_once __DIR__ . '/plan-guards.php';
 require_once __DIR__ . '/install-lock.php';

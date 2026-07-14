@@ -1,0 +1,28 @@
+{
+    "capabilities-core": [
+        {
+            "source": "docs/ai/capabilities/agent-observability-and-evidence",
+            "type": "dir"
+        },
+        {
+            "source": "docs/ai/capabilities/authorization-and-tool-governance",
+            "type": "dir",
+            "required": false
+        },
+        {
+            "source": "docs/ai/capabilities/config-change-safety",
+            "type": "dir",
+            "required": false
+        },
+        {
+            "source": "docs/ai/capabilities/docs-sync",
+            "type": "dir",
+            "required": false
+        },
+        {
+            "source": "docs/ai/capabilities/adapter-drift",
+            "type": "dir",
+            "required": false
+        }
+    ]
+}

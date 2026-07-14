@@ -17,7 +17,7 @@
       "install_guide": "docs/ai/adapter-contract.md",
       "install_script": "none",
       "ai_entrypoint": "CLAUDE.md",
-      "notes": "Installed via the adapter-claude pack (tools/ai/install/packs.php); no dedicated single-runtime install wrapper script exists yet, unlike install-opencode-kit.sh/install-copilot-kit.sh."
+      "notes": "Installed via the adapter-claude pack (tools/ai/install/registry.php); no dedicated single-runtime install wrapper script exists yet, unlike install-opencode-kit.sh/install-copilot-kit.sh."
     },
     {
       "path": "common-vocabulary",

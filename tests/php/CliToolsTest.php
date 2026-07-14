@@ -439,7 +439,7 @@ class CliToolsTest extends TestCase
             'repomix-ensure-fresh must be registered in docs/ai/script-registry.json'
         );
 
-        $packs = (string) file_get_contents(self::$repoRoot . '/tools/ai/install/packs.php');
+        $packs = (string) file_get_contents(self::$repoRoot . '/tools/ai/install/registry/runtime.yaml');
         $this->assertStringContainsString(
             'scripts/ai/repomix-ensure-fresh.sh',
             $packs,
