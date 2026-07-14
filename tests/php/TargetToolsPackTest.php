@@ -17,7 +17,7 @@ final class TargetToolsPackTest extends TestCase
             throw new \RuntimeException('Could not resolve repo root');
         }
         self::$repoRoot = $root;
-        require_once $root . '/tools/ai/install/packs.php';
+        require_once $root . '/tools/ai/install/registry.php';
     }
 
     public function testSourceRepoInstallCheckBatchesDoNotShipToTargets(): void

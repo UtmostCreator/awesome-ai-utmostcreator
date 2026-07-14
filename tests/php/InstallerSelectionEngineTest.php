@@ -30,7 +30,7 @@ class InstallerSelectionEngineTest extends TestCase
         self::$repoRoot = $root;
 
         require_once $root . '/tools/ai/commands/helpers.php';
-        require_once $root . '/tools/ai/install/packs.php';
+        require_once $root . '/tools/ai/install/registry.php';
         require_once $root . '/tools/ai/install/selection-engine.php';
     }
 

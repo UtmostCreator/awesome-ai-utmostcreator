@@ -1,0 +1,126 @@
+{
+    "policy-pack": [
+        {
+            "source": "docs/ai/command-risk-taxonomy.md",
+            "merge_strategy": "skip-if-exists"
+        },
+        {
+            "source": "docs/ai/failure-handling.md",
+            "merge_strategy": "skip-if-exists"
+        },
+        {
+            "source": "schemas/ai/evidence-event.schema.json",
+            "merge_strategy": "skip-if-exists"
+        }
+    ],
+    "hooks-pack": [
+        {
+            "source": "packages/ai-universal-rules/templates/github/hooks/tool-policy.json",
+            "target": ".github/hooks/tool-policy.json"
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/github/hooks/tool-guardian.json",
+            "target": ".github/hooks/tool-guardian.json",
+            "required": false
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/github/hooks/scripts/tool-guardian.ps1",
+            "target": ".github/hooks/scripts/tool-guardian.ps1",
+            "required": false
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/github/hooks/scripts/tool-guardian.sh",
+            "target": ".github/hooks/scripts/tool-guardian.sh",
+            "required": false
+        },
+        {
+            "source": "packages/ai-universal-rules/templates/github/hooks/scripts/command-policy.compiled.sh",
+            "target": ".github/hooks/scripts/command-policy.compiled.sh",
+            "required": false
+        },
+        {
+            "source": "scripts/hooks/pre-commit.sh",
+            "merge_strategy": "skip-if-exists"
+        },
+        {
+            "source": "scripts/hooks/commit-msg.sh",
+            "merge_strategy": "skip-if-exists"
+        },
+        {
+            "source": "docs/ai/hooks.md",
+            "merge_strategy": "skip-if-exists"
+        }
+    ],
+    "ci-pack": [
+        {
+            "source": "packages/ai-universal-rules/templates/github/workflows/validate-ai-surface.yml",
+            "target": ".github/workflows/validate-ai-surface.yml"
+        },
+        {
+            "source": "docs/ai/validation.md",
+            "merge_strategy": "skip-if-exists"
+        }
+    ],
+    "evidence-pack": [
+        {
+            "source": "docs/ai/capabilities/agent-observability-and-evidence/event-schema.md",
+            "merge_strategy": "skip-if-exists"
+        },
+        {
+            "source": "docs/ai/capabilities/agent-observability-and-evidence/failure-taxonomy.md",
+            "merge_strategy": "skip-if-exists"
+        }
+    ],
+    "docs-reference-pack": [
+        {
+            "source": "docs/ai/agent-ops.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/AGENTS-MANIFEST.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/agent-ops-checklist.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/failure-handling.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/validation.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/context-packing.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/hooks.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/scripts-reference.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/toolchain-requirements.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        },
+        {
+            "source": "docs/ai/recommended-optional-tools.md",
+            "merge_strategy": "skip-if-exists",
+            "required": false
+        }
+    ]
+}

@@ -1,0 +1,97 @@
+# GENERATED-EDITABLE: canonical installer pack registry data.
+# Edited by hand; loaded by tools/ai/install/registry-loader.php and
+# normalized by aiInstallerRegistryEntry(). One entry per pack list item:
+# a bare string means source==target with all defaults; a map overrides
+# target/type/core/merge_strategy/required or adds install_type etc.
+adapter-copilot:
+  - source: packages/ai-universal-rules/templates/core/copilot-instructions.template.md
+    target: .github/copilot-instructions.md
+  - source: packages/ai-universal-rules/templates/github/pull_request_template.md
+    target: .github/pull_request_template.md
+  - source: packages/ai-universal-rules/templates/core/copilot-vscode-settings.template.json
+    target: .vscode/settings.json
+    merge_strategy: skip-if-exists
+    required: false
+  - source: packages/ai-universal-rules/templates/instructions
+    target: .github/instructions
+    type: dir
+  - source: packages/ai-universal-rules/templates/core/agents
+    target: .github/agents
+    type: dir
+    install_type: copilot-agents
+  - source: packages/ai-universal-rules/templates/workflows
+    target: .github/prompts
+    type: dir
+    rename_ext: .prompt.md
+  - source: packages/ai-universal-rules/templates/workflows
+    target: .github/skills
+    type: dir
+    install_type: skill-dirs
+  - source: packages/ai-universal-rules/templates/skills/ai-search/SKILL.md
+    target: .github/skills/ai-search/SKILL.md
+  - source: packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md
+    target: .github/skills/ai-scripts/SKILL.md
+  - source: packages/ai-universal-rules/templates/instructions/tools.instructions.md
+    target: .github/instructions/tools.instructions.md
+  - source: packages/ai-universal-rules/templates/instructions/execution-protocol.instructions.md
+    target: .github/instructions/execution-protocol.instructions.md
+adapter-opencode:
+  - source: packages/ai-universal-rules/templates/core/opencode.json
+    target: opencode.jsonc
+    never_auto_merge: true
+  - source: packages/ai-universal-rules/templates/core/agents
+    target: .opencode/agents
+    type: dir
+    install_type: opencode-agents
+  - source: packages/ai-universal-rules/templates/workflows
+    target: .opencode/skills
+    type: dir
+    install_type: skill-dirs
+  - source: packages/ai-universal-rules/templates/workflows
+    target: .opencode/commands
+    type: dir
+    install_type: opencode-commands
+  - source: packages/ai-universal-rules/templates/commands
+    target: .opencode/commands
+    type: dir
+    install_type: opencode-commands
+  - source: packages/ai-universal-rules/templates/skills/ai-search/SKILL.md
+    target: .opencode/skills/ai-search/SKILL.md
+  - source: packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md
+    target: .opencode/skills/ai-scripts/SKILL.md
+adapter-claude:
+  - source: packages/ai-universal-rules/templates/core/agents
+    target: .claude/agents
+    type: dir
+    install_type: claude-agents
+  - source: packages/ai-universal-rules/templates/core/CLAUDE.template.md
+    target: CLAUDE.md
+  - source: packages/ai-universal-rules/templates/claude/settings.json
+    target: .claude/settings.json
+    install_type: claude-settings-merge
+  - source: packages/ai-universal-rules/templates/workflows
+    target: .claude/skills
+    type: dir
+    install_type: skill-dirs
+  - source: packages/ai-universal-rules/templates/skills/ai-search/SKILL.md
+    target: .claude/skills/ai-search/SKILL.md
+  - source: packages/ai-universal-rules/templates/skills/ai-scripts/SKILL.md
+    target: .claude/skills/ai-scripts/SKILL.md
+  - source: packages/ai-universal-rules/templates/commands
+    target: .claude/commands
+    type: dir
+    install_type: opencode-commands
+capabilities-extended:
+  - source: packages/ai-universal-rules/templates/capabilities/bug-regression
+    target: docs/ai/capabilities/bug-regression
+    type: dir
+  - source: packages/ai-universal-rules/templates/capabilities/release-safety
+    target: docs/ai/capabilities/release-safety
+    type: dir
+capabilities-governance:
+  - source: packages/ai-universal-rules/templates/capabilities/dependency-upgrade
+    target: docs/ai/capabilities/dependency-upgrade
+    type: dir
+  - source: packages/ai-universal-rules/templates/capabilities/mentor-mode
+    target: docs/ai/capabilities/mentor-mode
+    type: dir

@@ -226,16 +226,16 @@ OpenCode/`.opencode`, Claude/`.claude`). It complements — and does not duplica
 `plan-28`'s byte-parity gate for agent bash/edit **permission bodies**
 (`docs/tickets/claude-agent-fleet-remediation/plan-28-permission-sot-and-render-parity-sync.md`);
 this section audits **primitive presence/routing**, not permission-body content parity.
-Source of truth for wiring is `tools/ai/install/packs.php` (verified against live installed
+Source of truth for wiring is `tools/ai/install/registry.php` (verified against live installed
 file counts on 2026-07-09).
 
-### Wiring paths per primitive (from `packs.php`)
+### Wiring paths per primitive (from `registry.php`)
 
 | Primitive (canonical source) | Copilot target | OpenCode target | Claude target |
 |---|---|---|---|
 | agents — `core/agents` (13) | `.github/agents` (`copilot-agents` renderer, `adapter-copilot`) | `.opencode/agents` (`opencode-agents` -> `aiInstallerCopyDirAsOpenCodeAgents`, `copilot-agent-renderer.php:314`, `adapter-opencode`) | `.claude/agents` (`claude-agents` renderer, `adapter-claude`) |
 | agents — `optional/agents` (13) | `.github/agents` merged (`optional-agents-copilot-pack`, `merge_into_existing`) | `.opencode/agents-optional` — **separate dir** (`optional-agents-opencode-pack`) | `.claude/agents` merged (`optional-agents-claude-pack`, `merge_into_existing`) |
-| commands — `templates/commands` (5 thin) | none — no `packs.php` entry writes thin commands to `.github` | `.opencode/commands` (`opencode-commands`, `adapter-opencode`) | `.claude/commands` (`opencode-commands`, `adapter-claude`) |
+| commands — `templates/commands` (5 thin) | none — no `registry.php` entry writes thin commands to `.github` | `.opencode/commands` (`opencode-commands`, `adapter-opencode`) | `.claude/commands` (`opencode-commands`, `adapter-claude`) |
 | workflows — `templates/workflows` (23) | `.github/prompts` (`rename_ext=.prompt.md`) + `.github/skills` (`skill-dirs`) | `.opencode/commands` (`opencode-commands`) + `.opencode/skills` (`skill-dirs`) | `.claude/skills` (`skill-dirs`) only — **not** dual-shipped to `.claude/commands` |
 | instructions — `templates/instructions` (22) | `.github/instructions` (`applyTo`-scoped, `adapter-copilot`) | none — OpenCode uses `AGENTS.md` + `opencode.jsonc instructions[]` by design | none — Claude uses `CLAUDE.md` + `AGENTS.md` by design |
 
@@ -279,11 +279,11 @@ explained in this file or an adapter doc); `intentional-asymmetry-undocumented-f
 | Primitive | Copilot | OpenCode | Claude |
 |---|---|---|---|
 | **agents** | `intentional-asymmetry-documented` — rendered via `copilot-agents`; core (`adapter-copilot`) + optional (`optional-agents-copilot-pack`) merged into `.github/agents`; hidden agents skipped. Full symmetry with the other two renderers, documented in the Claude adapter parity notes above. | `intentional-asymmetry-undocumented-fix-docs` — core -> `.opencode/agents`, but optional -> a **separate** `.opencode/agents-optional/` dir (Copilot/Claude merge optional into the same dir). This split-dir behavior is real and by design (see `optional-agents-opencode-pack` comment in `packs.php:334`) but is NOT reflected in any matrix row above. | `intentional-asymmetry-documented` — rendered via `claude-agents`; core (`adapter-claude`) + optional (`optional-agents-claude-pack`) merged into `.claude/agents`; per-command bash enforcement advisory-only, documented under "Runtime limitation notes". |
-| **commands** (5 thin) | `intentional-asymmetry-undocumented-fix-docs` — Copilot receives **no** thin command templates (`packs.php` has zero `templates/commands` -> `.github` entries; `.github/commands` does not exist). The 3 shared basenames in `.github/prompts` come from `templates/workflows`, not `templates/commands` (`verify`/`verify-ai-wiring` — thin-command-only names — are absent from `.github/prompts`). This is by design (Copilot gets workflow-derived prompts, not slash commands) but is not documented anywhere. | `intentional-asymmetry-documented` — `.opencode/commands` receives both workflows and the 5 thin commands (`opencode-commands` install type). Command-shaped surface is documented in the Handoff/Runtime tables above. | `intentional-asymmetry-documented` — `.claude/commands` receives exactly the 5 thin commands; workflows are NOT dual-shipped as commands (only as skills). Documented in `packs.php:191-207` and the Claude parity note ("skills and commands register the same `/name`; dual-shipping would register duplicates"). |
+| **commands** (5 thin) | `intentional-asymmetry-undocumented-fix-docs` — Copilot receives **no** thin command templates (`registry.php` has zero `templates/commands` -> `.github` entries; `.github/commands` does not exist). The 3 shared basenames in `.github/prompts` come from `templates/workflows`, not `templates/commands` (`verify`/`verify-ai-wiring` — thin-command-only names — are absent from `.github/prompts`). This is by design (Copilot gets workflow-derived prompts, not slash commands) but is not documented anywhere. | `intentional-asymmetry-documented` — `.opencode/commands` receives both workflows and the 5 thin commands (`opencode-commands` install type). Command-shaped surface is documented in the Handoff/Runtime tables above. | `intentional-asymmetry-documented` — `.claude/commands` receives exactly the 5 thin commands; workflows are NOT dual-shipped as commands (only as skills). Documented in `packs.php:191-207` and the Claude parity note ("skills and commands register the same `/name`; dual-shipping would register duplicates"). |
 | **workflows** (23) | `intentional-asymmetry-documented` — fan out to `.github/prompts` (`rename_ext`) AND `.github/skills` (`skill-dirs`). Both surfaces documented in the Runtime Surface Matrix and Shipped Surface Role Classification. | `intentional-asymmetry-documented` — fan out to `.opencode/commands` AND `.opencode/skills` (4 total workflow targets across providers, as the plan notes). Documented. | `intentional-asymmetry-documented` — `.claude/skills` only (single surface), NOT `.claude/commands` — deliberate, to avoid duplicate `/name` registration (see commands row). Documented in the Claude parity note above. |
 | **instructions** (22) | `intentional-asymmetry-documented` — `.github/instructions/*.instructions.md` with `applyTo` globs; documented as Copilot's deterministic-load surface in the Runtime Surface Matrix and Critical-Topic Coverage Matrix. | `intentional-asymmetry-documented` — no structural equivalent; OpenCode uses `AGENTS.md` + `opencode.jsonc instructions[]` (Runtime Surface Matrix). Documented. | `intentional-asymmetry-documented` — no structural equivalent; Claude uses `CLAUDE.md` + `AGENTS.md` (Runtime Surface Matrix). Documented. |
 
-No cell is blank (AC-01). Every `undocumented`/`gap` cell cites the exact `packs.php` entry
+No cell is blank (AC-01). Every `undocumented`/`gap` cell cites the exact `registry.php` entry
 or file-count evidence that proves it (AC-02).
 
 ### Findings requiring follow-up (named, not implemented)
@@ -302,7 +302,7 @@ not fixed inline:
    slice; add a note here and to `docs/ai/adapter-contract.md`).
 
 No `accidental-gap-fix-code` findings were identified: every primitive absence traces to a
-deliberate `packs.php` design decision, not a missing/broken entry. The two undocumented
+deliberate `registry.php` design decision, not a missing/broken entry. The two undocumented
 asymmetries above are also required inputs to
 `docs/tickets/IDEAS/plan-provider-content-parity-validator.md`'s allowed-exception list (encode
 them as `intentional-asymmetry`, not as failures).

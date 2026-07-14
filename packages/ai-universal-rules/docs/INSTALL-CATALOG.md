@@ -47,7 +47,7 @@ Deterministic catalog generated from installer registries.
 - `evaluation-pack` (1 items)
 - `service-boundary-pack` (1 items)
 - `mcp-boundaries-pack` (1 items)
-- `target-tools-pack` (102 items)
+- `target-tools-pack` (105 items)
 - `shared-templates-pack` (4 items)
 - `package-source-pack` (8 items)
 - `kit-authoring-pack` (5 items)

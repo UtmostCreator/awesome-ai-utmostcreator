@@ -1,0 +1,20 @@
+# GENERATED-EDITABLE: canonical installer pack registry data.
+# Edited by hand; loaded by tools/ai/install/registry-loader.php and
+# normalized by aiInstallerRegistryEntry(). One entry per pack list item:
+# a bare string means source==target with all defaults; a map overrides
+# target/type/core/merge_strategy/required or adds install_type etc.
+capabilities-core:
+  - source: docs/ai/capabilities/agent-observability-and-evidence
+    type: dir
+  - source: docs/ai/capabilities/authorization-and-tool-governance
+    type: dir
+    required: false
+  - source: docs/ai/capabilities/config-change-safety
+    type: dir
+    required: false
+  - source: docs/ai/capabilities/docs-sync
+    type: dir
+    required: false
+  - source: docs/ai/capabilities/adapter-drift
+    type: dir
+    required: false

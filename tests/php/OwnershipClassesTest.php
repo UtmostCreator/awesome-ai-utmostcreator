@@ -70,7 +70,7 @@ final class OwnershipClassesTest extends TestCase
 
     public function testReservedUserNamespaceDetection(): void
     {
-        require_once self::$repoRoot . '/tools/ai/install/packs.php';
+        require_once self::$repoRoot . '/tools/ai/install/registry.php';
 
         // Reserved: local- basenames, *.local.* files, anything under a local/ dir.
         $this->assertTrue(aiInstallerIsReservedUserNamespace('docs/ai/local-notes.md'));
@@ -86,7 +86,7 @@ final class OwnershipClassesTest extends TestCase
 
     public function testKitRegistryNeverShipsIntoReservedUserNamespace(): void
     {
-        require_once self::$repoRoot . '/tools/ai/install/packs.php';
+        require_once self::$repoRoot . '/tools/ai/install/registry.php';
 
         $registry = aiInstallerPackRegistry();
         $errors = aiInstallerValidatePackRegistry($registry);
@@ -310,7 +310,7 @@ PHP);
      */
     public function testBuiltManifestEntriesConformToOwnershipContract(): void
     {
-        require_once self::$repoRoot . '/tools/ai/install/packs.php';
+        require_once self::$repoRoot . '/tools/ai/install/registry.php';
         require_once self::$repoRoot . '/tools/ai/install/planner.php';
 
         $config = [

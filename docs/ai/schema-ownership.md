@@ -38,7 +38,7 @@ Integrity of this directory is enforced by `tools/ai/validate-schemas.php` (wire
 
 1. Add `schemas/ai/<name>.schema.json` with `$schema`, a unique `$id`
    (`https://app-configs.local/schemas/<name>.schema.json`), and a `title`.
-2. Ship it via `tools/ai/install/packs.php` and list it in `docs/ai/installed-files.md`.
+2. Ship it via `tools/ai/install/registry.php` and list it in `docs/ai/installed-files.md`.
 3. Add a row to this table naming its producer, consumer, validator, and status.
 4. Run `php tools/ai/validate-schemas.php --root=.` and `bash scripts/ai/ai-doc-check.sh --check`.
 

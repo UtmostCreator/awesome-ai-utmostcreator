@@ -1,0 +1,84 @@
+# GENERATED-EDITABLE: canonical installer pack registry data.
+# Edited by hand; loaded by tools/ai/install/registry-loader.php and
+# normalized by aiInstallerRegistryEntry(). One entry per pack list item:
+# a bare string means source==target with all defaults; a map overrides
+# target/type/core/merge_strategy/required or adds install_type etc.
+base:
+  - source: packages/ai-universal-rules/templates/core/AGENTS.template.md
+    target: AGENTS.md
+    core: true
+  - source: packages/ai-universal-rules/templates/core/project-context.template.md
+    target: docs/ai/project-context.md
+    core: true
+  - source: packages/ai-universal-rules/templates/core/project-context.placeholders.md
+    target: docs/ai/project-context-placeholders.md
+    core: true
+    required: false
+  - source: packages/ai-universal-rules/templates/core/workflow.template.md
+    target: docs/ai/workflow.md
+    core: true
+  - source: packages/ai-universal-rules/templates/core/execution-protocol.template.md
+    target: docs/ai/execution-protocol.md
+    core: true
+  - source: packages/ai-universal-rules/templates/core/ai-file-standards.template.md
+    target: docs/ai/ai-file-standards.md
+    core: true
+  - source: packages/ai-universal-rules/templates/shared/guardrails/AI-GUARDRAILS.md
+    target: docs/ai/AI-GUARDRAILS.md
+    core: true
+  - source: packages/ai-universal-rules/templates/core/generated-artifacts.template.md
+    target: docs/ai/generated-artifacts.md
+    core: true
+  - source: packages/ai-universal-rules/templates/core/POST-INSTALL.template.md
+    target: docs/ai/POST-INSTALL.md
+    core: true
+  - source: packages/ai-universal-rules/templates/core/project-stack.template.md
+    target: docs/ai/project-stack.md
+    core: true
+    merge_strategy: skip-if-exists
+    required: false
+  - source: packages/ai-universal-rules/templates/core/project/README.md
+    target: docs/ai/project/README.md
+    merge_strategy: skip-if-exists
+    required: false
+  - source: packages/ai-universal-rules/templates/core/project/project-interaction.md
+    target: docs/ai/project/project-interaction.md
+    merge_strategy: skip-if-exists
+    required: false
+  - source: packages/ai-universal-rules/templates/core/project/conventions.md
+    target: docs/ai/project/conventions.md
+    merge_strategy: skip-if-exists
+    required: false
+  - source: packages/ai-universal-rules/templates/capabilities/project-context
+    target: docs/ai/capabilities/project-context
+    type: dir
+    core: true
+  - source: packages/ai-universal-rules/templates/capabilities/verify-change
+    target: docs/ai/capabilities/verify-change
+    type: dir
+    core: true
+  - source: packages/ai-universal-rules/templates/capabilities/review-diff
+    target: docs/ai/capabilities/review-diff
+    type: dir
+    core: true
+  - source: packages/ai-universal-rules/templates/capabilities/evidence-first-execution
+    target: docs/ai/capabilities/evidence-first-execution
+    type: dir
+    core: true
+  - source: packages/ai-universal-rules/templates/capabilities/clarification-and-handoff
+    target: docs/ai/capabilities/clarification-and-handoff
+    type: dir
+    core: true
+  - source: handoff/dispatch.py
+    core: true
+  - source: handoff/agent-handoff.yaml
+    core: true
+  - source: handoff/gen_handoff.py
+    core: true
+  - source: handoff/gen_handoff.sh
+    core: true
+  - source: handoff/AGENT-INCLUDE.md
+    core: true
+  - source: handoff/generated
+    type: dir
+    core: true

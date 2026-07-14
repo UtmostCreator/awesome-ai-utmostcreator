@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/profiles.php';
-require_once __DIR__ . '/packs.php';
+require_once __DIR__ . '/registry.php';
 require_once __DIR__ . '/script-registry.php';
 require_once __DIR__ . '/toolchain-registry.php';
 require_once __DIR__ . '/generated-header.php';
