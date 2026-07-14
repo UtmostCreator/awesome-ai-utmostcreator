@@ -445,7 +445,6 @@ function aiCollectRootResources(string $root): array
         '.github/hooks/tool-guardian.json' => ['adapter-hook', 'tool-guardian', 'GitHub Copilot hook configuration for guarded tool execution.', 'github-copilot'],
         '.github/hooks/scripts/tool-guardian.ps1' => ['adapter-hook-script', 'tool-guardian.ps1', 'PowerShell hook script for GitHub Copilot guarded tool execution.', 'github-copilot'],
         'schemas/ai/evidence-event.schema.json' => ['schema', 'evidence-event.schema.json', 'JSON schema for durable agent evidence events emitted by supported runtime surfaces.', 'canonical'],
-        'schemas/ai/ai-run-ledger.schema.json' => ['schema', 'ai-run-ledger.schema.json', 'JSON schema for the per-run rollup ledger folded from evidence-event.schema.json entries by session_id/trace_id.', 'canonical'],
     ];
 
     foreach ($adapterSurfaceMap as $relativePath => [$type, $name, $description, $runtime]) {

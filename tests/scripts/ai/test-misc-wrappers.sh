@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 # Smoke tests for thin read-only wrapper scripts that previously had no suite:
-#   repo-stats.sh, ai-file-freshness.sh, ai-install-coverage.sh,
-#   scripts/doctor.sh, scripts/hooks/pre-commit.sh, scripts/hooks/commit-msg.sh
+#   ai-install-coverage.sh, scripts/doctor.sh, scripts/hooks/pre-commit.sh,
+#   scripts/hooks/commit-msg.sh
+#
+# repo-stats.sh and ai-file-freshness.sh moved to
+# /home/utmostcreator/Projects/agent-repo-tools/test/test-misc-wrappers.sh
+# (REUSABLE bucket, see docs/tickets/arch-todo-scripts-ai-reusable-extraction-20260711-162902/).
 set -euo pipefail
 BASH_BIN="${BASH_BIN:-$(command -v bash)}"
 
@@ -18,20 +22,6 @@ run_test() {
 }
 
 printf 'misc wrappers\n'
-
-# repo-stats.sh: prints a numeric tracked-file count.
-test_repo_stats() {
-    local out
-    out="$("$BASH_BIN" "$REPO_ROOT/scripts/ai/repo-stats.sh")"
-    [[ "$out" =~ ^[0-9]+$ ]]
-}
-run_test "repo-stats.sh prints a numeric count" test_repo_stats
-
-# ai-file-freshness.sh: read-only git status wrapper, exit 0.
-test_file_freshness() {
-    "$BASH_BIN" "$REPO_ROOT/scripts/ai/ai-file-freshness.sh" >/dev/null 2>&1
-}
-run_test "ai-file-freshness.sh runs (exit 0)" test_file_freshness
 
 # ai-install-coverage.sh: validates install surface; should run to completion.
 test_install_coverage() {
