@@ -103,8 +103,8 @@ final class ClaudeSettingsProjectionTest extends TestCase
         $this->assertNotEmpty($allow);
 
         $agents = $this->shippedAgentAllowedBash();
-        // 26 templates - 2 hidden (bootstrapper, ui-builder) = 24 shipped.
-        $this->assertCount(24, $agents, 'expected exactly 24 shipped Claude agents');
+        // 14 templates - 3 hidden (bootstrapper, ui-builder, ai-maintenance) = 11 shipped.
+        $this->assertCount(11, $agents, 'expected exactly 11 shipped Claude agents');
 
         $missing = [];
         foreach ($agents as $agentId => $patterns) {

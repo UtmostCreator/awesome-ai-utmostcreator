@@ -44,17 +44,10 @@ class CopilotAgentRendererTest extends TestCase
         return (string) file_get_contents($path);
     }
 
-    private function bugfixTemplate(): string
-    {
-        $path = $this->repoRoot . '/packages/ai-universal-rules/templates/optional/agents/bugfix.md';
-        $this->assertFileExists($path, 'bugfix template must exist');
-        return (string) file_get_contents($path);
-    }
-
     private function architecturePlanWriterTemplate(): string
     {
-        $path = $this->repoRoot . '/packages/ai-universal-rules/templates/core/agents/architecture-plan-writer.md';
-        $this->assertFileExists($path, 'architecture-plan-writer template must exist');
+        $path = $this->repoRoot . '/packages/ai-universal-rules/templates/core/agents/plan-writer.md';
+        $this->assertFileExists($path, 'plan-writer template must exist');
         return (string) file_get_contents($path);
     }
 
@@ -180,18 +173,6 @@ class CopilotAgentRendererTest extends TestCase
     {
         $out = aiInstallerRenderCopilotAgent($this->implementerTemplate(), 'implementer', '/project/scripts/ai');
         $this->assertStringContainsString('## Shell Boundary', $out);
-    }
-
-    public function testBugfixOutputHasEditAndExecuteTools(): void
-    {
-        $out = aiInstallerRenderCopilotAgent($this->bugfixTemplate(), 'bugfix', '/project/scripts/ai');
-        if (preg_match('/^tools:\s*(.+)$/m', $out, $m)) {
-            $this->assertStringContainsString('edit/editFiles', $m[1]);
-            $this->assertStringContainsString('edit/createFile', $m[1]);
-            $this->assertStringContainsString('execute/runInTerminal', $m[1]);
-        } else {
-            $this->fail('tools: line not found in optional bugfix output');
-        }
     }
 
     public function testCopilotAgentCopyRefreshesWithoutDeletingDestinationTree(): void
@@ -332,7 +313,7 @@ class CopilotAgentRendererTest extends TestCase
      */
     public static function handoffChainProvider(): iterable
     {
-        yield 'architect -> architecture-plan-writer' => ['architect', 'architectTemplate', 'architecture-plan-writer'];
+        yield 'architect -> plan-writer' => ['architect', 'architectTemplate', 'plan-writer'];
         yield 'implementer -> reviewer' => ['implementer', 'implementerTemplate', 'reviewer'];
     }
 
@@ -356,7 +337,7 @@ class CopilotAgentRendererTest extends TestCase
     {
         $out = aiInstallerRenderCopilotAgent(
             $this->architecturePlanWriterTemplate(),
-            'architecture-plan-writer',
+            'plan-writer',
             '/project/scripts/ai'
         );
         $this->assertStringContainsString('handoffs:', $out);
@@ -364,12 +345,15 @@ class CopilotAgentRendererTest extends TestCase
         $this->assertMatchesRegularExpression('/recommended next step/i', $out);
     }
 
-    public function testReviewerHandoffTargetsImplementerAndRefactorer(): void
+    public function testReviewerHandoffTargetsImplementer(): void
     {
+        // refactorer was retired in Phase 4; the reviewer's refactor path is now the
+        // implementer applying the safe-refactor skill, so the reviewer's single
+        // native handoff button targets implementer (Fix Findings).
         $out = aiInstallerRenderCopilotAgent($this->reviewerTemplate(), 'reviewer', '/project/scripts/ai');
         $this->assertStringContainsString('handoffs:', $out);
         $this->assertStringContainsString("agent: 'implementer'", $out);
-        $this->assertStringContainsString("agent: 'refactorer'", $out);
+        $this->assertStringNotContainsString("agent: 'refactorer'", $out);
         $this->assertMatchesRegularExpression('/recommended next step/i', $out);
 
         // Both the Plan-3 clarification section and the Plan-4 pre-flight framing section

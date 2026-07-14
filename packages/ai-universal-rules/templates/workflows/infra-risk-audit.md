@@ -1,0 +1,44 @@
+---
+name: infra-risk-audit
+description: Use to audit dependency, compatibility, build, and infrastructure risk
+argument-hint: 'Describe the dependency, build, or compatibility concern to audit'
+---
+
+## What I Do
+
+I audit dependency, build, release, and compatibility risk read-only. I assess each risk against the exact manifest, lockfile, or config line that backs it, severity-rank the findings, and name the owner or next action. I report risk; I do not apply fixes.
+
+## When To Use Me
+
+- when a dependency, version, or lockfile change may carry risk
+- when a build or release configuration change needs a risk read before rollout
+- when environment or tooling compatibility is uncertain
+- when a verification-workflow change could weaken proof coverage
+
+## Read Alongside
+
+- `docs/ai/capabilities/release-safety/CAPABILITY.md`
+- `docs/ai/capabilities/dependency-upgrade/CAPABILITY.md`
+- `docs/ai/generated-artifacts.md`
+
+## Steps
+
+1. Scope the audit to the specific dependency, build, or compatibility concern and gather the backing evidence (manifest, lockfile, config, or diff).
+2. Assess dependency risk against the exact lockfile/manifest entry and version; do not issue a verdict from inference alone.
+3. Assess build, release, and compatibility risk against the exact file and line, including any verification-coverage impact.
+4. Severity-rank each finding and cite the file, line, and version (for dependency risk) that backs it.
+5. Name the owner or the matching next action for each finding; do not recommend wider rollout without matching verification evidence.
+6. Report the risk findings; if evidence is insufficient or a probe cannot complete, report `blocked` and name the missing evidence rather than asserting a clean result.
+
+## Output
+
+- a severity-ranked risk findings table with file, line, and version citations
+- the owner or next action per finding (upgrade, build-config, release review, or implementer)
+- a `blocked` note naming any missing evidence instead of a guessed pass
+
+## Gotchas
+
+- this is advisory and read-only; report risk, do not apply fixes
+- do not present advisory risk as a confirmed production incident
+- do not recommend wider rollout without matching verification evidence
+- cite the exact file, line, and version; never issue a risk verdict from inference alone

@@ -20,33 +20,33 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 
 ## Highlights
 
-- `package / core-template` - 29
+- `package / core-template` - 25
 - `package / foundation-doc` - 6
 - `package / github-copilot-instruction-template` - 22
 - `package / opencode-command-template` - 5
 - `package / operations-doc` - 6
-- `package / optional-template` - 15
+- `package / optional-template` - 6
 - `package / package-capability` - 43
 - `package / shared-template` - 4
 - `package / workflow-doc` - 6
-- `package / workflow-template` - 23
+- `package / workflow-template` - 34
 - `root / adapter-doc` - 1
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
 - `root / adapter-policy` - 1
-- `root / ai-script` - 27
+- `root / ai-script` - 4
 - `root / capability` - 17
-- `root / claude-agent` - 24
+- `root / claude-agent` - 10
 - `root / claude-command` - 5
 - `root / claude-skill` - 24
 - `root / cli` - 1
 - `root / exporter` - 2
 - `root / generator` - 1
-- `root / github-copilot-agent` - 24
+- `root / github-copilot-agent` - 10
 - `root / github-copilot-instruction` - 22
-- `root / github-copilot-prompt` - 23
-- `root / github-copilot-skill` - 25
-- `root / opencode-agent` - 16
+- `root / github-copilot-prompt` - 34
+- `root / github-copilot-skill` - 36
+- `root / opencode-agent` - 12
 - `root / opencode-command` - 25
 - `root / opencode-skill` - 26
 - `root / php-reference` - 3
@@ -64,33 +64,10 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`adapter-hook`|tool-policy|`.github/hooks/tool-policy.json`|GitHub Copilot hook configuration for tool policy enforcement.|
 |`adapter-hook-script`|tool-guardian.ps1|`.github/hooks/scripts/tool-guardian.ps1`|PowerShell hook script for GitHub Copilot guarded tool execution.|
 |`adapter-policy`|ai-policy|`policies/ai/policy.yaml`|Declarative allow, deny, and confirm rules enforced for all runtimes by the canonical pre-tool-use hook.|
-|`ai-script`|ai-diff-context.sh|`scripts/ai/ai-diff-context.sh`|Builds focused diff and change-context packs for AI review and implementation.|
-|`ai-script`|ai-doc-check.sh|`scripts/ai/ai-doc-check.sh`|Checks AI-facing documentation surfaces for required references and drift.|
-|`ai-script`|ai-edit.sh|`scripts/ai/ai-edit.sh`|Guarded edit wrapper with snapshots, dry-run behavior, visible diff, and optional verification.|
-|`ai-script`|ai-rollback.sh|`scripts/ai/ai-rollback.sh`|Rollback helper for explicit recovery work using session snapshots and refs.|
-|`ai-script`|ai-search.sh|`scripts/ai/ai-search.sh`|Unified search entrypoint for text, file, tracked, all, and structural discovery.|
-|`ai-script`|ai-structured.sh|`scripts/ai/ai-structured.sh`|Structured output helper for deterministic AI workflow data.|
-|`ai-script`|ai-task.sh|`scripts/ai/ai-task.sh`|Task-oriented AI workflow helper for routing, context, and verification steps.|
-|`ai-script`|ai-test-select.sh|`scripts/ai/ai-test-select.sh`|Selects likely relevant tests from changed files and task context.|
-|`ai-script`|ai-verify.sh|`scripts/ai/ai-verify.sh`|Project-aware verification gate for AI-driven changes across shell, PHP, JS/TS, and security checks.|
 |`ai-script`|common.sh|`scripts/ai/common.sh`|Shared helper library for AI workflow scripts, logging, snapshots, and token-budget checks.|
-|`ai-script`|fd-files.sh|`scripts/ai/fd-files.sh`|Repo-aware file discovery wrapper around fd/fdfind with rg fallback and safer defaults.|
-|`ai-script`|gh-pr-context.sh|`scripts/ai/gh-pr-context.sh`|GitHub PR context wrapper with metadata, diff, checks, reviews, and optional PR-scoped context packing.|
-|`ai-script`|git-forensics.sh|`scripts/ai/git-forensics.sh`|Git history and blame wrapper for evidence-oriented code archaeology.|
 |`ai-script`|install-mandatory-tools.sh|`scripts/ai/install-mandatory-tools.sh`|Installs mandatory CLI tools required by the AI workflow script layer.|
-|`ai-script`|pack-context.sh|`scripts/ai/pack-context.sh`|Builds bounded repository context packs for AI task execution.|
 |`ai-script`|post-tool-use.sh|`scripts/ai/post-tool-use.sh`|Post-tool hook helper for tool usage logging and failure classification.|
 |`ai-script`|pre-tool-use.sh|`scripts/ai/pre-tool-use.sh`|Pre-tool hook helper for approval boundaries and command policy enforcement.|
-|`ai-script`|preview-file.sh|`scripts/ai/preview-file.sh`|Smart file preview wrapper with text and fallback modes.|
-|`ai-script`|query-usage.sh|`scripts/ai/query-usage.sh`|Usage and repository-size query helper for AI context planning.|
-|`ai-script`|repo-tool-inventory.sh|`scripts/ai/repo-tool-inventory.sh`|Generates the required tool inventory from scripts and workflow requirements.|
-|`ai-script`|repomix-context-tree.sh|`scripts/ai/repomix-context-tree.sh`|Builds repository tree context for Repomix-based AI context packing.|
-|`ai-script`|repomix-scc-router.sh|`scripts/ai/repomix-scc-router.sh`|Ranked context router that produces TSV and JSON bundle plans with churn-aware scoring.|
-|`ai-script`|rg-code.sh|`scripts/ai/rg-code.sh`|Mode-aware ripgrep wrapper with JSON, file-list, count, and context output modes.|
-|`ai-script`|run-repo-tests.sh|`scripts/ai/run-repo-tests.sh`|Parallel-first repository test runner for PHP, shell, Bats, and validators.|
-|`ai-script`|run-repomix-context.sh|`scripts/ai/run-repomix-context.sh`|Runs Repomix context generation with repository-aware defaults.|
-|`ai-script`|session-checkpoint.sh|`scripts/ai/session-checkpoint.sh`|Creates session checkpoints for recovery and traceability.|
-|`ai-script`|watch-loop.sh|`scripts/ai/watch-loop.sh`|Watch-based verification loop with debounce and repo-local session logging.|
 |`capability`|adapter-drift|`docs/ai/capabilities/adapter-drift/CAPABILITY.md`|Check Copilot, OpenCode, and canonical docs for conflicting instructions after adapter changes.|
 |`capability`|agent-observability-and-evidence|`docs/ai/capabilities/agent-observability-and-evidence/CAPABILITY.md`|Capture command evidence, verification results, and handoff context without exposing secrets.|
 |`capability`|authorization-and-tool-governance|`docs/ai/capabilities/authorization-and-tool-governance/CAPABILITY.md`|Use policy gates and approval boundaries before running commands that mutate state or broaden access.|
@@ -108,30 +85,16 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`capability`|review-diff|`docs/ai/capabilities/review-diff/CAPABILITY.md`|Review a change set from the diff first, then expand only as needed to assess correctness, regression risk, policy fit, and missing verification.|
 |`capability`|service-boundary-patterns|`docs/ai/capabilities/service-boundary-patterns/CAPABILITY.md`|Use this capability when a change crosses repository, package, API, adapter, data, or internal tooling boundaries.|
 |`capability`|verify-change|`docs/ai/capabilities/verify-change/CAPABILITY.md`|Choose and run the smallest relevant verification flow for a change, then report evidence clearly.|
-|`claude-agent`|agent-creator-runtime-guardian|`.claude/agents/agent-creator-runtime-guardian.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator|
-|`claude-agent`|agent-creator-semantic-verifier|`.claude/agents/agent-creator-semantic-verifier.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator|
-|`claude-agent`|agent-creator-static-validator|`.claude/agents/agent-creator-static-validator.md`|Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors|
-|`claude-agent`|agent-creator-supervisor|`.claude/agents/agent-creator-supervisor.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
-|`claude-agent`|agent-creator|`.claude/agents/agent-creator.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
-|`claude-agent`|agent-critic|`.claude/agents/agent-critic.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
-|`claude-agent`|agent-fleet-assessor|`.claude/agents/agent-fleet-assessor.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
+|`claude-agent`|agent-definition-reviewer|`.claude/agents/agent-definition-reviewer.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
+|`claude-agent`|agent-factory|`.claude/agents/agent-factory.md`|Use to create or materially change an agent definition in awesome-ai-utmostcreator — decides reuse vs. create, produces a strict AgentSpec, runs deterministic static validation, checks semantic fit and runtime guardrails, and holds for human approval. Produces specs, never runs the created agent.|
 |`claude-agent`|architect|`.claude/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
-|`claude-agent`|architecture-plan-writer|`.claude/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
-|`claude-agent`|bugfix|`.claude/agents/bugfix.md`|Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal|
-|`claude-agent`|build-config|`.claude/agents/build-config.md`|Update build, packaging, or verification configuration in awesome-ai-utmostcreator|
-|`claude-agent`|config-maintainer|`.claude/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
-|`claude-agent`|docs|`.claude/agents/docs.md`|Update or align documentation after implementation changes in awesome-ai-utmostcreator|
+|`claude-agent`|configuration-maintainer|`.claude/agents/configuration-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
+|`claude-agent`|fleet-assessor|`.claude/agents/fleet-assessor.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`claude-agent`|implementer|`.claude/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
-|`claude-agent`|infra-auditor|`.claude/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator|
-|`claude-agent`|post-install|`.claude/agents/post-install.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
-|`claude-agent`|refactorer|`.claude/agents/refactorer.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
+|`claude-agent`|plan-writer|`.claude/agents/plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`claude-agent`|release-auditor|`.claude/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
-|`claude-agent`|repository-researcher|`.claude/agents/repository-researcher.md`|Strict script-first repository researcher using ai-search before raw search|
-|`claude-agent`|repository-reviewer|`.claude/agents/repository-reviewer.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`claude-agent`|researcher|`.claude/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`claude-agent`|reviewer|`.claude/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
-|`claude-agent`|upgrade|`.claude/agents/upgrade.md`|Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in awesome-ai-utmostcreator|
-|`claude-agent`|workflow-auditor|`.claude/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`claude-command`|install|`.claude/commands/install.md`|Guided install of the AI workflow kit into a target project, asking for missing parameters|
 |`claude-command`|post-install-setup|`.claude/commands/post-install-setup.md`|Guided post-install setup for installed projects|
 |`claude-command`|search-evidence|`.claude/commands/search-evidence.md`|Collect script-first repository evidence using ai-search|
@@ -165,30 +128,16 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`exporter`|export-ai-universal-rules|`tools/ai/export-ai-universal-rules.php`|Builds starter-profile release bundles under dist/.|
 |`exporter`|export-install-bundle|`tools/ai/export-install-bundle.php`|Vendors a standalone, offline-runnable copy of the installer into a specified path.|
 |`generator`|generate-ai-catalog|`tools/ai/generate-ai-catalog.php`|Generates catalog docs, catalog JSON, and llms.txt.|
-|`github-copilot-agent`|Agent Creator Runtime Guardian|`.github/agents/agent-creator-runtime-guardian.agent.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator|
-|`github-copilot-agent`|Agent Creator Semantic Verifier|`.github/agents/agent-creator-semantic-verifier.agent.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator|
-|`github-copilot-agent`|Agent Creator Static Validator|`.github/agents/agent-creator-static-validator.agent.md`|Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors|
-|`github-copilot-agent`|Agent Creator Supervisor|`.github/agents/agent-creator-supervisor.agent.md`|Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
-|`github-copilot-agent`|Agent Creator|`.github/agents/agent-creator.agent.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly|
-|`github-copilot-agent`|Agent Critic|`.github/agents/agent-critic.agent.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
-|`github-copilot-agent`|Agent Fleet Assessor|`.github/agents/agent-fleet-assessor.agent.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
+|`github-copilot-agent`|Agent Definition Reviewer|`.github/agents/agent-definition-reviewer.agent.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
+|`github-copilot-agent`|Agent Factory|`.github/agents/agent-factory.agent.md`|Use to create or materially change an agent definition in awesome-ai-utmostcreator — decides reuse vs. create, produces a strict AgentSpec, runs deterministic static validation, checks semantic fit and runtime guardrails, and holds for human approval. Produces specs, never runs the created agent.|
 |`github-copilot-agent`|Architect|`.github/agents/architect.agent.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
-|`github-copilot-agent`|Architecture Plan Writer|`.github/agents/architecture-plan-writer.agent.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
-|`github-copilot-agent`|Bugfix|`.github/agents/bugfix.agent.md`|Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal|
-|`github-copilot-agent`|Build Config|`.github/agents/build-config.agent.md`|Update build, packaging, or verification configuration in awesome-ai-utmostcreator|
-|`github-copilot-agent`|Config Maintainer|`.github/agents/config-maintainer.agent.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
-|`github-copilot-agent`|Docs|`.github/agents/docs.agent.md`|Update or align documentation after implementation changes in awesome-ai-utmostcreator|
+|`github-copilot-agent`|Configuration Maintainer|`.github/agents/configuration-maintainer.agent.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
+|`github-copilot-agent`|Fleet Assessor|`.github/agents/fleet-assessor.agent.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`github-copilot-agent`|Implementer|`.github/agents/implementer.agent.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
-|`github-copilot-agent`|Infra Auditor|`.github/agents/infra-auditor.agent.md`|Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator|
-|`github-copilot-agent`|Post Install|`.github/agents/post-install.agent.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
-|`github-copilot-agent`|Refactorer|`.github/agents/refactorer.agent.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
+|`github-copilot-agent`|Plan Writer|`.github/agents/plan-writer.agent.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`github-copilot-agent`|Release Auditor|`.github/agents/release-auditor.agent.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
-|`github-copilot-agent`|Repository Researcher|`.github/agents/repository-researcher.agent.md`|Strict script-first repository researcher using ai-search before raw search|
-|`github-copilot-agent`|Repository Reviewer|`.github/agents/repository-reviewer.agent.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`github-copilot-agent`|Researcher|`.github/agents/researcher.agent.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`github-copilot-agent`|Reviewer|`.github/agents/reviewer.agent.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
-|`github-copilot-agent`|Upgrade|`.github/agents/upgrade.agent.md`|Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in awesome-ai-utmostcreator|
-|`github-copilot-agent`|Workflow Auditor|`.github/agents/workflow-auditor.agent.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`github-copilot-instruction`|ai-file-standards|`.github/instructions/ai-file-standards.instructions.md`|AI workflow file roles, line budgets, duplication rules, and adapter boundaries|
 |`github-copilot-instruction`|ai-scripts|`.github/instructions/ai-scripts.instructions.md`|AI script registry consistency and risk-based execution rules|
 |`github-copilot-instruction`|ai-search|`.github/instructions/ai-search.instructions.md`|applyTo: "scripts/ai/**,tests/scripts/ai/**,docs/ai/tools/**"|
@@ -211,12 +160,20 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-instruction`|targets|`.github/instructions/targets.instructions.md`|Target, runtime, platform, adapter, and deployment-surface adaptation guidance|
 |`github-copilot-instruction`|testing|`.github/instructions/testing.instructions.md`|Testing, verification ladder, regression coverage, and deterministic proof rules|
 |`github-copilot-instruction`|tools|`.github/instructions/tools.instructions.md`|Tool selection and script enforcement — use rg/fd/approved scripts; never use bare grep/find|
+|`github-copilot-prompt`|agent-definition-review|`.github/prompts/agent-definition-review.prompt.md`|Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes|
+|`github-copilot-prompt`|agent-semantic-verification|`.github/prompts/agent-semantic-verification.prompt.md`|Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered.|
 |`github-copilot-prompt`|architecture-plan|`.github/prompts/architecture-plan.prompt.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`github-copilot-prompt`|bug-regression|`.github/prompts/bug-regression.prompt.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
+|`github-copilot-prompt`|build-configuration|`.github/prompts/build-configuration.prompt.md`|Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable|
+|`github-copilot-prompt`|config-change-safety|`.github/prompts/config-change-safety.prompt.md`|Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification.|
 |`github-copilot-prompt`|dependency-upgrade|`.github/prompts/dependency-upgrade.prompt.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`github-copilot-prompt`|docs-sync|`.github/prompts/docs-sync.prompt.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`github-copilot-prompt`|evidence-first-execution|`.github/prompts/evidence-first-execution.prompt.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`github-copilot-prompt`|fleet-assessment|`.github/prompts/fleet-assessment.prompt.md`|Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities|
 |`github-copilot-prompt`|generate-permissions|`.github/prompts/generate-permissions.prompt.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
+|`github-copilot-prompt`|handoff-contract|`.github/prompts/handoff-contract.prompt.md`|Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring|
+|`github-copilot-prompt`|handoff|`.github/prompts/handoff.prompt.md`|Transfer control to the next agent via the edgeless handoff contract|
+|`github-copilot-prompt`|infra-risk-audit|`.github/prompts/infra-risk-audit.prompt.md`|Use to audit dependency, compatibility, build, and infrastructure risk|
 |`github-copilot-prompt`|install|`.github/prompts/install.prompt.md`|Use to install (or reinstall/refresh) the AI workflow kit into a target project, asking for missing parameters (target path, profile, runtime, project name) before writing anything|
 |`github-copilot-prompt`|mentor-mode|`.github/prompts/mentor-mode.prompt.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-prompt`|new-feature|`.github/prompts/new-feature.prompt.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
@@ -230,19 +187,30 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-prompt`|repo-investigation|`.github/prompts/repo-investigation.prompt.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`github-copilot-prompt`|review-diff|`.github/prompts/review-diff.prompt.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`github-copilot-prompt`|review-search-tool|`.github/prompts/review-search-tool.prompt.md`|Review ai-search implementation and contract safety|
+|`github-copilot-prompt`|runtime-guardrail-design|`.github/prompts/runtime-guardrail-design.prompt.md`|Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails.|
+|`github-copilot-prompt`|safe-refactor|`.github/prompts/safe-refactor.prompt.md`|Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks|
 |`github-copilot-prompt`|scan-stack|`.github/prompts/scan-stack.prompt.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`github-copilot-prompt`|script-inventory|`.github/prompts/script-inventory.prompt.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-prompt`|search-evidence|`.github/prompts/search-evidence.prompt.md`|Collect repository evidence using ai-search|
 |`github-copilot-prompt`|verify-change|`.github/prompts/verify-change.prompt.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
+|`github-copilot-prompt`|workflow-drift-audit|`.github/prompts/workflow-drift-audit.prompt.md`|Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims|
+|`github-copilot-skill`|agent-definition-review|`.github/skills/agent-definition-review/SKILL.md`|Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes|
+|`github-copilot-skill`|agent-semantic-verification|`.github/skills/agent-semantic-verification/SKILL.md`|Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered.|
 |`github-copilot-skill`|ai-scripts|`.github/skills/ai-scripts/SKILL.md`|Use registered scripts with risk-based approvals and evidence.|
 |`github-copilot-skill`|ai-search|`.github/skills/ai-search/SKILL.md`|Use ai-search to collect bounded repository evidence.|
 |`github-copilot-skill`|architecture-plan-writer|`.github/skills/architecture-plan-writer/SKILL.md`|Use when an architect design or a bounded task/ticket must be persisted as a Todo architecture plan markdown file under docs/tickets, strictly scoped to the task with steps, things-to-avoid, and acceptance criteria|
 |`github-copilot-skill`|architecture-plan|`.github/skills/architecture-plan/SKILL.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`github-copilot-skill`|bug-regression|`.github/skills/bug-regression/SKILL.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
+|`github-copilot-skill`|build-configuration|`.github/skills/build-configuration/SKILL.md`|Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable|
+|`github-copilot-skill`|config-change-safety|`.github/skills/config-change-safety/SKILL.md`|Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification.|
 |`github-copilot-skill`|dependency-upgrade|`.github/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`github-copilot-skill`|docs-sync|`.github/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`github-copilot-skill`|evidence-first-execution|`.github/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`github-copilot-skill`|fleet-assessment|`.github/skills/fleet-assessment/SKILL.md`|Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities|
 |`github-copilot-skill`|generate-permissions|`.github/skills/generate-permissions/SKILL.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
+|`github-copilot-skill`|handoff-contract|`.github/skills/handoff-contract/SKILL.md`|Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring|
+|`github-copilot-skill`|handoff|`.github/skills/handoff/SKILL.md`|Transfer control to the next agent with a validated, contract-bearing handoff instead of a prose recommendation|
+|`github-copilot-skill`|infra-risk-audit|`.github/skills/infra-risk-audit/SKILL.md`|Use to audit dependency, compatibility, build, and infrastructure risk|
 |`github-copilot-skill`|mentor-mode|`.github/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`github-copilot-skill`|new-feature|`.github/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`github-copilot-skill`|plan-slice|`.github/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -255,26 +223,25 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-skill`|repo-investigation|`.github/skills/repo-investigation/SKILL.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`github-copilot-skill`|review-diff|`.github/skills/review-diff/SKILL.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`github-copilot-skill`|review-search-tool|`.github/skills/review-search-tool/SKILL.md`|Review ai-search implementation and contract safety|
+|`github-copilot-skill`|runtime-guardrail-design|`.github/skills/runtime-guardrail-design/SKILL.md`|Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails.|
+|`github-copilot-skill`|safe-refactor|`.github/skills/safe-refactor/SKILL.md`|Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks|
 |`github-copilot-skill`|scan-stack|`.github/skills/scan-stack/SKILL.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`github-copilot-skill`|script-inventory|`.github/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
 |`github-copilot-skill`|search-evidence|`.github/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`github-copilot-skill`|verify-change|`.github/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
-|`opencode-agent`|agent-critic|`.opencode/agents/agent-critic.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
-|`opencode-agent`|agent-fleet-assessor|`.opencode/agents/agent-fleet-assessor.md`|Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
+|`github-copilot-skill`|workflow-drift-audit|`.github/skills/workflow-drift-audit/SKILL.md`|Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims|
+|`opencode-agent`|agent-definition-reviewer|`.opencode/agents/agent-definition-reviewer.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
+|`opencode-agent`|agent-factory|`.opencode/agents/agent-factory.md`|Use to create or materially change an agent definition in <PROJECT_NAME> — decides reuse vs. create, produces a strict AgentSpec, runs deterministic static validation, checks semantic fit and runtime guardrails, and holds for human approval. Produces specs, never runs the created agent.|
 |`opencode-agent`|architect|`.opencode/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
-|`opencode-agent`|architecture-plan-writer|`.opencode/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
-|`opencode-agent`|bootstrapper|`.opencode/agents/bootstrapper.md`|INTERNAL — use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects.|
-|`opencode-agent`|config-maintainer|`.opencode/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
+|`opencode-agent`|bootstrapper|`.opencode/agents/bootstrapper.md`|Use when installing, re-installing, or validating the AI kit from dry-run to backup to apply to full verification|
+|`opencode-agent`|configuration-maintainer|`.opencode/agents/configuration-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
+|`opencode-agent`|fleet-assessor|`.opencode/agents/fleet-assessor.md`|Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`opencode-agent`|implementer|`.opencode/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
-|`opencode-agent`|post-install|`.opencode/agents/post-install.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
-|`opencode-agent`|refactorer|`.opencode/agents/refactorer.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
+|`opencode-agent`|plan-writer|`.opencode/agents/plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`opencode-agent`|release-auditor|`.opencode/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
-|`opencode-agent`|repository-researcher|`.opencode/agents/repository-researcher.md`|Strict script-first repository researcher using ai-search before raw search|
-|`opencode-agent`|repository-reviewer|`.opencode/agents/repository-reviewer.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`opencode-agent`|researcher|`.opencode/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`opencode-agent`|reviewer|`.opencode/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
 |`opencode-agent`|script-runner|`.opencode/agents/script-runner.md`|Use when work should run ONLY this repository's registered scripts/ai/*.sh wrappers (read/analysis allowed, mutating ones gated by ask) and every other bash command, file edit, and external action is blocked|
-|`opencode-agent`|workflow-auditor|`.opencode/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`opencode-command`|architecture-plan|`.opencode/commands/architecture-plan.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`opencode-command`|bug-regression|`.opencode/commands/bug-regression.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
 |`opencode-command`|dependency-upgrade|`.opencode/commands/dependency-upgrade.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
@@ -364,18 +331,14 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`core-template`|CLAUDE.md|`packages/ai-universal-rules/templates/core/CLAUDE.template.md`|<!-- GENERATED — DO NOT EDIT: rendered by ai-kit installer from packages/ai-universal-rules/templates/core/CLAUDE.template.md. Edit the template or .ai/project.yml, not this file. -->|
 |`core-template`|Post-Install Checklist|`packages/ai-universal-rules/templates/core/POST-INSTALL.template.md`|Your AI workflow kit was installed successfully. **Complete every item below before running write-capable AI agents.**|
 |`core-template`|Architect Agent|`packages/ai-universal-rules/templates/core/agents/architect.md`|Use when a change needs scoping, design, ownership decisions, contract boundaries, adapter strategy, or risk posture before implementation|
-|`core-template`|Architecture Plan Writer Agent|`packages/ai-universal-rules/templates/core/agents/architecture-plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`core-template`|Bootstrapper Agent|`packages/ai-universal-rules/templates/core/agents/bootstrapper.md`|Use when installing, re-installing, or validating the AI kit from dry-run to backup to apply to full verification|
-|`core-template`|Config Maintainer Agent|`packages/ai-universal-rules/templates/core/agents/config-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
+|`core-template`|Configuration Maintainer Agent|`packages/ai-universal-rules/templates/core/agents/configuration-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`core-template`|Implementer Agent|`packages/ai-universal-rules/templates/core/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
-|`core-template`|POST-Install Agent|`packages/ai-universal-rules/templates/core/agents/post-install.md`|Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification|
-|`core-template`|Refactorer Agent|`packages/ai-universal-rules/templates/core/agents/refactorer.md`|Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability|
+|`core-template`|Orchestrator Agent|`packages/ai-universal-rules/templates/core/agents/orchestrator.md`|Use to coordinate a multi-step task by routing each stage to the right delivery agent (researcher, architect, plan-writer, implementer, configuration-maintainer, reviewer, release-auditor) through the shared handoff contract, owning loop and failure control. Does not edit, design, or review itself.|
+|`core-template`|Plan Writer Agent|`packages/ai-universal-rules/templates/core/agents/plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`core-template`|Release Auditor Agent|`packages/ai-universal-rules/templates/core/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
-|`core-template`|Repository Researcher|`packages/ai-universal-rules/templates/core/agents/repository-researcher.md`|Strict script-first repository researcher using ai-search before raw search|
-|`core-template`|Repository Reviewer|`packages/ai-universal-rules/templates/core/agents/repository-reviewer.md`|Strict script-first diff reviewer using ai-search and validator evidence|
 |`core-template`|Researcher Agent|`packages/ai-universal-rules/templates/core/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`core-template`|Reviewer Agent|`packages/ai-universal-rules/templates/core/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
-|`core-template`|Workflow Auditor Agent|`packages/ai-universal-rules/templates/core/agents/workflow-auditor.md`|Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims|
 |`core-template`|<PROJECT_NAME> AI File Standards|`packages/ai-universal-rules/templates/core/ai-file-standards.template.md`|Use this file as the installed repository's canonical content and size contract for AI workflow files.|
 |`core-template`|Repository Instructions For <PROJECT_NAME>|`packages/ai-universal-rules/templates/core/copilot-instructions.template.md`|Use these instructions as the repository-wide baseline for GitHub Copilot.|
 |`core-template`|copilot-vscode-settings.template|`packages/ai-universal-rules/templates/core/copilot-vscode-settings.template.json`|{|
@@ -428,19 +391,10 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`operations-doc`|Maintenance|`packages/ai-universal-rules/docs/operations/MAINTENANCE.md`|Treat this package like workflow infrastructure, not throwaway prompts.|
 |`operations-doc`|MCP Boundaries|`packages/ai-universal-rules/docs/operations/MCP-BOUNDARIES.md`|MCP extends capability, but also risk.|
 |`operations-doc`|Troubleshooting|`packages/ai-universal-rules/docs/operations/TROUBLESHOOTING.md`|- unresolved placeholders|
-|`optional-template`|Agent Creator Runtime Guardian|`packages/ai-universal-rules/templates/optional/agents/agent-creator-runtime-guardian.md`|Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in <PROJECT_NAME>|
-|`optional-template`|Agent Creator Semantic Verifier|`packages/ai-universal-rules/templates/optional/agents/agent-creator-semantic-verifier.md`|Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in <PROJECT_NAME>|
-|`optional-template`|Agent Creator Static Validator|`packages/ai-universal-rules/templates/optional/agents/agent-creator-static-validator.md`|Use under the supervisor to run the deterministic AgentSpec static validator for <PROJECT_NAME> and report pass/fail with exact errors|
-|`optional-template`|Agent Creator Supervisor|`packages/ai-universal-rules/templates/optional/agents/agent-creator-supervisor.md`|Use to request a new agent in <PROJECT_NAME>; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility|
-|`optional-template`|Agent Creator|`packages/ai-universal-rules/templates/optional/agents/agent-creator.md`|Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for <PROJECT_NAME>; never emits free-text agents directly|
-|`optional-template`|Agent Critic|`packages/ai-universal-rules/templates/optional/agents/agent-critic.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
-|`optional-template`|Agent Fleet Assessor|`packages/ai-universal-rules/templates/optional/agents/agent-fleet-assessor.md`|Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
-|`optional-template`|bugfix|`packages/ai-universal-rules/templates/optional/agents/bugfix.md`|Use when fixing a bug in <PROJECT_NAME>, reproducing it first when practical, and keeping the fix minimal|
-|`optional-template`|build-config|`packages/ai-universal-rules/templates/optional/agents/build-config.md`|Update build, packaging, or verification configuration in <PROJECT_NAME>|
-|`optional-template`|docs|`packages/ai-universal-rules/templates/optional/agents/docs.md`|Update or align documentation after implementation changes in <PROJECT_NAME>|
-|`optional-template`|infra-auditor|`packages/ai-universal-rules/templates/optional/agents/infra-auditor.md`|Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>|
+|`optional-template`|Agent Definition Reviewer|`packages/ai-universal-rules/templates/optional/agents/agent-definition-reviewer.md`|Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet.|
+|`optional-template`|Agent Factory|`packages/ai-universal-rules/templates/optional/agents/agent-factory.md`|Use to create or materially change an agent definition in <PROJECT_NAME> — decides reuse vs. create, produces a strict AgentSpec, runs deterministic static validation, checks semantic fit and runtime guardrails, and holds for human approval. Produces specs, never runs the created agent.|
+|`optional-template`|Fleet Assessor|`packages/ai-universal-rules/templates/optional/agents/fleet-assessor.md`|Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`optional-template`|ui-builder|`packages/ai-universal-rules/templates/optional/agents/ui-builder.md`|UI builder for <PROJECT_NAME>. Builds UI changes that follow existing product patterns and accessibility expectations.|
-|`optional-template`|upgrade|`packages/ai-universal-rules/templates/optional/agents/upgrade.md`|Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in <PROJECT_NAME>|
 |`optional-template`|Optional Delivery Pack|`packages/ai-universal-rules/templates/optional/delivery/README.md`|Use this pack when you want a lightweight slice card for non-trivial work.|
 |`optional-template`|Slice Card|`packages/ai-universal-rules/templates/optional/delivery/slice-card.template.md`|- User outcome:|
 |`package-capability`|Capability Templates|`packages/ai-universal-rules/templates/capabilities/README.md`|These folders are the canonical reusable workflow units in this kit.|
@@ -496,12 +450,20 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-doc`|Runtime Observability|`packages/ai-universal-rules/docs/workflows/RUNTIME-OBSERVABILITY.md`|Do not only ask whether files exist. Ask what actually loaded.|
 |`workflow-doc`|System Workflow|`packages/ai-universal-rules/docs/workflows/SYSTEM-WORKFLOW.md`|Use this document as the end-to-end operating model for the kit.|
 |`workflow-doc`|Task Entrypoints|`packages/ai-universal-rules/docs/workflows/TASK-ENTRYPOINTS.md`|This document explains when to use each mechanism.|
+|`workflow-template`|agent-definition-review|`packages/ai-universal-rules/templates/workflows/agent-definition-review.md`|Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes|
+|`workflow-template`|agent-semantic-verification|`packages/ai-universal-rules/templates/workflows/agent-semantic-verification.md`|Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered.|
 |`workflow-template`|architecture-plan|`packages/ai-universal-rules/templates/workflows/architecture-plan.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`workflow-template`|bug-regression|`packages/ai-universal-rules/templates/workflows/bug-regression.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
+|`workflow-template`|build-configuration|`packages/ai-universal-rules/templates/workflows/build-configuration.md`|Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable|
+|`workflow-template`|config-change-safety|`packages/ai-universal-rules/templates/workflows/config-change-safety.md`|Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification.|
 |`workflow-template`|dependency-upgrade|`packages/ai-universal-rules/templates/workflows/dependency-upgrade.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`workflow-template`|docs-sync|`packages/ai-universal-rules/templates/workflows/docs-sync.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`workflow-template`|evidence-first-execution|`packages/ai-universal-rules/templates/workflows/evidence-first-execution.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
+|`workflow-template`|fleet-assessment|`packages/ai-universal-rules/templates/workflows/fleet-assessment.md`|Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities|
 |`workflow-template`|generate-permissions|`packages/ai-universal-rules/templates/workflows/generate-permissions.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
+|`workflow-template`|handoff-contract|`packages/ai-universal-rules/templates/workflows/handoff-contract.md`|Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring|
+|`workflow-template`|handoff|`packages/ai-universal-rules/templates/workflows/handoff.md`|Transfer control to the next agent with a validated, contract-bearing handoff instead of a prose recommendation|
+|`workflow-template`|infra-risk-audit|`packages/ai-universal-rules/templates/workflows/infra-risk-audit.md`|Use to audit dependency, compatibility, build, and infrastructure risk|
 |`workflow-template`|install|`packages/ai-universal-rules/templates/workflows/install.md`|Use to install (or reinstall/refresh) the AI workflow kit into a target project, asking for missing parameters (target path, profile, runtime, project name) before writing anything|
 |`workflow-template`|mentor-mode|`packages/ai-universal-rules/templates/workflows/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`workflow-template`|new-feature|`packages/ai-universal-rules/templates/workflows/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
@@ -515,10 +477,13 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`workflow-template`|repo-investigation|`packages/ai-universal-rules/templates/workflows/repo-investigation.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`workflow-template`|review-diff|`packages/ai-universal-rules/templates/workflows/review-diff.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`workflow-template`|review-search-tool|`packages/ai-universal-rules/templates/workflows/review-search-tool.md`|Review ai-search implementation and contract safety|
+|`workflow-template`|runtime-guardrail-design|`packages/ai-universal-rules/templates/workflows/runtime-guardrail-design.md`|Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails.|
+|`workflow-template`|safe-refactor|`packages/ai-universal-rules/templates/workflows/safe-refactor.md`|Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks|
 |`workflow-template`|scan-stack|`packages/ai-universal-rules/templates/workflows/scan-stack.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`workflow-template`|script-inventory|`packages/ai-universal-rules/templates/workflows/script-inventory.md`|Build AI script inventory with risk and parity checks|
 |`workflow-template`|search-evidence|`packages/ai-universal-rules/templates/workflows/search-evidence.md`|Collect repository evidence using ai-search|
 |`workflow-template`|verify-change|`packages/ai-universal-rules/templates/workflows/verify-change.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
+|`workflow-template`|workflow-drift-audit|`packages/ai-universal-rules/templates/workflows/workflow-drift-audit.md`|Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims|
 
 ## Starter Profiles
 

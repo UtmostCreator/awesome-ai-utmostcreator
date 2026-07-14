@@ -1,6 +1,6 @@
-# awesome-ai-utmostcreator AI File Standards
+# AI File Standards
 
-Use this file as the installed repository's canonical content and size contract for AI workflow files.
+Use this file as the canonical content and size contract for AI workflow files in this repository and in installed target repositories.
 
 ## Purpose
 
@@ -51,20 +51,17 @@ Generated outputs are excluded from line limits, but must not be manually edited
 | Root `AGENTS.md` | 60-120 | 180 | 250 |
 | `.github/copilot-instructions.md` | 40-100 | 150 | 220 |
 | `.github/instructions/*.instructions.md` | 40-90 | 140 | 180 |
-| `.github/agents/*.agent.md` | 80-160 | 220 | 300 |
+| `.github/agents/*.agent.md` | 80-160 | 320 | 360 |
+| Claude agents | 80-170 | 320 | 360 |
 | `.github/prompts/*.prompt.md` | 30-80 | 120 | 160 |
 | `.github/skills/*/SKILL.md` | 80-180 | 250 | 350 |
-| `.opencode/agents/*.md` | 80-170 | 240 | 320 |
+| `.opencode/agents/*.md` | 80-170 | 320 | 360 |
 | `.opencode/commands/*.md` | 15-50 | 80 | 120 |
-| `.claude/agents/*.md` | 80-170 | 240 | 320 |
-| `.claude/skills/*/SKILL.md` | 80-180 | 250 | 350 |
-| `.claude/commands/*.md` | 15-50 | 80 | 120 |
-| `CLAUDE.md` | 40-90 | 140 | 180 |
 | `.opencode/skills/*/SKILL.md` | 80-180 | 250 | 350 |
 | Root `AGENTS.md` template | 60-120 | 180 | 250 |
 | `.github/copilot-instructions.md` template | 40-100 | 150 | 220 |
 | Instruction templates | 40-90 | 140 | 180 |
-| Agent templates | 80-170 | 240 | 320 |
+| Agent templates | 80-170 | 320 | 360 |
 | Workflow templates | 30-80 | 120 | 160 |
 | Command templates | 15-50 | 80 | 120 |
 | `CAPABILITY.md` | 120-220 | 300 | 400 |

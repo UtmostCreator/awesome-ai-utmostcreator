@@ -277,7 +277,7 @@ foreach (glob($root . '/packages/ai-universal-rules/templates/core/agents/*.md')
     }
     $mode = frontmatterField($agentContent, 'mode');
     $agentName = pathinfo($agentFile, PATHINFO_FILENAME);
-    $expectedMode = in_array($agentName, ['architect', 'implementer', 'reviewer'], true) ? 'all' : 'subagent';
+    $expectedMode = in_array($agentName, ['architect', 'implementer', 'reviewer', 'orchestrator'], true) ? 'all' : 'subagent';
     if ($mode !== $expectedMode) {
         $errors[] = relativePath($root, $agentFile) . " must set frontmatter mode: {$expectedMode}";
     }
@@ -418,6 +418,7 @@ foreach ($copilotPromptFiles as $promptFile) {
 }
 
 // Enforce installable AI surface hard line limits. Generated outputs are intentionally excluded.
+$infos = [];
 foreach (aiFileLineLimitRules($root, $errors) as $rule) {
     foreach (glob((string) $rule['pattern']) ?: [] as $path) {
         if (!is_file($path)) {
@@ -429,6 +430,8 @@ foreach (aiFileLineLimitRules($root, $errors) as $rule) {
             $errors[] = "{$relative} has {$lines} lines, above hard max {$rule['hard']} for {$rule['label']}";
         } elseif ($lines > (int) $rule['soft'] && !isset($rule['warn_allowlist'][$relative])) {
             $warnings[] = "{$relative} has {$lines} lines, above soft max {$rule['soft']} for {$rule['label']}";
+        } elseif ((int) $rule['info'] > 0 && $lines > (int) $rule['info']) {
+            $infos[] = "{$relative} has {$lines} lines, above info threshold {$rule['info']} for {$rule['label']}";
         }
     }
 }
@@ -439,6 +442,9 @@ if (!is_file($toolsInstructionsFile) && is_dir($root . '/.github/instructions'))
     $warnings[] = 'tools.instructions.md is missing from .github/instructions/ — tool enforcement may not be active';
 }
 
+foreach ($infos as $infoMessage) {
+    fwrite(STDOUT, "INFO: {$infoMessage}\n");
+}
 foreach ($warnings as $warning) {
     fwrite(STDOUT, "WARN: {$warning}\n");
 }
@@ -548,6 +554,7 @@ function aiFileLineLimitRules(string $root, array &$errors): array
             continue;
         }
         $label = (string) ($rule['label'] ?? $rule['id'] ?? 'line-limit rule');
+        $info = (int) ($rule['info_above'] ?? 0);
         $soft = (int) ($rule['warn_above'] ?? 0);
         $hard = (int) ($rule['fail_above'] ?? 0);
         $warnAllowlist = aiFileLineLimitAllowlist($rule, 'warn_allowlist');
@@ -560,6 +567,7 @@ function aiFileLineLimitRules(string $root, array &$errors): array
             $rules[] = [
                 'label' => $label,
                 'pattern' => $root . '/' . ltrim(str_replace('\\', '/', $pattern), '/'),
+                'info' => $info,
                 'soft' => $soft,
                 'hard' => $hard,
                 'warn_allowlist' => $warnAllowlist,

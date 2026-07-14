@@ -76,26 +76,20 @@ class AgentPermissionPolicyTest extends TestCase
         '.opencode/agents/release-auditor.md',
         '.opencode/agents/researcher.md',
         '.opencode/agents/reviewer.md',
-        '.opencode/agents/workflow-auditor.md',
         'packages/ai-universal-rules/templates/core/agents/architect.md',
         'packages/ai-universal-rules/templates/core/agents/release-auditor.md',
         'packages/ai-universal-rules/templates/core/agents/researcher.md',
         'packages/ai-universal-rules/templates/core/agents/reviewer.md',
-        'packages/ai-universal-rules/templates/core/agents/workflow-auditor.md',
     ];
 
     /** @var list<string> */
     private const GIT_MUTATING_AGENT_FILES = [
         '.opencode/agents/bootstrapper.md',
-        '.opencode/agents/config-maintainer.md',
+        '.opencode/agents/configuration-maintainer.md',
         '.opencode/agents/implementer.md',
-        '.opencode/agents/refactorer.md',
-        '.opencode/agents/post-install.md',
         'packages/ai-universal-rules/templates/core/agents/bootstrapper.md',
-        'packages/ai-universal-rules/templates/core/agents/config-maintainer.md',
+        'packages/ai-universal-rules/templates/core/agents/configuration-maintainer.md',
         'packages/ai-universal-rules/templates/core/agents/implementer.md',
-        'packages/ai-universal-rules/templates/core/agents/refactorer.md',
-        'packages/ai-universal-rules/templates/core/agents/post-install.md',
         // super-implementer.md is intentionally NOT listed here: it is gitignored
         // (.gitignore:32 — draft agent held back, `id: implementer` collides with
         // implementer.md's own id) and does not exist in a fresh checkout, so a
@@ -110,20 +104,19 @@ class AgentPermissionPolicyTest extends TestCase
         'packages/ai-universal-rules/templates/core/agents/implementer.md',
     ];
 
-    /** @var list<string> */
-    private const ASK_DEFAULT_AGENTS = [
-        '.opencode/agents/repository-researcher.md',
-        '.opencode/agents/repository-reviewer.md',
-        'packages/ai-universal-rules/templates/core/agents/repository-researcher.md',
-        'packages/ai-universal-rules/templates/core/agents/repository-reviewer.md',
-    ];
+    /**
+     * repository-researcher/repository-reviewer were retired
+     * (agent-handoff-governance-20260714, Phase 5a); no shipped agent currently
+     * defaults its bash `*` fallback to `ask`.
+     *
+     * @var list<string>
+     */
+    private const ASK_DEFAULT_AGENTS = [];
 
     /** @var list<string> */
     private const REVIEWER_AGENT_FILES = [
         '.opencode/agents/reviewer.md',
-        '.opencode/agents/repository-reviewer.md',
         'packages/ai-universal-rules/templates/core/agents/reviewer.md',
-        'packages/ai-universal-rules/templates/core/agents/repository-reviewer.md',
     ];
 
     /** @var list<string> */

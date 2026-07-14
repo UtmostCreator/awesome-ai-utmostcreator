@@ -37,33 +37,33 @@
         ]
     },
     "counts": {
-        "package:core-template": 29,
+        "package:core-template": 25,
         "package:foundation-doc": 6,
         "package:github-copilot-instruction-template": 22,
         "package:opencode-command-template": 5,
         "package:operations-doc": 6,
-        "package:optional-template": 15,
+        "package:optional-template": 6,
         "package:package-capability": 43,
         "package:shared-template": 4,
         "package:workflow-doc": 6,
-        "package:workflow-template": 23,
+        "package:workflow-template": 34,
         "root:adapter-doc": 1,
         "root:adapter-hook": 2,
         "root:adapter-hook-script": 1,
         "root:adapter-policy": 1,
-        "root:ai-script": 27,
+        "root:ai-script": 4,
         "root:capability": 17,
-        "root:claude-agent": 24,
+        "root:claude-agent": 10,
         "root:claude-command": 5,
         "root:claude-skill": 24,
         "root:cli": 1,
         "root:exporter": 2,
         "root:generator": 1,
-        "root:github-copilot-agent": 24,
+        "root:github-copilot-agent": 10,
         "root:github-copilot-instruction": 22,
-        "root:github-copilot-prompt": 23,
-        "root:github-copilot-skill": 25,
-        "root:opencode-agent": 16,
+        "root:github-copilot-prompt": 34,
+        "root:github-copilot-skill": 36,
+        "root:opencode-agent": 12,
         "root:opencode-command": 25,
         "root:opencode-skill": 26,
         "root:php-reference": 3,
@@ -108,14 +108,6 @@
         {
             "scope": "package",
             "type": "core-template",
-            "name": "Architecture Plan Writer Agent",
-            "path": "packages/ai-universal-rules/templates/core/agents/architecture-plan-writer.md",
-            "runtime": "canonical",
-            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
-        },
-        {
-            "scope": "package",
-            "type": "core-template",
             "name": "Bootstrapper Agent",
             "path": "packages/ai-universal-rules/templates/core/agents/bootstrapper.md",
             "runtime": "canonical",
@@ -124,8 +116,8 @@
         {
             "scope": "package",
             "type": "core-template",
-            "name": "Config Maintainer Agent",
-            "path": "packages/ai-universal-rules/templates/core/agents/config-maintainer.md",
+            "name": "Configuration Maintainer Agent",
+            "path": "packages/ai-universal-rules/templates/core/agents/configuration-maintainer.md",
             "runtime": "canonical",
             "description": "Use when changing editor, shell, runtime, or tool configuration while preserving current behavior"
         },
@@ -140,18 +132,18 @@
         {
             "scope": "package",
             "type": "core-template",
-            "name": "POST-Install Agent",
-            "path": "packages/ai-universal-rules/templates/core/agents/post-install.md",
+            "name": "Orchestrator Agent",
+            "path": "packages/ai-universal-rules/templates/core/agents/orchestrator.md",
             "runtime": "canonical",
-            "description": "Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification"
+            "description": "Use to coordinate a multi-step task by routing each stage to the right delivery agent (researcher, architect, plan-writer, implementer, configuration-maintainer, reviewer, release-auditor) through the shared handoff contract, owning loop and failure control. Does not edit, design, or review itself."
         },
         {
             "scope": "package",
             "type": "core-template",
-            "name": "Refactorer Agent",
-            "path": "packages/ai-universal-rules/templates/core/agents/refactorer.md",
+            "name": "Plan Writer Agent",
+            "path": "packages/ai-universal-rules/templates/core/agents/plan-writer.md",
             "runtime": "canonical",
-            "description": "Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability"
+            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
         },
         {
             "scope": "package",
@@ -160,22 +152,6 @@
             "path": "packages/ai-universal-rules/templates/core/agents/release-auditor.md",
             "runtime": "canonical",
             "description": "Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review"
-        },
-        {
-            "scope": "package",
-            "type": "core-template",
-            "name": "Repository Researcher",
-            "path": "packages/ai-universal-rules/templates/core/agents/repository-researcher.md",
-            "runtime": "canonical",
-            "description": "Strict script-first repository researcher using ai-search before raw search"
-        },
-        {
-            "scope": "package",
-            "type": "core-template",
-            "name": "Repository Reviewer",
-            "path": "packages/ai-universal-rules/templates/core/agents/repository-reviewer.md",
-            "runtime": "canonical",
-            "description": "Strict script-first diff reviewer using ai-search and validator evidence"
         },
         {
             "scope": "package",
@@ -192,14 +168,6 @@
             "path": "packages/ai-universal-rules/templates/core/agents/reviewer.md",
             "runtime": "canonical",
             "description": "Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification"
-        },
-        {
-            "scope": "package",
-            "type": "core-template",
-            "name": "Workflow Auditor Agent",
-            "path": "packages/ai-universal-rules/templates/core/agents/workflow-auditor.md",
-            "runtime": "canonical",
-            "description": "Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims"
         },
         {
             "scope": "package",
@@ -620,90 +588,26 @@
         {
             "scope": "package",
             "type": "optional-template",
-            "name": "Agent Creator Runtime Guardian",
-            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-runtime-guardian.md",
-            "runtime": "optional",
-            "description": "Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in <PROJECT_NAME>"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "Agent Creator Semantic Verifier",
-            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-semantic-verifier.md",
-            "runtime": "optional",
-            "description": "Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in <PROJECT_NAME>"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "Agent Creator Static Validator",
-            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-static-validator.md",
-            "runtime": "optional",
-            "description": "Use under the supervisor to run the deterministic AgentSpec static validator for <PROJECT_NAME> and report pass/fail with exact errors"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "Agent Creator Supervisor",
-            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator-supervisor.md",
-            "runtime": "optional",
-            "description": "Use to request a new agent in <PROJECT_NAME>; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "Agent Creator",
-            "path": "packages/ai-universal-rules/templates/optional/agents/agent-creator.md",
-            "runtime": "optional",
-            "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for <PROJECT_NAME>; never emits free-text agents directly"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "Agent Critic",
-            "path": "packages/ai-universal-rules/templates/optional/agents/agent-critic.md",
+            "name": "Agent Definition Reviewer",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-definition-reviewer.md",
             "runtime": "optional",
             "description": "Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet."
         },
         {
             "scope": "package",
             "type": "optional-template",
-            "name": "Agent Fleet Assessor",
-            "path": "packages/ai-universal-rules/templates/optional/agents/agent-fleet-assessor.md",
+            "name": "Agent Factory",
+            "path": "packages/ai-universal-rules/templates/optional/agents/agent-factory.md",
             "runtime": "optional",
-            "description": "Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
+            "description": "Use to create or materially change an agent definition in <PROJECT_NAME> \u2014 decides reuse vs. create, produces a strict AgentSpec, runs deterministic static validation, checks semantic fit and runtime guardrails, and holds for human approval. Produces specs, never runs the created agent."
         },
         {
             "scope": "package",
             "type": "optional-template",
-            "name": "bugfix",
-            "path": "packages/ai-universal-rules/templates/optional/agents/bugfix.md",
+            "name": "Fleet Assessor",
+            "path": "packages/ai-universal-rules/templates/optional/agents/fleet-assessor.md",
             "runtime": "optional",
-            "description": "Use when fixing a bug in <PROJECT_NAME>, reproducing it first when practical, and keeping the fix minimal"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "build-config",
-            "path": "packages/ai-universal-rules/templates/optional/agents/build-config.md",
-            "runtime": "optional",
-            "description": "Update build, packaging, or verification configuration in <PROJECT_NAME>"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "docs",
-            "path": "packages/ai-universal-rules/templates/optional/agents/docs.md",
-            "runtime": "optional",
-            "description": "Update or align documentation after implementation changes in <PROJECT_NAME>"
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "infra-auditor",
-            "path": "packages/ai-universal-rules/templates/optional/agents/infra-auditor.md",
-            "runtime": "optional",
-            "description": "Use when auditing dependency, build, release, or compatibility risk in <PROJECT_NAME>"
+            "description": "Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
         },
         {
             "scope": "package",
@@ -712,14 +616,6 @@
             "path": "packages/ai-universal-rules/templates/optional/agents/ui-builder.md",
             "runtime": "optional",
             "description": "UI builder for <PROJECT_NAME>. Builds UI changes that follow existing product patterns and accessibility expectations."
-        },
-        {
-            "scope": "package",
-            "type": "optional-template",
-            "name": "upgrade",
-            "path": "packages/ai-universal-rules/templates/optional/agents/upgrade.md",
-            "runtime": "optional",
-            "description": "Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in <PROJECT_NAME>"
         },
         {
             "scope": "package",
@@ -1164,6 +1060,22 @@
         {
             "scope": "package",
             "type": "workflow-template",
+            "name": "agent-definition-review",
+            "path": "packages/ai-universal-rules/templates/workflows/agent-definition-review.md",
+            "runtime": "dual-runtime",
+            "description": "Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "agent-semantic-verification",
+            "path": "packages/ai-universal-rules/templates/workflows/agent-semantic-verification.md",
+            "runtime": "dual-runtime",
+            "description": "Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered."
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
             "name": "architecture-plan",
             "path": "packages/ai-universal-rules/templates/workflows/architecture-plan.md",
             "runtime": "dual-runtime",
@@ -1176,6 +1088,22 @@
             "path": "packages/ai-universal-rules/templates/workflows/bug-regression.md",
             "runtime": "dual-runtime",
             "description": "Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "build-configuration",
+            "path": "packages/ai-universal-rules/templates/workflows/build-configuration.md",
+            "runtime": "dual-runtime",
+            "description": "Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "config-change-safety",
+            "path": "packages/ai-universal-rules/templates/workflows/config-change-safety.md",
+            "runtime": "dual-runtime",
+            "description": "Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification."
         },
         {
             "scope": "package",
@@ -1204,10 +1132,42 @@
         {
             "scope": "package",
             "type": "workflow-template",
+            "name": "fleet-assessment",
+            "path": "packages/ai-universal-rules/templates/workflows/fleet-assessment.md",
+            "runtime": "dual-runtime",
+            "description": "Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
             "name": "generate-permissions",
             "path": "packages/ai-universal-rules/templates/workflows/generate-permissions.md",
             "runtime": "dual-runtime",
             "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "handoff-contract",
+            "path": "packages/ai-universal-rules/templates/workflows/handoff-contract.md",
+            "runtime": "dual-runtime",
+            "description": "Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "handoff",
+            "path": "packages/ai-universal-rules/templates/workflows/handoff.md",
+            "runtime": "dual-runtime",
+            "description": "Transfer control to the next agent with a validated, contract-bearing handoff instead of a prose recommendation"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "infra-risk-audit",
+            "path": "packages/ai-universal-rules/templates/workflows/infra-risk-audit.md",
+            "runtime": "dual-runtime",
+            "description": "Use to audit dependency, compatibility, build, and infrastructure risk"
         },
         {
             "scope": "package",
@@ -1316,6 +1276,22 @@
         {
             "scope": "package",
             "type": "workflow-template",
+            "name": "runtime-guardrail-design",
+            "path": "packages/ai-universal-rules/templates/workflows/runtime-guardrail-design.md",
+            "runtime": "dual-runtime",
+            "description": "Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails."
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "safe-refactor",
+            "path": "packages/ai-universal-rules/templates/workflows/safe-refactor.md",
+            "runtime": "dual-runtime",
+            "description": "Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
             "name": "scan-stack",
             "path": "packages/ai-universal-rules/templates/workflows/scan-stack.md",
             "runtime": "dual-runtime",
@@ -1344,6 +1320,14 @@
             "path": "packages/ai-universal-rules/templates/workflows/verify-change.md",
             "runtime": "dual-runtime",
             "description": "Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly"
+        },
+        {
+            "scope": "package",
+            "type": "workflow-template",
+            "name": "workflow-drift-audit",
+            "path": "packages/ai-universal-rules/templates/workflows/workflow-drift-audit.md",
+            "runtime": "dual-runtime",
+            "description": "Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims"
         },
         {
             "scope": "root",
@@ -1388,78 +1372,6 @@
         {
             "scope": "root",
             "type": "ai-script",
-            "name": "ai-diff-context.sh",
-            "path": "scripts/ai/ai-diff-context.sh",
-            "runtime": "canonical",
-            "description": "Builds focused diff and change-context packs for AI review and implementation."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "ai-doc-check.sh",
-            "path": "scripts/ai/ai-doc-check.sh",
-            "runtime": "canonical",
-            "description": "Checks AI-facing documentation surfaces for required references and drift."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "ai-edit.sh",
-            "path": "scripts/ai/ai-edit.sh",
-            "runtime": "canonical",
-            "description": "Guarded edit wrapper with snapshots, dry-run behavior, visible diff, and optional verification."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "ai-rollback.sh",
-            "path": "scripts/ai/ai-rollback.sh",
-            "runtime": "canonical",
-            "description": "Rollback helper for explicit recovery work using session snapshots and refs."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "ai-search.sh",
-            "path": "scripts/ai/ai-search.sh",
-            "runtime": "canonical",
-            "description": "Unified search entrypoint for text, file, tracked, all, and structural discovery."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "ai-structured.sh",
-            "path": "scripts/ai/ai-structured.sh",
-            "runtime": "canonical",
-            "description": "Structured output helper for deterministic AI workflow data."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "ai-task.sh",
-            "path": "scripts/ai/ai-task.sh",
-            "runtime": "canonical",
-            "description": "Task-oriented AI workflow helper for routing, context, and verification steps."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "ai-test-select.sh",
-            "path": "scripts/ai/ai-test-select.sh",
-            "runtime": "canonical",
-            "description": "Selects likely relevant tests from changed files and task context."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "ai-verify.sh",
-            "path": "scripts/ai/ai-verify.sh",
-            "runtime": "canonical",
-            "description": "Project-aware verification gate for AI-driven changes across shell, PHP, JS/TS, and security checks."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
             "name": "common.sh",
             "path": "scripts/ai/common.sh",
             "runtime": "canonical",
@@ -1468,42 +1380,10 @@
         {
             "scope": "root",
             "type": "ai-script",
-            "name": "fd-files.sh",
-            "path": "scripts/ai/fd-files.sh",
-            "runtime": "canonical",
-            "description": "Repo-aware file discovery wrapper around fd/fdfind with rg fallback and safer defaults."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "gh-pr-context.sh",
-            "path": "scripts/ai/gh-pr-context.sh",
-            "runtime": "canonical",
-            "description": "GitHub PR context wrapper with metadata, diff, checks, reviews, and optional PR-scoped context packing."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "git-forensics.sh",
-            "path": "scripts/ai/git-forensics.sh",
-            "runtime": "canonical",
-            "description": "Git history and blame wrapper for evidence-oriented code archaeology."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
             "name": "install-mandatory-tools.sh",
             "path": "scripts/ai/install-mandatory-tools.sh",
             "runtime": "canonical",
             "description": "Installs mandatory CLI tools required by the AI workflow script layer."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "pack-context.sh",
-            "path": "scripts/ai/pack-context.sh",
-            "runtime": "canonical",
-            "description": "Builds bounded repository context packs for AI task execution."
         },
         {
             "scope": "root",
@@ -1520,86 +1400,6 @@
             "path": "scripts/ai/pre-tool-use.sh",
             "runtime": "canonical",
             "description": "Pre-tool hook helper for approval boundaries and command policy enforcement."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "preview-file.sh",
-            "path": "scripts/ai/preview-file.sh",
-            "runtime": "canonical",
-            "description": "Smart file preview wrapper with text and fallback modes."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "query-usage.sh",
-            "path": "scripts/ai/query-usage.sh",
-            "runtime": "canonical",
-            "description": "Usage and repository-size query helper for AI context planning."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "repo-tool-inventory.sh",
-            "path": "scripts/ai/repo-tool-inventory.sh",
-            "runtime": "canonical",
-            "description": "Generates the required tool inventory from scripts and workflow requirements."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "repomix-context-tree.sh",
-            "path": "scripts/ai/repomix-context-tree.sh",
-            "runtime": "canonical",
-            "description": "Builds repository tree context for Repomix-based AI context packing."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "repomix-scc-router.sh",
-            "path": "scripts/ai/repomix-scc-router.sh",
-            "runtime": "canonical",
-            "description": "Ranked context router that produces TSV and JSON bundle plans with churn-aware scoring."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "rg-code.sh",
-            "path": "scripts/ai/rg-code.sh",
-            "runtime": "canonical",
-            "description": "Mode-aware ripgrep wrapper with JSON, file-list, count, and context output modes."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "run-repo-tests.sh",
-            "path": "scripts/ai/run-repo-tests.sh",
-            "runtime": "canonical",
-            "description": "Parallel-first repository test runner for PHP, shell, Bats, and validators."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "run-repomix-context.sh",
-            "path": "scripts/ai/run-repomix-context.sh",
-            "runtime": "canonical",
-            "description": "Runs Repomix context generation with repository-aware defaults."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "session-checkpoint.sh",
-            "path": "scripts/ai/session-checkpoint.sh",
-            "runtime": "canonical",
-            "description": "Creates session checkpoints for recovery and traceability."
-        },
-        {
-            "scope": "root",
-            "type": "ai-script",
-            "name": "watch-loop.sh",
-            "path": "scripts/ai/watch-loop.sh",
-            "runtime": "canonical",
-            "description": "Watch-based verification loop with debounce and repo-local session logging."
         },
         {
             "scope": "root",
@@ -1740,58 +1540,18 @@
         {
             "scope": "root",
             "type": "claude-agent",
-            "name": "agent-creator-runtime-guardian",
-            "path": ".claude/agents/agent-creator-runtime-guardian.md",
-            "runtime": "claude",
-            "description": "Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "agent-creator-semantic-verifier",
-            "path": ".claude/agents/agent-creator-semantic-verifier.md",
-            "runtime": "claude",
-            "description": "Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "agent-creator-static-validator",
-            "path": ".claude/agents/agent-creator-static-validator.md",
-            "runtime": "claude",
-            "description": "Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "agent-creator-supervisor",
-            "path": ".claude/agents/agent-creator-supervisor.md",
-            "runtime": "claude",
-            "description": "Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "agent-creator",
-            "path": ".claude/agents/agent-creator.md",
-            "runtime": "claude",
-            "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "agent-critic",
-            "path": ".claude/agents/agent-critic.md",
+            "name": "agent-definition-reviewer",
+            "path": ".claude/agents/agent-definition-reviewer.md",
             "runtime": "claude",
             "description": "Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet."
         },
         {
             "scope": "root",
             "type": "claude-agent",
-            "name": "agent-fleet-assessor",
-            "path": ".claude/agents/agent-fleet-assessor.md",
+            "name": "agent-factory",
+            "path": ".claude/agents/agent-factory.md",
             "runtime": "claude",
-            "description": "Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
+            "description": "Use to create or materially change an agent definition in awesome-ai-utmostcreator \u2014 decides reuse vs. create, produces a strict AgentSpec, runs deterministic static validation, checks semantic fit and runtime guardrails, and holds for human approval. Produces specs, never runs the created agent."
         },
         {
             "scope": "root",
@@ -1804,42 +1564,18 @@
         {
             "scope": "root",
             "type": "claude-agent",
-            "name": "architecture-plan-writer",
-            "path": ".claude/agents/architecture-plan-writer.md",
-            "runtime": "claude",
-            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "bugfix",
-            "path": ".claude/agents/bugfix.md",
-            "runtime": "claude",
-            "description": "Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "build-config",
-            "path": ".claude/agents/build-config.md",
-            "runtime": "claude",
-            "description": "Update build, packaging, or verification configuration in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "config-maintainer",
-            "path": ".claude/agents/config-maintainer.md",
+            "name": "configuration-maintainer",
+            "path": ".claude/agents/configuration-maintainer.md",
             "runtime": "claude",
             "description": "Use when changing editor, shell, runtime, or tool configuration while preserving current behavior"
         },
         {
             "scope": "root",
             "type": "claude-agent",
-            "name": "docs",
-            "path": ".claude/agents/docs.md",
+            "name": "fleet-assessor",
+            "path": ".claude/agents/fleet-assessor.md",
             "runtime": "claude",
-            "description": "Update or align documentation after implementation changes in awesome-ai-utmostcreator"
+            "description": "Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
         },
         {
             "scope": "root",
@@ -1852,26 +1588,10 @@
         {
             "scope": "root",
             "type": "claude-agent",
-            "name": "infra-auditor",
-            "path": ".claude/agents/infra-auditor.md",
+            "name": "plan-writer",
+            "path": ".claude/agents/plan-writer.md",
             "runtime": "claude",
-            "description": "Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "post-install",
-            "path": ".claude/agents/post-install.md",
-            "runtime": "claude",
-            "description": "Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "refactorer",
-            "path": ".claude/agents/refactorer.md",
-            "runtime": "claude",
-            "description": "Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability"
+            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
         },
         {
             "scope": "root",
@@ -1880,22 +1600,6 @@
             "path": ".claude/agents/release-auditor.md",
             "runtime": "claude",
             "description": "Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "repository-researcher",
-            "path": ".claude/agents/repository-researcher.md",
-            "runtime": "claude",
-            "description": "Strict script-first repository researcher using ai-search before raw search"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "repository-reviewer",
-            "path": ".claude/agents/repository-reviewer.md",
-            "runtime": "claude",
-            "description": "Strict script-first diff reviewer using ai-search and validator evidence"
         },
         {
             "scope": "root",
@@ -1912,22 +1616,6 @@
             "path": ".claude/agents/reviewer.md",
             "runtime": "claude",
             "description": "Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "upgrade",
-            "path": ".claude/agents/upgrade.md",
-            "runtime": "claude",
-            "description": "Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "claude-agent",
-            "name": "workflow-auditor",
-            "path": ".claude/agents/workflow-auditor.md",
-            "runtime": "claude",
-            "description": "Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims"
         },
         {
             "scope": "root",
@@ -2196,58 +1884,18 @@
         {
             "scope": "root",
             "type": "github-copilot-agent",
-            "name": "Agent Creator Runtime Guardian",
-            "path": ".github/agents/agent-creator-runtime-guardian.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use under the supervisor to define and enforce input, tool-call, and output guardrails plus stop conditions for an approved agent in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Creator Semantic Verifier",
-            "path": ".github/agents/agent-creator-semantic-verifier.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use under the supervisor to judge whether a statically valid AgentSpec actually matches the user request and is not overpowered in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Creator Static Validator",
-            "path": ".github/agents/agent-creator-static-validator.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use under the supervisor to run the deterministic AgentSpec static validator for awesome-ai-utmostcreator and report pass/fail with exact errors"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Creator Supervisor",
-            "path": ".github/agents/agent-creator-supervisor.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use to request a new agent in awesome-ai-utmostcreator; routes Creator, Static Validator, Semantic Verifier, and runtime guardrails and keeps final responsibility"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Creator",
-            "path": ".github/agents/agent-creator.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use under the supervisor to turn an approved agent brief into a strict AgentSpec JSON for awesome-ai-utmostcreator; never emits free-text agents directly"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Agent Critic",
-            "path": ".github/agents/agent-critic.agent.md",
+            "name": "Agent Definition Reviewer",
+            "path": ".github/agents/agent-definition-reviewer.agent.md",
             "runtime": "github-copilot",
             "description": "Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet."
         },
         {
             "scope": "root",
             "type": "github-copilot-agent",
-            "name": "Agent Fleet Assessor",
-            "path": ".github/agents/agent-fleet-assessor.agent.md",
+            "name": "Agent Factory",
+            "path": ".github/agents/agent-factory.agent.md",
             "runtime": "github-copilot",
-            "description": "Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
+            "description": "Use to create or materially change an agent definition in awesome-ai-utmostcreator \u2014 decides reuse vs. create, produces a strict AgentSpec, runs deterministic static validation, checks semantic fit and runtime guardrails, and holds for human approval. Produces specs, never runs the created agent."
         },
         {
             "scope": "root",
@@ -2260,42 +1908,18 @@
         {
             "scope": "root",
             "type": "github-copilot-agent",
-            "name": "Architecture Plan Writer",
-            "path": ".github/agents/architecture-plan-writer.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Bugfix",
-            "path": ".github/agents/bugfix.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use when fixing a bug in awesome-ai-utmostcreator, reproducing it first when practical, and keeping the fix minimal"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Build Config",
-            "path": ".github/agents/build-config.agent.md",
-            "runtime": "github-copilot",
-            "description": "Update build, packaging, or verification configuration in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Config Maintainer",
-            "path": ".github/agents/config-maintainer.agent.md",
+            "name": "Configuration Maintainer",
+            "path": ".github/agents/configuration-maintainer.agent.md",
             "runtime": "github-copilot",
             "description": "Use when changing editor, shell, runtime, or tool configuration while preserving current behavior"
         },
         {
             "scope": "root",
             "type": "github-copilot-agent",
-            "name": "Docs",
-            "path": ".github/agents/docs.agent.md",
+            "name": "Fleet Assessor",
+            "path": ".github/agents/fleet-assessor.agent.md",
             "runtime": "github-copilot",
-            "description": "Update or align documentation after implementation changes in awesome-ai-utmostcreator"
+            "description": "Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
         },
         {
             "scope": "root",
@@ -2308,26 +1932,10 @@
         {
             "scope": "root",
             "type": "github-copilot-agent",
-            "name": "Infra Auditor",
-            "path": ".github/agents/infra-auditor.agent.md",
+            "name": "Plan Writer",
+            "path": ".github/agents/plan-writer.agent.md",
             "runtime": "github-copilot",
-            "description": "Use when auditing dependency, build, release, or compatibility risk in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Post Install",
-            "path": ".github/agents/post-install.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Refactorer",
-            "path": ".github/agents/refactorer.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability"
+            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
         },
         {
             "scope": "root",
@@ -2336,22 +1944,6 @@
             "path": ".github/agents/release-auditor.agent.md",
             "runtime": "github-copilot",
             "description": "Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Repository Researcher",
-            "path": ".github/agents/repository-researcher.agent.md",
-            "runtime": "github-copilot",
-            "description": "Strict script-first repository researcher using ai-search before raw search"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Repository Reviewer",
-            "path": ".github/agents/repository-reviewer.agent.md",
-            "runtime": "github-copilot",
-            "description": "Strict script-first diff reviewer using ai-search and validator evidence"
         },
         {
             "scope": "root",
@@ -2368,22 +1960,6 @@
             "path": ".github/agents/reviewer.agent.md",
             "runtime": "github-copilot",
             "description": "Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Upgrade",
-            "path": ".github/agents/upgrade.agent.md",
-            "runtime": "github-copilot",
-            "description": "Plan or apply dependency and platform upgrades with explicit compatibility and rollback checks in awesome-ai-utmostcreator"
-        },
-        {
-            "scope": "root",
-            "type": "github-copilot-agent",
-            "name": "Workflow Auditor",
-            "path": ".github/agents/workflow-auditor.agent.md",
-            "runtime": "github-copilot",
-            "description": "Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims"
         },
         {
             "scope": "root",
@@ -2564,6 +2140,22 @@
         {
             "scope": "root",
             "type": "github-copilot-prompt",
+            "name": "agent-definition-review",
+            "path": ".github/prompts/agent-definition-review.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "agent-semantic-verification",
+            "path": ".github/prompts/agent-semantic-verification.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
             "name": "architecture-plan",
             "path": ".github/prompts/architecture-plan.prompt.md",
             "runtime": "github-copilot",
@@ -2576,6 +2168,22 @@
             "path": ".github/prompts/bug-regression.prompt.md",
             "runtime": "github-copilot",
             "description": "Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "build-configuration",
+            "path": ".github/prompts/build-configuration.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "config-change-safety",
+            "path": ".github/prompts/config-change-safety.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification."
         },
         {
             "scope": "root",
@@ -2604,10 +2212,42 @@
         {
             "scope": "root",
             "type": "github-copilot-prompt",
+            "name": "fleet-assessment",
+            "path": ".github/prompts/fleet-assessment.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
             "name": "generate-permissions",
             "path": ".github/prompts/generate-permissions.prompt.md",
             "runtime": "github-copilot",
             "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "handoff-contract",
+            "path": ".github/prompts/handoff-contract.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "handoff",
+            "path": ".github/prompts/handoff.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Transfer control to the next agent via the edgeless handoff contract"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "infra-risk-audit",
+            "path": ".github/prompts/infra-risk-audit.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to audit dependency, compatibility, build, and infrastructure risk"
         },
         {
             "scope": "root",
@@ -2716,6 +2356,22 @@
         {
             "scope": "root",
             "type": "github-copilot-prompt",
+            "name": "runtime-guardrail-design",
+            "path": ".github/prompts/runtime-guardrail-design.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "safe-refactor",
+            "path": ".github/prompts/safe-refactor.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
             "name": "scan-stack",
             "path": ".github/prompts/scan-stack.prompt.md",
             "runtime": "github-copilot",
@@ -2744,6 +2400,30 @@
             "path": ".github/prompts/verify-change.prompt.md",
             "runtime": "github-copilot",
             "description": "Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-prompt",
+            "name": "workflow-drift-audit",
+            "path": ".github/prompts/workflow-drift-audit.prompt.md",
+            "runtime": "github-copilot",
+            "description": "Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "agent-definition-review",
+            "path": ".github/skills/agent-definition-review/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "agent-semantic-verification",
+            "path": ".github/skills/agent-semantic-verification/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered."
         },
         {
             "scope": "root",
@@ -2788,6 +2468,22 @@
         {
             "scope": "root",
             "type": "github-copilot-skill",
+            "name": "build-configuration",
+            "path": ".github/skills/build-configuration/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "config-change-safety",
+            "path": ".github/skills/config-change-safety/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
             "name": "dependency-upgrade",
             "path": ".github/skills/dependency-upgrade/SKILL.md",
             "runtime": "github-copilot",
@@ -2812,10 +2508,42 @@
         {
             "scope": "root",
             "type": "github-copilot-skill",
+            "name": "fleet-assessment",
+            "path": ".github/skills/fleet-assessment/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
             "name": "generate-permissions",
             "path": ".github/skills/generate-permissions/SKILL.md",
             "runtime": "github-copilot",
             "description": "Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "handoff-contract",
+            "path": ".github/skills/handoff-contract/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "handoff",
+            "path": ".github/skills/handoff/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Transfer control to the next agent with a validated, contract-bearing handoff instead of a prose recommendation"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "infra-risk-audit",
+            "path": ".github/skills/infra-risk-audit/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to audit dependency, compatibility, build, and infrastructure risk"
         },
         {
             "scope": "root",
@@ -2916,6 +2644,22 @@
         {
             "scope": "root",
             "type": "github-copilot-skill",
+            "name": "runtime-guardrail-design",
+            "path": ".github/skills/runtime-guardrail-design/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails."
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "safe-refactor",
+            "path": ".github/skills/safe-refactor/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks"
+        },
+        {
+            "scope": "root",
+            "type": "github-copilot-skill",
             "name": "scan-stack",
             "path": ".github/skills/scan-stack/SKILL.md",
             "runtime": "github-copilot",
@@ -2947,19 +2691,27 @@
         },
         {
             "scope": "root",
+            "type": "github-copilot-skill",
+            "name": "workflow-drift-audit",
+            "path": ".github/skills/workflow-drift-audit/SKILL.md",
+            "runtime": "github-copilot",
+            "description": "Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims"
+        },
+        {
+            "scope": "root",
             "type": "opencode-agent",
-            "name": "agent-critic",
-            "path": ".opencode/agents/agent-critic.md",
+            "name": "agent-definition-reviewer",
+            "path": ".opencode/agents/agent-definition-reviewer.md",
             "runtime": "opencode",
             "description": "Use to audit ONE agent instruction file for schema fit, role/permission fit, contradictions, handoffs, and token economy, returning a 0-100 score, exact fixes, and a proposed agent_assessment block. Reviews one file per run; not the fleet."
         },
         {
             "scope": "root",
             "type": "opencode-agent",
-            "name": "agent-fleet-assessor",
-            "path": ".opencode/agents/agent-fleet-assessor.md",
+            "name": "agent-factory",
+            "path": ".opencode/agents/agent-factory.md",
             "runtime": "opencode",
-            "description": "Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-critic, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
+            "description": "Use to create or materially change an agent definition in <PROJECT_NAME> \u2014 decides reuse vs. create, produces a strict AgentSpec, runs deterministic static validation, checks semantic fit and runtime guardrails, and holds for human approval. Produces specs, never runs the created agent."
         },
         {
             "scope": "root",
@@ -2972,26 +2724,26 @@
         {
             "scope": "root",
             "type": "opencode-agent",
-            "name": "architecture-plan-writer",
-            "path": ".opencode/agents/architecture-plan-writer.md",
-            "runtime": "opencode",
-            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
             "name": "bootstrapper",
             "path": ".opencode/agents/bootstrapper.md",
             "runtime": "opencode",
-            "description": "INTERNAL \u2014 use when running the AI kit installation for this repo from dry-run to backup to apply to full validation. Not shipped to installed projects."
+            "description": "Use when installing, re-installing, or validating the AI kit from dry-run to backup to apply to full verification"
         },
         {
             "scope": "root",
             "type": "opencode-agent",
-            "name": "config-maintainer",
-            "path": ".opencode/agents/config-maintainer.md",
+            "name": "configuration-maintainer",
+            "path": ".opencode/agents/configuration-maintainer.md",
             "runtime": "opencode",
             "description": "Use when changing editor, shell, runtime, or tool configuration while preserving current behavior"
+        },
+        {
+            "scope": "root",
+            "type": "opencode-agent",
+            "name": "fleet-assessor",
+            "path": ".opencode/agents/fleet-assessor.md",
+            "runtime": "opencode",
+            "description": "Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file."
         },
         {
             "scope": "root",
@@ -3004,18 +2756,10 @@
         {
             "scope": "root",
             "type": "opencode-agent",
-            "name": "post-install",
-            "path": ".opencode/agents/post-install.md",
+            "name": "plan-writer",
+            "path": ".opencode/agents/plan-writer.md",
             "runtime": "opencode",
-            "description": "Use after installing the AI kit in a target repository to complete placeholder cleanup, repo scanning, project docs updates, and post-install verification"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "refactorer",
-            "path": ".opencode/agents/refactorer.md",
-            "runtime": "opencode",
-            "description": "Use when behavior is already correct and the remaining work is structure, readability, duplication reduction, or maintainability"
+            "description": "Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket"
         },
         {
             "scope": "root",
@@ -3024,22 +2768,6 @@
             "path": ".opencode/agents/release-auditor.md",
             "runtime": "opencode",
             "description": "Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "repository-researcher",
-            "path": ".opencode/agents/repository-researcher.md",
-            "runtime": "opencode",
-            "description": "Strict script-first repository researcher using ai-search before raw search"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "repository-reviewer",
-            "path": ".opencode/agents/repository-reviewer.md",
-            "runtime": "opencode",
-            "description": "Strict script-first diff reviewer using ai-search and validator evidence"
         },
         {
             "scope": "root",
@@ -3064,14 +2792,6 @@
             "path": ".opencode/agents/script-runner.md",
             "runtime": "opencode",
             "description": "Use when work should run ONLY this repository's registered scripts/ai/*.sh wrappers (read/analysis allowed, mutating ones gated by ask) and every other bash command, file edit, and external action is blocked"
-        },
-        {
-            "scope": "root",
-            "type": "opencode-agent",
-            "name": "workflow-auditor",
-            "path": ".opencode/agents/workflow-auditor.md",
-            "runtime": "opencode",
-            "description": "Use when reviewing AI workflow files, instruction drift, repo context drift, or unsupported workflow claims"
         },
         {
             "scope": "root",

@@ -1,6 +1,6 @@
 ---
 description: Verify OpenCode script-first AI wiring
-agent: repository-reviewer
+agent: reviewer
 ---
 
 Run the narrow wiring checks first:

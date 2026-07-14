@@ -1,0 +1,81 @@
+flowchart LR
+  classDef gate fill:#fff3e0,stroke:#ef6c00,color:#e65100,stroke-width:2px
+  classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+  classDef research fill:#e0f7fa,stroke:#00838f,color:#004d40
+  classDef design fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c
+  classDef write fill:#e8eaf6,stroke:#3949ab,color:#1a237e
+  classDef review fill:#fff8e1,stroke:#f9a825,color:#6d4c00
+  classDef factory fill:#ede7f6,stroke:#5e35b1,color:#311b92
+  classDef audit fill:#eceff1,stroke:#455a64,color:#263238
+  classDef skill fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+  classDef removed fill:#ffebee,stroke:#c62828,color:#b71c1c
+  classDef kept fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+
+  subgraph delivery["Change Delivery"]
+    direction LR
+  delivery__intake{"Task classification"}:::gate
+  delivery__research["Research when evidence is insufficient"]:::research
+  delivery__design["Design when contracts or risk are non-trivial"]:::design
+  delivery__persist_plan["Persist durable plan when required"]:::write
+  delivery__implement["Implement bounded slice"]:::write
+  delivery__review["Independent review"]:::review
+  delivery__release["Conditional release gate"]:::gate
+  delivery__done(["Accepted evidence"]):::terminal
+    delivery__intake -->|evidence_missing| delivery__research
+    delivery__intake -->|design_needed| delivery__design
+    delivery__intake -->|bounded_low_risk| delivery__implement
+    delivery__research -->|design_needed| delivery__design
+    delivery__research -->|bounded_after_research| delivery__implement
+    delivery__design -->|durable_plan_required| delivery__persist_plan
+    delivery__design -->|plan_not_required| delivery__implement
+    delivery__persist_plan -->|plan_accepted| delivery__implement
+    delivery__implement -->|diff_ready| delivery__review
+    delivery__review -->|findings_require_fix| delivery__implement
+    delivery__review -->|release_relevant| delivery__release
+    delivery__review -->|low_risk_pass| delivery__done
+    delivery__release -->|ready| delivery__done
+  end
+
+  subgraph agent_creation["Agent Creation"]
+    direction LR
+  agent_creation__request{"Reuse-or-create request"}:::gate
+  agent_creation__factory["Agent factory pipeline"]:::factory
+  agent_creation__definition_review["Independent definition review"]:::audit
+  agent_creation__human_gate{"Human approval"}:::gate
+  agent_creation__approved(["Approved AgentSpec and guardrails"]):::terminal
+    agent_creation__request -->|request_clear| agent_creation__factory
+    agent_creation__factory -->|static_validation_passed| agent_creation__definition_review
+    agent_creation__definition_review -->|semantic_match| agent_creation__human_gate
+    agent_creation__human_gate -->|explicitly_approved| agent_creation__approved
+  end
+
+  subgraph fleet_assurance["Fleet Assurance"]
+    direction LR
+  fleet_assurance__enumerate{"Enumerate canonical fleet"}:::gate
+  fleet_assurance__assessor["Aggregate fleet"]:::audit
+  fleet_assurance__critic["Review one definition"]:::audit
+  fleet_assurance__report(["Fleet score and remediation queue"]):::terminal
+    fleet_assurance__enumerate -->|roster_ready| fleet_assurance__assessor
+    fleet_assurance__assessor -->|next_agent| fleet_assurance__critic
+    fleet_assurance__critic -->|result_ready| fleet_assurance__assessor
+    fleet_assurance__assessor -->|all_agents_assessed| fleet_assurance__report
+  end
+
+  subgraph post_install["Temporary Post-Install"]
+    direction LR
+  post_install__install_gate{"Installation completed"}:::gate
+  post_install__setup_skill[/"Placeholder and setup workflow"/]:::skill
+  post_install__evidence["Resolve project facts"]:::research
+  post_install__apply["Apply bounded setup values"]:::write
+  post_install__verify["Verify install and placeholder gate"]:::review
+  post_install__retire(["Retire temporary workflow"]):::terminal
+    post_install__install_gate -->|installed| post_install__setup_skill
+    post_install__setup_skill -->|facts_needed| post_install__evidence
+    post_install__evidence -->|values_verified| post_install__apply
+    post_install__apply -->|setup_complete| post_install__verify
+    post_install__verify -->|all_gates_green| post_install__retire
+  end
+
+  %% Explicit cross-workflow bridges only
+  agent_creation__approved -.->|approved_agent_to_fleet_assurance| fleet_assurance__enumerate
+  delivery__done -.->|delivery_change_to_fleet_assurance| fleet_assurance__enumerate

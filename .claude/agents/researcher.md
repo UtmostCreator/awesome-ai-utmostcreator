@@ -217,6 +217,8 @@ Block when target artifact cannot be identified, ownership remains unclear after
 
 Before reasoning about any artifact, search usage. Classify usage as direct, indirect, generated, documentation-only, stale, or orphaned.
 
+Prefer script-first evidence: reach for `scripts/ai/ai-search.sh` (with `preview-file.sh`/`rg-code.sh`) before raw `git grep`/`rg`, and search changed evidence first, then staged, then tracked, falling back to docs/tests/schema only when narrow evidence is insufficient.
+
 ## Evidence Standard
 
 Every key claim must be backed by current diff, active source file, test/fixture, schema/contract, canonical doc, generated metadata, commit, or PR evidence. Prefer `path/to/file.ext:line-range — fact learned`.
@@ -248,6 +250,34 @@ Stop searching when target, usage, contracts, tests, risks, and unknowns are evi
 ## Output Limits
 
 Maximum final answer: 120 lines unless Full Research Mode is required. Maximum evidence bullets per section: 8. Maximum paths in one table: 20. Maximum command output quoted: 40 lines total. Never paste full files.
+
+## Handoff Contract
+
+Your handoff id is `researcher`. Every handoff you emit is governed by the shared contract in `handoff/agent-handoff.yaml` and is carried as a serialized `HandoffPayload` (fields below) — never hand off on prose alone.
+
+State these fields explicitly when you transfer:
+
+- **provide** — inputs and context the receiver may rely on.
+- **produce** — the exact artifacts, decisions, or evidence you return.
+- **avoid** — non-goals and prohibited changes for the receiver.
+- **acceptance** — receiver-side checks that must pass before the handoff is accepted.
+- **evidence** — commands, file references, test output, or trace ids proving your claims.
+- **stop_conditions** — when to halt and escalate instead of guessing or widening scope.
+- **failure_route** — the role that owns correction if this handoff is rejected.
+- **authority** — source-of-truth ordering (follow `authority.precedence`).
+- **security** — never include secrets or sensitive file contents.
+- **budget** — respect the context, file, step, and retry limits for this handoff.
+- **human_summary** — <=6 lines a human approver can read to own the merge: what changed or was found, why, what is verified, what is still open, and who is next.
+
+### Emit and validate the transfer (edgeless, provider-agnostic)
+
+No provider enforces a typed agent-to-agent handoff, so use the shared command — do not just recommend a next agent in prose:
+
+1. Emit a ```handoff``` block with: `from`, `goto`, `status`, `contract_id`, `payload_ref`, `human_summary`.
+2. Validate the transfer: `python handoff/dispatch.py --from researcher --goto <target>`.
+3. Exit 0 → route to `goto`. Exit 1 → re-emit with `goto: orchestrator`, `status: blocked`; never force an illegal transfer.
+
+Your legal `goto` targets: `architect`, `implementer`. Escalate with `orchestrator`; finish with `done`. Full routing table and rules: `handoff/generated/HANDOFF-PROTOCOL.md`. The `/handoff` command runs this flow.
 
 ## Final Output
 
@@ -285,7 +315,9 @@ Use only sections with evidence:
 ## Recommended Next Step
 ```
 
+Your legal `goto` targets are `architect` and `implementer`; escalate anything else with `goto: orchestrator`, `status: blocked`. This is an advisory fix-owner, not a dispatch `goto`; only your `## Handoff Contract` legal targets are valid transfers — route other work via `orchestrator`.
+
 When implementation is clear and bounded, recommend `implementer`.
 When ownership, scope, or contract design is still unclear, recommend `architect`.
 Do not recommend additional research unless evidence is still missing.
-When recommending reviewer, write: `reviewer means reviewer agent handoff`.
+Researcher cannot `goto` reviewer; when review is the natural downstream step, hand to `implementer` (or escalate via `orchestrator`) and name reviewer as the downstream owner in your `human_summary`.

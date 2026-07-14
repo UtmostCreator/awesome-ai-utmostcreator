@@ -1,0 +1,25 @@
+flowchart LR
+  classDef gate fill:#fff3e0,stroke:#ef6c00,color:#e65100,stroke-width:2px
+  classDef terminal fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+  classDef research fill:#e0f7fa,stroke:#00838f,color:#004d40
+  classDef design fill:#f3e5f5,stroke:#6a1b9a,color:#4a148c
+  classDef write fill:#e8eaf6,stroke:#3949ab,color:#1a237e
+  classDef review fill:#fff8e1,stroke:#f9a825,color:#6d4c00
+  classDef factory fill:#ede7f6,stroke:#5e35b1,color:#311b92
+  classDef audit fill:#eceff1,stroke:#455a64,color:#263238
+  classDef skill fill:#e3f2fd,stroke:#1565c0,color:#0d47a1
+  classDef removed fill:#ffebee,stroke:#c62828,color:#b71c1c
+  classDef kept fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
+
+  subgraph agent_creation["Agent Creation"]
+    direction LR
+  agent_creation__request{"Reuse-or-create request"}:::gate
+  agent_creation__factory["Agent factory pipeline"]:::factory
+  agent_creation__definition_review["Independent definition review"]:::audit
+  agent_creation__human_gate{"Human approval"}:::gate
+  agent_creation__approved(["Approved AgentSpec and guardrails"]):::terminal
+    agent_creation__request -->|request_clear| agent_creation__factory
+    agent_creation__factory -->|static_validation_passed| agent_creation__definition_review
+    agent_creation__definition_review -->|semantic_match| agent_creation__human_gate
+    agent_creation__human_gate -->|explicitly_approved| agent_creation__approved
+  end

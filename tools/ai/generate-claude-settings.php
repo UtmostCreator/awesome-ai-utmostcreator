@@ -18,7 +18,7 @@ declare(strict_types=1);
  * `aiAgentIsHiddenInternalOnly()`), of that agent's resolved allowedBash list. Agents with a
  * registered composition (`aiPermissionAgentCompositions()`) use the real composed model;
  * the remaining shipped agents that have not yet migrated to the composed model (currently:
- * `agent-critic`, `agent-fleet-assessor`) fall back to their legacy frontmatter-parsed
+ * `agent-definition-reviewer`, `fleet-assessor`) fall back to their legacy frontmatter-parsed
  * allowedBash list (`aiInstallerParseCanonicalAgentFrontmatter()`) wrapped as a minimal
  * single-layer model — the SAME source-frontmatter parse `aiPermissionResolveAllowedBash()`
  * itself falls back to inside the Claude/Copilot renderers, so this stays a projection of
@@ -168,7 +168,7 @@ function aiGenerateClaudeSettingsPerAgentModels(string $root): array
                 continue;
             }
 
-            // Not-yet-migrated shipped agent (currently: agent-critic, agent-fleet-assessor):
+            // Not-yet-migrated shipped agent (currently: agent-definition-reviewer, fleet-assessor):
             // fall back to a minimal single-layer model built from its own legacy
             // frontmatter-parsed allowedBash list, mirroring aiPermissionResolveAllowedBash()'s
             // own fallback so this stays a projection of source frontmatter, not rendered text.

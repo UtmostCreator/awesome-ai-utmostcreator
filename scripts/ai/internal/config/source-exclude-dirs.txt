@@ -1,0 +1,26 @@
+# Source-only context/SCC excludes. These keep generated or low-value runtime
+# surfaces out of source analysis while preserving install/ship policy checks.
+.git
+.ai-logs
+.ai-backups
+.repomix-context
+docs/ai/generated
+docs/ai/generated/advisor-context.md
+node_modules
+vendor
+dist
+build
+coverage
+.cache
+.next
+.nuxt
+.turbo
+tmp
+temp
+cache
+logs
+storage/logs
+storage/framework/cache
+storage/framework/sessions
+storage/framework/views
+target

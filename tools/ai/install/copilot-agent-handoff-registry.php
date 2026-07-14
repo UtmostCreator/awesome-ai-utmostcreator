@@ -27,11 +27,20 @@ require_once __DIR__ . '/copilot-agent-tool-registry.php';
 function aiCopilotAgentHandoffRegistry(): array
 {
     return [
-        'agent-fleet-assessor' => [
+        'fleet-assessor' => [
             [
                 'label'  => 'Assess Agent',
-                'agent'  => 'agent-critic',
+                'agent'  => 'agent-definition-reviewer',
                 'prompt' => 'Assess this one agent file and return your standard output plus the fenced json summary block (score, readiness, decision, blockers, majors, minors, next_handoff, handoff_executable). Copilot has no programmatic fan-out, so this is one agent at a time; the fleet assessor aggregates each returned critic result into the ranking.',
+                'send'   => true,
+                'model'  => null,
+            ],
+        ],
+        'agent-factory' => [
+            [
+                'label'  => 'Review Agent Definition',
+                'agent'  => 'agent-definition-reviewer',
+                'prompt' => 'Audit this produced agent definition (AgentSpec + guardrail plan): schema/role/permission fit, contradictions, handoff contract, and token economy. Return your standard output plus the fenced json summary block. Do not approve; readiness is a human gate.',
                 'send'   => true,
                 'model'  => null,
             ],
@@ -39,13 +48,13 @@ function aiCopilotAgentHandoffRegistry(): array
         'architect' => [
             [
                 'label'  => 'Write Architecture Plan',
-                'agent'  => 'architecture-plan-writer',
+                'agent'  => 'plan-writer',
                 'prompt' => 'Convert this approved architecture design into a bounded implementation plan under docs/tickets/: ordered steps, acceptance criteria, affected paths, and a verification plan. Do not widen the design scope.',
                 'send'   => true,
                 'model'  => null,
             ],
         ],
-        'architecture-plan-writer' => [
+        'plan-writer' => [
             [
                 'label'  => 'Start Implementation',
                 'agent'  => 'implementer',
@@ -68,13 +77,6 @@ function aiCopilotAgentHandoffRegistry(): array
                 'label'  => 'Fix Findings',
                 'agent'  => 'implementer',
                 'prompt' => 'Fix only the accepted review findings, naming the finding and affected path for each fix, then rerun the verification command the reviewer specified.',
-                'send'   => true,
-                'model'  => null,
-            ],
-            [
-                'label'  => 'Refactor Findings',
-                'agent'  => 'refactorer',
-                'prompt' => 'Refactor only the accepted structural review findings, preserving behavior, then rerun the verification command the reviewer specified.',
                 'send'   => true,
                 'model'  => null,
             ],

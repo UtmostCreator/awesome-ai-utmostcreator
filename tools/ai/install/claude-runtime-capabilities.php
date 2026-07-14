@@ -25,7 +25,7 @@ declare(strict_types=1);
  * sentence, moving them from inline code into this ordered, agent-agnostic rule table. It does
  * NOT subsume every per-agent `if ($agentId === '...')` override already in
  * `claude-agent-renderer.php` — several of those (the release-auditor/workflow-auditor/
- * agent-fleet-assessor/config-maintainer/agent-creator-runtime-guardian Bash-Command-Policy
+ * fleet-assessor/config-maintainer/agent-creator-runtime-guardian Bash-Command-Policy
  * footer rewrites, release-auditor's Script-Access cross-reference fix, researcher's
  * Write/Edit-capability neutralization, docs' Script-Access override) carry hand-tuned wording
  * specific to that agent's mission framing that a generic rule would either not reach (they are

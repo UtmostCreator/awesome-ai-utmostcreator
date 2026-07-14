@@ -116,24 +116,6 @@ function aiPermissionAgentCompositions(): array
             backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
-        'repository-researcher' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            // Ground truth: this agent's bash '*' fallback is 'ask' (looser than the
-            // 'deny' most readonly agents ship); N-3 requires pinning each agent's own
-            // shipped baseline rather than assuming a universal floor.
-            starBaseline: 'ask',
-            // Deliberately narrower "script-first" agent (description: "Strict script-first
-            // repository researcher using ai-search before raw search"). Fully covered by
-            // packs — no leftover agent-specific exceptions.
-            denyPacks: ['core.safe_read.deny_script_first_generics'],
-            askPacks: ['raw_tools.ask_gated'],
-            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
-            // pack as reviewer. This agent's floor is `'*': ask`, so the deny is not even
-            // subject to the same-as-floor-effect filter; it renders and denies regardless.
-            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
-        ),
-
         'reviewer' => aiPermissionAgentSpecReadonly(
             editSurface: 'none',
             render: aiPermissionRenderTaskAsk(),
@@ -142,10 +124,9 @@ function aiPermissionAgentCompositions(): array
             // deletion risk); tighten via a pack pair, then reopen the narrow sub-patterns.
             // Agent-critic MAJOR (2026-07-07): sed -n/head/tail/nl/bat are unrestricted raw
             // readers with no enumerated-secret guard, while preview-file.sh (secret-blocking)
-            // is already granted; repository-reviewer — the same review archetype — already
-            // denies exactly these five. Reuse its atomic packs (deny_sed_n/deny_head_tail/
-            // deny_nl/deny_bat) rather than the much broader deny_script_first_generics bundle
-            // repository-reviewer uses, which would also strip reviewer's wc/sort/jq/yq/
+            // is already granted. Deny exactly those five via atomic packs (deny_sed_n/
+            // deny_head_tail/deny_nl/deny_bat) rather than the much broader
+            // deny_script_first_generics bundle, which would also strip reviewer's wc/sort/jq/yq/
             // git-branch-narrow-read/ai.php/lychee/actionlint/shellcheck grants it still needs.
             denyPacks: [
                 'core.safe_read.deny_common_generics',
@@ -176,54 +157,6 @@ function aiPermissionAgentCompositions(): array
             // fd-files/query-usage/git-forensics) were broad-`allow` and could open secret
             // files despite the prose Sensitive File Rule. Rendered AFTER those allows so
             // OpenCode's `.findLast()` resolves a secret path to deny. OpenCode-scoped.
-            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
-        ),
-
-        'repository-reviewer' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            // Ground truth: this agent's bash '*' fallback is 'ask' (looser than the
-            // 'deny' most readonly agents ship); N-3 requires pinning each agent's own
-            // shipped baseline rather than assuming a universal floor.
-            starBaseline: 'ask',
-            // Script-first generics pack already denies 'git branch*'; reopen the narrow
-            // sub-patterns same as 'reviewer'. Note: unlike 'reviewer', this agent does NOT
-            // grant proof.php_lint/proof.phpunit_direct/proof.markdown/proof.security/
-            // context.packaging — only a partial proof-tooling subset, kept precise via
-            // atomic packs rather than a coarse bundle.
-            denyPacks: ['core.safe_read.deny_script_first_generics'],
-            allowPacks: [
-                'git.branch_narrow_read',
-                'git.review_extra',
-                'git.pr_context_allow',
-                'verify.scoped_allow',
-                'doctor.scripts',
-                'proof.validate_script',
-                'proof.generate_check',
-            ],
-            askPacks: ['raw_tools.ask_gated', 'verify.manual_ask'],
-            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
-            // pack as reviewer. Floor is `'*': ask`, so the deny renders regardless of filter.
-            backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
-        ),
-
-        'workflow-auditor' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            denyPacks: [
-                'core.safe_read.deny_common_generics',
-                'core.safe_read.deny_sed_n',
-                'core.safe_read.deny_nl',
-                'core.safe_read.deny_file_probe',
-                'core.safe_read.deny_test_x',
-                'git.branch_wildcard_deny',
-                'git.deny_blame',
-                'git.deny_rev_parse',
-            ],
-            allowPacks: ['verify.install_coverage_allow', 'proof.validate_script'],
-            askPacks: ['verify.manual_ask'],
-            // Secret-path deny backstop (plan-2-opencode-secret-deny-backstop): same shared
-            // pack + rationale as reviewer; renders after this agent's reader allows.
             backstopDenyPacks: ['core.safe_read.deny_secret_reads'],
         ),
 
@@ -284,7 +217,7 @@ function aiPermissionAgentCompositions(): array
         // sort/uniq/du-h/head/tail/jq/yq/scc/tokei/ast-grep/bat/fx/glow/difft/delta/ls-1-scripts)
         // is deliberately denied back too, matching its actual narrow shipped surface (rg/git
         // grep stay allowed — those ARE shipped) rather than accepted as a "low risk" widening.
-        'architecture-plan-writer' => aiPermissionAgentSpecReadonly(
+        'plan-writer' => aiPermissionAgentSpecReadonly(
             editSurface: 'tickets',
             render: aiPermissionRenderArchitecturePlanWriter(),
             cliTools: 'none',
@@ -359,7 +292,7 @@ function aiPermissionAgentCompositions(): array
             ],
         ),
 
-        'config-maintainer' => aiPermissionAgentSpecVerify(
+        'configuration-maintainer' => aiPermissionAgentSpecVerify(
             editSurface: 'config',
             render: aiPermissionRenderTaskAsk(),
             denyPacks: [
@@ -400,120 +333,6 @@ function aiPermissionAgentCompositions(): array
                 aiPermissionBashAsk(aiPatternGit('stash apply*')),
                 aiPermissionBashAsk(aiPatternGit('stash drop*')),
                 aiPermissionBashAsk(aiPatternGit('checkout*')),
-            ],
-        ),
-
-        'refactorer' => aiPermissionAgentSpecImpl(
-            editSurface: 'code',
-            render: aiPermissionRenderNoTask(),
-            denyPacks: [
-                ...aiPermissionPackSetCommonReadDeny(),
-                // Ground truth: refactorer grants no package-manager mutations at all.
-                // Extracted (docs/tickets/arch-todo-optional-agent-permission-composition-
-                // 20260705T221434Z/plan.md) from 11 inline exceptions into this shared pack
-                // because `docs` needs the identical 11-pattern deny set — leaving both as
-                // inline exceptions would duplicate a pattern across 2+ agents
-                // (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents). Zero behavior
-                // change for refactorer (verified via --check byte-stability).
-                'package_manager.deny_all_mutations',
-                'git.branch_wildcard_deny',
-            ],
-            allowPacks: [
-                'git.stash_read',
-                'doctor.scripts',
-                // Refactorer needs generated/markdown/security proof tooling, but not the
-                // broad `validate-*.php` wildcard from aiPermissionPackSetFullProof(); keep
-                // validator grants exact in the agent-specific exceptions below.
-                'proof.generate_check',
-                'proof.markdown',
-                'proof.security',
-            ],
-            // Slice D: php-lint/phpunit-direct/js-core now sourced via language overlays
-            // instead of the (reconciled) aiPermissionPackSetFullProof() bundle's former
-            // proof.php_lint/proof.phpunit_direct/proof.js_test_lint_typecheck members.
-            // Byte-stable: js-core is an exact copy of proof.js_test_lint_typecheck (no
-            // yarn/bun — refactorer never granted those, unlike implementer).
-            languageOverlays: ['php-lint', 'php-phpunit', 'js-core'],
-            askPacks: ['context.packaging', 'core.safe_read.raw_read_ask_gate', 'impl.ask_python3'],
-            exceptions: [
-                // Refactorer only needs branch inspection; broad branch wildcard is blocked
-                // by the shared git.branch_wildcard_deny pack, so reopen safe forms only.
-                aiPermissionBashAllow(aiPatternGit('branch')),
-                aiPermissionBashAllow(aiPatternGit('branch --list*')),
-                // Keep validator access exact so future mutation-capable validators are not
-                // automatically allowed by a wildcard.
-                aiPermissionBashAllow('php tools/ai/validate-agent-assessment.php *'),
-                aiPermissionBashAllow('php tools/ai/validate-agent-assessment-values.php'),
-                aiPermissionBashAllow('php tools/ai/validate-adapter-drift.php *'),
-                aiPermissionBashAllow('php tools/ai/validate-ai-config.php'),
-                // Refactorer should not drive kit-level AI CLI workflows; use explicit
-                // validation scripts instead.
-                aiPermissionBashDeny('php tools/ai/ai.php placeholders*'),
-                aiPermissionBashDeny('php tools/ai/ai.php verify*'),
-                aiPermissionBashDeny('php tools/ai/ai.php preflight*'),
-                aiPermissionBashDeny('php tools/ai/ai.php list'),
-                aiPermissionBashDeny('php tools/ai/ai.php next*'),
-                aiPermissionBashDeny('php tools/ai/ai.php freshness*'),
-                aiPermissionBashDeny('php tools/ai/ai.php packs*'),
-                aiPermissionBashDeny('php tools/ai/ai.php env-check*'),
-                aiPermissionBashDeny('php tools/ai/ai.php install-docs --check'),
-                aiPermissionBashDeny('bash scripts/ai/install-mandatory-tools.sh *'),
-                // Ground truth: refactorer's git-mutating-ask grants are narrower than
-                // the 'impl' profile default (no reset/fetch/merge/pull/checkout/switch/
-                // tag/cherry-pick/revert).
-                aiPermissionBashDeny(aiPatternGit('reset*')),
-                aiPermissionBashDeny(aiPatternGit('fetch*')),
-                aiPermissionBashDeny(aiPatternGit('merge*')),
-                aiPermissionBashDeny(aiPatternGit('pull*')),
-                aiPermissionBashDeny(aiPatternGit('checkout*')),
-                aiPermissionBashDeny(aiPatternGit('switch*')),
-                aiPermissionBashDeny(aiPatternGit('tag*')),
-                aiPermissionBashDeny(aiPatternGit('cherry-pick*')),
-                aiPermissionBashDeny(aiPatternGit('revert*')),
-                // agent-critic (2026-07-07): the 'js-core' language overlay grants npm/pnpm
-                // test/lint/typecheck as 'allow', but each of these executes an arbitrary
-                // project-defined package.json script body, not a fixed binary — broader
-                // trust than the fixed-binary commands (phpunit, shellcheck) sharing the
-                // same allow tier. 'js-core' is currently referenced only by refactorer (no
-                // other composition uses this overlay key), so downgrading here is a
-                // refactorer-specific override of the overlay's allow, not a narrowing of a
-                // tier shared with other agents; implementer's broader 'js-ts' overlay is
-                // untouched. Covers plain 'npm test*'/'pnpm test*' too: both are shorthand
-                // for running the same user-defined "test" package.json script, so they
-                // carry the identical arbitrary-script-execution risk.
-                aiPermissionBashAsk('npm test*'),
-                aiPermissionBashAsk('npm run test*'),
-                aiPermissionBashAsk('npm run lint*'),
-                aiPermissionBashAsk('npm run typecheck*'),
-                aiPermissionBashAsk('pnpm test*'),
-                aiPermissionBashAsk('pnpm run test*'),
-                aiPermissionBashAsk('pnpm run lint*'),
-                aiPermissionBashAsk('pnpm run typecheck*'),
-                // agent-critic (2026-07-07): defense-in-depth generated-file deny patterns
-                // beyond this repo's own docs/ai/generated/**+docs/generated/**+*.generated.*
-                // convention (edit-surfaces.php $denyTail), given refactorer's broad
-                // src/**+app/**+packages/** edit access. Refactorer-specific (not added to
-                // the shared $denyTail, which every edit surface/agent inherits) because no
-                // evidence was found that other agents need this narrowing; confirmed via
-                // `git ls-files` that no tracked path in this repo currently matches these
-                // globs, so this is additive with zero blast radius here.
-                aiPermissionEditDeny('**/generated/**'),
-                aiPermissionEditDeny('**/__generated__/**'),
-                aiPermissionEditDeny('**/*.gen.*'),
-                // agent-critic (2026-07-07): 'proof.generate_check' grants the wildcard
-                // 'php tools/ai/generate-*.php --check*' (trailing wildcard on the flag).
-                // Every generate-*.php script gates check-mode with a strict
-                // `in_array('--check', $argv, true)` (confirmed: generate-agent-permissions,
-                // generate-agent-snippets, generate-ai-catalog, generate-ai-file-standards,
-                // generate-repo-structure, generate-stack-registry) — none recognize a
-                // `--check`-prefixed flag as check mode, so the wildcard previously let a
-                // command like `... --check-and-repair` match this "read-only check" grant
-                // while actually running the script's untested default/mutating path.
-                // Narrowed here for refactorer only (deny the wildcard, reopen the exact bare
-                // token) rather than in the shared 'proof.generate_check' pack itself, which
-                // is also consumed by other agents' compositions outside this fix's scope.
-                aiPermissionBashDeny('php tools/ai/generate-*.php --check*'),
-                aiPermissionBashAllow('php tools/ai/generate-*.php --check'),
             ],
         ),
 
@@ -618,9 +437,9 @@ function aiPermissionAgentCompositions(): array
             // (edit: deny)") — a real, pre-existing bug. Corrected here via 'none'.
             editSurface: 'none',
             render: aiPermissionRenderScriptRunner(),
-            // Script-first generics pack (repository-researcher/repository-reviewer) is
-            // the closest match; script-runner is even narrower (denies rg/fd/ls/git-read
-            // passthrough that the two "script-first" agents still allow) — see exceptions.
+            // The deny_script_first_generics pack is the closest match; script-runner is
+            // even narrower (denies rg/fd/ls/git-read passthrough that the pack still
+            // allows) — see exceptions.
             denyPacks: [
                 'core.safe_read.deny_script_first_generics',
                 'core.safe_read.deny_rg',
@@ -727,67 +546,6 @@ function aiPermissionAgentCompositions(): array
             ],
         ),
 
-        'post-install' => aiPermissionAgentSpecImpl(
-            editSurface: 'install',
-            render: aiPermissionRenderTaskAllow(),
-            denyPacks: [
-                'core.safe_read.deny_common_generics',
-                'core.safe_read.deny_eza',
-                'core.safe_read.deny_git_grep',
-                'core.safe_read.deny_sed_n',
-                'core.safe_read.deny_nl',
-                'core.safe_read.deny_file_probe',
-                'git.deny_blame',
-                'hard_stop.deny_chown',
-            ],
-            allowPacks: [
-                'git.stash_read',
-                'verify.install_coverage_allow',
-                'proof.validate_script',
-                'doctor.scripts',
-            ],
-            // Policy decision (continuation session): ask-gate rg/bat/jq/yq the same as the
-            // other 4 impl-profile agents. head/tail/sed-n are excluded below via exceptions
-            // (see note there) — post-install already denies them, stricter than ask, and
-            // must not be loosened by this pack. 'hard_stop.ask_rm' (governance remediation,
-            // docs/tickets/ai-run-ledger-rollup-slice-a/arch-todo-permission-budget-and-
-            // delete-posture-20260709.md P1 sub-item B) replaces the former inline 'rm *': ask
-            // exception below — extracted to a shared pack because implementer and
-            // super-implementer now need the identical entry
-            // (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents).
-            askPacks: ['core.safe_read.raw_read_ask_gate', 'hard_stop.ask_rm', 'impl.ask_python3'],
-            exceptions: [
-                // Ground truth: shipped post-install's edit block has scripts/ai/** allow but
-                // NO tools/ai/** key, so it denies tools/ai/** edits. The 'install' edit
-                // surface grants tools/ai/** allow, so re-deny it to preserve behavior.
-                aiPermissionEditDeny('tools/ai/**'),
-
-                // Generic CLI tools this agent does not grant (beyond the shared deny packs).
-                // NOTE: 'sed -n *' is deny via the deny_sed_n pack above; re-deny it here too
-                // because 'core.safe_read.raw_read_ask_gate' (askPacks, applied after
-                // deny_packs) would otherwise loosen it to 'ask' — post-install's existing
-                // deny posture for sed-n must not regress.
-                aiPermissionBashDeny('sed -n *'),
-                aiPermissionBashDeny('head *'),
-                aiPermissionBashDeny('tail *'),
-
-                // Post-install-specific install/verification tooling grants.
-                aiPermissionBashAllow('php tools/ai/verify-install-placeholders.php*'),
-                aiPermissionBashAllow(aiPatternAiTool('advisor*')),
-
-                // Post-install-specific destructive-command gating. ('chown *': deny is
-                // already covered by the 'hard_stop.deny_chown' pack above, and 'rm *': ask
-                // by the 'hard_stop.ask_rm' pack above — neither restated here.)
-                aiPermissionBashAsk(aiPatternGit('clean*')),
-
-                // Ground truth: post-install denies these write scripts (impl profile's
-                // ai-write tier defaults them to ask).
-                aiPermissionBashDeny(aiPatternAiScript('ai-edit.sh')),
-                aiPermissionBashDeny(aiPatternAiScript('ai-rollback.sh')),
-                aiPermissionBashDeny(aiPatternAiScript('session-checkpoint.sh')),
-            ],
-        ),
-
         // --- Optional agents (docs/tickets/arch-todo-optional-agent-permission-
         // composition-20260705T221434Z/plan.md, Slice A). These ship only under
         // packages/ai-universal-rules/templates/optional/agents/ +
@@ -795,337 +553,6 @@ function aiPermissionAgentCompositions(): array
         // Design Fork F1 in that plan: intentionally NOT added to
         // aiInstallerAgentProfiles() (tool-gateway visibility stays unchanged); a separate
         // PermissionComposeTest invariant (not the 15-key equality test) covers them.
-
-        // infra-auditor: closest analog is release-auditor (readonly profile, edit:none,
-        // task:ask). Ground truth's CLI/git preamble is narrower than core:safe-read's
-        // default toolkit (shares the same reduced subset as bugfix/build-config/upgrade
-        // below) and grants no shipped-cli-readonly pattern at all (no ai.php subcommands,
-        // no lychee/actionlint/shfmt/shellcheck) — same 'cli_tools: none' opt-out as
-        // architecture-plan-writer. Only 'composer validate*' is granted from the php
-        // family (no lint/phpunit) — the atomic 'php-composer-validate' overlay alone.
-        'infra-auditor' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'git.branch_wildcard_deny',
-            ],
-            allowPacks: [
-                'git.grep_allow',
-                'verify.install_coverage_allow',
-                'proof.validate_script',
-            ],
-            languageOverlays: ['php-composer-validate'],
-            askPacks: ['verify.manual_ask'],
-            exceptions: [
-                // Ground truth: infra-auditor asks before raw grep (core:safe-read's
-                // default is deny) — a single-agent deviation, not yet shared by 2+ agents.
-                aiPermissionBashAsk('grep *'),
-            ],
-        ),
-
-        // bugfix / build-config / upgrade share a near-identical impl-profile, 'code'-edit-
-        // surface shape: same reduced CLI/git preamble as infra-auditor above (+ same
-        // 'cli_tools: none' opt-out — none of the 3 grant any shipped-cli-readonly
-        // pattern), the same narrowed git-mutating-ask (only add/commit) and
-        // package-manager-ask (composer install/update/require + npm install/ci + pnpm
-        // install + yarn install; no add/bun) subsets, and the same
-        // php-lint+php-phpunit+php-composer-validate language-overlay trio (bootstrapper's
-        // exact set). `upgrade` is NOT composed in this slice (flagged in the plan as
-        // needing a full, not excerpted, ground-truth diff first) — only bugfix and
-        // build-config land here.
-        'bugfix' => aiPermissionAgentSpecImpl(
-            editSurface: 'code',
-            render: aiPermissionRenderNoTask(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'git.branch_wildcard_deny',
-                'git.mutating_add_commit_only_deny',
-                'package_manager.narrow_no_add_or_bun_deny',
-            ],
-            allowPacks: ['git.grep_allow', 'proof.validate_script'],
-            languageOverlays: ['php-lint', 'php-phpunit', 'php-composer-validate'],
-            // Intentional, documented tightening (matches the established policy already
-            // applied to every other impl-profile agent — implementer/refactorer/
-            // post-install/config-maintainer all ask-gate these 7 raw-read tools via the
-            // same pack): shipped bugfix.md grants rg/jq/yq/head/tail/sed-n as bare `allow`;
-            // `testRawReadToolsAreNeverAllowedInWriteProfileAgents` hard-enforces `ask` (or
-            // stricter) for any impl-profile agent, so this is a required, safety-increasing
-            // deviation from the literal hand-maintained file, not a silent widening.
-            askPacks: ['core.safe_read.raw_read_ask_gate'],
-            // Ground truth: bugfix denies ai-install-coverage.sh (unlike build-config,
-            // which allows it) — already the impl-profile default (not part of ai-verify's
-            // tier grants), so no exception is needed to preserve that deny.
-        ),
-
-        'build-config' => aiPermissionAgentSpecImpl(
-            editSurface: 'code',
-            render: aiPermissionRenderNoTask(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'git.branch_wildcard_deny',
-                'git.mutating_add_commit_only_deny',
-                'package_manager.narrow_no_add_or_bun_deny',
-                // Fresh agent-critic audit finding (plan-13): the piped 'ls -1 scripts/ai/*.sh
-                // | sort' form is denied back; the unpiped equivalent is granted below.
-                'core.safe_read.deny_ls_pipe_sort',
-            ],
-            allowPacks: [
-                'git.grep_allow',
-                'proof.validate_script',
-                'verify.install_coverage_allow',
-            ],
-            languageOverlays: ['php-lint', 'php-phpunit', 'php-composer-validate'],
-            // Same intentional raw-read-tool tightening as bugfix above (required by
-            // testRawReadToolsAreNeverAllowedInWriteProfileAgents).
-            askPacks: ['core.safe_read.raw_read_ask_gate'],
-            exceptions: [
-                aiPermissionBashAllow('ls scripts/ai/*.sh'),
-            ],
-        ),
-
-        // upgrade: verified via `diff` against `build-config`'s original shipped ground
-        // truth (git show HEAD) BEFORE composing either — the two permission blocks were
-        // byte-identical at HEAD (both allow ai-install-coverage.sh, both share the exact
-        // same reduced CLI/git preamble, narrow git-mutating/package-manager subsets, and
-        // php-lint+phpunit+composer-validate trio). Same composition as build-config.
-        'upgrade' => aiPermissionAgentSpecImpl(
-            editSurface: 'code',
-            render: aiPermissionRenderNoTask(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'git.branch_wildcard_deny',
-                'git.mutating_add_commit_only_deny',
-                'package_manager.narrow_no_add_or_bun_deny',
-            ],
-            allowPacks: [
-                'git.grep_allow',
-                'proof.validate_script',
-                'verify.install_coverage_allow',
-            ],
-            languageOverlays: ['php-lint', 'php-phpunit', 'php-composer-validate'],
-            askPacks: ['core.safe_read.raw_read_ask_gate'],
-        ),
-
-        // docs: impl profile + 'docs' edit surface. Ground truth grants NO package-manager
-        // mutation at all (shares refactorer's full-deny pack) and denies
-        // ai-test-select/run-repo-tests back (impl profile's ai-verify tier would otherwise
-        // allow both by default) — a genuine, single-agent deviation from every other
-        // impl-profile agent composed so far. Also narrower than bugfix/build-config on
-        // git rev-parse*/yq* (both denied here, unlike the other 3) — single-agent
-        // exceptions, not yet shared by 2+ agents.
-        'docs' => aiPermissionAgentSpecImpl(
-            editSurface: 'docs',
-            render: aiPermissionRenderNoTask(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'git.branch_wildcard_deny',
-                'git.mutating_add_commit_only_deny',
-                'package_manager.deny_all_mutations',
-            ],
-            allowPacks: ['git.grep_allow', 'proof.markdown'],
-            // Same intentional raw-read-tool tightening as bugfix/build-config (required by
-            // testRawReadToolsAreNeverAllowedInWriteProfileAgents).
-            askPacks: ['core.safe_read.raw_read_ask_gate'],
-            exceptions: [
-                aiPermissionBashDeny(aiPatternGit('rev-parse*')),
-                // NOTE: kept as an exception (NOT the 'core.safe_read.deny_yq' pack used by
-                // agent-creator-static-validator below) because this agent's askPacks
-                // (raw_read_ask_gate, which grants 'yq *': ask) apply AFTER denyPacks in
-                // compose order — a denyPacks entry here would be silently overridden back
-                // to 'ask'. Exceptions apply last, so only this mechanism actually keeps
-                // 'yq *' at 'deny' for an agent that also carries raw_read_ask_gate. Not a
-                // duplicate of static-validator's pack-based deny_yq (different composition
-                // mechanism; the cross-agent duplicate check only scans literal `exceptions`
-                // entries, and static-validator's yq denial is not one).
-                aiPermissionBashDeny('yq *'),
-                aiPermissionBashDeny(aiPatternAiScript('ai-test-select.sh')),
-                aiPermissionBashDeny('bash scripts/ai/run-repo-tests.sh*'),
-            ],
-        ),
-
-        // agent-creator-static-validator / agent-creator-semantic-verifier /
-        // agent-creator-runtime-guardian: readonly profile, edit:none, task:ask, 'cli_tools:
-        // none' (no ai.php/lychee/actionlint/shfmt/shellcheck grants, same opt-out as
-        // architecture-plan-writer/infra-auditor above). All 3 share a narrower git/CLI
-        // surface than every other composed readonly agent: only git diff*/log* (+ git
-        // grep*/status* for 2 of the 3) stay allowed; git show*/ls-files*/blame*/branch*/
-        // rev-parse* are denied back, and the full core:safe-read extended CLI toolkit
-        // (stat/date/uuidgen/eza/nl/wc/sort/uniq/file/du-h/scc/tokei/ast-grep/bat/fx/glow/
-        // difft/delta/command-v/test-f/test-x/test-d) is denied too (same
-        // 'deny_extended_probe_tools' + 'deny_common_generics' pair infra-auditor/bugfix/
-        // build-config/docs already use — 'deny_common_generics' is the only pack of the two
-        // that reaches 'wc', which none of these 3 grant, unlike the other 4 agents).
-        'agent-creator-static-validator' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'core.safe_read.deny_common_generics',
-                'ai_scripts.deny_context_and_doc_scripts',
-                'core.safe_read.deny_git_grep',
-                'git.deny_blame',
-                'git.branch_wildcard_deny',
-                'git.deny_rev_parse',
-                'git.deny_show',
-                'git.deny_ls_files',
-                'core.safe_read.deny_yq',
-                // Extracted to a pack (docs/tickets/arch-todo-optional-agent-permission-
-                // composition-20260705T221434Z/plan.md, Slice C continuation): `agent-creator`
-                // also denies this pattern, which would otherwise duplicate an inline
-                // exception across 2+ agents.
-                'agent_creator.deny_ai_diff_context',
-            ],
-            allowPacks: ['agent_creator.validate_spec_allow'],
-            exceptions: [
-                // Ground truth: only this family member grants 'cat *' (ask) — a
-                // single-agent deviation, not shared by semantic-verifier/runtime-guardian.
-                aiPermissionBashAsk('cat *'),
-                // Ground truth: this is the only family member that also denies
-                // 'git status*' (semantic-verifier/runtime-guardian keep it allowed).
-                aiPermissionBashDeny(aiPatternGit('status*')),
-            ],
-        ),
-
-        'agent-creator-semantic-verifier' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'core.safe_read.deny_common_generics',
-                'ai_scripts.deny_context_and_doc_scripts',
-                'git.deny_blame',
-                'git.branch_wildcard_deny',
-                'git.deny_rev_parse',
-                'git.deny_show',
-                'git.deny_ls_files',
-            ],
-            allowPacks: ['agent_creator.validate_spec_allow'],
-            // Readonly profile has no script-tiers:ai-verify tier by default (that tier
-            // only ships with verify/impl profiles) — this agent needs ai-verify.sh
-            // ask-gated explicitly, same as infra-auditor above.
-            askPacks: ['verify.manual_ask'],
-        ),
-
-        // Ground truth: identical CLI/git/context-script surface to semantic-verifier
-        // above, but additionally ask-gates ai-rollback.sh/session-checkpoint.sh (its own
-        // enforcement-tier job — checkpoint/restore runtime state) that the other 2 family
-        // members deny outright (matching the readonly profile's default, since 'impl'
-        // profile's ai-write tier is not part of 'readonly'). Ground truth also grants
-        // pre-tool-use.sh/post-tool-use.sh as 'ask', but both are on the TRUE immutable
-        // hard-deny floor (core.php hard-deny; see architecture-plan-writer's own note above
-        // for the identical precedent) — composing this agent intentionally NARROWS both
-        // from ask to deny (safety-increasing, not a widening) rather than violating
-        // aiPermissionAssertNoHardDenyWeakening.
-        'agent-creator-runtime-guardian' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'core.safe_read.deny_common_generics',
-                'ai_scripts.deny_context_and_doc_scripts',
-                'git.deny_blame',
-                'git.branch_wildcard_deny',
-                'git.deny_rev_parse',
-                'git.deny_show',
-                'git.deny_ls_files',
-            ],
-            allowPacks: ['agent_creator.validate_spec_allow'],
-            // Extracted 'session-checkpoint.sh': ask to a pack (docs/tickets/arch-todo-
-            // optional-agent-permission-composition-20260705T221434Z/plan.md, Slice C
-            // continuation): `agent-creator-supervisor` needs the identical pattern too.
-            // 'core.safe_read.raw_read_ask_gate' added per plan-25 (agent-critic BLOCKER):
-            // narrows sed -n/head/tail/jq/yq/rg/bat from allow to ask, same precedented pack
-            // reused verbatim by ~8 other readonly-profile agents above (reviewer,
-            // infra-auditor, architect, etc.).
-            askPacks: [
-                'verify.manual_ask',
-                'agent_creator.ask_session_checkpoint',
-                'core.safe_read.raw_read_ask_gate',
-            ],
-            exceptions: [
-                // Ground truth: only this family member ask-gates ai-rollback.sh (the
-                // other 4 deny it outright, matching the readonly profile's default).
-                aiPermissionBashAsk(aiPatternAiScript('ai-rollback.sh')),
-            ],
-        ),
-
-        // agent-creator: readonly profile, edit:none, task:ask, 'cli_tools: none' — same
-        // narrowed CLI/git surface as the other 4 family members (git diff*/log*/grep*/
-        // status* stay allowed; show*/ls-files*/blame*/branch*/rev-parse* denied). Unlike
-        // static-validator/semantic-verifier/runtime-guardian, this agent keeps the
-        // context-packaging family (pack-context/run-repomix-context/repomix-context-tree/
-        // repomix-scc-router) at their unconditional 'ask' default (ground truth: all 4
-        // show 'ask', not 'deny') — so it uses the smaller
-        // 'agent_creator.deny_freshness_and_doc_check' pack instead of the 6-pattern
-        // 'ai_scripts.deny_context_and_doc_scripts' bundle. Also the only family member
-        // that does NOT grant 'php tools/ai/validate-agent-spec.php *' at all (ground
-        // truth: absent) — 'agent_creator.validate_spec_allow' is deliberately NOT applied
-        // here.
-        'agent-creator' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'core.safe_read.deny_common_generics',
-                'agent_creator.deny_freshness_and_doc_check',
-                'agent_creator.deny_ai_diff_context',
-                'git.deny_blame',
-                'git.branch_wildcard_deny',
-                'git.deny_rev_parse',
-                'git.deny_show',
-                'git.deny_ls_files',
-            ],
-            allowPacks: ['git.grep_allow'],
-            // Ground truth grants 'bash scripts/ai/ai-task.sh *': ask, but ai-task.sh is on
-            // the TRUE immutable hard-deny floor (core.php) — no composed agent may
-            // override it (same precedent as architecture-plan-writer/script-runner/the
-            // other 4 family members). Composing this agent intentionally NARROWS it from
-            // ask to deny (safety-increasing) rather than violating
-            // aiPermissionAssertNoHardDenyWeakening; no exception is added for it (letting
-            // it resolve via the floor is correct — adding 'ask' here would throw).
-        ),
-
-        // agent-creator-supervisor: readonly profile, edit:none, task:ask, 'cli_tools:
-        // none'. Same narrowed CLI/git surface and freshness/doc-check denial as
-        // agent-creator above (context-packaging family stays at its 'ask' default here
-        // too). Differs from agent-creator by granting
-        // 'agent_creator.validate_spec_allow' (ground truth: both
-        // 'php tools/ai/validate-agent-spec.php *' AND the bare 'php tools/ai/validate-*.php
-        // *' glob — the pack's specific pattern already covers both via
-        // aiPermissionResolvePacks(), so only the one pack is needed) and by ask-gating
-        // session-checkpoint.sh (shared 'agent_creator.ask_session_checkpoint' pack with
-        // agent-creator-runtime-guardian above).
-        'agent-creator-supervisor' => aiPermissionAgentSpecReadonly(
-            editSurface: 'none',
-            render: aiPermissionRenderTaskAsk(),
-            cliTools: 'none',
-            denyPacks: [
-                'core.safe_read.deny_extended_probe_tools',
-                'core.safe_read.deny_common_generics',
-                'agent_creator.deny_freshness_and_doc_check',
-                'git.deny_blame',
-                'git.branch_wildcard_deny',
-                'git.deny_rev_parse',
-                'git.deny_show',
-                'git.deny_ls_files',
-            ],
-            allowPacks: ['git.grep_allow', 'agent_creator.validate_spec_allow'],
-            askPacks: ['agent_creator.ask_session_checkpoint'],
-            // Ground truth grants 'ai-task.sh': ask and 'pre-tool-use.sh'/'post-tool-use.sh':
-            // ask — all three intentionally narrowed to deny via the immutable hard-deny
-            // floor (same precedent as agent-creator/architecture-plan-writer/script-runner
-            // above); no exceptions added for any of the three (adding 'ask' would throw).
-        ),
 
         // ui-builder (Slice D, docs/tickets/arch-todo-optional-agent-permission-
         // composition-20260705T221434Z/plan.md — composed on explicit user instruction,
@@ -1232,31 +659,25 @@ function aiPermissionAgentCompositions(): array
 }
 
 /**
- * Canonical list of the 11 optional-agent filename stems (docs/tickets/arch-todo-optional-
- * agent-permission-composition-20260705T221434Z/plan.md). These ship only under
+ * Canonical list of the 2 composed optional-agent filename stems (docs/tickets/arch-todo-
+ * optional-agent-permission-composition-20260705T221434Z/plan.md). These ship only under
  * `packages/ai-universal-rules/templates/optional/agents/` + `.opencode/agents-optional/`
  * (opt-in packs), never in `aiInstallerAgentProfiles()` (Design Fork F1, LOCKED — that map
  * stays scoped to the 15 core agents' tool-gateway visibility). Single source of truth for
  * both `PermissionComposeTest`'s core-key-set exclusion and its optional-key-set coverage
- * assertion, so the 11-name list is never duplicated across two tests. Not every key here
- * has a composition entry yet (migrated incrementally, Slice A/C/D) — this list only bounds
- * which names are *recognized* as optional agents when one is composed.
+ * assertion, so the list is never duplicated across two tests. Not every optional agent is
+ * composed (fleet-assessor/orchestrator/agent-definition-reviewer/agent-factory carry
+ * hand-authored `permission:` blocks instead) — this list only bounds which names are
+ * *recognized* as composed optional agents.
+ *
+ * The 5 agent-creator-family stems were removed with their composition entries when the
+ * family was retired into `agent-factory` (agent-handoff-governance-20260714, Phase 5c).
  *
  * @return list<string>
  */
 function aiPermissionOptionalAgentKeys(): array
 {
     return [
-        'agent-creator',
-        'agent-creator-runtime-guardian',
-        'agent-creator-semantic-verifier',
-        'agent-creator-static-validator',
-        'agent-creator-supervisor',
-        'bugfix',
-        'build-config',
-        'docs',
-        'infra-auditor',
         'ui-builder',
-        'upgrade',
     ];
 }

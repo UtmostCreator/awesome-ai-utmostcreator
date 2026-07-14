@@ -90,7 +90,7 @@ logic in `docs/ai/shared/project-interaction.md` (per-project defaults go in
   worked-adjacent example, **L5** direct solution; a struggle gate and teach-it-back step reinforce
   retention. See [docs/ai/capabilities/mentor-mode/CAPABILITY.md](docs/ai/capabilities/mentor-mode/CAPABILITY.md).
 - **AI builder (agent-creator)** — an opt-in pipeline (supervisor → creator → validators) plus the
-  architecture-plan-writer to scaffold new agents safely. It is **optional**
+  plan-writer to scaffold new agents safely. It is **optional**
   (`optional-agents-opencode-pack` / `optional-agents-copilot-pack`, removable with `--without ...`).
   See [docs/ai/agents.md](docs/ai/agents.md).
 

@@ -30,7 +30,6 @@ agent's mutation/gate posture, not its quality.
 | `validation` | Deterministic checks |
 | `review` | Semantic/correctness review (gate) |
 | `release` | Ship/no-ship decision (gate) |
-| `post-install` | Install/drift verification |
 | `agent-factory` | Creates and validates agents |
 | `runtime-safety` | Tool and execution safety (gate) |
 
@@ -44,31 +43,18 @@ enforced frontmatter.
 
 | Agent | OpenCode | GitHub | Lifecycle | Mutating | Gate | Risk | Purpose |
 | --- | :---: | :---: | --- | :---: | :---: | --- | --- |
-| `agent-creator` | yes | yes | agent-factory | no | no | high | Turns an approved brief into a strict AgentSpec; never self-approves. |
-| `agent-creator-static-validator` | yes | yes | agent-factory | no | yes | medium | Deterministic AgentSpec static validation. |
-| `agent-creator-semantic-verifier` | yes | yes | agent-factory | no | yes | medium | Judges whether a valid AgentSpec matches the request. |
-| `agent-creator-runtime-guardian` | yes | yes | runtime-safety | no | yes | critical | Enforces input/tool-call/output guardrails and stop conditions. |
-| `agent-creator-supervisor` | yes | yes | orchestration | no | yes | high | Routes the agent-factory pipeline; blocks unsafe handoffs. |
+| `agent-factory` | yes | yes | agent-factory | no | yes | medium | Staged agent-creation pipeline (reuse→spec→static validation→semantic fit→guardrails→human approval); produces specs, never runs the created agent. Merges the retired agent-creator + supervisor. |
 | `architect` | yes | yes | planning | no | yes | high | Scoping, design, contract boundaries, risk posture. |
-| `architecture-plan-writer` | yes | yes | planning | no | no | medium | Persists a bounded plan as a Todo markdown file under `docs/tickets`. |
-| `repository-researcher` | yes | yes | discovery | no | no | low | Script-first read-only repository research. |
-| `researcher` | yes | yes | discovery | no | no | medium | Read-only grounding (scope, ownership, contracts, tests). |
-| `repository-reviewer` | yes | yes | discovery / review | no | yes | medium | Script-first diff review using ai-search + validator evidence. |
+| `plan-writer` | yes | yes | planning | no | no | medium | Persists a bounded plan as a Todo markdown file under `docs/tickets`. |
+| `researcher` | yes | yes | discovery | no | no | medium | Read-only grounding (scope, ownership, contracts, tests); folds the retired repository-researcher's script-first ai-search evidence discipline. |
 | `implementer` | yes | yes | execution | yes | no | high | Bounded implementation slice with focused verification. |
 | `super-implementer` | yes | no | execution | yes | no | high | Implementation slice variant (OpenCode-only). |
-| `bugfix` | no | yes | execution | yes | no | medium | Reproduce, isolate, fix, verify a bug (GitHub-only). |
-| `refactorer` | yes | yes | execution | yes | no | high | Structure/readability improvement; tightly path-scoped. |
-| `config-maintainer` | yes | yes | execution | yes | no | high | Editor/shell/runtime/tool config changes. |
-| `build-config` | no | yes | execution | yes | no | high | Build/packaging/verification config edits (GitHub-only). |
-| `upgrade` | no | yes | execution | yes | no | critical | Dependency/platform upgrades; strongest gates (GitHub-only). |
-| `docs` | no | yes | execution / release | yes | no | low | Documentation alignment after verified behavior (GitHub-only). |
-| `workflow-auditor` | yes | yes | validation | no | yes | high | AI workflow/instruction/repo-context drift checks. |
-| `infra-auditor` | no | yes | validation | no | yes | high | Dependency/build/release/compatibility risk audit (GitHub-only). |
-| `agent-critic` | yes | yes | review | no | yes | medium | Audits one agent instruction file for schema/role/permission fit, contradictions, handoffs, and token economy. |
-| `agent-fleet-assessor` | yes | yes | orchestration | no | yes | medium | Delegates each agent file to `agent-critic`, then ranks the fleet 0-100 with fix priorities. |
+| `configuration-maintainer` | yes | yes | execution | yes | no | high | Editor/shell/runtime/tool config changes; absorbs the retired build-config's build/packaging/verification config scope via the `build-configuration` skill. |
+| `agent-definition-reviewer` | yes | yes | review | no | yes | medium | Audits one agent instruction file for schema/role/permission fit, contradictions, handoffs, and token economy. |
+| `fleet-assessor` | yes | yes | orchestration | no | yes | medium | Delegates each agent file to `agent-definition-reviewer`, then ranks the fleet 0-100 with fix priorities. |
+| `orchestrator` | yes | yes | orchestration | no | yes | medium | Supervisor/coordinator: routes each stage of a task to the right delivery agent via the shared handoff contract; owns loop and failure control. Does not edit, design, or review. |
 | `reviewer` | yes | yes | review | no | yes | high | Correctness, regression, policy, duplication, adapter-drift review. |
 | `release-auditor` | yes | yes | release | no | yes | critical | Ship/no-ship decision for medium/high-risk changes. |
-| `post-install` | yes | yes | post-install | no | yes | high | Placeholder cleanup, install/drift verification after kit install. |
 | `script-runner` | yes | no | execution | no | no | high | Runs only registered scripts/ai/*.sh wrappers with per-script risk gating; blocks ad hoc commands, chaining, and file edits (OpenCode-only). |
 | `bootstrapper` | yes | no | orchestration | yes | no | high | INTERNAL kit-install orchestration (OpenCode-only). |
 
@@ -79,16 +65,12 @@ coverage check must treat the two surfaces as distinct sets, not assume parity.
 
 - OpenCode-only (`.opencode/agents/*.md`): `bootstrapper`, `script-runner`,
   `super-implementer`.
-- GitHub-only (`.github/agents/*.agent.md`): `bugfix`, `build-config`, `docs`,
-  `infra-auditor`, `upgrade`.
+- GitHub-only (`.github/agents/*.agent.md`): none.
 
-The shared set present on BOTH surfaces (19 agents): `agent-creator`,
-`agent-creator-runtime-guardian`, `agent-creator-semantic-verifier`,
-`agent-creator-static-validator`, `agent-creator-supervisor`, `agent-critic`,
-`agent-fleet-assessor`, `architect`, `architecture-plan-writer`,
-`config-maintainer`, `implementer`, `post-install`, `refactorer`,
-`release-auditor`, `repository-researcher`, `repository-reviewer`, `researcher`,
-`reviewer`, `workflow-auditor`.
+The shared set present on BOTH surfaces (11 agents): `agent-factory`,
+`agent-definition-reviewer`, `fleet-assessor`, `orchestrator`, `architect`,
+`plan-writer`, `configuration-maintainer`, `implementer`,
+`release-auditor`, `researcher`, `reviewer`.
 
 ## Notes
 
