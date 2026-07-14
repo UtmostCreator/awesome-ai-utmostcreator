@@ -34,21 +34,21 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / adapter-hook` - 2
 - `root / adapter-hook-script` - 1
 - `root / adapter-policy` - 1
-- `root / ai-script` - 27
+- `root / ai-script` - 4
 - `root / capability` - 17
-- `root / claude-agent` - 12
+- `root / claude-agent` - 10
 - `root / claude-command` - 5
-- `root / claude-skill` - 35
+- `root / claude-skill` - 24
 - `root / cli` - 1
 - `root / exporter` - 2
 - `root / generator` - 1
-- `root / github-copilot-agent` - 11
+- `root / github-copilot-agent` - 10
 - `root / github-copilot-instruction` - 22
 - `root / github-copilot-prompt` - 34
 - `root / github-copilot-skill` - 36
-- `root / opencode-agent` - 13
-- `root / opencode-command` - 36
-- `root / opencode-skill` - 37
+- `root / opencode-agent` - 12
+- `root / opencode-command` - 25
+- `root / opencode-skill` - 26
 - `root / php-reference` - 3
 - `root / root-doc` - 19
 - `root / schema` - 1
@@ -64,33 +64,10 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`adapter-hook`|tool-policy|`.github/hooks/tool-policy.json`|GitHub Copilot hook configuration for tool policy enforcement.|
 |`adapter-hook-script`|tool-guardian.ps1|`.github/hooks/scripts/tool-guardian.ps1`|PowerShell hook script for GitHub Copilot guarded tool execution.|
 |`adapter-policy`|ai-policy|`policies/ai/policy.yaml`|Declarative allow, deny, and confirm rules enforced for all runtimes by the canonical pre-tool-use hook.|
-|`ai-script`|ai-diff-context.sh|`scripts/ai/ai-diff-context.sh`|Builds focused diff and change-context packs for AI review and implementation.|
-|`ai-script`|ai-doc-check.sh|`scripts/ai/ai-doc-check.sh`|Checks AI-facing documentation surfaces for required references and drift.|
-|`ai-script`|ai-edit.sh|`scripts/ai/ai-edit.sh`|Guarded edit wrapper with snapshots, dry-run behavior, visible diff, and optional verification.|
-|`ai-script`|ai-rollback.sh|`scripts/ai/ai-rollback.sh`|Rollback helper for explicit recovery work using session snapshots and refs.|
-|`ai-script`|ai-search.sh|`scripts/ai/ai-search.sh`|Unified search entrypoint for text, file, tracked, all, and structural discovery.|
-|`ai-script`|ai-structured.sh|`scripts/ai/ai-structured.sh`|Structured output helper for deterministic AI workflow data.|
-|`ai-script`|ai-task.sh|`scripts/ai/ai-task.sh`|Task-oriented AI workflow helper for routing, context, and verification steps.|
-|`ai-script`|ai-test-select.sh|`scripts/ai/ai-test-select.sh`|Selects likely relevant tests from changed files and task context.|
-|`ai-script`|ai-verify.sh|`scripts/ai/ai-verify.sh`|Project-aware verification gate for AI-driven changes across shell, PHP, JS/TS, and security checks.|
 |`ai-script`|common.sh|`scripts/ai/common.sh`|Shared helper library for AI workflow scripts, logging, snapshots, and token-budget checks.|
-|`ai-script`|fd-files.sh|`scripts/ai/fd-files.sh`|Repo-aware file discovery wrapper around fd/fdfind with rg fallback and safer defaults.|
-|`ai-script`|gh-pr-context.sh|`scripts/ai/gh-pr-context.sh`|GitHub PR context wrapper with metadata, diff, checks, reviews, and optional PR-scoped context packing.|
-|`ai-script`|git-forensics.sh|`scripts/ai/git-forensics.sh`|Git history and blame wrapper for evidence-oriented code archaeology.|
 |`ai-script`|install-mandatory-tools.sh|`scripts/ai/install-mandatory-tools.sh`|Installs mandatory CLI tools required by the AI workflow script layer.|
-|`ai-script`|pack-context.sh|`scripts/ai/pack-context.sh`|Builds bounded repository context packs for AI task execution.|
 |`ai-script`|post-tool-use.sh|`scripts/ai/post-tool-use.sh`|Post-tool hook helper for tool usage logging and failure classification.|
 |`ai-script`|pre-tool-use.sh|`scripts/ai/pre-tool-use.sh`|Pre-tool hook helper for approval boundaries and command policy enforcement.|
-|`ai-script`|preview-file.sh|`scripts/ai/preview-file.sh`|Smart file preview wrapper with text and fallback modes.|
-|`ai-script`|query-usage.sh|`scripts/ai/query-usage.sh`|Usage and repository-size query helper for AI context planning.|
-|`ai-script`|repo-tool-inventory.sh|`scripts/ai/repo-tool-inventory.sh`|Generates the required tool inventory from scripts and workflow requirements.|
-|`ai-script`|repomix-context-tree.sh|`scripts/ai/repomix-context-tree.sh`|Builds repository tree context for Repomix-based AI context packing.|
-|`ai-script`|repomix-scc-router.sh|`scripts/ai/repomix-scc-router.sh`|Ranked context router that produces TSV and JSON bundle plans with churn-aware scoring.|
-|`ai-script`|rg-code.sh|`scripts/ai/rg-code.sh`|Mode-aware ripgrep wrapper with JSON, file-list, count, and context output modes.|
-|`ai-script`|run-repo-tests.sh|`scripts/ai/run-repo-tests.sh`|Parallel-first repository test runner for PHP, shell, Bats, and validators.|
-|`ai-script`|run-repomix-context.sh|`scripts/ai/run-repomix-context.sh`|Runs Repomix context generation with repository-aware defaults.|
-|`ai-script`|session-checkpoint.sh|`scripts/ai/session-checkpoint.sh`|Creates session checkpoints for recovery and traceability.|
-|`ai-script`|watch-loop.sh|`scripts/ai/watch-loop.sh`|Watch-based verification loop with debounce and repo-local session logging.|
 |`capability`|adapter-drift|`docs/ai/capabilities/adapter-drift/CAPABILITY.md`|Check Copilot, OpenCode, and canonical docs for conflicting instructions after adapter changes.|
 |`capability`|agent-observability-and-evidence|`docs/ai/capabilities/agent-observability-and-evidence/CAPABILITY.md`|Capture command evidence, verification results, and handoff context without exposing secrets.|
 |`capability`|authorization-and-tool-governance|`docs/ai/capabilities/authorization-and-tool-governance/CAPABILITY.md`|Use policy gates and approval boundaries before running commands that mutate state or broaden access.|
@@ -114,33 +91,23 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`claude-agent`|configuration-maintainer|`.claude/agents/configuration-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`claude-agent`|fleet-assessor|`.claude/agents/fleet-assessor.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`claude-agent`|implementer|`.claude/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
-|`claude-agent`|orchestrator|`.claude/agents/orchestrator.md`|Use to coordinate a multi-step task by routing each stage to the right delivery agent (researcher, architect, plan-writer, implementer, configuration-maintainer, reviewer, release-auditor) through the shared handoff contract, owning loop and failure control. Does not edit, design, or review itself.|
 |`claude-agent`|plan-writer|`.claude/agents/plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`claude-agent`|release-auditor|`.claude/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
 |`claude-agent`|researcher|`.claude/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`claude-agent`|reviewer|`.claude/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
-|`claude-agent`|super-implementer|`.claude/agents/super-implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
 |`claude-command`|install|`.claude/commands/install.md`|Guided install of the AI workflow kit into a target project, asking for missing parameters|
 |`claude-command`|post-install-setup|`.claude/commands/post-install-setup.md`|Guided post-install setup for installed projects|
 |`claude-command`|search-evidence|`.claude/commands/search-evidence.md`|Collect script-first repository evidence using ai-search|
 |`claude-command`|verify-ai-wiring|`.claude/commands/verify-ai-wiring.md`|Verify OpenCode script-first AI wiring|
 |`claude-command`|verify|`.claude/commands/verify.md`|Compatibility command that runs the verification workflow; prefer the verify-change skill for reusable guidance|
-|`claude-skill`|agent-definition-review|`.claude/skills/agent-definition-review/SKILL.md`|Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes|
-|`claude-skill`|agent-semantic-verification|`.claude/skills/agent-semantic-verification/SKILL.md`|Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered.|
 |`claude-skill`|ai-scripts|`.claude/skills/ai-scripts/SKILL.md`|Use registered scripts with risk-based approvals and evidence.|
 |`claude-skill`|ai-search|`.claude/skills/ai-search/SKILL.md`|Use ai-search to collect bounded repository evidence.|
 |`claude-skill`|architecture-plan|`.claude/skills/architecture-plan/SKILL.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`claude-skill`|bug-regression|`.claude/skills/bug-regression/SKILL.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
-|`claude-skill`|build-configuration|`.claude/skills/build-configuration/SKILL.md`|Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable|
-|`claude-skill`|config-change-safety|`.claude/skills/config-change-safety/SKILL.md`|Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification.|
 |`claude-skill`|dependency-upgrade|`.claude/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`claude-skill`|docs-sync|`.claude/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`claude-skill`|evidence-first-execution|`.claude/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
-|`claude-skill`|fleet-assessment|`.claude/skills/fleet-assessment/SKILL.md`|Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities|
 |`claude-skill`|generate-permissions|`.claude/skills/generate-permissions/SKILL.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
-|`claude-skill`|handoff-contract|`.claude/skills/handoff-contract/SKILL.md`|Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring|
-|`claude-skill`|handoff|`.claude/skills/handoff/SKILL.md`|Transfer control to the next agent via the edgeless handoff contract|
-|`claude-skill`|infra-risk-audit|`.claude/skills/infra-risk-audit/SKILL.md`|Use to audit dependency, compatibility, build, and infrastructure risk|
 |`claude-skill`|mentor-mode|`.claude/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`claude-skill`|new-feature|`.claude/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`claude-skill`|plan-slice|`.claude/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -153,13 +120,10 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`claude-skill`|repo-investigation|`.claude/skills/repo-investigation/SKILL.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`claude-skill`|review-diff|`.claude/skills/review-diff/SKILL.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`claude-skill`|review-search-tool|`.claude/skills/review-search-tool/SKILL.md`|Review ai-search implementation and contract safety|
-|`claude-skill`|runtime-guardrail-design|`.claude/skills/runtime-guardrail-design/SKILL.md`|Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails.|
-|`claude-skill`|safe-refactor|`.claude/skills/safe-refactor/SKILL.md`|Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks|
 |`claude-skill`|scan-stack|`.claude/skills/scan-stack/SKILL.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`claude-skill`|script-inventory|`.claude/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
 |`claude-skill`|search-evidence|`.claude/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`claude-skill`|verify-change|`.claude/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
-|`claude-skill`|workflow-drift-audit|`.claude/skills/workflow-drift-audit/SKILL.md`|Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims|
 |`cli`|ai|`tools/ai/ai.php`|Main AI workflow CLI dispatcher.|
 |`exporter`|export-ai-universal-rules|`tools/ai/export-ai-universal-rules.php`|Builds starter-profile release bundles under dist/.|
 |`exporter`|export-install-bundle|`tools/ai/export-install-bundle.php`|Vendors a standalone, offline-runnable copy of the installer into a specified path.|
@@ -170,7 +134,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`github-copilot-agent`|Configuration Maintainer|`.github/agents/configuration-maintainer.agent.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`github-copilot-agent`|Fleet Assessor|`.github/agents/fleet-assessor.agent.md`|Use to assess every agent file in awesome-ai-utmostcreator by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`github-copilot-agent`|Implementer|`.github/agents/implementer.agent.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
-|`github-copilot-agent`|Orchestrator|`.github/agents/orchestrator.agent.md`|Use to coordinate a multi-step task by routing each stage to the right delivery agent (researcher, architect, plan-writer, implementer, configuration-maintainer, reviewer, release-auditor) through the shared handoff contract, owning loop and failure control. Does not edit, design, or review itself.|
 |`github-copilot-agent`|Plan Writer|`.github/agents/plan-writer.agent.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`github-copilot-agent`|Release Auditor|`.github/agents/release-auditor.agent.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
 |`github-copilot-agent`|Researcher|`.github/agents/researcher.agent.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
@@ -274,26 +237,17 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-agent`|configuration-maintainer|`.opencode/agents/configuration-maintainer.md`|Use when changing editor, shell, runtime, or tool configuration while preserving current behavior|
 |`opencode-agent`|fleet-assessor|`.opencode/agents/fleet-assessor.md`|Use to assess every agent file in <PROJECT_NAME> by delegating each one to agent-definition-reviewer, then rank the fleet 0-100 with strengths, weaknesses, and fix priorities. Reviews the whole fleet; not one file.|
 |`opencode-agent`|implementer|`.opencode/agents/implementer.md`|Use when a bounded implementation slice is clear and focused verification should happen in this repository|
-|`opencode-agent`|orchestrator|`.opencode/agents/orchestrator.md`|Use to coordinate a multi-step task by routing each stage to the right delivery agent (researcher, architect, plan-writer, implementer, configuration-maintainer, reviewer, release-auditor) through the shared handoff contract, owning loop and failure control. Does not edit, design, or review itself.|
 |`opencode-agent`|plan-writer|`.opencode/agents/plan-writer.md`|Use to persist a bounded architecture plan as a Todo markdown file under docs/tickets; architect hands off here to document the plan, steps, things-to-avoid, and acceptance criteria strictly scoped to the task or ticket|
 |`opencode-agent`|release-auditor|`.opencode/agents/release-auditor.md`|Use when medium or high risk changes need rollout, rollback, migration, observability, preview, or install-safety review|
 |`opencode-agent`|researcher|`.opencode/agents/researcher.md`|Use for read-only repository grounding when scope, ownership, usage, contracts, tests, adapter parity, generated artifacts, permissions, or current changes need investigation before planning, implementation, or review|
 |`opencode-agent`|reviewer|`.opencode/agents/reviewer.md`|Use when reviewing a change set for correctness, regressions, policy fit, duplication, adapter drift, and missing verification|
 |`opencode-agent`|script-runner|`.opencode/agents/script-runner.md`|Use when work should run ONLY this repository's registered scripts/ai/*.sh wrappers (read/analysis allowed, mutating ones gated by ask) and every other bash command, file edit, and external action is blocked|
-|`opencode-command`|agent-definition-review|`.opencode/commands/agent-definition-review.md`|Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes|
-|`opencode-command`|agent-semantic-verification|`.opencode/commands/agent-semantic-verification.md`|Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered.|
 |`opencode-command`|architecture-plan|`.opencode/commands/architecture-plan.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`opencode-command`|bug-regression|`.opencode/commands/bug-regression.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
-|`opencode-command`|build-configuration|`.opencode/commands/build-configuration.md`|Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable|
-|`opencode-command`|config-change-safety|`.opencode/commands/config-change-safety.md`|Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification.|
 |`opencode-command`|dependency-upgrade|`.opencode/commands/dependency-upgrade.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`opencode-command`|docs-sync|`.opencode/commands/docs-sync.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-command`|evidence-first-execution|`.opencode/commands/evidence-first-execution.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
-|`opencode-command`|fleet-assessment|`.opencode/commands/fleet-assessment.md`|Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities|
 |`opencode-command`|generate-permissions|`.opencode/commands/generate-permissions.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
-|`opencode-command`|handoff-contract|`.opencode/commands/handoff-contract.md`|Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring|
-|`opencode-command`|handoff|`.opencode/commands/handoff.md`|Transfer control to the next agent via the edgeless handoff contract|
-|`opencode-command`|infra-risk-audit|`.opencode/commands/infra-risk-audit.md`|Use to audit dependency, compatibility, build, and infrastructure risk|
 |`opencode-command`|install|`.opencode/commands/install.md`|Guided install of the AI workflow kit into a target project, asking for missing parameters|
 |`opencode-command`|mentor-mode|`.opencode/commands/mentor-mode.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-command`|new-feature|`.opencode/commands/new-feature.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
@@ -307,33 +261,22 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-command`|repo-investigation|`.opencode/commands/repo-investigation.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`opencode-command`|review-diff|`.opencode/commands/review-diff.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`opencode-command`|review-search-tool|`.opencode/commands/review-search-tool.md`|Review ai-search implementation and contract safety|
-|`opencode-command`|runtime-guardrail-design|`.opencode/commands/runtime-guardrail-design.md`|Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails.|
-|`opencode-command`|safe-refactor|`.opencode/commands/safe-refactor.md`|Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks|
 |`opencode-command`|scan-stack|`.opencode/commands/scan-stack.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`opencode-command`|script-inventory|`.opencode/commands/script-inventory.md`|Build AI script inventory with risk and parity checks|
 |`opencode-command`|search-evidence|`.opencode/commands/search-evidence.md`|Collect script-first repository evidence using ai-search|
 |`opencode-command`|verify-ai-wiring|`.opencode/commands/verify-ai-wiring.md`|Verify OpenCode script-first AI wiring|
 |`opencode-command`|verify-change|`.opencode/commands/verify-change.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
 |`opencode-command`|verify|`.opencode/commands/verify.md`|Compatibility command that runs the verification workflow; prefer the verify-change skill for reusable guidance|
-|`opencode-command`|workflow-drift-audit|`.opencode/commands/workflow-drift-audit.md`|Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims|
-|`opencode-skill`|agent-definition-review|`.opencode/skills/agent-definition-review/SKILL.md`|Use to score one agent definition for role/permission fit, handoff executability, and token economy, returning a 0-100 score and exact fixes|
-|`opencode-skill`|agent-semantic-verification|`.opencode/skills/agent-semantic-verification/SKILL.md`|Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered.|
 |`opencode-skill`|ai-scripts|`.opencode/skills/ai-scripts/SKILL.md`|Use registered scripts with risk-based approvals and evidence.|
 |`opencode-skill`|ai-search|`.opencode/skills/ai-search/SKILL.md`|Use ai-search to collect bounded repository evidence.|
 |`opencode-skill`|architecture-plan-writer|`.opencode/skills/architecture-plan-writer/SKILL.md`|Use when an architect design or a bounded task/ticket must be persisted as a Todo architecture plan markdown file under docs/tickets, strictly scoped to the task with steps, things-to-avoid, and acceptance criteria|
 |`opencode-skill`|architecture-plan|`.opencode/skills/architecture-plan/SKILL.md`|Use when producing a focused implementation plan for a medium or large change before implementation begins|
 |`opencode-skill`|bug-regression|`.opencode/skills/bug-regression/SKILL.md`|Use when fixing a bug, adding a regression test, or proving a minimal fix with direct evidence|
-|`opencode-skill`|build-configuration|`.opencode/skills/build-configuration/SKILL.md`|Use when changing build, packaging, or verification configuration and you need to keep current behavior verifiable|
-|`opencode-skill`|config-change-safety|`.opencode/skills/config-change-safety/SKILL.md`|Use when changing editor, shell, runtime, or tool configuration and you must preserve current behavior with the closest verification.|
 |`opencode-skill`|dependency-upgrade|`.opencode/skills/dependency-upgrade/SKILL.md`|Use when upgrading a dependency and you need compatibility, verification, and release-risk guidance|
 |`opencode-skill`|docs-sync|`.opencode/skills/docs-sync/SKILL.md`|Use when changed behavior or workflow needs matching documentation updates without broad implementation planning|
 |`opencode-skill`|evidence-first-execution|`.opencode/skills/evidence-first-execution/SKILL.md`|Use when planning, editing, reviewing, or verifying repository changes that require scope control, dirty-worktree protection, and evidence-backed output.|
-|`opencode-skill`|fleet-assessment|`.opencode/skills/fleet-assessment/SKILL.md`|Use to enumerate the canonical agent fleet and aggregate per-agent scores into a ranked report with remediation priorities|
 |`opencode-skill`|generate-permissions|`.opencode/skills/generate-permissions/SKILL.md`|Use to preview the permission overlay a scanned project stack would add, before any agent permission frontmatter is applied|
 |`opencode-skill`|graphify|`.opencode/skills/graphify/SKILL.md`|Use for any question about a codebase, its architecture, file relationships, or project content — especially when graphify-out/ exists, where the question should be treated as a graphify query first. Turns any input (code, docs, papers, images, videos) into a persistent knowledge graph with god nodes, community detection, and query/path/explain tools.|
-|`opencode-skill`|handoff-contract|`.opencode/skills/handoff-contract/SKILL.md`|Use to validate a handoff carries provide/produce/avoid plus authority, evidence, budget, stop conditions, security, failure routing, and a human_summary before transferring|
-|`opencode-skill`|handoff|`.opencode/skills/handoff/SKILL.md`|Transfer control to the next agent with a validated, contract-bearing handoff instead of a prose recommendation|
-|`opencode-skill`|infra-risk-audit|`.opencode/skills/infra-risk-audit/SKILL.md`|Use to audit dependency, compatibility, build, and infrastructure risk|
 |`opencode-skill`|mentor-mode|`.opencode/skills/mentor-mode/SKILL.md`|Set Mentor Mode for the active agent on this task so it scaffolds instead of handing over a full solution by default|
 |`opencode-skill`|new-feature|`.opencode/skills/new-feature/SKILL.md`|Use when implementing a bounded feature with existing repository patterns and focused verification|
 |`opencode-skill`|plan-slice|`.opencode/skills/plan-slice/SKILL.md`|Use when a task is multi-step, ambiguous, or architecture-affecting and needs a bounded plan before implementation|
@@ -346,13 +289,10 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`opencode-skill`|repo-investigation|`.opencode/skills/repo-investigation/SKILL.md`|Use when investigating a bug, regression, suspicious behavior, or change history in this repository and you need a read-first workflow with exact evidence.|
 |`opencode-skill`|review-diff|`.opencode/skills/review-diff/SKILL.md`|Use when reviewing a change set for correctness, regression risk, policy fit, and missing verification starting from the diff|
 |`opencode-skill`|review-search-tool|`.opencode/skills/review-search-tool/SKILL.md`|Review ai-search implementation and contract safety|
-|`opencode-skill`|runtime-guardrail-design|`.opencode/skills/runtime-guardrail-design/SKILL.md`|Use to map an AgentSpec's tools, limits, stop conditions, and observability into concrete runtime policy/guardrails.|
-|`opencode-skill`|safe-refactor|`.opencode/skills/safe-refactor/SKILL.md`|Use when behavior is already correct and you are restructuring code to preserve behavior with before/after baseline tests and duplication checks|
 |`opencode-skill`|scan-stack|`.opencode/skills/scan-stack/SKILL.md`|Use to detect this project's language/tool stack and refresh the committed docs/ai/project/stack.md projection|
 |`opencode-skill`|script-inventory|`.opencode/skills/script-inventory/SKILL.md`|Build AI script inventory with risk and parity checks|
 |`opencode-skill`|search-evidence|`.opencode/skills/search-evidence/SKILL.md`|Collect repository evidence using ai-search|
 |`opencode-skill`|verify-change|`.opencode/skills/verify-change/SKILL.md`|Use when behavior changed and you need to choose the smallest relevant verification first, then report evidence clearly|
-|`opencode-skill`|workflow-drift-audit|`.opencode/skills/workflow-drift-audit/SKILL.md`|Use to review AI workflow files, instruction drift, repo-context drift, and unsupported workflow claims|
 |`php-reference`|design-patterns|`reference/php/design-patterns`|Primary local PHP design pattern corpus for agent and human lookups.|
 |`php-reference`|design-principles|`reference/php/design-principles`|Secondary PHP principles and composition examples.|
 |`php-reference`|php-built-ins|`reference/php/php-built-ins`|Supporting PHP built-in usage examples.|
