@@ -34,6 +34,19 @@ I drive a minimal bug-fix workflow: reproduce, localize, fix narrowly, verify, a
 4. follow the verification ladder: focused proof first, affected layer tests second, broader repository verification third, build as a smoke check when relevant, release-safety review only when risk warrants it
 5. report reproduction, root cause, fix, and evidence
 
+## Modes
+
+- **default** — the full workflow above: reproduce, localize, fix narrowly, verify, report.
+- **`reproduce_only`** — stop after proving the failure, when the deliverable is a failing or
+  proving regression test for a reported bug or edge case, without the fix (this replaces the
+  former `regression-test` skill):
+  1. identify the smallest useful proving surface
+  2. add the narrowest practical test or deterministic reproduction
+  3. confirm failure or proving behavior when practical
+  4. stop before applying a fix unless the request also asks for it
+
+  Do not widen into a broader refactor or feature task; do not weaken assertions to force a pass.
+
 ## Gotchas
 
 - do not weaken assertions to force a pass
