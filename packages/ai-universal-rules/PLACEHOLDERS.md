@@ -107,6 +107,18 @@ These placeholders appear in `docs/ai/project-context.md` (and related canonical
 
 `<PLACEHOLDER>` appears in installer log messages and docs as a generic stand-in for "any uppercase token". `<PLACEHOLDER_NAME>` is the same device used in the format example at the top of this file. Both are documentation devices, not project values, so the installer does not substitute them.
 
+## Command Usage Placeholders
+
+These tokens are argument stand-ins in command usage examples (for example the `install`
+command), not project values. The installer never substitutes them; a human replaces them on
+the command line.
+
+| Placeholder  | Meaning                              | Example Value | Used In           |
+| ------------ | ------------------------------------ | ------------- | ----------------- |
+| `<TARGET>`   | Target project directory for install | `../my-app`   | `install` command |
+| `<PROFILE>`  | Install profile name                 | `agents-only` | `install` command |
+| `<RUNTIME>`  | Target runtime / adapter             | `claude`      | `install` command |
+
 ## Machine-Readable Registry
 
 This document has a machine-readable companion: `placeholders.json` (shipped from `packages/ai-universal-rules/placeholders.json`, installed as `.ai/placeholders.json`). It maps every token to its `required` flag, category, and `.ai/project.yml` key (`projectYmlKey`). Tooling reads the JSON registry:

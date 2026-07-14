@@ -201,9 +201,12 @@ foreach (preg_split('/\R/', $access) ?: [] as $line) {
         }
     }
 }
-$allowedHookAgent = ['agent-creator-runtime-guardian'];
+// The pre/post-tool-use.sh runtime hooks are harness-invoked, not agent tools.
+// The retired agent-creator-runtime-guardian was their sole owner; after the
+// agent-handoff governance migration no agent holds an explicit hook grant.
+$allowedHookAgent = [];
 if (array_keys($hookGrantedTo) !== $allowedHookAgent) {
-    $errors[] = 'only agent-creator-runtime-guardian may be granted pre/post-tool-use.sh; got: '
+    $errors[] = 'no agent may be granted pre/post-tool-use.sh (harness-invoked runtime hooks); got: '
         . implode(', ', array_keys($hookGrantedTo) ?: ['(none)']);
 }
 
