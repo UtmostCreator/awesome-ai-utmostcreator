@@ -23,7 +23,7 @@ Integrity of this directory is enforced by `tools/ai/validate-schemas.php` (wire
 | `ai-file-standards.schema.json` | `generate-ai-file-standards.php` | `packages/ai-universal-rules/policies/ai-file-standards.json` (`$schema`) | `validate-schemas.php` | active-generated-contract |
 | `ai-universal-rules-manifest.schema.json` | export pipeline | `packages/ai-universal-rules/manifest.json` (`$schema`) | `validate-schemas.php` | active-generated-contract |
 | `evidence-event.schema.json` | evidence/observability writers | `validate-ai-config.php`, `validate-ai-catalog.php`, `ai_catalog_lib.php` | `validate-ai-config.php`, `validate-schemas.php` | active-runtime-contract |
-| `agent-spec.schema.json` | agent authoring | `validate-agent-spec.php` (hardcoded rules), agent-creator prompt | `validate-schemas.php` | public-doc-contract |
+| `agent-spec.schema.json` | agent authoring | `validate-agent-spec.php` (hardcoded rules), agent-factory prompt | `validate-schemas.php` | public-doc-contract |
 | `ai-install-manifest.schema.json` | installer manifest writer | `tests/php/OwnershipClassesTest.php` (structural read) | `validate-schemas.php` | active-runtime-contract |
 | `ai-manifest-lock.schema.json` | installer lock writer | `tests/php/OwnershipClassesTest.php` (structural read) | `validate-schemas.php` | active-runtime-contract |
 | `advisor-recommendation.schema.json` | advisor output | `tests/php/AdvisorSchemaTest.php` (existence) | `validate-schemas.php` | public-doc-contract |

@@ -227,7 +227,7 @@ function aiInstallerRenderClaudeAgent(
         );
     }
 
-    // agent-fleet-assessor's Bash Command Policy footer carries the same self-contradictory
+    // fleet-assessor's Bash Command Policy footer carries the same self-contradictory
     // "Other listed commands (...) are prose-discouraged and interactively gated, not
     // hard-blocked" sentence release-auditor's plan-16 fix and workflow-auditor's plan-17 fix
     // already replaced above — stale for this read-only orchestrator too: none of `rm`, `mv`,
@@ -235,7 +235,7 @@ function aiInstallerRenderClaudeAgent(
     // it must never attempt them. See
     // docs/tickets/claude-agent-fleet-remediation/plan-20-agent-fleet-assessor-critic-fixes.md
     // (fresh agent-critic re-audit, MINOR #3).
-    if ($agentId === 'agent-fleet-assessor') {
+    if ($agentId === 'fleet-assessor') {
         $bashPolicy = str_replace(
             'Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.',
             "For other Claude sessions in this repository, `rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset` are prose-discouraged and interactively gated, not hard-blocked — but none of them appear in this agent's own approved list above, so this agent must never attempt them.",
@@ -243,35 +243,19 @@ function aiInstallerRenderClaudeAgent(
         );
     }
 
-    // config-maintainer's Bash Command Policy footer carries the same self-contradictory
+    // configuration-maintainer's Bash Command Policy footer carries the same self-contradictory
     // "Other listed commands (...) are prose-discouraged and interactively gated, not
     // hard-blocked" sentence release-auditor's plan-16 fix, workflow-auditor's plan-17 fix, and
     // agent-fleet-assessor's plan-20 fix already replaced above — it falsely implies these
     // commands are "listed" for this agent when none of `rm`, `mv`, `cp`, `chmod`, plain
-    // `git push`/`git reset` ever appear in config-maintainer's own Approved-scripts list. See
+    // `git push`/`git reset` ever appear in configuration-maintainer's own Approved-scripts list.
+    // (Agent renamed from config-maintainer in agent-handoff-governance-20260714 Phase 5d.) See
     // docs/tickets/claude-agent-fleet-remediation/plan-24-config-maintainer-blocker-fix.md
     // (fresh agent-critic re-audit, MINOR finding #2).
-    if ($agentId === 'config-maintainer') {
+    if ($agentId === 'configuration-maintainer') {
         $bashPolicy = str_replace(
             'Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.',
             "Other repository-wide commands not part of this agent's approved list (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) remain prose-discouraged and interactively gated repo-wide per `.claude/settings.json`, but are outside this agent's own bash surface regardless.",
-            $bashPolicy
-        );
-    }
-
-    // agent-creator-runtime-guardian's Bash Command Policy footer carries the same
-    // self-contradictory "Other listed commands (...) are prose-discouraged and interactively
-    // gated, not hard-blocked" sentence release-auditor's plan-16 fix, workflow-auditor's
-    // plan-17 fix, agent-fleet-assessor's plan-20 fix, and config-maintainer's plan-24 fix
-    // already replaced above — it falsely implies these commands are "listed" for this agent
-    // when none of `rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset` ever appear in this
-    // agent's own approved list. See
-    // docs/tickets/claude-agent-fleet-remediation/plan-25-agent-creator-runtime-guardian-permission-fix.md
-    // (fresh agent-critic re-audit, MAJOR finding #1).
-    if ($agentId === 'agent-creator-runtime-guardian') {
-        $bashPolicy = str_replace(
-            'Other listed commands (`rm`, `mv`, `cp`, `chmod`, plain `git push`/`git reset`) are prose-discouraged and interactively gated, not hard-blocked.',
-            "These commands are absent from this agent's approved list above and MUST NOT be run by this agent regardless of `.claude/settings.json`'s ask-tier default for other agents.",
             $bashPolicy
         );
     }

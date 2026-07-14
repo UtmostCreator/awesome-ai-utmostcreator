@@ -1,0 +1,57 @@
+{
+  "supervisor": "orchestrator",
+  "participants": [
+    "researcher",
+    "architect",
+    "plan-writer",
+    "implementer",
+    "configuration-maintainer",
+    "reviewer",
+    "release-auditor"
+  ],
+  "exits": [
+    "reviewer",
+    "release-auditor"
+  ],
+  "always_allowed": [
+    "orchestrator",
+    "done"
+  ],
+  "allowed_next": {
+    "researcher": [
+      "architect",
+      "implementer"
+    ],
+    "architect": [
+      "plan-writer",
+      "implementer"
+    ],
+    "plan-writer": [
+      "implementer"
+    ],
+    "implementer": [
+      "reviewer"
+    ],
+    "configuration-maintainer": [
+      "reviewer"
+    ],
+    "reviewer": [
+      "implementer",
+      "release-auditor"
+    ],
+    "release-auditor": [],
+    "agent-factory": [
+      "agent-definition-reviewer"
+    ],
+    "fleet-assessor": [
+      "agent-definition-reviewer"
+    ],
+    "agent-definition-reviewer": [
+      "fleet-assessor"
+    ],
+    "bootstrapper": [],
+    "ui-builder": [
+      "reviewer"
+    ]
+  }
+}

@@ -132,6 +132,15 @@ final class ClaudeCapabilityFilterTest extends TestCase
             $this->markTestSkipped('.claude/agents not installed');
         }
         $files = glob($dir . '/*.md') ?: [];
+        // super-implementer.md is a held-back draft orphan (see .gitignore: id-collision
+        // with implementer.md), not a renderer-managed shipped agent — the same reason
+        // OpencodeAgentBodyParityTest skips it as an "opencode-only agent with no canonical
+        // template". It carries stale Script Access bullets naming scripts that were moved
+        // out of scripts/ai (commit b2fbf715), so it must not gate the installed fleet.
+        $files = array_values(array_filter(
+            $files,
+            static fn (string $f): bool => basename($f, '.md') !== 'super-implementer'
+        ));
         if ($files === []) {
             $this->markTestSkipped('.claude/agents has no rendered agent files');
         }
@@ -221,12 +230,8 @@ final class ClaudeCapabilityFilterTest extends TestCase
     public function testKnownMixedPresenceBulletsAreUnchanged(): void
     {
         $expected = [
-            'bugfix.md' => '- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to prove the fix; expect pass/fail evidence.',
-            'build-config.md' => '- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to prove the change; expect pass/fail evidence.',
-            'config-maintainer.md' => '- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.',
+            'configuration-maintainer.md' => '- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.',
             'implementer.md' => '- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for proof; expect pass/fail.',
-            'upgrade.md' => '- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — to prove compatibility; expect pass/fail evidence.',
-            'refactorer.md' => '- `ai-verify.sh` (`ask`) / `ai-test-select.sh` / `run-repo-tests.sh` — for behavior-preservation proof; expect pass/fail. Note: even the exact-match `AI_VERIFY_SCOPE=changed VERIFY_SECRETS=0 bash scripts/ai/ai-verify.sh *` form (listed `allow` in this file\'s OpenCode permission table, and shown as an "Approved script" in the Claude Bash Command Policy body) still surfaces an interactive approval prompt on Claude Code unless `.claude/settings.json`\'s `permissions.allow` also carries a matching `Bash(...)` entry — check that file rather than assuming the listed form runs unprompted.',
             'release-auditor.md' => '- `ai-diff-context.sh` / `ai-verify.sh` (`ask`) — to confirm verification depth; expect diff bundle and test results already produced by prior implementer/reviewer runs. Ask-tier scripts such as `ai-verify.sh` require a separate per-run approval prompt each time they run and are deliberately not part of the renderer\'s fixed "Approved scripts" allow-list; listing them here is not a contradiction of that list.',
         ];
 

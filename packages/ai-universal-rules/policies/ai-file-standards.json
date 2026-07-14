@@ -81,8 +81,21 @@
       ],
       "target_min": 80,
       "target_max": 160,
-      "warn_above": 220,
-      "fail_above": 300
+      "info_above": 240,
+      "warn_above": 320,
+      "fail_above": 360
+    },
+    {
+      "id": "claude-agents",
+      "label": "Claude agents",
+      "patterns": [
+        ".claude/agents/*.md"
+      ],
+      "target_min": 80,
+      "target_max": 170,
+      "info_above": 240,
+      "warn_above": 320,
+      "fail_above": 360
     },
     {
       "id": "copilot-prompts",
@@ -114,8 +127,9 @@
       ],
       "target_min": 80,
       "target_max": 170,
-      "warn_above": 275,
-      "fail_above": 350,
+      "info_above": 240,
+      "warn_above": 320,
+      "fail_above": 360,
       "warn_allowlist": [
         {
           "path": ".opencode/agents/implementer.md",
@@ -196,8 +210,9 @@
       ],
       "target_min": 80,
       "target_max": 170,
-      "warn_above": 275,
-      "fail_above": 350,
+      "info_above": 240,
+      "warn_above": 320,
+      "fail_above": 360,
       "warn_allowlist": [
         {
           "path": "packages/ai-universal-rules/templates/core/agents/bootstrapper.md",

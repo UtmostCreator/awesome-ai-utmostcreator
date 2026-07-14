@@ -171,7 +171,7 @@ $liveFiles = [
     '.github/instructions/targets.instructions.md',
     '.github/instructions/testing.instructions.md',
     '.github/instructions/execution-protocol.instructions.md',
-    '.github/agents/config-maintainer.agent.md',
+    '.github/agents/configuration-maintainer.agent.md',
     '.github/agents/workflow-auditor.agent.md',
     'docs/ai/capabilities/project-context/CAPABILITY.md',
     'docs/ai/capabilities/verify-change/CAPABILITY.md',
@@ -520,16 +520,11 @@ $aiWiringRequiredFiles = [
     '.github/instructions/ai-search.instructions.md',
     '.github/instructions/ai-tooling.instructions.md',
     '.github/prompts/search-evidence.prompt.md',
-    '.github/agents/repository-researcher.agent.md',
     'opencode.jsonc',
     '.opencode/commands/search-evidence.md',
     '.opencode/commands/verify-ai-wiring.md',
-    '.opencode/agents/repository-researcher.md',
-    '.opencode/agents/repository-reviewer.md',
     '.opencode/skills/ai-search/SKILL.md',
     'packages/ai-universal-rules/templates/core/opencode.json',
-    'packages/ai-universal-rules/templates/core/agents/repository-researcher.md',
-    'packages/ai-universal-rules/templates/core/agents/repository-reviewer.md',
     'packages/ai-universal-rules/templates/commands/search-evidence.md',
     'packages/ai-universal-rules/templates/commands/verify-ai-wiring.md',
     'packages/ai-universal-rules/templates/skills/ai-search/SKILL.md',
@@ -551,7 +546,7 @@ foreach ($aiWiringRequiredFiles as $relativePath) {
 
 $requiredSnippets = ['AI_OUTPUT=json bash scripts/ai/ai-search.sh', 'changed', 'staged', 'tracked', 'schema', 'unsafe-all', 'AI_ALLOW_UNLIMITED=1', 'unsafe_blocked', 'dry_run', 'bash scripts/ai/query-usage.sh', 'bash scripts/ai/ai-verify.sh', 'secrets'];
 $previewRequiredSnippets = ['AI_OUTPUT=json bash scripts/ai/preview-file.sh', '--range', '--around', '--max-columns', '--max-bytes', '--force', 'schema', 'status', 'tool', 'path', 'range', 'content', 'warnings', 'errors'];
-$wiringSources = ['AGENTS.md', 'docs/ai/tools/ai-search.md', 'docs/ai/tools/tool-map.md', 'docs/ai/tools/actions/preview-file.md', '.github/copilot-instructions.md', '.github/instructions/ai-tooling.instructions.md', '.opencode/commands/search-evidence.md', '.opencode/commands/verify-ai-wiring.md', '.opencode/agents/repository-researcher.md', '.opencode/agents/repository-reviewer.md', '.opencode/skills/ai-search/SKILL.md', 'scripts/ai/preview-file.sh'];
+$wiringSources = ['AGENTS.md', 'docs/ai/tools/ai-search.md', 'docs/ai/tools/tool-map.md', 'docs/ai/tools/actions/preview-file.md', '.github/copilot-instructions.md', '.github/instructions/ai-tooling.instructions.md', '.opencode/commands/search-evidence.md', '.opencode/commands/verify-ai-wiring.md', '.opencode/skills/ai-search/SKILL.md', 'scripts/ai/preview-file.sh'];
 $combined = '';
 foreach ($wiringSources as $src) {
     $combined .= "\n" . (safeRead($root, $src) ?? '');

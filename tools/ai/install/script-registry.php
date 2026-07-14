@@ -644,22 +644,22 @@ function aiInstallerAgentProfiles(): array
     return [
         'architect' => 'readonly',
         'researcher' => 'readonly',
-        'repository-researcher' => 'readonly',
         'reviewer' => 'readonly',
-        'repository-reviewer' => 'readonly',
         'release-auditor' => 'readonly',
-        'workflow-auditor' => 'readonly',
-        // Extended to all 15 shipped .opencode/agents/*.md per
+        // Extended to the shipped core .opencode/agents/*.md per
         // docs/tickets/arch-todo-permission-layer-composition-20260705T004618Z/plan.md,
         // Slice 4. Keyed by filename stem, never frontmatter `id` (super-implementer
-        // ships `id: implementer` while its filename differs).
-        'architecture-plan-writer' => 'readonly',
-        'config-maintainer' => 'verify',
+        // ships `id: implementer` while its filename differs). `workflow-auditor` and
+        // `refactorer` were retired (agent-handoff-governance-20260714, Phase 4) — their
+        // methods moved to the workflow-drift-audit skill (reviewer) and the safe-refactor
+        // skill (implementer) respectively. `repository-researcher` and `repository-reviewer`
+        // were retired (agent-handoff-governance-20260714, Phase 5a) — their script-first
+        // ai-search evidence discipline was folded into `researcher`/`reviewer`.
+        'plan-writer' => 'readonly',
+        'configuration-maintainer' => 'verify',
         'script-runner' => 'verify',
         'implementer' => 'impl',
         'super-implementer' => 'impl',
-        'refactorer' => 'impl',
-        'post-install' => 'impl',
         'bootstrapper' => 'impl',
     ];
 }

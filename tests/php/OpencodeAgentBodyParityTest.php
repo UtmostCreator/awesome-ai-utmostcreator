@@ -47,7 +47,7 @@ final class OpencodeAgentBodyParityTest extends TestCase
         'ai-kit installer from packages/ai-universal-rules/templates/core/agents';
 
     /** @var list<string> */
-    private const RECONCILIATION_PENDING = ['architect', 'architecture-plan-writer'];
+    private const RECONCILIATION_PENDING = [];
 
     private static string $repoRoot;
 

@@ -1,0 +1,44 @@
+---
+name: agent-semantic-verification
+description: Use to judge whether a statically valid AgentSpec actually matches the user request and is not over-powered.
+argument-hint: 'Provide the AgentSpec JSON and the original user request to compare'
+---
+
+## What I Do
+
+I judge meaning, not syntax: given a statically valid AgentSpec plus the original user request, I decide whether the spec actually fits the request and is not overpowered. Static validation already proved the spec is legal; I decide whether it is the right and safe agent. I return a verdict with exact fixes — I never edit the spec and never run the agent.
+
+## When To Use Me
+
+- after static validation returns exit 0 but before approval
+- when the agent can use tools, write files, call APIs, search the web, or act across steps without confirmation
+- to check least privilege and autonomy proportionality against the stated purpose
+- (optional for pure text-only agents that only read and reply)
+
+## Read Alongside
+
+- `packages/ai-universal-rules/templates/optional/agents/agent-creator-semantic-verifier.md`
+- `docs/ai/capabilities/authorization-and-tool-governance/CAPABILITY.md`
+- `docs/ai/capabilities/verify-change/CAPABILITY.md`
+
+## Steps
+
+1. Confirm the Static Validator already returned exit 0 and the original user request is present. If the request is missing, stop and ask for it — never infer intent from the spec alone.
+2. Request-fit: does the spec do what the request asks, no more and no less? Flag instructions that are too broad, off-target, or internally conflicting.
+3. Least privilege: check every granted tool and permission against the stated purpose; anything the request does not justify is a finding to reduce, never expand.
+4. Autonomy proportionality: check that `maximum_steps`, network access, file-write, and human-approval settings fit the risk level; overpowered autonomy is a mismatch.
+5. Confirm `success_criteria` are specific and measurable, then issue one verdict — MATCHES, MATCHES WITH NOTES, or MISMATCH — with the exact changes required before ship.
+
+## Output
+
+- a request-vs-spec fit assessment and any conflicts or ambiguities
+- overpower findings across tools, permissions, and autonomy
+- one verdict: MATCHES | MATCHES WITH NOTES | MISMATCH
+- the exact reductions or fixes required before approval
+
+## Gotchas
+
+- statically valid is not the same as safe — never pass an overpowered agent just because it parses
+- recommendations may only narrow the granted surface, never widen it
+- do not edit the spec; you critique, the creator revises
+- use `unknown` when the request does not prove a needed detail, and stop rather than guess intent

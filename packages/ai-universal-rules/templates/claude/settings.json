@@ -135,6 +135,7 @@
             "Bash(pnpm run typecheck*)",
             "Bash(pnpm test*)",
             "Bash(pwd)",
+            "Bash(python handoff/dispatch.py *)",
             "Bash(rg *)",
             "Bash(scc *)",
             "Bash(scc --no-complexity --no-cocomo *)",
