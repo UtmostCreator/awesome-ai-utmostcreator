@@ -290,6 +290,19 @@ function aiPermissionPacks(): array
         'hard_stop.ask_rm' => aiPermissionEntries('bash', [
             'rm *' => 'ask',
         ]),
+        // Grant (2026-07-10): 'python3 *' was relocated out of the immutable hard-deny floor
+        // to a NON-immutable 'deny' default in core:safe-read (see core.php's two NOTE blocks).
+        // Read-only agents fall through to that deny; the write/edit-capable impl-tier agents
+        // (implementer, refactorer, bootstrapper, post-install, super-implementer) route it to
+        // 'ask' via this shared pack — never a silent 'allow', matching the AGENTS.md approval-
+        // boundary posture for interpreter execution. Extracted into a named pack because 5
+        // agents need the identical entry (testNoExceptionPatternDuplicatedAcrossTwoOrMoreAgents
+        // forbids repeating the same exception pattern inline across 2+ agents). To make this
+        // super-implementer-specific instead, remove this pack from the other agents' askPacks
+        // and keep it only on super-implementer's askPacks list in compositions.php.
+        'impl.ask_python3' => aiPermissionEntries('bash', [
+            'python3 *' => 'ask',
+        ]),
         'core.safe_read.deny_git_grep' => aiPermissionEntries('bash', [
             'git grep *' => 'deny',
         ]),
@@ -470,12 +483,6 @@ function aiPermissionPacks(): array
             'bash scripts/ai/ai-doc-check.sh *' => 'deny',
         ]),
 
-        // Shared by all 5 agent-creator-family members (only 3 composed this slice); the
-        // deterministic AgentSpec validator script every family member invokes directly.
-        'agent_creator.validate_spec_allow' => aiPermissionEntries('bash', [
-            'php tools/ai/validate-agent-spec.php *' => 'allow',
-        ]),
-
         // core:git-read grants both by default; static-validator/semantic-verifier/
         // runtime-guardian all deny them back (narrower git surface than every other
         // composed agent). Kept atomic (not bundled with git.deny_blame/deny_rev_parse/
@@ -497,37 +504,6 @@ function aiPermissionPacks(): array
             'yq *' => 'deny',
         ]),
 
-        // ai-file-freshness/ai-doc-check (both ai-read baseline default: allow) denied back
-        // by `agent-creator` and `agent-creator-supervisor` WITHOUT also denying the
-        // context-packaging family (unlike 'ai_scripts.deny_context_and_doc_scripts' above,
-        // which bundles both for the 3 agents that deny all 6 together) — those 2 agents
-        // keep pack-context/run-repomix-context/repomix-context-tree/repomix-scc-router at
-        // their unconditional 'ask' default, so a smaller, separate pack is needed rather
-        // than reusing the 6-pattern bundle.
-        'agent_creator.deny_freshness_and_doc_check' => aiPermissionEntries('bash', [
-            'bash scripts/ai/ai-file-freshness.sh *' => 'deny',
-            'bash scripts/ai/ai-doc-check.sh *' => 'deny',
-        ]),
-
-        // ai-diff-context (ai-read baseline default: allow) denied back by exactly 2 of 5
-        // agent-creator-family members (`agent-creator`, `agent-creator-static-validator`);
-        // extracted here (rather than left as static-validator's prior inline exception)
-        // because `agent-creator` needs the identical pattern too.
-        'agent_creator.deny_ai_diff_context' => aiPermissionEntries('bash', [
-            'bash scripts/ai/ai-diff-context.sh *' => 'deny',
-        ]),
-
-        // session-checkpoint.sh (readonly-profile default: deny) ask-gated by exactly 2 of
-        // 5 agent-creator-family members (`agent-creator-runtime-guardian`,
-        // `agent-creator-supervisor`); extracted here (rather than left as
-        // runtime-guardian's prior inline exception) because `agent-creator-supervisor`
-        // needs the identical pattern too. pre-tool-use.sh/post-tool-use.sh are
-        // deliberately NOT included — both are on the TRUE immutable hard-deny floor and
-        // can never resolve to `ask` for any composed agent (same forced-tightening
-        // precedent as architecture-plan-writer/script-runner).
-        'agent_creator.ask_session_checkpoint' => aiPermissionEntries('bash', [
-            'bash scripts/ai/session-checkpoint.sh *' => 'ask',
-        ]),
     ];
 }
 

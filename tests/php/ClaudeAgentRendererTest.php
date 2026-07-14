@@ -139,7 +139,12 @@ class ClaudeAgentRendererTest extends TestCase
     {
         $out = aiInstallerRenderClaudeAgent($this->architectTemplate(), 'architect', '/project/scripts/ai');
         $this->assertStringContainsString('## Bash Command Policy', $out);
-        $this->assertStringContainsString('.claude/settings.json` wins', $out);
+        // Plan-28 Phase 3: the disclaimer states the approved-scripts list is a SUBSET of
+        // `.claude/settings.json`'s enforced floor by construction, replacing the pre-Phase-3
+        // "if this list and .claude/settings.json disagree, .claude/settings.json wins"
+        // contradiction framing (see ClaudeCapabilityFilterTest for the fleet-wide assertion
+        // that the old contradiction phrase never appears in any installed agent body).
+        $this->assertStringContainsString('SUBSET of `.claude/settings.json`', $out);
     }
 
     // ----- Implementer (write-capable, no task grant) -----

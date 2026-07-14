@@ -1,3 +1,29 @@
+> **Correction (grounded review, 2026-07-09):** most of the "## TODO" list at the bottom of
+> this file is **already implemented**, confirmed by direct file inspection:
+>
+> - `docs/ai/script-registry.json` exists (plus `docs/ai/script-registry.schema.json`).
+> - `docs/ai/script-registry.md` exists.
+> - `docs/ai/agent-script-access.md` exists, and is already the canonical per-tier
+>   allow/ask/deny doc every agent's "Script Access" section points to (confirmed in this
+>   repo's own rendered `implementer` agent body).
+> - Agent permission frontmatter is already generated from a composed model
+>   (`tools/ai/install/permission-layers/*`, `aiPermissionComposeFromSpec` over
+>   `aiInstallerAgentProfiles`), not hand-written per this doc's original proposal.
+> - `scripts/ai/bin/{read,context,verify,edit,admin,hooks}/` (role-grouped internals) and
+>   `scripts/ai/internal/**` exist exactly as this doc's "Recommended source-of-truth split"
+>   describes; the ~42 root `scripts/ai/*.sh` wrappers are the frozen, intended public
+>   contract (see `docs/tickets/MASTER-INDEX.md` "P6 REJECTED" — a later, conflicting 3rd
+>   reorg proposal was explicitly rejected to keep this exact shape).
+>
+> What is **not yet fully closed**, per `docs/tickets/claude-agent-fleet-remediation/plan-28-permission-sot-and-render-parity-sync.md`
+> (in progress — see working tree): the script-registry -> permission-frontmatter pipeline is
+> only one of three still-partially-unlinked enforcement surfaces (composed body vs.
+> `.claude/settings.json` vs. `command-policy.tiers.yaml`), and there is still no byte-parity
+> render gate covering `.claude/agents` + `.github/agents` end-to-end (Phase 1 of plan-28 is
+> landing this now). Treat plan-28 as the authoritative, near-complete answer to this file's
+> "Add a machine registry" / "Frontmatter permission pattern" sections — do not restart that
+> design; see `docs/tickets/IDEAS/architecture-plan.md` §"Scripts And Permissions".
+
 ## Best wiring model
 
 Do **not** wire scripts directly into every agent. Wire them through a registry + capability + workflow + permission layer.

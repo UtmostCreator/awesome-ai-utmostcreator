@@ -76,40 +76,27 @@ run_suite() {
 
 printf '\033[1m=== AI Script Test Runner ===\033[0m\n'
 
+# NOTE: the REUSABLE-bucket suites (ai-search.sh, rg-code.sh, fd-files.sh,
+# preview-file.sh, ai-diff-context.sh, query-usage.sh, ai-test-select.sh,
+# ai-task.sh, ai-doc-check.sh, session-checkpoint.sh, git-forensics.sh,
+# gh-pr-context.sh, ai-structured.sh, pack-context.sh, repomix-scc-router.sh,
+# repomix-context-tree.sh, run-repomix-context.sh, run-repomix-file.sh,
+# repo-tool-inventory.sh, sh-introspect.sh, watch-loop.sh, ai-edit.sh,
+# ai-rollback.sh, check-file-refs.sh, repomix-freshness.sh) moved to
+# /home/utmostcreator/Projects/agent-repo-tools/test/ along with their scripts
+# (see docs/tickets/arch-todo-scripts-ai-reusable-extraction-20260711-162902/).
+# Their entries are removed here rather than left to report a misleading
+# "not yet created" skip — they will not be re-created in this repo; they come
+# back only via the Chunk 5 re-vendor mechanism once approved.
 SUITES=(
     "common.sh|tests/scripts/ai/test-common.sh"
     "common.sh-source|tests/scripts/ai/test-common-source.sh"
-    "ai-search.sh|tests/scripts/ai/test-ai-search.sh"
-    "rg-code.sh|tests/scripts/ai/test-rg-code.sh"
-    "fd-files.sh|tests/scripts/ai/test-fd-files.sh"
-    "preview-file.sh|tests/scripts/ai/test-preview-file.sh"
     "pre-tool-use.sh|tests/scripts/ai/test-pre-tool-use.sh"
     "post-tool-use.sh|tests/scripts/ai/test-post-tool-use.sh"
     "ai-verify.sh|tests/scripts/ai/test-ai-verify.sh"
-    "ai-diff-context.sh|tests/scripts/ai/test-ai-diff-context.sh"
-    "query-usage.sh|tests/scripts/ai/test-query-usage.sh"
-    "ai-test-select.sh|tests/scripts/ai/test-ai-test-select.sh"
-    "ai-task.sh|tests/scripts/ai/test-ai-task.sh"
-    "ai-doc-check.sh|tests/scripts/ai/test-ai-doc-check.sh"
-    "session-checkpoint.sh|tests/scripts/ai/test-session-checkpoint.sh"
-    "git-forensics.sh|tests/scripts/ai/test-git-forensics.sh"
-    "gh-pr-context.sh|tests/scripts/ai/test-gh-pr-context.sh"
-    "ai-structured.sh|tests/scripts/ai/test-ai-structured.sh"
-    "pack-context.sh|tests/scripts/ai/test-pack-context.sh"
-    "repomix-scc-router.sh|tests/scripts/ai/test-repomix-scc-router.sh"
-    "repomix-context-tree.sh|tests/scripts/ai/test-repomix-context-tree.sh"
-    "run-repomix-context.sh|tests/scripts/ai/test-run-repomix-context.sh"
-    "run-repomix-file.sh|tests/scripts/ai/test-run-repomix-file.sh"
-    "repo-tool-inventory.sh|tests/scripts/ai/test-repo-tool-inventory.sh"
-    "sh-introspect.sh|tests/scripts/ai/test-sh-introspect.sh"
-    "watch-loop.sh|tests/scripts/ai/test-watch-loop.sh"
-    "ai-edit.sh|tests/scripts/ai/test-ai-edit.sh"
-    "ai-rollback.sh|tests/scripts/ai/test-ai-rollback.sh"
     "install-mandatory-tools.sh|tests/scripts/ai/test-install-mandatory-tools.sh"
-    "check-file-refs.sh|tests/scripts/ai/test-check-file-refs.sh"
     "validate-agent-spec.php|tests/scripts/ai/test-validate-agent-spec.sh"
     "prune-shipped-targets.sh|tests/scripts/ai/test-prune-shipped-targets.sh"
-    "repomix-freshness.sh|tests/scripts/ai/test-repomix-freshness.sh"
     "misc-wrappers|tests/scripts/ai/test-misc-wrappers.sh"
 )
 

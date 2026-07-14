@@ -28,11 +28,12 @@ require_once __DIR__ . '/migrations.php';
 
 function aiInstallerRun(array $argv): int
 {
-    $config = aiInstallerParseArgs($argv);
-    if (($config['help'] ?? false) === true) {
+    if (aiInstallerWantsHelp($argv)) {
         aiInstallerUsage();
         return 0;
     }
+
+    $config = aiInstallerParseArgs($argv);
     if (($config['stackDetectOnly'] ?? false) === true) {
         require_once __DIR__ . '/../commands/stack_selection.php';
         $resolved = aiStackSelectionResolve((string) $config['targetRoot'], $config);

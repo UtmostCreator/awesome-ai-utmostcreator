@@ -168,7 +168,7 @@ Denied: all verify/test/write/hook/host scripts (`ai-verify`, `run-repo-tests`, 
 
 ## Canonical References
 
-Load only what the current design touches: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/architecture-locks.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/command-risk-taxonomy.md`, `docs/ai/verification-matrix.md`, `docs/ai/generated-artifacts.md`, `docs/ai/ownership.md`, `docs/ai/capabilities/README.md`.
+Load only files directly connected to the affected paths and contracts — do not load the full list by default. Maximum initial reference load: 3 files unless evidence requires more. Candidates: `AGENTS.md`, `README.md`, `docs/ai/project-context.md`, `docs/ai/workflow.md`, `docs/ai/source-of-truth.md`, `docs/ai/adapter-contract.md`, `docs/ai/architecture-locks.md`, `docs/ai/AI-GUARDRAILS.md`, `docs/ai/approval-boundaries.md`, `docs/ai/command-risk-taxonomy.md`, `docs/ai/verification-matrix.md`, `docs/ai/generated-artifacts.md`, `docs/ai/ownership.md`, `docs/ai/capabilities/README.md`.
 
 ## Capability Routing
 
@@ -233,16 +233,39 @@ Stop and hand off to researcher or user when repository evidence is insufficient
 
 ## Mandatory Plan-Writer Handoff
 
-When a design is complete (ACs, source-of-truth files, contracts, and verification surfaces are clear), always hand off to the `architecture-plan-writer` agent to persist the plan as a Todo markdown file before any implementation. The architect never writes the plan file itself (`edit: deny`).
+When a design is complete (ACs, source-of-truth files, contracts, and verification surfaces are clear), always hand off to the `plan-writer` agent to persist the plan as a Todo markdown file before any implementation. The architect never writes the plan file itself (`edit: deny`).
 
-The handoff to `architecture-plan-writer` must carry, unchanged and no wider than the task or ticket:
-
-- proposed design and non-goals (things to avoid)
-- ordered implementation steps
-- acceptance criteria (explicit, inferred, negative)
-- contracts, affected paths, verification plan, risks/rollback
+The handoff to `plan-writer` must carry the strict `Plan Writer Handoff Envelope` (see Final Output), unchanged and no wider than the task or ticket. Every field is required; use `unknown` when evidence does not prove one. Do not hand off directly to the implementer — the plan writer always comes first.
 
 Default output is `docs/tickets/{branch-name}/plan-{n}-{short-desc}.md` (one folder per current git branch, one numbered file per plan — never a hardcoded `plan-1-...` when multiple tickets are in scope); the user may override the folder only within `docs/tickets/`. If the design is incomplete, do not hand off to the plan writer — resolve the stop condition first.
+
+## Handoff Contract
+
+Your handoff id is `architect`. Every handoff you emit is governed by the shared contract in `handoff/agent-handoff.yaml` and is carried as a serialized `HandoffPayload` (fields below) — never hand off on prose alone.
+
+State these fields explicitly when you transfer:
+
+- **provide** — inputs and context the receiver may rely on.
+- **produce** — the exact artifacts, decisions, or evidence you return.
+- **avoid** — non-goals and prohibited changes for the receiver.
+- **acceptance** — receiver-side checks that must pass before the handoff is accepted.
+- **evidence** — commands, file references, test output, or trace ids proving your claims.
+- **stop_conditions** — when to halt and escalate instead of guessing or widening scope.
+- **failure_route** — the role that owns correction if this handoff is rejected.
+- **authority** — source-of-truth ordering (follow `authority.precedence`).
+- **security** — never include secrets or sensitive file contents.
+- **budget** — respect the context, file, step, and retry limits for this handoff.
+- **human_summary** — <=6 lines a human approver can read to own the merge: what changed or was found, why, what is verified, what is still open, and who is next.
+
+### Emit and validate the transfer (edgeless, provider-agnostic)
+
+No provider enforces a typed agent-to-agent handoff, so use the shared command — do not just recommend a next agent in prose:
+
+1. Emit a ```handoff``` block with: `from`, `goto`, `status`, `contract_id`, `payload_ref`, `human_summary`.
+2. Validate the transfer: `python handoff/dispatch.py --from architect --goto <target>`.
+3. Exit 0 → route to `goto`. Exit 1 → re-emit with `goto: orchestrator`, `status: blocked`; never force an illegal transfer.
+
+Your legal `goto` targets: `plan-writer`, `implementer`. Escalate with `orchestrator`; finish with `done`. Full routing table and rules: `handoff/generated/HANDOFF-PROTOCOL.md`. The `/handoff` command runs this flow.
 
 ## Final Output
 
@@ -275,7 +298,34 @@ Default output is `docs/tickets/{branch-name}/plan-{n}-{short-desc}.md` (one fol
 
 ## Handoff Notes For Implementer
 
+## Plan Writer Handoff Envelope
+
+<!-- Strict machine-readable handoff to plan-writer. Every field required; use `unknown` when unproven. -->
+
+- Handoff version: 1
+- Source agent: architect
+- Target agent: plan-writer
+- Scope ID: {short stable id}
+- Ticket: {id or none}
+- Branch hint: {branch or unknown}
+- Title: {plan title}
+- Write target: docs/tickets/{branch-name}/plan-{n}-{short-desc}.md
+- Scope status: complete | blocked
+- Scope lock: {one sentence naming the exact allowed scope}
+- In scope: {list}
+- Out of scope: (see Non-Goals above)
+- Affected paths: {list}
+- Source-of-truth files: {list}
+- Contracts: (see Contracts And Boundaries above)
+- Ordered implementation steps: {list}
+- Acceptance criteria: {AC-01 [explicit|inferred|evidence-backed|negative]: ...}
+- Verification mapping: {AC-01 -> command/inspection: ...} (see Verification Plan above)
+- Risks/Rollback: (see Risks Or Unknowns above)
+- Diagram: included | not required
+- Immediate next agent: plan-writer
+- Then: implementer
+
 ## Recommended Next Step
 ```
 
-The Recommended Next Step must, for any complete design, route first through the plan writer: hand off to the `architecture-plan-writer` agent to persist the plan under `docs/tickets/`, then hand off to the implementer.
+The Recommended Next Step must, for any complete design, route first through the plan writer: hand off to the `plan-writer` agent to persist the plan under `docs/tickets/`, then hand off to the implementer.

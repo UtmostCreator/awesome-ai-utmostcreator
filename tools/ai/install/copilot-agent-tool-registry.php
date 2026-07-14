@@ -37,26 +37,26 @@ function aiCopilotAgentToolRegistry(): array
     ]);
 
     return [
-        'agent-critic'      => $executeToolsWithQuestions,
-        'agent-fleet-assessor' => $readOnlyToolsWithQuestions,
+        'agent-definition-reviewer' => $executeToolsWithQuestions,
+        'fleet-assessor'    => $readOnlyToolsWithQuestions,
+        // orchestrator: read-only supervisor/coordinator that routes tasks to delivery
+        // agents via the handoff contract (edit: deny, task: allow). Mirrors
+        // fleet-assessor — a read-only coordinator that delegates rather than edits.
+        'orchestrator'      => $readOnlyToolsWithQuestions,
+        // agent-factory: read-only agent-creation pipeline (edit: deny, task: deny). It routes to
+        // agent-definition-reviewer via the native `handoffs:` button (a handoff, not a spawn) and
+        // asks clarifying questions — so it keeps read + askQuestions but is granted NO subagent/Agent
+        // tool (the Copilot tool registry never carried one). Merges the retired agent-creator family.
+        'agent-factory'     => $readOnlyToolsWithQuestions,
         'architect'         => $readOnlyToolsWithQuestions,
-        'architecture-plan-writer' => $editExecuteTools,
+        'plan-writer' => $editExecuteTools,
         'reviewer'          => $executeToolsWithQuestions,
         'release-auditor'   => $readOnlyTools,
-        'workflow-auditor'  => $readOnlyTools,
         'researcher'        => $executeToolsWithQuestions,
-        'repository-researcher' => $executeToolsWithQuestions,
-        'repository-reviewer' => $executeToolsWithQuestions,
         'bootstrapper'      => $editExecuteTools,
         'implementer'       => $editExecuteTools,
-        'post-install'      => $editExecuteTools,
-        'config-maintainer' => $editExecuteTools,
-        'refactorer'        => $editExecuteTools,
-        'bugfix'            => $editExecuteTools,
-        'build-config'      => $editExecuteTools,
-        'docs'              => $editExecuteTools,
+        'configuration-maintainer' => $editExecuteTools,
         'ui-builder'        => $editExecuteTools,
-        'upgrade'           => $editExecuteTools,
     ];
 }
 

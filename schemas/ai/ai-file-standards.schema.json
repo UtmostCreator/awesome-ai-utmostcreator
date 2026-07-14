@@ -125,6 +125,10 @@
             "type": "integer",
             "minimum": 0
           },
+          "info_above": {
+            "type": "integer",
+            "minimum": 0
+          },
           "warn_above": {
             "type": "integer",
             "minimum": 0

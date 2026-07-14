@@ -89,6 +89,9 @@
         {"token": "<FILES_OR_COMMANDS_CHECKED>", "required": false, "category": "format-slot", "projectYmlKey": null, "substitute": false},
         {"token": "<NEXT_STEP>", "required": false, "category": "format-slot", "projectYmlKey": null, "substitute": false},
         {"token": "<PLACEHOLDER>", "required": false, "category": "meta", "projectYmlKey": null, "substitute": false},
-        {"token": "<PLACEHOLDER_NAME>", "required": false, "category": "meta", "projectYmlKey": null, "substitute": false}
+        {"token": "<PLACEHOLDER_NAME>", "required": false, "category": "meta", "projectYmlKey": null, "substitute": false},
+        {"token": "<TARGET>", "required": false, "category": "meta", "projectYmlKey": null, "substitute": false},
+        {"token": "<PROFILE>", "required": false, "category": "meta", "projectYmlKey": null, "substitute": false},
+        {"token": "<RUNTIME>", "required": false, "category": "meta", "projectYmlKey": null, "substitute": false}
     ]
 }

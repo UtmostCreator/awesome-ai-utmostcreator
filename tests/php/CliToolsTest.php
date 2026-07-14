@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests;
 
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -532,6 +533,7 @@ class CliToolsTest extends TestCase
         $this->assertSame(0, $result['exit'], "ai.php risk exited non-zero:\n" . $result['stderr']);
     }
 
+    #[Group('slow')]
     public function testAiCliVerifyExitsZeroOrKnownFailureCode(): void
     {
         $result = $this->runTool('php tools/ai/ai.php verify --changed');

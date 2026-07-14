@@ -103,8 +103,8 @@ final class ClaudeSettingsProjectionTest extends TestCase
         $this->assertNotEmpty($allow);
 
         $agents = $this->shippedAgentAllowedBash();
-        // 26 templates - 2 hidden (bootstrapper, ui-builder) = 24 shipped.
-        $this->assertCount(24, $agents, 'expected exactly 24 shipped Claude agents');
+        // 14 templates - 3 hidden (bootstrapper, ui-builder, ai-maintenance) = 11 shipped.
+        $this->assertCount(11, $agents, 'expected exactly 11 shipped Claude agents');
 
         $missing = [];
         foreach ($agents as $agentId => $patterns) {
@@ -142,6 +142,32 @@ final class ClaudeSettingsProjectionTest extends TestCase
             [],
             $missing,
             "immutable hard-deny pattern(s) missing from generated permissions.deny:\n" . implode("\n", $missing)
+        );
+    }
+
+    /**
+     * Regression: this repo develops the AI kit whose source lives under `packages/`, and the
+     * editor agents (implementer/refactorer/bootstrapper, editSurface:'code') must be able to
+     * edit it on every provider. A `packages/**` Edit/Write deny in the Claude settings floor
+     * silently overrides OpenCode's per-agent `packages/**: allow` grant (Claude has no
+     * per-agent path-scoped edit), so it must NOT be present in the generated template. See the
+     * generate-claude-settings.php header note and the auto-mode denial this fixed.
+     */
+    public function testPackagesEditWriteIsNotDeniedInTemplate(): void
+    {
+        $decoded = json_decode((string) file_get_contents(self::$settingsPath), true);
+        $this->assertIsArray($decoded, 'settings template must be valid JSON');
+        $deny = $decoded['permissions']['deny'] ?? [];
+
+        $this->assertNotContains(
+            'Edit(packages/**)',
+            $deny,
+            'Edit(packages/**) must not be denied — kit editor agents develop packages/ source'
+        );
+        $this->assertNotContains(
+            'Write(packages/**)',
+            $deny,
+            'Write(packages/**) must not be denied — kit editor agents develop packages/ source'
         );
     }
 

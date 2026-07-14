@@ -132,10 +132,12 @@ class AiScriptAccessManifestTest extends TestCase
         }
     }
 
-    public function testOnlyRuntimeGuardianMayUseToolHooks(): void
+    public function testNoAgentIsGrantedToolHooks(): void
     {
-        // pre-tool-use.sh / post-tool-use.sh may be granted (allowed_scripts)
-        // only to agent-creator-runtime-guardian. Scan the agents block.
+        // pre-tool-use.sh / post-tool-use.sh are harness-invoked runtime hooks.
+        // Their former sole owner (agent-creator-runtime-guardian) was retired in
+        // the agent-handoff governance migration, so no agent may hold an explicit
+        // allowed_scripts grant for them. Scan the agents block.
         $lines = preg_split('/\R/', self::$manifest) ?: [];
         $inAgents = false;
         $curAgent = null;
@@ -159,9 +161,9 @@ class AiScriptAccessManifestTest extends TestCase
         }
 
         $this->assertSame(
-            ['agent-creator-runtime-guardian'],
+            [],
             array_keys($grantedHookTo),
-            'only agent-creator-runtime-guardian may be granted the tool-use hooks'
+            'no agent may be granted the harness-invoked pre/post-tool-use hooks'
         );
     }
 }

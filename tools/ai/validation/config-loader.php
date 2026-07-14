@@ -207,6 +207,20 @@ function shouldSkipPathCheck(string $path): bool
         return true;
     }
 
+    // Descriptive shorthand used in the wiring-audit prose of docs/ai/integration-matrix.md:
+    // canonical-subtree names relative to packages/ai-universal-rules/templates, basenames of
+    // real files (packs.php, agent templates), a slash-command placeholder, and a
+    // deliberately-absent dir discussed as non-existent. These are readable descriptors, not
+    // resolvable link targets, so the file-existence check does not apply.
+    if (in_array($path, [
+        'core/agents', 'optional/agents',
+        'templates/workflows', 'templates/commands', 'templates/instructions',
+        'packs.php', 'bootstrapper.md', 'ui-builder.md',
+        '.github/commands', '/name',
+    ], true)) {
+        return true;
+    }
+
     // Stack-conditional config-tool dotfiles/lockfiles named in the multi-stack-agnostic
     // config-maintainer agent template (packages/ai-universal-rules/templates/core/agents/
     // config-maintainer.md): these are permission.edit allow-list entries for tooling that
@@ -218,7 +232,7 @@ function shouldSkipPathCheck(string $path): bool
         return true;
     }
 
-    foreach (['*', '{', '}', '<', '>', 'http://', 'https://', ',', '->'] as $fragment) {
+    foreach (['*', '{', '}', '<', '>', 'http://', 'https://', ',', '->', '='] as $fragment) {
         if (str_contains($path, $fragment)) {
             return true;
         }
