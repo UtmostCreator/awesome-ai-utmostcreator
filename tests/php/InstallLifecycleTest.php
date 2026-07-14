@@ -150,7 +150,7 @@ final class InstallLifecycleTest extends TestCase
         $init = $this->runInRepo($target, 'git init .');
         $this->assertSame(0, $init['exit'], 'git init failed: ' . $init['stderr']);
 
-        foreach (['tools', 'packages', 'scripts', 'docs', 'schemas'] as $dir) {
+        foreach (['tools', 'packages', 'scripts', 'docs', 'schemas', 'handoff'] as $dir) {
             $this->copyTree(self::$repoRoot . DIRECTORY_SEPARATOR . $dir, $target . DIRECTORY_SEPARATOR . $dir);
         }
         foreach (['.repomixignore', 'PLACEHOLDERS.md', 'llms.txt'] as $file) {
