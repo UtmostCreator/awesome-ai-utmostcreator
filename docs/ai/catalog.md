@@ -51,7 +51,7 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 - `root / opencode-skill` - 26
 - `root / php-reference` - 3
 - `root / root-doc` - 19
-- `root / schema` - 2
+- `root / schema` - 1
 - `root / validator` - 4
 - `root / verifier` - 2
 
@@ -348,7 +348,6 @@ Use the relevant adapter onboarding document first, then use this catalog when y
 |`root-doc`|integration-matrix|`docs/ai/integration-matrix.md`|Coverage map that tracks which AI workflow concepts are covered, partial, or missing.|
 |`root-doc`|project-context-doc|`docs/ai/project-context.md`|Durable repository context for instructions, capabilities, and runtime adapters.|
 |`root-doc`|workflow|`docs/ai/workflow.md`|Default live workflow for risk, verification, context, and docs sync.|
-|`schema`|ai-run-ledger.schema.json|`schemas/ai/ai-run-ledger.schema.json`|JSON schema for the per-run rollup ledger folded from evidence-event.schema.json entries by session_id/trace_id.|
 |`schema`|evidence-event.schema.json|`schemas/ai/evidence-event.schema.json`|JSON schema for durable agent evidence events emitted by supported runtime surfaces.|
 |`validator`|validate-ai-catalog|`tools/ai/validate-ai-catalog.php`|Validates manifest, catalog, and starter profile metadata.|
 |`validator`|validate-ai-config|`tools/ai/validate-ai-config.php`|Validates the root live AI workflow layer.|

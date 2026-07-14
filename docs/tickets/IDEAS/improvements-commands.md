@@ -1,8 +1,40 @@
 Your commands should become **small wrappers** around workflows.
 
-## Current command coverage: **42/100**
+> **Correction (grounded review, 2026-07-09):** the "42/100" score and the "current
+> commands" list below only inventoried `packages/ai-universal-rules/templates/commands/`
+> (5 thin files). That is **not** the actual shipped command/skill surface. Confirmed by
+> direct inspection of `tools/ai/install/packs.php` (lines ~164-207) and the installed
+> adapters in this repo:
+>
+> - EVERY file in `packages/ai-universal-rules/templates/workflows/` (23 files) is
+>   already rendered as a slash-invokable primitive on all three providers:
+>   `.opencode/commands/*.md` (`install_type: opencode-commands`), `.github/prompts/*.prompt.md`
+>   (`rename_ext: .prompt.md`, `runtime-copilot.sh:43`), and `.claude/skills/*/SKILL.md` +
+>   `.opencode/skills/*/SKILL.md` + `.github/skills/*/SKILL.md` (`install_type: skill-dirs`).
+> - Confirmed counts in this repo: `.opencode/commands/` = 24 files, `.github/prompts/` = 23
+>   files, `.claude/skills/` = 23 dirs, `.opencode/skills/` = 24 dirs, `.github/skills/` = 23 dirs.
+> - So `plan.md` already exists as `plan-slice`/`architecture-plan` (command + prompt + skill),
+>   `bugfix.md` as `bug-regression`, `review.md` as `review-diff`, `investigate.md` as
+>   `repo-investigation`, `docs-sync.md`, `upgrade.md` as `dependency-upgrade`, `release-check.md`
+>   as `release-safety`, `scan-stack.md`, `permissions-preview.md` as `generate-permissions` — all
+>   of the "P0 — missing commands" below are already shipped, just named after the workflow
+>   instead of the shorter proposed alias.
+> - What is genuinely true and still open: only 5 files live under the thin
+>   `templates/commands/` tier (`install`, `post-install-setup`, `search-evidence`,
+>   `verify-ai-wiring`, `verify`) — this is the correct "thin command, not 1:1 with every
+>   workflow" tier described later in this same file ("Do not add commands for every
+>   workflow"), and it is intentionally small. `.claude/commands/*.md` only gets these 5 (not the
+>   23 workflow-derived ones — Claude gets workflows as **skills**, not as `.claude/commands/`,
+>   per `packs.php:207` vs `:201`), which is a real, narrower asymmetry worth tracking — see
+>   `docs/tickets/IDEAS/plan-provider-wiring-reconciliation.md`.
+> - Revised coverage read: **naming/alias clarity gap, not a missing-entrypoint gap.** See
+>   `docs/tickets/IDEAS/architecture-plan.md` §"Commands And Workflows" for the corrected
+>   assessment and the one real recommendation (a short alias layer), instead of the ~25-file
+>   command-creation program implied below.
 
-Current commands:
+## Current command coverage: ~~42/100~~ corrected: command *entrypoints* are ~90/100 (23/23 workflows already reachable on every provider); the open gap is naming/alias ergonomics and the Claude `.claude/commands` vs `.claude/skills` asymmetry, not missing commands.
+
+Current thin `templates/commands/` tier (deliberately not 1:1 with workflows):
 
 ```text id="2y3c4t"
 commands/install.md
@@ -12,7 +44,7 @@ commands/verify-ai-wiring.md
 commands/verify.md
 ```
 
-This covers **install/setup/search/verify**, but misses the main day-to-day AI workflow entrypoints: **plan, implement, bugfix, review, docs, upgrade, release, agent-governance**.
+Every workflow in `templates/workflows/*.md` (23 files) is additionally already a command/prompt/skill on every provider (see correction above). The remaining real gap is that the invocation name is the workflow name (`bug-regression`, `dependency-upgrade`, `release-safety`) rather than a short user-facing verb (`bugfix`, `upgrade`, `release-check`), and that agent-governance workflows listed as "P0 missing" below (`agent-creation-pipeline`, `agent-critic-review`, `agent-fleet-assessment`, `runtime-guardrail-audit`, `static-agent-validation`, `semantic-agent-verification`) are confirmed **still absent** from `templates/workflows/` — those, not the P0 table below, are the real missing-workflow list (see `improvements-workflows.md`, which already tracks this correctly).
 
 ## P0 — missing commands to add first
 

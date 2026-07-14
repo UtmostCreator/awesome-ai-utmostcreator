@@ -68,7 +68,7 @@
         "root:opencode-skill": 26,
         "root:php-reference": 3,
         "root:root-doc": 19,
-        "root:schema": 2,
+        "root:schema": 1,
         "root:validator": 4,
         "root:verifier": 2
     },
@@ -3656,14 +3656,6 @@
             "path": "docs/ai/workflow.md",
             "runtime": "canonical",
             "description": "Default live workflow for risk, verification, context, and docs sync."
-        },
-        {
-            "scope": "root",
-            "type": "schema",
-            "name": "ai-run-ledger.schema.json",
-            "path": "schemas/ai/ai-run-ledger.schema.json",
-            "runtime": "canonical",
-            "description": "JSON schema for the per-run rollup ledger folded from evidence-event.schema.json entries by session_id/trace_id."
         },
         {
             "scope": "root",

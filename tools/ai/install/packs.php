@@ -218,7 +218,6 @@ function aiInstallerPackRegistry(): array
             ['type' => 'file', 'source' => 'docs/ai/command-risk-taxonomy.md', 'target' => 'docs/ai/command-risk-taxonomy.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
             ['type' => 'file', 'source' => 'docs/ai/failure-handling.md', 'target' => 'docs/ai/failure-handling.md', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
             ['type' => 'file', 'source' => 'schemas/ai/evidence-event.schema.json', 'target' => 'schemas/ai/evidence-event.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => true],
-            ['type' => 'file', 'source' => 'schemas/ai/ai-run-ledger.schema.json', 'target' => 'schemas/ai/ai-run-ledger.schema.json', 'core' => false, 'merge_strategy' => 'skip-if-exists', 'required' => false],
         ],
         'scripts-pack' => [
             ['type' => 'file', 'source' => 'scripts/ai/common.sh', 'target' => 'scripts/ai/common.sh', 'core' => false, 'merge_strategy' => 'replace', 'required' => true],

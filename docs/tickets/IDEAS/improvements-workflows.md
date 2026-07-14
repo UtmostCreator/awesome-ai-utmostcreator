@@ -2,6 +2,28 @@ Based on the filenames only, these agents do **not** have a clear direct workflo
 
 Existing workflow coverage is visible for items such as `architecture-plan`, `repo-investigation`, `plan-slice`, `search-evidence`, `dependency-upgrade`, and `docs-sync`.
 
+> **Correction (grounded review, 2026-07-09):** the P0/P1 "missing workflow" tables below are
+> **confirmed still accurate** — direct listing of `packages/ai-universal-rules/templates/workflows/`
+> (23 files) shows none of `agent-creation-pipeline.md`, `agent-critic-review.md`,
+> `agent-fleet-assessment.md`, `runtime-guardrail-audit.md`, `static-agent-validation.md`,
+> `semantic-agent-verification.md`, `build-config-change.md`, `infra-audit.md`, `ui-build.md`,
+> `refactor-slice.md`, `repository-review.md`, `workflow-audit.md`, or `project-bootstrap.md`
+> exist yet. This is genuinely the strongest part of this review pass. Two caveats found during
+> grounding:
+>
+> - Diagram/architecture-doc coverage: the "P0 fixes" list further down says workflows lack a
+>   Mermaid guidance section — that is now **stale**: the architect and architecture-plan-writer
+>   agents already carry a `## Architecture Diagram (Mermaid)` section on all rendered surfaces
+>   (`docs/tickets/claude-agent-fleet-remediation/plan-30-architecture-mermaid-redesign.md`,
+>   landed), and `docs/ai/architecture-diagrams.md` already exists (380 lines, 6+ sections,
+>   hand-authored-must-sync, covers install/render/permission pipeline). It does **not** yet
+>   cover agent-to-workflow routing as a diagram (only as the `docs/ai/agents.md` prose table)
+>   — see `docs/tickets/IDEAS/plan-agent-workflow-routing-diagram.md` for that specific,
+>   still-real gap.
+> - Every workflow already IS reachable as a command/prompt/skill on all three providers (see
+>   the correction in `improvements-commands.md`) — so "missing workflow" here correctly means
+>   "missing process/safety-gate content", not "missing entrypoint".
+
 ## P0 — clearly missing workflows
 
 | Missing workflow                 |                                                                                                                                    Agents affected | Why missing                                                                                                                                                                                                                                            |
